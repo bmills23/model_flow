@@ -14,7 +14,7 @@ import {
   type Warning,
   type WexlerInput,
 } from '@model-flow/engine';
-import type { LoadingTerm, Scenario } from './form';
+import type { Scenario } from './form';
 
 export type MethodKey = 'legacy' | 'modern' | 'domenico';
 
