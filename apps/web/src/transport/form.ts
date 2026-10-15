@@ -151,18 +151,23 @@ export interface Scenario {
   extent: { xMin: number; xMax: number; yHalf: number };
   /** Labels and values for display. */
   dispersivityDistance: number;
+  /** The dispersivity law's own values (before overrides). */
+  lawAlphas: { alphaL: number; alphaT: number; alphaV: number };
   dispLaw: 'legacy' | 'modern';
   notes: Warning[];
 }
 
-export type ScenarioResult =
-  | { ok: true; scenario: Scenario }
-  | { ok: false; errors: string[] };
+export type ScenarioResult = { ok: true; scenario: Scenario } | { ok: false; errors: string[] };
 
 const YR = convert(1, 'yr', 's');
 
 function num(s: string): number {
   return s.trim() === '' ? NaN : Number(s);
+}
+
+/** Engine z (from the aquifer base when finite, upward) for a depth below the water table. */
+export function makeZOf(thickness: number | undefined): (depth: number) => number {
+  return (depth) => (thickness === undefined ? -depth : thickness - depth);
 }
 
 export function toScenario(f: TransportForm): ScenarioResult {
@@ -179,7 +184,7 @@ export function toScenario(f: TransportForm): ScenarioResult {
   const nonneg = (v: number) => v >= 0;
 
   const porosity = need('Porosity', f.porosity, (v) => v > 0 && v < 1, 'must be between 0 and 1.');
-  let velocity = NaN;
+  let velocity: number;
   if (f.aquiferMode === 'darcy') {
     const k = need('Hydraulic conductivity', f.K, pos, 'must be a positive number (m/d).');
     const i = need('Hydraulic gradient', f.gradient, pos, 'must be a positive number.');
@@ -201,7 +206,7 @@ export function toScenario(f: TransportForm): ScenarioResult {
     width = need('Aquifer width', f.width, pos, 'must be a positive number (m) or blank.');
   }
 
-  let retardation = 1;
+  let retardation: number;
   if (f.retardMode === 'factor') {
     retardation = need('Retardation factor', f.retardation, (v) => v >= 1, 'must be 1 or more.');
   } else {
@@ -211,7 +216,8 @@ export function toScenario(f: TransportForm): ScenarioResult {
   }
 
   let halfLife = 0;
-  if (f.halfLifeYr.trim() !== '') halfLife = need('Half-life', f.halfLifeYr, nonneg, 'must be zero or more (years).');
+  if (f.halfLifeYr.trim() !== '')
+    halfLife = need('Half-life', f.halfLifeYr, nonneg, 'must be zero or more (years).');
   const decayRate = halfLife > 0 ? Math.LN2 / (halfLife * YR) : 0;
 
   const srcLength = need('Source length', f.srcLength, nonneg, 'must be zero or more (m).');
@@ -226,13 +232,21 @@ export function toScenario(f: TransportForm): ScenarioResult {
 
   const darcy = velocity * porosity;
   const area = srcWidth * srcDepth;
-  let c0 = NaN;
-  let massRate = NaN;
+  let c0: number;
+  let massRate: number;
   if (f.sourceMode === 'concentration') {
-    c0 = convert(need('Source concentration', f.c0, nonneg, 'must be zero or more (mg/L).'), 'mg/L', 'kg/m3');
+    c0 = convert(
+      need('Source concentration', f.c0, nonneg, 'must be zero or more (mg/L).'),
+      'mg/L',
+      'kg/m3',
+    );
     massRate = c0 * darcy * area;
   } else {
-    massRate = convert(need('Mass rate', f.massRate, nonneg, 'must be zero or more (g/d).'), 'g/d', 'kg/s');
+    massRate = convert(
+      need('Mass rate', f.massRate, nonneg, 'must be zero or more (g/d).'),
+      'g/d',
+      'kg/s',
+    );
     c0 = massRate / (darcy * area);
   }
 
@@ -249,7 +263,8 @@ export function toScenario(f: TransportForm): ScenarioResult {
       const a = need(`${label} start`, row.start, nonneg, 'must be zero or more (years).');
       const b = need(`${label} end`, row.end, nonneg, 'must be zero or more (years).');
       const fac = need(`${label} factor`, row.factor, nonneg, 'must be zero or more.');
-      if (Number.isFinite(a) && Number.isFinite(b) && !(b > a)) errors.push(`${label} must end after it starts.`);
+      if (Number.isFinite(a) && Number.isFinite(b) && !(b > a))
+        errors.push(`${label} must end after it starts.`);
       terms.push({ start: a * YR, end: b * YR, factor: fac });
     });
   }
@@ -259,13 +274,28 @@ export function toScenario(f: TransportForm): ScenarioResult {
   let top: number;
   let bottom: number;
   if (f.screen) {
-    top = need('Screen top', f.screenTop, nonneg, 'must be zero or more (m below the water table).');
-    bottom = need('Screen bottom', f.screenBottom, nonneg, 'must be zero or more (m below the water table).');
+    top = need(
+      'Screen top',
+      f.screenTop,
+      nonneg,
+      'must be zero or more (m below the water table).',
+    );
+    bottom = need(
+      'Screen bottom',
+      f.screenBottom,
+      nonneg,
+      'must be zero or more (m below the water table).',
+    );
     if (Number.isFinite(top) && Number.isFinite(bottom) && !(bottom > top)) {
       errors.push('Screen bottom must be below its top.');
     }
   } else {
-    top = bottom = need('Receptor depth', f.rDepth, nonneg, 'must be zero or more (m below the water table).');
+    top = bottom = need(
+      'Receptor depth',
+      f.rDepth,
+      nonneg,
+      'must be zero or more (m below the water table).',
+    );
   }
   if (thickness !== undefined && Number.isFinite(bottom) && bottom > thickness) {
     errors.push('The receptor depth is below the base of the aquifer.');
@@ -280,7 +310,8 @@ export function toScenario(f: TransportForm): ScenarioResult {
   }
 
   // dispersivity: the law's values, each replaceable by an override
-  const distance = Number.isFinite(rx) && rx > 0 ? rx : Number.isFinite(xMax) && xMax > 0 ? xMax : 1;
+  const distance =
+    Number.isFinite(rx) && rx > 0 ? rx : Number.isFinite(xMax) && xMax > 0 ? xMax : 1;
   const law = f.dispLaw === 'legacy' ? gelhar1985Api1987 : xuEckstein1995;
   const lawOut = law.run({ distance });
   const notes: Warning[] = [...(law.validate?.({ distance }) ?? [])];
@@ -293,7 +324,7 @@ export function toScenario(f: TransportForm): ScenarioResult {
   if (errors.length > 0) return { ok: false, errors };
 
   const { dx, dy, dz } = dispersionCoefficients({ alphaL, alphaT, alphaV, velocity });
-  const zOf = (depth: number): number => (thickness === undefined ? -depth : thickness - depth);
+  const zOf = makeZOf(thickness);
   const z1 = zOf(srcDepth);
   const z2 = zOf(0);
   return {
@@ -311,7 +342,14 @@ export function toScenario(f: TransportForm): ScenarioResult {
       dz,
       thickness,
       width,
-      source: { x1: -srcLength, x2: 0, y1: -srcWidth / 2, y2: srcWidth / 2, z1: Math.min(z1, z2), z2: Math.max(z1, z2) },
+      source: {
+        x1: -srcLength,
+        x2: 0,
+        y1: -srcWidth / 2,
+        y2: srcWidth / 2,
+        z1: Math.min(z1, z2),
+        z2: Math.max(z1, z2),
+      },
       srcLength,
       srcWidth,
       srcDepth,
@@ -324,6 +362,7 @@ export function toScenario(f: TransportForm): ScenarioResult {
       time,
       extent: { xMin, xMax, yHalf },
       dispersivityDistance: distance,
+      lawAlphas: lawOut,
       dispLaw: f.dispLaw,
       notes,
     },

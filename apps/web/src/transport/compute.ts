@@ -51,7 +51,11 @@ const linspace = (a: number, b: number, n: number): number[] =>
   Array.from({ length: n }, (_, i) => (n === 1 ? a : a + ((b - a) * i) / (n - 1)));
 
 /** Superpose constant-source responses F(tau) over loading terms (the problem is linear in the source). */
-export function superpose(terms: readonly LoadingTerm[], time: number, f: (tau: number) => number): number {
+export function superpose(
+  terms: readonly LoadingTerm[],
+  time: number,
+  f: (tau: number) => number,
+): number {
   let sum = 0;
   for (const t of terms) {
     if (t.factor === 0) continue;
@@ -103,7 +107,11 @@ function at123dInput(s: Scenario, time: number): At123dInput {
 }
 
 /** PATCHF needs y in [0, W], so a finite aquifer is centred on the source with an offset of W/2. */
-function wexler(s: Scenario): { params: WexlerInput; finite?: { width: number; thickness: number } | undefined; yOff: number } {
+function wexler(s: Scenario): {
+  params: WexlerInput;
+  finite?: { width: number; thickness: number } | undefined;
+  yOff: number;
+} {
   const finite =
     s.thickness !== undefined && s.width !== undefined
       ? { width: s.width, thickness: s.thickness }
@@ -139,11 +147,7 @@ function domenicoInput(s: Scenario): DomenicoInput {
   };
 }
 
-function depthAverage(
-  s: Scenario,
-  profile: (depth: number) => number,
-  intervals: number,
-): number {
+function depthAverage(s: Scenario, profile: (depth: number) => number, intervals: number): number {
   const { top, bottom } = s.receptorDepths;
   return bottom > top ? wellScreenAverage(profile, top, bottom, intervals) : profile(top);
 }
@@ -212,7 +216,9 @@ export function plumeGrid(
       const w = wexler(s);
       const ysh = ys.map((y) => y + w.yOff);
       g = superposeGrid(s.terms, s.time, (tau) =>
-        w.finite ? patchfGrid(w.params, xs, ysh, z, tau, w.finite) : patchiGrid(w.params, xs, ysh, z, tau),
+        w.finite
+          ? patchfGrid(w.params, xs, ysh, z, tau, w.finite)
+          : patchiGrid(w.params, xs, ysh, z, tau),
       );
     }
     if (g.length === 0) g = xs.map(() => ys.map(() => 0));
@@ -224,13 +230,20 @@ export function plumeGrid(
   return acc ?? [];
 }
 
-function collectWarnings(s: Scenario, req: ComputeRequest, flags: { notConverged: boolean }): Warning[] {
+function collectWarnings(
+  s: Scenario,
+  req: ComputeRequest,
+  flags: { notConverged: boolean },
+): Warning[] {
   const out: Warning[] = [...s.notes];
   const add = (code: string, message: string): void => {
     if (!out.some((w) => w.code === code)) out.push({ code, message });
   };
   if (s.receptor.x <= 0) {
-    add('ui.receptor-in-source', 'The receptor x is at or upgradient of the source face (x <= 0); Wexler and Domenico report zero there.');
+    add(
+      'ui.receptor-in-source',
+      'The receptor x is at or upgradient of the source face (x <= 0); Wexler and Domenico report zero there.',
+    );
   }
   if (s.thickness !== undefined && s.width === undefined) {
     add(
@@ -239,7 +252,10 @@ function collectWarnings(s: Scenario, req: ComputeRequest, flags: { notConverged
     );
   }
   if (s.thickness !== undefined && req.domenico) {
-    add('ui.domenico-ignores-bounds', 'The Domenico comparison ignores the finite aquifer thickness and width.');
+    add(
+      'ui.domenico-ignores-bounds',
+      'The Domenico comparison ignores the finite aquifer thickness and width.',
+    );
   }
   if (s.terms.some((t) => t.factor !== 1 || Number.isFinite(t.end))) {
     add(
@@ -252,11 +268,18 @@ function collectWarnings(s: Scenario, req: ComputeRequest, flags: { notConverged
     'The legacy method releases a mass rate (source concentration times Darcy flux times source area) through the source volume; the modern method holds the source concentration fixed on the inflow plane. Expect the two to differ near the source.',
   );
   if (flags.notConverged) {
-    add('wexler.series-not-converged', 'The PATCHF series did not converge at one or more points; those values come from the integral form and carry more numerical uncertainty.');
+    add(
+      'wexler.series-not-converged',
+      'The PATCHF series did not converge at one or more points; those values come from the integral form and carry more numerical uncertainty.',
+    );
   }
   if (req.domenico) {
     const z = (s.receptorDepths.top + s.receptorDepths.bottom) / 2;
-    for (const w of domenicoWarnings(domenicoInput(s), { x: s.receptor.x, y: s.receptor.y, z }, s.time)) {
+    for (const w of domenicoWarnings(
+      domenicoInput(s),
+      { x: s.receptor.x, y: s.receptor.y, z },
+      s.time,
+    )) {
       add(w.code, w.message);
     }
   }

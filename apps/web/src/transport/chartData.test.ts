@@ -64,14 +64,30 @@ describe('contourBands', () => {
     const values: number[] = [];
     for (let j = 0; j < ny; j++)
       for (let i = 0; i < nx; i++) values.push(10 * Math.exp(-((i - 5) ** 2 + (j - 5) ** 2) / 20));
-    const bands = contourBands(values, nx, ny, [1, 5, 10.5], 'linear', (cx) => cx * 10, (cy) => cy * 10);
+    const bands = contourBands(
+      values,
+      nx,
+      ny,
+      [1, 5, 10.5],
+      'linear',
+      (cx) => cx * 10,
+      (cy) => cy * 10,
+    );
     expect(bands.map((b) => b.level)).toEqual([1, 5]);
     expect(bands[0]!.d).toMatch(/^M[\d.-]/);
   });
 
   it('maps grid vertices to the supplied coordinates (cell centres at index + 0.5)', () => {
     const values = [0, 0, 0, 0, 5, 0, 0, 0, 0];
-    const [band] = contourBands(values, 3, 3, [1], 'linear', (cx) => cx, (cy) => cy);
+    const [band] = contourBands(
+      values,
+      3,
+      3,
+      [1],
+      'linear',
+      (cx) => cx,
+      (cy) => cy,
+    );
     expect(band!.d).toContain('1.5');
   });
 });

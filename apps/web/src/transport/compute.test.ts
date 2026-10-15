@@ -41,7 +41,11 @@ describe('receptorConcentration', () => {
   });
 
   it('gives a pulse a lower late-time value than continuous loading', () => {
-    const cont = receptorConcentration(scenario({ timeYr: '30' }), 'modern', scenario({ timeYr: '30' }).time);
+    const cont = receptorConcentration(
+      scenario({ timeYr: '30' }),
+      'modern',
+      scenario({ timeYr: '30' }).time,
+    );
     const pulseS = scenario({ timeYr: '30', loading: 'pulse', pulseYr: '3' });
     const pulse = receptorConcentration(pulseS, 'modern', pulseS.time);
     expect(pulse).toBeLessThan(cont);
@@ -52,7 +56,14 @@ describe('receptorConcentration', () => {
 describe('compute', () => {
   it('returns the map grid, both curves, readouts and warnings, with Domenico only on request', () => {
     const s = scenario();
-    const out = compute({ scenario: s, mapMethod: 'legacy', domenico: false, nx: 20, ny: 12, nCurve: 6 });
+    const out = compute({
+      scenario: s,
+      mapMethod: 'legacy',
+      domenico: false,
+      nx: 20,
+      ny: 12,
+      nCurve: 6,
+    });
     expect(out.ok).toBe(true);
     if (!out.ok) return;
     const r = out.result;
@@ -70,7 +81,14 @@ describe('compute', () => {
   });
 
   it('adds the Domenico series, readout and its validity warnings when enabled', () => {
-    const out = compute({ scenario: scenario(), mapMethod: 'modern', domenico: true, nx: 12, ny: 8, nCurve: 4 });
+    const out = compute({
+      scenario: scenario(),
+      mapMethod: 'modern',
+      domenico: true,
+      nx: 12,
+      ny: 8,
+      nCurve: 4,
+    });
     expect(out.ok).toBe(true);
     if (!out.ok) return;
     expect(out.result.series.domenico?.length).toBe(5);
@@ -96,6 +114,8 @@ describe('compute', () => {
       ny: 8,
       nCurve: 3,
     });
-    expect(noWidth.ok && noWidth.result.warnings.some((w) => w.code === 'ui.wexler-infinite-width')).toBe(true);
+    expect(
+      noWidth.ok && noWidth.result.warnings.some((w) => w.code === 'ui.wexler-infinite-width'),
+    ).toBe(true);
   });
 });
