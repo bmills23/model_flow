@@ -1,4 +1,4 @@
-> Status: M0 in progress (started 2026-10-15). Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M0 DONE 2026-10-15 (commits cacac67..0f14058, merged to main). Next: M1 groundwater transport. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
@@ -82,7 +82,7 @@ alternative this project adds. Every row becomes an entry in the method registry
 - **Clean room.** Implement each model from its primary paper or agency report. Use the manual as the
   map of RISC5's choices (which boundary conditions, which regressions, which defaults), and record each
   such choice in the method's registry metadata as "RISC5 choice: ...". No manual text in the repo.
-- **Two documents, one source of truth.** `data/references.json` holds every citation (authors, year,
+- **Two documents, one source of truth.** `packages/engine/src/references/references.json` holds every citation (authors, year,
   title, venue, DOI/URL, type: method | data | review). It generates:
   - `docs/ATTRIBUTIONS.md`: methods by process (legacy and modern side by side), data provenance
     (EPA RSL edition and date, IRIS, CompTox, USGS ANALGWST, Appendix R review as fixture source), and the
@@ -92,7 +92,11 @@ alternative this project adds. Every row becomes an entry in the method registry
   - The in-app **Methods & References** page and the per-run **methods statement** (every result export
     lists the methods used and their citations, so a report reader can see exactly what was computed).
 - Each method implementation declares `citations: string[]` keys that must exist in `references.json`;
-  a test fails the build if a method lacks a citation or a citation is unused.
+  tests fail the build if a method lacks a citation, cites a reference not marked `used`, or a `used`
+  reference is cited by nothing. A reference may be marked `used` only with its verified published
+  title; square-bracketed descriptor titles are allowed for `planned` references only (enforced by test).
+- The generated documents are committed. `pnpm docs:check` (part of the gate) regenerates them and fails on
+  drift. Their "Generated" date moves only when content changes (`packages/data/src/stable.ts`).
 
 ## 5. Architecture
 
@@ -156,7 +160,7 @@ first) -> UI step and visualization -> ATTRIBUTIONS and references updated -> lo
 typecheck, full vitest, build, mobile viewport check) -> one push. Record per-push CI minutes in CLAUDE.md
 after the first run.
 
-- **M0 Foundation (first session).** Clone to `~/repos/model_flow`; copy this plan to `docs/ROADMAP.md`;
+- **M0 Foundation (first session). DONE 2026-10-15.** Clone to `~/repos/model_flow`; copy this plan to `docs/ROADMAP.md`;
   retire `index.py` (keep its parameter lists in `docs/methods/risc5-parameter-map.md`); pnpm monorepo,
   engine + web + data packages, lint/typecheck/vitest, CI and Pages workflows; numerics kernel with tests;
   `references.json` seeded with every citation in section 3; ATTRIBUTIONS and THIRD_PARTY_LICENSES
@@ -254,7 +258,7 @@ compiles cleanly with modern gfortran (fallback: port the ~500-line Fortran kern
 6. Doc validity: ROADMAP milestone statuses corrected in place when work lands.
 7. One push per milestone (or per logical unit); CI confirms, it does not discover.
 
-## 10. First implementation session (M0), in order
+## 10. First implementation session (M0), in order (completed 2026-10-15)
 
 1. `git clone https://github.com/bmills23/model_flow.git ~/repos/model_flow`; branch `m0-foundation`.
 2. Copy this plan to `docs/ROADMAP.md`; write `docs/DECISIONS.md` (section 2 table) and README (scope,
@@ -265,7 +269,7 @@ compiles cleanly with modern gfortran (fallback: port the ~500-line Fortran kern
    prettier, vitest; Vite + React in `apps/web` with the responsive shell and dark/light tokens.
 5. Numerics kernel with tests (erf/erfc/erfcx accuracy, quadrature on known integrals, Brent/secant on
    known roots, PRNG and LHS statistics).
-6. `MethodRegistry` with one toy method to prove the citation gate; `data/references.json` seeded from
+6. `MethodRegistry` with one toy method to prove the citation gate; `packages/engine/src/references/references.json` seeded from
    section 3 and 8; generators for the two docs; test that fails on missing citations.
 7. CI and Pages workflows with paths-ignore and concurrency; first push; record CI minutes.
 8. Save a project memory file (`model_flow_project.md`) with the decisions table and resume pointer.

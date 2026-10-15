@@ -1,0 +1,37 @@
+# model_flow: project instructions for agents
+
+Read `docs/ROADMAP.md` (plan of record, milestone statuses maintained in place) and `docs/DECISIONS.md`
+before doing anything. Statuses are claims: grep the tree before acting on an "open" row or skipping a
+"done" row.
+
+## Working rules
+- Personal open-source project (MIT), $0 hosting. Cheapest viable path: local gate first, one push per
+  milestone or logical unit, no cloud fleets, Sonnet or Haiku workers for implementation.
+- TDD for every engine, data and UI change: failing test first, then the implementation. Fixture
+  tolerances are only widened with a DECISIONS.md entry.
+- Clean room: implement from the primary publication; the RISC5 manual is a map of RISC5's choices
+  only. Never copy its prose, figures or tables. Never inspect the RISC5 binary. No GPL code vendored.
+- Every registered method declares citations that exist in `packages/engine/src/references/references.json`
+  with status `used`; the test suite enforces it. Never invent DOIs, volumes, pages or report numbers.
+- Attributions (science, data provenance) and third-party software licences are separate generated
+  documents: `docs/ATTRIBUTIONS.md` and `docs/THIRD_PARTY_LICENSES.md`. Regenerate with
+  `corepack pnpm docs:generate`; their "Generated" date moves only when content changes.
+- SI units inside the engine; RISC-style units only at input and output boundaries. All randomness seeded.
+- Web: mobile and desktop, light and dark, no UI framework. Before calling a screen done, verify at a
+  true 390x844 viewport through CDP device emulation with zero overflowing elements.
+- Never use an em dash in any text. No personal contact addresses on any public surface.
+
+## Commands
+```
+corepack pnpm install
+corepack pnpm gate                          # lint, format check, typecheck, tests, docs check, build
+corepack pnpm --filter @model-flow/engine test
+corepack pnpm --filter @model-flow/web dev
+BASE_PATH=/model_flow/ corepack pnpm --filter @model-flow/web build
+```
+
+## CI
+Workflows: `.github/workflows/ci.yml` (push to main and PRs; docs and markdown ignored; cancel in
+progress) and `pages.yml` (deploy to GitHub Pages on main). CI confirms, it does not discover: push only
+after a green local gate. Measured cost per push to main: not yet measured (fill in after the first run
+with `gh run view <id> --json jobs`).
