@@ -1,0 +1,12 @@
+PATCHF patch source, finite width 60 m and thickness 10 m, first-order decay
+Generated for model_flow fixtures; units: metres and days.
+====
+   6   9   6   2 350 350   0
+MG/L      M/D       M**2/D    PER DAY   METERS    DAYS      
+      1000       0.5         2       0.4       0.1      0.01
+        60        10        20        40         2         6
+         5        10        20        30        40        60
+         0        10        15        20        30        40        45        50
+        60
+         0         2         4         6         8        10
+        40       200

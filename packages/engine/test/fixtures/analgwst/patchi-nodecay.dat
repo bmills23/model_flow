@@ -1,0 +1,11 @@
+PATCHI patch source, infinite width and depth, no decay
+Generated for model_flow fixtures; units: metres and days.
+====
+   8   7   5   2 104   0
+MG/L      M/D       M**2/D    PER DAY   METERS    DAYS      
+      1000       0.5         2       0.4       0.1         0
+       -10        10         0         4
+         1         2         5        10        20        30        40        60
+       -15       -10        -5         0         5        10        15
+        -2         0         2         4         6
+        40       200
