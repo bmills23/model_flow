@@ -67,11 +67,20 @@ UI as a second wave".
   and show the message in the warnings panel.
 - Gate hygiene: agent worktrees live under .claude/worktrees/ inside the repo; added to .gitignore and
   the eslint ignores so `pnpm lint` passes while a worktree exists.
-- Wave 2 (UI, Dispatch 4): in flight in an isolated worktree on branch `m1-groundwater-ui`, Sonnet,
-  architect-worker-medium. Scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern
-  overlay, warnings panel, CDP check at 390x844 with zero overflow.
-- Then: corrective dispatch if the review finds defects, merge UI into the engine branch, one Haiku
-  doc-validity check, full gate, ROADMAP M1 status in place, one push.
+- Wave 2 (UI, Dispatch 4) LANDED and MERGED into m1-groundwater-engine (merge 11ae5b6; UI commits
+  a7a3f11, 4ac8ac4, 5d6c6c7; worktree removed). Groundwater screen: form with unit conversion at the
+  boundary, plan-view plume map (d3-contour and d3-scale, ISC, React SVG; decision in DECISIONS.md),
+  breakthrough chart with legacy, modern and optional Domenico overlay, warnings panel, engine in a module
+  Web Worker. CDP at 390 and 1280, light and dark: overflow 0, no tap target under 44 px. Web tests 39.
+  Nine ISC d3 packages added to THIRD_PARTY_LICENSES. CDP script kept in the session scratchpad only.
+- Merged baseline gate (orchestrator run, 2026-10-15): exit 0, engine 129, data 11, web 39, lint,
+  prettier, typecheck, docs:check, build green.
+- Follow-ups in flight before close: (a) engine, resume of Dispatch 5: pulse and piecewise-constant
+  loading for the Wexler and Domenico methods by superposition inside the engine (point and grid paths),
+  because the UI currently does this itself under a `ui.superposition` note; (b) UI, resume of
+  Dispatch 4 after (a): call the engine's loading support, remove the UI-side superposition, catch
+  RangeError from engine calls and show it in the warnings panel, re-run CDP and the gate.
+- Then: one Haiku doc-validity check, full gate, ROADMAP M1 status in place, one push.
 
 ## Session log
 - Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
@@ -79,4 +88,4 @@ UI as a second wave".
 - Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
 - Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. 193K tokens, 13 min. Done.
 - Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. 116K tokens, 7 min. Landed.
-- Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. In flight.
+- Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. 209K tokens, 22 min. Landed and merged.
