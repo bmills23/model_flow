@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { patchiConcentration } from '@model-flow/engine';
-import { compute, receptorConcentration, superpose } from './compute';
+import { compute, receptorConcentration } from './compute';
 import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
 
 function scenario(over: Partial<TransportForm> = {}) {
@@ -8,16 +8,6 @@ function scenario(over: Partial<TransportForm> = {}) {
   if (!r.ok) throw new Error(r.errors.join('; '));
   return r.scenario;
 }
-
-describe('superpose', () => {
-  it('is the continuous response minus the delayed response after a pulse ends', () => {
-    const f = (tau: number) => Math.sqrt(tau);
-    const terms = [{ start: 0, end: 4, factor: 2 }];
-    expect(superpose(terms, 3, f)).toBeCloseTo(2 * Math.sqrt(3), 12);
-    expect(superpose(terms, 10, f)).toBeCloseTo(2 * (Math.sqrt(10) - Math.sqrt(6)), 12);
-    expect(superpose([{ start: 5, end: Infinity, factor: 1 }], 3, f)).toBe(0);
-  });
-});
 
 describe('receptorConcentration', () => {
   it('matches the engine PATCHI value for a continuous point receptor', () => {
@@ -117,5 +107,59 @@ describe('compute', () => {
     expect(
       noWidth.ok && noWidth.result.warnings.some((w) => w.code === 'ui.wexler-infinite-width'),
     ).toBe(true);
+  });
+});
+
+describe('engine input errors', () => {
+  const small = { nx: 8, ny: 6, nCurve: 3 };
+
+  it('reports porosity 0 as an input error instead of throwing or returning zeros', () => {
+    const s = { ...scenario(), porosity: 0 };
+    const out = compute({ scenario: s, mapMethod: 'legacy', domenico: false, ...small });
+    expect(out.ok).toBe(false);
+    if (!out.ok) expect(out.error).toMatch(/porosity/i);
+  });
+
+  it('reports a grid above the Peclet limit with the engine message', () => {
+    const out = compute({
+      scenario: scenario({
+        alphaLOverride: '0.0001',
+        alphaTOverride: '0.0001',
+        alphaVOverride: '0.0001',
+        xMax: '5000',
+      }),
+      mapMethod: 'modern',
+      domenico: false,
+      ...small,
+    });
+    expect(out.ok).toBe(false);
+    if (!out.ok) expect(out.error).toMatch(/peclet/i);
+  });
+
+  it('reports overlapping loading steps as an input error', () => {
+    const out = compute({
+      scenario: scenario({
+        loading: 'steps',
+        steps: [
+          { start: '0', end: '5', factor: '1' },
+          { start: '3', end: '8', factor: '1' },
+        ],
+      }),
+      mapMethod: 'modern',
+      domenico: true,
+      ...small,
+    });
+    expect(out.ok).toBe(false);
+    if (!out.ok) expect(out.error).toMatch(/overlap/i);
+  });
+
+  it('no longer emits the ui.superposition note for pulse loading', () => {
+    const out = compute({
+      scenario: scenario({ loading: 'pulse', pulseYr: '3' }),
+      mapMethod: 'modern',
+      domenico: false,
+      ...small,
+    });
+    expect(out.ok && out.result.warnings.some((w) => w.code === 'ui.superposition')).toBe(false);
   });
 });

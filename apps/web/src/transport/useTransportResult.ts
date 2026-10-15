@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ComputeOutcome, ComputeRequest } from './compute';
+import type { ComputeOutcome, ComputeRequest, ComputeResult } from './compute';
+import type { Scenario } from './form';
 import { createRunner, toWire } from './runner';
 
 export const DEBOUNCE_MS = 300;
 
 export interface TransportState {
   outcome: ComputeOutcome | null;
+  /** The most recent successful result and the scenario it was computed for, kept through errors. */
+  lastGood: { result: ComputeResult; scenario: Scenario } | null;
   computing: boolean;
 }
 
@@ -18,6 +21,7 @@ function jsonReplacer(_k: string, v: unknown): unknown {
  * `computing` is derived: the request key differs from the key of the last delivered outcome.
  */
 export function useTransportResult(req: ComputeRequest | null): TransportState {
+  const [lastGood, setLastGood] = useState<TransportState['lastGood']>(null);
   const [done, setDone] = useState<{ key: string; outcome: ComputeOutcome } | null>(null);
   const runner = useRef<ReturnType<typeof createRunner> | null>(null);
   const first = useRef(true);
@@ -32,7 +36,9 @@ export function useTransportResult(req: ComputeRequest | null): TransportState {
     const timer = setTimeout(() => {
       runner.current ??= createRunner();
       void runner.current.run(req).then((outcome) => {
-        if (outcome !== null) setDone({ key, outcome });
+        if (outcome === null) return;
+        if (outcome.ok) setLastGood({ result: outcome.result, scenario: req.scenario });
+        setDone({ key, outcome });
       });
     }, delay);
     return () => clearTimeout(timer);
@@ -40,5 +46,5 @@ export function useTransportResult(req: ComputeRequest | null): TransportState {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  return { outcome: done?.outcome ?? null, computing: req !== null && done?.key !== key };
+  return { outcome: done?.outcome ?? null, lastGood, computing: req !== null && done?.key !== key };
 }

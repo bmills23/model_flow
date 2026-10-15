@@ -137,9 +137,15 @@ export function TransportPage() {
         : null,
     [parsed, form.mapMethod, form.showDomenico],
   );
-  const { outcome, computing } = useTransportResult(request);
-  const scenario = parsed.ok ? parsed.scenario : null;
-  const result = outcome?.ok ? outcome.result : null;
+  const { outcome, lastGood, computing } = useTransportResult(request);
+  // An engine input error keeps the last good result (and the scenario it belongs to) on screen.
+  const engineError = outcome && !outcome.ok && parsed.ok ? outcome.error : null;
+  const scenario = parsed.ok
+    ? engineError && lastGood
+      ? lastGood.scenario
+      : parsed.scenario
+    : null;
+  const result = outcome?.ok ? outcome.result : engineError ? (lastGood?.result ?? null) : null;
   const keys = (['legacy', 'modern', 'domenico'] as const).filter(
     (k) => result?.readouts[k] !== undefined,
   );
@@ -495,9 +501,9 @@ export function TransportPage() {
               </ul>
             </div>
           )}
-          {outcome && !outcome.ok && parsed.ok && (
+          {engineError && !result && (
             <div className="alert" role="alert">
-              The calculation failed: {outcome.error}
+              Input error: {engineError}
             </div>
           )}
 
@@ -531,11 +537,17 @@ export function TransportPage() {
                 </dl>
               </section>
               <section className="panel" aria-label="Warnings and notes">
-                <h2>Warnings and notes ({result.warnings.length})</h2>
-                {result.warnings.length === 0 ? (
+                <h2>Warnings and notes ({result.warnings.length + (engineError ? 1 : 0)})</h2>
+                {result.warnings.length === 0 && !engineError ? (
                   <p className="muted">No warnings.</p>
                 ) : (
                   <ul className="warnings">
+                    {engineError && (
+                      <li key="ui.input-error" className="input-error">
+                        <code>ui.input-error</code>
+                        <span>Input error, showing the last good result: {engineError}</span>
+                      </li>
+                    )}
                     {result.warnings.map((w) => (
                       <li key={w.code}>
                         <code>{w.code}</code>

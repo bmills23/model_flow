@@ -9,6 +9,7 @@ import {
   patchiGrid,
   wellScreenAverage,
   type At123dInput,
+  type ConcentrationStep,
   type DomenicoInput,
   type Warning,
   type WexlerInput,
@@ -50,42 +51,21 @@ export type ComputeOutcome = { ok: true; result: ComputeResult } | { ok: false; 
 const linspace = (a: number, b: number, n: number): number[] =>
   Array.from({ length: n }, (_, i) => (n === 1 ? a : a + ((b - a) * i) / (n - 1)));
 
-/** Superpose constant-source responses F(tau) over loading terms (the problem is linear in the source). */
-export function superpose(
-  terms: readonly LoadingTerm[],
-  time: number,
-  f: (tau: number) => number,
-): number {
-  let sum = 0;
-  for (const t of terms) {
-    if (t.factor === 0) continue;
-    const on = time - t.start;
-    if (on <= 0) continue;
-    const off = Number.isFinite(t.end) ? time - t.end : -1;
-    sum += t.factor * (f(on) - (off > 0 ? f(off) : 0));
-  }
-  return sum;
-}
-
-function superposeGrid(
-  terms: readonly LoadingTerm[],
-  time: number,
-  g: (tau: number) => number[][],
-): number[][] {
-  let out: number[][] | undefined;
-  const add = (grid: number[][], w: number): void => {
-    if (!out) out = grid.map((row) => row.map(() => 0));
-    grid.forEach((row, i) => row.forEach((v, j) => (out![i]![j]! += w * v)));
-  };
-  for (const t of terms) {
-    if (t.factor === 0) continue;
-    const on = time - t.start;
-    if (on <= 0) continue;
-    add(g(on), t.factor);
-    const off = Number.isFinite(t.end) ? time - t.end : -1;
-    if (off > 0) add(g(off), -t.factor);
-  }
-  return out ?? [];
+/**
+ * Boundary-concentration loading for the engine's Wexler and Domenico methods: c0 times the step
+ * factor. Zero-length steps are dropped (the engine rejects them); undefined means continuous.
+ */
+function concentrationLoading(s: Scenario): ConcentrationStep[] | undefined {
+  if (
+    s.terms.length === 1 &&
+    s.terms[0]!.start === 0 &&
+    s.terms[0]!.end === Infinity &&
+    s.terms[0]!.factor === 1
+  )
+    return undefined;
+  return s.terms
+    .filter((t) => t.end > t.start)
+    .map((t) => ({ start: t.start, end: t.end, concentration: s.c0 * t.factor }));
 }
 
 function at123dInput(s: Scenario, time: number): At123dInput {
@@ -167,23 +147,24 @@ export function receptorConcentration(
   }
   if (method === 'modern') {
     const w = wexler(s);
+    const loading = concentrationLoading(s);
     return depthAverage(
       s,
-      (d) =>
-        superpose(s.terms, time, (tau) => {
-          const p = { x, y: y + w.yOff, z: s.zOf(d) };
-          if (!w.finite) return patchiConcentration(w.params, p, tau);
-          const r = patchfConcentration(w.params, p, tau, w.finite);
-          if (!r.converged && flags) flags.notConverged = true;
-          return r.value;
-        }),
+      (d) => {
+        const p = { x, y: y + w.yOff, z: s.zOf(d) };
+        if (!w.finite) return patchiConcentration(w.params, p, time, loading);
+        const r = patchfConcentration(w.params, p, time, w.finite, loading);
+        if (!r.converged && flags) flags.notConverged = true;
+        return r.value;
+      },
       intervals,
     );
   }
   const input = domenicoInput(s);
+  const loading = concentrationLoading(s);
   return depthAverage(
     s,
-    (d) => superpose(s.terms, time, (tau) => domenicoConcentration(input, { x, y, z: d }, tau)),
+    (d) => domenicoConcentration(input, { x, y, z: d }, time, loading),
     intervals,
   );
 }
@@ -215,11 +196,10 @@ export function plumeGrid(
     } else {
       const w = wexler(s);
       const ysh = ys.map((y) => y + w.yOff);
-      g = superposeGrid(s.terms, s.time, (tau) =>
-        w.finite
-          ? patchfGrid(w.params, xs, ysh, z, tau, w.finite)
-          : patchiGrid(w.params, xs, ysh, z, tau),
-      );
+      const loading = concentrationLoading(s);
+      g = w.finite
+        ? patchfGrid(w.params, xs, ysh, z, s.time, w.finite, undefined, loading)
+        : patchiGrid(w.params, xs, ysh, z, s.time, undefined, loading);
     }
     if (g.length === 0) g = xs.map(() => ys.map(() => 0));
     const wgt = weights[k]!;
@@ -257,12 +237,6 @@ function collectWarnings(
       'The Domenico comparison ignores the finite aquifer thickness and width.',
     );
   }
-  if (s.terms.some((t) => t.factor !== 1 || Number.isFinite(t.end))) {
-    add(
-      'ui.superposition',
-      'Pulse and stepped loading are applied to the Wexler and Domenico methods by superposing the constant-concentration solution (the transport problem is linear in the source).',
-    );
-  }
   add(
     'ui.source-basis',
     'The legacy method releases a mass rate (source concentration times Darcy flux times source area) through the source volume; the modern method holds the source concentration fixed on the inflow plane. Expect the two to differ near the source.',
@@ -279,6 +253,8 @@ function collectWarnings(
       domenicoInput(s),
       { x: s.receptor.x, y: s.receptor.y, z },
       s.time,
+      undefined,
+      concentrationLoading(s),
     )) {
       add(w.code, w.message);
     }
@@ -315,6 +291,8 @@ export function compute(req: ComputeRequest): ComputeOutcome {
       result: { xs, ys, grid, times, series, readouts, warnings: collectWarnings(s, req, flags) },
     };
   } catch (e) {
+    // The engine throws RangeError for invalid inputs; surface its message as an input error.
+    if (e instanceof RangeError) return { ok: false, error: e.message };
     return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
 }
