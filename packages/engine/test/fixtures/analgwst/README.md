@@ -12,9 +12,14 @@ validate the Wexler (PATCHI, PATCHF) and point-source kernels in `packages/engin
   input decks and the programs' numeric output are committed.
 - Compile (gfortran 15.1.0, Homebrew): graphics are replaced by empty stubs for `PLOT2D` and `DGDISS`
   (plot control is 0 in every deck) and the dummy `locsubs.DMY.f` supplies the date and time routines
-  (so the "PROGRAM RUN ON" stamp in the `.prt` files is a fixed dummy, not a real date):
-  `gfortran -std=legacy -fallow-argument-mismatch -O1 -w -fno-automatic -I. <prog>.f [glqpts.f for patchi]
-  ofile.f title.f lenchr.f locsubs.DMY.f stub.f rdplot.f subs3.f exerfc.f -o <prog>`
+  (so the "PROGRAM RUN ON" stamp in the `.prt` files is a fixed dummy, not a real date). Command, run in the
+  `src` directory of the distribution, with `stub.f` holding the two empty subroutines (add `glqpts.f` for
+  PATCHI):
+
+  ```
+  gfortran -std=legacy -fallow-argument-mismatch -O1 -w -fno-automatic -I. PROG.f     ofile.f title.f lenchr.f locsubs.DMY.f stub.f rdplot.f subs3.f exerfc.f -o PROG
+  ```
+
 - Validation of the build: the shipped sample problems 10 (PATCHF) and 11 (PATCHI) were rerun with plotting
   off and reproduce the shipped `.prt` files byte for byte apart from the run stamp.
 - Reproduce: `python3 -I build_fixtures.py <bin_dir> <glq.pts> <out_dir>` (PATCHI reads `GLQ.PTS`,
@@ -23,13 +28,18 @@ validate the Wexler (PATCHI, PATCHF) and point-source kernels in `packages/engin
 Files per case: `<case>.dat` (input deck), `<case>.prt` (raw program output), `<case>.json` (parsed
 concentrations as `results[i] = {t, z, c[ix][iy]}`). Units: metres, days, mg/L.
 
-| Case | Program | Notes |
-|---|---|---|
-| point3-nodecay, point3-decay | POINT3 | continuous point source in an infinite aquifer; decay 0 and 0.03 per day |
-| patchi-nodecay, patchi-decay | PATCHI | patch on the inflow plane, infinite width and depth; decay 0 and 0.01 per day |
-| patchf-nodecay, patchf-decay | PATCHF | 60 m wide, 10 m thick aquifer, no-flux sides, top and bottom; decay 0 and 0.01 per day |
+| Case                         | Program | Notes                                                                                  |
+| ---------------------------- | ------- | -------------------------------------------------------------------------------------- |
+| point3-nodecay, point3-decay | POINT3  | continuous point source in an infinite aquifer; decay 0 and 0.03 per day               |
+| patchi-nodecay, patchi-decay | PATCHI  | patch on the inflow plane, infinite width and depth; decay 0 and 0.01 per day          |
+| patchf-nodecay, patchf-decay | PATCHF  | 60 m wide, 10 m thick aquifer, no-flux sides, top and bottom; decay 0 and 0.01 per day |
 
 Printed precision limits comparison: POINT3 and PATCHI print six decimals, PATCHF five. PATCHI uses a
 104-point Gauss-Legendre rule and PATCHF a 350-term series, so tolerances are set in the tests that
 read these files.
+
 - Source archive sha1: 046969528600274d49a6e406856d21d4bae973e4 (analgwst.1.source.tar.gz).
+
+Agreement achieved by the engine (see `groundwater-fixtures.test.ts`): every compared value matches to the
+printed precision, that is within half a unit in the last printed decimal (5e-7 for POINT3 and PATCHI,
+5e-6 for PATCHF). No tolerance was widened.

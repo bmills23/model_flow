@@ -46,81 +46,86 @@
   {
     "key": "yeh1981",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Yeh, G.T.",
     "year": 1981,
     "title": "AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system",
     "venue": "Oak Ridge National Laboratory",
     "identifier": "ORNL-5602",
-    "tags": ["groundwater"]
+    "tags": ["groundwater"],
+    "doi": "10.2172/6531241"
   },
   {
     "key": "galya1987",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Galya, D.P.",
     "year": 1987,
-    "title": "[Finite rectangular volume source for the AT123D solution]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["groundwater", "saturatedSource"]
+    "title": "A horizontal plane source model for ground-water transport",
+    "tags": ["groundwater", "saturatedSource"],
+    "venue": "Ground Water",
+    "identifier": "25(6):733-739",
+    "doi": "10.1111/j.1745-6584.1987.tb02215.x"
   },
   {
     "key": "wexler1992",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Wexler, E.J.",
     "year": 1992,
-    "title": "[Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow]",
+    "title": "Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow",
     "venue": "U.S. Geological Survey Techniques of Water-Resources Investigations",
-    "identifier": "TWRI 3-B7",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["groundwater"]
+    "identifier": "TWRI 3-B7 (Book 3, Chapter B7)",
+    "tags": ["groundwater"],
+    "doi": "10.3133/twri03b7"
   },
   {
     "key": "domenico1987",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Domenico, P.A.",
     "year": 1987,
     "title": "An analytical model for multidimensional transport of a decaying contaminant species",
     "venue": "Journal of Hydrology",
-    "tags": ["groundwater", "surfaceWater"]
+    "tags": ["groundwater", "surfaceWater"],
+    "identifier": "91(1-2):49-58",
+    "doi": "10.1016/0022-1694(87)90127-2"
   },
   {
     "key": "west2007",
     "type": "review",
-    "status": "planned",
+    "status": "used",
     "authors": "West, M.R., Kueper, B.H., Ungs, M.J.",
     "year": 2007,
-    "title": "[Evaluation of the Domenico approximation for contaminant transport]",
+    "title": "On the use and error of approximation in the Domenico (1987) solution",
     "venue": "Ground Water",
-    "identifier": "45:126-135",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["groundwater"]
+    "identifier": "45(2):126-135",
+    "tags": ["groundwater"],
+    "doi": "10.1111/j.1745-6584.2006.00280.x"
   },
   {
     "key": "guyonnet2004",
     "type": "review",
-    "status": "planned",
+    "status": "used",
     "authors": "Guyonnet, D., Neville, C.",
     "year": 2004,
-    "title": "[Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater]",
+    "title": "Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater",
     "venue": "Journal of Contaminant Hydrology",
-    "identifier": "75:141-153",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["groundwater"]
+    "identifier": "75(1-2):141-153",
+    "tags": ["groundwater"],
+    "doi": "10.1016/j.jconhyd.2004.06.004"
   },
   {
     "key": "srinivasan2007",
     "type": "review",
-    "status": "planned",
+    "status": "used",
     "authors": "Srinivasan, V., Clement, T.P., Lee, K.K.",
     "year": 2007,
-    "title": "[Domenico solution: is it valid?]",
+    "title": "Domenico solution--is it valid?",
     "venue": "Ground Water",
-    "identifier": "45:136-146",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["groundwater"]
+    "identifier": "45(2):136-146",
+    "tags": ["groundwater"],
+    "doi": "10.1111/j.1745-6584.2006.00281.x"
   },
   {
     "key": "srinivasan2008a",
@@ -767,7 +772,10 @@
     "year": 1996,
     "title": "ANALGWST (analytical groundwater solute transport code), version 1.1",
     "venue": "U.S. Geological Survey",
-    "tags": ["validation", "groundwater"]
+    "tags": ["validation", "groundwater"],
+    "identifier": "Version 1.1 (1996/04/03)",
+    "url": "https://water.usgs.gov/software/ANALGWST/",
+    "notes": "USGS software released under its User Rights Notice. Retrieved 2026-10-15; used only to generate test fixtures, source not vendored."
   },
   {
     "key": "mibitrans",
@@ -776,7 +784,9 @@
     "authors": "Utrecht University (MiBiPreT)",
     "year": 2026,
     "title": "mibitrans",
-    "notes": "Apache-2.0 Python package used only for cross-checks; not vendored. Year is the retrieval year (accessed 2026); no publication year is recorded.",
-    "tags": ["validation", "groundwater"]
+    "notes": "Apache-2.0 Python package used only for cross-checks; not vendored. Version 1.0.1, retrieved 2026-10-15. Year is the retrieval year (accessed 2026); no publication year is recorded.",
+    "tags": ["validation", "groundwater"],
+    "identifier": "Version 1.0.1",
+    "url": "https://pypi.org/project/mibitrans/"
   }
 ]
