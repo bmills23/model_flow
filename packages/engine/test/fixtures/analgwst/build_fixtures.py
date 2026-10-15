@@ -1,7 +1,8 @@
 """Build ANALGWST fixtures: write input decks, run the compiled USGS programs, parse outputs to JSON.
 
 Usage: python3 -I build_fixtures.py <bin_dir> <glq_pts> <out_dir>
-Reproduces the committed files in packages/engine/test/fixtures/analgwst/.
+Reproduces the committed files in packages/engine/test/fixtures/analgwst/ (the .json files byte for byte
+only after `prettier --write`; the content is identical).
 """
 import json, os, re, subprocess, sys
 

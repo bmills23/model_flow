@@ -34,6 +34,10 @@ concentrations as `results[i] = {t, z, c[ix][iy]}`). Units: metres, days, mg/L.
 | patchi-nodecay, patchi-decay | PATCHI  | patch on the inflow plane, infinite width and depth; decay 0 and 0.01 per day          |
 | patchf-nodecay, patchf-decay | PATCHF  | 60 m wide, 10 m thick aquifer, no-flux sides, top and bottom; decay 0 and 0.01 per day |
 
+Regenerating: `build_fixtures.py` writes compact JSON; the committed `.json` files were then formatted with
+`prettier --write` (content identical, `.dat` and `.prt` byte for byte identical), so run prettier on the
+output before comparing with `git diff`.
+
 Printed precision limits comparison: POINT3 and PATCHI print six decimals, PATCHF five. PATCHI uses a
 104-point Gauss-Legendre rule and PATCHF a 350-term series, so tolerances are set in the tests that
 read these files.

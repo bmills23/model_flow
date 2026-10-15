@@ -60,7 +60,23 @@ points carry half weight.
 
 Plan-view maps use `at123dGrid`: one composite Gauss-Legendre rule in release age (6 points per panel,
 panels growing geometrically, 24 per decade) shared by every grid point, so each point costs a product
-sum instead of an adaptive integral. It agrees with the adaptive point solution to about 2e-5 relative.
+sum instead of an adaptive integral. The advective peak of the age integrand has relative width
+sqrt(2/Pe) with Pe = |x - x_c| u / D_x', so a fixed 24 per decade stops resolving it near Pe = 1e3. The
+rule therefore follows the peak: at age tau the density is 24 sqrt(max(1, Pe(tau) / 1e3)) per decade, with
+Pe(tau) = u^2 tau / D_x' (`peakFollowingDensity`), applied up to the oldest receptor peak. Measured
+against the adaptive point solution at Pe = 1e3, 1e4, 1e5 and 1e6 the grid agrees to 3.5e-8 relative or
+better wherever the value exceeds 1e-6 of the source (or of the largest value); far in the pre-arrival
+tail, below that level, the steep Gaussian rise inside the last panel limits the match to about 1e-4
+relative, which is immaterial in absolute terms. Pe above 1e6 throws a RangeError (use the point
+solution). A 100 by 60 map costs about the same as before (about 60 to 100 ms per grid).
+
+Validation (all methods, RangeError): non-finite inputs; porosity outside (0, 1]; retardation below 1;
+negative decay rate or dispersion coefficient; non-positive or non-finite thickness; a source box that
+is not inside the layer (0 <= z1 <= z2 <= H); non-finite or negative time. `time = Infinity` is not
+supported by the AT123D kernel (use the Wexler methods for steady state). Negative velocity is
+accepted, the age cut follows (x - x_c)/u for either sign. A receptor outside the finite layer or
+aquifer (z outside [0, H], y outside [0, W]) reports zero in the point and grid functions alike
+instead of a mirrored image.
 
 ## Modern method: Wexler (1992) patch sources (`groundwater.wexler1992`; citation `wexler1992`)
 
@@ -76,6 +92,10 @@ decay rate k:
 
 and the steady state (t = Infinity) is exp(x (u - beta) / (2 D_x')). Terms are evaluated as
 exp(a) erfc(b) through the scaled complementary error function so large exponents do not overflow.
+When the time integral is used at steady state its upper limit is the larger root of
+(x - u T)^2 / (4 D T) + k T = 40, that is T = [(x u + 80 D) + sqrt((x u + 80 D)^2 - beta^2 x^2)] / beta^2,
+which covers the advective Gaussian tail at every Peclet number (a limit of x/u + 40/(k + u^2/4D) fell
+13 to 36 percent short at Pe = 1e3 to 1e5). A huge patch without decay returns c0 to better than 1e-6.
 
 PATCHI is the time integral of the decayed first-passage density times the lateral spreading of the patch:
 
@@ -109,12 +129,15 @@ that is exact only for zero longitudinal dispersivity (`srinivasan2007`). The va
 
 - `domenico.approximate-longitudinal-dispersion`: a_x > 0. `west2007` report centreline underprediction of
   up to 80 percent for a medium sand, growing with dispersivity, time and dimensionality.
-- `domenico.off-centreline-with-decay`: decay on and the point off the centreline. `guyonnet2004` report
+- `domenico.off-centreline-with-decay`: decay on and the point laterally offset (y != 0). `guyonnet2004` report
   good centreline agreement with the rigorous solution but large lateral divergence, especially with decay.
 - `domenico.deviates-from-exact`: the computed difference from the exact patch solution (the mirror at the
   water table turns the source into a patch of height 2Z) exceeds 10 percent. The 10 percent threshold is a
   screening choice made here, not a published limit.
-- `domenico.outside-domain`: x <= 0.
+- `domenico.outside-domain`: x <= 0, or z < 0 (above the water table; the value is zero, never mirrored).
+
+Domenico needs a finite positive velocity (RangeError otherwise), because the dispersion coefficients and
+the exact reference are proportional to it.
 
 The papers give qualitative conditions in their abstracts; no numerical validity thresholds are taken
 from them. The quantitative warning is computed directly against the exact solution.

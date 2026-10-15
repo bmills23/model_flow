@@ -143,7 +143,7 @@ describe('instantaneous box release (Green function)', () => {
     // tau where D tau / H^2 straddles the switch (0.2): tau = 0.2*4/0.4 = 2
     const lo = instantaneousBoxConcentration(thick, src, { x: 2, y: 0, z: 1.3 }, 1.999999);
     const hi = instantaneousBoxConcentration(thick, src, { x: 2, y: 0, z: 1.3 }, 2.000001);
-    expect(Math.abs(hi - lo) / lo).toBeLessThan(1e-4);
+    expect(Math.abs(hi - lo) / lo).toBeLessThan(1e-5);
   });
 });
 
