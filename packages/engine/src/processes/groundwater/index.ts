@@ -3,11 +3,13 @@ import { at123dConcentration, type At123dInput } from './kernel.js';
 import { domenicoConcentration, domenicoWarnings, type DomenicoInput } from './domenico.js';
 import { patchfConcentration, patchiConcentration, type WexlerInput } from './wexler.js';
 import type { Point3 } from './common.js';
+import type { ConcentrationStep } from './loading.js';
 
 export * from './common.js';
 export * from './kernel.js';
 export * from './wexler.js';
 export * from './domenico.js';
+export * from './loading.js';
 
 export interface At123dRunInput extends Omit<At123dInput, 'time'> {
   time: number;
@@ -47,6 +49,8 @@ export interface WexlerRunInput {
   thickness?: number;
   /** Time, or Infinity for steady state. */
   time: number;
+  /** Optional boundary-concentration steps (see ConcentrationStep); absent means continuous at c0. */
+  loading?: readonly ConcentrationStep[];
   points: readonly Point3[];
 }
 
@@ -74,11 +78,11 @@ export const groundwaterWexler: MethodDescriptor<WexlerRunInput, GroundwaterOutp
     }
     return w;
   },
-  run: ({ params, width, thickness, time, points }) => ({
+  run: ({ params, width, thickness, time, loading, points }) => ({
     concentrations: points.map((p) =>
       width !== undefined && thickness !== undefined
-        ? patchfConcentration(params, p, time, { width, thickness }).value
-        : patchiConcentration(params, p, time),
+        ? patchfConcentration(params, p, time, { width, thickness }, loading).value
+        : patchiConcentration(params, p, time, loading),
     ),
   }),
 };
@@ -87,6 +91,8 @@ export interface DomenicoRunInput {
   params: DomenicoInput;
   /** Time, or Infinity for steady state. */
   time: number;
+  /** Optional boundary-concentration steps (see ConcentrationStep); absent means continuous at c0. */
+  loading?: readonly ConcentrationStep[];
   points: readonly Point3[];
 }
 
@@ -103,14 +109,15 @@ export const groundwaterDomenico: MethodDescriptor<DomenicoRunInput, Groundwater
     'Transient behaviour only through the longitudinal erfc term; transverse spreading evaluated at steady state.',
     'Plume centreline accuracy depends on dispersivity, time and dimensionality; see the emitted warnings.',
   ],
-  validate: ({ params, time, points }) => {
+  validate: ({ params, time, loading, points }) => {
     const seen = new Map<string, Warning>();
     for (const p of points) {
-      for (const w of domenicoWarnings(params, p, time)) if (!seen.has(w.code)) seen.set(w.code, w);
+      for (const w of domenicoWarnings(params, p, time, undefined, loading))
+        if (!seen.has(w.code)) seen.set(w.code, w);
     }
     return [...seen.values()];
   },
-  run: ({ params, time, points }) => ({
-    concentrations: points.map((p) => domenicoConcentration(params, p, time)),
+  run: ({ params, time, loading, points }) => ({
+    concentrations: points.map((p) => domenicoConcentration(params, p, time, loading)),
   }),
 };

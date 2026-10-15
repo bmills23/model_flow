@@ -1,6 +1,7 @@
 import type { Warning } from '../../registry/index.js';
 import { erf, erfc } from '../../numerics/special.js';
 import type { Point3 } from './common.js';
+import { superposeLoading, type ConcentrationStep } from './loading.js';
 import { patchiConcentration } from './wexler.js';
 
 /**
@@ -43,8 +44,17 @@ function erfBand(s: number, half: number, w: number): number {
  * Domenico (1987) concentration at p and the given time (Infinity for steady state), in the
  * truncated one-term form used by BIOSCREEN: the transient enters only through the erfc term.
  */
-export function domenicoConcentration(input: DomenicoInput, p: Point3, time: number): number {
+export function domenicoConcentration(
+  input: DomenicoInput,
+  p: Point3,
+  time: number,
+  loading?: readonly ConcentrationStep[],
+): number {
   checkVelocity(input);
+  if (loading) {
+    const unit = { ...input, c0: 1 };
+    return superposeLoading(loading, time, (tau) => domenicoConcentration(unit, p, tau));
+  }
   // z is measured down from the water table; above it there is no aquifer (no mirror image)
   if (p.x <= 0 || time <= 0 || p.z < 0) return 0;
   const R = input.retardation ?? 1;
@@ -69,7 +79,12 @@ export function domenicoConcentration(input: DomenicoInput, p: Point3, time: num
 }
 
 /** The exact (Wexler 1992 PATCHI) concentration for the same source: the mirror gives a patch of height 2Z. */
-export function domenicoExactReference(input: DomenicoInput, p: Point3, time: number): number {
+export function domenicoExactReference(
+  input: DomenicoInput,
+  p: Point3,
+  time: number,
+  loading?: readonly ConcentrationStep[],
+): number {
   const R = input.retardation ?? 1;
   const u = input.velocity / R;
   return patchiConcentration(
@@ -89,6 +104,7 @@ export function domenicoExactReference(input: DomenicoInput, p: Point3, time: nu
     },
     p,
     time,
+    loading,
   );
 }
 
@@ -108,6 +124,7 @@ export function domenicoWarnings(
   p: Point3,
   time: number,
   threshold = DOMENICO_DEVIATION_THRESHOLD,
+  loading?: readonly ConcentrationStep[],
 ): Warning[] {
   checkVelocity(input);
   const out: Warning[] = [];
@@ -135,8 +152,8 @@ export function domenicoWarnings(
   }
   // the exact reference needs strictly positive dispersion in every direction
   const canCompare = input.alphaL > 0 && input.alphaT > 0 && input.alphaV > 0;
-  const approx = domenicoConcentration(input, p, time);
-  const exact = canCompare ? domenicoExactReference(input, p, time) : 0;
+  const approx = domenicoConcentration(input, p, time, loading);
+  const exact = canCompare ? domenicoExactReference(input, p, time, loading) : 0;
   if (exact > 0) {
     const dev = (approx - exact) / exact;
     if (Math.abs(dev) > threshold) {

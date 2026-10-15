@@ -1,4 +1,10 @@
 import { integrateTanhSinh } from '../../numerics/quadrature.js';
+import {
+  superposeLoading,
+  superposeLoadingGrid,
+  validateConcentrationLoading,
+  type ConcentrationStep,
+} from './loading.js';
 import { expErfc } from '../../numerics/special.js';
 import {
   BASE_PANELS_PER_DECADE,
@@ -157,7 +163,16 @@ function inflowPlane(
 }
 
 /** Wexler (1992) PATCHI: patch source on the inflow plane, infinite width and depth. */
-export function patchiConcentration(input: WexlerInput, p: Point3, time: number): number {
+export function patchiConcentration(
+  input: WexlerInput,
+  p: Point3,
+  time: number,
+  loading?: readonly ConcentrationStep[],
+): number {
+  if (loading) {
+    const unit = { ...input, c0: 1 };
+    return superposeLoading(loading, time, (tau) => patchiConcentration(unit, p, tau));
+  }
   const r = retarded(input);
   if (p.x < 0 || time < 0) return 0;
   if (p.x === 0) return inflowPlane(input, p);
@@ -171,7 +186,20 @@ export function patchfConcentration(
   p: Point3,
   time: number,
   aquifer: FiniteAquifer,
+  loading?: readonly ConcentrationStep[],
 ): PatchfResult {
+  if (loading) {
+    const unit = { ...input, c0: 1 };
+    const acc: PatchfResult = { value: 0, converged: true, method: 'series', terms: 0 };
+    acc.value = superposeLoading(loading, time, (tau) => {
+      const r = patchfConcentration(unit, p, tau, aquifer);
+      acc.converged &&= r.converged;
+      if (r.method === 'integral') acc.method = 'integral';
+      acc.terms = Math.max(acc.terms, r.terms);
+      return r.value;
+    });
+    return acc;
+  }
   const r = retarded(input);
   const { width: W, thickness: H } = aquifer;
   const { y1, y2, z1, z2 } = input.patch;
@@ -258,7 +286,14 @@ export function patchiGrid(
   z: number,
   time: number,
   panelsPerDecade = BASE_PANELS_PER_DECADE,
+  loading?: readonly ConcentrationStep[],
 ): number[][] {
+  if (loading) {
+    const unit = { ...input, c0: 1 };
+    return superposeLoadingGrid(loading, time, xs.length, ys.length, (tau) =>
+      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade),
+    );
+  }
   return wexlerGrid(input, xs, ys, z, time, panelsPerDecade);
 }
 
@@ -271,10 +306,17 @@ export function patchfGrid(
   time: number,
   aquifer: { width: number; thickness: number },
   panelsPerDecade = BASE_PANELS_PER_DECADE,
+  loading?: readonly ConcentrationStep[],
 ): number[][] {
   const { y1, y2, z1, z2 } = input.patch;
   if (!(y1 >= 0 && y2 <= aquifer.width && z1 >= 0 && z2 <= aquifer.thickness)) {
     throw new RangeError('Patch must lie inside the aquifer');
+  }
+  if (loading) {
+    const unit = { ...input, c0: 1 };
+    return superposeLoadingGrid(loading, time, xs.length, ys.length, (tau) =>
+      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade, aquifer),
+    );
   }
   return wexlerGrid(input, xs, ys, z, time, panelsPerDecade, aquifer);
 }

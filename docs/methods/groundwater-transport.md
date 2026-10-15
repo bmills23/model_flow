@@ -113,6 +113,20 @@ slowly (the same limitation ANALGWST flags); the engine then falls back to the t
 reflected profiles and reports `converged` and `method` in the result. `patchiGrid` and `patchfGrid`
 give plan-view grids with the shared time rule.
 
+### Time-varying boundary loading (Wexler and Domenico)
+
+Both patch-source methods accept an optional list of `ConcentrationStep` values `{ start, end, concentration }`
+in seconds, `end` possibly Infinity. Unlike the AT123D `LoadingStep`, whose value is a mass rate, the value
+here is the concentration held on the source boundary. Without the list the source is continuous at `c0`.
+Because the governing equation and the boundary condition are linear in the source, the answer is the sum
+over steps of `c_i [F(t - start_i) - F(t - end_i)]`, where `F` is the method's response to a unit constant
+boundary concentration and `F(tau) = 0` for `tau <= 0`. At `t = Infinity` a finished step cancels exactly
+(contributes zero) and an open-ended step contributes `c_i F(Infinity)`. Steps must be ordered by start,
+must not overlap, and carry finite non-negative concentrations (RangeError otherwise). The point
+functions, `patchiGrid`/`patchfGrid` (a trailing `loading` argument, one grid per step edge), `domenicoWarnings`
+and the `loading` field of the method run inputs all use the same rule, so the Domenico deviation warning
+compares the loaded approximate value with the loaded exact value.
+
 ## Comparison mode: Domenico (1987) (`groundwater.domenico1987`)
 
 Citations: `domenico1987`, `west2007`, `guyonnet2004`, `srinivasan2007`, `newell1996`. Named in the
