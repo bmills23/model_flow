@@ -79,10 +79,20 @@ UI as a second wave".
   loading on the Wexler and Domenico point, grid and registry paths by superposition in the engine;
   tests in packages/engine/test/groundwater-loading.test.ts (engine now 136); methods note has a loading
   section. Worker wrote the implementation before the tests this time (process deviation, tests pass).
-- Follow-up (b), UI adapter, in flight as a resume of Dispatch 4 in the main checkout: call the engine's
-  loading API, remove the UI-side superposition, catch RangeError from engine calls and show it in the
-  warnings panel keeping the last good result, re-run CDP and the gate.
-- Then: one Haiku doc-validity check, full gate, ROADMAP M1 status in place, one push.
+- Follow-up (b), UI adapter, LANDED (commits 1dacca1, f34b63e, Dispatch 6, a fresh worker because the
+  wave 2 worker could not be resumed once its worktree was removed): compute.ts passes ConcentrationStep
+  loading to the engine, UI-side superposition removed, parity test apps/web/src/transport/loadingParity.test.ts
+  holds values recorded from the old code and passes at 1e-9; engine RangeError is caught in compute and
+  the Web Worker and shown as a `ui.input-error` warning while the last good result stays on screen.
+  CDP 390 and 1280, light and dark: overflow 0. Web tests 46. Gate green.
+- Milestone audit against the M1 bullet (2026-10-15): everything landed except the Schulze-Makuch 2005
+  dispersivity law (reference present, status planned, no method). Dispatch 7 (Sonnet,
+  architect-worker-medium) in flight: verify the publication and coefficients, register
+  `dispersivity.schulze-makuch2005`, third option in the UI law selector; if the coefficients cannot
+  be verified the worker stops and reports, and the item is recorded as deferred with a DECISIONS entry.
+- README line 7 still says "milestone M0 (foundation) in progress": stale, corrected at close.
+- Then: ROADMAP M1 status and README status in place, one Haiku doc-validity check, full gate, one push
+  (Pages deploy on main is the first public version).
 
 ## Session log
 - Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
@@ -92,3 +102,5 @@ UI as a second wave".
 - Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. 116K tokens, 7 min. Landed.
   Resumed once for engine loading: 132K tokens, 2 min. Landed.
 - Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. 209K tokens, 22 min. Landed and merged.
+- Dispatch 6 (Sonnet, architect-worker-medium): UI adapter and RangeError handling. 91K tokens, 5 min. Landed.
+- Dispatch 7 (Sonnet, architect-worker-medium): Schulze-Makuch 2005 dispersivity law. In flight.
