@@ -1,6 +1,7 @@
 import {
   convert,
   gelhar1985Api1987,
+  schulzeMakuch2005,
   xuEckstein1995,
   dispersionCoefficients,
   type Warning,
@@ -43,7 +44,7 @@ export interface TransportForm {
   pulseYr: string;
   steps: StepRow[];
   // dispersivity
-  dispLaw: 'legacy' | 'modern';
+  dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
   alphaLOverride: string;
   alphaTOverride: string;
   alphaVOverride: string;
@@ -153,7 +154,7 @@ export interface Scenario {
   dispersivityDistance: number;
   /** The dispersivity law's own values (before overrides). */
   lawAlphas: { alphaL: number; alphaT: number; alphaV: number };
-  dispLaw: 'legacy' | 'modern';
+  dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
   notes: Warning[];
 }
 
@@ -312,7 +313,12 @@ export function toScenario(f: TransportForm): ScenarioResult {
   // dispersivity: the law's values, each replaceable by an override
   const distance =
     Number.isFinite(rx) && rx > 0 ? rx : Number.isFinite(xMax) && xMax > 0 ? xMax : 1;
-  const law = f.dispLaw === 'legacy' ? gelhar1985Api1987 : xuEckstein1995;
+  const law =
+    f.dispLaw === 'legacy'
+      ? gelhar1985Api1987
+      : f.dispLaw === 'schulze-makuch'
+        ? schulzeMakuch2005
+        : xuEckstein1995;
   const lawOut = law.run({ distance });
   const notes: Warning[] = [...(law.validate?.({ distance }) ?? [])];
   const over = (label: string, s: string, fallback: number): number =>

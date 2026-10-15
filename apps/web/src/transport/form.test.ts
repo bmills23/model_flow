@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { gelhar1985Longitudinal, xuEckstein1995Longitudinal } from '@model-flow/engine';
+import {
+  gelhar1985Longitudinal,
+  schulzeMakuch2005Longitudinal,
+  xuEckstein1995Longitudinal,
+} from '@model-flow/engine';
 import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
 
 const YR = 365.25 * 86400;
@@ -72,6 +76,11 @@ describe('toScenario: unit conversion at the boundary', () => {
     const modern = ok({ ...DEFAULT_FORM, dispLaw: 'modern', rx: '80' });
     expect(modern.alphaL).toBeCloseTo(xuEckstein1995Longitudinal(80), 12);
     expect(modern.alphaT).toBeCloseTo(modern.alphaL / 10, 12);
+    const schulze = ok({ ...DEFAULT_FORM, dispLaw: 'schulze-makuch', rx: '80' });
+    expect(schulze.alphaL).toBeCloseTo(schulzeMakuch2005Longitudinal(80), 12);
+    expect(schulze.alphaT).toBeCloseTo(schulze.alphaL / 10, 12);
+    expect(schulze.alphaV).toBeCloseTo(schulze.alphaL / 100, 12);
+    expect(schulze.dispLaw).toBe('schulze-makuch');
     const over = ok({
       ...DEFAULT_FORM,
       alphaLOverride: '5',

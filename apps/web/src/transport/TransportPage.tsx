@@ -348,6 +348,7 @@ export function TransportPage() {
               options={[
                 { value: 'legacy', label: 'Gelhar 1985 + API 1987' },
                 { value: 'modern', label: 'Xu & Eckstein 1995' },
+                { value: 'schulze-makuch', label: 'Schulze-Makuch 2005' },
               ]}
             />
             {scenario && (
