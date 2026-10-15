@@ -76,3 +76,41 @@ export const xuEckstein1995: MethodDescriptor<DispersivityInput, DispersivityOut
     return { alphaL, alphaT: alphaL / 10, alphaV: alphaL / 100 };
   },
 };
+
+/**
+ * Schulze-Makuch (2005) scale-dependent power law, alpha_L = c L^m.
+ *
+ * Provenance of the coefficients (verified 2026-10-15). The publication itself (Ground Water 43(3),
+ * 443-456, doi 10.1111/j.1745-6584.2005.0051.x) was confirmed through Crossref; its abstract states the
+ * unconsolidated-media exponent range 0.44 to 0.94 with the most reliable subsets at the low end.
+ * The coefficient pair c = 0.20, m = 0.44 for unconsolidated media fitted to the most reliable data
+ * is quoted from a secondary source with attribution to the paper: Bjerg, P.L., "Note A5: Dispersion
+ * in aquifers" (DTU Environment, v1.1, 2008) and the DTU Sustain lecture note "Dispersion in Aquifers"
+ * (v2.0, 2025, course 12330), both reading "alpha_L = c (L)^m = 0.20 (L)^0.44". Per-medium
+ * coefficients for consolidated rocks and the paper's stated data range could not be verified and are
+ * deliberately not encoded. Those notes give 1.6 m at 100 m, whereas the formula gives 1.517 m; the
+ * formula as quoted is used.
+ */
+export function schulzeMakuch2005Longitudinal(length: number): number {
+  if (!(length > 0)) throw new RangeError(`Scale length must be positive, got ${length}`);
+  return 0.2 * length ** 0.44;
+}
+
+export const schulzeMakuch2005: MethodDescriptor<DispersivityInput, DispersivityOutput> = {
+  id: 'dispersivity.schulze-makuch2005',
+  process: 'dispersivity',
+  kind: 'modern',
+  name: 'Schulze-Makuch (2005) power law with BIOSCREEN ratios',
+  summary:
+    'Longitudinal dispersivity from the unconsolidated-media power law 0.20 L^0.44 on scale; transverse is one tenth and vertical one hundredth of longitudinal (BIOSCREEN ratios).',
+  citations: ['schulzemakuch2005', 'newell1996'],
+  assumptions: [
+    'Dispersivity depends only on the transport distance and grows without an upper bound.',
+    'Coefficients are those for unconsolidated media fitted to the most reliable data in the compilation.',
+    'Transverse and vertical dispersivity are fixed fractions (1/10 and 1/100) of the longitudinal value.',
+  ],
+  run: ({ distance }) => {
+    const alphaL = schulzeMakuch2005Longitudinal(distance);
+    return { alphaL, alphaT: alphaL / 10, alphaV: alphaL / 100 };
+  },
+};

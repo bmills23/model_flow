@@ -19,6 +19,14 @@ Write u = v/R and D_i' = D_i/R. Dispersion coefficients are D_i = alpha_i v + D_
 dispersivity laws in `processes/dispersivity` (`dispersionCoefficients`). Solutions are products of one
 dimensional kernels in x, y and z, which is why a single time integral suffices.
 
+Three dispersivity laws are offered. The legacy law is the Gelhar et al. 1985 regression with API 1987
+ratios (transverse one third, vertical 1/87 of transverse). The modern laws are the Xu and Eckstein 1995
+regression and a power law after Schulze-Makuch 2005 (`schulzemakuch2005`), alpha_L = 0.20 L^0.44 for
+unconsolidated media, both paired with the BIOSCREEN ratios alpha_T = alpha_L/10 and alpha_V = alpha_L/100.
+The Schulze-Makuch compilation reports exponents of 0.44 to 0.94 for unconsolidated media with the most
+reliable data near the low end, and no evidence of an upper bound. Only the unconsolidated coefficient pair
+is encoded: it was verified from lecture notes that quote the paper, not from the paper's own tables.
+
 ## Legacy method: AT123D-class (`groundwater.at123d`; citations `yeh1981`, `galya1987`)
 
 Yeh (`yeh1981`) gives the Green function of this equation for instantaneous point, line, plane and volume

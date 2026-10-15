@@ -35,6 +35,19 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908.
   - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087.
 
+#### Schulze-Makuch (2005) power law with BIOSCREEN ratios
+
+- Kind: Modern
+- Method id: `dispersivity.schulze-makuch2005`
+- Summary: Longitudinal dispersivity from the unconsolidated-media power law 0.20 L^0.44 on scale; transverse is one tenth and vertical one hundredth of longitudinal (BIOSCREEN ratios).
+- Assumptions:
+  - Dispersivity depends only on the transport distance and grows without an upper bound.
+  - Coefficients are those for unconsolidated media fitted to the most reliable data in the compilation.
+  - Transverse and vertical dispersivity are fixed fractions (1/10 and 1/100) of the longitudinal value.
+- Sources:
+  - Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x>
+  - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087.
+
 ### groundwater
 
 #### AT123D-class Green function solution with a finite volume source
@@ -112,7 +125,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - National Oceanic and Atmospheric Administration (2026). Screening Quick Reference Tables (SQuiRTs).
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory.
-- Schulze-Makuch, D. (2005). [Longitudinal dispersivity data and implications for scaling behavior]. Ground Water. 43:443-456.
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
@@ -198,7 +210,7 @@ Every entry in the reference database, alphabetical by author.
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087. [used]
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output]. [planned]
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
-- Schulze-Makuch, D. (2005). [Longitudinal dispersivity data and implications for scaling behavior]. Ground Water. 43:443-456. [planned]
+- Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x> [used]
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]

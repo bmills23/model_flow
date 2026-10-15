@@ -197,13 +197,14 @@
   {
     "key": "schulzemakuch2005",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Schulze-Makuch, D.",
     "year": 2005,
-    "title": "[Longitudinal dispersivity data and implications for scaling behavior]",
+    "title": "Longitudinal dispersivity data and implications for scaling behavior",
     "venue": "Ground Water",
-    "identifier": "43:443-456",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "identifier": "43(3):443-456",
+    "doi": "10.1111/j.1745-6584.2005.0051.x",
+    "notes": "Publication verified through Crossref. The 0.20 L^0.44 unconsolidated-media coefficients are taken from DTU lecture notes quoting the paper; see the comment in processes/dispersivity.",
     "tags": ["dispersivity"]
   },
   {
