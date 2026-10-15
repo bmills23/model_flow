@@ -45,7 +45,17 @@ UI as a second wave".
 - Worker-reported open items awaiting the review: Domenico deviation threshold 10% is the worker's own
   screening choice (needs a DECISIONS.md entry once settled); Galya 1987 is a plane-source paper (roadmap
   row annotated); Srinivasan 2007 title stored with `--` in place of the published long dash.
-- Fable review of the engine (Dispatch 3): in flight, read-only, findings only.
+- Fable review of the engine (Dispatch 3) DONE: 1 critical (steady-state time integral truncated at high
+  Peclet in wexler.ts integralUpperLimit, 13 to 36 percent low with no warning), 4 major (shared
+  24-per-decade panel rule loses accuracy above Peclet 1e3; no input validation in the AT123D kernel so
+  bad inputs return 0; Domenico validate throws for velocity 0; negative velocity mis-handled), 6 minor
+  (Infinity time NaN in AT123D; out-of-domain z silently mirrored; fixture build script formatting;
+  one loose tolerance; off-centreline warning fires on z; Srinivasan title punctuation). Verified clean:
+  kernel mathematics versus Yeh 1981, Wexler formulas and series, fixture honesty (fresh gfortran build
+  reproduces all six .prt files byte for byte), mibitrans match, registry, units, seven references
+  against Crossref, clean room, zero em dashes.
+- Corrective dispatch (Dispatch 5, Sonnet, architect-worker-medium) on m1-groundwater-engine: in flight,
+  brief is the review findings verbatim. No second Fable pass after it (doctrine: one pass per wave).
 - Wave 2 (UI, Dispatch 4): in flight in an isolated worktree on branch `m1-groundwater-ui`, Sonnet,
   architect-worker-medium. Scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern
   overlay, warnings panel, CDP check at 390x844 with zero overflow.
@@ -56,5 +66,6 @@ UI as a second wave".
 - Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
   resume for the date-stability, retrieval-year and used-title fixes.
 - Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
-- Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. In flight.
+- Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. 193K tokens, 13 min. Done.
+- Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. In flight.
 - Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. In flight.

@@ -21,3 +21,14 @@ Append new decisions at the bottom with the date. Correct a superseded decision 
 - Clean room: every model is implemented from its primary publication. The RISC5 user's guide is used only as a map of which published choices RISC5 made. No manual prose, figures, or database tables are copied. The RISC5 binary is never inspected.
 - Root solver for cleanup-level back-calculation is Brent's method; a secant variant is kept only for parity checks against RISC5's documented behaviour.
 - SI units inside the engine; RISC-style units (cm/d, mg/kg, mg/L) only at the input and output boundary.
+
+## 2026-10-15: Domenico comparison deviation threshold (M1 wave 1)
+
+The Domenico 1987 comparison mode emits `domenico.deviates-from-exact` when its result differs from the
+exact Wexler PATCHI solution for the same inputs by more than 10 percent (`DOMENICO_DEVIATION_THRESHOLD`
+in `packages/engine/src/processes/groundwater/domenico.ts`). The published validity papers (West et al.
+2007, Guyonnet and Neville 2004, Srinivasan et al. 2007) give qualitative conditions rather than a single
+numeric bound, so the threshold is a screening choice made by the implementing worker and kept after the
+independent review raised no objection. It is a UI signal, not a scientific claim; change it with a new
+entry here.
+
