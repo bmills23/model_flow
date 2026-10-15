@@ -9,5 +9,5 @@ mibitrans (Utrecht University). The package is not vendored; only inputs and out
   solution as in BIOSCREEN-AT, no source depletion), both sampled at z = 0.
 - `cases.json`: two cases (`nodecay`, `decay`), each 48 points (x, y, t) with both solutions. Units: metres,
   days, g/m3. Regenerate with `generate.py <out.json>` inside a venv with mibitrans.
-- Two cases per the brief: the Domenico-type solution is checked against `Bioscreen`; the exact
+- Two cases: the Domenico-type solution is checked against `Bioscreen`; the exact
   patch solution against `Mibitrans`.

@@ -1,106 +1,56 @@
-# HANDOFF (written from the tree, 2026-10-15, end of M0 session)
+# HANDOFF (written from the tree, 2026-10-15, end of M1)
 
-Resume: start a fresh session in `~/repos/model_flow`, run `/architect on`, read this file, then
-`docs/ROADMAP.md` (sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep before acting.
+Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (sections 7
+and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or skipping
+a done one.
 
 ## State of the tree
-- `main` at the commit after bcfce84 (CI cost recorded), pushed; working tree clean; branch
-  `m0-foundation` fully merged (safe to delete).
-- Gate green locally and in CI: lint, prettier, typecheck, 49 engine + 11 data + 7 web tests,
-  `docs:check`, build. Pages live at https://bmills23.github.io/model_flow/ (build_type workflow).
+- `main` at the M1 merge, pushed; working tree clean. Branches `m0-foundation`, `m1-groundwater-engine`
+  and `m1-groundwater-ui` are fully merged (safe to delete).
+- Gate green locally: lint, prettier, typecheck, engine 140 + data 11 + web 46 tests, `docs:check`, build.
+  Pages deploys from main: https://bmills23.github.io/model_flow/
 - CI cost: about 3 billed minutes per push to main; docs-only pushes trigger nothing.
 
-## M0 landed
-- Monorepo (pnpm 12.11.2 via `corepack pnpm`, Node 24, TypeScript 6.0.3, Vite 8, vitest 5, React 19).
-- `packages/engine`: numerics (special functions, Gauss-Kronrod and tanh-sinh quadrature, Brent and
-  secant, xoshiro128** PRNG, Latin hypercube, units), `MethodRegistry`, references (75 entries, 4 used),
-  dispersivity process (legacy Gelhar 1985 + API 1987 ratios; modern Xu and Eckstein 1995 + BIOSCREEN
-  ratios).
-- `packages/data`: `renderAttributions`, `renderThirdPartyLicenses`, `renderStable` (date moves only
-  on content change), `generate-docs.ts`; generated `docs/ATTRIBUTIONS.md` and
-  `docs/THIRD_PARTY_LICENSES.md` are committed and checked by the gate.
-- `apps/web`: responsive shell (six-step nav placeholders, Methods & References page, non-affiliation
-  footer), zero overflow at 390x844 (CDP check).
+## M1 landed (groundwater transport, Appendix B)
+- Engine `packages/engine/src/processes/groundwater/`: AT123D-class Green's-function kernel (3-D ADE,
+  box source, finite or infinite thickness, retardation, decay, continuous, pulse and piecewise-constant
+  mass loading, well-screen averaging); Wexler 1992 PATCHI and PATCHF (point, grid and registry paths,
+  boundary-concentration loading by superposition); Domenico 1987 comparison mode with four validity
+  warnings (deviation threshold recorded in DECISIONS.md). Invalid inputs throw RangeError (non-finite
+  values, porosity outside (0,1], retardation below 1, negative decay or dispersion, thickness at or below
+  0, velocity at or below 0 for Domenico, time Infinity for AT123D, a source box outside the layer, grids
+  above Peclet 1e6). Grid versus point agree within 2e-8 up to Peclet 1e6; a 100 by 60 grid takes about
+  75, 61 and 90 ms (AT123D, PATCHI, PATCHF).
+- Dispersivity: third law `dispersivity.schulze-makuch2005` (alpha_L = 0.20 L^0.44, unconsolidated
+  media); coefficient provenance recorded in DECISIONS.md.
+- Fixtures `packages/engine/test/fixtures/`: USGS ANALGWST 1.1 (POINT3, PATCHI, PATCHF, decay on and off;
+  a fresh gfortran build reproduces every committed output byte for byte; README records version, URL,
+  retrieval date, compile command and the public-domain notice); mibitrans 1.0.1 (two cases, generate.py,
+  throwaway venv, not vendored). Tolerances are the printed-precision floor; none widened.
+- References: 12 entries `used`, titles and identifiers checked against Crossref and the USGS
+  Publications Warehouse. Methods note: `docs/methods/groundwater-transport.md`.
+- Web `apps/web/src/transport/`: scenario form with unit conversion at the boundary, three dispersivity
+  laws, legacy or modern method switch, optional Domenico overlay labelled as a comparison; plan-view
+  plume map (d3-contour and d3-scale, React SVG), breakthrough chart, warnings panel that also shows
+  engine input errors while keeping the last good result; engine in a module Web Worker. Zero overflowing
+  elements at 390x844 and 1280, light and dark. Eight d3 packages plus internmap, all ISC, in THIRD_PARTY_LICENSES.
 
-## Known debt
-- 42 of 75 references have square-bracketed descriptor titles (status `planned`). Replace each with its
-  verified published title when a milestone marks it `used` (a test enforces this for `used` entries).
-- Manual text extraction lived in a per-session scratchpad; re-extract when needed:
+## Open items
+- Schulze-Makuch 2005 coefficients (0.20, 0.44) come from lecture notes quoting the paper, not from the
+  paper's own table; per-medium coefficients and the data range are not encoded, so the method has no
+  range warning. Check against the paper and record the check in DECISIONS.md.
+- Galya 1987 is a horizontal plane-source paper; the box source derives from Yeh 1981 (the methods note
+  says so; the ROADMAP section 3 row is annotated).
+- 35 of 75 references still carry square-bracketed descriptor titles (status `planned`); replace each
+  with its verified published title when a milestone marks it `used` (a test enforces this).
+- The 390x844 viewport check script is not in the repo. Recreate it when needed: headless Chrome with
+  remote debugging, Emulation.setDeviceMetricsOverride (390x844, mobile, scale 2), count elements whose
+  bounding rect right edge exceeds clientWidth; the count must be 0.
+- Manual text extraction lives outside the repo; re-extract when needed:
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
-  (appendix line index in ROADMAP section 3 refers to that extraction).
+  (the appendix line index in ROADMAP section 3 refers to that extraction).
 
-## In flight: M1 groundwater transport (ROADMAP section 7)
-Bryan's directive (2026-10-15, verbatim, in reply to the proposed four-agent shape): "go, engine first,
-UI as a second wave".
-
-- Wave 1 (engine) LANDED on branch `m1-groundwater-engine` (not pushed), commits dee0953, 47266da,
-  425de19, 995dcc4, 158d87f: ANALGWST 1.1 fixtures (POINT3, PATCHI, PATCHF, decay on and off; sample
-  problems 10 and 11 reproduce byte for byte), mibitrans 1.0.1 fixtures (two cases), methods
-  `groundwater.at123d` (legacy), `groundwater.wexler1992` (modern), `groundwater.domenico1987`
-  (comparison, four warnings), methods note docs/methods/groundwater-transport.md, seven references
-  marked used, ATTRIBUTIONS regenerated. Worker gate tail: engine 94 tests, data 11, web 7, lint,
-  prettier, typecheck, docs:check, build all green. Grid timings (100 by 60): at123dGrid about 190 ms,
-  patchiGrid 43 ms, patchfGrid 51 ms; the per-point adaptive path costs seconds, so the UI uses the
-  grid functions.
-- Worker-reported open items awaiting the review: Domenico deviation threshold 10% is the worker's own
-  screening choice (needs a DECISIONS.md entry once settled); Galya 1987 is a plane-source paper (roadmap
-  row annotated); Srinivasan 2007 title stored with `--` in place of the published long dash.
-- Fable review of the engine (Dispatch 3) DONE: 1 critical (steady-state time integral truncated at high
-  Peclet in wexler.ts integralUpperLimit, 13 to 36 percent low with no warning), 4 major (shared
-  24-per-decade panel rule loses accuracy above Peclet 1e3; no input validation in the AT123D kernel so
-  bad inputs return 0; Domenico validate throws for velocity 0; negative velocity mis-handled), 6 minor
-  (Infinity time NaN in AT123D; out-of-domain z silently mirrored; fixture build script formatting;
-  one loose tolerance; off-centreline warning fires on z; Srinivasan title punctuation). Verified clean:
-  kernel mathematics versus Yeh 1981, Wexler formulas and series, fixture honesty (fresh gfortran build
-  reproduces all six .prt files byte for byte), mibitrans match, registry, units, seven references
-  against Crossref, clean room, zero em dashes.
-- Corrective dispatch (Dispatch 5, Sonnet, architect-worker-medium) LANDED on m1-groundwater-engine,
-  commits 53b1e13, 0741ee2, 6852c54: all eleven findings fixed, tests in
-  packages/engine/test/groundwater-review.test.ts (engine now 129 tests). Steady-state upper limit from
-  the exponent root; peak-following grid density (grid versus point within 2e-8 up to Peclet 1e6, grids
-  throw RangeError above MAX_GRID_PECLET 1e6); AT123D kernel and Domenico throw RangeError on invalid
-  inputs (non-finite, porosity outside (0,1], R below 1, negative decay or dispersion, thickness at or
-  below 0, velocity at or below 0 for Domenico, time Infinity for AT123D, source box outside the layer);
-  receptors outside the layer return 0; Srinivasan title now "Domenico solution: is it valid?". Grid
-  timings 75, 61, 90 ms (at123d, patchi, patchf) on a 100 by 60 grid. No second Fable pass (doctrine).
-  UI consequence, queued as a resume of the UI worker after merge: catch RangeError from engine calls
-  and show the message in the warnings panel.
-- Gate hygiene: agent worktrees live under .claude/worktrees/ inside the repo; added to .gitignore and
-  the eslint ignores so `pnpm lint` passes while a worktree exists.
-- Wave 2 (UI, Dispatch 4) LANDED and MERGED into m1-groundwater-engine (merge 11ae5b6; UI commits
-  a7a3f11, 4ac8ac4, 5d6c6c7; worktree removed). Groundwater screen: form with unit conversion at the
-  boundary, plan-view plume map (d3-contour and d3-scale, ISC, React SVG; decision in DECISIONS.md),
-  breakthrough chart with legacy, modern and optional Domenico overlay, warnings panel, engine in a module
-  Web Worker. CDP at 390 and 1280, light and dark: overflow 0, no tap target under 44 px. Web tests 39.
-  Nine ISC d3 packages added to THIRD_PARTY_LICENSES. CDP script kept in the session scratchpad only.
-- Merged baseline gate (orchestrator run, 2026-10-15): exit 0, engine 129, data 11, web 39, lint,
-  prettier, typecheck, docs:check, build green.
-- Follow-up (a), engine loading, LANDED (commits 8a4418f, 43a9fc9, resume of Dispatch 5): ConcentrationStep
-  loading on the Wexler and Domenico point, grid and registry paths by superposition in the engine;
-  tests in packages/engine/test/groundwater-loading.test.ts (engine now 136); methods note has a loading
-  section. Worker wrote the implementation before the tests this time (process deviation, tests pass).
-- Follow-up (b), UI adapter, LANDED (commits 1dacca1, f34b63e, Dispatch 6, a fresh worker because the
-  wave 2 worker could not be resumed once its worktree was removed): compute.ts passes ConcentrationStep
-  loading to the engine, UI-side superposition removed, parity test apps/web/src/transport/loadingParity.test.ts
-  holds values recorded from the old code and passes at 1e-9; engine RangeError is caught in compute and
-  the Web Worker and shown as a `ui.input-error` warning while the last good result stays on screen.
-  CDP 390 and 1280, light and dark: overflow 0. Web tests 46. Gate green.
-- Milestone audit against the M1 bullet (2026-10-15): everything landed except the Schulze-Makuch 2005
-  dispersivity law (reference present, status planned, no method). Dispatch 7 (Sonnet,
-  architect-worker-medium) in flight: verify the publication and coefficients, register
-  `dispersivity.schulze-makuch2005`, third option in the UI law selector; if the coefficients cannot
-  be verified the worker stops and reports, and the item is recorded as deferred with a DECISIONS entry.
-- README line 7 still says "milestone M0 (foundation) in progress": stale, corrected at close.
-- Then: ROADMAP M1 status and README status in place, one Haiku doc-validity check, full gate, one push
-  (Pages deploy on main is the first public version).
-
-## Session log
-- Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
-  resume for the date-stability, retrieval-year and used-title fixes.
-- Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
-- Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. 193K tokens, 13 min. Done.
-- Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. 116K tokens, 7 min. Landed.
-  Resumed once for engine loading: 132K tokens, 2 min. Landed.
-- Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. 209K tokens, 22 min. Landed and merged.
-- Dispatch 6 (Sonnet, architect-worker-medium): UI adapter and RangeError handling. 91K tokens, 5 min. Landed.
-- Dispatch 7 (Sonnet, architect-worker-medium): Schulze-Makuch 2005 dispersivity law. In flight.
+## Queued: M2 vadose leaching (ROADMAP section 7)
+VADSAT-type legacy model with lens and Raoult's law; modern k(theta) and multi-layer options; coupling of
+the leachate flux into M1 as a time-varying source (the engine's loading steps are the hook). Table R-7
+fixture, van Genuchten and Alves tables. Depth-profile and source-depletion charts. Not started.

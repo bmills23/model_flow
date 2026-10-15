@@ -1,9 +1,9 @@
-> Status: M0 DONE 2026-10-15 (commits cacac67..0f14058, merged to main). Next: M1 groundwater transport. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M1 DONE 2026-10-15 (merged to main; first public version on Pages). Next: M2 vadose leaching. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
-Plan written 2026-10-15. Copy this file into the repo (`docs/ROADMAP.md`) in the first implementation
-session; `~/.claude/plans/` is auto-cleaned after about 30 days.
+Plan written 2026-10-15 and copied into the repo as `docs/ROADMAP.md` in the first implementation
+session.
 
 ## 1. Context
 
@@ -165,7 +165,8 @@ after the first run.
   engine + web + data packages, lint/typecheck/vitest, CI and Pages workflows; numerics kernel with tests;
   `references.json` seeded with every citation in section 3; ATTRIBUTIONS and THIRD_PARTY_LICENSES
   generators; README with scope, non-affiliation notice, licence; DECISIONS.md with the section 2 table.
-- **M1 Groundwater transport (App. B).** AT123D-equivalent kernel (legacy), Wexler PATCHI/PATCHF (modern),
+- **M1 Groundwater transport (App. B). DONE 2026-10-15** (Schulze-Makuch coefficients from a secondary
+  source, see DECISIONS.md). AT123D-equivalent kernel (legacy), Wexler PATCHI/PATCHF (modern),
   Domenico comparison mode with validity warnings, dispersivity laws (Gelhar 1985 + API ratios legacy;
   Xu & Eckstein / Schulze-Makuch modern), well-screen averaging, pulse and time-varying sources. ANALGWST
   and mibitrans fixtures. First UI: scenario form, plan-view plume map, breakthrough curve, legacy-vs-modern
