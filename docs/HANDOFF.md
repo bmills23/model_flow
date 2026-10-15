@@ -75,11 +75,13 @@ UI as a second wave".
   Nine ISC d3 packages added to THIRD_PARTY_LICENSES. CDP script kept in the session scratchpad only.
 - Merged baseline gate (orchestrator run, 2026-10-15): exit 0, engine 129, data 11, web 39, lint,
   prettier, typecheck, docs:check, build green.
-- Follow-ups in flight before close: (a) engine, resume of Dispatch 5: pulse and piecewise-constant
-  loading for the Wexler and Domenico methods by superposition inside the engine (point and grid paths),
-  because the UI currently does this itself under a `ui.superposition` note; (b) UI, resume of
-  Dispatch 4 after (a): call the engine's loading support, remove the UI-side superposition, catch
-  RangeError from engine calls and show it in the warnings panel, re-run CDP and the gate.
+- Follow-up (a), engine loading, LANDED (commits 8a4418f, 43a9fc9, resume of Dispatch 5): ConcentrationStep
+  loading on the Wexler and Domenico point, grid and registry paths by superposition in the engine;
+  tests in packages/engine/test/groundwater-loading.test.ts (engine now 136); methods note has a loading
+  section. Worker wrote the implementation before the tests this time (process deviation, tests pass).
+- Follow-up (b), UI adapter, in flight as a resume of Dispatch 4 in the main checkout: call the engine's
+  loading API, remove the UI-side superposition, catch RangeError from engine calls and show it in the
+  warnings panel keeping the last good result, re-run CDP and the gate.
 - Then: one Haiku doc-validity check, full gate, ROADMAP M1 status in place, one push.
 
 ## Session log
@@ -88,4 +90,5 @@ UI as a second wave".
 - Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
 - Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. 193K tokens, 13 min. Done.
 - Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. 116K tokens, 7 min. Landed.
+  Resumed once for engine loading: 132K tokens, 2 min. Landed.
 - Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. 209K tokens, 22 min. Landed and merged.
