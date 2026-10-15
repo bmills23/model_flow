@@ -33,18 +33,28 @@ Resume: start a fresh session in `~/repos/model_flow`, run `/architect on`, read
 Bryan's directive (2026-10-15, verbatim, in reply to the proposed four-agent shape): "go, engine first,
 UI as a second wave".
 
-- Wave 1 (engine), dispatched 2026-10-15 as Dispatch 2 (Sonnet, architect-worker-medium) on branch
-  `m1-groundwater-engine`: AT123D-class Green's-function kernel (3-D ADE, box source, pulse and
-  time-varying loading, well-screen averaging), Wexler 1992 PATCHI/PATCHF option with USGS ANALGWST
-  fixtures (gfortran 15 at /usr/local/bin/gfortran), Domenico comparison mode with validity warnings,
-  mibitrans cross-check fixtures if the package installs, methods note, references marked `used`,
-  ATTRIBUTIONS regenerated, local gate green. No push, no UI.
-- Wave 2 (UI), queued: scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern overlay
-  (dataviz skill; Observable Plot + d3 or ECharts), CDP check at 390x844 with zero overflow. One Sonnet
-  worker.
-- Then: one Haiku doc-validity check, one Fable review pass (timing decided at wave 1 close), one push.
+- Wave 1 (engine) LANDED on branch `m1-groundwater-engine` (not pushed), commits dee0953, 47266da,
+  425de19, 995dcc4, 158d87f: ANALGWST 1.1 fixtures (POINT3, PATCHI, PATCHF, decay on and off; sample
+  problems 10 and 11 reproduce byte for byte), mibitrans 1.0.1 fixtures (two cases), methods
+  `groundwater.at123d` (legacy), `groundwater.wexler1992` (modern), `groundwater.domenico1987`
+  (comparison, four warnings), methods note docs/methods/groundwater-transport.md, seven references
+  marked used, ATTRIBUTIONS regenerated. Worker gate tail: engine 94 tests, data 11, web 7, lint,
+  prettier, typecheck, docs:check, build all green. Grid timings (100 by 60): at123dGrid about 190 ms,
+  patchiGrid 43 ms, patchfGrid 51 ms; the per-point adaptive path costs seconds, so the UI uses the
+  grid functions.
+- Worker-reported open items awaiting the review: Domenico deviation threshold 10% is the worker's own
+  screening choice (needs a DECISIONS.md entry once settled); Galya 1987 is a plane-source paper (roadmap
+  row annotated); Srinivasan 2007 title stored with `--` in place of the published long dash.
+- Fable review of the engine (Dispatch 3): in flight, read-only, findings only.
+- Wave 2 (UI, Dispatch 4): in flight in an isolated worktree on branch `m1-groundwater-ui`, Sonnet,
+  architect-worker-medium. Scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern
+  overlay, warnings panel, CDP check at 390x844 with zero overflow.
+- Then: corrective dispatch if the review finds defects, merge UI into the engine branch, one Haiku
+  doc-validity check, full gate, ROADMAP M1 status in place, one push.
 
 ## Session log
 - Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
   resume for the date-stability, retrieval-year and used-title fixes.
-- Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. Launched 2026-10-15; in flight.
+- Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
+- Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. In flight.
+- Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. In flight.
