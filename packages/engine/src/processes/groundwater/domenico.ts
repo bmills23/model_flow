@@ -23,6 +23,13 @@ export interface DomenicoInput {
   sourceThickness: number;
 }
 
+function checkVelocity(input: DomenicoInput): void {
+  const R = input.retardation ?? 1;
+  if (!(input.velocity > 0 && Number.isFinite(input.velocity)))
+    throw new RangeError('Domenico needs a finite positive velocity');
+  if (!(R >= 1 && Number.isFinite(R))) throw new RangeError('Retardation factor must be >= 1');
+}
+
 /** erf((s + h) / w) - erf((s - h) / w) with the sharp limit when the spreading width is zero. */
 function erfBand(s: number, half: number, w: number): number {
   if (w === 0) {
@@ -37,7 +44,9 @@ function erfBand(s: number, half: number, w: number): number {
  * truncated one-term form used by BIOSCREEN: the transient enters only through the erfc term.
  */
 export function domenicoConcentration(input: DomenicoInput, p: Point3, time: number): number {
-  if (p.x <= 0 || time <= 0) return 0;
+  checkVelocity(input);
+  // z is measured down from the water table; above it there is no aquifer (no mirror image)
+  if (p.x <= 0 || time <= 0 || p.z < 0) return 0;
   const R = input.retardation ?? 1;
   const lambda = input.decayRate ?? 0;
   const v = input.velocity / R;
@@ -100,11 +109,13 @@ export function domenicoWarnings(
   time: number,
   threshold = DOMENICO_DEVIATION_THRESHOLD,
 ): Warning[] {
+  checkVelocity(input);
   const out: Warning[] = [];
-  if (p.x <= 0) {
+  if (p.x <= 0 || p.z < 0) {
     out.push({
       code: 'domenico.outside-domain',
-      message: 'The Domenico solution is defined for x > 0 only; the value is reported as zero.',
+      message:
+        'The Domenico solution is defined for x > 0 and z >= 0 (z is depth below the water table) only; the value is reported as zero.',
     });
     return out;
   }
@@ -115,11 +126,11 @@ export function domenicoWarnings(
         'The Domenico solution is exact only for zero longitudinal dispersivity (Srinivasan et al. 2007). West et al. 2007 report centreline underprediction of up to 80 percent for a medium sand, growing with dispersivity, time and dimensionality.',
     });
   }
-  if ((input.decayRate ?? 0) > 0 && (p.y !== 0 || p.z !== 0)) {
+  if ((input.decayRate ?? 0) > 0 && p.y !== 0) {
     out.push({
       code: 'domenico.off-centreline-with-decay',
       message:
-        'Off the plume centreline with decay the Domenico solution can diverge considerably from the rigorous solution (Guyonnet and Neville 2004).',
+        'Off the plume centreline (lateral offset) with decay the Domenico solution can diverge considerably from the rigorous solution (Guyonnet and Neville 2004).',
     });
   }
   // the exact reference needs strictly positive dispersion in every direction
