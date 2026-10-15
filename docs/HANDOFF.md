@@ -54,8 +54,19 @@ UI as a second wave".
   kernel mathematics versus Yeh 1981, Wexler formulas and series, fixture honesty (fresh gfortran build
   reproduces all six .prt files byte for byte), mibitrans match, registry, units, seven references
   against Crossref, clean room, zero em dashes.
-- Corrective dispatch (Dispatch 5, Sonnet, architect-worker-medium) on m1-groundwater-engine: in flight,
-  brief is the review findings verbatim. No second Fable pass after it (doctrine: one pass per wave).
+- Corrective dispatch (Dispatch 5, Sonnet, architect-worker-medium) LANDED on m1-groundwater-engine,
+  commits 53b1e13, 0741ee2, 6852c54: all eleven findings fixed, tests in
+  packages/engine/test/groundwater-review.test.ts (engine now 129 tests). Steady-state upper limit from
+  the exponent root; peak-following grid density (grid versus point within 2e-8 up to Peclet 1e6, grids
+  throw RangeError above MAX_GRID_PECLET 1e6); AT123D kernel and Domenico throw RangeError on invalid
+  inputs (non-finite, porosity outside (0,1], R below 1, negative decay or dispersion, thickness at or
+  below 0, velocity at or below 0 for Domenico, time Infinity for AT123D, source box outside the layer);
+  receptors outside the layer return 0; Srinivasan title now "Domenico solution: is it valid?". Grid
+  timings 75, 61, 90 ms (at123d, patchi, patchf) on a 100 by 60 grid. No second Fable pass (doctrine).
+  UI consequence, queued as a resume of the UI worker after merge: catch RangeError from engine calls
+  and show the message in the warnings panel.
+- Gate hygiene: agent worktrees live under .claude/worktrees/ inside the repo; added to .gitignore and
+  the eslint ignores so `pnpm lint` passes while a worktree exists.
 - Wave 2 (UI, Dispatch 4): in flight in an isolated worktree on branch `m1-groundwater-ui`, Sonnet,
   architect-worker-medium. Scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern
   overlay, warnings panel, CDP check at 390x844 with zero overflow.
@@ -67,5 +78,5 @@ UI as a second wave".
   resume for the date-stability, retrieval-year and used-title fixes.
 - Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. 261K tokens, 84 tool uses, 22 min. Landed.
 - Dispatch 3 (Fable, read-only): adversarial review of the wave 1 engine. 193K tokens, 13 min. Done.
-- Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. In flight.
+- Dispatch 5 (Sonnet, architect-worker-medium): corrective fixes from the review. 116K tokens, 7 min. Landed.
 - Dispatch 4 (Sonnet, architect-worker-medium, worktree): M1 wave 2 UI. In flight.
