@@ -33,5 +33,6 @@ BASE_PATH=/model_flow/ corepack pnpm --filter @model-flow/web build
 ## CI
 Workflows: `.github/workflows/ci.yml` (push to main and PRs; docs and markdown ignored; cancel in
 progress) and `pages.yml` (deploy to GitHub Pages on main). CI confirms, it does not discover: push only
-after a green local gate. Measured cost per push to main: not yet measured (fill in after the first run
-with `gh run view <id> --json jobs`).
+after a green local gate. Measured cost per push to main (2026-10-15, runs 38793375347 and 38793375314): CI gate job 26 s, Pages
+build 17 s plus deploy 10 s, so about 3 billed minutes per push (each job rounds up to a minute).
+Pushes that touch only docs or markdown trigger nothing.
