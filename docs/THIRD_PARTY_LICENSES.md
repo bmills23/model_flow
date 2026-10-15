@@ -1,0 +1,163 @@
+# Third-party licences
+
+Generated 2026-10-15 from `pnpm licenses list --json --prod -r`. Do not edit by hand.
+
+This document lists the software this project depends on at runtime, grouped by licence. For the scientific methods and data sources, see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).
+
+## Apache-2.0
+
+- @stdlib/array-float32 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/array-float64 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/array-uint16 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/array-uint32 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/array-uint8 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-float32array-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-float64array-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-own-property 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-symbol-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-to-primitive-symbol-support 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-tostringtag-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-uint16array-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-uint32array-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-has-uint8array-support 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-big-endian 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-boolean 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-buffer 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-float32array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-float64array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-function 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-little-endian 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-number 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-object 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-object-like 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-plain-object 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-regexp 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-string 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-uint16array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-uint32array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-is-uint8array 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-napi-equal-types 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-napi-is-type 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-napi-status-ok 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/assert-tools-array-function 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/boolean-ctor 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/complex-float32-ctor 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/complex-float32-reim 0.1.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/complex-float64-ctor 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/complex-float64-reim 0.1.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-eps 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-exponent-bias 0.3.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-exponent-mask 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-max 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-num-significand-bits 0.0.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-sign-mask 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-significand-mask 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float16-smallest-normal 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-abs-mask 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-eps 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-exponent-bias 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-exponent-mask 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-ninf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-num-significand-bits 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-pinf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-sign-mask 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float32-significand-mask 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-eps 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-exponent-bias 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-high-word-abs-mask 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-high-word-exponent-mask 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-high-word-sign-mask 0.2.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-max-base2-exponent 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-max-base2-exponent-subnormal 0.2.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-min-base2-exponent-subnormal 0.2.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-ninf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-pinf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-float64-smallest-normal 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-uint16-max 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-uint32-max 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/constants-uint8-max 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/error-tools-fmtprodmsg 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/fs-exists 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/fs-resolve-parent-path 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-assert-is-finite 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-assert-is-finitef 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-assert-is-infinite 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-assert-is-nan 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-assert-is-nanf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-napi-binary 0.3.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-napi-unary 0.2.7, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-abs 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-absf 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-ceil 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-copysign 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-erf 0.2.6, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-erfc 0.2.5, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-erfcx 0.3.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-exp 0.2.5, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-floor 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-ldexp 0.2.5, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/math-base-special-trunc 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-argv 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-argv-double 0.2.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-argv-float 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-argv-int32 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-create-int32 0.0.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/napi-export 0.3.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-ctor 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float16-base-to-float32 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float16-base-to-float64 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float16-ctor 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float32-base-exponent 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float32-base-to-float16 0.1.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float32-base-to-word 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-exponent 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-from-words 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-get-high-word 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-normalize 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-set-low-word 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-to-float16 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-to-float32 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/number-float64-base-to-words 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/object-ctor 0.2.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/os-byte-order 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/os-float-word-order 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/process-cwd 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/regexp-extended-length-path 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/regexp-function-name 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-base-format-interpolate 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-base-format-tokenize 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-base-lowercase 0.4.1, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-base-replace 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-format 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/string-replace 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/symbol-ctor 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/symbol-to-primitive 0.1.2, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/types 0.4.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-constructor-name 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-convert-path 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-define-nonenumerable-read-only-property 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-define-property 0.2.5, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-define-read-only-property 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-escape-regexp-string 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-get-prototype-of 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-global 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-library-manifest 0.2.4, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-native-class 0.2.3, The Stdlib Authors, <https://stdlib.io>
+- @stdlib/utils-type-of 0.2.3, The Stdlib Authors, <https://stdlib.io>
+
+## MIT
+
+- debug 2.6.9, TJ Holowaychuk, <https://github.com/visionmedia/debug#readme>
+- es-errors 1.3.0, Jordan Harband, <https://github.com/ljharb/es-errors#readme>
+- function-bind 1.1.2, Raynos, <https://github.com/Raynos/function-bind>
+- hasown 2.0.4, Jordan Harband, <https://github.com/inspect-js/hasOwn#readme>
+- is-core-module 2.17.0, Jordan Harband, <https://github.com/inspect-js/is-core-module>
+- ms 2.0.0, <https://github.com/zeit/ms#readme>
+- path-parse 1.0.7, Javier Blanco, <https://github.com/jbgutierrez/path-parse#readme>
+- react 19.3.1, <https://react.dev/>
+- react-dom 19.3.1, <https://react.dev/>
+- resolve 1.22.13, James Halliday, <https://github.com/browserify/resolve#readme>
+- scheduler 0.28.0, <https://react.dev/>
+- supports-preserve-symlinks-flag 1.0.0, Jordan Harband, <https://github.com/inspect-js/node-supports-preserve-symlinks-flag#readme>
+- zod 4.6.7, Colin McDonnell, <https://zod.dev>

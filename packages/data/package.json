@@ -1,0 +1,22 @@
+{
+  "name": "@model-flow/data",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Build scripts: attribution and licence documents, chemical and toxicity database builds.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "build": "echo 'nothing to build'",
+    "generate": "tsx scripts/generate-docs.ts"
+  },
+  "dependencies": {
+    "@model-flow/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "tsx": "4.23.15",
+    "vitest": "5.0.5"
+  }
+}
