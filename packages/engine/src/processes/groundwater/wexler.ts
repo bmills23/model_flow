@@ -1,10 +1,5 @@
 import { integrateTanhSinh } from '../../numerics/quadrature.js';
-import {
-  superposeLoading,
-  superposeLoadingGrid,
-  validateConcentrationLoading,
-  type ConcentrationStep,
-} from './loading.js';
+import { superposeLoading, superposeLoadingGrid, type ConcentrationStep } from './loading.js';
 import { expErfc } from '../../numerics/special.js';
 import {
   BASE_PANELS_PER_DECADE,
