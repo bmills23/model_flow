@@ -17,7 +17,8 @@
     "test": "pnpm -r test",
     "build": "pnpm -r build",
     "docs:generate": "pnpm --filter @model-flow/data generate",
-    "gate": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:generate && pnpm build"
+    "docs:check": "pnpm docs:generate && git diff --quiet -- docs/ATTRIBUTIONS.md docs/THIRD_PARTY_LICENSES.md",
+    "gate": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:check && pnpm build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

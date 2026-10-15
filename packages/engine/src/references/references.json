@@ -16,9 +16,9 @@
     "status": "used",
     "authors": "American Petroleum Institute",
     "year": 1987,
-    "title": "[Dispersivity ratios for groundwater transport: transverse = longitudinal/3, vertical = transverse/87]",
-    "venue": "API Document 471-01-09",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "title": "Oil and Gas Industry Exploration and Production Wastes",
+    "venue": "Washington, D.C.",
+    "identifier": "API Document No. 471-01-09",
     "tags": ["dispersivity", "groundwater"]
   },
   {
@@ -162,11 +162,11 @@
     "type": "software",
     "status": "planned",
     "authors": "Falta, R.W.",
-    "year": 2025,
+    "year": 2026,
     "title": "REMChlor",
     "venue": "U.S. Environmental Protection Agency",
     "tags": ["groundwater"],
-    "notes": "Year is the retrieval year; no publication year is recorded."
+    "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
     "key": "aziz2000",
@@ -703,30 +703,30 @@
     "type": "data",
     "status": "planned",
     "authors": "U.S. Environmental Protection Agency",
-    "year": 2025,
+    "year": 2026,
     "title": "National Recommended Water Quality Criteria (NRWQC)",
     "tags": ["surfaceWater"],
-    "notes": "Year is the retrieval year; no publication year is recorded."
+    "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
     "key": "noaasquirts",
     "type": "data",
     "status": "planned",
     "authors": "National Oceanic and Atmospheric Administration",
-    "year": 2025,
+    "year": 2026,
     "title": "Screening Quick Reference Tables (SQuiRTs)",
     "tags": ["surfaceWater"],
-    "notes": "Year is the retrieval year; no publication year is recorded."
+    "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
-    "key": "epa2025rsl",
+    "key": "epa2026rsl",
     "type": "data",
     "status": "data",
     "authors": "U.S. Environmental Protection Agency",
-    "year": 2025,
+    "year": 2026,
     "title": "Regional Screening Levels (RSLs), Generic Tables",
     "url": "https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables",
-    "notes": "Edition and date to be fixed when the chemical database is built. Year is the retrieval year; no publication year is recorded.",
+    "notes": "Edition and date to be fixed when the chemical database is built; accessed 2026. Year is the retrieval year (accessed 2026); no publication year is recorded.",
     "tags": ["chemistry", "toxicity"]
   },
   {
@@ -734,20 +734,20 @@
     "type": "data",
     "status": "data",
     "authors": "U.S. Environmental Protection Agency",
-    "year": 2025,
+    "year": 2026,
     "title": "Integrated Risk Information System (IRIS)",
     "tags": ["toxicity"],
-    "notes": "Year is the retrieval year; no publication year is recorded."
+    "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
     "key": "epacomptox",
     "type": "data",
     "status": "data",
     "authors": "U.S. Environmental Protection Agency",
-    "year": 2025,
+    "year": 2026,
     "title": "CompTox Chemicals Dashboard",
     "tags": ["chemistry"],
-    "notes": "Year is the retrieval year; no publication year is recorded."
+    "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
     "key": "arcadis2001",
@@ -774,9 +774,9 @@
     "type": "software",
     "status": "fixture",
     "authors": "Utrecht University (MiBiPreT)",
-    "year": 2025,
+    "year": 2026,
     "title": "mibitrans",
-    "notes": "Apache-2.0 Python package used only for cross-checks; not vendored. Year is the retrieval year; no publication year is recorded.",
+    "notes": "Apache-2.0 Python package used only for cross-checks; not vendored. Year is the retrieval year (accessed 2026); no publication year is recorded.",
     "tags": ["validation", "groundwater"]
   }
 ]

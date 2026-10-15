@@ -21,7 +21,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 - RISC5 choice: RISC5 computes longitudinal dispersivity from the Gelhar et al. 1985 regression on receptor distance and applies the API 1987 ratios 3 and 87 when dispersivities are entered as zero.
 - Sources:
   - Gelhar, L.W., Mantoglou, A., Welty, C., Rehfeldt, K.R. (1985). A review of field-scale physical solute transport processes in saturated and unsaturated porous media. Electric Power Research Institute. EPRI EA-4190.
-  - American Petroleum Institute (1987). [Dispersivity ratios for groundwater transport: transverse = longitudinal/3, vertical = transverse/87]. API Document 471-01-09.
+  - American Petroleum Institute (1987). Oil and Gas Industry Exploration and Production Wastes. Washington, D.C. API Document No. 471-01-09.
 
 #### Xu and Eckstein (1995) regression with BIOSCREEN ratios
 
@@ -50,7 +50,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248.
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology.
-- Falta, R.W. (2025). REMChlor. U.S. Environmental Protection Agency.
+- Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78:259-280.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Galya, D.P. (1987). [Finite rectangular volume source for the AT123D solution].
@@ -67,7 +67,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
 - Millington, R.J., Quirk, J.P. (1961). [Permeability of porous solids].
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
-- National Oceanic and Atmospheric Administration (2025). Screening Quick Reference Tables (SQuiRTs).
+- National Oceanic and Atmospheric Administration (2026). Screening Quick Reference Tables (SQuiRTs).
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory.
 - Schulze-Makuch, D. (2005). [Longitudinal dispersivity data and implications for scaling behavior]. Ground Water. 43:443-456.
@@ -93,7 +93,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency. OSWER 9200.1-120.
 - U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites].
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air.
-- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria (NRWQC).
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
 - Ünlü, K., et al. (1992). [VADSAT: vadose zone leaching and volatilization model].
 - van Genuchten, M.T. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44:892-898.
 - van Genuchten, M.T., Alves, W.J. (1982). [Analytical solutions of the one-dimensional convective-dispersive solute transport equation]. USDA Technical Bulletin. 1661.
@@ -109,16 +109,16 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 
 Public datasets that the chemical and toxicity database is built from.
 
-- U.S. Environmental Protection Agency (2025). Regional Screening Levels (RSLs), Generic Tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
-- U.S. Environmental Protection Agency (2025). CompTox Chemicals Dashboard.
-- U.S. Environmental Protection Agency (2025). Integrated Risk Information System (IRIS).
+- U.S. Environmental Protection Agency (2026). Regional Screening Levels (RSLs), Generic Tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
+- U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
+- U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS).
 
 ## Validation sources
 
 Reviews, codes and packages used to produce test fixtures. They are checks on this software, not parts of it.
 
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0.
-- Utrecht University (MiBiPreT) (2025). mibitrans.
+- Utrecht University (MiBiPreT) (2026). mibitrans.
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey.
 
 ## References
@@ -127,7 +127,7 @@ Every entry in the reference database, alphabetical by author.
 
 - Abreu, L.D.V., Ettinger, R., McAlary, T. (2009). [Simulated soil vapor intrusion attenuation factors including biodegradation]. [planned]
 - Abreu, L.D.V., Johnson, P.C. (2005). [Three-dimensional numerical modeling of vapor intrusion]. [planned]
-- American Petroleum Institute (1987). [Dispersivity ratios for groundwater transport: transverse = longitudinal/3, vertical = transverse/87]. API Document 471-01-09. [used]
+- American Petroleum Institute (1987). Oil and Gas Industry Exploration and Production Wastes. Washington, D.C. API Document No. 471-01-09. [used]
 - American Petroleum Institute (2010). BioVapor. [planned]
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
@@ -138,7 +138,7 @@ Every entry in the reference database, alphabetical by author.
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248. [planned]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. [planned]
-- Falta, R.W. (2025). REMChlor. U.S. Environmental Protection Agency. [planned]
+- Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78:259-280. [planned]
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower]. [planned]
 - Galya, D.P. (1987). [Finite rectangular volume source for the AT123D solution]. [planned]
@@ -156,7 +156,7 @@ Every entry in the reference database, alphabetical by author.
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code]. [planned]
 - Millington, R.J., Quirk, J.P. (1961). [Permeability of porous solids]. [planned]
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments]. [planned]
-- National Oceanic and Atmospheric Administration (2025). Screening Quick Reference Tables (SQuiRTs). [planned]
+- National Oceanic and Atmospheric Administration (2026). Screening Quick Reference Tables (SQuiRTs). [planned]
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087. [used]
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output]. [planned]
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
@@ -183,12 +183,12 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency. OSWER 9200.1-120. [planned]
 - U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites]. [planned]
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. [planned]
-- U.S. Environmental Protection Agency (2025). Regional Screening Levels (RSLs), Generic Tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
-- U.S. Environmental Protection Agency (2025). CompTox Chemicals Dashboard. [data]
-- U.S. Environmental Protection Agency (2025). Integrated Risk Information System (IRIS). [data]
-- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria (NRWQC). [planned]
+- U.S. Environmental Protection Agency (2026). Regional Screening Levels (RSLs), Generic Tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
+- U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
+- U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
 - Ünlü, K., et al. (1992). [VADSAT: vadose zone leaching and volatilization model]. [planned]
-- Utrecht University (MiBiPreT) (2025). mibitrans. [fixture]
+- Utrecht University (MiBiPreT) (2026). mibitrans. [fixture]
 - van Genuchten, M.T. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44:892-898. [planned]
 - van Genuchten, M.T., Alves, W.J. (1982). [Analytical solutions of the one-dimensional convective-dispersive solute transport equation]. USDA Technical Bulletin. 1661. [planned]
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways]. [planned]

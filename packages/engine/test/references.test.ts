@@ -15,6 +15,14 @@ describe('references.json', () => {
     for (const key of keys) expect(key).toMatch(/^[a-z][a-z0-9]*$/);
   });
 
+  it('gives every used reference a real title, not a bracketed descriptor', () => {
+    for (const ref of references) {
+      if (ref.status === 'used') {
+        expect(ref.title.startsWith('['), `${ref.key} has a descriptor title`).toBe(false);
+      }
+    }
+  });
+
   it('has well-formed DOIs and plausible years', () => {
     const thisYear = new Date().getFullYear();
     for (const ref of references) {
