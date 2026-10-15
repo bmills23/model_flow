@@ -146,6 +146,18 @@ This document lists the software this project depends on at runtime, grouped by 
 - @stdlib/utils-native-class 0.2.3, The Stdlib Authors, <https://stdlib.io>
 - @stdlib/utils-type-of 0.2.3, The Stdlib Authors, <https://stdlib.io>
 
+## ISC
+
+- d3-array 3.2.4, Mike Bostock, <https://d3js.org/d3-array/>
+- d3-color 3.1.0, Mike Bostock, <https://d3js.org/d3-color/>
+- d3-contour 4.0.2, Mike Bostock, <https://d3js.org/d3-contour/>
+- d3-format 3.1.2, Mike Bostock, <https://d3js.org/d3-format/>
+- d3-interpolate 3.0.1, Mike Bostock, <https://d3js.org/d3-interpolate/>
+- d3-scale 4.0.2, Mike Bostock, <https://d3js.org/d3-scale/>
+- d3-time 3.1.0, Mike Bostock, <https://d3js.org/d3-time/>
+- d3-time-format 4.1.0, Mike Bostock, <https://d3js.org/d3-time-format/>
+- internmap 2.0.3, Mike Bostock, <https://github.com/mbostock/internmap/>
+
 ## MIT
 
 - debug 2.6.9, TJ Holowaychuk, <https://github.com/visionmedia/debug#readme>
