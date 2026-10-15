@@ -29,14 +29,22 @@ Resume: start a fresh session in `~/repos/model_flow`, run `/architect on`, read
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (appendix line index in ROADMAP section 3 refers to that extraction).
 
-## Queued: M1 groundwater transport (ROADMAP section 7)
-Proposed dispatch shape (Bryan has not yet said go): one Sonnet worker for the AT123D-class kernel
-(Appendix B: Green's-function 3-D ADE, finite volume source, pulse and time-varying loading, well-screen
-averaging) plus the Wexler 1992 PATCHI/PATCHF option with USGS ANALGWST fixtures (gfortran 15 is
-installed); one Sonnet worker for the scenario form, plan-view plume map and breakthrough chart (load the
-dataviz skill first; choose Observable Plot + d3 or ECharts); one Haiku doc-validity check; one Fable
-review pass; then one push. TDD throughout; fixtures before implementation.
+## In flight: M1 groundwater transport (ROADMAP section 7)
+Bryan's directive (2026-10-15, verbatim, in reply to the proposed four-agent shape): "go, engine first,
+UI as a second wave".
+
+- Wave 1 (engine), dispatched 2026-10-15 as Dispatch 2 (Sonnet, architect-worker-medium) on branch
+  `m1-groundwater-engine`: AT123D-class Green's-function kernel (3-D ADE, box source, pulse and
+  time-varying loading, well-screen averaging), Wexler 1992 PATCHI/PATCHF option with USGS ANALGWST
+  fixtures (gfortran 15 at /usr/local/bin/gfortran), Domenico comparison mode with validity warnings,
+  mibitrans cross-check fixtures if the package installs, methods note, references marked `used`,
+  ATTRIBUTIONS regenerated, local gate green. No push, no UI.
+- Wave 2 (UI), queued: scenario form, plan-view plume map, breakthrough chart, legacy-vs-modern overlay
+  (dataviz skill; Observable Plot + d3 or ECharts), CDP check at 390x844 with zero overflow. One Sonnet
+  worker.
+- Then: one Haiku doc-validity check, one Fable review pass (timing decided at wave 1 close), one push.
 
 ## Session log
 - Dispatch 1 (Sonnet, architect-worker-medium): all M0 implementation, about 240K tokens including one
   resume for the date-stability, retrieval-year and used-title fixes.
+- Dispatch 2 (Sonnet, architect-worker-medium): M1 wave 1 engine. Launched 2026-10-15; in flight.
