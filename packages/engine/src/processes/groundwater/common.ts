@@ -83,19 +83,64 @@ export interface PanelRule {
 }
 
 /**
+ * Base panel density of the shared time rule. With 24 panels per decade a panel spans about 10
+ * percent of its own age, which resolves the advective peak of the time integrand (relative width
+ * sqrt(2 / Pe) in age, Pe = x u / D) up to Pe of about 1e3.
+ */
+export const BASE_PANELS_PER_DECADE = 24;
+/** Peclet number up to which the base density is enough. */
+export const BASE_PECLET = 1e3;
+/**
+ * Largest Peclet number the shared-rule grids are validated for (measured a few 1e-8 relative against the
+ * adaptive point solution wherever the value exceeds 1e-6 of c0). Larger values throw; use the point functions instead.
+ */
+export const MAX_GRID_PECLET = 1e6;
+
+/**
+ * Panel density that follows the advective peak. At age tau the peak that belongs to a receptor
+ * x = u tau has Peclet number u^2 tau / D, and the panel width is kept at the same multiple of the
+ * peak width as the base density gives at Pe = 1e3, so density grows as sqrt(Pe). Beyond twice
+ * `tauMax` (the oldest age at which a receptor peak sits) the base density applies.
+ */
+export function peakFollowingDensity(
+  base: number,
+  u: number,
+  d: number,
+  tauMax: number,
+): (tau: number) => number {
+  if (!(u > 0) || !(d > 0) || !(tauMax > 0)) return () => base;
+  const peMax = (u * u * tauMax) / d;
+  if (peMax > MAX_GRID_PECLET) {
+    throw new RangeError(
+      `Peclet number ${peMax.toExponential(2)} exceeds the validated range of the grid solver (${MAX_GRID_PECLET.toExponential(0)}); use the point solution`,
+    );
+  }
+  return (tau) => {
+    if (tau > 2 * tauMax) return base;
+    const pe = (u * u * Math.min(tau, tauMax)) / d;
+    return base * Math.max(1, Math.sqrt(pe / BASE_PECLET));
+  };
+}
+
+/**
  * Composite 6-point Gauss-Legendre rule on [lo, hi] with panels that grow geometrically away from
  * `lo` (ratio 10^(1/panelsPerDecade)) from a first panel of 1e-7 of the range. The geometric
  * spacing resolves features at every time scale with a single fixed set of nodes, so the nodes can
- * be shared across all points of a plan-view grid.
+ * be shared across all points of a plan-view grid. `panelsPerDecade` may be a function of the
+ * absolute age to refine the rule near the advective peak (see peakFollowingDensity).
  */
-export function panelRule(lo: number, hi: number, panelsPerDecade = 24): PanelRule {
+export function panelRule(
+  lo: number,
+  hi: number,
+  panelsPerDecade: number | ((tau: number) => number) = BASE_PANELS_PER_DECADE,
+): PanelRule {
   const range = hi - lo;
-  const ratio = Math.pow(10, 1 / panelsPerDecade);
+  const density = typeof panelsPerDecade === 'number' ? () => panelsPerDecade : panelsPerDecade;
   const edges = [0];
   let e = range * 1e-7;
   while (e < range) {
     edges.push(e);
-    e *= ratio;
+    e *= Math.pow(10, 1 / density(lo + e));
   }
   edges.push(range);
   const tau: number[] = [];

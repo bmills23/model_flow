@@ -1,6 +1,13 @@
 import { integrateTanhSinh } from '../../numerics/quadrature.js';
 import { expErfc } from '../../numerics/special.js';
-import { axisDensity, panelRule, slab, type Point3 } from './common.js';
+import {
+  BASE_PANELS_PER_DECADE,
+  axisDensity,
+  panelRule,
+  peakFollowingDensity,
+  slab,
+  type Point3,
+} from './common.js';
 
 /**
  * Wexler (1992) exact solutions for a patch source on the inflow plane x = 0 with a first-type
@@ -78,10 +85,20 @@ function firstType(x: number, t: number, u: number, d: number, k: number): numbe
   );
 }
 
+/**
+ * Upper end of the time integral at steady state. The integrand carries
+ * exp(-(x - u T)^2 / (4 D T) - k T); the limit is the larger root of that exponent equal to 40
+ * (e^-40 is about 4e-18), which is the quadratic beta^2 T^2 - (2 x u + 160 D) T + x^2 = 0 with
+ * beta^2 = u^2 + 4 D k. This covers the advective Gaussian tail at any Peclet number. If the
+ * exponent never reaches 40 the integrand is negligible everywhere and the vertex is used.
+ */
 function integralUpperLimit(x: number, r: Retarded): number {
-  const rate = r.k + (r.u * r.u) / (4 * r.dx);
-  if (!(rate > 0)) throw new RangeError('No steady state: needs positive velocity or decay');
-  return (r.u > 0 ? x / r.u : 0) + 40 / rate;
+  const b2 = r.u * r.u + 4 * r.dx * r.k;
+  if (!(b2 > 0)) throw new RangeError('No steady state: needs positive velocity or decay');
+  const m = x * r.u + 80 * r.dx;
+  const disc = m * m - b2 * x * x;
+  const root = disc > 0 ? Math.sqrt(disc) : 0;
+  return (m + root) / b2;
 }
 
 function timeIntegral(
@@ -230,7 +247,9 @@ function patchfSeries(
 
 /**
  * PATCHI on a plan-view grid at height z: one shared time rule for all points (see at123dGrid).
- * Agrees with patchiConcentration to about 1e-5 relative. Returns c[ix][iy]; x < 0 gives zero.
+ * Agrees with patchiConcentration to a few 1e-8 relative wherever the value exceeds 1e-6 of c0, for Peclet
+ * numbers (x u / D) up to MAX_GRID_PECLET (larger values throw). Returns c[ix][iy]; x < 0 and receptors
+ * outside a finite aquifer give zero.
  */
 export function patchiGrid(
   input: WexlerInput,
@@ -238,7 +257,7 @@ export function patchiGrid(
   ys: readonly number[],
   z: number,
   time: number,
-  panelsPerDecade = 24,
+  panelsPerDecade = BASE_PANELS_PER_DECADE,
 ): number[][] {
   return wexlerGrid(input, xs, ys, z, time, panelsPerDecade);
 }
@@ -251,7 +270,7 @@ export function patchfGrid(
   z: number,
   time: number,
   aquifer: { width: number; thickness: number },
-  panelsPerDecade = 24,
+  panelsPerDecade = BASE_PANELS_PER_DECADE,
 ): number[][] {
   const { y1, y2, z1, z2 } = input.patch;
   if (!(y1 >= 0 && y2 <= aquifer.width && z1 >= 0 && z2 <= aquifer.thickness)) {
@@ -271,9 +290,14 @@ function wexlerGrid(
 ): number[][] {
   const r = retarded(input);
   const { y1, y2, z1, z2 } = input.patch;
+  // receptors outside the finite aquifer carry no concentration (same as patchfConcentration)
+  const outside = (y: number): boolean =>
+    finite !== undefined && (y < 0 || y > finite.width || z < 0 || z > finite.thickness);
   const xmax = Math.max(0, ...xs);
   const upper = time === Infinity ? integralUpperLimit(xmax, r) : time;
-  const rule = panelRule(0, upper, panelsPerDecade);
+  const xPos = xs.filter((x) => x > 0);
+  const tauMax = r.u > 0 && xPos.length > 0 ? Math.min(upper, Math.max(...xPos) / r.u) : 0;
+  const rule = panelRule(0, upper, peakFollowingDensity(panelsPerDecade, r.u, r.dx, tauMax));
   const n = rule.tau.length;
   const wy = new Float64Array(n);
   const fz = new Float64Array(n);
@@ -298,14 +322,15 @@ function wexlerGrid(
   });
   return xs.map((x) => {
     if (x < 0) return ys.map(() => 0);
-    if (x === 0) return ys.map((y) => inflowPlane(input, { x, y, z }, finite));
+    if (x === 0) return ys.map((y) => (outside(y) ? 0 : inflowPlane(input, { x, y, z }, finite)));
     const g = new Float64Array(n);
     const norm = x / (2 * Math.sqrt(Math.PI * r.dx));
     for (let k = 0; k < n; k++) {
       const tau = rule.tau[k]!;
       g[k] = (norm * Math.exp(-((x - r.u * tau) ** 2) / (4 * r.dx * tau))) / Math.pow(tau, 1.5);
     }
-    return ys.map((_, j) => {
+    return ys.map((y, j) => {
+      if (outside(y)) return 0;
       const f = fy[j]!;
       let sum = 0;
       for (let k = 0; k < n; k++) sum += g[k]! * f[k]!;

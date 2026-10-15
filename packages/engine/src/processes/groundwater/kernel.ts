@@ -1,5 +1,11 @@
 import { integrateTanhSinh } from '../../numerics/quadrature.js';
-import { axisDensity, panelRule, type Point3 } from './common.js';
+import {
+  BASE_PANELS_PER_DECADE,
+  axisDensity,
+  panelRule,
+  peakFollowingDensity,
+  type Point3,
+} from './common.js';
 
 export type { Point3 } from './common.js';
 
@@ -106,10 +112,51 @@ export function wellScreenAverage(
   return (sum * h) / (zBottom - zTop);
 }
 
-function checkGeometry(box: BoxSource): void {
+const finite = Number.isFinite;
+
+function checkAquifer(a: At123dAquifer): void {
+  const R = a.retardation ?? 1;
+  if (!finite(a.velocity)) throw new RangeError('Velocity must be finite');
+  if (!(a.porosity > 0 && a.porosity <= 1)) throw new RangeError('Porosity must be in (0, 1]');
+  if (!(finite(R) && R >= 1)) throw new RangeError('Retardation factor must be finite and >= 1');
+  if (!(finite(a.decayRate ?? 0) && (a.decayRate ?? 0) >= 0))
+    throw new RangeError('Decay rate must be finite and non-negative');
+  for (const d of [a.dx, a.dy, a.dz]) {
+    if (!(finite(d) && d >= 0))
+      throw new RangeError('Dispersion coefficients must be finite and >= 0');
+  }
+  if (a.thickness !== undefined && !(finite(a.thickness) && a.thickness > 0))
+    throw new RangeError('Thickness must be finite and positive (omit it for infinite depth)');
+}
+
+function checkGeometry(box: BoxSource, aquifer: At123dAquifer): void {
+  const v = [box.x1, box.x2, box.y1, box.y2, box.z1, box.z2];
+  if (!v.every(finite)) throw new RangeError('Source bounds must be finite');
   if (!(box.x2 >= box.x1 && box.y2 >= box.y1 && box.z2 >= box.z1)) {
     throw new RangeError('Source bounds must satisfy x1 <= x2, y1 <= y2, z1 <= z2');
   }
+  if (aquifer.thickness !== undefined && !(box.z1 >= 0 && box.z2 <= aquifer.thickness)) {
+    throw new RangeError('Source must lie inside the layer: 0 <= z1 <= z2 <= thickness');
+  }
+}
+
+function checkInput(input: At123dInput): void {
+  checkAquifer(input.aquifer);
+  checkGeometry(input.source, input.aquifer);
+  if (!(finite(input.time) && input.time >= 0)) {
+    throw new RangeError(
+      'Time must be finite and non-negative (no steady-state limit is provided)',
+    );
+  }
+  for (const s of input.loading) {
+    if (!(finite(s.rate) && s.rate >= 0 && s.start >= 0 && s.end >= s.start))
+      throw new RangeError('Loading steps need finite rate >= 0 and 0 <= start <= end');
+  }
+}
+
+/** Receptors outside the finite layer carry no concentration (the aquifer does not exist there). */
+function belowOrAbove(z: number, aquifer: At123dAquifer): boolean {
+  return aquifer.thickness !== undefined && (z < 0 || z > aquifer.thickness);
 }
 
 /**
@@ -143,14 +190,16 @@ export function instantaneousBoxConcentration(
  * instantaneous response over each loading step (adaptive Gauss-Kronrod in the release age).
  */
 export function at123dConcentration(input: At123dInput, p: Point3): number {
-  checkGeometry(input.source);
-  if (!(input.time >= 0)) throw new RangeError('Time must be non-negative');
+  checkInput(input);
+  if (!(finite(p.x) && finite(p.y) && finite(p.z)))
+    throw new RangeError('Receptor coordinates must be finite');
   const { aquifer, source, time } = input;
+  if (belowOrAbove(p.z, aquifer)) return 0;
   const R = aquifer.retardation ?? 1;
   const u = aquifer.velocity / R;
   // the age at which the advected source centre reaches the point is where the integrand peaks
   const xc = 0.5 * (source.x1 + source.x2);
-  const peak = u > 0 ? (p.x - xc) / u : -1;
+  const peak = u !== 0 ? (p.x - xc) / u : -1;
   let total = 0;
   for (const step of input.loading) {
     if (step.rate === 0) continue;
@@ -174,14 +223,18 @@ export function at123dConcentration(input: At123dInput, p: Point3): number {
 }
 
 export interface GridOptions {
-  /** Panels per decade of the shared time rule (default 24). */
+  /**
+   * Base panels per decade of the shared time rule (default 24). The rule is refined automatically
+   * near the advective peak, see peakFollowingDensity; Peclet numbers above MAX_GRID_PECLET throw.
+   */
   panelsPerDecade?: number;
 }
 
 /**
  * Plan-view concentration at height `z` for many (x, y) points at one time, using one time rule
  * shared by every point, which makes a 100 by 60 map cost a few erfc evaluations per node instead
- * of a full adaptive integral per point. Agrees with at123dConcentration to about 1e-5 relative.
+ * of a full adaptive integral per point. Agrees with at123dConcentration to a few 1e-8 relative
+ * (measured, values above 1e-6 of the largest) for Peclet numbers (|x - xc| u / D) up to MAX_GRID_PECLET, above which it throws.
  * Returns c[ix][iy].
  */
 export function at123dGrid(
@@ -191,16 +244,32 @@ export function at123dGrid(
   z: number,
   options: GridOptions = {},
 ): number[][] {
-  checkGeometry(input.source);
+  checkInput(input);
+  if (![...xs, ...ys, z].every(finite)) throw new RangeError('Grid coordinates must be finite');
   const { aquifer, source, time } = input;
   const R = aquifer.retardation ?? 1;
   const lambda = aquifer.decayRate ?? 0;
   const u = aquifer.velocity / R;
   const out = xs.map(() => new Array<number>(ys.length).fill(0));
+  if (belowOrAbove(z, aquifer)) return out;
+  const xc = 0.5 * (source.x1 + source.x2);
+  const farthest = Math.max(0, ...xs.map((x) => Math.abs(x - xc)));
   for (const step of input.loading) {
     const end = Math.min(step.end, time);
     if (step.rate === 0 || !(end > step.start)) continue;
-    const rule = panelRule(time - end, time - step.start, options.panelsPerDecade ?? 24);
+    const lo = time - end;
+    const hi = time - step.start;
+    const tauMax = u !== 0 ? Math.min(hi, farthest / Math.abs(u)) : 0;
+    const rule = panelRule(
+      lo,
+      hi,
+      peakFollowingDensity(
+        options.panelsPerDecade ?? BASE_PANELS_PER_DECADE,
+        Math.abs(u),
+        aquifer.dx / R,
+        tauMax,
+      ),
+    );
     const n = rule.tau.length;
     const base = new Float64Array(n);
     const wx = new Float64Array(n);
