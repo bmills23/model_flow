@@ -35,6 +35,51 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908.
   - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087.
 
+### groundwater
+
+#### AT123D-class Green function solution with a finite volume source
+
+- Kind: Legacy (RISC5 default)
+- Method id: `groundwater.at123d`
+- Summary: Three-dimensional advection-dispersion with retardation and first-order decay, uniform flow along x, a finite rectangular volume source and piecewise-constant mass loading, in an aquifer of infinite or finite thickness.
+- Assumptions:
+  - Uniform one-dimensional flow along x; constant dispersion coefficients.
+  - Aquifer infinite in x and y; infinite depth or finite thickness with no-flux top and bottom.
+  - Source mass is released uniformly through the box; concentration input is converted to a mass rate through the Darcy flux and source area.
+  - First-order decay acts on dissolved and sorbed mass alike.
+- RISC5 choice: RISC5 applies the AT123D Green function solution with a finite rectangular volume source, vertical well-screen averaging and Gelhar-based dispersivity ratios.
+- Sources:
+  - Yeh, G.T. (1981). AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system. Oak Ridge National Laboratory. ORNL-5602. <https://doi.org/10.2172/6531241>
+  - Galya, D.P. (1987). A horizontal plane source model for ground-water transport. Ground Water. 25(6):733-739. <https://doi.org/10.1111/j.1745-6584.1987.tb02215.x>
+
+#### Wexler (1992) exact patch-source solutions (PATCHI and PATCHF)
+
+- Kind: Modern
+- Method id: `groundwater.wexler1992`
+- Summary: Exact solutions for a patch source on the inflow plane held at fixed concentration: infinite width and depth (PATCHI) or finite width and thickness with no-flux boundaries (PATCHF), steady or transient.
+- Assumptions:
+  - Uniform one-dimensional flow along x; constant dispersion coefficients.
+  - Fixed-concentration boundary over the patch on x = 0; semi-infinite in x.
+  - PATCHF has no-flux boundaries at y = 0, y = W, z = 0 and z = H.
+- Sources:
+  - Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7>
+
+#### BIOSCREEN/RBCA-compatible comparison (Domenico 1987 approximation)
+
+- Kind: Modern
+- Method id: `groundwater.domenico1987`
+- Summary: Approximate patch-source solution used by BIOSCREEN-class screening tools, offered to reproduce those results; not the recommended method, because it is inexact for nonzero longitudinal dispersivity.
+- Assumptions:
+  - Vertical planar source of width Y and thickness Z at the water table, centred on y = 0.
+  - Transient behaviour only through the longitudinal erfc term; transverse spreading evaluated at steady state.
+  - Plume centreline accuracy depends on dispersivity, time and dimensionality; see the emitted warnings.
+- Sources:
+  - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2>
+  - West, M.R., Kueper, B.H., Ungs, M.J. (2007). On the use and error of approximation in the Domenico (1987) solution. Ground Water. 45(2):126-135. <https://doi.org/10.1111/j.1745-6584.2006.00280.x>
+  - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004>
+  - Srinivasan, V., Clement, T.P., Lee, K.K. (2007). Domenico solution--is it valid?. Ground Water. 45(2):136-146. <https://doi.org/10.1111/j.1745-6584.2006.00281.x>
+  - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087.
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -49,13 +94,10 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). [A general mass-conservative numerical solution for the unsaturated flow equation]. Water Resources Research.
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248.
-- Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology.
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78:259-280.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
-- Galya, D.P. (1987). [Finite rectangular volume source for the AT123D solution].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
-- Guyonnet, D., Neville, C. (2004). [Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater]. Journal of Contaminant Hydrology. 75:141-153.
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
 - Johnson, P.C., Ettinger, R.A. (1991). [Heuristic model for predicting the intrusion rate of contaminant vapors into buildings]. Environmental Science and Technology.
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). [Assessing the significance of subsurface contaminant vapor migration to enclosed spaces]. American Petroleum Institute. API 4674.
@@ -74,7 +116,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
-- Srinivasan, V., Clement, T.P., Lee, K.K. (2007). [Domenico solution: is it valid?]. Ground Water. 45:136-146.
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999].
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation].
@@ -99,11 +140,8 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - van Genuchten, M.T., Alves, W.J. (1982). [Analytical solutions of the one-dimensional convective-dispersive solute transport equation]. USDA Technical Bulletin. 1661.
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
-- West, M.R., Kueper, B.H., Ungs, M.J. (2007). [Evaluation of the Domenico approximation for contaminant transport]. Ground Water. 45:126-135.
-- Wexler, E.J. (1992). [Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow]. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7.
 - Yao, Y., Pennell, K.G., Suuberg, E.M. (2011). [Vapor intrusion model comparisons].
 - Yao, Y., Shen, R., Suuberg, E.M. (2013). [Review of vapor intrusion modeling].
-- Yeh, G.T. (1981). AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system. Oak Ridge National Laboratory. ORNL-5602.
 
 ## Data sources
 
@@ -118,8 +156,8 @@ Public datasets that the chemical and toxicity database is built from.
 Reviews, codes and packages used to produce test fixtures. They are checks on this software, not parts of it.
 
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0.
-- Utrecht University (MiBiPreT) (2026). mibitrans.
-- Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey.
+- Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/>
+- Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/>
 
 ## References
 
@@ -137,14 +175,14 @@ Every entry in the reference database, alphabetical by author.
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). [A general mass-conservative numerical solution for the unsaturated flow equation]. Water Resources Research. [planned]
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248. [planned]
-- Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. [planned]
+- Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78:259-280. [planned]
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower]. [planned]
-- Galya, D.P. (1987). [Finite rectangular volume source for the AT123D solution]. [planned]
+- Galya, D.P. (1987). A horizontal plane source model for ground-water transport. Ground Water. 25(6):733-739. <https://doi.org/10.1111/j.1745-6584.1987.tb02215.x> [used]
 - Gelhar, L.W., Mantoglou, A., Welty, C., Rehfeldt, K.R. (1985). A review of field-scale physical solute transport processes in saturated and unsaturated porous media. Electric Power Research Institute. EPRI EA-4190. [used]
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
-- Guyonnet, D., Neville, C. (2004). [Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater]. Journal of Contaminant Hydrology. 75:141-153. [planned]
+- Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables]. [planned]
 - Johnson, P.C., Ettinger, R.A. (1991). [Heuristic model for predicting the intrusion rate of contaminant vapors into buildings]. Environmental Science and Technology. [planned]
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). [Assessing the significance of subsurface contaminant vapor migration to enclosed spaces]. American Petroleum Institute. API 4674. [planned]
@@ -164,7 +202,7 @@ Every entry in the reference database, alphabetical by author.
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]
-- Srinivasan, V., Clement, T.P., Lee, K.K. (2007). [Domenico solution: is it valid?]. Ground Water. 45:136-146. [planned]
+- Srinivasan, V., Clement, T.P., Lee, K.K. (2007). Domenico solution--is it valid?. Ground Water. 45(2):136-146. <https://doi.org/10.1111/j.1745-6584.2006.00281.x> [used]
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999]. [planned]
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals]. [planned]
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation]. [planned]
@@ -188,15 +226,15 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
 - Ünlü, K., et al. (1992). [VADSAT: vadose zone leaching and volatilization model]. [planned]
-- Utrecht University (MiBiPreT) (2026). mibitrans. [fixture]
+- Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.T. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44:892-898. [planned]
 - van Genuchten, M.T., Alves, W.J. (1982). [Analytical solutions of the one-dimensional convective-dispersive solute transport equation]. USDA Technical Bulletin. 1661. [planned]
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways]. [planned]
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency. [planned]
-- West, M.R., Kueper, B.H., Ungs, M.J. (2007). [Evaluation of the Domenico approximation for contaminant transport]. Ground Water. 45:126-135. [planned]
-- Wexler, E.J. (1992). [Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow]. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7. [planned]
-- Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. [fixture]
+- West, M.R., Kueper, B.H., Ungs, M.J. (2007). On the use and error of approximation in the Domenico (1987) solution. Ground Water. 45(2):126-135. <https://doi.org/10.1111/j.1745-6584.2006.00280.x> [used]
+- Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7> [used]
+- Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/> [fixture]
 - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908. [used]
 - Yao, Y., Pennell, K.G., Suuberg, E.M. (2011). [Vapor intrusion model comparisons]. [planned]
 - Yao, Y., Shen, R., Suuberg, E.M. (2013). [Review of vapor intrusion modeling]. [planned]
-- Yeh, G.T. (1981). AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system. Oak Ridge National Laboratory. ORNL-5602. [planned]
+- Yeh, G.T. (1981). AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system. Oak Ridge National Laboratory. ORNL-5602. <https://doi.org/10.2172/6531241> [used]
