@@ -238,6 +238,16 @@ export function toScenario(
         rhoB: sat.input.soil.rhoB,
       }
     : null;
+  if (satAquifer && !(satAquifer.darcy > 0)) {
+    errors.push(
+      'The saturated source screen has a zero Darcy flux (hydraulic gradient or conductivity of zero), so there is no groundwater flow to transport the release; give it a positive gradient on the saturated screen.',
+    );
+  }
+  if (satAquifer && !(satAquifer.porosity > 0 && satAquifer.porosity < 1)) {
+    errors.push(
+      'The saturated source screen porosity must be between 0 and 1; fix it on the saturated screen.',
+    );
+  }
   const porosity = satAquifer
     ? satAquifer.porosity
     : need('Porosity', f.porosity, (v) => v > 0 && v < 1, 'must be between 0 and 1.');

@@ -110,3 +110,25 @@ describe('transport screen fed by the saturated source', () => {
     expect(out2.result.warnings.map((w) => w.code)).toContain('ui.saturated-seasonal-fallback');
   });
 });
+
+describe('saturated feed aquifer validation', () => {
+  const bad = (aq: Partial<typeof satInput.aquifer>, soil: Partial<typeof satInput.soil> = {}) =>
+    toScenario(
+      { ...DEFAULT_FORM, feedFromSaturated: true, timeYr: '12' },
+      null,
+      feed('legacy', {
+        ...satInput,
+        aquifer: { ...satInput.aquifer, ...aq },
+        soil: { ...satInput.soil, ...soil },
+      }),
+    );
+
+  it('reports a zero gradient or a porosity of 1 as an input error naming the saturated screen', () => {
+    const g = bad({ gradient: 0 });
+    expect(g.ok).toBe(false);
+    if (!g.ok) expect(g.errors.join(' ')).toMatch(/gradient.*saturated/i);
+    const n = bad({}, { porosity: 1 });
+    expect(n.ok).toBe(false);
+    if (!n.ok) expect(n.errors.join(' ')).toMatch(/porosity.*saturated/i);
+  });
+});
