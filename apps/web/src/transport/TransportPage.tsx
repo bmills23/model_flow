@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { convert } from '@model-flow/engine';
 import { BreakthroughChart } from './BreakthroughChart';
 import { Marker } from './Marker';
@@ -7,71 +7,11 @@ import { formatConcentration } from './chartData';
 import type { ComputeRequest, MethodKey } from './compute';
 import { DEFAULT_FORM, toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
+import { Field, Group, Seg } from '../ui/controls';
 import { useTransportResult } from './useTransportResult';
+import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
-
-function Field(props: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  hint?: string;
-  placeholder?: string;
-  disabled?: boolean;
-}) {
-  return (
-    <label className="field">
-      <span className="field-label">{props.label}</span>
-      <input
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        value={props.value}
-        placeholder={props.placeholder}
-        disabled={props.disabled}
-        onChange={(e) => props.onChange(e.target.value)}
-      />
-      {props.hint && <small>{props.hint}</small>}
-    </label>
-  );
-}
-
-function Seg<T extends string>(props: {
-  legend: string;
-  name: string;
-  value: T;
-  options: readonly { value: T; label: string }[];
-  onChange: (v: T) => void;
-}) {
-  return (
-    <fieldset className="seg">
-      <legend>{props.legend}</legend>
-      <div className="seg-row">
-        {props.options.map((o) => (
-          <label key={o.value} className={props.value === o.value ? 'on' : undefined}>
-            <input
-              type="radio"
-              name={props.name}
-              value={o.value}
-              checked={props.value === o.value}
-              onChange={() => props.onChange(o.value)}
-            />
-            <span>{o.label}</span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
-function Group(props: { title: string; children: React.ReactNode; open?: boolean }) {
-  return (
-    <details className="group" open={props.open ?? true}>
-      <summary>{props.title}</summary>
-      <div className="group-body">{props.children}</div>
-    </details>
-  );
-}
 
 function StepsTable({ form, set }: { form: TransportForm; set: Setter }) {
   const update = (i: number, patch: Partial<StepRow>): void =>
@@ -129,7 +69,9 @@ export function TransportPage() {
   const [form, setForm] = useState<TransportForm>(DEFAULT_FORM);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
-  const parsed = useMemo(() => toScenario(form), [form]);
+  const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
+  const fedOn = form.feedFromVadose && feed !== null;
+  const parsed = useMemo(() => toScenario(form, feed), [form, feed]);
   const request = useMemo<ComputeRequest | null>(
     () =>
       parsed.ok
@@ -273,17 +215,39 @@ export function TransportPage() {
           </Group>
 
           <Group title="Source">
+            {feed && (
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={form.feedFromVadose}
+                  onChange={(e) => set('feedFromVadose', e.target.checked)}
+                />
+                <span>Feed the source from the vadose leaching result ({feed.label})</span>
+              </label>
+            )}
+            {fedOn && feed && (
+              <p className="derived">
+                The mass reaching the water table over the {feed.scenario.source.length} m by{' '}
+                {feed.scenario.source.width} m vadose source sets the release schedule. Length,
+                width, strength and loading come from it; the thickness below is the mixing depth.{' '}
+                <a href="#/vadose">Open vadose leaching</a>
+              </p>
+            )}
             <div className="fields">
-              <Field
-                label="Source length along flow (m)"
-                value={form.srcLength}
-                onChange={(v) => set('srcLength', v)}
-              />
-              <Field
-                label="Source width across flow (m)"
-                value={form.srcWidth}
-                onChange={(v) => set('srcWidth', v)}
-              />
+              {!fedOn && (
+                <>
+                  <Field
+                    label="Source length along flow (m)"
+                    value={form.srcLength}
+                    onChange={(v) => set('srcLength', v)}
+                  />
+                  <Field
+                    label="Source width across flow (m)"
+                    value={form.srcWidth}
+                    onChange={(v) => set('srcWidth', v)}
+                  />
+                </>
+              )}
               <Field
                 label="Source thickness (m)"
                 value={form.srcDepth}
@@ -291,52 +255,56 @@ export function TransportPage() {
                 hint="Below the water table."
               />
             </div>
-            <Seg
-              legend="Source strength"
-              name="sourceMode"
-              value={form.sourceMode}
-              onChange={(v) => set('sourceMode', v)}
-              options={[
-                { value: 'concentration', label: 'Concentration' },
-                { value: 'massRate', label: 'Mass rate' },
-              ]}
-            />
-            <div className="fields">
-              {form.sourceMode === 'concentration' ? (
-                <Field
-                  label="Source concentration (mg/L)"
-                  value={form.c0}
-                  onChange={(v) => set('c0', v)}
+            {!fedOn && (
+              <>
+                <Seg
+                  legend="Source strength"
+                  name="sourceMode"
+                  value={form.sourceMode}
+                  onChange={(v) => set('sourceMode', v)}
+                  options={[
+                    { value: 'concentration', label: 'Concentration' },
+                    { value: 'massRate', label: 'Mass rate' },
+                  ]}
                 />
-              ) : (
-                <Field
-                  label="Mass release rate (g/d)"
-                  value={form.massRate}
-                  onChange={(v) => set('massRate', v)}
+                <div className="fields">
+                  {form.sourceMode === 'concentration' ? (
+                    <Field
+                      label="Source concentration (mg/L)"
+                      value={form.c0}
+                      onChange={(v) => set('c0', v)}
+                    />
+                  ) : (
+                    <Field
+                      label="Mass release rate (g/d)"
+                      value={form.massRate}
+                      onChange={(v) => set('massRate', v)}
+                    />
+                  )}
+                </div>
+                <Seg
+                  legend="Loading"
+                  name="loading"
+                  value={form.loading}
+                  onChange={(v) => set('loading', v)}
+                  options={[
+                    { value: 'continuous', label: 'Continuous' },
+                    { value: 'pulse', label: 'Pulse' },
+                    { value: 'steps', label: 'Steps' },
+                  ]}
                 />
-              )}
-            </div>
-            <Seg
-              legend="Loading"
-              name="loading"
-              value={form.loading}
-              onChange={(v) => set('loading', v)}
-              options={[
-                { value: 'continuous', label: 'Continuous' },
-                { value: 'pulse', label: 'Pulse' },
-                { value: 'steps', label: 'Steps' },
-              ]}
-            />
-            {form.loading === 'pulse' && (
-              <div className="fields">
-                <Field
-                  label="Pulse duration (yr)"
-                  value={form.pulseYr}
-                  onChange={(v) => set('pulseYr', v)}
-                />
-              </div>
+                {form.loading === 'pulse' && (
+                  <div className="fields">
+                    <Field
+                      label="Pulse duration (yr)"
+                      value={form.pulseYr}
+                      onChange={(v) => set('pulseYr', v)}
+                    />
+                  </div>
+                )}
+                {form.loading === 'steps' && <StepsTable form={form} set={set} />}
+              </>
             )}
-            {form.loading === 'steps' && <StepsTable form={form} set={set} />}
           </Group>
 
           <Group title="Dispersivity">

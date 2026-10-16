@@ -1,0 +1,92 @@
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { clearVadoseFeed, getVadoseFeed } from './feed';
+import { VadosePage } from './VadosePage';
+
+afterEach(() => clearVadoseFeed());
+
+async function loaded() {
+  render(<VadosePage />);
+  await screen.findByRole(
+    'img',
+    { name: /against depth below the base of the source/i },
+    { timeout: 15000 },
+  );
+}
+
+describe('VadosePage', () => {
+  it('opens on the Table R-7 validation case with its citations', async () => {
+    await loaded();
+    expect(screen.getByRole('heading', { level: 1, name: /vadose zone leaching/i })).toBeTruthy();
+    const example = screen.getByRole('region', { name: /table r-7 validation case/i });
+    expect(within(example).getByText(/arcadis/i)).toBeTruthy();
+    expect(within(example).getByText(/spence/i)).toBeTruthy();
+  }, 20000);
+
+  it('shows the profile, water-table and source charts, the budget and the readouts', async () => {
+    await loaded();
+    expect(screen.getByRole('img', { name: /concentration at the water table/i })).toBeTruthy();
+    expect(
+      screen.getByRole('img', { name: /pore-water concentration in the depleting source/i }),
+    ).toBeTruthy();
+    expect(screen.getByRole('img', { name: /stacked cumulative mass/i })).toBeTruthy();
+    const budget = screen.getByRole('region', { name: /mass budget/i });
+    expect(within(budget).getByText(/delivered to the water table/i)).toBeTruthy();
+    const source = screen.getByRole('region', { name: /source and leaching/i });
+    expect(within(source).getAllByText(/224/).length).toBeGreaterThan(0);
+  }, 20000);
+
+  it('checks the R-7 case against the published values while the inputs are unchanged', async () => {
+    await loaded();
+    const check = screen.getByRole('region', { name: /published values/i });
+    expect(within(check).getByText(/10\.8/)).toBeTruthy();
+    expect(within(check).getAllByText(/within/i).length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText(/^koc/i), { target: { value: '60' } });
+    await screen.findByText(/inputs differ from the table r-7 case/i, undefined, {
+      timeout: 15000,
+    });
+  }, 30000);
+
+  it('lists the warning codes of both methods', async () => {
+    await loaded();
+    const warnings = screen.getByRole('region', { name: /warnings/i });
+    expect(within(warnings).getAllByText('vadose.residual-phase').length).toBe(2);
+  }, 20000);
+
+  it('switches to the modern method and reports how it was evaluated', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('radio', { name: /modern layered/i }));
+    const source = screen.getByRole('region', { name: /source and leaching/i });
+    expect(
+      within(source).getByText(/analytic solution \(van Genuchten and Alves case C14\)/i),
+    ).toBeTruthy();
+  }, 20000);
+
+  it('replaces the results with a message when an input is invalid', async () => {
+    await loaded();
+    fireEvent.change(screen.getByLabelText(/^infiltration/i), { target: { value: '-1' } });
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/infiltration/i);
+    // the last good charts stay on screen beside the message
+    expect(
+      screen.getByRole('img', { name: /against depth below the base of the source/i }),
+    ).toBeTruthy();
+  }, 20000);
+
+  it('says why the legacy method is not shown when the profile has several layers below the source', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /add layer below the source/i }));
+    await screen.findAllByText(/more than one/i, undefined, { timeout: 15000 });
+    expect(screen.getAllByText(/legacy method describes one layer below/i).length).toBeGreaterThan(
+      0,
+    );
+  }, 30000);
+
+  it('offers the result to the groundwater screen', async () => {
+    await loaded();
+    expect(getVadoseFeed()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /use as groundwater source/i }));
+    expect(getVadoseFeed()?.method).toBe('legacy');
+    expect(screen.getByRole('link', { name: /open groundwater transport/i })).toBeTruthy();
+  }, 20000);
+});

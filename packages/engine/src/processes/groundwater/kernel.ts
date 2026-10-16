@@ -13,6 +13,12 @@ export type { Point3 } from './common.js';
  * AT123D-class Green's function solution of the three-dimensional advection-dispersion equation
  * (Yeh 1981) for uniform one-dimensional flow along x, an aquifer infinite in x and y, and either
  * infinite depth or a finite thickness with no-flux top and bottom (z measured from the base).
+ * Infinite depth comes in two forms: Yeh's semi-infinite aquifer (default, `top: 'no-flux'`), which is
+ * the half-space z <= 0 under a no-flux water table at z = 0 (Yeh's top radiation condition with a
+ * zero exchange coefficient), and the unbounded medium (`top: 'unbounded'`, no water table, as in
+ * the USGS POINT3 program). Sources that touch the water table need the semi-infinite form, or half
+ * of their mass diffuses upward out of the aquifer; the unbounded medium is for whole-space
+ * comparisons and must be asked for.
  *
  * Governing equation, written for the dissolved concentration C with retardation R and first-order
  * decay lambda acting on the total (dissolved plus sorbed) mass:
@@ -33,6 +39,15 @@ export interface At123dAquifer {
   dz: number;
   /** Layer thickness. Omit for an infinitely deep aquifer. */
   thickness?: number;
+  /**
+   * Top boundary of an infinitely deep aquifer. 'no-flux' (default): the aquifer is z <= 0 under a
+   * no-flux water table at z = 0, and the vertical profile is reflected about it (Yeh 1981
+   * infinite-depth Green function with zero exchange coefficient); sources must lie at z <= 0.
+   * 'unbounded': no boundary, the medium is infinite in z as well (the whole-space POINT3
+   * configuration). A finite layer always has a no-flux top at z = thickness, so 'unbounded'
+   * together with a thickness is rejected.
+   */
+  top?: 'unbounded' | 'no-flux';
 }
 
 /** Rectangular volume source (Galya 1987). Equal bounds in a direction make the source a plane, line or point. */
@@ -127,6 +142,26 @@ function checkAquifer(a: At123dAquifer): void {
   }
   if (a.thickness !== undefined && !(finite(a.thickness) && a.thickness > 0))
     throw new RangeError('Thickness must be finite and positive (omit it for infinite depth)');
+  if (a.top !== undefined && a.top !== 'unbounded' && a.top !== 'no-flux')
+    throw new RangeError("Aquifer top must be 'unbounded' or 'no-flux'");
+  if (a.thickness !== undefined && a.top === 'unbounded')
+    throw new RangeError(
+      "A finite layer has a no-flux top; 'unbounded' applies to infinite depth only",
+    );
+}
+
+/** Infinite depth under a no-flux water table at z = 0 (the aquifer is z <= 0); the default. */
+function waterTableTop(a: At123dAquifer): boolean {
+  return a.thickness === undefined && a.top !== 'unbounded';
+}
+
+/**
+ * Vertical profile per unit mass. Under a no-flux water table at z = 0 it is the free-space profile
+ * plus the mirror image of the source about z = 0 (the method of images).
+ */
+function verticalDensity(z: number, box: BoxSource, wz: number, aquifer: At123dAquifer): number {
+  if (!waterTableTop(aquifer)) return axisDensity(z, box.z1, box.z2, wz, aquifer.thickness);
+  return axisDensity(z, box.z1, box.z2, wz) + axisDensity(z, -box.z2, -box.z1, wz);
 }
 
 function checkGeometry(box: BoxSource, aquifer: At123dAquifer): void {
@@ -137,6 +172,11 @@ function checkGeometry(box: BoxSource, aquifer: At123dAquifer): void {
   }
   if (aquifer.thickness !== undefined && !(box.z1 >= 0 && box.z2 <= aquifer.thickness)) {
     throw new RangeError('Source must lie inside the layer: 0 <= z1 <= z2 <= thickness');
+  }
+  if (waterTableTop(aquifer) && !(box.z2 <= 0)) {
+    throw new RangeError(
+      "Source must lie below the water table: z2 <= 0 for an infinitely deep aquifer (top 'no-flux', the default); use top 'unbounded' for the whole-space medium",
+    );
   }
 }
 
@@ -154,8 +194,12 @@ function checkInput(input: At123dInput): void {
   }
 }
 
-/** Receptors outside the finite layer carry no concentration (the aquifer does not exist there). */
+/**
+ * Receptors outside the finite layer, or above the water table of a semi-infinite aquifer, carry no
+ * concentration (the aquifer does not exist there).
+ */
 function belowOrAbove(z: number, aquifer: At123dAquifer): boolean {
+  if (waterTableTop(aquifer)) return z > 0;
   return aquifer.thickness !== undefined && (z < 0 || z > aquifer.thickness);
 }
 
@@ -181,7 +225,7 @@ export function instantaneousBoxConcentration(
   if (fx === 0) return 0;
   const fy = axisDensity(p.y, box.y1, box.y2, wy);
   if (fy === 0) return 0;
-  const fz = axisDensity(p.z, box.z1, box.z2, wz, aquifer.thickness);
+  const fz = verticalDensity(p.z, box, wz, aquifer);
   return ((mass * Math.exp(-lambda * tau)) / (aquifer.porosity * R)) * fx * fy * fz;
 }
 
@@ -280,7 +324,7 @@ export function at123dGrid(
       wx[k] = 2 * Math.sqrt((aquifer.dx / R) * tau);
       wy[k] = 2 * Math.sqrt((aquifer.dy / R) * tau);
       const wz = 2 * Math.sqrt((aquifer.dz / R) * tau);
-      fz[k] = axisDensity(z, source.z1, source.z2, wz, aquifer.thickness);
+      fz[k] = verticalDensity(z, source, wz, aquifer);
       base[k] =
         (step.rate * rule.weight[k]! * Math.exp(-lambda * tau) * fz[k]!) / (aquifer.porosity * R);
     }

@@ -173,3 +173,119 @@ describe('plan-view grids and timing', () => {
     }
   });
 });
+
+describe('PATCHI with a bounded z axis', () => {
+  // a source box below a no-flux water table at z = 0, receptors at z <= 0
+  const below: WexlerInput = { ...base, patch: { y1: -2.5, y2: 2.5, z1: -3, z2: 0 } };
+  const image: WexlerInput = { ...below, patch: { y1: -2.5, y2: 2.5, z1: -3, z2: 3 } };
+  const noFlux = { waterTable: 0 };
+
+  it('a no-flux water table equals the image patch [-T, T] of the whole-space solution', () => {
+    for (const z of [0, -0.5, -1.5, -3, -6]) {
+      const want = patchiConcentration(image, { x: 40, y: 1, z }, 20);
+      const got = patchiConcentration(below, { x: 40, y: 1, z }, 20, undefined, noFlux);
+      expect(want).toBeGreaterThan(0);
+      expect(Math.abs(got - want)).toBeLessThanOrEqual(1e-12 * want);
+    }
+  });
+
+  it('lies above the unbounded solution, which leaks the held concentration upward', () => {
+    const open = patchiConcentration(below, { x: 40, y: 0, z: 0 }, 20);
+    const closed = patchiConcentration(below, { x: 40, y: 0, z: 0 }, 20, undefined, noFlux);
+    expect(open / closed).toBeLessThan(0.8);
+  });
+
+  it('reports zero above the water table and on the inflow plane outside the patch', () => {
+    expect(patchiConcentration(below, { x: 40, y: 0, z: 0.5 }, 20, undefined, noFlux)).toBe(0);
+    expect(patchiConcentration(below, { x: 0, y: 0, z: -1 }, 20, undefined, noFlux)).toBe(below.c0);
+    expect(patchiConcentration(below, { x: 0, y: 0, z: -5 }, 20, undefined, noFlux)).toBe(0);
+  });
+
+  it('the grid at a water-table depth matches the point solution and the image patch', () => {
+    const xs = [5, 30, 80];
+    const ys = [-4, 0, 4];
+    for (const z of [0, -1.5, -6]) {
+      const grid = patchiGrid(below, xs, ys, z, 25, undefined, undefined, noFlux);
+      xs.forEach((x, i) =>
+        ys.forEach((y, j) => {
+          const ref = patchiConcentration(image, { x, y, z }, 25);
+          expect(Math.abs(grid[i]![j]! - ref)).toBeLessThanOrEqual(1e-8 + 2e-5 * Math.abs(ref));
+        }),
+      );
+    }
+    expect(patchiGrid(below, xs, ys, 0.5, 25, undefined, undefined, noFlux)[1]![1]).toBe(0);
+  });
+
+  it('rejects a patch above the water table', () => {
+    expect(() =>
+      patchiConcentration(base, { x: 5, y: 0, z: 1 }, 10, undefined, { waterTable: 0 }),
+    ).toThrow(RangeError);
+  });
+
+  describe('a layer with no-flux top and bottom and infinite width', () => {
+    const H = 6;
+    const layer: WexlerInput = { ...base, patch: { y1: -2.5, y2: 2.5, z1: 2, z2: 5 } };
+    // independent reference: the whole-space solution summed over the images of the patch
+    const images = (p: { x: number; y: number; z: number }, t: number): number => {
+      let sum = 0;
+      for (let n = -8; n <= 8; n++) {
+        const { z1, z2 } = layer.patch;
+        for (const [a, b] of [
+          [z1 + 2 * n * H, z2 + 2 * n * H],
+          [-z2 + 2 * n * H, -z1 + 2 * n * H],
+        ] as const) {
+          sum += patchiConcentration({ ...layer, patch: { ...layer.patch, z1: a, z2: b } }, p, t);
+        }
+      }
+      return sum;
+    };
+
+    it('equals the whole-space solution summed over the patch images', () => {
+      for (const z of [0, 1.5, 3, 5.5, 6]) {
+        const p = { x: 25, y: 1, z };
+        const want = images(p, 40);
+        const got = patchiConcentration(layer, p, 40, undefined, { thickness: H });
+        expect(want).toBeGreaterThan(0);
+        expect(Math.abs(got - want)).toBeLessThanOrEqual(1e-7 * want);
+      }
+    });
+
+    it('tends to the finite-width PATCHF solution as the width grows', () => {
+      const W = 4000;
+      const wide: WexlerInput = {
+        ...layer,
+        patch: { ...layer.patch, y1: layer.patch.y1 + W / 2, y2: layer.patch.y2 + W / 2 },
+      };
+      const want = patchfConcentration(wide, { x: 25, y: 1 + W / 2, z: 3 }, 40, {
+        width: W,
+        thickness: H,
+        method: 'integral',
+      }).value;
+      const got = patchiConcentration(layer, { x: 25, y: 1, z: 3 }, 40, undefined, {
+        thickness: H,
+      });
+      expect(Math.abs(got - want)).toBeLessThanOrEqual(1e-8 * want);
+    });
+
+    it('the grid matches the point solution and zero outside [0, H]', () => {
+      const xs = [5, 30];
+      const ys = [-3, 0];
+      const grid = patchiGrid(layer, xs, ys, 3, 40, undefined, undefined, { thickness: H });
+      xs.forEach((x, i) =>
+        ys.forEach((y, j) => {
+          const ref = patchiConcentration(layer, { x, y, z: 3 }, 40, undefined, { thickness: H });
+          expect(Math.abs(grid[i]![j]! - ref)).toBeLessThanOrEqual(1e-8 + 2e-5 * Math.abs(ref));
+        }),
+      );
+      expect(
+        patchiConcentration(layer, { x: 25, y: 0, z: 7 }, 40, undefined, { thickness: H }),
+      ).toBe(0);
+    });
+
+    it('rejects a patch outside the layer', () => {
+      expect(() =>
+        patchiConcentration(layer, { x: 5, y: 0, z: 3 }, 10, undefined, { thickness: 4 }),
+      ).toThrow(RangeError);
+    });
+  });
+});

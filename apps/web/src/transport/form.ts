@@ -4,8 +4,12 @@ import {
   schulzeMakuch2005,
   xuEckstein1995,
   dispersionCoefficients,
+  type LoadingStep,
   type Warning,
 } from '@model-flow/engine';
+import type { VadoseMethod } from '../vadose/compute';
+import type { VadoseFeed } from '../vadose/feed';
+import type { VadoseScenario } from '../vadose/form';
 
 /** One row of the stepped-loading table (years since release start; factor times the base rate). */
 export interface StepRow {
@@ -43,6 +47,8 @@ export interface TransportForm {
   loading: 'continuous' | 'pulse' | 'steps';
   pulseYr: string;
   steps: StepRow[];
+  /** Take the source from the vadose leaching result (when the vadose screen holds one). */
+  feedFromVadose: boolean;
   // dispersivity
   dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
   alphaLOverride: string;
@@ -93,6 +99,7 @@ export const DEFAULT_FORM: TransportForm = {
     { start: '0', end: '5', factor: '1' },
     { start: '8', end: '12', factor: '0.5' },
   ],
+  feedFromVadose: false,
   dispLaw: 'legacy',
   alphaLOverride: '',
   alphaTOverride: '',
@@ -111,6 +118,17 @@ export const DEFAULT_FORM: TransportForm = {
   showDomenico: false,
   scale: 'linear',
 };
+
+/**
+ * A source fed by the vadose screen. The schedule depends on the evaluation time, so the compute
+ * step fills `steps` by running the vadose method for that time; it is plain data for the worker.
+ */
+export interface FedSource {
+  vadose: VadoseScenario;
+  method: VadoseMethod;
+  label: string;
+  steps?: LoadingStep[] | undefined;
+}
 
 export interface LoadingTerm {
   start: number;
@@ -149,6 +167,15 @@ export interface Scenario {
   /** Engine z coordinate (from the aquifer base when finite) for a depth below the water table. */
   zOf: (depth: number) => number;
   time: number;
+  /** Set when the source is fed by the vadose result instead of the typed strength and loading. */
+  fed?: FedSource | undefined;
+  /**
+   * Top boundary of an infinitely deep aquifer: always 'no-flux' for scenarios built by the screen
+   * (the water table at z = 0, aquifer z <= 0, source box [-srcDepth, 0]), so no source mass diffuses
+   * upward out of the aquifer. Absent for a finite aquifer, whose top is the water table anyway.
+   * 'unbounded' (whole-space medium) is accepted by the engine and used only by tests.
+   */
+  top?: 'no-flux' | 'unbounded' | undefined;
   extent: { xMin: number; xMax: number; yHalf: number };
   /** Labels and values for display. */
   dispersivityDistance: number;
@@ -171,7 +198,8 @@ export function makeZOf(thickness: number | undefined): (depth: number) => numbe
   return (depth) => (thickness === undefined ? -depth : thickness - depth);
 }
 
-export function toScenario(f: TransportForm): ScenarioResult {
+export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): ScenarioResult {
+  const fed = f.feedFromVadose && feed !== null ? feed : null;
   const errors: string[] = [];
   const need = (label: string, s: string, test: (v: number) => boolean, hint: string): number => {
     const v = num(s);
@@ -221,8 +249,14 @@ export function toScenario(f: TransportForm): ScenarioResult {
     halfLife = need('Half-life', f.halfLifeYr, nonneg, 'must be zero or more (years).');
   const decayRate = halfLife > 0 ? Math.LN2 / (halfLife * YR) : 0;
 
-  const srcLength = need('Source length', f.srcLength, nonneg, 'must be zero or more (m).');
-  const srcWidth = need('Source width', f.srcWidth, pos, 'must be a positive number (m).');
+  // A vadose-fed source keeps the vadose source's plan size (RISC5 choice); the thickness below the
+  // water table stays the typed mixing depth.
+  const srcLength = fed
+    ? fed.scenario.source.length
+    : need('Source length', f.srcLength, nonneg, 'must be zero or more (m).');
+  const srcWidth = fed
+    ? fed.scenario.source.width
+    : need('Source width', f.srcWidth, pos, 'must be a positive number (m).');
   const srcDepth = need('Source thickness', f.srcDepth, pos, 'must be a positive number (m).');
   if (thickness !== undefined && srcDepth > thickness) {
     errors.push('Source thickness cannot exceed the aquifer thickness.');
@@ -235,7 +269,11 @@ export function toScenario(f: TransportForm): ScenarioResult {
   const area = srcWidth * srcDepth;
   let c0: number;
   let massRate: number;
-  if (f.sourceMode === 'concentration') {
+  if (fed) {
+    // the schedule replaces the typed strength; the compute step supplies it
+    c0 = 0;
+    massRate = 0;
+  } else if (f.sourceMode === 'concentration') {
     c0 = convert(
       need('Source concentration', f.c0, nonneg, 'must be zero or more (mg/L).'),
       'mg/L',
@@ -252,7 +290,9 @@ export function toScenario(f: TransportForm): ScenarioResult {
   }
 
   const terms: LoadingTerm[] = [];
-  if (f.loading === 'continuous') {
+  if (fed) {
+    terms.push({ start: 0, end: Infinity, factor: 1 });
+  } else if (f.loading === 'continuous') {
     terms.push({ start: 0, end: Infinity, factor: 1 });
   } else if (f.loading === 'pulse') {
     const d = need('Pulse duration', f.pulseYr, pos, 'must be a positive number (years).');
@@ -366,6 +406,8 @@ export function toScenario(f: TransportForm): ScenarioResult {
       receptorDepths: { top, bottom },
       zOf,
       time,
+      ...(fed ? { fed: { vadose: fed.scenario, method: fed.method, label: fed.label } } : {}),
+      ...(thickness === undefined ? { top: 'no-flux' as const } : {}),
       extent: { xMin, xMax, yHalf },
       dispersivityDistance: distance,
       lawAlphas: lawOut,

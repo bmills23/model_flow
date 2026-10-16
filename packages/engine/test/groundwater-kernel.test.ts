@@ -20,10 +20,19 @@ const aquifer: At123dAquifer = {
   dx: 1.0,
   dy: 0.2,
   dz: 0.05,
+  // the whole-space medium of the closed-form checks; infinite depth defaults to a no-flux water table
+  top: 'unbounded',
 };
+/** The same aquifer as an infinitely deep whole-space medium. */
 function infinite(a: At123dAquifer): At123dAquifer {
-  const c = { ...a };
+  const c: At123dAquifer = { ...a, top: 'unbounded' };
   delete c.thickness;
+  return c;
+}
+/** A finite layer: a no-flux top is implied, so the whole-space flag is dropped. */
+function layer(a: At123dAquifer, over: Partial<At123dAquifer>): At123dAquifer {
+  const c: At123dAquifer = { ...a, ...over };
+  delete c.top;
   return c;
 }
 const box: BoxSource = { x1: -1, x2: 1, y1: -2, y2: 2, z1: -0.5, z2: 0.5 };
@@ -96,7 +105,7 @@ describe('instantaneous box release (Green function)', () => {
   });
 
   it('with no-flux top and bottom conserves mass over the layer and approaches a uniform profile', () => {
-    const thick: At123dAquifer = { ...aquifer, thickness: 2, dz: 0.4 };
+    const thick = layer(aquifer, { thickness: 2, dz: 0.4 });
     const src: BoxSource = { ...box, z1: 0.5, z2: 1.0 };
     const tol = { relTol: 1e-9, absTol: 1e-14 };
     for (const tau of [0.5, 3, 40]) {
@@ -138,7 +147,7 @@ describe('instantaneous box release (Green function)', () => {
   });
 
   it('image series and cosine series agree across their switching point', () => {
-    const thick: At123dAquifer = { ...aquifer, thickness: 2, dz: 0.4 };
+    const thick = layer(aquifer, { thickness: 2, dz: 0.4 });
     const src: BoxSource = { ...box, z1: 0.5, z2: 1.0 };
     // tau where D tau / H^2 straddles the switch (0.2): tau = 0.2*4/0.4 = 2
     const lo = instantaneousBoxConcentration(thick, src, { x: 2, y: 0, z: 1.3 }, 1.999999);
@@ -250,7 +259,7 @@ describe('time-integrated loading', () => {
 });
 
 describe('plan-view grid', () => {
-  const a: At123dAquifer = { ...aquifer, decayRate: 0.002, thickness: 10 };
+  const a = layer(aquifer, { decayRate: 0.002, thickness: 10 });
   const src: BoxSource = { x1: -2, x2: 2, y1: -5, y2: 5, z1: 0, z2: 3 };
   const input = {
     aquifer: a,
@@ -287,5 +296,136 @@ describe('plan-view grid', () => {
     );
     expect(grid[30]![30]).toBeGreaterThan(0);
     expect(ms).toBeLessThan(1000);
+  });
+});
+
+describe('infinite depth with a no-flux water table at z = 0 (Yeh 1981 semi-infinite case)', () => {
+  // Yeh (1981) measures z from the top surface and treats the infinitely deep aquifer as a half-space
+  // whose top carries a radiation condition; with zero exchange coefficient that is no-flux, and the
+  // vertical Green function becomes the free-space one plus its mirror image about the top.
+  const top: At123dAquifer = { ...aquifer, retardation: 1.6, decayRate: 0.01, top: 'no-flux' };
+  const free = infinite(top);
+  const plane: BoxSource = { x1: -1, x2: 1, y1: -2, y2: 2, z1: 0, z2: 0 };
+
+  it('conserves the released mass inside the aquifer (z <= 0) for a plane source on the water table', () => {
+    const tau = 6;
+    const tol = { relTol: 1e-10, absTol: 0 };
+    // the x and y profiles each integrate to one (tested above); the vertical factor carries the boundary
+    const zMass = integrate(
+      (z) => instantaneousBoxConcentration(top, plane, { x: 0, y: 0, z }, tau, 1),
+      -20,
+      0,
+      tol,
+    ).value;
+    const xy = instantaneousBoxConcentration(
+      free,
+      { ...plane, z1: -50, z2: 50 },
+      { x: 0, y: 0, z: 0 },
+      tau,
+      100,
+    );
+    // xy is (fx fy e^-lambda tau / (n R)); zMass / xy is the vertical integral of the aquifer profile
+    expect(Math.abs(zMass / xy - 1)).toBeLessThan(1e-6);
+    // the free-space kernel keeps only half of it below the water table
+    const zFree = integrate(
+      (z) => instantaneousBoxConcentration(free, plane, { x: 0, y: 0, z }, tau, 1),
+      -20,
+      0,
+      tol,
+    ).value;
+    expect(zFree / xy).toBeCloseTo(0.5, 9);
+  });
+
+  it('equals the free-space response plus its mirror image about z = 0', () => {
+    const src: BoxSource = { x1: -1, x2: 1, y1: -2, y2: 2, z1: -1.4, z2: -0.3 };
+    for (const tau of [0.5, 4, 30]) {
+      for (const z of [0, -0.2, -0.9, -2.5]) {
+        const p = { x: 2, y: 0.7, z };
+        const want =
+          instantaneousBoxConcentration(free, src, p, tau) +
+          instantaneousBoxConcentration(free, src, { ...p, z: -z }, tau);
+        expect(instantaneousBoxConcentration(top, src, p, tau)).toBeCloseTo(want, 14);
+      }
+    }
+  });
+
+  it('doubles the free-space (POINT3) continuous point source placed on the water table', () => {
+    const point: BoxSource = { x1: 0, x2: 0, y1: 0, y2: 0, z1: 0, z2: 0 };
+    const loading = [{ start: 0, end: Infinity, rate: 2 }];
+    for (const z of [-0.3, -1.5, -3]) {
+      const p = { x: 7, y: 1, z };
+      const a = at123dConcentration({ aquifer: top, source: point, loading, time: 60 }, p);
+      const b = at123dConcentration({ aquifer: free, source: point, loading, time: 60 }, p);
+      expect(a / b).toBeCloseTo(2, 9);
+    }
+    const g = at123dGrid({ aquifer: top, source: plane, loading, time: 60 }, [7], [1], -1.5);
+    const c = at123dConcentration(
+      { aquifer: top, source: plane, loading, time: 60 },
+      { x: 7, y: 1, z: -1.5 },
+    );
+    expect(Math.abs(g[0]![0]! / c - 1)).toBeLessThan(1e-6);
+  });
+
+  it('is the default for infinite depth: omitting top equals top no-flux, and unbounded must be asked for', () => {
+    const loading = [{ start: 0, end: Infinity, rate: 2 }];
+    const def: At123dAquifer = { ...aquifer, retardation: 1.6, decayRate: 0.01 };
+    delete def.top;
+    const p = { x: 7, y: 1, z: -0.4 };
+    const viaDefault = at123dConcentration({ aquifer: def, source: plane, loading, time: 60 }, p);
+    const viaFlag = at123dConcentration({ aquifer: top, source: plane, loading, time: 60 }, p);
+    const whole = at123dConcentration(
+      { aquifer: { ...top, top: 'unbounded' }, source: plane, loading, time: 60 },
+      p,
+    );
+    expect(viaDefault).toBe(viaFlag);
+    expect(viaDefault / whole).toBeCloseTo(2, 9);
+    // the default has a water table: nothing above it, and a source above it is rejected
+    expect(
+      at123dConcentration({ aquifer: def, source: plane, loading, time: 60 }, { ...p, z: 0.5 }),
+    ).toBe(0);
+    expect(() =>
+      at123dConcentration(
+        { aquifer: def, source: { ...plane, z1: -0.5, z2: 0.5 }, loading, time: 60 },
+        p,
+      ),
+    ).toThrow(RangeError);
+    // a finite layer is untouched by the default
+    expect(
+      at123dConcentration(
+        {
+          aquifer: { ...def, thickness: 5 },
+          source: { ...plane, z1: 5, z2: 5 },
+          loading,
+          time: 60,
+        },
+        { x: 7, y: 1, z: 4 },
+      ),
+    ).toBeGreaterThan(0);
+  });
+
+  it('reports zero above the water table and rejects a source above it or a contradictory top', () => {
+    const loading = [{ start: 0, end: Infinity, rate: 1 }];
+    const input = { aquifer: top, source: plane, loading, time: 20 };
+    expect(at123dConcentration(input, { x: 3, y: 0, z: 0.5 })).toBe(0);
+    expect(at123dGrid(input, [3], [0], 0.5)[0]![0]).toBe(0);
+    expect(() =>
+      at123dConcentration({ ...input, source: { ...plane, z2: 0.2 } }, { x: 3, y: 0, z: -1 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      at123dConcentration(
+        {
+          ...input,
+          aquifer: { ...top, top: 'unbounded', thickness: 5 },
+          source: { ...plane, z1: 5, z2: 5 },
+        },
+        { x: 3, y: 0, z: 1 },
+      ),
+    ).toThrow(RangeError);
+    expect(() =>
+      at123dConcentration(
+        { ...input, aquifer: { ...top, top: 'sideways' as 'no-flux' } },
+        { x: 3, y: 0, z: -1 },
+      ),
+    ).toThrow(RangeError);
   });
 });

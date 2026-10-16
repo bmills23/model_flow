@@ -42,7 +42,7 @@ entry here.
 | Source strength | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source |
 | Geometry | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width | One coordinate story for the three methods; Domenico already measures depth down from the top |
 | Screen average on the map | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout | Keeps the worker time bounded; the readout uses the finer average |
-| Finite thickness without a width | Wexler uses PATCHI and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both |
+| Finite thickness without a width | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table) |
 | Domenico | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed | Not a recommended method (see docs/methods/groundwater-transport.md) |
 
 ## 2026-10-15: Schulze-Makuch 2005 dispersivity coefficients (M1)
@@ -64,3 +64,82 @@ evidence of an upper scale bound; it gives no (c, m) pairs and no data range. Tw
 citing a table, and may share one lineage. The coefficients therefore stay as encoded, still
 secondary-sourced. Closing this needs the paper's PDF (institutional access, interlibrary loan, or the
 author); Neuman's 2006 comment on the paper and the author's reply should be read at the same time.
+
+## 2026-10-16: M2 vadose leaching scope and validation (Bryan)
+
+Three calls from the methods note (`docs/methods/vadose-leaching.md`), each settled on the recommended
+default:
+
+- **Table R-7 fixture:** "Year-10 average at 3%". The water-table target of 10.8 mg/L is compared with
+  the mean of the month-end values over year 10, within 3 percent, using the RISC4 manual's benzene
+  properties because Table R-7 does not list them; the review's independent 11.0 mg/L value is not used.
+  The point value at 10 years (about 14.1 mg/L) does not match, and the year-10 value is badly
+  conditioned (a 5 percent change in Koc moves it about 25 percent), so the fixture is a reproduction
+  check of the review's arithmetic, not evidence of model accuracy.
+  Fixture provenance (`packages/engine/test/fixtures/vadose/README.md`): the six benzene values
+  (M 78 g/mol, S 1750 mg/L, H 0.228, Koc 59 mL/g, D_a 0.088 and D_w 9.8e-6 cm^2/s) come from the RISC4
+  chemical database and are fixture inputs for this case only, not a product database. The independent
+  11.0 mg/L is unused because the review says it was computed with an approximate erf (error up to 0.7
+  percent), so it is not a reference-grade value. Other readings: the 4.0 m above the source includes the
+  0.2 m lens, L_d = 5.5 m, decay acts on the dissolved phase only, and the table's TPH "molecular weight
+  [mg/kg]" is g/mol.
+- **EPA Soil Screening Guidance leaching with a dilution attenuation factor:** "Defer to M5". It is a
+  back-calculation of screening levels and belongs with cleanup levels. M2 ships the legacy model, the
+  van Genuchten-Mualem k(theta) option, the multi-layer profile and the flux-type inlet.
+- **Layered transport:** "Finite volume, analytic for 1 layer". A finite-volume solver handles profiles
+  with more than one layer; the van Genuchten and Alves 1982 case C14 closed form is used for a single
+  layer, and tests require the two to agree.
+
+## 2026-10-16: M2 tolerance rulings and engine screening choices
+
+Bryan's rulings on two acceptance gaps found while building the M2 engine:
+
+- **van Genuchten and Alves 1982 Table 6:** "Named exceptions at 1.5e-4". Eight of the 110 printed values
+  (first-type t = 5, x = 18; third-type t:x = 10:8, 10:18, 15:20, 20:20, 25:16, 25:18, 25:20) differ from
+  the exact closed forms by more than 5e-5, at most 1.27e-4 (third-type t = 25, x = 20: printed 0.6334,
+  exact 0.63353). The closed forms agree with an independent convolution form to 1e-9, with
+  finite-difference checks of the PDE and inlet condition, and with the finite-volume solver, and the
+  digits were re-read from a 300 dpi render, so the differences are attributed to the 1982 program's
+  printed output. Those eight points are asserted at 1.5e-4 and listed by (t, x) in the test; the other
+  102 stay at 5e-5.
+- **Finite-volume versus closed-form agreement:** "Accept current criteria". The planned target (1e-4
+  relative wherever C > 1e-6 c0) is replaced by: 1e-4 c0 absolute everywhere, 1e-2 relative where
+  C > 1e-2 c0, and a measured second-order convergence rate under grid halving. The scheme is second
+  order; the relative error in the far leading tail of a front stays near 2.7e-4 even at 5334 cells.
+
+Screening choices made while building the engine (defaults; open to change):
+
+- `vadose.tph-constant-approximation` fires when F / F_T > 0.1.
+- `vadose.inlet-mass-excess` fires when the first-type inlet admits more than 1.05 times the source's
+  leaching loss, judged on the ratio over the whole release (closed form from the Laplace transform; 1.019
+  for Table R-7) rather than at the end of the run (1.060 for Table R-7 at 10 years), because the
+  finite-time ratio grows without bound as t approaches zero and would flag every short run.
+- Infiltration is clamped to the smallest saturated conductivity among the layers present, since under
+  unit gradient every layer carries the same flux.
+- The layered solver continues the deepest layer 20 dispersion lengths (D/v) below the water table and
+  reports the flux across the water-table face; a free exit at the water table gave outlet
+  concentrations up to 25 percent high and made one layer and two identical layers disagree.
+- The layered solver halves the time step, then the grid, until results change by less than 1e-3 of their
+  peak, and warns `vadose.numerics-not-converged` if either loop runs out of halvings.
+
+## 2026-10-16: No-flux water table for infinitely deep AT123D aquifers (Bryan)
+
+Building the M2 coupling showed that M1's infinite-thickness AT123D kernel modelled an unbounded medium,
+so a source at the water table lost half its mass upward and concentrations within a few vertical
+dispersion lengths of the water table were up to a factor of two low. Yeh 1981 (ORNL-5602) places an
+exchange condition on the top surface with image terms in the infinite-depth vertical functions; with a
+zero exchange coefficient that is a no-flux water table. The kernel gained `aquifer.top: 'no-flux'`.
+Bryan's ruling on the default: "Default to no-flux". Infinite-thickness AT123D runs use the no-flux water
+table unless a caller asks for `top: 'unbounded'`; the ANALGWST point-source fixtures and the kernel
+tests that need a whole-space medium request it explicitly. Results from the M1 screen near the water
+table change accordingly.
+
+## 2026-10-16: Wexler PATCHI honours the no-flux water table (Bryan: "Fix first, one push")
+
+Following the AT123D no-flux ruling above, the transport screen's Wexler path still leaked the held
+concentration upward through z = 0 (whole-space PATCHI read 0.50 to 0.82 of the no-flux value at depths
+0 to 6 m). `patchiConcentration` and `patchiGrid` gained an optional `VerticalBounds` argument
+(`{ waterTable }` or `{ thickness }`, images inside the time integral), the screen passes it for every
+infinitely deep aquifer and for a finite thickness without a width, and PATCHF and every ANALGWST
+fixture are unchanged. `loadingParity.test.ts` now pins its recorded whole-space Wexler values by
+dropping the screen's no-flux flag, because those values predate the change.

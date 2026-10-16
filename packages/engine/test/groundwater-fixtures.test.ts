@@ -82,6 +82,8 @@ describe('USGS ANALGWST 1.1 POINT3: continuous point source in an infinite aquif
                 dx: i.dx!,
                 dy: i.dy!,
                 dz: i.dz!,
+                // POINT3 is the whole-space medium, with the source at zc = 0 inside it
+                top: 'unbounded',
               },
               source: point,
               loading: [{ start: 0, end: Infinity, rate: i.c0! * i.qm! }],

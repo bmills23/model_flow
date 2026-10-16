@@ -97,6 +97,7 @@ describe('review finding 2: grid versus point at high Peclet', () => {
           dy: 0.2 * alphaL * u,
           dz: 0.05 * alphaL * u,
           decayRate: 0.001,
+          top: 'unbounded',
         },
         source: { x1: -1, x2: 1, y1: -2, y2: 2, z1: -0.5, z2: 0.5 },
         loading: [{ start: 0, end: Infinity, rate: 1 }],

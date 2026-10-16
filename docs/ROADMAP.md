@@ -1,4 +1,4 @@
-> Status: M1 DONE 2026-10-15 (merged to main; first public version on Pages). Next: M2 vadose leaching. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M2 DONE 2026-10-16 (vadose leaching, with the M1 no-flux water-table correction). Next: M3 saturated soil source. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
@@ -171,7 +171,9 @@ after the first run.
   Xu & Eckstein / Schulze-Makuch modern), well-screen averaging, pulse and time-varying sources. ANALGWST
   and mibitrans fixtures. First UI: scenario form, plan-view plume map, breakthrough curve, legacy-vs-modern
   overlay. Deploy to Pages: first public version.
-- **M2 Vadose leaching (App. A).** VADSAT-type legacy model with lens and Raoult's law; modern k(θ) and
+- **M2 Vadose leaching (App. A). DONE 2026-10-16** (scope, fixture rulings and the M1 no-flux water-table
+  default in DECISIONS.md; SSG/DAF leaching moved to M5, Jury 1983 volatilization to M6, the Richards
+  column after M2). VADSAT-type legacy model with lens and Raoult's law; modern k(θ) and
   multi-layer options; coupling of leachate flux into M1 as time-varying source. Table R-7 fixture, vG&A
   tables. Depth-profile and source-depletion charts.
 - **M3 Saturated soil source (App. C).** Two-region source with water-table fluctuation; feeds M1.
@@ -182,10 +184,12 @@ after the first run.
   RAGS 1989 intake vs modern RAGS Part F / Part E / 2014 defaults / ADAF. Table R-9 fixture. Risk
   contribution charts.
 - **M5 Cleanup levels (Ch. 8).** Back-calculation for direct and modeled pathways, individual vs cumulative
-  options, MCL/user targets; Brent solver (and secant for parity checks).
+  options, MCL/user targets; Brent solver (and secant for parity checks). EPA Soil Screening Guidance
+  1996/2002 leaching with a dilution attenuation factor (moved here from M2, see DECISIONS.md).
 - **M6 Vapor models (App. D, E, J, K, F).** J&E, GW-to-indoor, dominant layer, oxygen-limited, outdoor box;
   modern EPA 2004 J&E, DeVaull 2007 oxygen-limited, VISL attenuation factors, PVI vertical-separation
-  screen. Tables R-3..R-6 fixtures. Depth-attenuation plots.
+  screen. Tables R-3..R-6 fixtures. Depth-attenuation plots. Jury et al. 1983 behaviour-assessment
+  volatilization from soil (moved here from M2).
 - **M7 Shower, irrigation, particulates (App. G, H, I).** Foster & Chrostowski vs Little; PEF variants.
 - **M8 Surface water and sediment (App. L, M, N).** Mixing models; criteria tables from public sources
   only. Table R-8 fixture.
