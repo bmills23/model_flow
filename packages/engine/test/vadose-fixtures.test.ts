@@ -100,8 +100,6 @@ describe('Table R-7 fixture', () => {
     expect(f.targets.waterTableYear10MeanMgPerL.value).toBe(10.8);
     expect(f.targets.waterTableYear10MeanMgPerL.relativeTolerance).toBe(0.03);
   });
-  it.todo('legacy engine reproduces the source pore water within 1 percent (stage L)');
-  it.todo('legacy engine reproduces the year-10 month-end mean within 3 percent (stage L)');
 });
 
 describe('van Genuchten and Alves 1982 Table 6 fixture', () => {
@@ -122,6 +120,5 @@ describe('van Genuchten and Alves 1982 Table 6 fixture', () => {
       for (let k = 1; k < c.length; k++) expect(c[k]!).toBeLessThan(c[k - 1]!);
     }
   });
-  it.todo('first-type column from the C13 kernel within 5e-5 (stage L)');
   it.todo('third-type column from the C14 solution within 5e-5 (stage M)');
 });

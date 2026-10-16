@@ -6,7 +6,8 @@ used only as a map of which published choices RISC5 made; none of its text or ta
 its equation labels are not used here. Where a choice is RISC5's rather than a paper's, it is marked
 "RISC5 choice" and becomes the method's `risc5Choice` metadata.
 
-Status: methods note and reference check done 2026-10-16; engine, fixtures, coupling and UI not started.
+Status: methods note and reference check done 2026-10-16; fixtures, hydraulics helpers and the legacy
+method `vadose.vadsat` implemented 2026-10-16; modern method, coupling and UI not started.
 
 ## Scope of M2
 
@@ -86,7 +87,9 @@ The seepage velocity is v = q / theta and the water content is theta = theta_r +
 computed separately for the soil below the source, the source itself, the clean soil above and the lens.
 
 RISC5 choice: when q exceeds Ks, q is reduced to Ks (the excess is treated as runoff) and the soil is
-saturated. The legacy method reproduces this clamp and reports it (`vadose.infiltration-clamped`).
+saturated. The legacy method reproduces this clamp and reports it (`vadose.infiltration-clamped`). Under
+unit gradient every layer carries the same flux, so the engine clamps q to the smallest Ks among the
+layers present (clean soil above, lens, source, soil below); layers whose Ks equals that flux are saturated.
 
 ### Partitioning and the residual-phase test
 
@@ -190,10 +193,16 @@ choice).
 RISC5 choice: the mass flux per unit area at the water table is the advective term only,
 J(t) = q C(L_u, t). The legacy method reproduces it. Note that the first-type inlet admits a dispersive
 influx -theta D dC/dx at x = 0 that is not debited from the source, so the column receives slightly more
-mass than the source loses by leaching. The engine computes the ratio of the cumulative column influx
-(analytic derivative) to the cumulative leaching loss and warns (`vadose.inlet-mass-excess`) when it
-exceeds 1.05 (a screening threshold, recorded in DECISIONS.md when implemented). The excess shrinks as the
-column Peclet number L_u / alpha_L grows (about 23 for Table R-7).
+mass than the source loses by leaching. The engine reports the ratio of the cumulative column influx
+(analytic derivative, integrated in time) to the cumulative leaching loss at the end of the run. That
+finite-time ratio grows without bound as t approaches zero, so the warning (`vadose.inlet-mass-excess`,
+threshold 1.05, a screening choice recorded in DECISIONS.md) tests the same ratio over the whole release
+instead. Setting the Laplace variable to zero in the transformed inlet gradient gives the closed form
+
+    ratio over the release = 1 + (sqrt(v^2 + 4 D mu) - v) / (2 v)
+
+independent of R and gamma: with mu = 0 the early dispersive influx is returned later and the ratio is
+one. For Table R-7 it is 1.019, while the ratio at 10 yr is 1.060.
 
 ## Modern method: layered profile (`vadose.layered`)
 
