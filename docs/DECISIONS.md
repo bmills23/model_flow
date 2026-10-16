@@ -89,3 +89,35 @@ default:
 - **Layered transport:** "Finite volume, analytic for 1 layer". A finite-volume solver handles profiles
   with more than one layer; the van Genuchten and Alves 1982 case C14 closed form is used for a single
   layer, and tests require the two to agree.
+
+## 2026-10-16: M2 tolerance rulings and engine screening choices
+
+Bryan's rulings on two acceptance gaps found while building the M2 engine:
+
+- **van Genuchten and Alves 1982 Table 6:** "Named exceptions at 1.5e-4". Eight of the 110 printed values
+  (first-type t = 5, x = 18; third-type t:x = 10:8, 10:18, 15:20, 20:20, 25:16, 25:18, 25:20) differ from
+  the exact closed forms by more than 5e-5, at most 1.27e-4 (third-type t = 25, x = 20: printed 0.6334,
+  exact 0.63353). The closed forms agree with an independent convolution form to 1e-9, with
+  finite-difference checks of the PDE and inlet condition, and with the finite-volume solver, and the
+  digits were re-read from a 300 dpi render, so the differences are attributed to the 1982 program's
+  printed output. Those eight points are asserted at 1.5e-4 and listed by (t, x) in the test; the other
+  102 stay at 5e-5.
+- **Finite-volume versus closed-form agreement:** "Accept current criteria". The planned target (1e-4
+  relative wherever C > 1e-6 c0) is replaced by: 1e-4 c0 absolute everywhere, 1e-2 relative where
+  C > 1e-2 c0, and a measured second-order convergence rate under grid halving. The scheme is second
+  order; the relative error in the far leading tail of a front stays near 2.7e-4 even at 5334 cells.
+
+Screening choices made while building the engine (defaults; open to change):
+
+- `vadose.tph-constant-approximation` fires when F / F_T > 0.1.
+- `vadose.inlet-mass-excess` fires when the first-type inlet admits more than 1.05 times the source's
+  leaching loss, judged on the ratio over the whole release (closed form from the Laplace transform; 1.019
+  for Table R-7) rather than at the end of the run (1.060 for Table R-7 at 10 years), because the
+  finite-time ratio grows without bound as t approaches zero and would flag every short run.
+- Infiltration is clamped to the smallest saturated conductivity among the layers present, since under
+  unit gradient every layer carries the same flux.
+- The layered solver continues the deepest layer 20 dispersion lengths (D/v) below the water table and
+  reports the flux across the water-table face; a free exit at the water table gave outlet
+  concentrations up to 25 percent high and made one layer and two identical layers disagree.
+- The layered solver halves the time step, then the grid, until results change by less than 1e-3 of their
+  peak, and warns `vadose.numerics-not-converged` if either loop runs out of halvings.
