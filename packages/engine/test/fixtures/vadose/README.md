@@ -44,5 +44,8 @@ Reading notes:
   closed-form first-type solution to within print rounding (worst 5.05e-5).
 - Third-type values agree with the closed-form C14 to 1.3e-4 at worst (t = 25, x = 20: printed 0.6334,
   closed form 0.63353; several more points exceed 5e-5). The 1982 program evidently evaluated
-  C14 slightly differently at large x and t. The fixture tolerance is 5e-5 absolute and is not widened
-  here; see the stage report for the C14 comparison.
+  C14 slightly differently at large x and t. The base tolerance stays 5e-5 absolute. Bryan's ruling of
+  2026-10-16 (`docs/DECISIONS.md`, "M2 tolerance rulings and engine screening choices") names eight
+  points as exceptions, asserted at 1.5e-4 absolute: first-type t = 5, x = 18; third-type t:x = 10:8,
+  10:18, 15:20, 20:20, 25:16, 25:18, 25:20. They are listed in `namedExceptions` in
+  `vga1982-a1.json`. The other 102 printed values stay at 5e-5.

@@ -82,6 +82,19 @@ const vgaSchema = z.object({
   distances: z.array(finite).length(11),
   times: z.array(finite).length(5),
   absTolerance: finite,
+  namedExceptions: z.object({
+    source: z.string(),
+    absTolerance: finite.positive(),
+    points: z
+      .array(
+        z.object({
+          column: z.enum(['firstType', 'thirdType']),
+          t: finite,
+          x: finite,
+        }),
+      )
+      .length(8),
+  }),
   firstType: z.record(z.string(), column),
   thirdType: z.record(z.string(), column),
 });
@@ -112,6 +125,19 @@ describe('van Genuchten and Alves 1982 Table 6 fixture', () => {
       for (const t of f.times) for (const c of col[String(t)]!) expect(c).toBeGreaterThan(0);
     }
     expect(f.absTolerance).toBe(5e-5);
+  });
+  it('records the eight named exceptions at 1.5e-4 with their (column, t, x) keys', () => {
+    expect(f.namedExceptions.absTolerance).toBe(1.5e-4);
+    for (const p of f.namedExceptions.points) {
+      expect(f.times).toContain(p.t);
+      expect(f.distances).toContain(p.x);
+    }
+    expect(f.namedExceptions.points).toEqual(
+      expect.arrayContaining([
+        { column: 'firstType', t: 5, x: 18 },
+        { column: 'thirdType', t: 25, x: 20 },
+      ]),
+    );
   });
   it('first-type column is 1 at the inlet and decreases with distance', () => {
     for (const t of f.times) {
