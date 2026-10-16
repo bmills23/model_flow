@@ -157,9 +157,9 @@ export function toConcentrationSteps(
  * The horizontal patch where the infiltration enters the aquifer, as a kernel source. The patch sits
  * on the water table, which must be a no-flux boundary so the delivered mass stays in the aquifer:
  * - finite layer (`thickness`, or an `aquifer` with a thickness): the top, z = thickness;
- * - infinite depth: z = 0, which is the water table only for an aquifer with `top: 'no-flux'` (Yeh
- *   1981 semi-infinite case, aquifer z <= 0). The default unbounded medium has no water table and
- *   would carry half of the loaded mass upward out of the aquifer, so passing such an `aquifer` is a
+ * - infinite depth: z = 0, the no-flux water table of Yeh's 1981 semi-infinite aquifer (z <= 0), which
+ *   is the kernel's default for infinite depth. An `aquifer` with `top: 'unbounded'` has no water
+ *   table and would carry half of the loaded mass upward out of the aquifer, so passing one is a
  *   RangeError. Pass the `aquifer` to have this checked; the bare `thickness` form cannot check it.
  */
 export function waterTableSource(
@@ -172,9 +172,9 @@ export function waterTableSource(
   if (aquifer !== undefined) {
     if (options.thickness !== undefined && options.thickness !== aquifer.thickness)
       throw new RangeError('Thickness disagrees with the aquifer thickness');
-    if (aquifer.thickness === undefined && aquifer.top !== 'no-flux')
+    if (aquifer.thickness === undefined && aquifer.top === 'unbounded')
       throw new RangeError(
-        "A vadose-fed source on an infinitely deep aquifer needs top: 'no-flux' (a water table at z = 0); the unbounded medium loses half of the loaded mass upward",
+        "A vadose-fed source on an infinitely deep aquifer needs top: 'no-flux' (the default; a water table at z = 0); the unbounded medium loses half of the loaded mass upward",
       );
   }
   const x1 = options.xStart ?? 0;

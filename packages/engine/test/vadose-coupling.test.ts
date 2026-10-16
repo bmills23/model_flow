@@ -139,7 +139,7 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
   };
 
   function aquiferMass(withThickness: boolean | 'water-table', zs: number[], dz: number): number {
-    const free: At123dAquifer = { ...aq };
+    const free: At123dAquifer = { ...aq, top: 'unbounded' };
     delete free.thickness;
     const a =
       withThickness === 'water-table'
@@ -204,7 +204,8 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
       z1: 0,
       z2: 0,
     });
-    expect(() => waterTableSource(L, W, { aquifer: free })).toThrow(RangeError);
+    // an infinite aquifer with no top given has the default no-flux water table
+    expect(waterTableSource(L, W, { aquifer: free })).toMatchObject({ z1: 0, z2: 0 });
     expect(() => waterTableSource(L, W, { aquifer: { ...free, top: 'unbounded' } })).toThrow(
       RangeError,
     );

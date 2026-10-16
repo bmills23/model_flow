@@ -51,14 +51,26 @@ Infinite depth has two forms, chosen by the aquifer's `top`. Yeh measures z from
 treats the infinitely deep aquifer as a half-space whose top carries a radiation (exchange) condition; with
 a zero exchange coefficient that top is no-flux, and Yeh's infinite-depth vertical Green function (point
 and line source forms) is the free-space profile plus its mirror image about the top. The engine offers
-this as `top: 'no-flux'`: the aquifer is z <= 0 under a water table at z = 0, and fz is the free-space
-profile of [z1, z2] plus that of the image [-z2, -z1]. The exchange (atmospheric loss) term is not
-implemented. The default, `top: 'unbounded'`, has no boundary in z at all: the medium of the USGS POINT3
-program, which the POINT3 fixtures and several analytic tests use. It is right only for sources well below
-the water table. A source on the water table in the unbounded medium sends half of its mass upward out of
-the aquifer, so concentrations below it come out low by up to a factor of two (exactly two for a point or
-plane source at z = 0 once the plume has spread). Sources at or near the water table, including every
-vadose-fed source, therefore use `top: 'no-flux'` or a finite thickness.
+this as `top: 'no-flux'`, which is the default (Bryan's ruling of 2026-10-16, DECISIONS.md): the aquifer
+is z <= 0 under a water table at z = 0, and fz is the free-space profile of [z1, z2] plus that of the
+image [-z2, -z1]. The exchange (atmospheric loss) term is not implemented. `top: 'unbounded'` must be
+asked for: it has no boundary in z at all, the whole-space medium of the USGS POINT3 program, which the
+POINT3 fixtures and the closed-form analytic tests use. It is right only for sources well below any water
+table. A source on the water table in the unbounded medium sends half of its mass upward out of the
+aquifer, so concentrations below it come out low by up to a factor of two (exactly two for a point or
+plane source at z = 0 once the plume has spread).
+
+What changed for users: before 2026-10-16 an infinitely deep AT123D run used the unbounded medium unless
+`top: 'no-flux'` was passed, so the legacy results on the transport screen (typed sources) were low near
+the water table, by up to a factor of two within a few vertical dispersion lengths of it and for a source
+at the water table. Every infinite-depth AT123D run now uses the no-flux water table, in the engine by
+default and on the transport screen for every run (typed or vadose-fed, `Scenario.top = 'no-flux'`). The
+screen's convention matches it: the water table is z = 0, receptors sit at z = -depth and the source box is
+[-source thickness, 0]. Two consequences. Callers that built a source box reaching above z = 0 on an
+infinitely deep aquifer (z2 > 0) now get a RangeError instead of a whole-space answer, and receptors above
+z = 0 report zero; code that needs the whole-space medium (POINT3 comparisons, sources straddling z = 0)
+passes `top: 'unbounded'`. A finite thickness is unchanged (its top was always no-flux), and the Wexler
+methods are not touched by this change (see the PATCHI note under the modern method).
 
 Finite thickness H (z measured from the base, no-flux top and bottom) replaces fz by the reflected
 profile. For D_z' tau / H^2 up to 0.2 the engine sums mirror images 2nH +/- z (only images whose smoothed
@@ -94,11 +106,11 @@ solution). A 100 by 60 map costs about the same as before (about 60 to 100 ms pe
 Validation (all methods, RangeError): non-finite inputs; porosity outside (0, 1]; retardation below 1;
 negative decay rate or dispersion coefficient; non-positive or non-finite thickness; a `top` other than
 'unbounded' or 'no-flux', or 'unbounded' together with a thickness (a finite layer always has a no-flux
-top); a source box that is not inside the layer (0 <= z1 <= z2 <= H) or, under a no-flux water table,
-not below it (z2 <= 0); non-finite or negative time. `time = Infinity` is not
+top); a source box that is not inside the layer (0 <= z1 <= z2 <= H) or, under the default no-flux water
+table of an infinitely deep aquifer, not below it (z2 <= 0); non-finite or negative time. `time = Infinity` is not
 supported by the AT123D kernel (use the Wexler methods for steady state). Negative velocity is
 accepted, the age cut follows (x - x_c)/u for either sign. A receptor outside the finite layer or
-aquifer (z outside [0, H], y outside [0, W], or z > 0 under a no-flux water table) reports zero in the
+aquifer (z outside [0, H], y outside [0, W], or z > 0 under the no-flux water table of an infinitely deep aquifer) reports zero in the
 point and grid functions alike instead of a mirrored image.
 
 ## Modern method: Wexler (1992) patch sources (`groundwater.wexler1992`; citation `wexler1992`)
@@ -106,6 +118,15 @@ point and grid functions alike instead of a mirrored image.
 A patch [y1,y2] x [z1,z2] on the inflow plane x = 0 is held at c0; the medium is semi-infinite in x.
 PATCHI has infinite width and depth; PATCHF has width W (y in [0,W]) and thickness H (z in [0,H]) with
 no-flux boundaries. Concentrations at x < 0 are reported as zero.
+
+Open question (not resolved by the AT123D no-flux ruling): PATCHI has no boundary in z, so it carries no
+water table. The transport screen places the patch at z in [-source thickness, 0] and receptors at
+z = -depth, so PATCHI lets the held concentration diffuse upward through z = 0 and reads low near the water
+table relative to a no-flux water table (an image patch [-T, T] gives the no-flux value; a 5 m by 3 m patch
+at 60 m gave PATCHI/no-flux ratios of 0.50, 0.63, 0.73 and 0.82 at depths 0, 1.5, 3 and 6 m). PATCHF is
+unaffected where the screen uses it (z from the base, patch at [H - T, H], no-flux top at H). The screen
+also falls back to PATCHI for a finite thickness without a width, which ignores the top and bottom. No
+change has been made to either; it needs its own ruling.
 
 The x kernel is the first-type boundary solution. With beta = sqrt(u^2 + 4 D_x' k) for an effective
 decay rate k:
@@ -190,6 +211,8 @@ from them. The quantitative warning is computed directly against the exact solut
   as width and thickness grow, series versus integral, image versus cosine series. Under a no-flux water
   table: the profile equals the free-space value plus its mirror about z = 0 to 1e-14, the vertical
   integral over z <= 0 of a plane source on the water table is the released mass to 1e-6 (the unbounded
-  medium keeps half), and a continuous point source on the water table is exactly twice POINT3.
+  medium keeps half), and a continuous point source on the water table is exactly twice POINT3. Omitting
+  `top` equals `top: 'no-flux'` exactly, and the POINT3 fixtures and the closed-form kernel tests pass
+  `top: 'unbounded'` with their expected values unchanged.
 - Timing (Node 24, one run on the development machine): 100 by 60 plan-view grid in about 190 ms for the
   AT123D-class kernel with two loading steps, about 45 ms for PATCHI and about 50 ms for PATCHF.

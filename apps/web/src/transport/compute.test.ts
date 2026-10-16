@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { patchiConcentration } from '@model-flow/engine';
+import { at123dConcentration, patchiConcentration } from '@model-flow/engine';
 import { compute, receptorConcentration } from './compute';
 import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
 
@@ -40,6 +40,49 @@ describe('receptorConcentration', () => {
     const pulse = receptorConcentration(pulseS, 'modern', pulseS.time);
     expect(pulse).toBeLessThan(cont);
     expect(pulse).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('the infinitely deep legacy aquifer has a no-flux water table', () => {
+  it('puts the water table at z = 0, the source box below it and the receptors at z = -depth', () => {
+    const s = scenario({ srcDepth: '3' });
+    expect(s.zOf(0)).toBeCloseTo(0, 12);
+    expect(s.zOf(2.5)).toBe(-2.5);
+    expect(s.source.z2).toBeCloseTo(0, 12);
+    expect(s.source.z1).toBe(-3);
+    expect(s.top).toBe('no-flux');
+  });
+
+  it('leaves a finite aquifer without a top flag and measures z from its base', () => {
+    const s = scenario({ thicknessMode: 'finite', thickness: '10', srcDepth: '3' });
+    expect(s.top).toBeUndefined();
+    expect(s.zOf(0)).toBe(10);
+    expect(s.source.z2).toBe(10);
+  });
+
+  it('runs a typed (not vadose-fed) source through the no-flux kernel, above the whole-space value', () => {
+    const s = scenario({ rx: '60', ry: '0', rDepth: '0.5', timeYr: '8' });
+    const input = (top: 'no-flux' | 'unbounded') => ({
+      aquifer: {
+        velocity: s.velocity,
+        porosity: s.porosity,
+        retardation: s.retardation,
+        decayRate: s.decayRate,
+        dx: s.dx,
+        dy: s.dy,
+        dz: s.dz,
+        top,
+      },
+      source: s.source,
+      loading: s.terms.map((t) => ({ start: t.start, end: t.end, rate: s.massRate * t.factor })),
+      time: s.time,
+    });
+    const p = { x: 60, y: 0, z: s.zOf(0.5) };
+    const want = at123dConcentration(input('no-flux'), p);
+    const whole = at123dConcentration(input('unbounded'), p);
+    const got = receptorConcentration(s, 'legacy', s.time);
+    expect(got).toBeCloseTo(want, 14);
+    expect(got).toBeGreaterThan(whole);
   });
 });
 

@@ -13,11 +13,12 @@ export type { Point3 } from './common.js';
  * AT123D-class Green's function solution of the three-dimensional advection-dispersion equation
  * (Yeh 1981) for uniform one-dimensional flow along x, an aquifer infinite in x and y, and either
  * infinite depth or a finite thickness with no-flux top and bottom (z measured from the base).
- * Infinite depth comes in two forms: the unbounded medium (default, no water table, as in the USGS
- * POINT3 program) and Yeh's semi-infinite aquifer, `top: 'no-flux'`, which is the half-space z <= 0
- * under a no-flux water table at z = 0 (Yeh's top radiation condition with a zero exchange
- * coefficient). Sources that touch the water table need the semi-infinite form, or half of their mass
- * diffuses upward out of the aquifer.
+ * Infinite depth comes in two forms: Yeh's semi-infinite aquifer (default, `top: 'no-flux'`), which is
+ * the half-space z <= 0 under a no-flux water table at z = 0 (Yeh's top radiation condition with a
+ * zero exchange coefficient), and the unbounded medium (`top: 'unbounded'`, no water table, as in
+ * the USGS POINT3 program). Sources that touch the water table need the semi-infinite form, or half
+ * of their mass diffuses upward out of the aquifer; the unbounded medium is for whole-space
+ * comparisons and must be asked for.
  *
  * Governing equation, written for the dissolved concentration C with retardation R and first-order
  * decay lambda acting on the total (dissolved plus sorbed) mass:
@@ -39,10 +40,11 @@ export interface At123dAquifer {
   /** Layer thickness. Omit for an infinitely deep aquifer. */
   thickness?: number;
   /**
-   * Top boundary of an infinitely deep aquifer. 'unbounded' (default): no boundary, the medium is
-   * infinite in z as well. 'no-flux': the aquifer is z <= 0 under a no-flux water table at z = 0, and
-   * the vertical profile is reflected about it (Yeh 1981 infinite-depth Green function with zero
-   * exchange coefficient). A finite layer always has a no-flux top at z = thickness, so 'unbounded'
+   * Top boundary of an infinitely deep aquifer. 'no-flux' (default): the aquifer is z <= 0 under a
+   * no-flux water table at z = 0, and the vertical profile is reflected about it (Yeh 1981
+   * infinite-depth Green function with zero exchange coefficient); sources must lie at z <= 0.
+   * 'unbounded': no boundary, the medium is infinite in z as well (the whole-space POINT3
+   * configuration). A finite layer always has a no-flux top at z = thickness, so 'unbounded'
    * together with a thickness is rejected.
    */
   top?: 'unbounded' | 'no-flux';
@@ -148,9 +150,9 @@ function checkAquifer(a: At123dAquifer): void {
     );
 }
 
-/** Infinite depth under a no-flux water table at z = 0 (the aquifer is z <= 0). */
+/** Infinite depth under a no-flux water table at z = 0 (the aquifer is z <= 0); the default. */
 function waterTableTop(a: At123dAquifer): boolean {
-  return a.thickness === undefined && a.top === 'no-flux';
+  return a.thickness === undefined && a.top !== 'unbounded';
 }
 
 /**
@@ -172,7 +174,9 @@ function checkGeometry(box: BoxSource, aquifer: At123dAquifer): void {
     throw new RangeError('Source must lie inside the layer: 0 <= z1 <= z2 <= thickness');
   }
   if (waterTableTop(aquifer) && !(box.z2 <= 0)) {
-    throw new RangeError('Source must lie below the water table: z2 <= 0 when top is no-flux');
+    throw new RangeError(
+      "Source must lie below the water table: z2 <= 0 for an infinitely deep aquifer (top 'no-flux', the default); use top 'unbounded' for the whole-space medium",
+    );
   }
 }
 

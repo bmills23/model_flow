@@ -170,10 +170,12 @@ export interface Scenario {
   /** Set when the source is fed by the vadose result instead of the typed strength and loading. */
   fed?: FedSource | undefined;
   /**
-   * Top boundary of an infinitely deep aquifer: 'no-flux' when the load enters through the water
-   * table (a vadose-fed source), so the delivered mass cannot diffuse upward out of the aquifer.
+   * Top boundary of an infinitely deep aquifer: always 'no-flux' for scenarios built by the screen
+   * (the water table at z = 0, aquifer z <= 0, source box [-srcDepth, 0]), so no source mass diffuses
+   * upward out of the aquifer. Absent for a finite aquifer, whose top is the water table anyway.
+   * 'unbounded' (whole-space medium) is accepted by the engine and used only by tests.
    */
-  top?: 'no-flux' | undefined;
+  top?: 'no-flux' | 'unbounded' | undefined;
   extent: { xMin: number; xMax: number; yHalf: number };
   /** Labels and values for display. */
   dispersivityDistance: number;
@@ -404,12 +406,8 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
       receptorDepths: { top, bottom },
       zOf,
       time,
-      ...(fed
-        ? {
-            fed: { vadose: fed.scenario, method: fed.method, label: fed.label },
-            ...(thickness === undefined ? { top: 'no-flux' as const } : {}),
-          }
-        : {}),
+      ...(fed ? { fed: { vadose: fed.scenario, method: fed.method, label: fed.label } } : {}),
+      ...(thickness === undefined ? { top: 'no-flux' as const } : {}),
       extent: { xMin, xMax, yHalf },
       dispersivityDistance: distance,
       lawAlphas: lawOut,
