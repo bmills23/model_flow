@@ -1,0 +1,130 @@
+/* Saturated soil source screen. Reuses the vadose and transport layout, controls and chart classes. */
+:root {
+  --soil-1: #d9c7a4;
+  --soil-2: #9cc3e6;
+  --soil-line: #7a6a4c;
+  --flow: #3a4a5a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --soil-1: #5b4d33;
+    --soil-2: #1f4a73;
+    --soil-line: #a89877;
+    --flow: #c9d3dd;
+  }
+}
+
+.saturated .line.s-legacy {
+  stroke: var(--s-legacy);
+}
+
+.saturated .line.s-modern {
+  stroke: var(--s-modern);
+}
+
+.vline {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.vline.s-legacy {
+  stroke: var(--s-legacy);
+}
+
+.vline.s-modern {
+  stroke: var(--s-modern);
+}
+
+.section-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.section-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.section-title {
+  font-weight: 600;
+}
+
+.section-svg .soil-1 {
+  fill: var(--soil-1);
+}
+
+.section-svg .soil-2 {
+  fill: var(--soil-2);
+}
+
+.section-svg .section-frame {
+  fill: none;
+  stroke: var(--soil-line);
+  stroke-width: 1.5;
+}
+
+.section-svg .water-line {
+  stroke: var(--water);
+  stroke-width: 3;
+}
+
+.section-svg .flow-arrow {
+  stroke: var(--flow);
+  stroke-width: 1.5;
+}
+
+.section-svg .flow-head {
+  fill: none;
+  stroke: var(--flow);
+  stroke-width: 1.5;
+}
+
+table.sat {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.88rem;
+  table-layout: auto;
+}
+
+table.sat th,
+table.sat td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+table.sat thead th {
+  text-align: right;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+table.sat thead th:first-child,
+table.sat tbody th {
+  text-align: left;
+}
+
+table.sat tbody th {
+  font-weight: 400;
+}
+
+table.sat td {
+  text-align: right;
+}
+
+.saturated .panel h3 {
+  font-size: 0.95rem;
+  margin: 14px 0 4px;
+}
+
+.sat-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}

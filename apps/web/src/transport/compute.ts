@@ -8,6 +8,7 @@ import {
   patchiConcentration,
   patchiGrid,
   fluxToLoadingSteps,
+  waterLevels,
   toConcentrationSteps,
   wellScreenAverage,
   type At123dInput,
@@ -19,6 +20,7 @@ import {
   type WexlerInput,
 } from '@model-flow/engine';
 import { vadoseFluxSeries } from '../vadose/compute';
+import { saturatedFedSteps } from '../saturated/steps';
 import type { Scenario } from './form';
 
 /**
@@ -77,15 +79,36 @@ const linspace = (a: number, b: number, n: number): number[] =>
  * superposition to FED_MAX_STEPS steps; see FED_MAX_STEPS for the bound.
  */
 export function fedSteps(s: Scenario): LoadingStep[] {
-  if (!s.fed) return [];
-  const series = vadoseFluxSeries(s.fed.vadose, s.fed.method, s.time);
-  return fluxToLoadingSteps(series, s.srcLength * s.srcWidth, s.time, fedStepLength(s.time));
+  return fedResolved(s).steps;
+}
+
+function fedResolved(s: Scenario): { steps: LoadingStep[]; fallback: boolean } {
+  if (!s.fed) return { steps: [], fallback: false };
+  if (s.fed.saturated) {
+    // the saturated release schedule is closed form: the steps carry its exact delivered mass
+    return saturatedFedSteps(
+      s.fed.saturated,
+      s.fed.method,
+      s.time,
+      fedStepLength(s.time),
+      FED_MAX_STEPS,
+    );
+  }
+  const series = vadoseFluxSeries(s.fed.vadose!, s.fed.method, s.time);
+  return {
+    steps: fluxToLoadingSteps(series, s.srcLength * s.srcWidth, s.time, fedStepLength(s.time)),
+    fallback: false,
+  };
 }
 
 /** The scenario with a vadose-fed schedule resolved once, so per-point calls do not rerun the vadose method. */
 export function withFedSteps(s: Scenario): Scenario {
   if (!s.fed || s.fed.steps) return s;
-  return { ...s, fed: { ...s.fed, steps: fedSteps(s) } };
+  const { steps, fallback } = fedResolved(s);
+  return {
+    ...s,
+    fed: { ...s.fed, steps, ...(s.fed.saturated ? { seasonalFallback: fallback } : {}) },
+  };
 }
 
 function requireSteps(s: Scenario): LoadingStep[] {
@@ -300,7 +323,26 @@ function collectWarnings(
       'The Domenico comparison ignores the finite aquifer thickness and width.',
     );
   }
-  if (s.fed) {
+  if (s.fed?.saturated) {
+    add(
+      'ui.saturated-feed',
+      `The source is fed by the saturated soil source (${s.fed.label}) as ${s.fed.steps?.length ?? 0} mass-release steps over the evaluation time, released into a ${s.srcLength} m by ${s.srcWidth} m box ${s.srcDepth} m deep at the water table.${
+        waterLevels(s.fed.saturated!.source).hHi > 0
+          ? ''
+          : " The source never reaches below the water table, so the box depth is the mixing depth typed on this screen (the engine's own coupling uses a zero-thickness patch at the water table)."
+      } The porosity, hydraulic conductivity, gradient and organic carbon partitioning come from the saturated screen, so they set the flow and retardation here too.${
+        s.thickness === undefined
+          ? ' The infinitely deep aquifer has a no-flux water table at its top (Yeh 1981), so the released mass stays in the aquifer.'
+          : ' The top of the finite aquifer is the no-flux water table.'
+      }`,
+    );
+    if (s.fed.seasonalFallback) {
+      add(
+        'ui.saturated-seasonal-fallback',
+        `The seasonal water-table schedule needs more than ${FED_MAX_STEPS} loading steps over this evaluation time, so whole-year steps are fed instead. Each step carries the seasonal schedule's exact mass, so the cumulative mass is exact at every step boundary and only the timing within a step is lost.`,
+      );
+    }
+  } else if (s.fed) {
     add(
       'ui.vadose-feed',
       `The source is fed by the vadose result (${s.fed.label}) as ${s.fed.steps?.length ?? 0} mass-release steps over the evaluation time, over the vadose source footprint. The source box keeps its ${s.srcDepth} m thickness below the water table.${

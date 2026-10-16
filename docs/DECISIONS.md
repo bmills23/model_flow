@@ -143,3 +143,104 @@ concentration upward through z = 0 (whole-space PATCHI read 0.50 to 0.82 of the 
 infinitely deep aquifer and for a finite thickness without a width, and PATCHF and every ANALGWST
 fixture are unchanged. `loadingParity.test.ts` now pins its recorded whole-space Wexler values by
 dropping the screen's no-flux flag, because those values predate the change.
+
+## 2026-10-16: M3 saturated soil source scope and screening choices
+
+Bryan approved starting M3 (Appendix C) with a methods note first ("yes"). The note is
+`docs/methods/saturated-soil-source.md`; the scope it records:
+
+- **In M3:** the legacy two-region source (`saturatedSource.two-region`: equilibrium partitioning with a
+  per-chemical residual-phase test and Raoult's law, region 1 flushed by infiltration and region 2 by
+  groundwater flow, one well-mixed pool released at a constant rate until exhausted), the water-table
+  fluctuation on both methods, and the modern mass-consistent exponential decline
+  (`saturatedSource.exponential`, the first-order source of BIOSCREEN, Newell et al. 1996, and the
+  unit-exponent case of Falta et al. 2005). Transport reuses the M1 methods through the coupling.
+- **Not in M3:** the general power-law exponent (with the groundwater power-law option, ROADMAP row B),
+  volatilization from region 1 (M6), the mixture-wide residual test and multicomponent dissolution
+  (the TPH mass is held constant, as in M2), and cleanup-level back-calculation (M5).
+- **Validation:** no manual worked example and no Appendix R table covers this model. Fixtures are the
+  EPA 1996 Soil Screening Guidance Table 3-A soil saturation limits (six chemicals, half a unit in the
+  second printed figure), the BIOSCREEN source-decay derivation and soluble-mass example (zone masses
+  within 0.5 kg), the Falta et al. 2005 zero- and unit-exponent source functions (1e-12), two hand
+  calculations (1e-9), and identities with M1 and M2 (1e-12; aquifer mass 1e-6 as in M2).
+
+DEFAULT rulings (applied in the note, Bryan's to overturn):
+
+1. **Water-table fluctuation:** the release rate is the time-weighted annual mean of the high-water and
+   low-water rates; a seasonal schedule (high water for the first fraction f of each year) is an
+   option. The manual says both that the rates shift during the year and that the fluctuation
+   apportions the mass loss; without source decay the annual mean removes the same mass each year
+   (with a source decay it does not, see the stage 3 entry).
+2. **Region 1 water content:** computed with the M2 unit-gradient helper from a residual water content
+   and van Genuchten n entered for the source soil, with the aquifer's hydraulic conductivity as Ks
+   (Brooks-Corey with the Lenhard conversion by default). The model's data list has neither input,
+   while the manual's input chapter says n is used for this model.
+3. **Where the release enters the aquifer:** an AT123D box of the source's plan size from the water
+   table down to the high-water saturated thickness, carrying both regions' release; a source that never
+   submerges collapses to the water-table patch of the vadose coupling. Wexler and Domenico use the
+   cross-section width times that thickness.
+
+Screening choices (not rulings): one well-mixed pool for both regions; region 1 leachate reaches the
+aquifer immediately and undiluted, and its rate does not depend on region 1's thickness (RISC5 choice);
+one porosity serves partitioning and transport (RISC5 choice); no source decay in the legacy method, an
+optional first-order source decay in the modern one; the legacy method warns
+`saturatedSource.constant-dissolved-source` when a contributing region holds no separate phase, because
+a constant pore-water concentration then contradicts the partitioning it came from; the
+`tph-constant-approximation` threshold stays at 0.1 as in M2. Raoult's law was attributed to Cline et al.
+1991 only provisionally because the paper was not readable; stage 2 dropped it from the citations (see
+the stage 2 entry).
+
+## 2026-10-16: M3 engine built (stage 2)
+
+- `cline1991` is not cited. Only Crossref metadata could be read (no abstract anywhere, full text behind
+  the paywall), so its support for the ideal Raoult's law form is unconfirmed. Both methods drop it from
+  their citations and the entry stays `planned`; the Raoult form is the RISC5 choice and the M2 vadose
+  source's, with no reference attached. `feenstra1991` and `falta2005` are `used`.
+- The engine is `packages/engine/src/processes/saturatedSource/`: `saturatedSource.two-region` (legacy,
+  exponent 0) and `saturatedSource.exponential` (modern, exponent 1), the DEFAULT rulings above applied as
+  written. The release schedule is closed form for both exponents and both fluctuation schedules, in O(1)
+  per query for any horizon (the seasonal modern schedule uses the geometric sum over whole years).
+- Screening readings made while building it: a legacy infiltration above K is clamped and warned, equal
+  to K is silently saturated, and the modern method refuses infiltration at or above K only when region 1
+  exists; region 1 and region 2 are evaluated only where the water levels give them thickness; a legacy
+  loading list stops at the depletion time rather than carrying a zero-rate tail; the default modern step
+  length is one month; the constant-dissolved-source warning needs a contributing region (nonzero rate)
+  without a separate phase.
+- Hand-case fixture values are stored at full double precision from an independent script, because the
+  eight significant digits printed in the methods note cannot support a 1e-9 relative comparison.
+
+## 2026-10-16: M3 web screen and the step cap for seasonal schedules (stage 3)
+
+- The saturated soil source screen is `#/saturated` (`apps/web/src/saturated/`). It follows the vadose
+  screen: form, compute in a worker, an in-memory feed, charts, and a feed into the groundwater screen,
+  which draws the receptor breakthrough curve and the plan-view plume with the M1 components. The screen
+  opens on hand case A of the methods note and checks its M0, depletion time and decline constant against
+  the hand-calculation values.
+- **Step cap.** The groundwater feed uses the vadose feed's bound of 48 loading steps with exact mass per
+  step. A legacy annual mean is one step and a modern annual mean is cut into steps of at least a month
+  (lengthened to stay within 48). A **seasonal** schedule has two segments a year that must stay separate
+  steps, so stage 3 keeps it by lengthening the steps (up to one step per season) while the count stays
+  within 48, which holds up to about 24 years of release. Past that, the feed falls back to whole-year
+  steps (boundaries at multiples of n years, n chosen so the count stays within 48), each carrying the
+  seasonal schedule's exact delivered mass, so the cumulative mass is exact at every step boundary, with
+  or without source decay, and only the timing within a step is lost. (A first version fed the annual
+  mean and claimed equal mass at year ends; that holds only without source decay, because the faster
+  high-water release leaves less mass to decay, 4.1 percent low for case A with decay 0.001/d over 30
+  years.) The fallback is
+  never silent: the saturated screen's coupling panel states it for the current horizon, and the
+  groundwater screen's warnings carry `ui.saturated-seasonal-fallback`. A legacy seasonal source that is
+  exhausted early (few years) never reaches the cap.
+- **Aquifer travels with the feed.** The methods note says one porosity, bulk density and organic carbon
+  serve partitioning and transport, so a saturated-fed groundwater run takes its porosity, Darcy flux
+  (K times the gradient) and retardation (1 + rho_b Koc f_oc / porosity) from the saturated screen and
+  disables the typed aquifer fields. The source box is the plan size by the high-water saturated
+  thickness; a source that never submerges keeps the typed mixing depth. This deliberately differs from the engine
+  coupling (`saturatedSourceBox`, a zero-thickness water-table patch when the high-water saturated
+  thickness is zero): the engine API has no mixing depth to take, while the screen follows the vadose
+  screen, whose Wexler and Domenico cross-section and AT123D box need a finite thickness the user
+  chooses. The groundwater screen states this in its `ui.saturated-feed` note, so the two never
+  disagree silently.
+- The legacy method has no source decay, so the screen drops a typed decay rate from the legacy run
+  rather than refusing it; only the modern run uses it.
+- `TimeLineChart` gained an optional `vlines` prop for the depletion-time markers; vadose charts do not
+  pass it and are unchanged.

@@ -1,4 +1,4 @@
-> Status: M2 DONE 2026-10-16 (vadose leaching, with the M1 no-flux water-table correction). Next: M3 saturated soil source. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M3 DONE 2026-10-16 (saturated soil source: legacy two-region and modern exponential release with water-table fluctuation, fed into M1). Next: M4 chemical and toxicity database, direct exposure and forward risk. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
@@ -176,7 +176,10 @@ after the first run.
   column after M2). VADSAT-type legacy model with lens and Raoult's law; modern k(θ) and
   multi-layer options; coupling of leachate flux into M1 as time-varying source. Table R-7 fixture, vG&A
   tables. Depth-profile and source-depletion charts.
-- **M3 Saturated soil source (App. C).** Two-region source with water-table fluctuation; feeds M1.
+- **M3 Saturated soil source (App. C). DONE 2026-10-16** (scope, default rulings, fixtures and the
+  seasonal step-cap ruling in DECISIONS.md; the general power-law source exponent and the mixture-wide
+  residual test deferred, region 1 volatilization to M6, cleanup back-calculation to M5). Two-region
+  source with water-table fluctuation; feeds M1.
 - **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7).** RSL-derived
   database with source tags; 9 direct pathways (soil ingestion, dermal soil, GW ingestion, dermal water,
   shower inhalation and dermal, indoor/outdoor air inhalation, surface water ingestion and dermal);

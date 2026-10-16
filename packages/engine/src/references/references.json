@@ -40,8 +40,10 @@
     "year": 1996,
     "title": "BIOSCREEN natural attenuation decision support system, user's manual",
     "venue": "U.S. Environmental Protection Agency",
-    "identifier": "EPA/600/R-96/087",
-    "tags": ["dispersivity", "groundwater"]
+    "identifier": "EPA/600/R-96/087, Version 1.3, August 1996",
+    "tags": ["dispersivity", "groundwater", "saturatedSource"],
+    "url": "https://nepis.epa.gov/Adobe/PDF/P1007K50.pdf",
+    "notes": "Verified from the manual itself (EPA NEPIS copy, retrieved 2026-10-16; cover, the source half-life and soluble mass entries, and Appendix A.3, the derivation of the first-order source decay constant)."
   },
   {
     "key": "yeh1981",
@@ -154,13 +156,41 @@
   {
     "key": "falta2005",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Falta, R.W., Rao, P.S., Basu, N.",
     "year": 2005,
     "title": "Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response",
     "venue": "Journal of Contaminant Hydrology",
-    "identifier": "78:259-280",
-    "tags": ["groundwater"]
+    "identifier": "78(4):259-280",
+    "tags": ["groundwater", "saturatedSource"],
+    "doi": "10.1016/j.jconhyd.2005.05.010",
+    "notes": "Title, authors, volume, issue and pages verified through Europe PMC (PMID 16019108, with abstract) and Crossref (2026-10-16); Crossref holds the title without its part subtitle. Full text is behind the publisher paywall and was not read; the saturated-source note uses only the power-function form stated in the abstract, in its zero-exponent (constant until depleted) and unit-exponent (exponential) cases."
+  },
+  {
+    "key": "feenstra1991",
+    "type": "method",
+    "status": "used",
+    "authors": "Feenstra, S., Mackay, D.M., Cherry, J.A.",
+    "year": 1991,
+    "title": "A method for assessing residual NAPL based on organic chemical concentrations in soil samples",
+    "venue": "Ground Water Monitoring Review",
+    "identifier": "11(2):128-136",
+    "doi": "10.1111/j.1745-6592.1991.tb00374.x",
+    "notes": "Bibliographic data and abstract verified through Crossref (2026-10-16); the journal is now Groundwater Monitoring & Remediation. Full text is behind the publisher paywall and was not read; the residual-phase test is implemented from the partitioning principle the abstract states, in the form given in docs/methods/saturated-soil-source.md.",
+    "tags": ["saturatedSource"]
+  },
+  {
+    "key": "cline1991",
+    "type": "method",
+    "status": "planned",
+    "authors": "Cline, P.V., Delfino, J.J., Rao, P.S.C.",
+    "year": 1991,
+    "title": "Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures",
+    "venue": "Environmental Science & Technology",
+    "identifier": "25(5):914-920",
+    "doi": "10.1021/es00017a013",
+    "notes": "Bibliographic data verified through Crossref (2026-10-16). No abstract is held by Crossref, Europe PMC, Semantic Scholar or OpenAlex, and the full text is behind the publisher paywall and was not read. Listed for the Raoult's law effective solubility of petroleum constituents, but no method cites it: that its data support the ideal-mixture form could not be confirmed without the paper, so it stays planned (see docs/DECISIONS.md, 2026-10-16 M3 engine).",
+    "tags": ["saturatedSource"]
   },
   {
     "key": "remchlor",
@@ -308,9 +338,9 @@
     "title": "Soil Screening Guidance: Technical Background Document",
     "venue": "U.S. Environmental Protection Agency",
     "identifier": "EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996",
-    "tags": ["vadose", "outdoorAir", "particulate"],
+    "tags": ["vadose", "saturatedSource", "outdoorAir", "particulate"],
     "url": "https://semspub.epa.gov/work/HQ/207.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16)."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture."
   },
   {
     "key": "epa2002ssg",
