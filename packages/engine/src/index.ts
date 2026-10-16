@@ -9,7 +9,7 @@ import {
   groundwaterDomenico,
   groundwaterWexler,
 } from './processes/groundwater/index.js';
-import { vadoseVadsat } from './processes/vadose/index.js';
+import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 
 export * from './numerics/special.js';
 export * from './numerics/quadrature.js';
@@ -30,3 +30,4 @@ registry.register(groundwaterAt123d);
 registry.register(groundwaterWexler);
 registry.register(groundwaterDomenico);
 registry.register(vadoseVadsat);
+registry.register(vadoseLayered);

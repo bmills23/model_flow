@@ -27,6 +27,9 @@ export * from './diffusion.js';
 export * from './source.js';
 export * from './kernel.js';
 export * from './dispersivity.js';
+export * from './c14.js';
+export * from './layered.js';
+export * from './modern.js';
 export * from './coupling.js';
 
 const DAY = 86400;

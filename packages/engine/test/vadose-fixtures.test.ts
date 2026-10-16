@@ -120,5 +120,4 @@ describe('van Genuchten and Alves 1982 Table 6 fixture', () => {
       for (let k = 1; k < c.length; k++) expect(c[k]!).toBeLessThan(c[k - 1]!);
     }
   });
-  it.todo('third-type column from the C14 solution within 5e-5 (stage M)');
 });

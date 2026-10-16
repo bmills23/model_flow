@@ -6,8 +6,9 @@ used only as a map of which published choices RISC5 made; none of its text or ta
 its equation labels are not used here. Where a choice is RISC5's rather than a paper's, it is marked
 "RISC5 choice" and becomes the method's `risc5Choice` metadata.
 
-Status: methods note and reference check done 2026-10-16; fixtures, hydraulics helpers and the legacy
-method `vadose.vadsat` implemented 2026-10-16; modern method, coupling and UI not started.
+Status: methods note and reference check done 2026-10-16; fixtures, hydraulics helpers, the legacy
+method `vadose.vadsat`, the groundwater coupling and the modern method `vadose.layered` implemented
+2026-10-16; UI not started.
 
 ## Scope of M2
 
@@ -239,22 +240,41 @@ coefficient therefore describe the same column.
 
 There is no compact closed form for the layered problem, so it is solved numerically: cell-centred finite
 volumes in depth with interface fluxes q C - theta D dC/dx (D harmonically averaged in theta D across an
-interface), a flux-type inlet q C_s(t) at the base of the source, a free-exit outlet at the water table
-(zero dispersive flux, outflow q C), and Crank-Nicolson time stepping. The grid is chosen so the cell
-Peclet number stays at or below 2 and every layer holds at least 20 cells; the time step is refined until
-halving it changes the water-table flux by less than 1e-4 relative. The solver keeps a running mass budget
-(stored, decayed, outflow) and the result reports its closure error; above 1e-9 relative it warns
-(`vadose.mass-balance`), which should never happen. Dispersivity is one value per run (alpha_L(L_u) from
+interface, advection by distance-weighted central interpolation), a flux-type inlet q C_s(t) at the base
+of the source whose step inflow is the exact integral of the leaching loss, and Crank-Nicolson time
+stepping with two backward Euler start-up steps. The outlet keeps the semi-infinite convention of the
+analytic solutions: the deepest layer continues below the water table for 20 dispersion lengths D/v and
+ends in a free exit (zero dispersive flux, outflow q C), which perturbs the solution upstream by about
+exp(-20). The water-table flux is the total flux across the water-table face and mass that crosses it
+counts as delivered. A free exit placed at the water table itself was tried first; it raised the
+water-table concentration by up to 25 percent and the flux by about 2 percent of its peak relative to
+the analytic solution, so one layer and two identical layers gave different answers. The starting grid
+keeps the cell Peclet number at or below 2 with at least 20 cells per layer; the time step is refined on it
+until halving the step changes the water-table flux (and any profile value) by less than 1e-4 of its peak.
+That grid is coarse for accuracy (the scheme is second order, and a 3 m column at 20 cells left an error
+of 2.7 percent of the peak flux), so every cell is then halved until halving changes the results by less
+than 1e-3 of their peak. Either loop that runs out of halvings warns (`vadose.numerics-not-converged`).
+The solver keeps a running mass budget (stored, decayed, outflow) and the result reports its closure
+error; above 1e-9 relative it warns (`vadose.mass-balance`), which should never happen. Dispersivity is one value per run (alpha_L(L_u) from
 the legacy regression or user-entered), so the profile is a single solution. Pore-water diffusion
 D_w theta^(7/3) / theta_s^2 is added to alpha_L v (the liquid-phase counterpart of the Millington-Quirk form).
 
 When the profile below the source is one homogeneous layer, the method evaluates the analytic solution of
 `vangenuchten1982` case C14 (third-type inlet q C_s0 exp(-gamma t), same equation, zero initial
-concentration) instead, and reports `evaluation: 'analytic-c14'`. The finite-volume solver is tested
-against C14 on an extended column, where the two must agree.
+concentration) instead, and reports `evaluation: 'analytic-c14'`. Where w is imaginary, or within 1e-3
+relative of the removable singularity w = v (mu = gamma R, where the general expression cancels), it is
+evaluated as a Duhamel convolution of the inlet history with the flux-type impulse response, as for C13.
+The total flux at depth x is theta v times the C13 solution with the same parameters, because the
+flux-averaged concentration C - (D/v) dC/dx obeys the same equation and equals the inlet concentration at
+x = 0; the analytic path uses this for the water-table flux. The finite-volume solver is tested against
+C14 on a homogeneous column: it converges at second order, agrees to 1e-4 of the inlet concentration at a
+fine grid, and matches the analytic water-table flux to 1e-3 of its peak with its default refinement. The
+fixture plan's stricter target (1e-4 relative wherever C exceeds 1e-6 of the inlet) is not met: a second
+order scheme's relative error grows in the leading tail of a front (2.7e-4 at 5334 cells on a 16 m test
+column), so that target needs a ruling.
 
-The water-table flux is the total flux at the outlet face. With the third-type inlet the column inflow
-equals the source's leaching loss, so mass is conserved from source to aquifer.
+With the third-type inlet the column inflow equals the source's leaching loss, so mass is conserved from
+source to aquifer.
 
 ## Validity checks
 
@@ -274,6 +294,7 @@ Warnings (codes are part of the result):
 | `vadose.low-foc-retardation-ignored` | legacy | f_oc < 0.001; R set to 1 (RISC5 choice) |
 | `vadose.inlet-mass-excess` | legacy | first-type inlet admits more than 1.05 times the leaching loss (screening choice) |
 | `vadose.mass-balance` | modern | finite-volume budget closure worse than 1e-9 relative |
+| `vadose.numerics-not-converged` | modern | the finite-volume time-step or grid halvings ran out before the results settled |
 
 Assumptions listed on both methods (not warnings): steady unit-gradient flow with uniform moisture per
 layer; no NAPL migration; dissolved-phase decay only below the source; vapour concentrations below the
