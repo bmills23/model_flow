@@ -61,5 +61,7 @@ a done one.
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
-## Queued: M4 chemical and toxicity database, direct exposure and forward risk (ROADMAP section 7)
-Not started.
+## In progress: M4 chemical and toxicity database, direct exposure and forward risk (ROADMAP section 7)
+Stage 1 done 2026-10-16 on branch `m4-exposure-risk`: methods note `docs/methods/exposure-and-risk.md`,
+data plan `docs/methods/chemical-database.md` (current RSL edition: November 2024), M4 references
+verified, default rulings in DECISIONS.md. Engine, data build and screen not started.

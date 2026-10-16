@@ -244,3 +244,65 @@ the stage 2 entry).
   rather than refusing it; only the modern run uses it.
 - `TimeLineChart` gained an optional `vlines` prop for the depletion-time markers; vadose charts do not
   pass it and are unchanged.
+
+## 2026-10-16: M4 exposure, risk and chemical database scope (stage 1)
+
+Bryan's "continue" started M4 with a methods note first. The notes are
+`docs/methods/exposure-and-risk.md` and `docs/methods/chemical-database.md`. The current RSL edition was
+checked on the EPA site on 2026-10-16: November 2024 (no 2025 or 2026 edition exists), recorded as
+`epa2024rsl` (the placeholder `epa2026rsl` entry was renamed). No engine, data or web code is written in
+this stage.
+
+DEFAULT rulings (applied in the notes, Bryan's to overturn):
+
+1. **Pathways and deferred media.** M4 ships the nine direct pathways of the ROADMAP row, each in a
+   legacy and a modern variant. Bathroom air (until M7), indoor and outdoor air (until M6) and surface
+   water (until M8) are user-entered constants; the RSL tap-water inhalation term (Andelman factor) and
+   the RSL soil inhalation term (volatilization and particulate emission factors) are not offered. Each
+   EPC records its origin so a later milestone can supply it without changing M4.
+2. **Legacy method** `exposure.rags-a-1989`: RAGS Part A doses for every pathway, inhalation as a dose
+   with SFi and RfDi converted from the IUR and RfC at 20 m^3/d and 70 kg (RISC5 choice), oral toxicity
+   values for dermal routes with absorption through AAF and Kp, soil bioavailability 1, and
+   route-to-route extrapolation off by default (a switch, warned when used).
+3. **Legacy presets** come from EPA's 1991 standard default exposure factors and the RAGS Part A
+   exhibits, not from RISC5's receptor database, which is not reproduced.
+4. **Time-varying EPCs.** Legacy: RISC5's windows (largest 7-year average for noncancer, or the
+   duration when shorter; largest duration-long average for cancer). Modern: the exposure start time
+   that maximizes the cancer risk, with life stages in sequence inside that window; each stage's HQ uses
+   the largest average over that stage's duration. A series shorter than the window is averaged over
+   its span and warned.
+5. **Modern resident is age-segmented.** Child 6 yr plus adult 20 yr; for mutagens 0-2, 2-6, 6-16 and
+   16-26 yr with ADAF 10, 3, 3, 1, child factors before 6 and adult factors after (the RSL convention).
+   The headline HI is the larger of the life stages' HIs, both shown, never added. The additive
+   two-receptor option with a modern age-segmented resident is a RangeError (it would count the child
+   twice).
+6. **Dermal water event time for cancer.** For a non-mutagen the modern cancer dose uses the
+   time-weighted resident event time (0.6708 h), as the RSL tables do; mutagen segments and every HQ use
+   each stage's own event time.
+7. **Outside the RAGS E prediction domain** a dermal-water dose is computed and warned
+   (`exposure.dermal-outside-epd`), where the RSL tables omit it.
+8. **Additivity.** Within a receptor, risks and HQs each sum over pathways and chemicals; across
+   receptors nothing sums except the additive option's cancer risks. No target-organ segregation (a
+   warning when a total HI exceeds 1). Linear risk in both methods, warned above 0.01. A missing
+   toxicity value gives "not quantified", never zero.
+9. **Raw RSL spreadsheets are committed** (`packages/data/raw/rsl/2024-11/`, three files, about 600 kB,
+   public domain) with a SHA-256 manifest; the build reads only those and fails on a checksum mismatch;
+   a hand-run fetch script adds a new edition as a new directory.
+10. **No CompTox gap filling in M4.** A value the RSL leaves blank stays absent; a user-entered project
+    value is tagged `user`.
+11. **Database units.** `chemicals.json` and `tox.json` keep the RSL's published units with a units
+    block; the engine converts to SI on the way in.
+12. **Fixtures.** Table R-9 follows the Table R-7 convention: inputs not in the table come from the
+    RISC4 manual (Table 6-2 adult resident factors, Table 11-1 values for the four chemicals) for this
+    case only; the dermal-soil product SA x AF = 5,750 cm^2 mg/cm^2 is back-solved from the table
+    because no RISC4 default reproduces it; targets are the review's calculated row within half a unit
+    in its last printed digit; only page 1 of 3 is available, and its shower inhalation and vegetable
+    rows wait for M7 and M9. The RSL independent check requires the engine's screening level to round
+    to the published two-figure value.
+13. **RSL special cases** (trichloroethylene, vinyl chloride) are computed as ordinary chemicals and
+    warned (`exposure.special-case-not-modelled`).
+14. **Smaller calls.** Exposure years are 365 days (the guidance convention), so averaging windows on
+    the transport time axis are not corrected for the 365.25-day year; swimming frequency and event
+    time have no default in either method and are required; soil EPCs are constants (RISC5 choice, no
+    depleting-soil coupling in M4); the arsenic relative bioavailability of 0.6 is a modern default
+    only.

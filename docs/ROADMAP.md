@@ -180,7 +180,9 @@ after the first run.
   seasonal step-cap ruling in DECISIONS.md; the general power-law source exponent and the mixture-wide
   residual test deferred, region 1 volatilization to M6, cleanup back-calculation to M5). Two-region
   source with water-table fluctuation; feeds M1.
-- **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7).** RSL-derived
+- **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7).** Scope in
+  progress, methods note at `docs/methods/exposure-and-risk.md` and data plan at
+  `docs/methods/chemical-database.md` (stage 1, 2026-10-16; default rulings in DECISIONS.md). RSL-derived
   database with source tags; 9 direct pathways (soil ingestion, dermal soil, GW ingestion, dermal water,
   shower inhalation and dermal, indoor/outdoor air inhalation, surface water ingestion and dermal);
   carcinogenic risk and hazard index; two simultaneous receptor scenarios and additivity rules. Legacy
@@ -249,7 +251,8 @@ BIOCHLOR/REMChlor (spreadsheets/exe, no source), EPA PVIScreen (Java; source lic
 open-source tool covers RISC5's scope.
 
 Items still to confirm during the relevant milestone (not blockers): current VISL default attenuation
-factors; PVIScreen source availability; which RSL edition is current when M4 starts; whether ANALGWST
+factors; PVIScreen source availability; which RSL edition is current when M4 starts (checked 2026-10-16: November 2024, see
+docs/methods/chemical-database.md); whether ANALGWST
 compiles cleanly with modern gfortran (fallback: port the ~500-line Fortran kernels, public domain).
 
 ## 9. Verification (per milestone and before any push)
