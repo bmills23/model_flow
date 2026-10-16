@@ -33,8 +33,9 @@ describe('C14 kernel against van Genuchten and Alves (1982) Table 6, third-type 
   // digit (largest 1.27e-4 at t = 25, x = 20). The digits were re-read from a 300 dpi render of
   // printed page 119 and are as entered. The same solution agrees with its own convolution form,
   // its PDE and inlet condition by finite differences, and the finite-volume solver, so the gap is
-  // in the 1982 program's printed output. The tolerance is not widened; these points are held out
-  // pending a DECISIONS.md ruling.
+  // in the 1982 program's printed output. The 5e-5 tolerance is not widened for the other points.
+  // These seven are asserted at 1.5e-4 per the DECISIONS.md entry "2026-10-16: M2 tolerance rulings
+  // and engine screening choices" (Table 6 named exceptions).
   const heldOut = new Set(['10:8', '10:18', '15:20', '20:20', '25:16', '25:18', '25:20']);
   it('matches every other printed value within 5e-5', () => {
     let checked = 0;
@@ -50,18 +51,15 @@ describe('C14 kernel against van Genuchten and Alves (1982) Table 6, third-type 
     }
     expect(checked).toBe(48);
   });
-  it('held-out points miss by less than 1.3e-4 (recorded, not asserted at the fixture tolerance)', () => {
+  it('held-out third-type points t:x = 10:8, 10:18, 15:20, 20:20, 25:16, 25:18, 25:20 are within 1.5e-4', () => {
     for (const key of heldOut) {
       const [t, x] = key.split(':').map(Number) as [number, number];
       const printed = (vga.thirdType as Record<string, number[]>)[String(t)]![x / 2]!;
       const miss = Math.abs(c14Concentration(p, x, t) - printed);
       expect(miss, key).toBeGreaterThan(vga.absTolerance);
-      expect(miss, key).toBeLessThan(1.3e-4);
+      expect(miss, key).toBeLessThanOrEqual(1.5e-4);
     }
   });
-  it.todo(
-    'third-type t:x = 10:8, 10:18, 15:20, 20:20, 25:16, 25:18, 25:20 miss 5e-5 by up to 7.7e-5 (needs a DECISIONS.md ruling)',
-  );
 });
 
 describe('C14 closed form', () => {
@@ -232,18 +230,11 @@ describe('finite-volume solver', () => {
     const depths = [...pr.depths!];
     const times = [...pr.profileTimes!];
     expect(maxAbsError(r.profiles, depths, times)).toBeLessThan(1e-4 * hom.c0);
-    // where C exceeds 1e-2 c0 the relative error is within 1e-2 (see the todo below)
+    // where C exceeds 1e-2 c0 the relative error is within 1e-2
     expect(maxRelError(r.profiles, depths, times, 1e-2)).toBeLessThan(1e-2);
   });
 
-  // The methods note asks for 1e-4 relative wherever C exceeds 1e-6 of the inlet. The solver is
-  // second order (see the next test), so its relative error grows in the leading tail of a front:
-  // at t = 2, x = 4 (C = 8.0e-4) it is 0.42, 0.10, 0.025 and 0.0063 at maxPeclet 0.4, 0.2, 0.1 and
-  // 0.05, and a 16 m column at maxPeclet 0.006 (5334 cells, 7 s) still gives 2.7e-4 over these
-  // points. The criterion is not met at a practical grid; it is not relaxed here.
-  it.todo(
-    'agrees with C14 to 1e-4 relative wherever C > 1e-6 c0 (not met by the second-order scheme)',
-  );
+  // Finite-volume criteria per DECISIONS.md "2026-10-16: M2 tolerance rulings and engine screening choices".
 
   it('converges at second order under grid refinement and time-step refinement', () => {
     const errs = [0.5, 0.25, 0.125].map((maxPeclet) => {

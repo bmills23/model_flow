@@ -20,9 +20,10 @@ const YEAR = 365.25 * DAY;
 describe('C13 kernel against van Genuchten and Alves (1982) Table 6, first-type inlet', () => {
   const p: C13Params = { v: 1, D: 4, R: 1, mu: 0, gamma: 0, c0: 1 };
   // t = 5, x = 18 is printed 0.0324; the exact value 0.0323495 sits 5.4e-7 below the rounding
-  // boundary, so the print misses the half-unit tolerance by 5.4e-7. Held out pending a decision.
+  // boundary, so the print misses the half-unit tolerance by 5.4e-7. Asserted at 1.5e-4 below per
+  // the DECISIONS.md entry "2026-10-16: M2 tolerance rulings and engine screening choices".
   const heldOut = new Set(['5:18']);
-  it('matches every printed value within 5e-5 (one held-out point, see the todo below)', () => {
+  it('matches every printed value within 5e-5 except the held-out point, asserted at 1.5e-4', () => {
     let checked = 0;
     for (const t of vga.times) {
       const col = (vga.firstType as Record<string, number[]>)[String(t)]!;
@@ -36,9 +37,13 @@ describe('C13 kernel against van Genuchten and Alves (1982) Table 6, first-type 
     }
     expect(checked).toBe(54);
   });
-  it.todo(
-    't = 5, x = 18: printed 0.0324, closed form 0.0323495, misses 5e-5 by 5.4e-7 (needs a DECISIONS.md ruling)',
-  );
+  // Named exception per DECISIONS.md "2026-10-16: M2 tolerance rulings and engine screening choices".
+  it('held-out first-type point t:x = 5:18 is within 1.5e-4 of its printed value', () => {
+    const printed = (vga.firstType as Record<string, number[]>)['5']![18 / 2]!;
+    const miss = Math.abs(c13Concentration(p, 18, 5) - printed);
+    expect(miss).toBeGreaterThan(vga.absTolerance);
+    expect(miss).toBeLessThanOrEqual(1.5e-4);
+  });
 });
 
 describe('C13 closed form and Duhamel convolution', () => {
