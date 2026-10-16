@@ -151,11 +151,28 @@ describe('modern release', () => {
       }
     }
   });
-  it('seasonal and annual-mean delivery agree on the mean exponent at year ends only to first order', () => {
+  it('without source decay the seasonal schedule delivers the annual-mean mass at every year end', () => {
     const s = runExponential(seasonal('A'));
     const a = runExponential(handInput('A'));
-    expect(relErr(s.schedule.delivered(10 * YEAR), a.schedule.delivered(10 * YEAR))).toBeLessThan(
-      2e-3,
+    for (const n of [1, 2, 10, 40]) {
+      expect(relErr(s.schedule.delivered(n * YEAR), a.schedule.delivered(n * YEAR))).toBeLessThan(
+        1e-12,
+      );
+    }
+    expect(
+      relErr(s.schedule.delivered(0.3 * YEAR), a.schedule.delivered(0.3 * YEAR)),
+    ).toBeGreaterThan(1e-4);
+  });
+  it('with source decay the seasonal schedule delivers more than the annual mean at year ends', () => {
+    const lam = 0.001 / DAY;
+    const s = runExponential(seasonal('A', { sourceDecayRate: lam }));
+    const a = runExponential(handInput('A', { sourceDecayRate: lam }));
+    const r = relErr(s.schedule.delivered(30 * YEAR), a.schedule.delivered(30 * YEAR));
+    expect(r).toBeGreaterThan(0.03);
+    expect(s.schedule.delivered(30 * YEAR)).toBeGreaterThan(a.schedule.delivered(30 * YEAR));
+    // remaining mass is identical: the mean schedule books the shortfall as decay
+    expect(relErr(s.schedule.remaining(30 * YEAR), a.schedule.remaining(30 * YEAR))).toBeLessThan(
+      1e-12,
     );
   });
 });
