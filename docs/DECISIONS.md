@@ -121,3 +121,15 @@ Screening choices made while building the engine (defaults; open to change):
   concentrations up to 25 percent high and made one layer and two identical layers disagree.
 - The layered solver halves the time step, then the grid, until results change by less than 1e-3 of their
   peak, and warns `vadose.numerics-not-converged` if either loop runs out of halvings.
+
+## 2026-10-16: No-flux water table for infinitely deep AT123D aquifers (Bryan)
+
+Building the M2 coupling showed that M1's infinite-thickness AT123D kernel modelled an unbounded medium,
+so a source at the water table lost half its mass upward and concentrations within a few vertical
+dispersion lengths of the water table were up to a factor of two low. Yeh 1981 (ORNL-5602) places an
+exchange condition on the top surface with image terms in the infinite-depth vertical functions; with a
+zero exchange coefficient that is a no-flux water table. The kernel gained `aquifer.top: 'no-flux'`.
+Bryan's ruling on the default: "Default to no-flux". Infinite-thickness AT123D runs use the no-flux water
+table unless a caller asks for `top: 'unbounded'`; the ANALGWST point-source fixtures and the kernel
+tests that need a whole-space medium request it explicitly. Results from the M1 screen near the water
+table change accordingly.
