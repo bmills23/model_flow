@@ -310,26 +310,36 @@ The vadose result is a mass flux per unit area J(t) at the water table. Projecte
 mass rate is Mdot(t) = J(t) A.
 
 - AT123D-class kernel (mass-rate source, `LoadingStep`): the coupling builds piecewise-constant steps over
-  [0, t_end]. Default step length is one month (365.25/12 d); each step's rate is the step average
-  (1/dt) integral Mdot dt computed with Gauss-Legendre quadrature, so every step carries exactly the mass
-  that crossed the water table during it. Loading after t_end cannot affect concentrations at or before
+  [0, t_end]. Default step length is one month (365.25/12 d). The vadose methods expose their exact
+  cumulative delivery to the water table at every series node (legacy: quadrature of the C13 flux;
+  modern: the analytic integral or the finite-volume outflow), and each step's rate is the mass delivered
+  during it divided by its length, with the flux samples supplying only the shape inside a node interval.
+  Every step therefore carries exactly the mass that crossed the water table during it, and the loaded
+  mass equals `budget.deliveredToWaterTable` to 1e-12 (the trapezoid of the monthly flux samples, used
+  when a series carries no cumulative, differs from it by up to 6e-2 relative at 3 yr). The screen caps
+  the schedule at 48 steps to stay responsive (cost is linear in the step count; monthly steps over 25
+  years took about 45 s), so beyond 4 yr a step is time/48 long (12.5 months at 50 yr); the mass per step
+  stays exact and only the timing within a step is lumped. Loading after t_end cannot affect concentrations at or before
   t_end, so the list stops there and needs no open-ended step. The groundwater source box keeps its
   user-entered thickness below the water table (the mixing depth); its plan dimensions come from the
   vadose source.
 - Aquifer top for vadose-fed runs: the delivered mass enters through the water table, which must be a
   no-flux boundary of the AT123D-class aquifer or part of the mass diffuses upward out of it. With a finite
-  thickness H the water table is the layer's no-flux top (z = H); with infinite depth the aquifer must use
-  `top: 'no-flux'` (Yeh's semi-infinite case, aquifer z <= 0, water table at z = 0). The default unbounded
-  medium has no water table and keeps only half of a water-table load below z = 0, so `waterTableSource`
-  rejects it with a RangeError when given the aquifer. The patch from `waterTableSource` lies on the water
+  thickness H the water table is the layer's no-flux top (z = H); with infinite depth the aquifer uses
+  `top: 'no-flux'` (Yeh's semi-infinite case, aquifer z <= 0, water table at z = 0), which is now the
+  kernel's default for infinite depth. An explicit `top: 'unbounded'` has no water table and keeps only
+  half of a water-table load below z = 0, so `waterTableSource` rejects it with a RangeError when given
+  the aquifer. The patch from `waterTableSource` lies on the water
   table in both cases (z = H, or z = 0).
 - Wexler and Domenico (boundary-concentration sources): each step is converted to a held concentration
   with the existing M1 rule (concentration = mass rate / (Darcy flux times source cross-section)), giving a
   `ConcentrationStep` list; the screen's existing `ui.source-basis` warning applies.
-- Mass conservation, tested: the sum of rate times duration over the steps equals the integral of Mdot
-  to 1e-12 relative; with mu = 0 in both processes the aquifer's dissolved plus sorbed mass (n R times the
+- Mass conservation, tested: the sum of rate times duration over the steps equals the vadose run's exact
+  delivered mass (`budget.deliveredToWaterTable`, an independent quantity) to 1e-12 relative; with mu = 0 in both processes the aquifer's dissolved plus sorbed mass (n R times the
   volume integral of C) equals the loaded mass; halving the step length changes a downstream receptor
-  value by less than 0.1 percent for the Table R-7 case; the vadose budget closes, initial source mass =
+  value by less than 0.1 percent for the Table R-7 case at 10 yr, and the screen's capped 12.5-month steps
+  at 50 yr change the receptor value by less than 0.2 percent against steps four times finer (measured 0.07
+  and 0.09 percent, legacy and modern); the vadose budget closes, initial source mass =
   source mass + volatilized + decayed in transit + held in the profile + delivered to the water table.
 
 ## Fixture plan

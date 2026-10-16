@@ -40,6 +40,32 @@ describe('fluxToLoadingSteps', () => {
     }
   });
 
+  it('uses a supplied exact cumulative delivery in place of the trapezoid', () => {
+    const exactTotal = trapezoidIntegral(synthetic, 1) * 1.1;
+    const cum = [0, 0.2, 0.55, 0.8, 1].map((f) => f * exactTotal);
+    const series: FluxSeries = { ...synthetic, delivered: cum };
+    const nodeAligned = fluxToLoadingSteps(series, 1, 100, 5);
+    expect(Math.abs(loadedMass(nodeAligned) - exactTotal) / exactTotal).toBeLessThan(1e-12);
+    // mass crossing a node-aligned boundary is the cumulative value there
+    const upTo25 = nodeAligned
+      .filter((s) => s.end <= 25)
+      .reduce((a, s) => a + s.rate * (s.end - s.start), 0);
+    expect(Math.abs(upTo25 - cum[2]!) / cum[2]!).toBeLessThan(1e-12);
+    // boundaries between nodes still total the exact amount and stay non-negative
+    const off = fluxToLoadingSteps(series, 1, 100, 13.3);
+    expect(Math.abs(loadedMass(off) - exactTotal) / exactTotal).toBeLessThan(1e-12);
+    off.forEach((s) => expect(s.rate).toBeGreaterThanOrEqual(0));
+  });
+
+  it('rejects a cumulative series of the wrong length or one that decreases', () => {
+    expect(() => fluxToLoadingSteps({ ...synthetic, delivered: [0, 1] }, 1, 100, 10)).toThrow(
+      RangeError,
+    );
+    expect(() =>
+      fluxToLoadingSteps({ ...synthetic, delivered: [0, 2, 1, 3, 4] }, 1, 100, 10),
+    ).toThrow(RangeError);
+  });
+
   it('stops at tEnd and carries the partial integral', () => {
     const steps = fluxToLoadingSteps(synthetic, 2, 33, 10);
     expect(steps[0]!.start).toBe(0);
@@ -258,11 +284,22 @@ describe('Table R-7 through the coupling', () => {
     return at123dConcentration({ aquifer: aq, source, loading: steps, time: 10 * YEAR }, receptor);
   }
 
-  it('loads the delivered mass recorded by the vadose budget (trapezoid of the monthly flux)', () => {
+  it('loads the delivered mass recorded by the vadose budget, independently of the flux samples', () => {
     const steps = fluxToLoadingSteps(out, A, 10 * YEAR, YEAR / 12);
-    const exact = trapezoidIntegral(out.series, A);
-    expect(Math.abs(loadedMass(steps) - exact) / exact).toBeLessThan(1e-12);
+    const delivered = out.budget.deliveredToWaterTable;
+    expect(delivered).toBeGreaterThan(0);
+    expect(Math.abs(loadedMass(steps) - delivered) / delivered).toBeLessThan(1e-12);
+    // and it differs from the trapezoid of the monthly samples, which is only an approximation
+    expect(trapezoidIntegral(out.series, A)).not.toBe(loadedMass(steps));
+  });
+
+  it('carries the exact cumulative delivery on an earlier horizon too', () => {
+    const k = 36;
+    const t = out.series.times[k]!;
+    const steps = fluxToLoadingSteps(out, A, t, t / k);
+    const exact = out.series.delivered[k]!;
     expect(exact).toBeGreaterThan(0);
+    expect(Math.abs(loadedMass(steps) - exact) / exact).toBeLessThan(1e-12);
   });
 
   it('halving the step length changes the receptor value by less than 0.1 percent', () => {

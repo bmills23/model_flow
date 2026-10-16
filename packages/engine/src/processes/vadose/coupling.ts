@@ -8,14 +8,22 @@ import type { ConcentrationStep } from '../groundwater/loading.js';
  * The vadose methods deliver an advective mass flux J(t) (kg/m^2/s) through the water table over
  * the source plan area A. The groundwater kernel takes piecewise-constant mass rates, so the flux
  * series is cut into steps of equal length and each step carries the exact mean of the
- * piecewise-linear interpolant of J over that step, which makes the total loaded mass equal the
- * integral of J A over the series (trapezoid rule on the series nodes) to rounding.
+ * piecewise-linear interpolant of J over that step. When the series also carries the engine's exact
+ * cumulative delivery (`delivered`, kg), each step instead carries exactly the delivered mass that
+ * crossed the water table during it, so the loaded mass equals the vadose budget to rounding; the
+ * linear interpolant of the monthly flux samples is only a trapezoid approximation of that.
  */
 
 /** A flux series: nodes `times` (s, ascending, first value >= 0) and flux at each node (kg/m^2/s). */
 export interface FluxSeries {
   times: readonly number[];
   flux: readonly number[];
+  /**
+   * Optional exact cumulative mass delivered through the water table by each node, kg, over the
+   * plan area passed to `fluxToLoadingSteps` (non-decreasing, same length as `times`). Between nodes
+   * the flux interpolant supplies only the shape; the mass of each node interval is exact.
+   */
+  delivered?: readonly number[];
 }
 
 /** Anything carrying a flux series, such as the output of `vadose.vadsat`. */
@@ -33,6 +41,34 @@ function validateSeries(s: FluxSeries): void {
       throw new RangeError('Flux series times must be finite, non-negative and strictly ascending');
     if (!(Number.isFinite(f) && f >= 0)) throw new RangeError('Flux must be finite and >= 0');
   }
+  const d = s.delivered;
+  if (d !== undefined) {
+    if (d.length !== s.times.length)
+      throw new RangeError('The cumulative delivery needs one value per node');
+    for (let i = 0; i < d.length; i++) {
+      if (!(Number.isFinite(d[i]!) && d[i]! >= 0) || (i > 0 && d[i]! < d[i - 1]!))
+        throw new RangeError('Cumulative delivery must be finite, non-negative and non-decreasing');
+    }
+  }
+}
+
+/**
+ * Exact cumulative delivered mass at time t, kg: the node values, with the flux interpolant giving
+ * the shape inside each node interval (so every node interval carries its exact mass).
+ */
+function cumulativeAt(s: FluxSeries & { delivered: readonly number[] }, t: number): number {
+  const times = s.times;
+  const last = times.length - 1;
+  if (t <= times[0]!) return s.delivered[0]!;
+  if (t >= times[last]!) return s.delivered[last]!;
+  let i = 0;
+  while (i + 1 < last && times[i + 1]! <= t) i++;
+  const t0 = times[i]!;
+  const t1 = times[i + 1]!;
+  const dm = s.delivered[i + 1]! - s.delivered[i]!;
+  const whole = integralOver(s, t0, t1);
+  const frac = whole > 0 ? integralOver(s, t0, t) / whole : (t - t0) / (t1 - t0);
+  return s.delivered[i]! + dm * frac;
 }
 
 /** Integral of the piecewise-linear interpolant of the series over [a, b], extended by zero outside. */
@@ -56,7 +92,8 @@ function integralOver(s: FluxSeries, a: number, b: number): number {
  * Cut a vadose flux series into constant-rate loading steps for the groundwater kernel.
  * `area` is the plan area over which the flux enters the aquifer, m^2. Steps start at the first
  * series node, are `stepLength` long, and stop at `tEnd` (the last step is shorter when tEnd is not
- * a multiple). `tEnd` must not exceed the end of the series, since the flux beyond it is unknown.
+ * a multiple). With `series.delivered` the steps carry the exact delivered mass (see `FluxSeries`),
+ * which must then be over the same `area`. `tEnd` must not exceed the end of the series, since the flux beyond it is unknown.
  */
 export function fluxToLoadingSteps(
   result: FluxSource | FluxSeries,
@@ -81,8 +118,12 @@ export function fluxToLoadingSteps(
   for (let k = 0; k < n; k++) {
     const start = first + k * stepLength;
     const end = k === n - 1 ? tEnd : first + (k + 1) * stepLength;
-    const rate = (integralOver(series, start, end) * area) / (end - start);
-    steps.push({ start, end, rate });
+    const mass =
+      series.delivered === undefined
+        ? integralOver(series, start, end) * area
+        : cumulativeAt({ ...series, delivered: series.delivered }, end) -
+          cumulativeAt({ ...series, delivered: series.delivered }, start);
+    steps.push({ start, end, rate: Math.max(0, mass) / (end - start) });
   }
   return steps;
 }

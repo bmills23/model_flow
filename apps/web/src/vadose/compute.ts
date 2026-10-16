@@ -295,13 +295,21 @@ export function vadoseFluxSeries(
   s: VadoseScenario,
   method: VadoseMethod,
   duration: number,
-): { times: number[]; flux: number[] } {
+): { times: number[]; flux: number[]; delivered: number[] } {
   if (method === 'legacy') {
     if (!s.legacy)
       throw new RangeError(s.legacyReason ?? 'The legacy method cannot describe this profile.');
     const o = runVadsat({ ...s.legacy, duration, depths: [0], profileTimes: [] });
-    return { times: o.series.times, flux: o.series.flux.map((f) => Math.max(0, f)) };
+    return {
+      times: o.series.times,
+      flux: o.series.flux.map((f) => Math.max(0, f)),
+      delivered: o.series.delivered,
+    };
   }
   const o = runLayered({ ...s.modern, duration, depths: [0], profileTimes: [] });
-  return { times: o.series.times, flux: o.series.flux.map((f) => Math.max(0, f)) };
+  return {
+    times: o.series.times,
+    flux: o.series.flux.map((f) => Math.max(0, f)),
+    delivered: o.series.delivered,
+  };
 }

@@ -20,9 +20,18 @@ import {
 import { vadoseFluxSeries } from '../vadose/compute';
 import type { Scenario } from './form';
 
-/** A vadose-fed schedule is cut into steps of a month, but never into more than this many. */
-const FED_MAX_STEPS = 48;
+/**
+ * A vadose-fed schedule is cut into steps of a month, but never into more than this many, which
+ * keeps the superposition (cost linear in the step count) responsive: monthly steps over 25 years
+ * took about 45 s for a full map and curve. At the cap a step is time / FED_MAX_STEPS long (2.5
+ * months at 10 years, 12.5 months at 50 years). Every step carries exactly the mass that crossed
+ * the water table during it whatever its length; only the timing within a step is lumped.
+ */
+export const FED_MAX_STEPS = 48;
 const MONTH = (365.25 * 86400) / 12;
+
+/** The step length of a vadose-fed schedule over `time` seconds. */
+export const fedStepLength = (time: number): number => Math.max(MONTH, time / FED_MAX_STEPS);
 
 export type MethodKey = 'legacy' | 'modern' | 'domenico';
 
@@ -62,14 +71,14 @@ const linspace = (a: number, b: number, n: number): number[] =>
 /**
  * The mass-release schedule of a vadose-fed source over [0, evaluation time]: the vadose method is
  * run for that time and its water-table flux, projected over the source footprint, is cut into
- * steps that each carry the exact mass that crossed the water table during them. The step length
- * is a month, lengthened only to keep the superposition to FED_MAX_STEPS steps.
+ * steps that each carry the exact mass that crossed the water table during them (the vadose
+ * run's own cumulative delivery). The step length is a month, lengthened only to keep the
+ * superposition to FED_MAX_STEPS steps; see FED_MAX_STEPS for the bound.
  */
 export function fedSteps(s: Scenario): LoadingStep[] {
   if (!s.fed) return [];
   const series = vadoseFluxSeries(s.fed.vadose, s.fed.method, s.time);
-  const stepLength = Math.max(MONTH, s.time / FED_MAX_STEPS);
-  return fluxToLoadingSteps(series, s.srcLength * s.srcWidth, s.time, stepLength);
+  return fluxToLoadingSteps(series, s.srcLength * s.srcWidth, s.time, fedStepLength(s.time));
 }
 
 /** The scenario with a vadose-fed schedule resolved once, so per-point calls do not rerun the vadose method. */
