@@ -75,6 +75,27 @@ describe('warnings', () => {
     expect(codes(runExponential(none))).toContain('saturatedSource.no-release');
     expect(codes(runTwoRegion(i))).not.toContain('saturatedSource.no-release');
   });
+  it('warns of no release when the time-weighted mean rate is zero although one water level releases', () => {
+    const i = handInput('A');
+    // f = 0: only low water counts, where nothing flows (no infiltration, no submerged part)
+    const lowOnly = {
+      ...i,
+      infiltration: 0,
+      source: { ...i.source, minSaturatedThickness: 0, fluctuation: 1, fractionHigh: 0 },
+    };
+    // f = 1: only high water counts, where the fully submerged source sees a zero gradient
+    const highOnly = {
+      ...i,
+      aquifer: { ...i.aquifer, gradient: 0 },
+      source: { ...i.source, minSaturatedThickness: 0, fluctuation: 10, fractionHigh: 1 },
+    };
+    for (const input of [lowOnly, highOnly]) {
+      const out = runTwoRegion(input);
+      expect(out.rates.mean).toBe(0);
+      expect(codes(out)).toContain('saturatedSource.no-release');
+      expect(codes(runExponential(input))).toContain('saturatedSource.no-release');
+    }
+  });
 });
 
 describe('RangeErrors', () => {

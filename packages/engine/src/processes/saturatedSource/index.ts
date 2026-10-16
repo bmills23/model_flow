@@ -179,11 +179,11 @@ function warningsFor(input: SaturatedSourceInput, p: Prepared, method: Method): 
         'Infiltration exceeds the aquifer hydraulic conductivity; it is reduced to the conductivity and region 1 is saturated (RISC5 choice).',
     });
   }
-  if (p.rates.low.q1 + p.rates.low.q2 === 0 && p.rates.high.q1 + p.rates.high.q2 === 0) {
+  if (p.rates.mean === 0) {
     out.push({
       code: 'saturatedSource.no-release',
       message:
-        'The release rate is zero at both water levels (no infiltration through an unsaturated part and no flow through a submerged part), so no mass reaches the aquifer.',
+        'The time-weighted mean release rate is zero (no infiltration through an unsaturated part and no flow through a submerged part, at every water level that lasts any of the year), so no mass reaches the aquifer.',
     });
   }
   return out;

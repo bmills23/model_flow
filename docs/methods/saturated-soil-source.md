@@ -247,7 +247,7 @@ Warnings (codes are part of the result):
 | `saturatedSource.constant-dissolved-source` | legacy | a contributing region has no separate phase, so a constant concentration is not mass-consistent |
 | `saturatedSource.fluctuation-capped` | both | h_min + dh > H_s; the high-water saturated thickness is capped at H_s |
 | `saturatedSource.infiltration-clamped` | legacy | q > K; q reduced to K and region 1 saturated (RISC5 choice) |
-| `saturatedSource.no-release` | both | the release rate is zero at both water levels |
+| `saturatedSource.no-release` | both | the time-weighted mean release rate Qbar is zero |
 
 Assumptions listed on both methods (not warnings): one homogeneous soil for the source and the aquifer;
 equilibrium partitioning and instantaneous dissolution; no NAPL migration; immediate delivery of region
