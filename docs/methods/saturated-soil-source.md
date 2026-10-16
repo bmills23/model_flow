@@ -1,6 +1,6 @@
 # Saturated soil source (methods note for M3)
 
-Equations to be implemented in `packages/engine/src/processes/saturatedSource/`, in our own words, derived
+Equations implemented in `packages/engine/src/processes/saturatedSource/`, in our own words, derived
 from the primary publications cited by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The
 RISC5 manual was used only as a map of which choices RISC5 made; none of its text, figures or tables is
 reproduced and its equation labels are not used here. Where a choice is RISC5's rather than a paper's, it

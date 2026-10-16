@@ -4,8 +4,9 @@ Open, web-based fate-and-transport and human health risk modeling for contaminat
 reach functional parity with RISC5-class tools while letting the user switch each process between the
 legacy published method and a modern alternative, with modern visualizations.
 
-Status: milestones M1 (dissolved-phase groundwater transport, 2026-10-15) and M2 (vadose zone
-leaching, 2026-10-16) complete, at https://bmills23.github.io/model_flow/ . Milestones M3 to M11 are open. See `docs/ROADMAP.md`
+Status: milestones M1 (dissolved-phase groundwater transport, 2026-10-15), M2 (vadose zone
+leaching, 2026-10-16) and M3 (saturated soil source, 2026-10-16) complete, at
+https://bmills23.github.io/model_flow/ . Milestones M4 to M11 are open. See `docs/ROADMAP.md`
 for scope, milestones and the research brief, and `docs/DECISIONS.md` for the decisions behind them.
 
 ## What it will do
