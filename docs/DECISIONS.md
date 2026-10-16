@@ -219,8 +219,13 @@ drops it and records why.
   step. A legacy annual mean is one step and a modern annual mean is cut into steps of at least a month
   (lengthened to stay within 48). A **seasonal** schedule has two segments a year that must stay separate
   steps, so stage 3 keeps it by lengthening the steps (up to one step per season) while the count stays
-  within 48, which holds up to about 24 years of release. Past that, the feed falls back to the annual
-  mean, which delivers the same mass at every year end and differs only within a year. The fallback is
+  within 48, which holds up to about 24 years of release. Past that, the feed falls back to whole-year
+  steps (boundaries at multiples of n years, n chosen so the count stays within 48), each carrying the
+  seasonal schedule's exact delivered mass, so the cumulative mass is exact at every step boundary, with
+  or without source decay, and only the timing within a step is lost. (A first version fed the annual
+  mean and claimed equal mass at year ends; that holds only without source decay, because the faster
+  high-water release leaves less mass to decay, 4.1 percent low for case A with decay 0.001/d over 30
+  years.) The fallback is
   never silent: the saturated screen's coupling panel states it for the current horizon, and the
   groundwater screen's warnings carry `ui.saturated-seasonal-fallback`. A legacy seasonal source that is
   exhausted early (few years) never reaches the cap.

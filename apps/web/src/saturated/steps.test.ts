@@ -53,12 +53,41 @@ describe('saturated feed step cap', () => {
     const f = saturatedFedSteps(i, 'modern', t, stepLength(t));
     expect(f.fallback).toBe(true);
     expect(f.steps.length).toBeLessThanOrEqual(FED_MAX_STEPS);
-    const mean = runExponential({
-      ...i,
-      source: { ...i.source, schedule: 'annual-mean' },
-      tEnd: t,
-    }).budget.delivered;
-    expect(Math.abs(loadedMass(f.steps) - mean) / mean).toBeLessThan(1e-12);
+    const d = runExponential({ ...i, tEnd: t }).budget.delivered;
+    expect(Math.abs(loadedMass(f.steps) - d) / d).toBeLessThan(1e-12);
+  });
+
+  it.each([0, 0.001])(
+    'the fallback delivers the seasonal cumulative mass at every step boundary (decay %s per day)',
+    (decay) => {
+      const i = input({ schedule: 'seasonal', srcDecay: String(decay) });
+      for (const years of [30, 100]) {
+        const t = years * YR;
+        const f = saturatedFedSteps(i, 'modern', t, stepLength(t));
+        expect(f.fallback).toBe(true);
+        expect(f.steps.length).toBeLessThanOrEqual(FED_MAX_STEPS);
+        const truth = runExponential({ ...i, tEnd: t }).schedule;
+        let cum = 0;
+        for (const s of f.steps) {
+          cum += s.rate * (s.end - s.start);
+          const d = truth.delivered(s.end);
+          expect(Math.abs(cum - d) / d).toBeLessThan(1e-9);
+        }
+        expect(f.steps[f.steps.length - 1]!.end).toBeCloseTo(t, 3);
+      }
+    },
+  );
+
+  it('the legacy fallback is exact at every step boundary too', () => {
+    const big = input({ schedule: 'seasonal', F: '5000', FT: '50000' });
+    const t = 30 * YR;
+    const f = saturatedFedSteps(big, 'legacy', t, stepLength(t));
+    const truth = runTwoRegion({ ...big, tEnd: t }).schedule;
+    let cum = 0;
+    for (const s of f.steps) {
+      cum += s.rate * (s.end - s.start);
+      expect(Math.abs(cum - truth.delivered(s.end)) / truth.delivered(s.end)).toBeLessThan(1e-9);
+    }
   });
 
   it('falls back for a long-lived legacy seasonal source and not for a short-lived one', () => {
@@ -68,7 +97,7 @@ describe('saturated feed step cap', () => {
     const big = input({ schedule: 'seasonal', F: '5000', FT: '50000' });
     const long = saturatedFedSteps(big, 'legacy', t, stepLength(t));
     expect(long.fallback).toBe(true);
-    expect(long.steps.length).toBe(1);
+    expect(long.steps.length).toBeLessThanOrEqual(FED_MAX_STEPS);
   });
 
   it('ignores a source decay rate for the legacy method', () => {

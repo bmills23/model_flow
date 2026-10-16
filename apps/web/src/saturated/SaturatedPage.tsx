@@ -470,8 +470,10 @@ export function SaturatedPage() {
               />
               {form.schedule === 'seasonal' && (
                 <p className="muted chart-note">
-                  The seasonal schedule releases faster while the water table is high. It delivers
-                  the same mass as the annual mean at every year end before the source is exhausted.
+                  The seasonal schedule releases faster while the water table is high. With no
+                  source decay it delivers the same mass as the annual mean at every year end; a
+                  source decay makes the two differ, because the faster high-water release leaves
+                  less mass to decay.
                 </p>
               )}
 
@@ -531,9 +533,11 @@ export function SaturatedPage() {
                 {form.schedule === 'seasonal' && (
                   <p className="note">
                     {preview?.fallback
-                      ? `At the horizon of ${fmt(horizonYr)} years the seasonal schedule needs more steps than the cap allows even at one step per season, so the feed falls back to the annual mean. `
-                      : 'A seasonal schedule is kept in the feed while its seasons fit the cap, with steps lengthened to fit; past about 24 years of release the feed uses the annual mean instead, and the groundwater screen says so. '}
-                    The annual mean delivers the same mass at every year end.
+                      ? `At the horizon of ${fmt(horizonYr)} years the seasonal schedule needs more steps than the cap allows even at one step per season, so the feed falls back to whole-year steps. `
+                      : 'A seasonal schedule is kept in the feed while its seasons fit the cap, with steps lengthened to fit; past about 24 years of release the feed uses whole-year steps instead, and the groundwater screen says so. '}
+                    Each whole-year step carries the seasonal schedule's exact mass, so the
+                    cumulative mass is exact at every step boundary and only the timing within a
+                    step is lost.
                   </p>
                 )}
                 <p>

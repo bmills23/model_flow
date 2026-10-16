@@ -135,7 +135,7 @@ export interface FedSource {
   method: VadoseMethod;
   label: string;
   steps?: LoadingStep[] | undefined;
-  /** Saturated feed only: a seasonal schedule did not fit the step cap and the annual mean was fed. */
+  /** Saturated feed only: a seasonal schedule did not fit the step cap and whole-year steps were fed. */
   seasonalFallback?: boolean | undefined;
 }
 

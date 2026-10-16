@@ -334,7 +334,7 @@ function collectWarnings(
     if (s.fed.seasonalFallback) {
       add(
         'ui.saturated-seasonal-fallback',
-        `The seasonal water-table schedule needs more than ${FED_MAX_STEPS} loading steps over this evaluation time, so the annual mean release is fed instead. The annual mean delivers the same mass at every year end and differs from the seasonal schedule only within a year.`,
+        `The seasonal water-table schedule needs more than ${FED_MAX_STEPS} loading steps over this evaluation time, so whole-year steps are fed instead. Each step carries the seasonal schedule's exact mass, so the cumulative mass is exact at every step boundary and only the timing within a step is lost.`,
       );
     }
   } else if (s.fed) {

@@ -47,14 +47,14 @@ describe('SaturatedPage', () => {
     expect(within(table).queryByText(/1763/)).toBeNull();
   }, 20000);
 
-  it('notes the step cap and says when a seasonal schedule falls back to the annual mean', async () => {
+  it('notes the step cap and says when a seasonal schedule falls back to whole-year steps', async () => {
     await loaded();
     const coupling = screen.getByRole('region', { name: /groundwater coupling/i });
     expect(within(coupling).getByText(/48 steps/i)).toBeTruthy();
     fireEvent.click(screen.getByRole('radio', { name: /feed modern/i }));
     fireEvent.click(screen.getByRole('radio', { name: /seasonal/i }));
     fireEvent.change(screen.getByLabelText(/^horizon/i), { target: { value: '30' } });
-    await screen.findByText(/falls back to the annual mean/i, undefined, { timeout: 15000 });
+    await screen.findByText(/falls back to whole-year steps/i, undefined, { timeout: 15000 });
   }, 30000);
 
   it('replaces the results with a message when an input is invalid and keeps the last charts', async () => {
