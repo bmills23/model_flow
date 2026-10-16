@@ -65,7 +65,7 @@ export interface FvTimeOptions {
   tolerance?: number;
   /** Largest number of halvings (default 12). */
   maxRefinements?: number;
-  /** Starting step, s (default: one cell transit time q dx / (theta R) of the fastest cell). */
+  /** Starting step, s (default: one cell transit time theta R dx / q of the fastest cell). */
   initialStep?: number;
   /** Use this step and skip the refinement loop. */
   fixedStep?: number;

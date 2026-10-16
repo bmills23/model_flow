@@ -118,5 +118,10 @@ export function unitGradientMoisture(
       ? brooksCoreySe(ratio, lenhardLambda(n))
       : mualemVanGenuchtenSe(ratio, n);
   const theta = thetaR + Se * (thetaS - thetaR);
+  if (!(theta > 0)) {
+    throw new RangeError(
+      `water content is zero (q = ${q} with thetaR = ${thetaR}): there is no mobile water to carry the chemical`,
+    );
+  }
   return { theta, Se, v: q / theta, clamped: false };
 }

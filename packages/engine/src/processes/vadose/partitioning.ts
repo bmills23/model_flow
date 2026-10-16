@@ -83,13 +83,19 @@ export function residualPhaseTest(p: ResidualPhaseInput): ResidualPhaseResult {
     pos('MT', p.MT);
     if (p.F > p.FT) throw new RangeError(`F (${p.F}) must not exceed FT (${p.FT})`);
     x = p.F / p.M / (p.FT / p.MT);
+    if (x > 1 + 1e-9) {
+      throw new RangeError(
+        `inconsistent TPH inputs: the chemical's moles F/M exceed the mixture's moles FT/MT (mole fraction ${x.toPrecision(4)} > 1)`,
+      );
+    }
+    x = Math.min(x, 1);
     tphRatio = p.F / p.FT;
   }
   if (!(x > 0)) {
     // F = 0: nothing to partition
     return { x: 0, effS: 0, ceq: p.ceq, residual: false, cs0: p.ceq, tphRatio };
   }
-  const effS = effectiveSolubility(p.S, Math.min(x, 1));
+  const effS = effectiveSolubility(p.S, x);
   const residual = p.ceq > effS;
   return { x, effS, ceq: p.ceq, residual, cs0: residual ? effS : p.ceq, tphRatio };
 }

@@ -177,6 +177,18 @@ describe('partitioning', () => {
     expect(r.cs0).toBe(r.effS);
     expect(r.tphRatio).toBeCloseTo(0.1, 14);
   });
+  it('a mole fraction above 1 (F/M above FT/MT) is a RangeError, never reported', () => {
+    expect(() =>
+      residualPhaseTest({ F: 5e-3, M: 0.078, S: 1.75, ceq: 10, FT: 5e-3, MT: 0.2 }),
+    ).toThrow(RangeError);
+    const edge = residualPhaseTest({ F: 5e-3, M: 0.2, S: 1.75, ceq: 10, FT: 5e-3, MT: 0.2 });
+    expect(edge.x).toBeCloseTo(1, 12);
+  });
+  it('zero water content (q = 0 with thetaR = 0) is a RangeError, not NaN', () => {
+    const dry = { thetaS: 0.4, thetaR: 0, n: 1.5, Ks: 1e-6 };
+    expect(() => unitGradientMoisture(dry, 0, 'brooksCorey1964')).toThrow(RangeError);
+    expect(() => unitGradientMoisture(dry, 0, 'vanGenuchten1980')).toThrow(RangeError);
+  });
   it('F greater than FT is a RangeError', () => {
     expect(() =>
       residualPhaseTest({ F: 2e-2, M: 0.078, S: 1.75, ceq: 1, FT: 1e-2, MT: 0.1 }),

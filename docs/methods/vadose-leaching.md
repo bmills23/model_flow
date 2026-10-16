@@ -280,7 +280,9 @@ source to aquifer.
 
 RangeError (both methods): non-finite inputs; theta_s outside (0, 1]; theta_r outside [0, theta_s);
 n <= 1; Ks <= 0; q < 0; rho_b <= 0; f_oc, Koc, H, D_a, D_w, mu or a source decay rate negative; S or M not
-positive; F negative; F greater than F_T; a layer or source thickness <= 0; lens or layers thicker than the
+positive; F negative; F greater than F_T; a TPH mole fraction (F / M) / (F_T / M_T) above 1 (the chemical's moles
+exceed the mixture's, inconsistent TPH inputs; never clamped or reported); zero water content (q = 0 with
+theta_r = 0, no mobile water, so v and R are undefined); a layer or source thickness <= 0; lens or layers thicker than the
 clean soil above the source; L_u <= 0 (contamination at the water table is the saturated-source process,
 M3); negative or NaN time.
 
