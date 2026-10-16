@@ -286,7 +286,10 @@ What does not fit, and replaces it:
   both regions' release distributed over it. In engine coordinates it is z in [-h_hi, 0] for an
   infinitely deep aquifer and z in [b - h_hi, b] for a layer of thickness b; h_hi greater than b is a
   RangeError. When h_hi = 0 (a source wholly above the water table) the box collapses to the
-  `waterTableSource` patch.
+  `waterTableSource` patch. The groundwater screen does not follow this for AT123D: it uses a box of
+  the mixing depth typed there (as the vadose screen does and as it does for the Wexler and Domenico
+  cross-section), because the screen needs a finite thickness the user chooses; it says so in its
+  feed note (DECISIONS.md, 2026-10-16, stage 3).
 - **Cross-section for Wexler and Domenico.** The held concentration uses the cross-section W h_hi. With
   h_hi = 0 there is no cross-section; the screen then uses its user-entered mixing depth, as the vadose
   screen does, and says so.

@@ -233,7 +233,12 @@ drops it and records why.
   serve partitioning and transport, so a saturated-fed groundwater run takes its porosity, Darcy flux
   (K times the gradient) and retardation (1 + rho_b Koc f_oc / porosity) from the saturated screen and
   disables the typed aquifer fields. The source box is the plan size by the high-water saturated
-  thickness; a source that never submerges keeps the typed mixing depth.
+  thickness; a source that never submerges keeps the typed mixing depth. This deliberately differs from the engine
+  coupling (`saturatedSourceBox`, a zero-thickness water-table patch when the high-water saturated
+  thickness is zero): the engine API has no mixing depth to take, while the screen follows the vadose
+  screen, whose Wexler and Domenico cross-section and AT123D box need a finite thickness the user
+  chooses. The groundwater screen states this in its `ui.saturated-feed` note, so the two never
+  disagree silently.
 - The legacy method has no source decay, so the screen drops a typed decay rate from the legacy run
   rather than refusing it; only the modern run uses it.
 - `TimeLineChart` gained an optional `vlines` prop for the depletion-time markers; vadose charts do not

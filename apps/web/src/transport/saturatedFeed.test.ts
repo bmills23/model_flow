@@ -132,3 +132,36 @@ describe('saturated feed aquifer validation', () => {
     if (!n.ok) expect(n.errors.join(' ')).toMatch(/porosity.*saturated/i);
   });
 });
+
+describe('saturated feed for a source that never submerges', () => {
+  it('keeps the typed mixing depth and says so, unlike the engine coupling, which uses a patch', () => {
+    const dry = toSaturated({ ...SAT_FORM, hMin: '0', dh: '0' });
+    if (!dry.ok) throw new Error('dry');
+    const s = scenario({ srcDepth: '3.5' }, feed('legacy', dry.scenario.input));
+    expect(s.srcDepth).toBe(3.5);
+    const out = compute({
+      scenario: s,
+      mapMethod: 'legacy',
+      domenico: false,
+      nx: 10,
+      ny: 8,
+      nCurve: 4,
+    });
+    if (!out.ok) throw new Error(out.error);
+    const note = out.result.warnings.find((w) => w.code === 'ui.saturated-feed');
+    expect(note?.message).toMatch(/never reaches below the water table/i);
+    expect(note?.message).toMatch(/mixing depth typed/i);
+    const wet = compute({
+      scenario: scenario(),
+      mapMethod: 'legacy',
+      domenico: false,
+      nx: 10,
+      ny: 8,
+      nCurve: 4,
+    });
+    if (!wet.ok) throw new Error(wet.error);
+    expect(wet.result.warnings.find((w) => w.code === 'ui.saturated-feed')?.message).not.toMatch(
+      /never reaches/i,
+    );
+  });
+});

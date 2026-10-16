@@ -8,6 +8,7 @@ import {
   patchiConcentration,
   patchiGrid,
   fluxToLoadingSteps,
+  waterLevels,
   toConcentrationSteps,
   wellScreenAverage,
   type At123dInput,
@@ -325,7 +326,11 @@ function collectWarnings(
   if (s.fed?.saturated) {
     add(
       'ui.saturated-feed',
-      `The source is fed by the saturated soil source (${s.fed.label}) as ${s.fed.steps?.length ?? 0} mass-release steps over the evaluation time, released into a ${s.srcLength} m by ${s.srcWidth} m box ${s.srcDepth} m deep at the water table. The porosity, hydraulic conductivity, gradient and organic carbon partitioning come from the saturated screen, so they set the flow and retardation here too.${
+      `The source is fed by the saturated soil source (${s.fed.label}) as ${s.fed.steps?.length ?? 0} mass-release steps over the evaluation time, released into a ${s.srcLength} m by ${s.srcWidth} m box ${s.srcDepth} m deep at the water table.${
+        waterLevels(s.fed.saturated!.source).hHi > 0
+          ? ''
+          : " The source never reaches below the water table, so the box depth is the mixing depth typed on this screen (the engine's own coupling uses a zero-thickness patch at the water table)."
+      } The porosity, hydraulic conductivity, gradient and organic carbon partitioning come from the saturated screen, so they set the flow and retardation here too.${
         s.thickness === undefined
           ? ' The infinitely deep aquifer has a no-flux water table at its top (Yeh 1981), so the released mass stays in the aquifer.'
           : ' The top of the finite aquifer is the no-flux water table.'
