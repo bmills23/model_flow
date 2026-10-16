@@ -4,12 +4,14 @@ import {
   schulzeMakuch2005,
   xuEckstein1995,
   dispersionCoefficients,
+  waterLevels,
   type LoadingStep,
   type Warning,
 } from '@model-flow/engine';
 import type { VadoseMethod } from '../vadose/compute';
 import type { VadoseFeed } from '../vadose/feed';
 import type { VadoseScenario } from '../vadose/form';
+import type { SaturatedFeed } from '../saturated/feed';
 
 /** One row of the stepped-loading table (years since release start; factor times the base rate). */
 export interface StepRow {
@@ -49,6 +51,8 @@ export interface TransportForm {
   steps: StepRow[];
   /** Take the source from the vadose leaching result (when the vadose screen holds one). */
   feedFromVadose: boolean;
+  /** Take the source from the saturated soil source result (when that screen holds one). */
+  feedFromSaturated: boolean;
   // dispersivity
   dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
   alphaLOverride: string;
@@ -100,6 +104,7 @@ export const DEFAULT_FORM: TransportForm = {
     { start: '8', end: '12', factor: '0.5' },
   ],
   feedFromVadose: false,
+  feedFromSaturated: false,
   dispLaw: 'legacy',
   alphaLOverride: '',
   alphaTOverride: '',
@@ -124,10 +129,14 @@ export const DEFAULT_FORM: TransportForm = {
  * step fills `steps` by running the vadose method for that time; it is plain data for the worker.
  */
 export interface FedSource {
-  vadose: VadoseScenario;
+  /** Exactly one of `vadose` and `saturated` is set. */
+  vadose?: VadoseScenario | undefined;
+  saturated?: SaturatedFeed['input'] | undefined;
   method: VadoseMethod;
   label: string;
   steps?: LoadingStep[] | undefined;
+  /** Saturated feed only: a seasonal schedule did not fit the step cap and the annual mean was fed. */
+  seasonalFallback?: boolean | undefined;
 }
 
 export interface LoadingTerm {
@@ -198,8 +207,15 @@ export function makeZOf(thickness: number | undefined): (depth: number) => numbe
   return (depth) => (thickness === undefined ? -depth : thickness - depth);
 }
 
-export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): ScenarioResult {
-  const fed = f.feedFromVadose && feed !== null ? feed : null;
+export function toScenario(
+  f: TransportForm,
+  feed: VadoseFeed | null = null,
+  satFeed: SaturatedFeed | null = null,
+): ScenarioResult {
+  // a saturated feed wins when both toggles are on
+  const sat = f.feedFromSaturated && satFeed !== null ? satFeed : null;
+  const fed = !sat && f.feedFromVadose && feed !== null ? feed : null;
+  const anyFed = fed !== null || sat !== null;
   const errors: string[] = [];
   const need = (label: string, s: string, test: (v: number) => boolean, hint: string): number => {
     const v = num(s);
@@ -212,9 +228,23 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
   const pos = (v: number) => v > 0;
   const nonneg = (v: number) => v >= 0;
 
-  const porosity = need('Porosity', f.porosity, (v) => v > 0 && v < 1, 'must be between 0 and 1.');
+  // A saturated-fed source brings its own aquifer: the same porosity, conductivity, gradient and
+  // organic carbon partitioning that set its release (RISC5 choice, the methods note's coupling).
+  const satAquifer = sat
+    ? {
+        porosity: sat.input.soil.porosity,
+        darcy: sat.input.aquifer.conductivity * sat.input.aquifer.gradient,
+        kd: sat.input.chemical.koc * sat.input.soil.foc,
+        rhoB: sat.input.soil.rhoB,
+      }
+    : null;
+  const porosity = satAquifer
+    ? satAquifer.porosity
+    : need('Porosity', f.porosity, (v) => v > 0 && v < 1, 'must be between 0 and 1.');
   let velocity: number;
-  if (f.aquiferMode === 'darcy') {
+  if (satAquifer) {
+    velocity = satAquifer.darcy / porosity;
+  } else if (f.aquiferMode === 'darcy') {
     const k = need('Hydraulic conductivity', f.K, pos, 'must be a positive number (m/d).');
     const i = need('Hydraulic gradient', f.gradient, pos, 'must be a positive number.');
     velocity = (convert(k, 'm/d', 'm/s') * i) / porosity;
@@ -236,7 +266,9 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
   }
 
   let retardation: number;
-  if (f.retardMode === 'factor') {
+  if (satAquifer) {
+    retardation = 1 + (satAquifer.rhoB * satAquifer.kd) / porosity;
+  } else if (f.retardMode === 'factor') {
     retardation = need('Retardation factor', f.retardation, (v) => v >= 1, 'must be 1 or more.');
   } else {
     const kd = need('Kd', f.kd, nonneg, 'must be zero or more (L/kg).');
@@ -251,13 +283,23 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
 
   // A vadose-fed source keeps the vadose source's plan size (RISC5 choice); the thickness below the
   // water table stays the typed mixing depth.
-  const srcLength = fed
-    ? fed.scenario.source.length
-    : need('Source length', f.srcLength, nonneg, 'must be zero or more (m).');
-  const srcWidth = fed
-    ? fed.scenario.source.width
-    : need('Source width', f.srcWidth, pos, 'must be a positive number (m).');
-  const srcDepth = need('Source thickness', f.srcDepth, pos, 'must be a positive number (m).');
+  const srcLength = sat
+    ? sat.input.source.length
+    : fed
+      ? fed.scenario.source.length
+      : need('Source length', f.srcLength, nonneg, 'must be zero or more (m).');
+  const srcWidth = sat
+    ? sat.input.source.width
+    : fed
+      ? fed.scenario.source.width
+      : need('Source width', f.srcWidth, pos, 'must be a positive number (m).');
+  // A saturated source that reaches below the water table releases into a box of its high-water
+  // saturated thickness; one that never submerges keeps the typed mixing depth.
+  const satDepth = sat ? waterLevels(sat.input.source).hHi : 0;
+  const srcDepth =
+    sat && satDepth > 0
+      ? satDepth
+      : need('Source thickness', f.srcDepth, pos, 'must be a positive number (m).');
   if (thickness !== undefined && srcDepth > thickness) {
     errors.push('Source thickness cannot exceed the aquifer thickness.');
   }
@@ -269,7 +311,7 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
   const area = srcWidth * srcDepth;
   let c0: number;
   let massRate: number;
-  if (fed) {
+  if (anyFed) {
     // the schedule replaces the typed strength; the compute step supplies it
     c0 = 0;
     massRate = 0;
@@ -290,7 +332,7 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
   }
 
   const terms: LoadingTerm[] = [];
-  if (fed) {
+  if (anyFed) {
     terms.push({ start: 0, end: Infinity, factor: 1 });
   } else if (f.loading === 'continuous') {
     terms.push({ start: 0, end: Infinity, factor: 1 });
@@ -407,6 +449,7 @@ export function toScenario(f: TransportForm, feed: VadoseFeed | null = null): Sc
       zOf,
       time,
       ...(fed ? { fed: { vadose: fed.scenario, method: fed.method, label: fed.label } } : {}),
+      ...(sat ? { fed: { saturated: sat.input, method: sat.method, label: sat.label } } : {}),
       ...(thickness === undefined ? { top: 'no-flux' as const } : {}),
       extent: { xMin, xMax, yHalf },
       dispersivityDistance: distance,

@@ -9,6 +9,7 @@ import { DEFAULT_FORM, toScenario, type StepRow, type TransportForm } from './fo
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
 import { useTransportResult } from './useTransportResult';
+import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
@@ -70,8 +71,10 @@ export function TransportPage() {
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const fedOn = form.feedFromVadose && feed !== null;
-  const parsed = useMemo(() => toScenario(form, feed), [form, feed]);
+  const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
+  const satOn = form.feedFromSaturated && satFeed !== null;
+  const fedOn = (form.feedFromVadose && feed !== null) || satOn;
+  const parsed = useMemo(() => toScenario(form, feed, satFeed), [form, feed, satFeed]);
   const request = useMemo<ComputeRequest | null>(
     () =>
       parsed.ok
@@ -126,11 +129,13 @@ export function TransportPage() {
                   <Field
                     label="Hydraulic conductivity K (m/d)"
                     value={form.K}
+                    disabled={satOn}
                     onChange={(v) => set('K', v)}
                   />
                   <Field
                     label="Hydraulic gradient (m/m)"
                     value={form.gradient}
+                    disabled={satOn}
                     onChange={(v) => set('gradient', v)}
                   />
                 </>
@@ -138,12 +143,14 @@ export function TransportPage() {
                 <Field
                   label="Seepage velocity (m/yr)"
                   value={form.velocityYr}
+                  disabled={satOn}
                   onChange={(v) => set('velocityYr', v)}
                 />
               )}
               <Field
                 label="Porosity (-)"
                 value={form.porosity}
+                disabled={satOn}
                 onChange={(v) => set('porosity', v)}
               />
             </div>
@@ -193,14 +200,21 @@ export function TransportPage() {
                 <Field
                   label="Retardation factor R (-)"
                   value={form.retardation}
+                  disabled={satOn}
                   onChange={(v) => set('retardation', v)}
                 />
               ) : (
                 <>
-                  <Field label="Kd (L/kg)" value={form.kd} onChange={(v) => set('kd', v)} />
+                  <Field
+                    label="Kd (L/kg)"
+                    value={form.kd}
+                    disabled={satOn}
+                    onChange={(v) => set('kd', v)}
+                  />
                   <Field
                     label="Bulk density (kg/L)"
                     value={form.bulkDensity}
+                    disabled={satOn}
                     onChange={(v) => set('bulkDensity', v)}
                   />
                 </>
@@ -219,13 +233,45 @@ export function TransportPage() {
               <label className="check">
                 <input
                   type="checkbox"
-                  checked={form.feedFromVadose}
-                  onChange={(e) => set('feedFromVadose', e.target.checked)}
+                  checked={form.feedFromVadose && !satOn}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      feedFromVadose: e.target.checked,
+                      feedFromSaturated: e.target.checked ? false : f.feedFromSaturated,
+                    }))
+                  }
                 />
                 <span>Feed the source from the vadose leaching result ({feed.label})</span>
               </label>
             )}
-            {fedOn && feed && (
+            {satFeed && (
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={form.feedFromSaturated}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      feedFromSaturated: e.target.checked,
+                      feedFromVadose: e.target.checked ? false : f.feedFromVadose,
+                    }))
+                  }
+                />
+                <span>Feed the source from the saturated soil source ({satFeed.label})</span>
+              </label>
+            )}
+            {satOn && satFeed && (
+              <p className="derived">
+                The release of the {satFeed.input.source.length} m by {satFeed.input.source.width} m
+                saturated source sets the loading schedule. Length, width, strength and loading come
+                from it, and so do the porosity, conductivity, gradient and retardation of the
+                aquifer. The box is as deep as the high-water saturated thickness when the source
+                reaches below the water table; otherwise the thickness below is the mixing depth.{' '}
+                <a href="#/saturated">Open saturated soil source</a>
+              </p>
+            )}
+            {fedOn && !satOn && feed && (
               <p className="derived">
                 The mass reaching the water table over the {feed.scenario.source.length} m by{' '}
                 {feed.scenario.source.width} m vadose source sets the release schedule. Length,

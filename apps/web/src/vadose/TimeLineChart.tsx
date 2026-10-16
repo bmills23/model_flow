@@ -34,6 +34,8 @@ export function TimeLineChart(props: {
   scale: ConcScale;
   ariaLabel: string;
   tableUnit: string;
+  /** Optional vertical reference lines, such as the time a source is exhausted. */
+  vlines?: { tYr: number; label: string; cls?: string }[];
 }) {
   const { timesYr, series, scale } = props;
   const [ref, width] = useWidth();
@@ -146,6 +148,31 @@ export function TimeLineChart(props: {
           >
             {props.yLabel}
           </text>
+          {(props.vlines ?? [])
+            .filter((v) => v.tYr > 0 && v.tYr <= (timesYr[timesYr.length - 1] ?? 0))
+            .map((v, i) => {
+              const x = sx(v.tYr);
+              const flip = x > M.l + plotW * 0.7;
+              return (
+                <g key={`v${i}`}>
+                  <line
+                    x1={x}
+                    x2={x}
+                    y1={M.t}
+                    y2={M.t + plotH}
+                    className={`vline ${v.cls ?? ''}`.trim()}
+                  />
+                  <text
+                    x={flip ? x - 5 : x + 5}
+                    y={M.t + 11 + i * 14}
+                    textAnchor={flip ? 'end' : 'start'}
+                    className="mark-label"
+                  >
+                    {v.label}
+                  </text>
+                </g>
+              );
+            })}
           {series.map((s) => (
             <path key={s.key} d={linePath(pts(s))} className={`line ${s.cls}`} fill="none" />
           ))}
