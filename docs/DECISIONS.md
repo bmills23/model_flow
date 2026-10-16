@@ -169,7 +169,8 @@ DEFAULT rulings (applied in the note, Bryan's to overturn):
 1. **Water-table fluctuation:** the release rate is the time-weighted annual mean of the high-water and
    low-water rates; a seasonal schedule (high water for the first fraction f of each year) is an
    option. The manual says both that the rates shift during the year and that the fluctuation
-   apportions the mass loss; the annual mean removes the same mass each year.
+   apportions the mass loss; without source decay the annual mean removes the same mass each year
+   (with a source decay it does not, see the stage 3 entry).
 2. **Region 1 water content:** computed with the M2 unit-gradient helper from a residual water content
    and van Genuchten n entered for the source soil, with the aquifer's hydraulic conductivity as Ks
    (Brooks-Corey with the Lenhard conversion by default). The model's data list has neither input,
@@ -185,9 +186,9 @@ one porosity serves partitioning and transport (RISC5 choice); no source decay i
 optional first-order source decay in the modern one; the legacy method warns
 `saturatedSource.constant-dissolved-source` when a contributing region holds no separate phase, because
 a constant pore-water concentration then contradicts the partitioning it came from; the
-`tph-constant-approximation` threshold stays at 0.1 as in M2. Raoult's law is attributed to Cline et al.
-1991 only provisionally: the paper was not readable, so stage 2 cites it only after confirming it, or
-drops it and records why.
+`tph-constant-approximation` threshold stays at 0.1 as in M2. Raoult's law was attributed to Cline et al.
+1991 only provisionally because the paper was not readable; stage 2 dropped it from the citations (see
+the stage 2 entry).
 
 ## 2026-10-16: M3 engine built (stage 2)
 

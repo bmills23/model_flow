@@ -156,8 +156,9 @@ method does.
 The rate at each water level is Q(h) = Q_1(h) + Q_2(h). Two schedules:
 
 - `annual-mean` (default, DEFAULT ruling, DECISIONS.md 2026-10-16): a constant rate
-  Qbar = (1 - f) Q(h_lo) + f Q(h_hi). The mass removed per year is exactly that of the seasonal schedule;
-  only its timing inside each year is averaged.
+  Qbar = (1 - f) Q(h_lo) + f Q(h_hi). Without source decay the mass removed per year is exactly that of
+  the seasonal schedule and only its timing inside each year is averaged; with a source decay the two
+  differ (see DECISIONS.md, M3 stage 3).
 - `seasonal`: Q(h_hi) during the first fraction f of every year and Q(h_lo) for the rest. The phase
   (high water first) is a convention; within-year timing matters only for receptors with travel times
   shorter than a year.
@@ -344,7 +345,7 @@ example for the depletion, analytic identities, and hand calculations.
    table (h_min = dh = 0) has the same depletion rate as the vadose legacy source for the same soil with
    no vapour loss (`sourceDepletionRate`, 1e-12). (c) With zero decay in both processes the aquifer mass
    equals the loaded mass within 1e-6, for a finite layer and for the no-flux infinite aquifer (the M2
-   coupling tolerance). (d) Annual-mean and seasonal schedules deliver equal mass at every year end
+   coupling tolerance). (d) Without source decay, annual-mean and seasonal schedules deliver equal mass at every year end
    before depletion (1e-12). (e) Halving the modern step length changes a downstream receptor value by
    less than 0.1 percent (case A at 10 yr, as in M2).
 
