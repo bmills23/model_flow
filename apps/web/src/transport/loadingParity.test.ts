@@ -24,7 +24,10 @@ const cases: Record<string, Partial<TransportForm>> = {
 };
 
 function record(over: Partial<TransportForm>) {
-  const s = scenario(over);
+  // The recorded Wexler values are the whole-space PATCHI superposition. The screen's infinitely
+  // deep aquifer now applies the no-flux water table, so drop that flag to pin the loading code alone.
+  const { top: _noFlux, ...s } = scenario(over);
+  void _noFlux;
   const f = scenario({ ...over, thicknessMode: 'finite', thickness: '10', width: '200' });
   return {
     wexlerPoint: receptorConcentration(s, 'modern', s.time),

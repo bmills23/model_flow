@@ -116,17 +116,38 @@ point and grid functions alike instead of a mirrored image.
 ## Modern method: Wexler (1992) patch sources (`groundwater.wexler1992`; citation `wexler1992`)
 
 A patch [y1,y2] x [z1,z2] on the inflow plane x = 0 is held at c0; the medium is semi-infinite in x.
-PATCHI has infinite width and depth; PATCHF has width W (y in [0,W]) and thickness H (z in [0,H]) with
+PATCHI has infinite width and depth (or one bounded z axis, below); PATCHF has width W (y in [0,W]) and thickness H (z in [0,H]) with
 no-flux boundaries. Concentrations at x < 0 are reported as zero.
 
-Open question (not resolved by the AT123D no-flux ruling): PATCHI has no boundary in z, so it carries no
-water table. The transport screen places the patch at z in [-source thickness, 0] and receptors at
-z = -depth, so PATCHI lets the held concentration diffuse upward through z = 0 and reads low near the water
-table relative to a no-flux water table (an image patch [-T, T] gives the no-flux value; a 5 m by 3 m patch
-at 60 m gave PATCHI/no-flux ratios of 0.50, 0.63, 0.73 and 0.82 at depths 0, 1.5, 3 and 6 m). PATCHF is
-unaffected where the screen uses it (z from the base, patch at [H - T, H], no-flux top at H). The screen
-also falls back to PATCHI for a finite thickness without a width, which ignores the top and bottom. No
-change has been made to either; it needs its own ruling.
+PATCHI has no boundary in z of its own, so a patch at z in [-T, 0] under an infinitely deep aquifer would
+let the held concentration diffuse upward through the water table at z = 0. Against the no-flux answer,
+that whole-space PATCHI read 0.50, 0.63, 0.73 and 0.82 of the value at depths 0, 1.5, 3 and 6 m (a 5 m by
+3 m patch at 60 m, 20 yr). The engine therefore takes an optional vertical boundary on `patchiConcentration`
+and `patchiGrid` (`VerticalBounds`), applied by the method of images inside the same time integral; the
+x kernel, the lateral y profile and the loading superposition are unchanged, and PATCHF is untouched:
+
+- `{ waterTable: z0 }` (infinitely deep aquifer, no-flux water table at z0): the z profile is the
+  smoothed indicator of the patch plus that of its mirror image about z0, that is, the patch [z1, z2]
+  with z2 <= z0 becomes [z1, 2 z0 - z1] when it touches the table (the image patch [-T, T] of the
+  AT123D no-flux ruling). Receptors above the water table report zero, as in the AT123D kernel.
+- `{ thickness: H }` (layer z in [0, H] with no-flux top and bottom, infinite width): the z profile is
+  the same reflected profile PATCHF uses (`axisDensity`: an image series at short times, a cosine series
+  at long times, which agree to rounding), with the y profile left open. The result equals the
+  whole-space solution summed over the patch images about z = 0 and z = H, and tends to PATCHF as its
+  width grows. Receptors outside [0, H] report zero. This route was chosen over calling PATCHF with a
+  made-up large width because PATCHF needs a finite y domain (a double cosine series whose cost and
+  accuracy depend on an invented number), and over a screen-side image sum because the reflection already
+  exists in the engine and the time integral evaluates it once per age instead of once per image.
+
+The transport screen uses `{ waterTable: 0 }` for every infinitely deep aquifer (its patch is
+[-source depth, 0] and its receptors are at z = -depth) and `{ thickness: H }` for a finite thickness with
+a blank width (message `ui.wexler-infinite-width`: PATCHI with infinite width and the no-flux top and
+bottom of the layer); a finite thickness with a width still uses PATCHF (z from the base, patch at
+[H - T, H], no-flux top at H). The legacy and modern overlay now share the no-flux water table: the ratio
+of the Wexler to the AT123D value at a fixed distance is flat with depth to within 5 percent (the two
+differ in source basis, so only the depth shape is compared; `compute.test.ts` pins it). The screen's
+earlier Wexler values for infinitely deep aquifers, which leaked through the water table, changed
+accordingly.
 
 The x kernel is the first-type boundary solution. With beta = sqrt(u^2 + 4 D_x' k) for an effective
 decay rate k:

@@ -14,6 +14,7 @@ import {
   type ConcentrationStep,
   type DomenicoInput,
   type LoadingStep,
+  type VerticalBounds,
   type Warning,
   type WexlerInput,
 } from '@model-flow/engine';
@@ -162,6 +163,19 @@ function wexler(s: Scenario): {
   };
 }
 
+/**
+ * The vertical boundaries PATCHI must honour when the screen has no PATCHF width. PATCHI has no z
+ * boundary of its own, so without this the held concentration would diffuse upward through the
+ * water table. An infinitely deep aquifer has a no-flux water table (the AT123D ruling), and a finite
+ * thickness without a width has no-flux top and bottom; both are applied as image patches inside
+ * the engine's PATCHI (see docs/methods/groundwater-transport.md). A scenario with neither is the
+ * whole-space PATCHI.
+ */
+function verticalBounds(s: Scenario): VerticalBounds | undefined {
+  if (s.thickness !== undefined) return { thickness: s.thickness };
+  return s.top === 'no-flux' ? { waterTable: s.zOf(0) } : undefined;
+}
+
 function domenicoInput(s: Scenario): DomenicoInput {
   return {
     velocity: s.velocity,
@@ -201,7 +215,7 @@ export function receptorConcentration(
       s,
       (d) => {
         const p = { x, y: y + w.yOff, z: s.zOf(d) };
-        if (!w.finite) return patchiConcentration(w.params, p, time, loading);
+        if (!w.finite) return patchiConcentration(w.params, p, time, loading, verticalBounds(s));
         const r = patchfConcentration(w.params, p, time, w.finite, loading);
         if (!r.converged && flags) flags.notConverged = true;
         return r.value;
@@ -248,7 +262,7 @@ export function plumeGrid(
       const loading = concentrationLoading(s);
       g = w.finite
         ? patchfGrid(w.params, xs, ysh, z, s.time, w.finite, undefined, loading)
-        : patchiGrid(w.params, xs, ysh, z, s.time, undefined, loading);
+        : patchiGrid(w.params, xs, ysh, z, s.time, undefined, loading, verticalBounds(s));
     }
     if (g.length === 0) g = xs.map(() => ys.map(() => 0));
     const wgt = weights[k]!;
@@ -277,7 +291,7 @@ function collectWarnings(
   if (s.thickness !== undefined && s.width === undefined) {
     add(
       'ui.wexler-infinite-width',
-      'The aquifer width is blank, so the Wexler method uses PATCHI (infinite width and depth). Enter a width to use the finite PATCHF solution.',
+      'The aquifer width is blank, so the Wexler method uses PATCHI with infinite width and the no-flux top and bottom of the layer. Enter a width to use the finite PATCHF solution.',
     );
   }
   if (s.thickness !== undefined && req.domenico) {

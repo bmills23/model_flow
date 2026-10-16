@@ -42,7 +42,7 @@ entry here.
 | Source strength | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source |
 | Geometry | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width | One coordinate story for the three methods; Domenico already measures depth down from the top |
 | Screen average on the map | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout | Keeps the worker time bounded; the readout uses the finer average |
-| Finite thickness without a width | Wexler uses PATCHI and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both |
+| Finite thickness without a width | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table) |
 | Domenico | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed | Not a recommended method (see docs/methods/groundwater-transport.md) |
 
 ## 2026-10-15: Schulze-Makuch 2005 dispersivity coefficients (M1)
@@ -133,3 +133,13 @@ Bryan's ruling on the default: "Default to no-flux". Infinite-thickness AT123D r
 table unless a caller asks for `top: 'unbounded'`; the ANALGWST point-source fixtures and the kernel
 tests that need a whole-space medium request it explicitly. Results from the M1 screen near the water
 table change accordingly.
+
+## 2026-10-16: Wexler PATCHI honours the no-flux water table (Bryan: "Fix first, one push")
+
+Following the AT123D no-flux ruling above, the transport screen's Wexler path still leaked the held
+concentration upward through z = 0 (whole-space PATCHI read 0.50 to 0.82 of the no-flux value at depths
+0 to 6 m). `patchiConcentration` and `patchiGrid` gained an optional `VerticalBounds` argument
+(`{ waterTable }` or `{ thickness }`, images inside the time integral), the screen passes it for every
+infinitely deep aquifer and for a finite thickness without a width, and PATCHF and every ANALGWST
+fixture are unchanged. `loadingParity.test.ts` now pins its recorded whole-space Wexler values by
+dropping the screen's no-flux flag, because those values predate the change.

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { at123dConcentration, patchiConcentration } from '@model-flow/engine';
-import { compute, receptorConcentration } from './compute';
+import {
+  at123dConcentration,
+  patchiConcentration,
+  patchiGrid,
+  type WexlerInput,
+} from '@model-flow/engine';
+import { compute, plumeGrid, receptorConcentration } from './compute';
 import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
 
 function scenario(over: Partial<TransportForm> = {}) {
@@ -9,21 +14,31 @@ function scenario(over: Partial<TransportForm> = {}) {
   return r.scenario;
 }
 
+/** The Wexler parameters of a scenario with its source patch replaced. */
+function wexlerParams(s: ReturnType<typeof scenario>, z1: number, z2: number): WexlerInput {
+  return {
+    velocity: s.velocity,
+    retardation: s.retardation,
+    decayRate: s.decayRate,
+    dx: s.dx,
+    dy: s.dy,
+    dz: s.dz,
+    c0: s.c0,
+    patch: { y1: s.source.y1, y2: s.source.y2, z1, z2 },
+  };
+}
+
 describe('receptorConcentration', () => {
-  it('matches the engine PATCHI value for a continuous point receptor', () => {
+  it('matches the no-flux image patch of the engine PATCHI value for a continuous point receptor', () => {
     const s = scenario({ rx: '60', ry: '2', rDepth: '1', timeYr: '8' });
+    // the water table at z = 0 is no-flux, so the held patch [-T, 0] is mirrored to [-T, T]
     const direct = patchiConcentration(
+      wexlerParams(s, s.source.z1, -s.source.z1),
       {
-        velocity: s.velocity,
-        retardation: s.retardation,
-        decayRate: s.decayRate,
-        dx: s.dx,
-        dy: s.dy,
-        dz: s.dz,
-        c0: s.c0,
-        patch: { y1: s.source.y1, y2: s.source.y2, z1: s.source.z1, z2: s.source.z2 },
+        x: 60,
+        y: 2,
+        z: s.zOf(1),
       },
-      { x: 60, y: 2, z: s.zOf(1) },
       s.time,
     );
     expect(receptorConcentration(s, 'modern', s.time)).toBeCloseTo(direct, 14);
@@ -83,6 +98,78 @@ describe('the infinitely deep legacy aquifer has a no-flux water table', () => {
     const got = receptorConcentration(s, 'legacy', s.time);
     expect(got).toBeCloseTo(want, 14);
     expect(got).toBeGreaterThan(whole);
+  });
+});
+
+describe('the modern method honours the no-flux water table of an infinitely deep aquifer', () => {
+  const depths = [0, 1.5, 3, 6];
+
+  it('reads the no-flux value at every depth, not the leaky whole-space value', () => {
+    for (const d of depths) {
+      const s = scenario({
+        srcWidth: '5',
+        srcDepth: '3',
+        rx: '60',
+        ry: '0',
+        rDepth: String(d),
+        timeYr: '20',
+      });
+      const noFlux = patchiConcentration(wexlerParams(s, -3, 3), { x: 60, y: 0, z: -d }, s.time);
+      const leaky = patchiConcentration(wexlerParams(s, -3, 0), { x: 60, y: 0, z: -d }, s.time);
+      const got = receptorConcentration(s, 'modern', s.time);
+      expect(Math.abs(got - noFlux)).toBeLessThanOrEqual(1e-9 * noFlux);
+      if (d === 0) expect(leaky / noFlux).toBeLessThan(0.6);
+    }
+  });
+
+  it('gives the plan-view grid the no-flux values too', () => {
+    const s = scenario({ srcWidth: '5', srcDepth: '3', rDepth: '1.5', timeYr: '20' });
+    const xs = [10, 40, 90];
+    const ys = [-4, 0, 4];
+    const got = plumeGrid(s, 'modern', xs, ys);
+    const want = patchiGrid(wexlerParams(s, -3, 3), xs, ys, -1.5, s.time);
+    xs.forEach((_, i) =>
+      ys.forEach((__, j) => {
+        expect(Math.abs(got[i]![j]! - want[i]![j]!)).toBeLessThanOrEqual(1e-9 * want[i]![j]!);
+      }),
+    );
+  });
+
+  it('applies the no-flux water table to pulse loading and a screened receptor', () => {
+    const s = scenario({
+      srcWidth: '5',
+      srcDepth: '3',
+      loading: 'pulse',
+      pulseYr: '3',
+      timeYr: '10',
+      screen: true,
+      screenTop: '0',
+      screenBottom: '2',
+    });
+    const { top: _top, ...open } = s;
+    void _top;
+    const leaky = receptorConcentration(open, 'modern', s.time);
+    expect(receptorConcentration(s, 'modern', s.time)).toBeGreaterThan(leaky);
+  });
+
+  it('keeps the modern and legacy depth profiles in the same shape near the water table', () => {
+    // the two methods differ in source basis, so compare the depth profile of their ratio: with both
+    // honouring the no-flux water table it is flat to a few percent (whole-space Wexler fell to half)
+    const ratio = (d: number): number => {
+      const s = scenario({
+        srcWidth: '5',
+        srcDepth: '3',
+        rx: '60',
+        ry: '0',
+        rDepth: String(d),
+        timeYr: '20',
+      });
+      return (
+        receptorConcentration(s, 'modern', s.time) / receptorConcentration(s, 'legacy', s.time)
+      );
+    };
+    const r0 = ratio(0);
+    for (const d of [1.5, 3]) expect(Math.abs(ratio(d) / r0 - 1)).toBeLessThan(0.05);
   });
 });
 
@@ -150,6 +237,70 @@ describe('compute', () => {
     expect(
       noWidth.ok && noWidth.result.warnings.some((w) => w.code === 'ui.wexler-infinite-width'),
     ).toBe(true);
+  });
+
+  it('describes the finite-thickness, blank-width fallback as a layer with infinite width', () => {
+    const out = compute({
+      scenario: scenario({ thicknessMode: 'finite', thickness: '10', width: '' }),
+      mapMethod: 'modern',
+      domenico: false,
+      nx: 6,
+      ny: 4,
+      nCurve: 2,
+    });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const w = out.result.warnings.find((x) => x.code === 'ui.wexler-infinite-width');
+    expect(w?.message).not.toMatch(/infinite width and depth/);
+    expect(w?.message).toMatch(/no-flux top and bottom/);
+  });
+});
+
+describe('a finite-thickness aquifer without a width keeps both no-flux boundaries', () => {
+  const H = 10;
+  const s = scenario({
+    thicknessMode: 'finite',
+    thickness: String(H),
+    width: '',
+    srcWidth: '5',
+    srcDepth: '3',
+    rx: '60',
+    ry: '0',
+    timeYr: '20',
+  });
+
+  // whole-space solution summed over the images of the patch about z = 0 and z = H
+  const images = (z: number): number => {
+    let sum = 0;
+    const { z1, z2 } = s.source;
+    for (let n = -10; n <= 10; n++) {
+      for (const [a, b] of [
+        [z1 + 2 * n * H, z2 + 2 * n * H],
+        [-z2 + 2 * n * H, -z1 + 2 * n * H],
+      ] as const) {
+        sum += patchiConcentration(wexlerParams(s, a, b), { x: 60, y: 0, z }, s.time);
+      }
+    }
+    return sum;
+  };
+
+  it('matches the image sum at the water table, mid-depth and the aquifer base', () => {
+    for (const d of [0, 1.5, 5, 10]) {
+      const sd = { ...s, receptorDepths: { top: d, bottom: d } };
+      const want = images(s.zOf(d));
+      const got = receptorConcentration(sd, 'modern', s.time);
+      expect(want).toBeGreaterThan(0);
+      expect(Math.abs(got - want)).toBeLessThanOrEqual(1e-6 * want);
+    }
+  });
+
+  it('exceeds the whole-space value, which ignores both boundaries', () => {
+    const open = patchiConcentration(
+      wexlerParams(s, s.source.z1, s.source.z2),
+      { x: 60, y: 0, z: H },
+      s.time,
+    );
+    expect(images(H)).toBeGreaterThan(open * 1.2);
   });
 });
 

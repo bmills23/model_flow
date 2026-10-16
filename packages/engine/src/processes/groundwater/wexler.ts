@@ -46,6 +46,67 @@ export interface PatchfResult {
   terms: number;
 }
 
+/**
+ * Vertical boundary of a PATCHI run, for a patch that does not span the whole z axis.
+ * `thickness`: a layer z in [0, H] with no-flux top and bottom (PATCHI with infinite width and a
+ * bounded depth). `waterTable`: an infinitely deep aquifer below a no-flux water table at z = waterTable
+ * (the patch must lie at or below it; receptors above it report zero).
+ */
+export type VerticalBounds = { thickness: number } | { waterTable: number };
+
+/** Lateral and vertical boundaries in force inside the time integral and the grid rule. */
+interface Bounds {
+  width?: number;
+  thickness?: number;
+  waterTable?: number;
+}
+
+function boundsOf(
+  finite?: { width: number; thickness: number },
+  vertical?: VerticalBounds,
+): Bounds {
+  if (finite) return { width: finite.width, thickness: finite.thickness };
+  return vertical ?? {};
+}
+
+/** True when a receptor lies outside the bounded domain (zero concentration, not a mirrored image). */
+function outsideBounds(p: Point3, b: Bounds): boolean {
+  if (b.width !== undefined && (p.y < 0 || p.y > b.width)) return true;
+  if (b.thickness !== undefined && (p.z < 0 || p.z > b.thickness)) return true;
+  return b.waterTable !== undefined && p.z > b.waterTable;
+}
+
+/** Unnormalised y profile of the patch spread by width w: smoothed indicator, reflected when bounded. */
+function yProfile(y: number, y1: number, y2: number, w: number, b: Bounds): number {
+  return b.width === undefined
+    ? slab(y, y1, y2, w)
+    : axisDensity(y, y1, y2, w, b.width) * (y2 - y1);
+}
+
+/** Unnormalised z profile: reflected at the layer ends, or at the water table (image patch), when bounded. */
+function zProfile(z: number, z1: number, z2: number, w: number, b: Bounds): number {
+  if (b.thickness !== undefined) return axisDensity(z, z1, z2, w, b.thickness) * (z2 - z1);
+  if (b.waterTable !== undefined) {
+    const t = b.waterTable;
+    return z > t ? 0 : slab(z, z1, z2, w) + slab(z, 2 * t - z2, 2 * t - z1, w);
+  }
+  return slab(z, z1, z2, w);
+}
+
+function checkVertical(input: WexlerInput, vertical?: VerticalBounds): void {
+  if (!vertical) return;
+  const { z1, z2 } = input.patch;
+  if ('thickness' in vertical) {
+    if (!(vertical.thickness > 0)) throw new RangeError('Thickness must be positive');
+    if (!(z1 >= 0 && z2 <= vertical.thickness))
+      throw new RangeError('Patch must lie inside the aquifer');
+  } else {
+    if (!Number.isFinite(vertical.waterTable)) throw new RangeError('Water table must be finite');
+    if (!(z2 <= vertical.waterTable))
+      throw new RangeError('Patch must lie at or below the no-flux water table');
+  }
+}
+
 interface Retarded {
   u: number;
   dx: number;
@@ -107,11 +168,9 @@ function timeIntegral(
   r: Retarded,
   p: Point3,
   time: number,
-  finite?: { width: number; thickness: number },
+  bounds: Bounds = {},
 ): number {
   const { y1, y2, z1, z2 } = input.patch;
-  const lenY = y2 - y1;
-  const lenZ = z2 - z1;
   const norm = x0(p.x);
   const upper = time === Infinity ? integralUpperLimit(p.x, r) : time;
   const f = (tau: number): number => {
@@ -121,11 +180,7 @@ function timeIntegral(
     if (!(g > 0)) return 0;
     const wy = 2 * Math.sqrt(r.dy * tau);
     const wz = 2 * Math.sqrt(r.dz * tau);
-    const fy = finite ? axisDensity(p.y, y1, y2, wy, finite.width) * lenY : slab(p.y, y1, y2, wy);
-    const fz = finite
-      ? axisDensity(p.z, z1, z2, wz, finite.thickness) * lenZ
-      : slab(p.z, z1, z2, wz);
-    return g * fy * fz;
+    return g * yProfile(p.y, y1, y2, wy, bounds) * zProfile(p.z, z1, z2, wz, bounds);
   };
   function x0(x: number): number {
     return x / (2 * Math.sqrt(Math.PI * r.dx));
@@ -142,37 +197,40 @@ function timeIntegral(
   return input.c0 * sum;
 }
 
-function inflowPlane(
-  input: WexlerInput,
-  p: Point3,
-  finite?: { width: number; thickness: number },
-): number {
+function inflowPlane(input: WexlerInput, p: Point3, bounds: Bounds = {}): number {
   const { y1, y2, z1, z2 } = input.patch;
-  if (finite) {
-    // on the inflow plane the profile is the sharp patch indicator inside the aquifer
-    const inY = p.y >= 0 && p.y <= finite.width;
-    const inZ = p.z >= 0 && p.z <= finite.thickness;
-    if (!inY || !inZ) return 0;
-  }
-  return input.c0 * slab(p.y, y1, y2, 0) * slab(p.z, z1, z2, 0);
+  // on the inflow plane the profile is the sharp patch indicator inside the aquifer
+  if (outsideBounds(p, bounds)) return 0;
+  const zPart =
+    bounds.waterTable !== undefined ? zProfile(p.z, z1, z2, 0, bounds) : slab(p.z, z1, z2, 0);
+  return input.c0 * slab(p.y, y1, y2, 0) * zPart;
 }
 
-/** Wexler (1992) PATCHI: patch source on the inflow plane, infinite width and depth. */
+/**
+ * Wexler (1992) PATCHI: patch source on the inflow plane, infinite width and depth. With `vertical`
+ * the z axis is bounded instead (see VerticalBounds): the patch spreading is reflected at the no-flux
+ * layer ends or water table by the method of images, and receptors outside the domain report zero.
+ */
 export function patchiConcentration(
   input: WexlerInput,
   p: Point3,
   time: number,
   loading?: readonly ConcentrationStep[],
+  vertical?: VerticalBounds,
 ): number {
   if (loading) {
     const unit = { ...input, c0: 1 };
-    return superposeLoading(loading, time, (tau) => patchiConcentration(unit, p, tau));
+    return superposeLoading(loading, time, (tau) =>
+      patchiConcentration(unit, p, tau, undefined, vertical),
+    );
   }
   const r = retarded(input);
-  if (p.x < 0 || time < 0) return 0;
-  if (p.x === 0) return inflowPlane(input, p);
+  checkVertical(input, vertical);
+  const bounds = boundsOf(undefined, vertical);
+  if (p.x < 0 || time < 0 || outsideBounds(p, bounds)) return 0;
+  if (p.x === 0) return inflowPlane(input, p, bounds);
   if (time === 0) return 0;
-  return timeIntegral(input, r, p, time);
+  return timeIntegral(input, r, p, time, bounds);
 }
 
 /** Wexler (1992) PATCHF: finite width and thickness, with the exact double-cosine series solution. */
@@ -205,7 +263,12 @@ export function patchfConcentration(
     return { value: 0, converged: true, method: 'series', terms: 0 };
   }
   if (p.x === 0)
-    return { value: inflowPlane(input, p, aquifer), converged: true, method: 'series', terms: 0 };
+    return {
+      value: inflowPlane(input, p, boundsOf(aquifer)),
+      converged: true,
+      method: 'series',
+      terms: 0,
+    };
   if (time === 0) return { value: 0, converged: true, method: 'series', terms: 0 };
   const finite = { width: W, thickness: H };
   const forced = aquifer.method;
@@ -217,7 +280,7 @@ export function patchfConcentration(
     }
   }
   return {
-    value: timeIntegral(input, r, p, time, finite),
+    value: timeIntegral(input, r, p, time, boundsOf(finite)),
     converged: true,
     method: 'integral',
     terms: 0,
@@ -272,7 +335,7 @@ function patchfSeries(
  * PATCHI on a plan-view grid at height z: one shared time rule for all points (see at123dGrid).
  * Agrees with patchiConcentration to a few 1e-8 relative wherever the value exceeds 1e-6 of c0, for Peclet
  * numbers (x u / D) up to MAX_GRID_PECLET (larger values throw). Returns c[ix][iy]; x < 0 and receptors
- * outside a finite aquifer give zero.
+ * outside a finite aquifer give zero. `vertical` bounds the z axis as for patchiConcentration.
  */
 export function patchiGrid(
   input: WexlerInput,
@@ -282,14 +345,17 @@ export function patchiGrid(
   time: number,
   panelsPerDecade = BASE_PANELS_PER_DECADE,
   loading?: readonly ConcentrationStep[],
+  vertical?: VerticalBounds,
 ): number[][] {
+  checkVertical(input, vertical);
+  const bounds = boundsOf(undefined, vertical);
   if (loading) {
     const unit = { ...input, c0: 1 };
     return superposeLoadingGrid(loading, time, xs.length, ys.length, (tau) =>
-      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade),
+      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade, bounds),
     );
   }
-  return wexlerGrid(input, xs, ys, z, time, panelsPerDecade);
+  return wexlerGrid(input, xs, ys, z, time, panelsPerDecade, bounds);
 }
 
 /** PATCHF on a plan-view grid (same shared time rule; reflected y and z profiles). */
@@ -310,10 +376,10 @@ export function patchfGrid(
   if (loading) {
     const unit = { ...input, c0: 1 };
     return superposeLoadingGrid(loading, time, xs.length, ys.length, (tau) =>
-      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade, aquifer),
+      wexlerGrid(unit, xs, ys, z, tau, panelsPerDecade, boundsOf(aquifer)),
     );
   }
-  return wexlerGrid(input, xs, ys, z, time, panelsPerDecade, aquifer);
+  return wexlerGrid(input, xs, ys, z, time, panelsPerDecade, boundsOf(aquifer));
 }
 
 function wexlerGrid(
@@ -323,13 +389,12 @@ function wexlerGrid(
   z: number,
   time: number,
   panelsPerDecade: number,
-  finite?: { width: number; thickness: number },
+  bounds: Bounds = {},
 ): number[][] {
   const r = retarded(input);
   const { y1, y2, z1, z2 } = input.patch;
-  // receptors outside the finite aquifer carry no concentration (same as patchfConcentration)
-  const outside = (y: number): boolean =>
-    finite !== undefined && (y < 0 || y > finite.width || z < 0 || z > finite.thickness);
+  // receptors outside the bounded domain carry no concentration (same as patchfConcentration)
+  const outside = (y: number): boolean => outsideBounds({ x: 0, y, z }, bounds);
   const xmax = Math.max(0, ...xs);
   const upper = time === Infinity ? integralUpperLimit(xmax, r) : time;
   const xPos = xs.filter((x) => x > 0);
@@ -342,24 +407,19 @@ function wexlerGrid(
     const tau = rule.tau[k]!;
     wy[k] = 2 * Math.sqrt(r.dy * tau);
     const wz = 2 * Math.sqrt(r.dz * tau);
-    const zf = finite
-      ? axisDensity(z, z1, z2, wz, finite.thickness) * (z2 - z1)
-      : slab(z, z1, z2, wz);
+    const zf = zProfile(z, z1, z2, wz, bounds);
     fz[k] = zf * rule.weight[k]! * Math.exp(-r.k * tau);
   }
   const fy = ys.map((y) => {
     const row = new Float64Array(n);
     for (let k = 0; k < n; k++) {
-      row[k] =
-        (finite
-          ? axisDensity(y, y1, y2, wy[k]!, finite.width) * (y2 - y1)
-          : slab(y, y1, y2, wy[k]!)) * fz[k]!;
+      row[k] = yProfile(y, y1, y2, wy[k]!, bounds) * fz[k]!;
     }
     return row;
   });
   return xs.map((x) => {
     if (x < 0) return ys.map(() => 0);
-    if (x === 0) return ys.map((y) => (outside(y) ? 0 : inflowPlane(input, { x, y, z }, finite)));
+    if (x === 0) return ys.map((y) => (outside(y) ? 0 : inflowPlane(input, { x, y, z }, bounds)));
     const g = new Float64Array(n);
     const norm = x / (2 * Math.sqrt(Math.PI * r.dx));
     for (let k = 0; k < n; k++) {
