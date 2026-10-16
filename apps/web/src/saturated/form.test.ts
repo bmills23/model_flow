@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { convert } from '@model-flow/engine';
-import { DEFAULT_FORM, toScenario, type SaturatedForm } from './form';
+import { convert, runTwoRegion } from '@model-flow/engine';
+import { DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
 
 const YR = convert(1, 'yr', 's');
 const DAY = 86400;
@@ -83,5 +83,16 @@ describe('saturated form: validation', () => {
 
   it('rejects the chemical exceeding the TPH', () => {
     expect(errors({ F: '9000' }).join(' ')).toMatch(/cannot exceed the TPH/i);
+  });
+});
+
+describe('saturated form: hand case A detection', () => {
+  it('is hand case A for the defaults and loses that status when the hydraulic model changes the numbers', () => {
+    expect(isCaseA(DEFAULT_FORM)).toBe(true);
+    const a = scenario();
+    const b = scenario({ hydraulicModel: 'vanGenuchten1980' });
+    const regionC = (s: typeof a) => JSON.stringify(runTwoRegion(s.input).regions);
+    expect(regionC(b)).not.toBe(regionC(a));
+    expect(isCaseA({ ...DEFAULT_FORM, hydraulicModel: 'vanGenuchten1980' })).toBe(false);
   });
 });

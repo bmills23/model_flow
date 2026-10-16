@@ -102,8 +102,11 @@ function num(s: string): number {
 }
 
 export function isCaseA(f: SaturatedForm): boolean {
+  // the hydraulic model sets the region 1 water content, so it is an input; the default is Brooks-Corey
+  const model = (x: SaturatedForm) =>
+    x.hydraulicModel === 'brooksCorey1964' ? 'default' : x.hydraulicModel;
   const inputs = (x: SaturatedForm) =>
-    JSON.stringify({ ...x, method: '', schedule: '', hydraulicModel: '', horizonYr: '' });
+    JSON.stringify({ ...x, method: '', schedule: '', hydraulicModel: model(x), horizonYr: '' });
   return inputs(f) === inputs(DEFAULT_FORM);
 }
 
