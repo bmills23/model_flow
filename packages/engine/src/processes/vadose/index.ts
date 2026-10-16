@@ -27,6 +27,7 @@ export * from './diffusion.js';
 export * from './source.js';
 export * from './kernel.js';
 export * from './dispersivity.js';
+export * from './coupling.js';
 
 const DAY = 86400;
 const MONTH = (365.25 * DAY) / 12;
