@@ -54,3 +54,13 @@ Crossref, but the coefficients were taken from lecture notes that quote the pape
 own table, and the per-medium coefficients and the stated data range were not verified, so they are not
 encoded and the method carries no range warning. The reference entry's notes field says so. Replace the
 coefficients or add the range warning only after checking the paper, and record that check here.
+
+Check attempted 2026-10-16, not closed: the full text is behind the publisher's paywall (Wiley and
+ResearchGate both refused access), so the only primary text read was the abstract (Europe PMC, PMID
+15882337). The abstract gives exponent ranges only, 0.40 to 0.92 for consolidated and 0.44 to 0.94 for
+unconsolidated media, says the higher-reliability subsets have exponents close to 0.5, and finds no clear
+evidence of an upper scale bound; it gives no (c, m) pairs and no data range. Two DTU lecture notes
+(Bjerg 2008; version 2.0, 2025) quote 0.20 L^0.44 for the most reliable unconsolidated data without
+citing a table, and may share one lineage. The coefficients therefore stay as encoded, still
+secondary-sourced. Closing this needs the paper's PDF (institutional access, interlibrary loan, or the
+author); Neuman's 2006 comment on the paper and the author's reply should be read at the same time.

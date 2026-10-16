@@ -38,7 +38,8 @@ a done one.
 ## Open items
 - Schulze-Makuch 2005 coefficients (0.20, 0.44) come from lecture notes quoting the paper, not from the
   paper's own table; per-medium coefficients and the data range are not encoded, so the method has no
-  range warning. Check against the paper and record the check in DECISIONS.md.
+  range warning. A check on 2026-10-16 reached only the abstract (paywalled full text; see DECISIONS.md),
+  so this stays open until someone supplies the paper's PDF.
 - Galya 1987 is a horizontal plane-source paper; the box source derives from Yeh 1981 (the methods note
   says so; the ROADMAP section 3 row is annotated).
 - 35 of 75 references still carry square-bracketed descriptor titles (status `planned`); replace each
