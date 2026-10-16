@@ -143,3 +143,48 @@ concentration upward through z = 0 (whole-space PATCHI read 0.50 to 0.82 of the 
 infinitely deep aquifer and for a finite thickness without a width, and PATCHF and every ANALGWST
 fixture are unchanged. `loadingParity.test.ts` now pins its recorded whole-space Wexler values by
 dropping the screen's no-flux flag, because those values predate the change.
+
+## 2026-10-16: M3 saturated soil source scope and screening choices
+
+Bryan approved starting M3 (Appendix C) with a methods note first ("yes"). The note is
+`docs/methods/saturated-soil-source.md`; the scope it records:
+
+- **In M3:** the legacy two-region source (`saturatedSource.two-region`: equilibrium partitioning with a
+  per-chemical residual-phase test and Raoult's law, region 1 flushed by infiltration and region 2 by
+  groundwater flow, one well-mixed pool released at a constant rate until exhausted), the water-table
+  fluctuation on both methods, and the modern mass-consistent exponential decline
+  (`saturatedSource.exponential`, the first-order source of BIOSCREEN, Newell et al. 1996, and the
+  unit-exponent case of Falta et al. 2005). Transport reuses the M1 methods through the coupling.
+- **Not in M3:** the general power-law exponent (with the groundwater power-law option, ROADMAP row B),
+  volatilization from region 1 (M6), the mixture-wide residual test and multicomponent dissolution
+  (the TPH mass is held constant, as in M2), and cleanup-level back-calculation (M5).
+- **Validation:** no manual worked example and no Appendix R table covers this model. Fixtures are the
+  EPA 1996 Soil Screening Guidance Table 3-A soil saturation limits (six chemicals, half a unit in the
+  second printed figure), the BIOSCREEN source-decay derivation and soluble-mass example (zone masses
+  within 0.5 kg), the Falta et al. 2005 zero- and unit-exponent source functions (1e-12), two hand
+  calculations (1e-9), and identities with M1 and M2 (1e-12; aquifer mass 1e-6 as in M2).
+
+DEFAULT rulings (applied in the note, Bryan's to overturn):
+
+1. **Water-table fluctuation:** the release rate is the time-weighted annual mean of the high-water and
+   low-water rates; a seasonal schedule (high water for the first fraction f of each year) is an
+   option. The manual says both that the rates shift during the year and that the fluctuation
+   apportions the mass loss; the annual mean removes the same mass each year.
+2. **Region 1 water content:** computed with the M2 unit-gradient helper from a residual water content
+   and van Genuchten n entered for the source soil, with the aquifer's hydraulic conductivity as Ks
+   (Brooks-Corey with the Lenhard conversion by default). The model's data list has neither input,
+   while the manual's input chapter says n is used for this model.
+3. **Where the release enters the aquifer:** an AT123D box of the source's plan size from the water
+   table down to the high-water saturated thickness, carrying both regions' release; a source that never
+   submerges collapses to the water-table patch of the vadose coupling. Wexler and Domenico use the
+   cross-section width times that thickness.
+
+Screening choices (not rulings): one well-mixed pool for both regions; region 1 leachate reaches the
+aquifer immediately and undiluted, and its rate does not depend on region 1's thickness (RISC5 choice);
+one porosity serves partitioning and transport (RISC5 choice); no source decay in the legacy method, an
+optional first-order source decay in the modern one; the legacy method warns
+`saturatedSource.constant-dissolved-source` when a contributing region holds no separate phase, because
+a constant pore-water concentration then contradicts the partitioning it came from; the
+`tph-constant-approximation` threshold stays at 0.1 as in M2. Raoult's law is attributed to Cline et al.
+1991 only provisionally: the paper was not readable, so stage 2 cites it only after confirming it, or
+drops it and records why.
