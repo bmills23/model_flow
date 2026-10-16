@@ -301,9 +301,9 @@ describe('vadose.vadsat method', () => {
     const timings: number[] = [];
     let out = vadoseVadsat.run(input);
     for (let i = 0; i < 5; i++) {
-      const t0 = performance.now();
+      const t0 = Date.now();
       out = vadoseVadsat.run(input);
-      timings.push(performance.now() - t0);
+      timings.push(Date.now() - t0);
     }
     expect(out.profiles.concentrations.length).toBe(120);
     expect(Math.min(...timings)).toBeLessThan(50);
