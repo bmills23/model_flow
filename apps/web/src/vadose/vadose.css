@@ -1,0 +1,276 @@
+/* Vadose leaching screen. Reuses the transport screen's layout, controls and chart classes. */
+:root {
+  /* time, one hue: later is darker (lighter in the dark theme); validated as an ordinal ramp */
+  --t-0: #86b6ef;
+  --t-1: #3987e5;
+  --t-2: #1c5cab;
+  --t-3: #0d366b;
+  /* mass budget: categorical slots 3 to 7, a run of the validated palette */
+  --b-source: #1baf7a;
+  --b-volatilized: #eda100;
+  --b-transit: #e87ba4;
+  --b-delivered: #008300;
+  --b-sourceDecayed: #6250d6;
+  --band-a: rgba(31, 111, 107, 0.05);
+  --band-b: rgba(31, 111, 107, 0.11);
+  --water: #2a78d6;
+  --ok-text: #006300;
+  --off-text: #7a1f14;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --t-0: #184f95;
+    --t-1: #256abf;
+    --t-2: #3987e5;
+    --t-3: #86b6ef;
+    --b-source: #199e70;
+    --b-volatilized: #c98500;
+    --b-transit: #d55181;
+    --b-delivered: #008300;
+    --b-sourceDecayed: #9085e9;
+    --band-a: rgba(95, 192, 185, 0.06);
+    --band-b: rgba(95, 192, 185, 0.14);
+    --water: #3987e5;
+    --ok-text: #0ca30c;
+    --off-text: #ffb4a8;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.vadose .example {
+  margin-top: 12px;
+}
+
+.vadose .example h2,
+.vadose .panel h2 {
+  text-transform: none;
+}
+
+.citations {
+  margin: 8px 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.citations li {
+  margin-bottom: 0.4rem;
+}
+
+fieldset.layer {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 4px 10px 10px;
+  min-width: 0;
+}
+
+fieldset.layer legend {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 12px;
+  font-size: 0.92rem;
+}
+
+.line.t-0,
+.line.t-1,
+.line.t-2,
+.line.t-3 {
+  fill: none;
+}
+.line.t-0 {
+  stroke: var(--t-0);
+}
+.line.t-1 {
+  stroke: var(--t-1);
+}
+.line.t-2 {
+  stroke: var(--t-2);
+}
+.line.t-3 {
+  stroke: var(--t-3);
+}
+
+.band-a {
+  fill: var(--band-a);
+}
+.band-b {
+  fill: var(--band-b);
+}
+
+.water-table {
+  stroke: var(--water);
+  stroke-width: 3;
+}
+
+.area {
+  stroke: var(--surface);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.area.b-source,
+.swatch.b-source {
+  fill: var(--b-source);
+  background: var(--b-source);
+}
+.area.b-volatilized,
+.swatch.b-volatilized {
+  fill: var(--b-volatilized);
+  background: var(--b-volatilized);
+}
+.area.b-transit,
+.swatch.b-transit {
+  fill: var(--b-transit);
+  background: var(--b-transit);
+}
+.area.b-delivered,
+.swatch.b-delivered {
+  fill: var(--b-delivered);
+  background: var(--b-delivered);
+}
+.area.b-sourceDecayed,
+.swatch.b-sourceDecayed {
+  fill: var(--b-sourceDecayed);
+  background: var(--b-sourceDecayed);
+}
+
+.note + .note {
+  margin-top: -4px;
+}
+
+table.budget {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+table.budget th,
+table.budget td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table.budget thead th {
+  text-align: right;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+table.budget thead th:first-child {
+  text-align: left;
+}
+
+table.budget tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+
+table.budget td {
+  text-align: right;
+  white-space: nowrap;
+}
+
+table.budget tr.sub th {
+  padding-left: 18px;
+}
+
+table.budget small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.layer-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 10px;
+}
+
+.layer-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.layer-card h3 {
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+}
+
+.checks {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.checks li {
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.verdict {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid currentColor;
+}
+
+.verdict.ok {
+  color: var(--ok-text);
+}
+
+.verdict.off {
+  color: var(--off-text);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.nav-links .nav-link {
+  margin-top: 8px;
+}
+
+.chart-note {
+  margin: -8px 0 16px;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 900px) {
+  .btn.jump {
+    display: none;
+  }
+}

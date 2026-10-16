@@ -28,4 +28,10 @@ describe('App shell', () => {
     const link = screen.getByRole('link', { name: /methods/i });
     expect(link).toBeTruthy();
   });
+
+  it('links to the vadose leaching screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /vadose leaching/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/vadose');
+  });
 });

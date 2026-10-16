@@ -7,14 +7,22 @@ import {
   patchfGrid,
   patchiConcentration,
   patchiGrid,
+  fluxToLoadingSteps,
+  toConcentrationSteps,
   wellScreenAverage,
   type At123dInput,
   type ConcentrationStep,
   type DomenicoInput,
+  type LoadingStep,
   type Warning,
   type WexlerInput,
 } from '@model-flow/engine';
+import { vadoseFluxSeries } from '../vadose/compute';
 import type { Scenario } from './form';
+
+/** A vadose-fed schedule is cut into steps of a month, but never into more than this many. */
+const FED_MAX_STEPS = 48;
+const MONTH = (365.25 * 86400) / 12;
 
 export type MethodKey = 'legacy' | 'modern' | 'domenico';
 
@@ -52,10 +60,39 @@ const linspace = (a: number, b: number, n: number): number[] =>
   Array.from({ length: n }, (_, i) => (n === 1 ? a : a + ((b - a) * i) / (n - 1)));
 
 /**
+ * The mass-release schedule of a vadose-fed source over [0, evaluation time]: the vadose method is
+ * run for that time and its water-table flux, projected over the source footprint, is cut into
+ * steps that each carry the exact mass that crossed the water table during them. The step length
+ * is a month, lengthened only to keep the superposition to FED_MAX_STEPS steps.
+ */
+export function fedSteps(s: Scenario): LoadingStep[] {
+  if (!s.fed) return [];
+  const series = vadoseFluxSeries(s.fed.vadose, s.fed.method, s.time);
+  const stepLength = Math.max(MONTH, s.time / FED_MAX_STEPS);
+  return fluxToLoadingSteps(series, s.srcLength * s.srcWidth, s.time, stepLength);
+}
+
+/** The scenario with a vadose-fed schedule resolved once, so per-point calls do not rerun the vadose method. */
+export function withFedSteps(s: Scenario): Scenario {
+  if (!s.fed || s.fed.steps) return s;
+  return { ...s, fed: { ...s.fed, steps: fedSteps(s) } };
+}
+
+function requireSteps(s: Scenario): LoadingStep[] {
+  if (!s.fed?.steps) throw new Error('The vadose-fed schedule was not resolved before computing.');
+  return s.fed.steps;
+}
+
+/**
  * Boundary-concentration loading for the engine's Wexler and Domenico methods: c0 times the step
  * factor. Zero-length steps are dropped (the engine rejects them); undefined means continuous.
+ * A vadose-fed schedule becomes concentrations by the same source-basis rule as the typed strength:
+ * mass rate over the Darcy flux times the source cross-section.
  */
 function concentrationLoading(s: Scenario): ConcentrationStep[] | undefined {
+  if (s.fed) {
+    return toConcentrationSteps(requireSteps(s), s.velocity * s.porosity, s.srcWidth * s.srcDepth);
+  }
   if (
     s.terms.length === 1 &&
     s.terms[0]!.start === 0 &&
@@ -79,9 +116,12 @@ function at123dInput(s: Scenario, time: number): At123dInput {
       dy: s.dy,
       dz: s.dz,
       ...(s.thickness !== undefined ? { thickness: s.thickness } : {}),
+      ...(s.top ? { top: s.top } : {}),
     },
     source: s.source,
-    loading: s.terms.map((t) => ({ start: t.start, end: t.end, rate: s.massRate * t.factor })),
+    loading: s.fed
+      ? requireSteps(s)
+      : s.terms.map((t) => ({ start: t.start, end: t.end, rate: s.massRate * t.factor })),
     time,
   };
 }
@@ -237,6 +277,16 @@ function collectWarnings(
       'The Domenico comparison ignores the finite aquifer thickness and width.',
     );
   }
+  if (s.fed) {
+    add(
+      'ui.vadose-feed',
+      `The source is fed by the vadose result (${s.fed.label}) as ${s.fed.steps?.length ?? 0} mass-release steps over the evaluation time, over the vadose source footprint. The source box keeps its ${s.srcDepth} m thickness below the water table.${
+        s.thickness === undefined
+          ? ' The infinitely deep aquifer has a no-flux water table at its top (Yeh 1981), so the delivered mass stays in the aquifer.'
+          : ' The top of the finite aquifer is the no-flux water table.'
+      }`,
+    );
+  }
   add(
     'ui.source-basis',
     'The legacy method releases a mass rate (source concentration times Darcy flux times source area) through the source volume; the modern method holds the source concentration fixed on the inflow plane. Expect the two to differ near the source.',
@@ -264,7 +314,7 @@ function collectWarnings(
 
 export function compute(req: ComputeRequest): ComputeOutcome {
   try {
-    const s = req.scenario;
+    const s = withFedSteps(req.scenario);
     const nx = req.nx ?? 100;
     const ny = req.ny ?? 60;
     const nCurve = req.nCurve ?? 32;

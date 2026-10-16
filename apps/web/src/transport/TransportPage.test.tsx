@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { clearVadoseFeed, setVadoseFeed } from '../vadose/feed';
+import { DEFAULT_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
 import { TransportPage } from './TransportPage';
+
+afterEach(() => clearVadoseFeed());
 
 describe('TransportPage', () => {
   it('shows a plume map, breakthrough curve, receptor readouts and warnings on first load', async () => {
@@ -48,4 +52,24 @@ describe('TransportPage', () => {
     expect(screen.getByRole('img', { name: /plume map/i })).toBeTruthy();
     expect(screen.getByRole('img', { name: /breakthrough curves/i })).toBeTruthy();
   }, 40000);
+
+  it('offers a vadose feed only when the vadose screen holds one, and then takes the source from it', async () => {
+    const first = render(<TransportPage />);
+    await screen.findByRole('img', { name: /plume map/i }, { timeout: 15000 });
+    expect(screen.queryByRole('checkbox', { name: /feed the source from the vadose/i })).toBeNull();
+    first.unmount();
+
+    const v = toVadose(VADOSE_FORM);
+    if (!v.ok) throw new Error('vadose scenario');
+    setVadoseFeed({ scenario: v.scenario, method: 'legacy', label: 'Table R-7 validation case' });
+    render(<TransportPage />);
+    await screen.findByRole('img', { name: /plume map/i }, { timeout: 15000 });
+    const toggle = screen.getByRole('checkbox', { name: /feed the source from the vadose/i });
+    expect(screen.getByLabelText(/source concentration/i)).toBeTruthy();
+    fireEvent.click(toggle);
+    expect(screen.queryByLabelText(/source concentration/i)).toBeNull();
+    const warnings = screen.getByRole('region', { name: /warnings/i });
+    await within(warnings).findByText('ui.vadose-feed', undefined, { timeout: 30000 });
+    expect(screen.getByRole('img', { name: /plume map/i })).toBeTruthy();
+  }, 60000);
 });

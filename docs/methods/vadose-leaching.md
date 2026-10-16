@@ -8,7 +8,7 @@ its equation labels are not used here. Where a choice is RISC5's rather than a p
 
 Status: methods note and reference check done 2026-10-16; fixtures, hydraulics helpers, the legacy
 method `vadose.vadsat`, the groundwater coupling and the modern method `vadose.layered` implemented
-2026-10-16; UI not started.
+2026-10-16; the screen (`apps/web/src/vadose`, with the groundwater feed) implemented 2026-10-16.
 
 ## Scope of M2
 
