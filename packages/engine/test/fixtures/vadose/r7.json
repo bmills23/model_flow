@@ -1,0 +1,86 @@
+{
+  "id": "arcadis2001-table-r7",
+  "source": "arcadis2001 Table R-7 (as reproduced in RISC5 Appendix R); benzene properties from spence2001 (RISC4 chemical database), fixture inputs only",
+  "units": "inputs are in the table's own units; the engine converts at its boundary",
+  "inputs": {
+    "layers": {
+      "vadoseAboveSource": {
+        "thicknessM": 3.8,
+        "porosity": 0.35,
+        "bulkDensityGcm3": 1.7,
+        "vanGenuchtenN": 2.68,
+        "residualMoisture": 0.05,
+        "ksMPerDay": 10,
+        "foc": 0.01
+      },
+      "lens": {
+        "thicknessM": 0.2,
+        "porosity": 0.35,
+        "bulkDensityGcm3": 1.7,
+        "vanGenuchtenN": 2.0,
+        "residualMoisture": 0.15,
+        "ksMPerDay": 1.0,
+        "foc": 0.01
+      },
+      "source": {
+        "thicknessM": 3.0,
+        "porosity": 0.35,
+        "bulkDensityGcm3": 1.7,
+        "vanGenuchtenN": 2.68,
+        "residualMoisture": 0.05,
+        "ksMPerDay": 10,
+        "foc": 0.01
+      },
+      "belowSource": {
+        "thicknessM": 2.8,
+        "porosity": 0.35,
+        "bulkDensityGcm3": 1.7,
+        "vanGenuchtenN": 2.68,
+        "residualMoisture": 0.05,
+        "ksMPerDay": 10,
+        "foc": 0.01
+      }
+    },
+    "infiltrationCmPerYear": 20,
+    "sourceLengthM": 10,
+    "sourceWidthM": 10,
+    "sourceDecayPerDay": 0,
+    "vadoseDecayPerDay": 0.001,
+    "benzeneSoilMgPerKg": 500,
+    "tphSoilMgPerKg": 5000,
+    "tphMolarMassGPerMol": 100,
+    "benzene": {
+      "molarMassGPerMol": 78,
+      "solubilityMgPerL": 1750,
+      "henryDimensionless": 0.228,
+      "kocMlPerG": 59,
+      "airDiffusionCm2PerS": 0.088,
+      "waterDiffusionCm2PerS": 9.8e-6
+    },
+    "interpretation": {
+      "thicknessAboveSourceIncludingLensM": 4.0,
+      "diffusionPathAboveSourceM": 4.0,
+      "leachingDistanceDownM": 5.5,
+      "transportDistanceBelowSourceM": 2.8,
+      "dissolvedPhaseDecayOnly": true,
+      "yearLengthDays": 365
+    }
+  },
+  "targets": {
+    "sourcePoreWaterMgPerL": {
+      "value": 224,
+      "relativeTolerance": 0.01,
+      "note": "separate phase present, so the value is the effective solubility fraction times S (224.4 mg/L)"
+    },
+    "waterTableYear10MeanMgPerL": {
+      "value": 10.8,
+      "relativeTolerance": 0.03,
+      "basis": "mean of the twelve month-end values in year 10 (months 109 to 120)"
+    }
+  },
+  "reconstruction": {
+    "yearTenMonthEndMeanMgPerL": 10.69,
+    "pointValueAtTenYearsMgPerL": 14.1,
+    "unusedIndependentValueMgPerL": 11.0
+  }
+}

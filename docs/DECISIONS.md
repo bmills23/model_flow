@@ -76,6 +76,13 @@ default:
   The point value at 10 years (about 14.1 mg/L) does not match, and the year-10 value is badly
   conditioned (a 5 percent change in Koc moves it about 25 percent), so the fixture is a reproduction
   check of the review's arithmetic, not evidence of model accuracy.
+  Fixture provenance (`packages/engine/test/fixtures/vadose/README.md`): the six benzene values
+  (M 78 g/mol, S 1750 mg/L, H 0.228, Koc 59 mL/g, D_a 0.088 and D_w 9.8e-6 cm^2/s) come from the RISC4
+  chemical database and are fixture inputs for this case only, not a product database. The independent
+  11.0 mg/L is unused because the review says it was computed with an approximate erf (error up to 0.7
+  percent), so it is not a reference-grade value. Other readings: the 4.0 m above the source includes the
+  0.2 m lens, L_d = 5.5 m, decay acts on the dissolved phase only, and the table's TPH "molecular weight
+  [mg/kg]" is g/mol.
 - **EPA Soil Screening Guidance leaching with a dilution attenuation factor:** "Defer to M5". It is a
   back-calculation of screening levels and belongs with cleanup levels. M2 ships the legacy model, the
   van Genuchten-Mualem k(theta) option, the multi-layer profile and the flux-type inlet.
