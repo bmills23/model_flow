@@ -64,3 +64,21 @@ evidence of an upper scale bound; it gives no (c, m) pairs and no data range. Tw
 citing a table, and may share one lineage. The coefficients therefore stay as encoded, still
 secondary-sourced. Closing this needs the paper's PDF (institutional access, interlibrary loan, or the
 author); Neuman's 2006 comment on the paper and the author's reply should be read at the same time.
+
+## 2026-10-16: M2 vadose leaching scope and validation (Bryan)
+
+Three calls from the methods note (`docs/methods/vadose-leaching.md`), each settled on the recommended
+default:
+
+- **Table R-7 fixture:** "Year-10 average at 3%". The water-table target of 10.8 mg/L is compared with
+  the mean of the month-end values over year 10, within 3 percent, using the RISC4 manual's benzene
+  properties because Table R-7 does not list them; the review's independent 11.0 mg/L value is not used.
+  The point value at 10 years (about 14.1 mg/L) does not match, and the year-10 value is badly
+  conditioned (a 5 percent change in Koc moves it about 25 percent), so the fixture is a reproduction
+  check of the review's arithmetic, not evidence of model accuracy.
+- **EPA Soil Screening Guidance leaching with a dilution attenuation factor:** "Defer to M5". It is a
+  back-calculation of screening levels and belongs with cleanup levels. M2 ships the legacy model, the
+  van Genuchten-Mualem k(theta) option, the multi-layer profile and the flux-type inlet.
+- **Layered transport:** "Finite volume, analytic for 1 layer". A finite-volume solver handles profiles
+  with more than one layer; the van Genuchten and Alves 1982 case C14 closed form is used for a single
+  layer, and tests require the two to agree.
