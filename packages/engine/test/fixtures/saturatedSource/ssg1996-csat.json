@@ -1,0 +1,72 @@
+{
+  "id": "ssg1996-csat",
+  "source": "U.S. EPA Soil Screening Guidance: Technical Background Document, EPA/540/R-95/128 (1996), Table 3-A (printed Csat), Table 36 (S, H prime) and Table 39 (calculated Koc column)",
+  "page": "Table 3-A on page 29 (as recorded in the methods note); Table 36 starts on page 132 and Table 39 on page 141 (document table of contents)",
+  "tolerance": {
+    "rule": "half a unit in the second printed significant figure",
+    "note": "ethylbenzene and 1,2-dichlorobenzene sit within 0.4 mg/kg of the band edge, so input digits must be exactly the printed ones"
+  },
+  "units": "S mg/L, H dimensionless, Koc L/kg, Csat mg/kg",
+  "soil": {
+    "bulkDensityKgPerL": 1.5,
+    "foc": 0.006,
+    "waterFilledPorosity": 0.15,
+    "airFilledPorosity": 0.28
+  },
+  "chemicals": [
+    {
+      "name": "toluene",
+      "solubilityMgPerL": 526,
+      "henryDimensionless": 0.272,
+      "kocLPerKg": 182,
+      "printedCsatMgPerKg": 650,
+      "engineValueMgPerKg": 653.7,
+      "toleranceMgPerKg": 5.0
+    },
+    {
+      "name": "ethylbenzene",
+      "solubilityMgPerL": 169,
+      "henryDimensionless": 0.323,
+      "kocLPerKg": 363,
+      "printedCsatMgPerKg": 400,
+      "engineValueMgPerKg": 395.2,
+      "toleranceMgPerKg": 5.0
+    },
+    {
+      "name": "styrene",
+      "solubilityMgPerL": 310,
+      "henryDimensionless": 0.113,
+      "kocLPerKg": 776,
+      "printedCsatMgPerKg": 1500,
+      "engineValueMgPerKg": 1481,
+      "toleranceMgPerKg": 50.0
+    },
+    {
+      "name": "1,1,1-trichloroethane",
+      "solubilityMgPerL": 1330,
+      "henryDimensionless": 0.705,
+      "kocLPerKg": 110,
+      "printedCsatMgPerKg": 1200,
+      "engineValueMgPerKg": 1186,
+      "toleranceMgPerKg": 50.0
+    },
+    {
+      "name": "1,2-dichlorobenzene",
+      "solubilityMgPerL": 156,
+      "henryDimensionless": 0.0779,
+      "kocLPerKg": 617,
+      "printedCsatMgPerKg": 600,
+      "engineValueMgPerKg": 595.4,
+      "toleranceMgPerKg": 5.0
+    },
+    {
+      "name": "1,4-dichlorobenzene",
+      "solubilityMgPerL": 73.8,
+      "henryDimensionless": 0.0996,
+      "kocLPerKg": 617,
+      "printedCsatMgPerKg": 280,
+      "engineValueMgPerKg": 282.0,
+      "toleranceMgPerKg": 5.0
+    }
+  ]
+}

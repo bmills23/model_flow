@@ -1,0 +1,29 @@
+{
+  "id": "bioscreen-mass",
+  "source": "Newell, McLeod and Gonzales (1996), BIOSCREEN user manual, EPA/600/R-96/087, entry \"Soluble Mass in NAPL, Soil\" and Appendix A.3",
+  "page": "Soluble mass example (zones) and Appendix A.3 (k_s = Q C0 / M0)",
+  "tolerance": {
+    "absoluteKg": 0.5,
+    "note": "printed masses are rounded to kg; the printed total of 73 kg is the sum of rounded zones (unrounded 72.2 kg) and is not used"
+  },
+  "units": "ft^2, ft, kg/L, mg/kg, kg; 1 ft = 0.3048 m exactly",
+  "depthFt": 20,
+  "bulkDensityKgPerL": 1.7,
+  "zones": [
+    {
+      "areaFt2": 100,
+      "soilMgPerKg": 600,
+      "printedKg": 58
+    },
+    {
+      "areaFt2": 220,
+      "soilMgPerKg": 50,
+      "printedKg": 11
+    },
+    {
+      "areaFt2": 400,
+      "soilMgPerKg": 10,
+      "printedKg": 4
+    }
+  ]
+}

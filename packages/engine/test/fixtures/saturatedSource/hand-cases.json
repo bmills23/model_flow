@@ -1,0 +1,96 @@
+{
+  "id": "saturated-hand-cases",
+  "source": "Constructed for this project; computed by an independent script (not the engine) from the formulas in docs/methods/saturated-soil-source.md. Benzene properties are the RISC4 values used by the M2 Table R-7 fixture (fixture inputs only).",
+  "page": "docs/methods/saturated-soil-source.md, Fixture plan item 4",
+  "tolerance": {
+    "relative": 1e-9,
+    "note": "arithmetic tolerance; initial mass 1e-12"
+  },
+  "units": "inputs in the units named by their keys; years are 365.25 days",
+  "common": {
+    "sourceLengthM": 10,
+    "sourceWidthM": 10,
+    "sourceThicknessM": 2,
+    "porosity": 0.3,
+    "bulkDensityGcm3": 1.7,
+    "foc": 0.002,
+    "conductivityMPerDay": 5,
+    "gradient": 0.01,
+    "infiltrationCmPerYear": 20,
+    "residualMoisture": 0.05,
+    "vanGenuchtenN": 1.5,
+    "hydraulicModel": "brooksCorey1964",
+    "chemical": {
+      "molarMassGPerMol": 78,
+      "solubilityMgPerL": 1750,
+      "henryDimensionless": 0.228,
+      "kocMlPerG": 59
+    }
+  },
+  "cases": {
+    "A": {
+      "description": "separate phase with fluctuation",
+      "soilMgPerKg": 50,
+      "tphMgPerKg": 5000,
+      "tphMolarMassGPerMol": 100,
+      "minSaturatedThicknessM": 0.5,
+      "fluctuationM": 1.0,
+      "fractionHigh": 0.25,
+      "expected": {
+        "lambda": 0.4375,
+        "effectiveSaturation": 0.2998548662541662,
+        "theta1": 0.12496371656354155,
+        "thetaA1": 0.17503628343645844,
+        "moleFraction": 0.01282051282051282,
+        "xSMgPerL": 22.435897435897434,
+        "ceq1MgPerL": 232.57596345227898,
+        "ceq2MgPerL": 169.79624450659207,
+        "c1MgPerL": 22.435897435897434,
+        "c2MgPerL": 22.435897435897434,
+        "initialMassKg": 17.0,
+        "q1LowKgPerDay": 0.0012285227890977378,
+        "q2LowKgPerDay": 0.005608974358974359,
+        "q1HighKgPerDay": 0.0012285227890977378,
+        "q2HighKgPerDay": 0.016826923076923076,
+        "qMeanKgPerDay": 0.009641984327559276,
+        "depletionAnnualMeanDays": 1763.1225505531693,
+        "depletionSeasonalDays": 1737.2300172455277,
+        "gammaPerYear": 0.2071608691553545,
+        "massRatioAt10Years": 0.12598295089368086,
+        "deliveredAt10YearsKg": 14.858289834807422
+      }
+    },
+    "B": {
+      "description": "no separate phase, steady water table",
+      "soilMgPerKg": 100,
+      "tphMgPerKg": null,
+      "tphMolarMassGPerMol": null,
+      "minSaturatedThicknessM": 1.0,
+      "fluctuationM": 0,
+      "fractionHigh": 0,
+      "expected": {
+        "lambda": 0.4375,
+        "effectiveSaturation": 0.2998548662541662,
+        "theta1": 0.12496371656354155,
+        "thetaA1": 0.17503628343645844,
+        "moleFraction": 1.0,
+        "xSMgPerL": 1750.0,
+        "ceq1MgPerL": 465.15192690455797,
+        "ceq2MgPerL": 339.59248901318415,
+        "c1MgPerL": 465.15192690455797,
+        "c2MgPerL": 339.59248901318415,
+        "initialMassKg": 34.0,
+        "q1LowKgPerDay": 0.025470331384233158,
+        "q2LowKgPerDay": 0.1697962445065921,
+        "q1HighKgPerDay": 0.025470331384233158,
+        "q2HighKgPerDay": 0.1697962445065921,
+        "qMeanKgPerDay": 0.19526657589082524,
+        "depletionAnnualMeanDays": 174.12094130748523,
+        "depletionSeasonalDays": 174.12094130748523,
+        "gammaPerYear": 2.0976799071801158,
+        "massRatioAt10Years": 7.7605395245615e-10,
+        "deliveredAt10YearsKg": 33.99999997361416
+      }
+    }
+  }
+}
