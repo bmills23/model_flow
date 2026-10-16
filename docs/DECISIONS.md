@@ -188,3 +188,22 @@ a constant pore-water concentration then contradicts the partitioning it came fr
 `tph-constant-approximation` threshold stays at 0.1 as in M2. Raoult's law is attributed to Cline et al.
 1991 only provisionally: the paper was not readable, so stage 2 cites it only after confirming it, or
 drops it and records why.
+
+## 2026-10-16: M3 engine built (stage 2)
+
+- `cline1991` is not cited. Only Crossref metadata could be read (no abstract anywhere, full text behind
+  the paywall), so its support for the ideal Raoult's law form is unconfirmed. Both methods drop it from
+  their citations and the entry stays `planned`; the Raoult form is the RISC5 choice and the M2 vadose
+  source's, with no reference attached. `feenstra1991` and `falta2005` are `used`.
+- The engine is `packages/engine/src/processes/saturatedSource/`: `saturatedSource.two-region` (legacy,
+  exponent 0) and `saturatedSource.exponential` (modern, exponent 1), the DEFAULT rulings above applied as
+  written. The release schedule is closed form for both exponents and both fluctuation schedules, in O(1)
+  per query for any horizon (the seasonal modern schedule uses the geometric sum over whole years).
+- Screening readings made while building it: a legacy infiltration above K is clamped and warned, equal
+  to K is silently saturated, and the modern method refuses infiltration at or above K only when region 1
+  exists; region 1 and region 2 are evaluated only where the water levels give them thickness; a legacy
+  loading list stops at the depletion time rather than carrying a zero-rate tail; the default modern step
+  length is one month; the constant-dissolved-source warning needs a contributing region (nonzero rate)
+  without a separate phase.
+- Hand-case fixture values are stored at full double precision from an independent script, because the
+  eight significant digits printed in the methods note cannot support a 1e-9 relative comparison.

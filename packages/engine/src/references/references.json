@@ -156,7 +156,7 @@
   {
     "key": "falta2005",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Falta, R.W., Rao, P.S., Basu, N.",
     "year": 2005,
     "title": "Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response",
@@ -169,7 +169,7 @@
   {
     "key": "feenstra1991",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Feenstra, S., Mackay, D.M., Cherry, J.A.",
     "year": 1991,
     "title": "A method for assessing residual NAPL based on organic chemical concentrations in soil samples",
@@ -189,7 +189,7 @@
     "venue": "Environmental Science & Technology",
     "identifier": "25(5):914-920",
     "doi": "10.1021/es00017a013",
-    "notes": "Bibliographic data verified through Crossref (2026-10-16). No abstract is held by Crossref, Europe PMC, Semantic Scholar or OpenAlex, and the full text is behind the publisher paywall and was not read. Listed for the Raoult's law effective solubility of petroleum constituents; that its data support the ideal-mixture form must be confirmed from the paper before a method cites it.",
+    "notes": "Bibliographic data verified through Crossref (2026-10-16). No abstract is held by Crossref, Europe PMC, Semantic Scholar or OpenAlex, and the full text is behind the publisher paywall and was not read. Listed for the Raoult's law effective solubility of petroleum constituents, but no method cites it: that its data support the ideal-mixture form could not be confirmed without the paper, so it stays planned (see docs/DECISIONS.md, 2026-10-16 M3 engine).",
     "tags": ["saturatedSource"]
   },
   {

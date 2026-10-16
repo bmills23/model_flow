@@ -6,8 +6,8 @@ RISC5 manual was used only as a map of which choices RISC5 made; none of its tex
 reproduced and its equation labels are not used here. Where a choice is RISC5's rather than a paper's, it
 is marked "RISC5 choice" and becomes the method's `risc5Choice` metadata.
 
-Status: methods note, reference check and fixture plan done 2026-10-16. Engine, coupling and screen not
-started.
+Status: methods note, reference check and fixture plan done 2026-10-16; engine and coupling built 2026-10-16
+(`packages/engine/src/processes/saturatedSource/`). Screen not started.
 
 ## What the process is
 
@@ -90,7 +90,7 @@ not change the aquifer's flow field, and the water table used by the transport m
 
 ## Legacy method: two-region source, constant until exhausted (`saturatedSource.two-region`)
 
-Citations: `feenstra1991`, `epa1996ssg`, `cline1991`, `brookscorey1964`, `lenhard1989`, plus
+Citations: `feenstra1991`, `epa1996ssg`, `brookscorey1964`, `lenhard1989`, plus
 `vangenuchten1980` and `mualem1976` when the van Genuchten-Mualem moisture option is selected (stage 2
 lists them on the method because the option is selectable on it).
 
@@ -119,8 +119,8 @@ concentration in a region with water content theta and air-filled porosity theta
 Residual-phase test, per chemical and per region (`feenstra1991` assess separate phase from soil
 concentrations by comparing the partitioning prediction with the solubility limit; the RISC5 choice is
 to apply the comparison to each chemical alone). Raoult's law for an ideal mixture sets the effective
-solubility to x S, with x the chemical's mole fraction in the hydrocarbon (`cline1991` for petroleum
-mixtures):
+solubility to x S, with x the chemical's mole fraction in the hydrocarbon (the ideal-mixture form is the RISC5
+choice and the M2 vadose source's; no reference is cited for it, see the references table):
 
     x = (F / M) / (F_T / M_T)     (x = 1 when no TPH is entered)
 
@@ -353,9 +353,9 @@ example for the depletion, analytic identities, and hand calculations.
 | `epa1996ssg` | The document (EPA SEMS copy) | Yes (section 2.4.4, equations 9 and 22, Table 3-A, Tables 36 and 39) |
 | `feenstra1991` | Crossref, with abstract | No, paywalled |
 | `falta2005` | Crossref and Europe PMC (PMID 16019108), with abstract | No, paywalled |
-| `cline1991` | Crossref | No; no abstract available. Its support for the ideal Raoult's law form must be confirmed from the paper before stage 2 cites it, or stage 2 drops it and records why |
+| `cline1991` | Crossref | No; no abstract available. Not cited: its support for the ideal Raoult's law form could not be confirmed, so stage 2 dropped it from the method citations (DECISIONS.md, 2026-10-16 M3 engine) |
 | `brookscorey1964`, `lenhard1989`, `vangenuchten1980`, `mualem1976` | As in the vadose note | As in the vadose note |
 
-`feenstra1991`, `falta2005` and `cline1991` are `planned` until a registered method cites them; the
+`feenstra1991` and `falta2005` became `used` when the two methods were registered; `cline1991` stays `planned` and uncited. The
 appendix's own citations (Galya 1987, Gelhar et al. 1985, API 1987) are transport and dispersivity
 sources already used by M1.

@@ -266,12 +266,16 @@ export function makeReleaseSchedule(p: ScheduleInput): ReleaseSchedule {
         return;
       }
       for (let y = 0; y * period < limit; y++) {
-        let start = y * period;
-        for (const x of parts) {
-          const end = Math.min(limit, start + x.len);
+        const base = y * period;
+        let offset = 0;
+        for (let j = 0; j < parts.length; j++) {
+          const x = parts[j]!;
+          const start = j === 0 ? base : base + offset;
+          offset += x.len;
+          const natural = j === parts.length - 1 ? (y + 1) * period : base + offset;
+          const end = Math.min(limit, natural);
           if (end > start) yield { start, end, level: x.level, rate: x.q };
-          start += x.len;
-          if (start >= limit) break;
+          if (natural >= limit) return;
         }
       }
     },

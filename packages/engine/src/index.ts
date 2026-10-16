@@ -10,6 +10,7 @@ import {
   groundwaterWexler,
 } from './processes/groundwater/index.js';
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
+import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
 export * from './numerics/quadrature.js';
@@ -21,6 +22,7 @@ export * from './registry/index.js';
 export * from './processes/dispersivity/index.js';
 export * from './processes/groundwater/index.js';
 export * from './processes/vadose/index.js';
+export * from './processes/saturatedSource/index.js';
 
 export const registry = new MethodRegistry();
 registry.register(gelhar1985Api1987);
@@ -31,3 +33,5 @@ registry.register(groundwaterWexler);
 registry.register(groundwaterDomenico);
 registry.register(vadoseVadsat);
 registry.register(vadoseLayered);
+registry.register(saturatedTwoRegion);
+registry.register(saturatedExponential);
