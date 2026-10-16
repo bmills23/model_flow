@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MethodsPage } from './pages/MethodsPage';
 import { TransportPage } from './transport/TransportPage';
+import { SaturatedPage } from './saturated/SaturatedPage';
 import { VadosePage } from './vadose/VadosePage';
 
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
@@ -11,6 +12,7 @@ const NON_AFFILIATION =
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
+const SATURATED_HASH = '#/saturated';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -22,9 +24,10 @@ export function App() {
   const onMethods = hash === METHODS_HASH;
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
+  const onSaturated = hash === SATURATED_HASH;
 
   return (
-    <div className={onTransport || onVadose ? 'shell shell-wide' : 'shell'}>
+    <div className={onTransport || onVadose || onSaturated ? 'shell shell-wide' : 'shell'}>
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
           model_flow
@@ -54,6 +57,13 @@ export function App() {
           <a className="nav-link" href={VADOSE_HASH} aria-current={onVadose ? 'page' : undefined}>
             Vadose leaching
           </a>
+          <a
+            className="nav-link"
+            href={SATURATED_HASH}
+            aria-current={onSaturated ? 'page' : undefined}
+          >
+            Saturated soil source
+          </a>
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
@@ -66,13 +76,16 @@ export function App() {
           <TransportPage />
         ) : onVadose ? (
           <VadosePage />
+        ) : onSaturated ? (
+          <SaturatedPage />
         ) : (
           <section>
             <h1>Fate-and-transport and risk modeling</h1>
             <p className="lede">
               An open reimplementation of RISC5-class methods with a switch between legacy and
-              modern alternatives for each process. Groundwater transport and vadose leaching are
-              working; the other steps are placeholders for the milestones on the roadmap.
+              modern alternatives for each process. Groundwater transport, vadose leaching and the
+              saturated soil source are working; the other steps are placeholders for the milestones
+              on the roadmap.
             </p>
             <p>
               <a className="button" href={TRANSPORT_HASH}>
@@ -80,6 +93,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={VADOSE_HASH}>
                 Open vadose leaching
+              </a>{' '}
+              <a className="button" href={SATURATED_HASH}>
+                Open saturated soil source
               </a>{' '}
               <a className="button" href={METHODS_HASH}>
                 Read how each calculation is sourced

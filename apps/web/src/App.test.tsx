@@ -34,4 +34,10 @@ describe('App shell', () => {
     const link = screen.getAllByRole('link', { name: /vadose leaching/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/vadose');
   });
+
+  it('links to the saturated soil source screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /saturated soil source/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/saturated');
+  });
 });

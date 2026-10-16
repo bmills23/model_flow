@@ -207,3 +207,29 @@ drops it and records why.
   without a separate phase.
 - Hand-case fixture values are stored at full double precision from an independent script, because the
   eight significant digits printed in the methods note cannot support a 1e-9 relative comparison.
+
+## 2026-10-16: M3 web screen and the step cap for seasonal schedules (stage 3)
+
+- The saturated soil source screen is `#/saturated` (`apps/web/src/saturated/`). It follows the vadose
+  screen: form, compute in a worker, an in-memory feed, charts, and a feed into the groundwater screen,
+  which draws the receptor breakthrough curve and the plan-view plume with the M1 components. The screen
+  opens on hand case A of the methods note and checks its M0, depletion time and decline constant against
+  the hand-calculation values.
+- **Step cap.** The groundwater feed uses the vadose feed's bound of 48 loading steps with exact mass per
+  step. A legacy annual mean is one step and a modern annual mean is cut into steps of at least a month
+  (lengthened to stay within 48). A **seasonal** schedule has two segments a year that must stay separate
+  steps, so stage 3 keeps it by lengthening the steps (up to one step per season) while the count stays
+  within 48, which holds up to about 24 years of release. Past that, the feed falls back to the annual
+  mean, which delivers the same mass at every year end and differs only within a year. The fallback is
+  never silent: the saturated screen's coupling panel states it for the current horizon, and the
+  groundwater screen's warnings carry `ui.saturated-seasonal-fallback`. A legacy seasonal source that is
+  exhausted early (few years) never reaches the cap.
+- **Aquifer travels with the feed.** The methods note says one porosity, bulk density and organic carbon
+  serve partitioning and transport, so a saturated-fed groundwater run takes its porosity, Darcy flux
+  (K times the gradient) and retardation (1 + rho_b Koc f_oc / porosity) from the saturated screen and
+  disables the typed aquifer fields. The source box is the plan size by the high-water saturated
+  thickness; a source that never submerges keeps the typed mixing depth.
+- The legacy method has no source decay, so the screen drops a typed decay rate from the legacy run
+  rather than refusing it; only the modern run uses it.
+- `TimeLineChart` gained an optional `vlines` prop for the depletion-time markers; vadose charts do not
+  pass it and are unchanged.
