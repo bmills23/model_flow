@@ -7,7 +7,7 @@ reproduced and its equation labels are not used here. Where a choice is RISC5's 
 is marked "RISC5 choice" and becomes the method's `risc5Choice` metadata.
 
 Status: methods note, reference check and fixture plan done 2026-10-16; engine and coupling built 2026-10-16
-(`packages/engine/src/processes/saturatedSource/`). Screen not started.
+(`packages/engine/src/processes/saturatedSource/`). Screen built 2026-10-16 (`apps/web/src/saturated/`, route `#/saturated`).
 
 ## What the process is
 
