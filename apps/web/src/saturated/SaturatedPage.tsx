@@ -41,7 +41,7 @@ const METHODS: Record<
 
 function Table(props: { caption: string; head: string[]; rows: Row[] }) {
   return (
-    <div className="table-scroll">
+    <div className="sat-wrap">
       <table className="sat">
         <caption className="sr-only">{props.caption}</caption>
         <thead>

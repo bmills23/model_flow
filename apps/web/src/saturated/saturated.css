@@ -123,3 +123,8 @@ table.sat td {
   font-size: 0.95rem;
   margin: 14px 0 4px;
 }
+
+.sat-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
