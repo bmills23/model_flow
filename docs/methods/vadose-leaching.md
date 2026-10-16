@@ -1,6 +1,6 @@
 # Vadose zone leaching (methods note for M2)
 
-Equations planned for `packages/engine/src/processes/vadose/`, in our own words, derived from the primary
+Equations implemented in `packages/engine/src/processes/vadose/`, in our own words, derived from the primary
 publications cited by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The RISC5 manual was
 used only as a map of which published choices RISC5 made; none of its text or tables is reproduced and
 its equation labels are not used here. Where a choice is RISC5's rather than a paper's, it is marked
@@ -271,7 +271,9 @@ C14 on a homogeneous column: it converges at second order, agrees to 1e-4 of the
 fine grid, and matches the analytic water-table flux to 1e-3 of its peak with its default refinement. The
 fixture plan's stricter target (1e-4 relative wherever C exceeds 1e-6 of the inlet) is not met: a second
 order scheme's relative error grows in the leading tail of a front (2.7e-4 at 5334 cells on a 16 m test
-column), so that target needs a ruling.
+column). The agreement standard is therefore 1e-4 of the inlet concentration absolute, 1e-2 relative where
+C exceeds 1e-2 of the inlet, and a measured second-order rate (DECISIONS.md, 2026-10-16 tolerance
+rulings).
 
 With the third-type inlet the column inflow equals the source's leaching loss, so mass is conserved from
 source to aquifer.
