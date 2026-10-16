@@ -112,11 +112,19 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
     thickness,
   };
 
-  function aquiferMass(withThickness: boolean, zs: number[], dz: number): number {
+  function aquiferMass(withThickness: boolean | 'water-table', zs: number[], dz: number): number {
     const free: At123dAquifer = { ...aq };
     delete free.thickness;
-    const a = withThickness ? aq : free;
-    const source = waterTableSource(L, W, withThickness ? { thickness } : {});
+    const a =
+      withThickness === 'water-table'
+        ? { ...free, top: 'no-flux' as const }
+        : withThickness
+          ? aq
+          : free;
+    const source =
+      withThickness === 'water-table'
+        ? waterTableSource(L, W, { aquifer: a })
+        : waterTableSource(L, W, withThickness ? { thickness } : {});
     const dx = 2;
     const xs: number[] = [];
     for (let x = -30; x <= 60; x += dx) xs.push(x);
@@ -139,10 +147,10 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
     expect(Math.abs(m - loaded) / loaded).toBeLessThan(1e-6);
   }, 60000);
 
-  it('infinite depth: the free-space solution spreads equally above and below the plane', () => {
-    // Judgment call: with no thickness the kernel has no boundary at the water table, so the plume
-    // diffuses upward as well and only the half below z = 0 is in the aquifer. Mass is conserved
-    // over all space, not over the aquifer.
+  it('unbounded infinite depth: the free-space solution spreads equally above and below the plane', () => {
+    // The default infinite-depth medium (top 'unbounded', the POINT3 configuration) has no water
+    // table, so the plume diffuses upward as well and only the half below z = 0 is in the aquifer.
+    // Mass is conserved over all space, not over the aquifer; vadose-fed runs use top 'no-flux'.
     const dz = 0.5;
     const below = Array.from({ length: 12 }, (_, k) => -(k + 0.5) * dz);
     const above = below.map((z) => -z);
@@ -152,6 +160,32 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
     expect(Math.abs(mBelow + mAbove - loaded) / loaded).toBeLessThan(2e-3);
     expect(mBelow / loaded).toBeCloseTo(0.5, 2);
   }, 60000);
+
+  it('infinite depth under the no-flux water table: aquifer mass equals loaded mass within 1e-6', () => {
+    // Yeh (1981) semi-infinite case: the aquifer is z <= 0 and the water table reflects, so nothing
+    // diffuses out of the top. The summation runs 15 m deep, past the plume's vertical reach.
+    const dz = 0.5;
+    const below = Array.from({ length: 30 }, (_, k) => -(k + 0.5) * dz);
+    const m = aquiferMass('water-table', below, dz);
+    expect(Math.abs(m - loaded) / loaded).toBeLessThan(1e-6);
+  }, 60000);
+
+  it('places the vadose-fed patch on the water table of either aquifer and rejects the unbounded one', () => {
+    const free: At123dAquifer = { ...aq };
+    delete free.thickness;
+    expect(waterTableSource(L, W, { aquifer: aq })).toMatchObject({ z1: thickness, z2: thickness });
+    expect(waterTableSource(L, W, { aquifer: { ...free, top: 'no-flux' } })).toMatchObject({
+      z1: 0,
+      z2: 0,
+    });
+    expect(() => waterTableSource(L, W, { aquifer: free })).toThrow(RangeError);
+    expect(() => waterTableSource(L, W, { aquifer: { ...free, top: 'unbounded' } })).toThrow(
+      RangeError,
+    );
+    expect(() => waterTableSource(L, W, { aquifer: aq, thickness: thickness + 1 })).toThrow(
+      RangeError,
+    );
+  });
 
   it('a mass-rate step agrees with at123dConcentration used directly', () => {
     const source = waterTableSource(L, W, { thickness });

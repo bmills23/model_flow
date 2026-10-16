@@ -47,6 +47,19 @@ the finite-source treatment of the AT123D lineage (its title is "A horizontal pl
 ground-water transport"; the box form implemented here is derived from the Green function, not copied
 from that paper).
 
+Infinite depth has two forms, chosen by the aquifer's `top`. Yeh measures z from the top surface and
+treats the infinitely deep aquifer as a half-space whose top carries a radiation (exchange) condition; with
+a zero exchange coefficient that top is no-flux, and Yeh's infinite-depth vertical Green function (point
+and line source forms) is the free-space profile plus its mirror image about the top. The engine offers
+this as `top: 'no-flux'`: the aquifer is z <= 0 under a water table at z = 0, and fz is the free-space
+profile of [z1, z2] plus that of the image [-z2, -z1]. The exchange (atmospheric loss) term is not
+implemented. The default, `top: 'unbounded'`, has no boundary in z at all: the medium of the USGS POINT3
+program, which the POINT3 fixtures and several analytic tests use. It is right only for sources well below
+the water table. A source on the water table in the unbounded medium sends half of its mass upward out of
+the aquifer, so concentrations below it come out low by up to a factor of two (exactly two for a point or
+plane source at z = 0 once the plume has spread). Sources at or near the water table, including every
+vadose-fed source, therefore use `top: 'no-flux'` or a finite thickness.
+
 Finite thickness H (z measured from the base, no-flux top and bottom) replaces fz by the reflected
 profile. For D_z' tau / H^2 up to 0.2 the engine sums mirror images 2nH +/- z (only images whose smoothed
 interval reaches the point); beyond that it uses the cosine series
@@ -79,12 +92,14 @@ relative, which is immaterial in absolute terms. Pe above 1e6 throws a RangeErro
 solution). A 100 by 60 map costs about the same as before (about 60 to 100 ms per grid).
 
 Validation (all methods, RangeError): non-finite inputs; porosity outside (0, 1]; retardation below 1;
-negative decay rate or dispersion coefficient; non-positive or non-finite thickness; a source box that
-is not inside the layer (0 <= z1 <= z2 <= H); non-finite or negative time. `time = Infinity` is not
+negative decay rate or dispersion coefficient; non-positive or non-finite thickness; a `top` other than
+'unbounded' or 'no-flux', or 'unbounded' together with a thickness (a finite layer always has a no-flux
+top); a source box that is not inside the layer (0 <= z1 <= z2 <= H) or, under a no-flux water table,
+not below it (z2 <= 0); non-finite or negative time. `time = Infinity` is not
 supported by the AT123D kernel (use the Wexler methods for steady state). Negative velocity is
 accepted, the age cut follows (x - x_c)/u for either sign. A receptor outside the finite layer or
-aquifer (z outside [0, H], y outside [0, W]) reports zero in the point and grid functions alike
-instead of a mirrored image.
+aquifer (z outside [0, H], y outside [0, W], or z > 0 under a no-flux water table) reports zero in the
+point and grid functions alike instead of a mirrored image.
 
 ## Modern method: Wexler (1992) patch sources (`groundwater.wexler1992`; citation `wexler1992`)
 
@@ -172,6 +187,9 @@ from them. The quantitative warning is computed directly against the exact solut
   solution agrees with `Mibitrans` (Wexler form) to 1e-7 relative.
 - Analytic tests: single-release mass conservation (n R times the volume integral equals M exp(-lambda tau)),
   symmetry, 1-D plane-source steady state, closed-form point source, pulse superposition, PATCHF to PATCHI
-  as width and thickness grow, series versus integral, image versus cosine series.
+  as width and thickness grow, series versus integral, image versus cosine series. Under a no-flux water
+  table: the profile equals the free-space value plus its mirror about z = 0 to 1e-14, the vertical
+  integral over z <= 0 of a plane source on the water table is the released mass to 1e-6 (the unbounded
+  medium keeps half), and a continuous point source on the water table is exactly twice POINT3.
 - Timing (Node 24, one run on the development machine): 100 by 60 plan-view grid in about 190 ms for the
   AT123D-class kernel with two loading steps, about 45 ms for PATCHI and about 50 ms for PATCHF.

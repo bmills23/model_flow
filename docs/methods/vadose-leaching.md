@@ -314,6 +314,13 @@ mass rate is Mdot(t) = J(t) A.
   t_end, so the list stops there and needs no open-ended step. The groundwater source box keeps its
   user-entered thickness below the water table (the mixing depth); its plan dimensions come from the
   vadose source.
+- Aquifer top for vadose-fed runs: the delivered mass enters through the water table, which must be a
+  no-flux boundary of the AT123D-class aquifer or part of the mass diffuses upward out of it. With a finite
+  thickness H the water table is the layer's no-flux top (z = H); with infinite depth the aquifer must use
+  `top: 'no-flux'` (Yeh's semi-infinite case, aquifer z <= 0, water table at z = 0). The default unbounded
+  medium has no water table and keeps only half of a water-table load below z = 0, so `waterTableSource`
+  rejects it with a RangeError when given the aquifer. The patch from `waterTableSource` lies on the water
+  table in both cases (z = H, or z = 0).
 - Wexler and Domenico (boundary-concentration sources): each step is converted to a held concentration
   with the existing M1 rule (concentration = mass rate / (Darcy flux times source cross-section)), giving a
   `ConcentrationStep` list; the screen's existing `ui.source-basis` warning applies.

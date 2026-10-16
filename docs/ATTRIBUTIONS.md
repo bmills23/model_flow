@@ -57,7 +57,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 - Summary: Three-dimensional advection-dispersion with retardation and first-order decay, uniform flow along x, a finite rectangular volume source and piecewise-constant mass loading, in an aquifer of infinite or finite thickness.
 - Assumptions:
   - Uniform one-dimensional flow along x; constant dispersion coefficients.
-  - Aquifer infinite in x and y; infinite depth or finite thickness with no-flux top and bottom.
+  - Aquifer infinite in x and y; finite thickness with no-flux top and bottom, or infinite depth either unbounded or under a no-flux water table at z = 0 (top: no-flux, needed for sources at the water table).
   - Source mass is released uniformly through the box; concentration input is converted to a mass rate through the Darcy flux and source area.
   - First-order decay acts on dissolved and sorbed mass alike.
 - RISC5 choice: RISC5 applies the AT123D Green function solution with a finite rectangular volume source, vertical well-screen averaging and Gelhar-based dispersivity ratios.

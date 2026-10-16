@@ -31,7 +31,7 @@ export const groundwaterAt123d: MethodDescriptor<At123dRunInput, GroundwaterOutp
   citations: ['yeh1981', 'galya1987'],
   assumptions: [
     'Uniform one-dimensional flow along x; constant dispersion coefficients.',
-    'Aquifer infinite in x and y; infinite depth or finite thickness with no-flux top and bottom.',
+    'Aquifer infinite in x and y; finite thickness with no-flux top and bottom, or infinite depth either unbounded or under a no-flux water table at z = 0 (top: no-flux, needed for sources at the water table).',
     'Source mass is released uniformly through the box; concentration input is converted to a mass rate through the Darcy flux and source area.',
     'First-order decay acts on dissolved and sorbed mass alike.',
   ],

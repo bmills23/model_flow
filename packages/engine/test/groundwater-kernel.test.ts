@@ -289,3 +289,98 @@ describe('plan-view grid', () => {
     expect(ms).toBeLessThan(1000);
   });
 });
+
+describe('infinite depth with a no-flux water table at z = 0 (Yeh 1981 semi-infinite case)', () => {
+  // Yeh (1981) measures z from the top surface and treats the infinitely deep aquifer as a half-space
+  // whose top carries a radiation condition; with zero exchange coefficient that is no-flux, and the
+  // vertical Green function becomes the free-space one plus its mirror image about the top.
+  const top: At123dAquifer = { ...aquifer, retardation: 1.6, decayRate: 0.01, top: 'no-flux' };
+  const free = infinite(top);
+  delete free.top;
+  const plane: BoxSource = { x1: -1, x2: 1, y1: -2, y2: 2, z1: 0, z2: 0 };
+
+  it('conserves the released mass inside the aquifer (z <= 0) for a plane source on the water table', () => {
+    const tau = 6;
+    const tol = { relTol: 1e-10, absTol: 0 };
+    // the x and y profiles each integrate to one (tested above); the vertical factor carries the boundary
+    const zMass = integrate(
+      (z) => instantaneousBoxConcentration(top, plane, { x: 0, y: 0, z }, tau, 1),
+      -20,
+      0,
+      tol,
+    ).value;
+    const xy = instantaneousBoxConcentration(
+      free,
+      { ...plane, z1: -50, z2: 50 },
+      { x: 0, y: 0, z: 0 },
+      tau,
+      100,
+    );
+    // xy is (fx fy e^-lambda tau / (n R)); zMass / xy is the vertical integral of the aquifer profile
+    expect(Math.abs(zMass / xy - 1)).toBeLessThan(1e-6);
+    // the free-space kernel keeps only half of it below the water table
+    const zFree = integrate(
+      (z) => instantaneousBoxConcentration(free, plane, { x: 0, y: 0, z }, tau, 1),
+      -20,
+      0,
+      tol,
+    ).value;
+    expect(zFree / xy).toBeCloseTo(0.5, 9);
+  });
+
+  it('equals the free-space response plus its mirror image about z = 0', () => {
+    const src: BoxSource = { x1: -1, x2: 1, y1: -2, y2: 2, z1: -1.4, z2: -0.3 };
+    for (const tau of [0.5, 4, 30]) {
+      for (const z of [0, -0.2, -0.9, -2.5]) {
+        const p = { x: 2, y: 0.7, z };
+        const want =
+          instantaneousBoxConcentration(free, src, p, tau) +
+          instantaneousBoxConcentration(free, src, { ...p, z: -z }, tau);
+        expect(instantaneousBoxConcentration(top, src, p, tau)).toBeCloseTo(want, 14);
+      }
+    }
+  });
+
+  it('doubles the free-space (POINT3) continuous point source placed on the water table', () => {
+    const point: BoxSource = { x1: 0, x2: 0, y1: 0, y2: 0, z1: 0, z2: 0 };
+    const loading = [{ start: 0, end: Infinity, rate: 2 }];
+    for (const z of [-0.3, -1.5, -3]) {
+      const p = { x: 7, y: 1, z };
+      const a = at123dConcentration({ aquifer: top, source: point, loading, time: 60 }, p);
+      const b = at123dConcentration({ aquifer: free, source: point, loading, time: 60 }, p);
+      expect(a / b).toBeCloseTo(2, 9);
+    }
+    const g = at123dGrid({ aquifer: top, source: plane, loading, time: 60 }, [7], [1], -1.5);
+    const c = at123dConcentration(
+      { aquifer: top, source: plane, loading, time: 60 },
+      { x: 7, y: 1, z: -1.5 },
+    );
+    expect(Math.abs(g[0]![0]! / c - 1)).toBeLessThan(1e-6);
+  });
+
+  it('reports zero above the water table and rejects a source above it or a contradictory top', () => {
+    const loading = [{ start: 0, end: Infinity, rate: 1 }];
+    const input = { aquifer: top, source: plane, loading, time: 20 };
+    expect(at123dConcentration(input, { x: 3, y: 0, z: 0.5 })).toBe(0);
+    expect(at123dGrid(input, [3], [0], 0.5)[0]![0]).toBe(0);
+    expect(() =>
+      at123dConcentration({ ...input, source: { ...plane, z2: 0.2 } }, { x: 3, y: 0, z: -1 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      at123dConcentration(
+        {
+          ...input,
+          aquifer: { ...top, top: 'unbounded', thickness: 5 },
+          source: { ...plane, z1: 5, z2: 5 },
+        },
+        { x: 3, y: 0, z: 1 },
+      ),
+    ).toThrow(RangeError);
+    expect(() =>
+      at123dConcentration(
+        { ...input, aquifer: { ...top, top: 'sideways' as 'no-flux' } },
+        { x: 3, y: 0, z: -1 },
+      ),
+    ).toThrow(RangeError);
+  });
+});
