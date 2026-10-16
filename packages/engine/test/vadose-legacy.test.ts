@@ -297,11 +297,16 @@ describe('vadose.vadsat method', () => {
     const profileTimes = Array.from({ length: 120 }, (_, k) => ((k + 1) * YEAR) / 12);
     const input = baseInput({ depths, profileTimes });
     vadoseVadsat.run(input); // warm up the JIT
-    const t0 = Date.now();
-    const out = vadoseVadsat.run(input);
-    const elapsed = Date.now() - t0;
+    // The minimum of five runs filters out machine contention (parallel test load), which only adds time.
+    const timings: number[] = [];
+    let out = vadoseVadsat.run(input);
+    for (let i = 0; i < 5; i++) {
+      const t0 = performance.now();
+      out = vadoseVadsat.run(input);
+      timings.push(performance.now() - t0);
+    }
     expect(out.profiles.concentrations.length).toBe(120);
-    expect(elapsed).toBeLessThan(50);
+    expect(Math.min(...timings)).toBeLessThan(50);
   });
 });
 
