@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-16 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-17 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -245,6 +245,47 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf>
   - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252>
 
+### surfaceWater
+
+#### Well-mixed surface water box with Darcy groundwater discharge and equilibrium sediment
+
+- Kind: Legacy (RISC5 default)
+- Method id: `surfaceWater.well-mixed`
+- Summary: The groundwater concentration at the bank times a Darcy discharge across the bed, mixed into a fraction of the upstream flow and the water body volume with first-order decay, evaluated at steady state for the loading at each time, and sediment in equilibrium with the groundwater.
+- Assumptions:
+  - The plume discharges into the water body (a gaining reach); a losing reach is refused.
+  - The mixing volume is uniformly mixed; the mixing fraction f scales both the upstream flow and the volume.
+  - The sediment is in equilibrium with its pore water; there is no degradation, burial, resuspension or sorption kinetics in the bed.
+  - There is no runoff, erosion, point discharge or upstream source other than the background concentration.
+  - A chemical with neither a Koc nor a Kd has no sediment concentration and is reported as not quantified, never as zero.
+  - Storage in the water body is ignored: the box is re-evaluated at steady state at each sample time (warned when the residence time exceeds 30 d).
+  - The groundwater concentration is the plume centreline value at the bank averaged over the discharge thickness, held across the whole reach width, so the loading can exceed the mass the source releases.
+  - The reach length is entered or the full width of the steady Domenico plume between its 5 percent points.
+- RISC5 choice: RISC5 loads the water body with the centreline groundwater concentration times a Darcy flow across the bed (bed conductivity, discharge thickness, reach length and gradient), mixes it with a fraction of the upstream flow and the body volume at steady state for each time, sets the reach length from the 5 percent Domenico plume width with its own dispersivities, and takes sediment as Kd times the groundwater concentration.
+- Sources:
+  - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
+  - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2>
+  - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
+
+#### Mass discharge across the bank plane into a transient well-mixed box
+
+- Kind: Modern
+- Method id: `surfaceWater.mass-discharge`
+- Summary: The advective mass the groundwater run carries across the vertical plane at the bank over the reach and the discharge thickness, a transient well-mixed box with storage, plug flow with first-order decay to a river receptor, and equilibrium sediment with a selectable pore water and an organic-carbon-normalized output.
+- Assumptions:
+  - The plume discharges into the water body (a gaining reach); a losing reach is refused.
+  - The mixing volume is uniformly mixed; the mixing fraction f scales both the upstream flow and the volume.
+  - The sediment is in equilibrium with its pore water; there is no degradation, burial, resuspension or sorption kinetics in the bed.
+  - There is no runoff, erosion, point discharge or upstream source other than the background concentration.
+  - A chemical with neither a Koc nor a Kd has no sediment concentration and is reported as not quantified, never as zero.
+  - The loading is the mass discharge across the plane, so the mass the groundwater run delivers is conserved; dispersive flux across the plane is neglected and the plane passes the plume without reflection.
+  - The groundwater flow is the Darcy flux of the groundwater run over the same area, so no bed conductivity or gradient is needed.
+  - The loading is linear between sample times and held after the last; the box starts at the steady state of the first loading unless an initial concentration is given.
+  - Downstream of the reach the whole river is mixed and moves as plug flow with first-order decay.
+- Sources:
+  - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
+  - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -257,11 +298,9 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley].
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
-- Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248.
-- Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
@@ -334,11 +373,11 @@ Every entry in the reference database, alphabetical by author.
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327> [planned]
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
-- Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5. [planned]
+- Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5. [used]
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013> [planned]
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
 - DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248. [planned]
-- Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203> [planned]
+- Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203> [used]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78(4):259-280. <https://doi.org/10.1016/j.jconhyd.2005.05.010> [used]

@@ -11,6 +11,7 @@ import {
 } from './processes/groundwater/index.js';
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 import { exposureLegacy, exposureModern } from './processes/exposure/index.js';
+import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -25,6 +26,7 @@ export * from './processes/groundwater/index.js';
 export * from './processes/vadose/index.js';
 export * from './processes/saturatedSource/index.js';
 export * from './processes/exposure/index.js';
+export * from './processes/surfaceWater/index.js';
 export * from './processes/risk/index.js';
 
 export const registry = new MethodRegistry();
@@ -40,3 +42,5 @@ registry.register(saturatedTwoRegion);
 registry.register(saturatedExponential);
 registry.register(exposureLegacy);
 registry.register(exposureModern);
+registry.register(surfaceWaterLegacy);
+registry.register(surfaceWaterModern);
