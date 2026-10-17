@@ -850,14 +850,14 @@
   {
     "key": "macdonald2000",
     "type": "data",
-    "status": "data",
+    "status": "planned",
     "authors": "MacDonald, D.D., Ingersoll, C.G., Berger, T.A.",
     "year": 2000,
     "title": "Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems",
     "venue": "Archives of Environmental Contamination and Toxicology",
     "identifier": "39(1):20-31",
     "doi": "10.1007/s002440010075",
-    "notes": "Authors, title, volume, issue, pages and DOI verified through Crossref on 2026-10-16. Source of the consensus TEC and PEC for 28 freshwater sediment chemicals planned for M8 (docs/methods/surface-water.md); the article is copyrighted, so only the numeric values are used, with this citation. Numeric values transcribed to packages/data/raw/sediment/macdonald2000 (two entries compared) and built into packages/data/generated/sediment-2026-10-16.",
+    "notes": "Authors, title, volume, issue, pages and DOI verified through Crossref on 2026-10-16. Planned source of the consensus TEC and PEC for 28 freshwater sediment chemicals (docs/methods/surface-water.md). Not used: the article is copyrighted and was not reachable, the 2000 EPA GLNPO report (EPA 905/R-00/007) lists only the PEC column, and no public reproduction of all 28 TEC and PEC pairs was found, so no values ship. Enter the values when a copy of the article or a complete public reproduction is available.",
     "tags": ["surfaceWater"]
   },
   {

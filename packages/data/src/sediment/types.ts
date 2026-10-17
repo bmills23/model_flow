@@ -1,5 +1,5 @@
-export type SedimentSource = 'epa2018r4era' | 'macdonald2000';
-export type SedimentTable = '2a' | '2b' | '2c' | 'tec-pec';
+export type SedimentSource = 'epa2018r4era';
+export type SedimentTable = '2a' | '2b' | '2c';
 /** Dry weight, or normalized to 1 percent organic carbon (ocBasis 0.01 in the row). */
 export type SedimentBasis = 'dw' | 'oc1pct';
 export type SedimentUnit = 'ug/kg' | 'mg/kg';
@@ -9,9 +9,7 @@ export type SedimentEndpoint =
   | 'region4-freshwater-refinement'
   | 'region4-marine-screening'
   | 'region4-marine-refinement'
-  | 'region4-pah-toxic-unit-refinement'
-  | 'macdonald-tec'
-  | 'macdonald-pec';
+  | 'region4-pah-toxic-unit-refinement';
 
 /**
  * One benchmark value, shaped like the engine `Criterion` record (medium, endpoint, value, unit, ocBasis,
@@ -34,7 +32,7 @@ export interface BenchmarkRow {
   medium: 'sediment';
   source: SedimentSource;
   table: SedimentTable;
-  /** PDF page for Region 4 rows; absent for the MacDonald rows. */
+  /** PDF page for Region 4 rows. */
   page?: number;
   section: string;
   endpoint: SedimentEndpoint;

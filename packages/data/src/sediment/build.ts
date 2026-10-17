@@ -9,7 +9,6 @@ import type {
   BenchmarkRow,
   SedimentBasis,
   SedimentEndpoint,
-  SedimentTable,
   SedimentUnit,
 } from './types.js';
 
@@ -19,8 +18,6 @@ export const serialize = (value: unknown): string => JSON.stringify(value, null,
 
 const EDITION = '2026-10-16';
 const R4_LICENCE = 'U.S. government work, public domain in the United States.';
-const MAC_LICENCE =
-  'Copyrighted article; only the numeric values are used, with the citation, as facts. No table layout or prose is copied.';
 
 const slug = (s: string): string =>
   s
@@ -174,43 +171,6 @@ function region4Rows(dir: string): BenchmarkRow[] {
   return rows;
 }
 
-function macdonaldRows(dir: string): BenchmarkRow[] {
-  const rows: BenchmarkRow[] = [];
-  for (const r of readCsv(dir, 'tec-pec.csv')) {
-    const name = r['chemical']!;
-    const cas = r['cas']! === '' ? '' : checkedCas(r['cas']!, `MacDonald ${name}`);
-    const code = r['code']!;
-    const tec = Number(r['tec']);
-    const pec = Number(r['pec']);
-    if (!(tec > 0 && pec > tec))
-      throw new Error(`MacDonald ${name}: TEC ${tec} must be positive and below PEC ${pec}`);
-    for (const [endpoint, value] of [
-      ['macdonald-tec', tec],
-      ['macdonald-pec', pec],
-    ] as const) {
-      rows.push({
-        id: '',
-        chemicalId: chemicalId(cas, code, name),
-        name,
-        cas: cas === '' ? null : cas,
-        code: code === '' ? null : code,
-        variant: null,
-        medium: 'sediment',
-        source: 'macdonald2000',
-        table: 'tec-pec',
-        section: 'Consensus-based sediment quality guidelines for freshwater ecosystems',
-        endpoint,
-        value,
-        unit: r['unit'] as SedimentUnit,
-        basis: 'dw',
-        waterType: 'fresh',
-        recordSource: 'database',
-      });
-    }
-  }
-  return rows;
-}
-
 const assignIds = (rows: BenchmarkRow[]): void => {
   const seen = new Map<string, number>();
   for (const r of rows) {
@@ -224,15 +184,11 @@ const assignIds = (rows: BenchmarkRow[]): void => {
 /** Verifies both manifests, then builds the benchmark file from the committed CSVs. */
 export function buildSediment(rawDir: string): SedimentBuild {
   const r4Dir = join(rawDir, 'epa-r4-2018');
-  const macDir = join(rawDir, 'macdonald2000');
   const r4 = verifySedimentManifest(r4Dir);
-  const mac = verifySedimentManifest(macDir);
   const report = r4.files.find((f) => f.role === 'report');
   if (report === undefined) throw new Error('the Region 4 manifest lists no report');
-  const rows = [...region4Rows(r4Dir), ...macdonaldRows(macDir)];
+  const rows = [...region4Rows(r4Dir)];
   assignIds(rows);
-  const tables: SedimentTable[] = ['2a', '2b', '2c', 'tec-pec'];
-  void tables;
   return {
     edition: EDITION,
     sources: {
@@ -242,12 +198,6 @@ export function buildSediment(rawDir: string): SedimentBuild {
         pageDate: report.pageDate ?? '',
         retrieved: r4.retrieved,
         licence: R4_LICENCE,
-      },
-      macdonald2000: {
-        reference: 'macdonald2000',
-        pageDate: '2000',
-        retrieved: mac.retrieved,
-        licence: MAC_LICENCE,
       },
     },
     units: {

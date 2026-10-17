@@ -504,18 +504,19 @@ Bryan to overturn) unless marked forced by a source:
     parameters at a user hardness, default 100 mg/L as CaCO3 (the table's basis); outside 25 to 400 mg/L is
     warned (a screening choice to be replaced if the appendix states other bounds). Metals criteria are
     dissolved and the model concentration is taken as dissolved (warned).
-13. **Sediment benchmark sources (DEFAULT).** EPA Region 4 Ecological Risk Assessment Supplemental Guidance,
-    March 2018 update (Tables 2a, 2b, 2c; public domain) and the MacDonald et al. 2000 consensus TEC and
-    PEC (numeric values with the citation, as facts; the article is copyrighted, so no layout or prose).
+13. **Sediment benchmark sources (DEFAULT, amended in slice D2b).** EPA Region 4 Ecological Risk Assessment
+    Supplemental Guidance, March 2018 update (Tables 2a, 2b, 2c; public domain). The MacDonald et al. 2000
+    consensus TEC and PEC were part of this ruling (numeric values with the citation, as facts) but are not
+    shipped: the first build typed them from recall because the article is paywalled, and recalled values
+    must never ship. Open until a copy of the article or a complete public reproduction is available.
     NOAA SQuiRTs are not a data source: NOAA's Office of Response and Restoration removed them on April 4,
     2024 as out of date, and they may be redistributed only whole and unmodified. This departs from the
     ROADMAP rows M, N, which name SQuiRTs; their TEC and PEC columns may serve as a transcription
     cross-check only.
 14. **Raw criteria files committed (DEFAULT).** As for the RSL (M4 ruling 9): the two NRWQC HTML pages as
-    served, the Region 4 PDF (about 1.3 MB) and transcribed CSVs, and a hand-entered MacDonald CSV, each
+    served, the Region 4 PDF (about 1.3 MB) and transcribed CSVs, each
     under a SHA-256 manifest; the build reads only committed files and fails on a mismatch. The PDF is
-    never parsed in the build or CI: a hand-run extraction script writes the CSVs; the MacDonald values are
-    entered twice and compared. HTML is read without a new dependency if the markup allows, otherwise with
+    never parsed in the build or CI: a hand-run extraction script writes the CSVs; HTML is read without a new dependency if the markup allows, otherwise with
     an exact-pinned build-time devDependency recorded here.
 15. **Edition naming (DEFAULT).** The NRWQC pages are not numbered editions, so the raw and generated
     directories are named by the date of the first check (2026-10-16), the manifest records the date the
@@ -568,13 +569,14 @@ above:
   registry number of sulfide, 18496-25-8, passes it and is used, with the printed form kept in `casPrinted`.
   Every other printed CAS number passes. Monobutyltin is printed `78763-54 -9` and is repaired by removing
   the space.
-- **MacDonald values.** A full-text copy of the 2000 article was not reachable (the publisher page is
-  paywalled and no open copy was found), so the 28 TEC and PEC pairs are not read against it. They are
-  entered twice (`tec-pec.csv`, `tec-pec-entry2.csv`, a separate pass in another order) and a test checks that
-  the two agree, that each TEC is below its PEC, and that they agree within 5 percent with the Region 4
-  freshwater values whose source b is the TEC and PEC (12 or more chemicals, the report rounds to two or
-  three significant figures). No page is recorded per value. A read against the article is still open. NOAA
-  SQuiRTs were not used.
+- **MacDonald values (slice D2b, 2026-10-17).** The D2 build typed the 28 TEC and PEC pairs from recall and
+  checked them only against each other and against Region 4 b-source rows; that is not provenance, so all
+  MacDonald values, both CSVs, the manifest and the generated rows were removed (811 rows remain, Region 4
+  only). Verification was tried against public-domain documents: EPA 905/R-00/007 (June 2000, Ingersoll et
+  al., USGS report for EPA GLNPO) prints only the consensus PEC column in its Table 1, no TEC, and the USGS
+  fact sheet 068-01 table covers trace metals only, so neither verifies all 28 pairs. `macdonald2000` is back
+  to status `planned`. Open item: enter the values, each with a page, when a copy of the article or a
+  complete public reproduction is available. NOAA SQuiRTs were not used.
 - **Duplicates.** Rows the report prints twice (acrolein in two Table 2a sections with different values,
   phenanthrene and 4-bromophenyl phenyl ether in two Table 2b sections with equal values) are both kept; ids
   carry a `#2` suffix for the repeat.

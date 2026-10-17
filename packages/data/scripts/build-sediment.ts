@@ -41,19 +41,11 @@ if (process.argv.includes('--manifest')) {
         entry('epa-r4-2018', 'table-2c.csv', 'table', 'epa2018r4era'),
       ],
     },
-    macdonald2000: {
-      edition,
-      retrieved: '2026-10-17',
-      files: [
-        entry('macdonald2000', 'tec-pec.csv', 'values', 'macdonald2000'),
-        entry('macdonald2000', 'tec-pec-entry2.csv', 'values', 'macdonald2000'),
-      ],
-    },
   };
   for (const [dir, m] of Object.entries(manifests)) {
     writeFileSync(join(rawDir, dir, 'manifest.json'), JSON.stringify(m, null, 2) + '\n');
   }
-  console.log('wrote both manifests');
+  console.log('wrote the manifest');
   process.exit(0);
 }
 

@@ -1,10 +1,9 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildSediment, serialize, type SedimentBuild } from '../src/sediment/build.js';
-import { parseCsv } from '../src/sediment/csv.js';
 import { verifySedimentManifest } from '../src/sediment/manifest.js';
 import type { BenchmarkRow } from '../src/sediment/types.js';
 import { casCheckDigitValid } from '../src/nrwqc/parse.js';
@@ -34,9 +33,8 @@ describe('checksum manifests', () => {
     return d;
   };
 
-  it('accepts the committed files of both sources', () => {
+  it('accepts the committed files of the Region 4 source', () => {
     expect(() => verifySedimentManifest(join(rawDir, 'epa-r4-2018'))).not.toThrow();
-    expect(() => verifySedimentManifest(join(rawDir, 'macdonald2000'))).not.toThrow();
   });
 
   it('records the PDF checksum the methods note recorded on 2026-10-16', () => {
@@ -58,13 +56,13 @@ describe('checksum manifests', () => {
 
   it('fails when a listed file is missing', () => {
     const d = copy();
-    rmSync(join(d, 'macdonald2000', 'tec-pec.csv'));
-    expect(() => verifySedimentManifest(join(d, 'macdonald2000'))).toThrow(/tec-pec\.csv/);
+    rmSync(join(d, 'epa-r4-2018', 'table-2b.csv'));
+    expect(() => verifySedimentManifest(join(d, 'epa-r4-2018'))).toThrow(/table-2b\.csv/);
   });
 });
 
 describe('edition and source blocks', () => {
-  it('records both sources, their dates, and the licence status', () => {
+  it('records the source, its date, and the licence status', () => {
     expect(built.edition).toBe('2026-10-16');
     expect(built.sources.epa2018r4era).toMatchObject({
       reference: 'epa2018r4era',
@@ -72,8 +70,6 @@ describe('edition and source blocks', () => {
       retrieved: '2026-10-17',
     });
     expect(built.sources.epa2018r4era.licence).toMatch(/public domain/i);
-    expect(built.sources.macdonald2000.reference).toBe('macdonald2000');
-    expect(built.sources.macdonald2000.licence).toMatch(/copyright/i);
   });
 });
 
@@ -252,73 +248,13 @@ describe('Region 4 Table 2c', () => {
   });
 });
 
-describe('MacDonald et al. (2000) consensus guidelines', () => {
-  const mac = () => built.rows.filter((r) => r.source === 'macdonald2000');
-
-  it('has 28 chemicals, each with a TEC below its PEC', () => {
-    const ids = new Set(mac().map((r) => r.chemicalId));
-    expect(ids.size).toBe(28);
-    for (const id of ids) {
-      const tec = mac().find((r) => r.chemicalId === id && r.endpoint === 'macdonald-tec')!;
-      const pec = mac().find((r) => r.chemicalId === id && r.endpoint === 'macdonald-pec')!;
-      expect(tec, id).toBeDefined();
-      expect(pec, id).toBeDefined();
-      expect(tec.value, id).toBeLessThan(pec.value);
-      expect(tec.unit).toBe(pec.unit);
-      expect(tec.basis).toBe('dw');
-    }
-  });
-
-  it('reads the metals in mg/kg and the organics in ug/kg, all dry weight', () => {
-    expect(find('tec-pec', '7440-66-6', 'macdonald-tec')).toMatchObject({
-      value: 121,
-      unit: 'mg/kg',
-    });
-    expect(find('tec-pec', '7440-66-6', 'macdonald-pec')!.value).toBe(459);
-    expect(find('tec-pec', '7440-43-9', 'macdonald-tec')!.value).toBe(0.99);
-    expect(find('tec-pec', '50-32-8', 'macdonald-pec')).toMatchObject({
-      value: 1450,
-      unit: 'ug/kg',
-    });
-  });
-
-  it('agrees with the second independent entry of the same values', () => {
-    const first = parseCsv(readFileSync(join(rawDir, 'macdonald2000/tec-pec.csv'), 'utf8'));
-    const second = parseCsv(readFileSync(join(rawDir, 'macdonald2000/tec-pec-entry2.csv'), 'utf8'));
-    expect(second.length).toBe(first.length);
-    const key = (r: Record<string, string>) => r['chemical']!;
-    const secondBy = new Map(second.map((r) => [key(r), r]));
-    for (const r of first) {
-      const o = secondBy.get(key(r));
-      expect(o, key(r)).toBeDefined();
-      expect(Number(o!['tec']), key(r)).toBe(Number(r['tec']));
-      expect(Number(o!['pec']), key(r)).toBe(Number(r['pec']));
-      expect(o!['unit'], key(r)).toBe(r['unit']);
-    }
-  });
-
-  it('agrees within rounding with the Region 4 freshwater values that cite the Florida TEC and PEC (source b)', () => {
-    let compared = 0;
-    for (const m of mac()) {
-      const twin = built.rows.find(
-        (r) =>
-          r.source === 'epa2018r4era' &&
-          r.table === '2a' &&
-          r.chemicalId === m.chemicalId &&
-          r.variant === null &&
-          r.sourceLetter === 'b' &&
-          r.endpoint ===
-            (m.endpoint === 'macdonald-tec'
-              ? 'region4-freshwater-screening'
-              : 'region4-freshwater-refinement'),
-      );
-      if (!twin) continue;
-      compared++;
-      expect(Math.abs(twin.value - m.value) / m.value, `${m.name} ${m.endpoint}`).toBeLessThan(
-        0.05,
-      );
-    }
-    expect(compared).toBeGreaterThanOrEqual(12);
+describe('MacDonald et al. (2000) consensus guidelines (not shipped)', () => {
+  it('carries no MacDonald row, source block, raw directory or endpoint', () => {
+    expect(built.rows.filter((r) => (r.source as string) === 'macdonald2000')).toEqual([]);
+    expect(built.rows.filter((r) => (r.table as string) === 'tec-pec')).toEqual([]);
+    expect(built.rows.filter((r) => r.endpoint.startsWith('macdonald'))).toEqual([]);
+    expect(Object.keys(built.sources)).toEqual(['epa2018r4era']);
+    expect(existsSync(join(rawDir, 'macdonald2000'))).toBe(false);
   });
 });
 
@@ -330,7 +266,7 @@ describe('generated file', () => {
   it('is shaped like the engine criterion record (sediment medium, database source)', () => {
     const r: BenchmarkRow = built.rows[0]!;
     expect(r.medium).toBe('sediment');
-    expect(r.source === 'epa2018r4era' || r.source === 'macdonald2000').toBe(true);
+    expect(r.source).toBe('epa2018r4era');
     expect(r.recordSource).toBe('database');
   });
 });
