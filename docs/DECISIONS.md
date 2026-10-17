@@ -578,10 +578,12 @@ Rulings, DEFAULT (Bryan's to overturn):
    offers the groundwater concentration at the water table under the receptor point (the building is taken
    to stand there), 32 steps plus t = 0, built with `groundwaterWaterTableSeries`; the vadose screen offers
    the source pore water series and the saturated screen the region 1 pore water as one value. A pore water
-   source gives the soil gas H times its concentration with the entered H at 25 deg C in both methods. A long
+   source gives the soil gas H times its concentration: the legacy method uses the entered H at 25 deg C, the
+   modern method uses H'(T) from the boiling point data when they are entered (the same H' it diffuses with)
+   and the entered H at 25 deg C otherwise. A long
    series is thinned to 120 times (ends kept). The steady methods are run at each time; `vapor.quasi-steady`
-   uses L_T^2 / D_T for the establishment time (D_T, the effective diffusivity of the column, not the
-   capacity-corrected one). The tables above the feed panel keep using the entered source. The vadose
+   uses L_T^2 R_g / D_T for the establishment time, R_g the thickness-weighted gas-referenced capacity of the
+   column from the modern run (`capacityRg`), or 1 when that run failed. The tables above the feed panel keep using the entered source. The vadose
    volatilization flux series is not fed to the outdoor box (the vadose screen does not publish the
    volatilization velocity); the outdoor series is the box over the steady flux from each time's source vapor.
 6. **Feed into exposure and risk.** The vapor screen sends the shown method's indoor and outdoor air for one

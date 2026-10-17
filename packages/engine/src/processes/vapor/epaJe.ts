@@ -136,6 +136,11 @@ export interface EpaJeResult {
   /** Enthalpy of vaporization at the system temperature, cal/mol (undefined without boiling data). */
   dHvTS?: number;
   DT: number;
+  /**
+   * Thickness-weighted gas-referenced capacity of the column, (rho_b K_d + theta_w) / H' + theta_a, with no
+   * sorption in a capillary zone (it carries no bulk density). The establishment time is L_T^2 R_g / D_T.
+   */
+  capacityRg: number;
   /** Source-building separation L_T, m. */
   LT: number;
   QB: number;
@@ -413,6 +418,12 @@ export function jeEpaIndoor(input: EpaJeInput): EpaJeResult {
     resistance += l.thickness / deffs[i]!;
   });
   const DT = LT / resistance;
+  let capacityRg = 0;
+  layers.forEach((l) => {
+    const sorbed =
+      l.stratum && chem.koc !== undefined ? l.stratum.bulkDensity * chem.koc * l.stratum.foc : 0;
+    capacityRg += (l.thickness / LT) * ((sorbed + l.moisture) / Hprime + (l.porosity - l.moisture));
+  });
   const floorLayer = layers[0]!;
   const Dcrack = deffs[0]!;
 
@@ -624,6 +635,7 @@ export function jeEpaIndoor(input: EpaJeInput): EpaJeResult {
     Hprime,
     ...(dHvTS !== undefined ? { dHvTS } : {}),
     DT,
+    capacityRg,
     LT,
     QB,
     AB,

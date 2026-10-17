@@ -232,12 +232,14 @@ R-4 and the Appendix J example (see "Fixture plan").
 
 ## Legacy method: outdoor air box (`outdoorAir.box`)
 
-Citations: `arcadis2001` and `spence2001` (Table R-6 and the RISC5 review; both are `used` since V7 registered the method, which must cite a used reference). The attribution of the box
+Citation: `hanna1982` (Hanna, Briggs and Hosker, Handbook on Atmospheric Diffusion, DOE/TIC-11223),
+Section 9-2, which gives the steady-state well-mixed box with zero background, C = Q_a delta_x / (u z_i), verified in
+the NTIS scan on the UNT Digital Library. That is a primary source for the equation; the RISC5 choices of receptor
+at the downwind edge and of the default wind speed and mixing height remain RISC5 choices, and the Table R-6 value
+(`arcadis2001`, `spence2001`) is a fixture comparison only, so those two references stay `fixture`. The attribution of the box
 to the ASTM RBCA guide (`astme1739`) could not be confirmed in slice V3: a public search found only state
-rules that adopt RBCA-style equations as images (Illinois 35 IAC 742 Appendix C, which lists a wind speed
-default of 225 cm/s and a source width W parallel to the wind), not the standard's own equations, which
-are purchased. The method therefore rests on the RISC5 choice alone and does not cite `astme1739`. RULING
-NEEDED: whether to cite the standard anyway on the strength of the Illinois variable list.
+rules that adopt RBCA-style equations as images (Illinois 35 IAC 742 Appendix C), not the standard's own
+equations, which are purchased, so the method does not cite `astme1739`.
 
 Emissions enter a box over the source, of length L along the wind, width W across it and height
 delta (the breathing zone), ventilated by a wind of speed u and fully mixed (RISC5 choice: the receptor is
@@ -519,8 +521,8 @@ Inputs from the existing engine (adapters in slice V7; none changes an existing 
   ruling 8).
 - **Quasi-steady application** (DEFAULT ruling 7): a steady method applied to a source series gives an air
   series at the same times. It is valid when the source changes slowly compared with the time to establish
-  the vapor profile, of order L_T^2 / D_E with the gas-referenced capacity included; the engine computes that
-  time and warns (`vapor.quasi-steady`) when the source changes by more than 10 percent within it.
+  the vapor profile, of order L_T^2 / D_E with the gas-referenced capacity included (D_E = D_T / R_g, R_g the
+  thickness-weighted capacity `capacityRg` of the modern run); the screen computes that time and warns (`vapor.quasi-steady`) when the source changes by more than 10 percent within it.
 
 Outputs to M4 (`packages/engine/src/processes/exposure/`): an EPC spec for `indoorInhalation` or
 `outdoorInhalation`, constant (`constantEpc`) or series (`seriesEpc`), in kg/m^3, with origin set to the
@@ -594,7 +596,14 @@ slices):
   marks as taken at a temperature other than the normal boiling point (trichlorofluoromethane,
   1,1,2-trichloro-1,2,2-trifluoroethane, dibenzofuran), and crotonaldehyde's (printed as 9, apparently
   kcal/mol), are left out of the merged row; T_B and T_C stay, so those chemicals get the
-  `vapor.henry-not-temperature-corrected` warning. `epa2017je`'s workbook (chemical table updated from the
+  `vapor.henry-not-temperature-corrected` warning. Every row is also screened for physical plausibility
+  (`screenLookupRow`): an enthalpy whose Trouton ratio dH/T_B lies outside 10 to 40 cal/(mol K) and a critical
+  temperature with T_C/T_B outside 1.2 to 2.2 (elemental mercury, a liquid metal, is exempt from the ratio
+  band) are published misprints and are left out, with no corrected value substituted. sec-Butylbenzene's
+  enthalpy (88,730 cal/mol, printed 8.87E+04 in Appendix B, ratio 199) fails the first band and its enthalpy
+  is omitted; tert-butylbenzene's T_C of 1220 K (ratio 2.76) fails the second and its whole lookup block is
+  omitted. Both leave the chemical with the not-temperature-corrected warning, and every screened value is
+  listed in `screenedEpa2004je` of the generated file. `epa2017je`'s workbook (chemical table updated from the
   2015 RSLs) was not downloaded; it remains the alternative and switching to it needs a ruling.
 - **k_w and chemical class** (slice V0, built) from `api2012biovapor` Appendix C, as a committed
   id-to-class list for the petroleum chemicals in the RSL table (`packages/data/src/vapor/classes.ts`, as
@@ -765,7 +774,7 @@ tests first, runs the engine test file alone, then the gate once.
 
 References each method cites (all must be `used` when registered; V7 flips them, or each registering
 slice flips its own): `johnsonettinger1991`, `millingtonquirk1961` (already used), `epa1996ssg` (already
-used), `johnson1998`, `arcadis2001` and `spence2001` (box), `astme1739` (not cited: V3 could not confirm it), `epa2004je`, `epa2017je`, `vangenuchten1980`
+used), `johnson1998`, `hanna1982` (box), `astme1739` (not cited: V3 could not confirm it), `epa2004je`, `epa2017je`, `vangenuchten1980`
 (already used), `devaull2007`, `api2012biovapor`, `epa2015vi`, `epavisl`, `epa2015pvi`, `lahvis2013`,
 `jury1983`, `jury1990`, and `epa2002ssg` only if the Q/C regression is used.
 
@@ -804,7 +813,7 @@ the risk feed carries the origins `vapor.je-1991` and `vapor.je-epa` for indoor 
 | `yao2011`, `yao2013`, `abreu2005`, `abreu2006`, `abreu2009` | Crossref | No; cited only in warnings |
 | `epa1996ssg` | As in the saturated-source note | Part 2 Section 2.4.2 (Equation 6, Table 3 Q/C), Section 2.6.3 (Equation 55), Table 3-A, Tables 36, 37 and 39 and Appendix C (Jury equations 1 to 12), read in slice V3 on 2026-10-17 |
 | `astme1739` | Not verified beyond its designation; V3 found no public reproduction of the equations | No (a purchased standard); not cited by any method |
-| `arcadis2001`, `spence2001` | As in the vadose note; Tables R-3 to R-6 read in the RISC5 guide | Fixture use, and cited by `outdoorAir.box` (hence `used`) |
+| `arcadis2001`, `spence2001` | As in the vadose note; Tables R-3 to R-6 read in the RISC5 guide | Fixture use only; no method cites them (the box cites `hanna1982`) |
 
 `biovapor2010` (software, year not verified) is superseded for citation by `api2012biovapor` and stays
 `planned`. `pviscreen` stays `planned` for M10.

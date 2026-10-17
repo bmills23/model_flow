@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SOIL_TEXTURES, jeEpaIndoor, jeLegacyIndoor } from '@model-flow/engine';
+import { SOIL_TEXTURES, henryAtTemperature, jeEpaIndoor, jeLegacyIndoor } from '@model-flow/engine';
 import { DEFAULT_FORM, applyTexture, toInputs, type VaporForm } from './form';
 import { DEFAULT_OUTDOOR } from './outdoor';
 import { vaporEpcs, type SourceSeries } from './series';
@@ -116,5 +116,55 @@ describe('vaporEpcs with a pore water source', () => {
     if (ci.kind !== 'constant') throw new Error('constant');
     expect(ci.value).toBe(dc.concentration);
     expect(c.outdoor.legacy?.kind).toBe('constant');
+  });
+});
+
+describe('vaporEpcs establishment time and temperature', () => {
+  it('uses the gas-referenced capacity in the establishment time (finding 4)', () => {
+    const form = DEFAULT_FORM;
+    const p = parse(form);
+    const probe = jeEpaIndoor({ ...p.modern, source: { kind: 'soilGas', csg: 1e-3 } });
+    expect(probe.capacityRg).toBeGreaterThan(2);
+    const tauDT = (probe.LT * probe.LT) / probe.DT;
+    const tauTrue = tauDT * probe.capacityRg;
+    // A source halving over a time between the bare diffusion time and the true time.
+    const t = Math.sqrt(tauDT * tauTrue);
+    const src: SourceSeries = {
+      kind: 'poreWater',
+      label: 'Vadose source pore water',
+      series: { times: [0, t, 2 * t], values: [1e-3, 5e-4, 2.5e-4] },
+    };
+    const r = vaporEpcs(form, p, src, DEFAULT_OUTDOOR);
+    expect(r.warnings.map((w) => w.code)).toContain('vapor.quasi-steady');
+  });
+
+  it('sources the modern pore water vapor with the temperature-corrected H prime (finding 7)', () => {
+    const form: VaporForm = {
+      ...DEFAULT_FORM,
+      temperature: '10',
+      TB: '353.24',
+      TC: '562.16',
+      dHvb: '7342',
+    };
+    const p = parse(form);
+    const c = 5e-4;
+    const hp = henryAtTemperature({
+      HR: p.modern.chemical.henryAtm,
+      dHvb: 7342,
+      TB: 353.24,
+      TC: 562.16,
+      TS: p.modern.temperature,
+    }).Hprime;
+    expect(hp).not.toBeCloseTo(0.228, 2);
+    const r = vaporEpcs(
+      form,
+      p,
+      { kind: 'poreWater', label: 'Saturated region 1', constant: c },
+      DEFAULT_OUTDOOR,
+    );
+    const direct = jeEpaIndoor({ ...p.modern, source: { kind: 'soilGas', csg: hp * c } });
+    const mi = r.indoor.modern!;
+    if (mi.kind !== 'constant') throw new Error('constant');
+    expect(mi.value).toBe(Math.max(0, direct.concentration));
   });
 });

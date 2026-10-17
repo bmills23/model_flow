@@ -78,7 +78,7 @@ export const outdoorAirBox: MethodDescriptor<OutdoorBoxInput, OutdoorBoxResult> 
   name: 'Outdoor air box model',
   summary:
     'Emissions into a fully mixed box of length, width and breathing-zone height ventilated by the wind: C = sum(E) / (u delta W), which for an area flux over the footprint is F L / (u delta).',
-  citations: ['arcadis2001', 'spence2001'],
+  citations: ['hanna1982'],
   assumptions: [
     'The receptor is at the downwind edge of the box; no vertical dispersion out of the box.',
     'No deposition or decay in air; steady emission.',

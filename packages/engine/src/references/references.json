@@ -405,6 +405,18 @@
     "tags": ["vapor", "saturatedSource", "particulate"]
   },
   {
+    "key": "hanna1982",
+    "type": "method",
+    "status": "used",
+    "authors": "Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr.",
+    "year": 1982,
+    "title": "Handbook on atmospheric diffusion",
+    "venue": "U.S. Department of Energy, Office of Health and Environmental Research",
+    "identifier": "DOE/TIC-11223",
+    "notes": "Verified from the NTIS scan on the UNT Digital Library (title page, retrieved 2026-10-17). Section 9-2 (box model, p. 57), steady state with zero background: C = Q_a delta_x / (u z_i), the well-mixed box that outdoorAir.box applies.",
+    "tags": ["outdoorAir", "dispersion"]
+  },
+  {
     "key": "epa2004je",
     "type": "guidance",
     "status": "used",
@@ -1029,24 +1041,24 @@
   {
     "key": "arcadis2001",
     "type": "review",
-    "status": "used",
+    "status": "fixture",
     "authors": "Arcadis Geraghty & Miller",
     "year": 2001,
     "title": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
-    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures, and cited by outdoorAir.box for the RISC5 choice and its Table R-6 value. The RISC5 guide reproduces only page 1 of the three pages of Table R-9 (direct exposure pathways); pages 2 and 3 are not available.",
+    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures. The RISC5 guide reproduces only page 1 of the three pages of Table R-9 (direct exposure pathways); pages 2 and 3 are not available.",
     "tags": ["validation", "exposure"]
   },
   {
     "key": "spence2001",
     "type": "data",
-    "status": "used",
+    "status": "fixture",
     "authors": "Spence, L.R., Walden, T.",
     "year": 2001,
     "title": "RISC4 User's Manual",
     "venue": "BP Oil International",
     "identifier": "Version 4.0, October 2001",
     "url": "https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf",
-    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Cited by outdoorAir.box for the RISC5 choice. Fixture use otherwise: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list, and, planned for M4, the adult resident reasonable-maximum factors (Table 6-2) and four chemicals' toxicity and permeability values (Table 11-1) that the Table R-9 comparison depends on but does not list. No table is reproduced.",
+    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Fixture use only: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list, and, planned for M4, the adult resident reasonable-maximum factors (Table 6-2) and four chemicals' toxicity and permeability values (Table 11-1) that the Table R-9 comparison depends on but does not list. No table is reproduced.",
     "tags": ["validation", "vadose", "exposure"]
   },
   {

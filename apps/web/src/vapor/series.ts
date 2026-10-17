@@ -1,4 +1,5 @@
 import {
+  henryAtTemperature,
   jeEpaIndoor,
   jeLegacyIndoor,
   quasiSteadyTime,
@@ -81,8 +82,21 @@ export function vaporEpcs(
         modern: { kind: 'groundwater' as const, cgw: c },
       };
     }
-    const soilGas = { kind: 'soilGas' as const, csg: H * c };
-    return { legacy: soilGas, modern: soilGas };
+    // The modern method diffuses with H' at the soil temperature, so it sources with the same H'.
+    const chem = parsed.modern.chemical;
+    const Hm = chem.thermo
+      ? henryAtTemperature({
+          HR: chem.henryAtm,
+          dHvb: chem.thermo.dHvb,
+          TB: chem.thermo.TB,
+          TC: chem.thermo.TC,
+          TS: parsed.modern.temperature,
+        }).Hprime
+      : H;
+    return {
+      legacy: { kind: 'soilGas' as const, csg: H * c },
+      modern: { kind: 'soilGas' as const, csg: Hm * c },
+    };
   };
 
   const out: VaporEpcs = { indoor: {}, outdoor: {}, errors: {}, warnings: [] };
@@ -149,7 +163,10 @@ export function vaporEpcs(
     const first = runs.get(times[0]!);
     if (first && first.DT > 0 && first.LT > 0) {
       const vapor: EpcSeries = { times, values: times.map((t) => runs.get(t)!.sourceVapor) };
-      out.warnings.push(...quasiSteadyWarnings(vapor, quasiSteadyTime(first.LT, first.DT)));
+      // D_E = D_T / R_g (gas-referenced); the legacy engine carries no sorption data, so it borrows the
+      // modern run's capacity and uses 1 (gas capacity alone, the shortest time) when that run failed.
+      const rg = modernRuns.get(times[0]!)?.capacityRg ?? 1;
+      out.warnings.push(...quasiSteadyWarnings(vapor, quasiSteadyTime(first.LT, first.DT / rg)));
     }
   }
   return out;

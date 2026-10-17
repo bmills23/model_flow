@@ -6,7 +6,12 @@ import { afterAll, describe, expect, it } from 'vitest';
 import type { ChemicalsFile } from '../src/rsl/types.js';
 import type { VaporRslKey } from '../src/vapor/types.js';
 import { serialize } from '../src/rsl/build.js';
-import { buildVapor, readLookupTable, screenLookupRow, verifyVaporManifest } from '../src/vapor/build.js';
+import {
+  buildVapor,
+  readLookupTable,
+  screenLookupRow,
+  verifyVaporManifest,
+} from '../src/vapor/build.js';
 import { biodegradationClasses, petroleumChemicals } from '../src/vapor/classes.js';
 import { oxygenDemand } from '../src/vapor/formulas.js';
 

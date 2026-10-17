@@ -371,8 +371,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The width cancels for an area flux over the whole footprint.
 - RISC5 choice: RISC5 ventilates a box over the source by a wind of fixed speed and mixing height and feeds it from the soil, groundwater or unsaturated zone emission; its Table R-6 print is not reproduced (see the fixture README).
 - Sources:
-  - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0.
-  - Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf>
+  - Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223.
 
 #### Soil Screening Guidance volatilization factor
 
@@ -444,6 +443,8 @@ Public datasets that the chemical and toxicity database is built from.
 
 Reviews, codes and packages used to produce test fixtures. They are checks on this software, not parts of it.
 
+- Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0.
+- Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide>
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/>
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/>
@@ -458,7 +459,7 @@ Every entry in the reference database, alphabetical by author.
 - American Petroleum Institute (1987). Oil and Gas Industry Exploration and Production Wastes. Washington, D.C. API Document No. 471-01-09. [used]
 - American Petroleum Institute (2010). BioVapor. [planned]
 - American Petroleum Institute (2012). BioVapor: A 1-D Vapor Intrusion Model with Oxygen-Limited Aerobic Biodegradation, Users Manual, Version 2.1. American Petroleum Institute (prepared by GSI Environmental Inc.). November 2012. <https://api.org/~/media/Files/EHS/Clean_Water/Ground_Water_Quality/biovapor/BioVapor-Users-Guide.pdf> [used]
-- Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [used]
+- Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]. [planned]
@@ -476,6 +477,7 @@ Every entry in the reference database, alphabetical by author.
 - Gelhar, L.W., Mantoglou, A., Welty, C., Rehfeldt, K.R. (1985). A review of field-scale physical solute transport processes in saturated and unsaturated porous media. Electric Power Research Institute. EPRI EA-4190. [used]
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
 - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
+- Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223. [used]
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables]. [planned]
 - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
@@ -496,7 +498,7 @@ Every entry in the reference database, alphabetical by author.
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
 - Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x> [used]
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
-- Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf> [used]
+- Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf> [fixture]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]
 - Srinivasan, V., Clement, T.P., Lee, K.K. (2007). Domenico solution: is it valid?. Ground Water. 45(2):136-146. <https://doi.org/10.1111/j.1745-6584.2006.00281.x> [used]
