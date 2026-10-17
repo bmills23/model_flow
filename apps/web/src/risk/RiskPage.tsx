@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Seg, Field } from '../ui/controls';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
+import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
 import { buildInputs, ENTER_CONCENTRATION, type BuildResult } from './build';
 import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
@@ -30,12 +31,16 @@ export function RiskPage() {
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const { db, error: dbError } = useChemicalDb();
   const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
+  const vapor = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
 
   const patch = (next: Partial<RiskForm>): void => setForm((f) => ({ ...f, ...next }));
   const setRow = (id: string, next: ChemicalRow): void =>
     setForm((f) => ({ ...f, chemicals: f.chemicals.map((c) => (c.id === id ? next : c)) }));
 
-  const built = useMemo(() => (db ? buildInputs(form, db, well) : null), [form, db, well]);
+  const built = useMemo(
+    () => (db ? buildInputs(form, db, well, vapor) : null),
+    [form, db, well, vapor],
+  );
   const outcome = useMemo(() => (built?.ok ? runRisk(built) : null), [built]);
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
   const needsInput =
@@ -145,6 +150,7 @@ export function RiskPage() {
                     rec={rec}
                     db={db}
                     well={well}
+                    vapor={vapor}
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>
                       patch({ chemicals: form.chemicals.filter((c) => c.id !== row.id) })

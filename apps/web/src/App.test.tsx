@@ -61,4 +61,13 @@ describe('App shell', () => {
     ).toBeTruthy();
     window.location.hash = '';
   }, 30000);
+
+  it('links to the vapor screen from the navigation and renders it on its route', async () => {
+    window.location.hash = '#/vapor';
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /vapor intrusion/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/vapor');
+    expect(await screen.findByRole('heading', { level: 1, name: /vapor intrusion/i })).toBeTruthy();
+    window.location.hash = '';
+  });
 });

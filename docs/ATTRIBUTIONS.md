@@ -314,12 +314,155 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 - Sources:
   - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
 
+### vapor
+
+#### Johnson and Ettinger soil, soil gas or groundwater to indoor air
+
+- Kind: Legacy (RISC5 default)
+- Method id: `vapor.je-1991`
+- Summary: Steady one-dimensional diffusion through clean soil layers (and an entered capillary fringe for a groundwater source) coupled to advection and diffusion through foundation cracks and a well-mixed building, for an infinite source.
+- Assumptions:
+  - Steady, one-dimensional vapor transport through homogeneous layers; the source extends under the whole building footprint.
+  - Infinite source: the source vapor concentration does not change with time; linked to a time-varying source the method is applied quasi-steadily.
+  - No sorption to building materials and no indoor background; no biodegradation.
+  - Henry constant as entered (25 deg C); foundation diffusion from the foundation layer itself.
+- RISC5 choice: RISC5 takes the crack diffusion coefficient from the foundation layer entered as a soil layer, enters the capillary fringe as a layer of given moisture, asks for hydraulic conductivity to estimate the vapor permeability, takes air exchanges per day, holds the source constant, and uses an air viscosity of 1.8e-4 g/(cm s).
+- Sources:
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### Dominant-layer vapor model with first-order degradation
+
+- Kind: Legacy (RISC5 default)
+- Method id: `vapor.dominant-layer-1998`
+- Summary: Three homogeneous soil layers above the source, the middle one degrading vapor at a first-order rate acting on the dissolved concentration, solved in closed form (hyperbolic profile) and coupled to the Johnson and Ettinger building for indoor air or to a zero-concentration ground surface for outdoor air.
+- Assumptions:
+  - Steady, one-dimensional transport; layers 1 and 3 do not degrade the chemical.
+  - Degradation is proportional to the dissolved concentration and the water content of layer 2.
+  - Infinite source; the receptor coefficient is linear in the source vapor concentration.
+  - Outdoor: zero vapor concentration at the ground surface; the result is an area emission.
+- RISC5 choice: RISC5 applies degradation to the water phase times moisture in the middle layer only, takes the source soil properties separately from the transport layers, and reports the indoor or outdoor result for the same column; with zero degradation the result equals the legacy Johnson and Ettinger model.
+- Sources:
+  - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998.
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### EPA Johnson and Ettinger soil, soil gas or groundwater to indoor air
+
+- Kind: Modern
+- Method id: `vapor.je-epa`
+- Summary: The EPA implementation of the Johnson and Ettinger model: layered soil with texture presets, Henry constant at the soil temperature, a capillary zone from the van Genuchten curve, five foundation types, soil gas flow from a ratio or the soil permeability, and an optional finite soil source.
+- Assumptions:
+  - Steady, one-dimensional vapor transport through homogeneous layers; the source extends under the whole building footprint.
+  - Infinite source unless a finite soil source is requested; linked to a time-varying source the method is applied quasi-steadily.
+  - No sorption to building materials, no indoor background and no biodegradation.
+  - The crack diffusion coefficient is that of the soil layer in contact with the floor; the source-building separation excludes the floor.
+  - The capillary zone is uncontaminated and its top must lie below the floor.
+- RISC5 choice: RISC5 holds Henry constant at 25 deg C, takes the crack diffusion coefficient from a foundation layer, enters the capillary fringe as a layer, and keeps the source infinite; this method follows EPA on each point.
+- Sources:
+  - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf>
+  - U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf>
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x>
+
+#### Oxygen-limited biodegradation vapor intrusion (DeVaull)
+
+- Kind: Modern
+- Method id: `vapor.devaull-2007`
+- Summary: One soil column between the source and the foundation split into an anaerobic layer and an aerobic layer where the chemical degrades at a first-order rate, solved in closed form (overflow-safe hyperbolic profile) and coupled to a foundation mass transfer coefficient and the indoor air. The aerobic depth is entered, set by a fast-reaction oxygen balance, or found from the coupled oxygen supply and demand.
+- Assumptions:
+  - Steady, one-dimensional transport through one homogeneous layer; infinite source under the whole footprint.
+  - Degradation acts on the dissolved concentration of the aerobic layer only; the anaerobic layer does not degrade.
+  - Oxygen enters by diffusion from a fixed concentration at the base of the foundation; baseline respiration is zero-order.
+  - The total hydrocarbon that sets the oxygen demand moves with the diffusivity and degrades at the rate of the chemical of concern.
+  - With the aerobic depth zero the result equals the Johnson and Ettinger model with the same foundation term.
+- Sources:
+  - DeVaull, G.E. (2007). Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source. Environmental Science and Technology. 41(9):3241-3248. <https://doi.org/10.1021/es060672a>
+  - American Petroleum Institute (2012). BioVapor: A 1-D Vapor Intrusion Model with Oxygen-Limited Aerobic Biodegradation, Users Manual, Version 2.1. American Petroleum Institute (prepared by GSI Environmental Inc.). November 2012. <https://api.org/~/media/Files/EHS/Clean_Water/Ground_Water_Quality/biovapor/BioVapor-Users-Guide.pdf>
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+
+#### Empirical attenuation factors (EPA 2015)
+
+- Kind: Modern
+- Method id: `vapor.attenuation-factor-2015`
+- Summary: Indoor air as a generic attenuation factor times the vapor concentration of the medium (groundwater through its equilibrium vapor at the groundwater temperature, sub-slab or exterior soil gas, crawlspace air). An empirical screening option, not a fate model.
+- Assumptions:
+  - Generic residential factors from the EPA 2015 technical guide, upper-percentile empirical values.
+  - The groundwater factor acts on the vapor in equilibrium with groundwater, H prime at the groundwater temperature.
+  - Not intended for a source less than 5 ft below the foundation or where preferential pathways exist.
+- Sources:
+  - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf>
+  - U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide>
+  - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf>
+
+#### Petroleum vapor intrusion vertical separation screen (EPA 2015)
+
+- Kind: Modern
+- Method id: `vapor.pvi-screen-2015`
+- Summary: A screened-out or further-assessment verdict from the clean-soil separation between the contamination and the building: 6 ft for a dissolved source, 15 ft for LNAPL under a building with a side shorter than 66 ft, with precluding factors forcing further assessment.
+- Assumptions:
+  - The Table 3 thresholds classify the source as dissolved or LNAPL; the separation is clean, biologically active soil.
+  - A verdict, not a concentration: it does not predict indoor air.
+  - Precluding factors (preferential pathways, high-ethanol blends, lead scavengers, a larger building over LNAPL, extensive impermeable cover, contamination in contact with the building) force further assessment.
+- Sources:
+  - U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites>
+  - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005>
+
+#### Jury behaviour-assessment soil volatilization
+
+- Kind: Modern
+- Method id: `vapor.jury-bam`
+- Summary: Transient, depleting volatilization flux from a contaminated soil layer under an optional clean cover with an optional stagnant air boundary layer and first-order degradation, in closed form for zero water flux; the flux series is an area emission to the outdoor box.
+- Assumptions:
+  - Zero water flux; semi-infinite soil below the contaminated layer; one homogeneous soil.
+  - Linear equilibrium sorption and Henry partitioning; Millington-Quirk diffusion.
+  - The closed form is derived in the methods note and checked against a finite-difference solution of the same equation and the published reduced solution, not against the full papers.
+- RISC5 choice: RISC5 offers Jury volatilization as a soil emission source; this implementation covers zero water flux only.
+- Sources:
+  - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x>
+  - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+
+### outdoorAir
+
+#### Outdoor air box model
+
+- Kind: Legacy (RISC5 default)
+- Method id: `outdoorAir.box`
+- Summary: Emissions into a fully mixed box of length, width and breathing-zone height ventilated by the wind: C = sum(E) / (u delta W), which for an area flux over the footprint is F L / (u delta).
+- Assumptions:
+  - The receptor is at the downwind edge of the box; no vertical dispersion out of the box.
+  - No deposition or decay in air; steady emission.
+  - The width cancels for an area flux over the whole footprint.
+- RISC5 choice: RISC5 ventilates a box over the source by a wind of fixed speed and mixing height and feeds it from the soil, groundwater or unsaturated zone emission; its Table R-6 print is not reproduced (see the fixture README).
+- Sources:
+  - Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223.
+
+#### Soil Screening Guidance volatilization factor
+
+- Kind: Modern
+- Method id: `outdoorAir.ssg-vf-1996`
+- Summary: Soil-to-air volatilization factor for a surface soil source: the time-averaged Jury infinite-source flux over the exposure interval divided into a user-entered dispersion factor Q/C, bounded below by the mass-limit VF for a source of finite depth.
+- Assumptions:
+  - Uniformly contaminated, semi-infinite soil with no boundary layer, no water flux and no degradation.
+  - The result is an air concentration at the centre of a square ground-level area source via Q/C; it does not use the outdoor box.
+  - Adding this to a box emission for the same area double counts.
+- RISC5 choice: Offered as the modern option for outdoor air; Q/C is user-entered with the guidance default of 68.81 g/(m^2 s) per kg/m^3 for a 0.5 acre source.
+- Sources:
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
 
-- Abreu, L.D.V., Ettinger, R., McAlary, T. (2009). [Simulated soil vapor intrusion attenuation factors including biodegradation].
-- Abreu, L.D.V., Johnson, P.C. (2005). [Three-dimensional numerical modeling of vapor intrusion].
+- Abreu, L.D.V., Ettinger, R., McAlary, T. (2009). Simulated soil vapor intrusion attenuation factors including biodegradation for petroleum hydrocarbons. Ground Water Monitoring and Remediation. 29(1):105-117. <https://doi.org/10.1111/j.1745-6592.2008.01219.x>
+- Abreu, L.D.V., Johnson, P.C. (2005). Effect of vapor source-building separation and building construction on soil vapor intrusion as studied with a three-dimensional numerical model. Environmental Science and Technology. 39(12):4550-4561. <https://doi.org/10.1021/es049781k>
+- Abreu, L.D.V., Johnson, P.C. (2006). Simulating the effect of aerobic biodegradation on soil vapor intrusion into buildings: influence of degradation rate, source concentration, and depth. Environmental Science and Technology. 40(7):2304-2315. <https://doi.org/10.1021/es051335p>
 - American Petroleum Institute (2010). BioVapor.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
@@ -327,14 +470,10 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
-- DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248.
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
-- Johnson, P.C., Ettinger, R.A. (1991). [Heuristic model for predicting the intrusion rate of contaminant vapors into buildings]. Environmental Science and Technology.
-- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). [Assessing the significance of subsurface contaminant vapor migration to enclosed spaces]. American Petroleum Institute. API 4674.
-- Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems].
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
@@ -352,15 +491,12 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
-- U.S. Environmental Protection Agency (2004). [Johnson and Ettinger (1991) vapor intrusion model spreadsheets].
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
-- U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites].
-- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air.
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
-- Yao, Y., Pennell, K.G., Suuberg, E.M. (2011). [Vapor intrusion model comparisons].
-- Yao, Y., Shen, R., Suuberg, E.M. (2013). [Review of vapor intrusion modeling].
+- Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
+- Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g>
 
 ## Data sources
 
@@ -386,10 +522,12 @@ Reviews, codes and packages used to produce test fixtures. They are checks on th
 
 Every entry in the reference database, alphabetical by author.
 
-- Abreu, L.D.V., Ettinger, R., McAlary, T. (2009). [Simulated soil vapor intrusion attenuation factors including biodegradation]. [planned]
-- Abreu, L.D.V., Johnson, P.C. (2005). [Three-dimensional numerical modeling of vapor intrusion]. [planned]
+- Abreu, L.D.V., Ettinger, R., McAlary, T. (2009). Simulated soil vapor intrusion attenuation factors including biodegradation for petroleum hydrocarbons. Ground Water Monitoring and Remediation. 29(1):105-117. <https://doi.org/10.1111/j.1745-6592.2008.01219.x> [planned]
+- Abreu, L.D.V., Johnson, P.C. (2005). Effect of vapor source-building separation and building construction on soil vapor intrusion as studied with a three-dimensional numerical model. Environmental Science and Technology. 39(12):4550-4561. <https://doi.org/10.1021/es049781k> [planned]
+- Abreu, L.D.V., Johnson, P.C. (2006). Simulating the effect of aerobic biodegradation on soil vapor intrusion into buildings: influence of degradation rate, source concentration, and depth. Environmental Science and Technology. 40(7):2304-2315. <https://doi.org/10.1021/es051335p> [planned]
 - American Petroleum Institute (1987). Oil and Gas Industry Exploration and Production Wastes. Washington, D.C. API Document No. 471-01-09. [used]
 - American Petroleum Institute (2010). BioVapor. [planned]
+- American Petroleum Institute (2012). BioVapor: A 1-D Vapor Intrusion Model with Oxygen-Limited Aerobic Biodegradation, Users Manual, Version 2.1. American Petroleum Institute (prepared by GSI Environmental Inc.). November 2012. <https://api.org/~/media/Files/EHS/Clean_Water/Ground_Water_Quality/biovapor/BioVapor-Users-Guide.pdf> [used]
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
@@ -399,7 +537,7 @@ Every entry in the reference database, alphabetical by author.
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013> [planned]
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
-- DeVaull, G.E. (2007). [Indoor vapor intrusion with oxygen-limited biodegradation for a subsurface gasoline source]. Environmental Science and Technology. 41:3241-3248. [planned]
+- DeVaull, G.E. (2007). Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source. Environmental Science and Technology. 41(9):3241-3248. <https://doi.org/10.1021/es060672a> [used]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78(4):259-280. <https://doi.org/10.1016/j.jconhyd.2005.05.010> [used]
@@ -409,10 +547,13 @@ Every entry in the reference database, alphabetical by author.
 - Gelhar, L.W., Mantoglou, A., Welty, C., Rehfeldt, K.R. (1985). A review of field-scale physical solute transport processes in saturated and unsaturated porous media. Electric Power Research Institute. EPRI EA-4190. [used]
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
 - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
+- Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223. [used]
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables]. [planned]
-- Johnson, P.C., Ettinger, R.A. (1991). [Heuristic model for predicting the intrusion rate of contaminant vapors into buildings]. Environmental Science and Technology. [planned]
-- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). [Assessing the significance of subsurface contaminant vapor migration to enclosed spaces]. American Petroleum Institute. API 4674. [planned]
-- Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x> [planned]
+- Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
+- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
+- Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013> [used]
+- Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x> [used]
+- Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [used]
 - Lenhard, R.J., Parker, J.C., Mishra, S. (1989). On the correspondence between Brooks-Corey and van Genuchten models. Journal of Irrigation and Drainage Engineering. 115(4):744-751. <https://doi.org/10.1061/(ASCE)0733-9437(1989)115:4(744)> [used]
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers]. [planned]
 - MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems]. [planned]
@@ -445,7 +586,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). [planned]
-- U.S. Environmental Protection Agency (2004). [Johnson and Ettinger (1991) vapor intrusion model spreadsheets]. [planned]
+- U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [used]
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf> [used]
@@ -454,14 +595,16 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252> [used]
 - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf> [used]
 - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9200.1-120, February 6, 2014. <https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf> [used]
-- U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites]. [planned]
-- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. [planned]
+- U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites> [used]
+- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf> [used]
+- U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [used]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
 - U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations> [data]
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
+- U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide> [used]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x> [used]
@@ -472,6 +615,6 @@ Every entry in the reference database, alphabetical by author.
 - Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7> [used]
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/> [fixture]
 - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908. [used]
-- Yao, Y., Pennell, K.G., Suuberg, E.M. (2011). [Vapor intrusion model comparisons]. [planned]
-- Yao, Y., Shen, R., Suuberg, E.M. (2013). [Review of vapor intrusion modeling]. [planned]
+- Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s> [planned]
+- Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g> [planned]
 - Yeh, G.T. (1981). AT123D: Analytical transient one-, two-, and three-dimensional simulation of waste transport in the aquifer system. Oak Ridge National Laboratory. ORNL-5602. <https://doi.org/10.2172/6531241> [used]

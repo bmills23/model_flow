@@ -30,6 +30,7 @@ import {
 } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { WellFeed } from '../transport/wellFeed';
+import type { VaporRiskFeed } from '../vapor/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
@@ -224,7 +225,12 @@ export function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundar
  * so the two methods are compared on equal footing. A pathway is switched on only when the receptor has
  * it on and some chemical has a concentration for its medium; the rest are listed in `notes`.
  */
-export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | null): BuildResult {
+export function buildInputs(
+  form: RiskForm,
+  db: ChemicalDb,
+  well: WellFeed | null,
+  vapor: VaporRiskFeed | null = null,
+): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
 
@@ -249,6 +255,24 @@ export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | nul
           { times: well.times, values: well.values },
           `transport.${well.method}`,
         );
+        continue;
+      }
+      const vaporSpec =
+        medium === 'indoorAir' && row.indoorFromVapor
+          ? { spec: vapor?.indoor, what: 'indoor air' }
+          : medium === 'outdoorAir' && row.outdoorFromVapor
+            ? { spec: vapor?.outdoor, what: 'outdoor air' }
+            : null;
+      if (vaporSpec) {
+        if (vapor === null || vapor.chemicalId !== row.id) {
+          errors.add(
+            `${row.name}: no vapor screen result for this chemical to use; run the vapor intrusion screen with it and send its result here`,
+          );
+        } else if (vaporSpec.spec === undefined) {
+          errors.add(`${row.name}: the vapor screen result has no ${vaporSpec.what}`);
+        } else {
+          byPathway[pathway] = vaporSpec.spec;
+        }
         continue;
       }
       const v = parse(

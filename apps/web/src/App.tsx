@@ -5,6 +5,7 @@ import { SaturatedPage } from './saturated/SaturatedPage';
 import { VadosePage } from './vadose/VadosePage';
 
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
+const VaporPage = lazy(() => import('./vapor/VaporPage').then((m) => ({ default: m.VaporPage })));
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
 const CleanupPage = lazy(() =>
@@ -22,6 +23,7 @@ const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
+const VAPOR_HASH = '#/vapor';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -36,11 +38,12 @@ export function App() {
   const onSaturated = hash === SATURATED_HASH;
   const onRisk = hash === RISK_HASH;
   const onCleanup = hash === CLEANUP_HASH;
+  const onVapor = hash === VAPOR_HASH;
 
   return (
     <div
       className={
-        onTransport || onVadose || onSaturated || onRisk || onCleanup ? 'shell shell-wide' : 'shell'
+        onTransport || onVadose || onSaturated || onRisk || onVapor || onCleanup ? 'shell shell-wide' : 'shell'
       }
     >
       <header className="masthead">
@@ -79,6 +82,9 @@ export function App() {
           >
             Saturated soil source
           </a>
+          <a className="nav-link" href={VAPOR_HASH} aria-current={onVapor ? 'page' : undefined}>
+            Vapor intrusion
+          </a>
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
@@ -99,6 +105,10 @@ export function App() {
           <VadosePage />
         ) : onSaturated ? (
           <SaturatedPage />
+        ) : onVapor ? (
+          <Suspense fallback={<p className="muted">Loading the vapor intrusion screen...</p>}>
+            <VaporPage />
+          </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
@@ -125,6 +135,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={SATURATED_HASH}>
                 Open saturated soil source
+              </a>{' '}
+              <a className="button" href={VAPOR_HASH}>
+                Open vapor intrusion
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk

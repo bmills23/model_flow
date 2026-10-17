@@ -536,3 +536,166 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
     citations to `used`. The two RAGS methods are the closed-form direct back-calculation and describe only
     that; the Brent solve over the modeled chains is its own registered method (`solveModeled`), so the
     registry cites the root finder exactly where it runs.
+
+## 2026-10-16: M6 vapor models scope (stage 1)
+
+The M6 track was approved to start with a methods note first. The note is `docs/methods/vapor-models.md`
+(scope, equations in our own words, coupling, the outdoor interface for M7, data plan, fixture plan and
+the stage 2 and stage 3 slice plan). No engine, data or web code is written in this stage. Nine planned
+references received their verified published titles and six were added (`abreu2006`, `jury1990`,
+`lahvis2013`, `epa2017je`, `epavisl`, `api2012biovapor`), all `planned`.
+
+Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
+
+1. **Scope.** M6 ships `vapor.je-1991` (legacy J&E, soil, soil gas or groundwater to indoor air),
+   `vapor.dominant-layer-1998`, `outdoorAir.box`, `vapor.je-epa` (modern EPA J&E), `vapor.devaull-2007`,
+   `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015`, `outdoorAir.ssg-vf-1996` and `vapor.jury-bam`.
+   Deferred: PVIScreen sampling (M10), shower, sprinkler and particulates (M7), vapor cleanup levels (M5),
+   Jury with nonzero water flux, lateral offsets and three-dimensional models.
+2. **The legacy oxygen-limited model (Appendix K) is not implemented.** Its only source is an unpublished
+   draft, so there is no primary publication to implement from (forced by the clean-room rule), and the
+   Appendix R review says its output was never validated. DeVaull 2007 is the oxygen-limited option.
+3. **One legacy indoor method for all three source kinds.** Appendices D and E share the J&E physics; the
+   groundwater source adds a Henry's-law source and an entered capillary fringe layer.
+4. **Residual-phase source vapor is x S H**, not x P_v M / (R T), matching the M2 and M3 residual test;
+   the vapor-pressure form is reported for comparison only.
+5. **Crack diffusion.** Legacy: the foundation layer's own Millington-Quirk coefficient from its entered
+   porosity and moisture (RISC5 choice, as Tables R-3 and R-5 list the foundation as a layer). Modern: the
+   coefficient of the soil layer at the floor, and L_T excludes the floor (forced by `epa2004je`).
+6. **Legacy air viscosity 1.8e-4 g/(cm s)**, the value with which Tables R-3 and R-4 both reproduce to
+   their printed figures (1.81e-4 gives 8.565 and 7.272, so Table R-4 would round to 7.27 instead of 7.28;
+   both values pass the 0.5 percent tolerance of ruling 17).
+7. **Quasi-steady coupling.** Steady vapor models applied to a source series give an air series at the
+   same times, with `vapor.quasi-steady` warned when the source changes by more than 10 percent within
+   the vapor equilibration time.
+8. **No volatilization loss is added to M3.** Region 1 pore water may serve as a vapor source, but the M3
+   mass balance and its results stay as they are (conservative for groundwater).
+9. **Modern J&E** uses the `epa2004je` equations with the Version 6.0 defaults of `epa2017je` (Q_soil / Q_B
+   0.003 scaled by 0.45 / ER, foundation types, building defaults). The soil-source option, which Version
+   6.0 removed, is kept for M2 and M3 sources and warned (`vapor.soil-source-not-recommended`).
+10. **Chemical data.** RSL values stay primary for every property they carry. T_B, T_C and dH_v,b for the
+    temperature correction come from the lookup table in `epa2004je` (Appendix C copy, 108 chemicals),
+    transcribed with the PDF checksum into the derived `vapor-chemicals.json` (slice V0, built);
+    enthalpies not at the normal boiling point, and crotonaldehyde's misprinted one, are omitted from the
+    merged row. Without them the modern method uses H at 25 deg C and warns (when the system temperature is not 25 deg C; at 25 deg C there is nothing to correct). DeVaull rates by class from
+    `api2012biovapor` Appendix C (one rate per class; the alkylbenzene class is applied to the propyl and
+    butyl benzenes as well as the six chemicals Appendix C names, a reading of its heading); a chemical
+    with no class is non-degrading and warned. Oxygen mass ratios come from committed formulas for the
+    classed chemicals. Oxygen diffusivities are required inputs until a verifiable source is found.
+11. **DeVaull oxygen options:** entered aerobic depth, fast-reaction depth (closed form without respiration, a
+    bracketed root with it), and the coupled solution (a bracketed root find); both use one oxygen balance,
+    derived from D_O O'' = R + Y kappa C with the oxygen and its flux zero at the aerobic base, so the supply
+    D_O O meets the first moment of the demand (option 2 is its point-sink limit); baseline respiration 1.69 mg O2/(g organic carbon day) times f_oc
+    (forced by `api2012biovapor`).
+12. **Empirical attenuation factors** are those of `epa2015vi` Table 6-1 (forced by the source); the
+    groundwater factor applies to H'(T_gw) C_gw at 25 deg C unless a temperature is entered, as VISL does.
+13. **The PVI screen is a verdict, not a concentration**, with the `epa2015pvi` Table 3 thresholds and the
+    6 ft and 15 ft separations stored in feet as published (forced by the source); precluding factors
+    force further assessment.
+14. **Outdoor air.** Legacy box C = sum(E) / (u delta W) (an area flux over the footprint gives F L / (u
+    delta)). Modern SSG volatilization factor (Equations 6 and 55 of `epa1996ssg`) with Q/C user-entered
+    and the guidance default 68.81; Table 3 of the guidance (29 cities, six areas) is transcribed as data.
+    The box could not be attributed to `astme1739` from a public source, so it cites the RISC5 review
+    references only and a ruling on citing the standard is requested. The SSG equation prints pi as 3.14;
+    the code uses pi (0.02 percent).
+15. **Jury volatilization:** the closed form derived in the note for zero water flux (semi-infinite soil,
+    clean cover, finite layer, optional boundary layer, first-order decay), checked against the published reduced
+    solution and Jury 1983 flux as reproduced in `epa1996ssg` Appendix C, an independent finite-volume
+    solution and mass balance, because neither paper's full text was read; no boundary layer by default.
+16. **Outdoor interface for M7:** `outdoorAirEpc({ box, emissions, direct })`, with emissions as area
+    fluxes or mass rates into the box and direct contributions as concentrations from dispersion-factor
+    models; contributions keep their origins, and mixing a box emission and a Q/C contribution for the
+    same area is warned. M9 needs no vapor interface.
+17. **Tolerances.** Tables R-3, R-4 and R-5: 0.5 percent of the RISC column (trial reproductions are
+    within 0.12 percent; tighter than the ROADMAP's 2 to 3 percent maximum). Table R-6: not asserted; its
+    printed output repeats Table R-5's and no box reading reproduces it, so the box hand value (2.5444e-6
+    mg/m^3) is asserted at 1e-9 and the printed value is a named exception. Appendix J example: 0.01
+    absolute on the normalized concentrations (they are figure readings). EPA 2004 Appendix C example:
+    half a unit in the third printed figure, viscosity not asserted. VISL calculator values: not obtained
+    (calculator not run), so identity 8c against the RSL resident air values stands in at 1e-12. Identities 1e-12 (1e-9 for limits, 1e-6 for quadrature mass balances);
+    hand cases 1e-9. SSG volatilization factor against Table 3-A: 4 percent (the printed values have two
+    significant figures and the table's Koc, H' and diffusivity inputs are rounded; observed 0.8 to 3.6
+    percent). Jury against the finite-volume solution: 2e-4 (observed 6e-5 at most).
+
+Fixture readings recorded in the note: Table R-3 takes its source soil from Table R-4's source block and
+places the lens outside the 2.60 m vadose zone (L_T 2.80 m); Table R-5 is a diffusion-only run (Q_soil 0);
+Table R-4's degradation rate is 0.09 /d in the water-phase form. With RISC4 benzene properties these
+reproduce 8.57, 8.57e-2, 3.23e5, 7.28, 7.27 and 2.27e-3 as printed.
+
+Slice V4 (modern EPA J&E, built 2026-10-17) readings, all verified against the Appendix C worked example
+(`test/fixtures/vapor/epa2004-sl-adv.json`):
+
+- **Millington and Quirk exponent 3.33 in the modern method.** The guide prints 3.33 (Equation 6 and the
+  soil equation); the worked example's coefficients (5.54e-3 and 1.42e-2 cm^2/s, total 7.97e-3) reproduce
+  only with 3.33, whereas the exact 10/3 gives 5.51e-3, 1.41e-2 and 7.94e-3. The legacy methods and the
+  vadose process keep 10/3. The fixture tolerance was not widened.
+- **Strata run from grade and the floor trims them.** Layers above the floor drop out of the diffusion
+  column, the crack coefficient is that of the layer in contact with the floor, and the source soil for
+  C_source and the finite source is the deepest stratum (the example reproduces with the bulk density of
+  stratum C, 1.66 g/cm^3). For a groundwater source the capillary zone is carved from the bottom of the
+  column and must leave its top below the floor (a RangeError otherwise, as the guide states).
+- **Registration.** `vapor.je-1991` and `vapor.dominant-layer-1998` (slice V2) are registered together with
+  `vapor.je-epa`, as the registry test pairs each legacy process with a modern one; `johnsonettinger1991`,
+  `johnson1998`, `epa2004je` and `epa2017je` are now `used`. The outdoor air and Jury descriptors were
+  registered in slice V7.
+- **Air viscosity** is an input (default 1.75e-5 Pa s, the value the guide prints at 10 deg C), because
+  the guide gives no temperature formula; it is not asserted by the fixture.
+- **Building presets** are the Version 6.0 residential defaults (Table 9: 150 m^2 square floor, mixing
+  height 2.44, 3.66 or 1.30 m by foundation, 0.45 exchanges per hour, crack fraction 0.001, Q_soil / Q_B
+  0.003). The commercial floor area (1,500 m^2) and mixing height (3 m, basement) are in the document but
+  its commercial air exchange rate was not found, so no commercial preset is built; they are entered.
+
+## 2026-10-17: M6 web slices W2 and W3
+
+The `#/vapor` screen gained its plot and screening panels (W2) and its feeds (W3). No engine process changed.
+Rulings, DEFAULT (Bryan's to overturn):
+
+1. **The profile plot draws the engine's points.** Both indoor methods return one profile point per layer
+   boundary (three points for the Table R-3 case), so the plot joins them with straight segments on a log
+   concentration axis, with the strata between the source and the floor as bands, and offers the points as a
+   data table. It is not a smooth profile; no interpolation is invented.
+2. **Outdoor air on the vapor screen.** Legacy: the outdoor box (2.25 m/s wind, 2 m mixing height, 10 m box,
+   the Table R-6 inputs) over the steady diffusion flux from the legacy source vapor through the whole soil
+   column to grade (the legacy capillary fringe, when entered, is the lowest layer and replaces the
+   lowest strata, as in the indoor runs). Modern: the Soil
+   Screening Guidance volatilization factor, offered for a soil source only, with the deepest stratum as the
+   source soil and the soil's own porosity, moisture, density and Koc times f_oc; Q/C is entered (default
+   68.81). The factor treats the source as exposed at grade, so a buried source is warned
+   (`outdoorAir.ssg-surface-source`).
+3. **Attenuation factor panel.** The 2015 factors act on soil gas and groundwater, so a soil source has none
+   and the panel says so. Groundwater uses the entered Henry constant at 25 deg C (no temperature
+   correction). The depth below the foundation is the source to building distance of the indoor air run.
+4. **Petroleum screen panel.** Concentrations are optional entries; the separation defaults to the source to
+   building distance and the shortest side to the side of a square floor of the entered area. The verdict,
+   the LNAPL indicators and the precluding factors are shown as the engine returns them.
+5. **Feeds into the vapor screen** (in memory for the session, like the existing feeds): the transport screen
+   offers the groundwater concentration at the water table under the receptor point (the building is taken
+   to stand there), 32 steps plus t = 0, built with `groundwaterWaterTableSeries`; the vadose screen offers
+   the source pore water series and the saturated screen the region 1 pore water as one value. A pore water
+   source gives the soil gas H times its concentration: the legacy method uses the entered H at 25 deg C, the
+   modern method uses H'(T) from the boiling point data when they are entered (the same H' it diffuses with)
+   and the entered H at 25 deg C otherwise. A long
+   series is thinned to 120 times (ends kept). The steady methods are run at each time; `vapor.quasi-steady`
+   uses L_T^2 R_g / D_T for the establishment time, R_g the thickness-weighted gas-referenced capacity of the
+   column from the modern run (`capacityRg`), or 1 when that run failed. The tables above the feed panel keep using the entered source. The vadose
+   volatilization flux series is not fed to the outdoor box (the vadose screen does not publish the
+   volatilization velocity); the outdoor series is the box over the steady flux from each time's source vapor.
+6. **Feed into exposure and risk.** The vapor screen sends the shown method's indoor and outdoor air for one
+   database chemical (a CAS id; the Table R-3 benzene test values are not a chemical and cannot be sent).
+   Indoor origins are `vapor.je-1991` and `vapor.je-epa`. Outdoor origins are the producing method ids
+   `outdoorAir.box` and `outdoorAir.ssg-vf-1996`, not `vapor.<method>`, because they are not vapor methods
+   (conflict with the slice brief's wording, resolved to the coupling section of the methods note). The
+   outdoor series comes from the legacy box only; the modern factor gives a constant from the entered soil
+   source. The risk screen offers a chemical's checkboxes only when the held feed is for that chemical.
+
+Web form rulings that keep the two methods on one site (DEFAULT, Bryan's to overturn):
+
+- **One water table.** The water table is the base of the entered strata for both methods. An entered
+  capillary fringe replaces the lowest strata (the modern method carves its capillary zone from the bottom;
+  the form now carves the legacy fringe the same way before the engine prepends it), so the comparison
+  table, the profile plot and the outdoor column describe the same site. A fringe that leaves no soil
+  between its top and the floor is refused in the form.
+- **Soil gas flow.** The form offers "Modern default ratio": the modern run takes the Version 6.0 default
+  Q_soil = 0.003 x 0.45 / ER x Q_B (ruling 9, default c) and the legacy run, which has no such default,
+  keeps using the pressure-difference inputs. The modern run has its own air viscosity field (default
+  1.75e-4 g/(cm s), the engine default); the legacy field keeps 1.8e-4 (ruling 6).

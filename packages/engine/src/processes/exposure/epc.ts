@@ -67,3 +67,20 @@ export function groundwaterBreakthrough(
   });
   return seriesEpc({ times, values }, origin);
 }
+
+/**
+ * Adapter from a vapor forward function (a steady method applied at each time to a source series) to
+ * an indoor or outdoor inhalation EPC series in kg/m^3. `run` returns the receptor air concentration at
+ * one time; negative round-off is clipped to zero. `origin` is the producing method id, for example
+ * `vapor.je-1991`, so the scenario and the risk screen take it without change. `times` are s, strictly
+ * increasing.
+ */
+export function vaporSeriesEpc(
+  run: (time: number) => { concentration: number },
+  times: readonly number[],
+  origin: EpcOrigin,
+): EpcSpec {
+  if (times.length < 2) throw new RangeError('a vapor series needs at least two times');
+  const values = times.map((t) => Math.max(0, run(t).concentration));
+  return seriesEpc({ times, values }, origin);
+}

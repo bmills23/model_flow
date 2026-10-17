@@ -1,0 +1,17 @@
+{
+  "source": "Appendix J worked example of the RISC5 user's guide (numeric inputs and the values stated in its prose), benzene with the RISC4 properties",
+  "benzene": { "henry": 0.228, "DaCm2PerS": 0.088, "DwCm2PerS": 9.8e-6 },
+  "layersThicknessM": [1.2, 1.2, 2.5],
+  "degradationPerDay": 0.07,
+  "outdoor": true,
+  "base": [
+    { "porosity": 0.36, "moisture": 0.1 },
+    { "porosity": 0.29, "moisture": 0.1 },
+    { "porosity": 0.36, "moisture": 0.19 }
+  ],
+  "dryLayer1": { "porosity": 0.4, "moisture": 0.05 },
+  "wetLayer2": { "porosity": 0.35, "moisture": 0.3 },
+  "wetCaseKeepsDryLayer1": true,
+  "normalizedAtTopOfLayer1": { "base": 0.65, "dry": 0.8, "wet": 0.95 },
+  "toleranceAbsolute": 0.01
+}

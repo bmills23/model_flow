@@ -1,0 +1,16 @@
+{
+  "reference": "epa2004je",
+  "title": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings (Revised February 22, 2004)",
+  "url": "https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf",
+  "retrieved": "2026-10-17",
+  "pdf": {
+    "file": "epa-2004-je-users-guide.pdf",
+    "bytes": 1304604,
+    "sha256": "c7c3a6f215e0214946c19d549a4fa8659e08d91a6dddd48d689204c7f1963ed0"
+  },
+  "table": {
+    "file": "lookup-table.csv",
+    "description": "Transcription of the 'Chemical Properties Lookup Table' printed in the VLOOKUP tables of Appendix C (PDF pages 113 and 114, 108 chemicals): CAS number, chemical name, normal boiling point T_B (K), critical temperature T_C (K), enthalpy of vaporization at the normal boiling point (cal/mol). Appendix B prints a shorter copy (95 chemicals, PDF pages 106 and 107) at three significant figures; it is used only for the enthalpy flags.",
+    "flagColumns": "dhvbAtNormalBoilingPoint is false where Appendix B marks the enthalpy as taken at a temperature other than the normal boiling point, or where the printed value is not a usable cal/mol figure (see note)."
+  }
+}

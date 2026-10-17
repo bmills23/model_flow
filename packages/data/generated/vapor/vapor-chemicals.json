@@ -1,0 +1,5240 @@
+{
+  "source": {
+    "rsl": {
+      "reference": "epa2024rsl",
+      "edition": "2024-11",
+      "documents": [
+        405302,
+        405290
+      ],
+      "retrieved": "2026-10-16"
+    },
+    "epa2004je": {
+      "reference": "epa2004je",
+      "file": "epa-2004-je-users-guide.pdf",
+      "sha256": "c7c3a6f215e0214946c19d549a4fa8659e08d91a6dddd48d689204c7f1963ed0",
+      "retrieved": "2026-10-17"
+    },
+    "api2012biovapor": {
+      "reference": "api2012biovapor",
+      "appendix": "C"
+    }
+  },
+  "units": {
+    "tbK": "K",
+    "tcK": "K",
+    "dhvbCalPerMol": "cal/mol",
+    "kwPerHour": "1/h",
+    "molecularWeight": "g/mol",
+    "molO2PerMol": "mol/mol",
+    "massRatio": "g/g"
+  },
+  "chemicals": [
+    {
+      "id": "75-07-0",
+      "name": "Acetaldehyde",
+      "rsl": {
+        "mw": {
+          "value": 44.054,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00272690106296,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000667,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 902,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.12770256772378,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001352915597,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1000000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 293.1,
+        "tcK": 466,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6157
+      }
+    },
+    {
+      "id": "67-64-1",
+      "name": "Acetone",
+      "rsl": {
+        "mw": {
+          "value": 58.081,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00143090760425,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000035,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 231.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10592149838196,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001147115345,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 2.364,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1000000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 329.2,
+        "tcK": 508.1,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6955
+      }
+    },
+    {
+      "id": "75-05-8",
+      "name": "Acetonitrile",
+      "rsl": {
+        "mw": {
+          "value": 41.053,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00141046606705,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000345,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 88.8,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.13399392452093,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001413900617,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 4.67,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1000000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 354.6,
+        "tcK": 545.5,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7110
+      }
+    },
+    {
+      "id": "98-86-2",
+      "name": "Acetophenone",
+      "rsl": {
+        "mw": {
+          "value": 120.15,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00042518397383,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000104,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.397,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06522211390988,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000872285637996,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 51.85,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 6130,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 475,
+        "tcK": 709.5,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 11732
+      }
+    },
+    {
+      "id": "107-02-8",
+      "name": "Acrolein",
+      "rsl": {
+        "mw": {
+          "value": 56.065,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00498773507768,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000122,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 274.1,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.11168620061171,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001220743013,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 212000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 325.6,
+        "tcK": 506,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6731
+      }
+    },
+    {
+      "id": "107-13-1",
+      "name": "Acrylonitrile",
+      "rsl": {
+        "mw": {
+          "value": 53.064,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00564186426819,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000138,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 108.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.11368364166964,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001225952597,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 8.511,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 74500,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 350.3,
+        "tcK": 519,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7786
+      }
+    },
+    {
+      "id": "309-00-2",
+      "name": "Aldrin",
+      "rsl": {
+        "mw": {
+          "value": 364.92,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00179885527392,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000044,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.00012,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02281156491601,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000584016559428,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 82020,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.017,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 603.01,
+        "tcK": 839.37,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 15000
+      }
+    },
+    {
+      "id": "100-52-7",
+      "name": "Benzaldehyde",
+      "rsl": {
+        "mw": {
+          "value": 106.13,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00109157808667,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000267,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1.27,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0743929585589,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000946267514265,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 11.09,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 6950,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 452,
+        "tcK": 695,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 11658
+      }
+    },
+    {
+      "id": "71-43-2",
+      "name": "Benzene",
+      "rsl": {
+        "mw": {
+          "value": 78.115,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.22690106295994,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00555,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 94.8,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08953403951206,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001026318746,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 145.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1790,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 353.24,
+        "tcK": 562.16,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7342
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 6,
+          "h": 6
+        },
+        "molecularWeight": 78.114,
+        "molO2PerMol": 7.5,
+        "massRatio": 3.0722405714724634
+      }
+    },
+    {
+      "id": "25551-13-7",
+      "name": "Benzene, Trimethyl",
+      "rsl": {
+        "mw": {
+          "value": 360.59,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.3585445625511,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.00877,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 2.1,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.01728187029676,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000414937454865,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 602.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 48.2,
+          "ref": "EPI"
+        }
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "100-44-7",
+      "name": "Benzyl Chloride",
+      "rsl": {
+        "mw": {
+          "value": 126.59,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01684382665576,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000412,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 1.23,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06336178034906,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000880567151661,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 446.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 525,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 452,
+        "tcK": 685,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8773
+      }
+    },
+    {
+      "id": "92-52-4",
+      "name": "Biphenyl, 1,1'-",
+      "rsl": {
+        "mw": {
+          "value": 154.21,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01259198691742,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000308,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.00893,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04705923501776,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000756178374096,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 5129,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 7.48,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 529.1,
+        "tcK": 789,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10890
+      }
+    },
+    {
+      "id": "111-44-4",
+      "name": "Bis(2-chloroethyl)ether",
+      "rsl": {
+        "mw": {
+          "value": 143.01,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00069501226492,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000017,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 1.55,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05671916482049,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000870698559542,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 32.21,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 17200,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 451.15,
+        "tcK": 659.79,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10803
+      }
+    },
+    {
+      "id": "75-27-4",
+      "name": "Bromodichloromethane",
+      "rsl": {
+        "mw": {
+          "value": 163.83,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.08667211774325,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00212,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 50,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05626289015191,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001073086737,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3032,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 363.15,
+        "tcK": 585.85,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7800
+      }
+    },
+    {
+      "id": "75-25-2",
+      "name": "Bromoform",
+      "rsl": {
+        "mw": {
+          "value": 252.73,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02187244480785,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000535,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 5.4,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.03573240646254,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001035629921,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3100,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 422.35,
+        "tcK": 696,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9479
+      }
+    },
+    {
+      "id": "74-83-9",
+      "name": "Bromomethane",
+      "rsl": {
+        "mw": {
+          "value": 94.939,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.30008176614881,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00734,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1616,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10049762980352,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001346764435,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 13.22,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 15200,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 276.71,
+        "tcK": 467,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5714
+      }
+    },
+    {
+      "id": "106-99-0",
+      "name": "Butadiene, 1,3-",
+      "rsl": {
+        "mw": {
+          "value": 54.092,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 3.00899427636958,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.0736,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 2107,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10034881658179,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000103436697,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 39.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 735,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 268.6,
+        "tcK": 425,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5370
+      }
+    },
+    {
+      "id": "104-51-8",
+      "name": "Butylbenzene, n-",
+      "rsl": {
+        "mw": {
+          "value": 134.22,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.65004088307441,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.0159,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 1.0641,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05277315687885,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000733349161022,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1482,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 11.8,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 456.46,
+        "tcK": 660.5,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9290
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 10,
+          "h": 14
+        },
+        "molecularWeight": 134.22199999999998,
+        "molO2PerMol": 13.5,
+        "massRatio": 3.218347215806649
+      }
+    },
+    {
+      "id": "135-98-8",
+      "name": "Butylbenzene, sec-",
+      "rsl": {
+        "mw": {
+          "value": 134.22,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.71954210956664,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.0176,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 1.752,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05279281950594,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000733707208379,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1331,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 17.6,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 446.5,
+        "tcK": 679,
+        "ref": "epa2004je"
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 10,
+          "h": 14
+        },
+        "molecularWeight": 134.22199999999998,
+        "molO2PerMol": 13.5,
+        "massRatio": 3.218347215806649
+      }
+    },
+    {
+      "id": "98-06-6",
+      "name": "Butylbenzene, tert-",
+      "rsl": {
+        "mw": {
+          "value": 134.22,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.53965658217498,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.0132,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 2.2044,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05295254610459,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000736618413908,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1001,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 29.5,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 10,
+          "h": 14
+        },
+        "molecularWeight": 134.22199999999998,
+        "molO2PerMol": 13.5,
+        "massRatio": 3.218347215806649
+      }
+    },
+    {
+      "id": "75-15-0",
+      "name": "Carbon Disulfide",
+      "rsl": {
+        "mw": {
+          "value": 76.139,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.58871627146361,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0144,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 359,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10643732214763,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001297749113,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 21.73,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2160,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 319,
+        "tcK": 552,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6391
+      }
+    },
+    {
+      "id": "56-23-5",
+      "name": "Carbon Tetrachloride",
+      "rsl": {
+        "mw": {
+          "value": 153.82,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 1.12837285363859,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0276,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 115,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05714346500735,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000978491545559,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 43.89,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 793,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 349.9,
+        "tcK": 556.6,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7127
+      }
+    },
+    {
+      "id": "126-99-8",
+      "name": "Chloro-1,3-butadiene, 2- (Chloroprene)",
+      "rsl": {
+        "mw": {
+          "value": 88.537,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 2.29354047424366,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0561,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 215.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08414890276425,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001002932317,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 60.7,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 874.9,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 332.4,
+        "tcK": 525,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8075
+      }
+    },
+    {
+      "id": "108-90-7",
+      "name": "Chlorobenzene",
+      "rsl": {
+        "mw": {
+          "value": 112.56,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.12714636140638,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00311,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 11.97,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07213061528771,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000947648484184,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 233.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 498,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 404.87,
+        "tcK": 632.4,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8410
+      }
+    },
+    {
+      "id": "109-69-3",
+      "name": "Chlorobutane, 1-",
+      "rsl": {
+        "mw": {
+          "value": 92.569,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.68274734260016,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0167,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 101.3,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07841372209389,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000932748190203,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 72.17,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1100,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 351.6,
+        "tcK": 542,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7263
+      }
+    },
+    {
+      "id": "75-45-6",
+      "name": "Chlorodifluoromethane",
+      "rsl": {
+        "mw": {
+          "value": 86.469,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 1.65985282093213,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0406,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 7252,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10337879493503,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001328081168,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2770,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 232.4,
+        "tcK": 369.3,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 4836
+      }
+    },
+    {
+      "id": "67-66-3",
+      "name": "Chloroform",
+      "rsl": {
+        "mw": {
+          "value": 119.38,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.15004088307441,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00367,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 197,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07691965735943,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001089076763,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 7950,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 334.32,
+        "tcK": 536.4,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6988
+      }
+    },
+    {
+      "id": "74-87-3",
+      "name": "Chloromethane",
+      "rsl": {
+        "mw": {
+          "value": 50.488,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.36058871627146,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00882,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 4300,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.12396507727202,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001364802777,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 13.22,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 5320,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 249,
+        "tcK": 416.25,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5115
+      }
+    },
+    {
+      "id": "95-57-8",
+      "name": "Chlorophenol, 2-",
+      "rsl": {
+        "mw": {
+          "value": 128.56,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00045789043336,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000112,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 2.53,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06611750371783,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000947835077067,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 388,
+          "ref": "SSL"
+        },
+        "s": {
+          "value": 11300,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 447.53,
+        "tcK": 675,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9572
+      }
+    },
+    {
+      "id": "123-73-9",
+      "name": "Crotonaldehyde, trans-",
+      "rsl": {
+        "mw": {
+          "value": 70.092,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.0007931316435,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000194,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 30,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.09592353020448,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001076495186,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1.793,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 150000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 375.2,
+        "tcK": 568,
+        "ref": "epa2004je"
+      }
+    },
+    {
+      "id": "98-82-8",
+      "name": "Cumene",
+      "rsl": {
+        "mw": {
+          "value": 120.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.47015535568275,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0115,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 4.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06030444996845,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000785664873238,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 697.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 61.3,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 425.56,
+        "tcK": 631.1,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10335
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "74-90-8",
+      "name": "Hydrogen Cyanide",
+      "rsl": {
+        "mw": {
+          "value": 27.026,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00543744889616,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000133,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 741.9,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.16782022010563,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001677274827,
+          "ref": "WATER9"
+        },
+        "s": {
+          "value": 1000000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 299,
+        "tcK": 456.7,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6676
+      }
+    },
+    {
+      "id": "110-82-7",
+      "name": "Cyclohexane",
+      "rsl": {
+        "mw": {
+          "value": 84.163,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 6.13246116107931,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.15,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 96.86,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07997293432494,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000910772596527,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 145.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 55,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "branched-cycloaliphatic",
+        "kwPerHour": 11,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 6,
+          "h": 12
+        },
+        "molecularWeight": 84.162,
+        "molO2PerMol": 9,
+        "massRatio": 3.4217580380694375
+      }
+    },
+    {
+      "id": "124-48-1",
+      "name": "Dibromochloromethane",
+      "rsl": {
+        "mw": {
+          "value": 208.28,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.03201144726083,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000783,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 5.54,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.03663560512248,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001056061516,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2700,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 416.14,
+        "tcK": 678.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5900
+      }
+    },
+    {
+      "id": "106-93-4",
+      "name": "Dibromoethane, 1,2-",
+      "rsl": {
+        "mw": {
+          "value": 187.86,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02657399836468,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00065,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 11.2,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04303484124455,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001043861314,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 39.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3910,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 404.6,
+        "tcK": 583,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8310
+      }
+    },
+    {
+      "id": "74-95-3",
+      "name": "Dibromomethane (Methylene Bromide)",
+      "rsl": {
+        "mw": {
+          "value": 173.84,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.03360588716271,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000822,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 44.4,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05513725951049,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001190207365,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 21.73,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 11900,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 370,
+        "tcK": 583,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7868
+      }
+    },
+    {
+      "id": "95-50-1",
+      "name": "Dichlorobenzene, 1,2-",
+      "rsl": {
+        "mw": {
+          "value": 147,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.07849550286182,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00192,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1.36,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05617034048903,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000892128315622,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 382.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 156,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 453.57,
+        "tcK": 705,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9700
+      }
+    },
+    {
+      "id": "106-46-7",
+      "name": "Dichlorobenzene, 1,4-",
+      "rsl": {
+        "mw": {
+          "value": 147,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.09852820932134,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00241,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1.74,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05504289425645,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000867971975691,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 375.3,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 81.3,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 447.21,
+        "tcK": 684.75,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9271
+      }
+    },
+    {
+      "id": "75-71-8",
+      "name": "Dichlorodifluoromethane",
+      "rsl": {
+        "mw": {
+          "value": 120.91,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 14.022894521668,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.343,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 4848,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0760292652763,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001083941202,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 43.89,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 280,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 243.2,
+        "tcK": 384.95,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9421
+      }
+    },
+    {
+      "id": "72-55-9",
+      "name": "Dichlorodiphenyldichloroethylene, p,p'- (DDE)",
+      "rsl": {
+        "mw": {
+          "value": 318.03,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00170073589534,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000416,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.000006,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.02299592570658,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000585921893614,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 117500,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.04,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 636.44,
+        "tcK": 860.38,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 15000
+      }
+    },
+    {
+      "id": "75-34-3",
+      "name": "Dichloroethane, 1,1-",
+      "rsl": {
+        "mw": {
+          "value": 98.96,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.22976287816844,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00562,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 227.3,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08364461132101,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001062120694,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 5040,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 330.55,
+        "tcK": 523,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6895
+      }
+    },
+    {
+      "id": "107-06-2",
+      "name": "Dichloroethane, 1,2-",
+      "rsl": {
+        "mw": {
+          "value": 98.96,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.04824202780049,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00118,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 78.9,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08572205807823,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001099464665,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 39.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 8600,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 356.65,
+        "tcK": 561,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7643
+      }
+    },
+    {
+      "id": "75-35-4",
+      "name": "Dichloroethylene, 1,1-",
+      "rsl": {
+        "mw": {
+          "value": 96.944,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 1.0670482420278,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0261,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 600,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0863106873591,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001095659708,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 31.82,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2420,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 304.75,
+        "tcK": 576.05,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6247
+      }
+    },
+    {
+      "id": "156-59-2",
+      "name": "Dichloroethylene, cis-1,2-",
+      "rsl": {
+        "mw": {
+          "value": 96.944,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.16680294358136,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00408,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 200,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08840564303746,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001133541266,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 39.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 6410,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 333.65,
+        "tcK": 544,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7192
+      }
+    },
+    {
+      "id": "156-60-5",
+      "name": "Dichloroethylene, trans-1,2-",
+      "rsl": {
+        "mw": {
+          "value": 96.944,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.38348323793949,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00938,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 331,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.08760943230539,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000111906859,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 39.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 4520,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 320.85,
+        "tcK": 516.5,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6717
+      }
+    },
+    {
+      "id": "78-87-5",
+      "name": "Dichloropropane, 1,2-",
+      "rsl": {
+        "mw": {
+          "value": 112.99,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.11529026982829,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00282,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 53.3,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07334024446115,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000972518402343,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 60.7,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2800,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 369.52,
+        "tcK": 572,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7590
+      }
+    },
+    {
+      "id": "542-75-6",
+      "name": "Dichloropropene, 1,3-",
+      "rsl": {
+        "mw": {
+          "value": 110.97,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.14513491414554,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00355,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 34,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07627248844751,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001012331538,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 72.17,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2800,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 381.15,
+        "tcK": 587.38,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7900
+      }
+    },
+    {
+      "id": "60-57-1",
+      "name": "Dieldrin",
+      "rsl": {
+        "mw": {
+          "value": 380.91,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00040883074407,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00001,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.00000589,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02328645360005,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000600621917562,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 20090,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.195,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 613.32,
+        "tcK": 842.25,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 17000
+      }
+    },
+    {
+      "id": "115-29-7",
+      "name": "Endosulfan",
+      "rsl": {
+        "mw": {
+          "value": 406.93,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00265739983647,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000065,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1.73e-7,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02248454845547,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000576284853659,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 6761,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.325,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 674.43,
+        "tcK": 942.94,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 14000
+      }
+    },
+    {
+      "id": "141-78-6",
+      "name": "Ethyl Acetate",
+      "rsl": {
+        "mw": {
+          "value": 88.107,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00547833197056,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000134,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 93.2,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0823158475399,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000970281773306,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 5.583,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 80000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 350.26,
+        "tcK": 523.3,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7633.66
+      }
+    },
+    {
+      "id": "75-00-3",
+      "name": "Ethyl Chloride (Chloroethane)",
+      "rsl": {
+        "mw": {
+          "value": 64.515,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.45380212591987,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0111,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1008,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.10375966598687,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001161897734,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 21.73,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 6710,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 285.3,
+        "tcK": 460.4,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5879
+      }
+    },
+    {
+      "id": "60-29-7",
+      "name": "Ethyl Ether",
+      "rsl": {
+        "mw": {
+          "value": 74.124,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.05028618152085,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00123,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 538,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08524456739297,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000093635900032,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 9.699,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 60400,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 307.5,
+        "tcK": 466.74,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6338
+      }
+    },
+    {
+      "id": "97-63-2",
+      "name": "Ethyl Methacrylate",
+      "rsl": {
+        "mw": {
+          "value": 114.15,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02342600163532,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000573,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 20.59,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06534409027224,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000837936972019,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 16.66,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 5400,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 390,
+        "tcK": 571,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10957
+      }
+    },
+    {
+      "id": "100-41-4",
+      "name": "Ethylbenzene",
+      "rsl": {
+        "mw": {
+          "value": 106.17,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.3221586263287,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00788,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 9.6,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06846520486071,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000845583214768,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 446.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 169,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 409.34,
+        "tcK": 617.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8501
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 8,
+          "h": 10
+        },
+        "molecularWeight": 106.16799999999999,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.164597618868209
+      }
+    },
+    {
+      "id": "75-21-8",
+      "name": "Ethylene Oxide",
+      "rsl": {
+        "mw": {
+          "value": 44.054,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00605069501226,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000148,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1314,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.1339637663264,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001452751245,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 3.237,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1000000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 283.6,
+        "tcK": 469,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6104
+      }
+    },
+    {
+      "id": "132-64-9",
+      "name": "Dibenzofuran",
+      "rsl": {
+        "mw": {
+          "value": 168.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00870809484873,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000213,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 0.00248,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06506632489205,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000737729541601,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 9161,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3.1,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 560,
+        "tcK": 824,
+        "ref": "epa2004je"
+      }
+    },
+    {
+      "id": "110-00-9",
+      "name": "Furan",
+      "rsl": {
+        "mw": {
+          "value": 68.076,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.22076860179886,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.0054,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 600,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.1022756523633,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001170828383,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 79.99,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 10000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 304.6,
+        "tcK": 490.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6477
+      }
+    },
+    {
+      "id": "76-44-8",
+      "name": "Heptachlor",
+      "rsl": {
+        "mw": {
+          "value": 373.32,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01201962387572,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000294,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.0004,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02234414581268,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000569590593731,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 41260,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.18,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 603.69,
+        "tcK": 846.31,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 13000
+      }
+    },
+    {
+      "id": "142-82-5",
+      "name": "Heptane, N-",
+      "rsl": {
+        "mw": {
+          "value": 100.21,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 81.7661488143908,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 2,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 46,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06492117693025,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000758645368685,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 239.7,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3.4,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "normal-alkane",
+        "kwPerHour": 170,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 7,
+          "h": 16
+        },
+        "molecularWeight": 100.205,
+        "molO2PerMol": 11,
+        "massRatio": 3.512579212614141
+      }
+    },
+    {
+      "id": "118-74-1",
+      "name": "Hexachlorobenzene",
+      "rsl": {
+        "mw": {
+          "value": 284.78,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.06950122649223,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0017,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.000018,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02897450736729,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000784972812122,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 6195,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.0062,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 582.55,
+        "tcK": 825,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 14447
+      }
+    },
+    {
+      "id": "87-68-3",
+      "name": "Hexachlorobutadiene",
+      "rsl": {
+        "mw": {
+          "value": 260.76,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.42109566639411,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0103,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.22,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02674452464823,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000702640119702,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 845.2,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3.2,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 486.15,
+        "tcK": 738,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10206
+      }
+    },
+    {
+      "id": "319-84-6",
+      "name": "Hexachlorocyclohexane, Alpha-",
+      "rsl": {
+        "mw": {
+          "value": 290.83,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00027391659853,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000067,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.0000352,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.04328400767982,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000505739458154,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 2807,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 596.55,
+        "tcK": 839.36,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 15000
+      }
+    },
+    {
+      "id": "58-89-9",
+      "name": "Hexachlorocyclohexane, Gamma- (Lindane)",
+      "rsl": {
+        "mw": {
+          "value": 290.83,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00021013900245,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00000514,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.000042,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04328400767982,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000505739458154,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 2807,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 7.3,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 596.55,
+        "tcK": 839.36,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 15000
+      }
+    },
+    {
+      "id": "77-47-4",
+      "name": "Hexachlorocyclopentadiene",
+      "rsl": {
+        "mw": {
+          "value": 272.77,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 1.10384300899428,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.027,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.06,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0272381827245,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000072169589046,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1404,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1.8,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 512.15,
+        "tcK": 746,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10931
+      }
+    },
+    {
+      "id": "67-72-1",
+      "name": "Hexachloroethane",
+      "rsl": {
+        "mw": {
+          "value": 236.74,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.15903515944399,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00389,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.21,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.03209377750706,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000889039803366,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 196.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 50,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 458,
+        "tcK": 695,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9510
+      }
+    },
+    {
+      "id": "110-54-3",
+      "name": "Hexane, N-",
+      "rsl": {
+        "mw": {
+          "value": 86.178,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 73.5895339329518,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 1.8,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 151.3,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07310779063336,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000816576855959,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 131.5,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 9.5,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 341.7,
+        "tcK": 508,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6895
+      },
+      "biodegradation": {
+        "class": "normal-alkane",
+        "kwPerHour": 170,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 6,
+          "h": 14
+        },
+        "molecularWeight": 86.178,
+        "molO2PerMol": 9.5,
+        "massRatio": 3.5273619717329248
+      }
+    },
+    {
+      "id": "78-83-1",
+      "name": "Isobutyl Alcohol",
+      "rsl": {
+        "mw": {
+          "value": 74.124,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.0003998364677,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00000978,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 10.45,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08966774612683,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001004005505,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 2.919,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 85000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 381.04,
+        "tcK": 547.78,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10936
+      }
+    },
+    {
+      "id": "7439-97-6",
+      "name": "Mercury (elemental)",
+      "rsl": {
+        "mw": {
+          "value": 200.59,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.352,
+          "ref": "PHYSPROP VP/S"
+        },
+        "hlc": {
+          "value": 0.008622,
+          "ref": "PHYSPROP VP/S"
+        },
+        "vp": {
+          "value": 0.001958,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07149744672966,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00003011162591,
+          "ref": "WATER9"
+        },
+        "s": {
+          "value": 0.06,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 629.88,
+        "tcK": 1750,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 14127
+      }
+    },
+    {
+      "id": "126-98-7",
+      "name": "Methacrylonitrile",
+      "rsl": {
+        "mw": {
+          "value": 67.091,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01009811937858,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000247,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 71.2,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.09642987101353,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001064534583,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 13.05,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 25400,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 363.3,
+        "tcK": 554,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7600
+      }
+    },
+    {
+      "id": "72-43-5",
+      "name": "Methoxychlor",
+      "rsl": {
+        "mw": {
+          "value": 345.66,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00000829926410466,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 2.03e-7,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.00000258,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02208485798774,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000055926000699,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 26890,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.1,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 651.02,
+        "tcK": 848.49,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 16000
+      }
+    },
+    {
+      "id": "79-20-9",
+      "name": "Methyl Acetate",
+      "rsl": {
+        "mw": {
+          "value": 74.08,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00470155355683,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000115,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 216.2,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.09577633568703,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001100816943,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 3.064,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 243000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 329.8,
+        "tcK": 506.7,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7260
+      }
+    },
+    {
+      "id": "96-33-3",
+      "name": "Methyl Acrylate",
+      "rsl": {
+        "mw": {
+          "value": 86.091,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00813573180703,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000199,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 86.56,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08599723767901,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001018332345,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 5.844,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 49400,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 353.7,
+        "tcK": 536,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7749
+      }
+    },
+    {
+      "id": "78-93-3",
+      "name": "Methyl Ethyl Ketone (2-Butanone)",
+      "rsl": {
+        "mw": {
+          "value": 72.108,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00232624693377,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000569,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 90.6,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.09144617164168,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001019302571,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 4.51,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 223000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 352.5,
+        "tcK": 536.78,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7481
+      }
+    },
+    {
+      "id": "108-10-1",
+      "name": "Methyl Isobutyl Ketone (4-methyl-2-pentanone)",
+      "rsl": {
+        "mw": {
+          "value": 100.16,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00564186426819,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000138,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 19.86,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06977965594743,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000834769648523,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 12.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 19000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 389.5,
+        "tcK": 571,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8243
+      }
+    },
+    {
+      "id": "80-62-6",
+      "name": "Methyl Methacrylate",
+      "rsl": {
+        "mw": {
+          "value": 100.12,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.0130417007359,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000319,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 38.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0750446674646,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000920868498346,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 9.14,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 15000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 373.5,
+        "tcK": 567,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8975
+      }
+    },
+    {
+      "id": "1634-04-4",
+      "name": "Methyl tert-Butyl Ether (MTBE)",
+      "rsl": {
+        "mw": {
+          "value": 88.151,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02399836467702,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000587,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 250,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07526720292606,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000859041539882,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 11.56,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 51000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 328.3,
+        "tcK": 497.1,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6677.66
+      }
+    },
+    {
+      "id": "108-87-2",
+      "name": "Methylcyclohexane",
+      "rsl": {
+        "mw": {
+          "value": 98.19,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 17.579721995094,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.43,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 46,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06995719163972,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000827413732815,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 233.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 14,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 373.9,
+        "tcK": 572.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7474
+      },
+      "biodegradation": {
+        "class": "branched-cycloaliphatic",
+        "kwPerHour": 11,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 7,
+          "h": 14
+        },
+        "molecularWeight": 98.189,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.4217580380694375
+      }
+    },
+    {
+      "id": "75-09-2",
+      "name": "Methylene Chloride",
+      "rsl": {
+        "mw": {
+          "value": 84.933,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.13286999182339,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00325,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 435,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.09993617367935,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001251612491,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 21.73,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 13000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 313,
+        "tcK": 510,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 6706
+      }
+    },
+    {
+      "id": "98-95-3",
+      "name": "Nitrobenzene",
+      "rsl": {
+        "mw": {
+          "value": 123.11,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00098119378577,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000024,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.245,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06805400568814,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.0000094494543019,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 226.4,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2090,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 483.95,
+        "tcK": 719,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10566
+      }
+    },
+    {
+      "id": "79-46-9",
+      "name": "Nitropropane, 2-",
+      "rsl": {
+        "mw": {
+          "value": 89.095,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00486508585446,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000119,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 17.21,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08469336906278,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001015437502,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 30.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 17000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 393.2,
+        "tcK": 594,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8383
+      }
+    },
+    {
+      "id": "88-72-2",
+      "name": "Nitrotoluene, o-",
+      "rsl": {
+        "mw": {
+          "value": 137.14,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00051103843009,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000125,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.188,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.05875353168099,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000866752413262,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 370.6,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 650,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 495,
+        "tcK": 720,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 12239
+      }
+    },
+    {
+      "id": "111-84-2",
+      "name": "Nonane, n-",
+      "rsl": {
+        "mw": {
+          "value": 128.26,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 139.002452984464,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 3.4,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 4.45,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05143199469658,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000676903621227,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 796,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.22,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "normal-alkane",
+        "kwPerHour": 170,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 20
+        },
+        "molecularWeight": 128.259,
+        "molO2PerMol": 14,
+        "massRatio": 3.4927139615933394
+      }
+    },
+    {
+      "id": "109-66-0",
+      "name": "Pentane, n-",
+      "rsl": {
+        "mw": {
+          "value": 72.151,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 51.1038430089943,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 1.25,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 514,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08212927659449,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000879739711922,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 72.17,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 38,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "normal-alkane",
+        "kwPerHour": 170,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 5,
+          "h": 12
+        },
+        "molecularWeight": 72.151,
+        "molO2PerMol": 8,
+        "massRatio": 3.547892614100983
+      }
+    },
+    {
+      "id": "83-32-9",
+      "name": "Acenaphthene",
+      "rsl": {
+        "mw": {
+          "value": 154.21,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00752248569092,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000184,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.00215,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05061431335423,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000833003781254,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 5027,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 3.9,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 550.54,
+        "tcK": 803.15,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 12155
+      }
+    },
+    {
+      "id": "205-99-2",
+      "name": "Benzo[b]fluoranthene",
+      "rsl": {
+        "mw": {
+          "value": 252.32,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00002686017989,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 6.57e-7,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 5e-7,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02502243175992,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000643378845932,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 599400,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.0015,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 715.9,
+        "tcK": 969.27,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 17000
+      }
+    },
+    {
+      "id": "218-01-9",
+      "name": "Chrysene",
+      "rsl": {
+        "mw": {
+          "value": 228.3,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00021381847915,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00000523,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 6.23e-9,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02611377767924,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000674947326571,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 180500,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.002,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 714.15,
+        "tcK": 979,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 16455
+      }
+    },
+    {
+      "id": "86-73-7",
+      "name": "Fluorene",
+      "rsl": {
+        "mw": {
+          "value": 166.22,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00393295175797,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000962,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.0006,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04397428220606,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000788898592422,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 9160,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1.69,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 570.44,
+        "tcK": 870,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 12666
+      }
+    },
+    {
+      "id": "91-57-6",
+      "name": "Methylnaphthalene, 2-",
+      "rsl": {
+        "mw": {
+          "value": 142.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02117743254293,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000518,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.055,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05243186839407,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000778106409048,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 2478,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 24.6,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 514.26,
+        "tcK": 761,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 12600
+      }
+    },
+    {
+      "id": "91-20-3",
+      "name": "Naphthalene",
+      "rsl": {
+        "mw": {
+          "value": 128.18,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01798855273917,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00044,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.085,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06049939884305,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.000008377032216,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1544,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 31,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 491.14,
+        "tcK": 748.4,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10373
+      },
+      "biodegradation": {
+        "class": "naphthalene",
+        "kwPerHour": 19,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 10,
+          "h": 8
+        },
+        "molecularWeight": 128.17399999999998,
+        "molO2PerMol": 12,
+        "massRatio": 2.9957401657122356
+      }
+    },
+    {
+      "id": "129-00-0",
+      "name": "Pyrene",
+      "rsl": {
+        "mw": {
+          "value": 202.26,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.00048650858545,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0000119,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.0000045,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.02778727543494,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000724791514425,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 54340,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 0.135,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 667.95,
+        "tcK": 936,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 14370
+      }
+    },
+    {
+      "id": "103-65-1",
+      "name": "Propyl benzene",
+      "rsl": {
+        "mw": {
+          "value": 120.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.42927228127555,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0105,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 3.42,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06015577297965,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000783097753394,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 813.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 52.2,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 432.2,
+        "tcK": 630,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9123
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "100-42-5",
+      "name": "Styrene",
+      "rsl": {
+        "mw": {
+          "value": 104.15,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.11242845461979,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00275,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 6.4,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07111401900652,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000878384267835,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 446.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 310,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 418.31,
+        "tcK": 636,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8737
+      }
+    },
+    {
+      "id": "630-20-6",
+      "name": "Tetrachloroethane, 1,1,1,2-",
+      "rsl": {
+        "mw": {
+          "value": 167.85,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.10220768601799,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0025,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 12,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04817607023637,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000909772699422,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 86.03,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1070,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 403.5,
+        "tcK": 624,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9768.282525
+      }
+    },
+    {
+      "id": "79-34-5",
+      "name": "Tetrachloroethane, 1,1,2,2-",
+      "rsl": {
+        "mw": {
+          "value": 167.85,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01500408830744,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000367,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 4.62,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.04892061532525,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000929018544767,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 94.94,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 2830,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 419.6,
+        "tcK": 661.15,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8996
+      }
+    },
+    {
+      "id": "127-18-4",
+      "name": "Tetrachloroethylene",
+      "rsl": {
+        "mw": {
+          "value": 165.83,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.72363041700736,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0177,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 18.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05046637415102,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000945507597723,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 94.94,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 206,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 394.4,
+        "tcK": 620.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8288
+      }
+    },
+    {
+      "id": "108-88-3",
+      "name": "Toluene",
+      "rsl": {
+        "mw": {
+          "value": 92.142,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.27146361406378,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00664,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 28.4,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.07780387356541,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000920433088009,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 233.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 526,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 383.78,
+        "tcK": 591.79,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7930
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 7,
+          "h": 8
+        },
+        "molecularWeight": 92.14099999999999,
+        "molO2PerMol": 9,
+        "massRatio": 3.1254490400581725
+      }
+    },
+    {
+      "id": "76-13-1",
+      "name": "Trichloro-1,2,2-trifluoroethane, 1,1,2-",
+      "rsl": {
+        "mw": {
+          "value": 187.38,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 21.5044971381848,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.526,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 362.5,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.03756581617152,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000859204537989,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 196.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 170,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 320.7,
+        "tcK": 487.3,
+        "ref": "epa2004je"
+      }
+    },
+    {
+      "id": "120-82-1",
+      "name": "Trichlorobenzene, 1,2,4-",
+      "rsl": {
+        "mw": {
+          "value": 181.45,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.05805396565822,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00142,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 0.46,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.03959924784732,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000840331731625,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 1356,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 49,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 486.15,
+        "tcK": 725,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 10471
+      }
+    },
+    {
+      "id": "71-55-6",
+      "name": "Trichloroethane, 1,1,1-",
+      "rsl": {
+        "mw": {
+          "value": 133.41,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.70318887980376,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0172,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 124,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06481740907214,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000959902421534,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 43.89,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1290,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 347.24,
+        "tcK": 545,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7136
+      }
+    },
+    {
+      "id": "79-00-5",
+      "name": "Trichloroethane, 1,1,2-",
+      "rsl": {
+        "mw": {
+          "value": 133.41,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.03368765331153,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000824,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 23,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06689038793672,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001002586711,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 60.7,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 4590,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 386.15,
+        "tcK": 602,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8322
+      }
+    },
+    {
+      "id": "79-01-6",
+      "name": "Trichloroethylene",
+      "rsl": {
+        "mw": {
+          "value": 131.39,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.40269828291088,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00985,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 69,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06866181040955,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001022102912,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 60.7,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1280,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 360.36,
+        "tcK": 544.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7505
+      }
+    },
+    {
+      "id": "75-69-4",
+      "name": "Trichlorofluoromethane",
+      "rsl": {
+        "mw": {
+          "value": 137.37,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 3.96565821749796,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.097,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 802.8,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0653559700527,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001004802898,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 43.89,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1100,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 296.7,
+        "tcK": 471,
+        "ref": "epa2004je"
+      }
+    },
+    {
+      "id": "96-18-4",
+      "name": "Trichloropropane, 1,2,3-",
+      "rsl": {
+        "mw": {
+          "value": 147.43,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.01402289452167,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.000343,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 3.69,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.05746605496498,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000924108232014,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 115.8,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 1750,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 430,
+        "tcK": 652,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9171
+      }
+    },
+    {
+      "id": "526-73-8",
+      "name": "Trimethylbenzene, 1,2,3-",
+      "rsl": {
+        "mw": {
+          "value": 120.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.17825020441537,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00436,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 1.6886,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06125353674148,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000802136290526,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 626.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 75.2,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "95-63-6",
+      "name": "Trimethylbenzene, 1,2,4-",
+      "rsl": {
+        "mw": {
+          "value": 120.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.25183973834832,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00616,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 2.1,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06067540563402,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000792085486049,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 614.3,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 57,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 442.3,
+        "tcK": 649.17,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9369
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "108-67-8",
+      "name": "Trimethylbenzene, 1,3,5-",
+      "rsl": {
+        "mw": {
+          "value": 120.2,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.3585445625511,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00877,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 2.48,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06022543251572,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000784300081302,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 602.1,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 48.2,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 437.89,
+        "tcK": 637.25,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 9321
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 9,
+          "h": 12
+        },
+        "molecularWeight": 120.195,
+        "molO2PerMol": 12,
+        "massRatio": 3.194608760763759
+      }
+    },
+    {
+      "id": "108-05-4",
+      "name": "Vinyl Acetate",
+      "rsl": {
+        "mw": {
+          "value": 86.091,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.02089125102208,
+          "ref": "EPI"
+        },
+        "hlc": {
+          "value": 0.000511,
+          "ref": "EPI"
+        },
+        "vp": {
+          "value": 90.16,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.08490160753321,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001000348045,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 5.583,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 20000,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 345.65,
+        "tcK": 519.13,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 7800
+      }
+    },
+    {
+      "id": "75-01-4",
+      "name": "Vinyl Chloride",
+      "rsl": {
+        "mw": {
+          "value": 62.499,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 1.13654946852003,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0278,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 2980,
+          "ref": "EPI"
+        },
+        "dia": {
+          "value": 0.10712015187485,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00001200451222,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 21.73,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 8800,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 259.25,
+        "tcK": 432,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 5250
+      }
+    },
+    {
+      "id": "108-38-3",
+      "name": "Xylene, m-",
+      "rsl": {
+        "mw": {
+          "value": 106.17,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.29354047424366,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00718,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 8.29,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06851832716554,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000846465153597,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 375.3,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 161,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 412.27,
+        "tcK": 617.05,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8523
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 8,
+          "h": 10
+        },
+        "molecularWeight": 106.16799999999999,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.164597618868209
+      }
+    },
+    {
+      "id": "95-47-6",
+      "name": "Xylene, o-",
+      "rsl": {
+        "mw": {
+          "value": 106.17,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.21177432542927,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00518,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 6.61,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06908468961244,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000855893049678,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 382.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 178,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 417.6,
+        "tcK": 630.3,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8661
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 8,
+          "h": 10
+        },
+        "molecularWeight": 106.16799999999999,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.164597618868209
+      }
+    },
+    {
+      "id": "106-42-3",
+      "name": "Xylene, p-",
+      "rsl": {
+        "mw": {
+          "value": 106.17,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.28209321340965,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.0069,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 8.84,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.0684084734873,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000844641803584,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 375.3,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 162,
+          "ref": "PHYSPROP"
+        }
+      },
+      "epa2004je": {
+        "tbK": 411.52,
+        "tcK": 616.2,
+        "ref": "epa2004je",
+        "dhvbCalPerMol": 8525
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 8,
+          "h": 10
+        },
+        "molecularWeight": 106.16799999999999,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.164597618868209
+      }
+    },
+    {
+      "id": "1330-20-7",
+      "name": "Xylenes",
+      "rsl": {
+        "mw": {
+          "value": 106.17,
+          "ref": "PHYSPROP"
+        },
+        "hPrime": {
+          "value": 0.27105478331971,
+          "ref": "PHYSPROP"
+        },
+        "hlc": {
+          "value": 0.00663,
+          "ref": "PHYSPROP"
+        },
+        "vp": {
+          "value": 7.99,
+          "ref": "PHYSPROP"
+        },
+        "dia": {
+          "value": 0.06851478758267,
+          "ref": "WATER9"
+        },
+        "diw": {
+          "value": 0.00000846406376737,
+          "ref": "WATER9"
+        },
+        "koc": {
+          "value": 382.9,
+          "ref": "EPI"
+        },
+        "s": {
+          "value": 106,
+          "ref": "PHYSPROP"
+        }
+      },
+      "biodegradation": {
+        "class": "alkylbenzene",
+        "kwPerHour": 0.73,
+        "ref": "api2012biovapor"
+      },
+      "oxygen": {
+        "formula": {
+          "c": 8,
+          "h": 10
+        },
+        "molecularWeight": 106.16799999999999,
+        "molO2PerMol": 10.5,
+        "massRatio": 3.164597618868209
+      }
+    }
+  ],
+  "screenedEpa2004je": [
+    {
+      "id": "135-98-8",
+      "field": "dhvb",
+      "reason": "Trouton ratio 198.7 cal/(mol K) outside 10 to 40"
+    },
+    {
+      "id": "98-06-6",
+      "field": "tc",
+      "reason": "T_C/T_B 2.76 outside 1.2 to 2.2"
+    }
+  ],
+  "unmatchedEpa2004je": [
+    "57-74-9",
+    "75-29-6",
+    "541-73-1"
+  ]
+}

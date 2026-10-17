@@ -2,6 +2,7 @@ import type { Medium } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import { Field, Seg } from '../ui/controls';
 import type { WellFeed } from '../transport/wellFeed';
+import type { VaporRiskFeed } from '../vapor/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow } from './form';
 import { fmtTox } from './format';
@@ -15,11 +16,13 @@ export function ChemicalCard(props: {
   /** Default true. The cleanup screen shows the concentration fields only where the ratios matter. */
   showConcentrations?: boolean;
   concentrationNote?: string;
+  vapor: VaporRiskFeed | null;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
-  const { row, rec, db, well } = props;
+  const { row, rec, db, well, vapor } = props;
   const showConc = props.showConcentrations ?? true;
+  const vaporHere = vapor !== null && vapor.chemicalId === row.id;
   const rows = toxRows(rec, db.sourceKeys);
   const t = rec.tox;
   const setConc = (m: Medium, v: string): void =>
@@ -81,6 +84,12 @@ export function ChemicalCard(props: {
               <p className="muted well-note" key={m.key}>
                 Groundwater concentration: {well ? well.label : 'no well result held'}.
               </p>
+            ) : (m.key === 'indoorAir' && row.indoorFromVapor) ||
+              (m.key === 'outdoorAir' && row.outdoorFromVapor) ? (
+              <p className="muted well-note" key={m.key}>
+                {m.label} concentration:{' '}
+                {vaporHere ? vapor.label : 'no vapor result held for this chemical'}.
+              </p>
             ) : (
               <Field
                 key={m.key}
@@ -100,6 +109,26 @@ export function ChemicalCard(props: {
             onChange={(e) => props.onChange({ ...row, groundwaterFromWell: e.target.checked })}
           />
           <span>Use the transport well result for the groundwater concentration</span>
+        </label>
+      )}
+      {(vaporHere || row.indoorFromVapor) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.indoorFromVapor}
+            onChange={(e) => props.onChange({ ...row, indoorFromVapor: e.target.checked })}
+          />
+          <span>Use the vapor screen indoor air for the indoor air concentration</span>
+        </label>
+      )}
+      {(vaporHere || row.outdoorFromVapor) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.outdoorFromVapor}
+            onChange={(e) => props.onChange({ ...row, outdoorFromVapor: e.target.checked })}
+          />
+          <span>Use the vapor screen outdoor air for the outdoor air concentration</span>
         </label>
       )}
       {rec.phys?.values.kp !== undefined && (
