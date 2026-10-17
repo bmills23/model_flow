@@ -1,3 +1,9 @@
+/** The local calendar date as YYYY-MM-DD. toISOString would use the UTC day, which is a day ahead in the evening. */
+export function localIsoDate(date: Date): string {
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 const DATE_LINE = /^Generated (\d{4}-\d{2}-\d{2}) /m;
 
 /**

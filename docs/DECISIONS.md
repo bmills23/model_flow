@@ -427,3 +427,19 @@ ten references the two methods cite were marked `used`. Judgment calls, open to 
   origin.
 - **Legacy hazard summary.** The legacy method has no life stages, so its summary reports one group
   named `total`.
+
+## 2026-10-16: M4 review fixes (independent review of the branch)
+
+An independent review of the M4 branch ran after slice E3. Its findings are fixed in the commits after
+`d9613db`, each with a test that failed first; the earlier rulings above are amended in place where a
+finding changed them (E2 dermal form, 5, 11 and 14). Judgment calls, open to overturn:
+
+- **Timing checks allow for load.** A speed check is a regression tripwire, not a benchmark, so it takes
+  the best of several runs after a warm-up. The vadose speed test (`vadose-legacy.test.ts`) uses the best
+  of nine runs under 250 ms, a 5x margin on its 50 ms design budget; the plan-view grid check
+  (`groundwater-kernel.test.ts`) uses the best of three under 1 s. An order-of-magnitude slowdown still fails.
+- **Generated document dates use the local calendar day.** `toISOString` gives the UTC day, which is a day
+  ahead in the evening in Mountain time. `localIsoDate` fixes this, and the attributions header moves to
+  2026-10-16 (the content change day). The date still moves only when the content changes.
+- **`epa2003toxhier` is a `data` reference.** The RSL tables apply its tiers; the memorandum is not a
+  method citation, so it is not `planned` (a planned status reads as an unverified citation).

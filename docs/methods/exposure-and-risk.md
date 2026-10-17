@@ -1,13 +1,13 @@
 # Direct exposure and forward risk (methods note for M4)
 
-Equations to be implemented in `packages/engine/src/processes/exposure/` and
+Equations implemented in `packages/engine/src/processes/exposure/` and
 `packages/engine/src/processes/risk/`, in our own words, derived from the primary publications cited
 by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The RISC5 manual (chapters 3, 6, 7 and
 10, and Table R-9 of its Appendix R review) was used only as a map of which choices RISC5 made; none of
 its text, figures or tables is reproduced and its equation labels are not used here. Where a choice is
 RISC5's rather than a guidance document's, it is marked "RISC5 choice" and becomes the method's
-`risc5Choice` metadata. The chemical and toxicity database that feeds this process is planned in
-`docs/methods/chemical-database.md`.
+`risc5Choice` metadata. The chemical and toxicity database that feeds this process is described in
+`docs/methods/chemical-database.md` and built by `packages/data` (RSL November 2024).
 
 Status: DONE 2026-10-16 (M4). Methods note, reference check, data plan and fixture plan (stage 1); legacy and modern kernels, presets and hand cases (slices E1 and E2, `packages/engine/src/processes/exposure/`); the scenario runner, series windows, the M1 adapter, additivity and registration (slice E3, `exposure/` and `risk/additivity.ts`, `risk/summary.ts`, registered as `exposure.rags-a-1989` and `exposure.rags-e-f-2014`); and the screen at `#/risk` (slice W1, `apps/web/src/risk/`). The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
 
