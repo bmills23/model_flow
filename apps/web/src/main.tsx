@@ -6,6 +6,7 @@ import './transport/transport.css';
 import './vadose/vadose.css';
 import './saturated/saturated.css';
 import './risk/risk.css';
+import './surfaceWater/surfaceWater.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element');

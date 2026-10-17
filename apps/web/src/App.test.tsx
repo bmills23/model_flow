@@ -46,4 +46,19 @@ describe('App shell', () => {
     const link = screen.getAllByRole('link', { name: /exposure and risk/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/risk');
   });
+
+  it('links to the surface water screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /surface water and sediment/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/surface-water');
+  });
+
+  it('opens the surface water screen at #/surface-water', async () => {
+    window.location.hash = '#/surface-water';
+    render(<App />);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /surface water and sediment/i }),
+    ).toBeTruthy();
+    window.location.hash = '';
+  });
 });

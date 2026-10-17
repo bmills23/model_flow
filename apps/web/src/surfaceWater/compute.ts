@@ -1,0 +1,262 @@
+import {
+  at123dBankPlane,
+  at123dConcentration,
+  bankScreenAverage,
+  domenicoReachLength,
+  runLegacySurfaceWater,
+  runModernSurfaceWater,
+  type LegacySurfaceWaterInput,
+  type ModernSurfaceWaterInput,
+  type SurfaceWaterWarning,
+} from '@model-flow/engine';
+import { at123dInput, withFedSteps } from '../transport/compute';
+import { makeZOf, type Scenario } from '../transport/form';
+import type { SwRequest } from './inputs';
+
+/** Sample times of a run (the curves have this many points after t = 0). */
+export const N_TIMES = 24;
+/**
+ * Tolerance of the bank plane quadrature. The engine default (1e-9, eight panels per axis) costs about
+ * 40 s for a 24 point curve in the browser; this setting is about ten times faster and the test in
+ * compute.test.ts holds it within 1 percent of the tight integral.
+ */
+export const BANK_QUADRATURE = { relTol: 1e-3, panels: 1 } as const;
+/** Points of the trapezoid over the discharge thickness for the bank screen average. */
+const SCREEN_POINTS = 5;
+
+export interface SedimentOut {
+  quantified: boolean;
+  /** kg/kg dry weight; absent when not quantified. */
+  concentrations?: number[];
+  /** kg/kg organic carbon, when Kd came from a Koc. */
+  organicCarbonNormalized?: number[];
+  poreWater: string;
+}
+
+export interface SwResult {
+  /** s, strictly increasing. */
+  times: number[];
+  linked: boolean;
+  linkLabel?: string;
+  /** Reach length used, m. */
+  reachLength: number;
+  legacy: {
+    /** kg/m^3 */
+    groundwaterConcentrations: number[];
+    surfaceWater: number[];
+    /** m^3/s */
+    groundwaterFlow: number;
+    sediment: SedimentOut;
+    warnings: SurfaceWaterWarning[];
+  };
+  modern: {
+    surfaceWater: number[];
+    /** W / Q_gw, kg/m^3 */
+    fluxAveraged: number[];
+    /** m^3/s */
+    groundwaterFlow: number;
+    /** s */
+    residenceTime: number;
+    downstream?: number[];
+    sediment: SedimentOut;
+    warnings: SurfaceWaterWarning[];
+  };
+}
+
+export type SwOutcome = { ok: true; result: SwResult } | { ok: false; error: string };
+
+const grid = (end: number): number[] =>
+  Array.from({ length: N_TIMES }, (_, k) => (end * (k + 1)) / N_TIMES);
+
+function sedimentOut(s: {
+  quantified: boolean;
+  concentrations?: number[] | undefined;
+  organicCarbonNormalized?: number[] | undefined;
+  poreWater: string;
+}): SedimentOut {
+  return {
+    quantified: s.quantified,
+    poreWater: s.poreWater,
+    ...(s.concentrations ? { concentrations: [...s.concentrations] } : {}),
+    ...(s.organicCarbonNormalized
+      ? { organicCarbonNormalized: [...s.organicCarbonNormalized] }
+      : {}),
+  };
+}
+
+/** The M1 source release rate at time t, kg/s, for a typed (not vadose or saturated fed) source. */
+function releaseRate(s: Omit<Scenario, 'zOf'>, t: number): number {
+  return s.terms.reduce(
+    (a, term) => (t >= term.start && t < term.end ? a + s.massRate * term.factor : a),
+    0,
+  );
+}
+
+export function compute(req: SwRequest): SwOutcome {
+  try {
+    const link = req.link;
+    const scenario: Scenario | null = link
+      ? withFedSteps({ ...link.scenario, zOf: makeZOf(link.scenario.thickness) })
+      : null;
+    const times = grid(scenario ? scenario.time : req.duration);
+
+    // reach length: entered, or the 5 percent Domenico width at the bank distance
+    let legacyReach: LegacySurfaceWaterInput['reach'];
+    let reachLength: number;
+    if (req.reach.kind === 'entered') {
+      legacyReach = { kind: 'entered', length: req.reach.length };
+      reachLength = req.reach.length;
+    } else {
+      if (req.bankX === undefined) throw new RangeError('the distance to the bank is needed');
+      const spec = { sourceWidth: req.reach.sourceWidth, distance: req.bankX };
+      legacyReach = { kind: 'domenico', ...spec };
+      reachLength = domenicoReachLength(spec);
+    }
+
+    // groundwater at the bank for the legacy method: the screen-averaged centreline concentration
+    let gw: number[];
+    let source: { bankX: number; darcyFlux: number; thickness: number } | null = null;
+    if (scenario) {
+      if (req.bankX === undefined || req.thickness === undefined) {
+        throw new RangeError('the bank distance and the discharge thickness are needed');
+      }
+      source = {
+        bankX: req.bankX,
+        darcyFlux: scenario.velocity * scenario.porosity,
+        thickness: req.thickness,
+      };
+      const input = at123dInput(scenario, 0);
+      const { time: _t, ...fixed } = input;
+      void _t;
+      const depths = Array.from(
+        { length: SCREEN_POINTS },
+        (_, k) => (source!.thickness * k) / (SCREEN_POINTS - 1),
+      );
+      gw = [
+        ...bankScreenAverage(
+          (t) => ({
+            concentrations: depths.map((d) =>
+              at123dConcentration(
+                { ...fixed, time: t },
+                { x: source!.bankX, y: 0, z: scenario.zOf(d) },
+              ),
+            ),
+          }),
+          times,
+        ).values,
+      ];
+    } else {
+      gw = times.map(() => req.groundwaterConcentration);
+    }
+
+    const body = req.body;
+    const legacyIn: LegacySurfaceWaterInput = {
+      body,
+      upstreamFlow: req.upstreamFlow,
+      background: req.background,
+      mixingFraction: req.mixingFraction,
+      decay: req.decay,
+      reach: legacyReach,
+      discharge: req.discharge,
+      times,
+      groundwaterConcentrations: gw,
+      ...(req.sediment
+        ? {
+            sediment: {
+              fractionOrganicCarbon: req.sediment.fractionOrganicCarbon,
+              ...(req.sediment.koc !== undefined ? { koc: req.sediment.koc } : {}),
+              ...(req.sediment.kd !== undefined ? { kd: req.sediment.kd } : {}),
+            },
+          }
+        : {}),
+      ...(req.solubility !== undefined ? { solubility: req.solubility } : {}),
+      ...(scenario && source
+        ? {
+            link: {
+              darcyFlux: source.darcyFlux,
+              ...(scenario.fed
+                ? {}
+                : { sourceReleaseRates: times.map((t) => releaseRate(scenario, t)) }),
+            },
+          }
+        : {}),
+    };
+    const legacy = runLegacySurfaceWater(legacyIn);
+
+    // modern: mass discharge across the bank plane (linked) or the typed concentration times the flow
+    const sedimentIn = req.sediment
+      ? {
+          fractionOrganicCarbon: req.sediment.fractionOrganicCarbon,
+          ...(req.sediment.koc !== undefined ? { koc: req.sediment.koc } : {}),
+          ...(req.sediment.kd !== undefined ? { kd: req.sediment.kd } : {}),
+          poreWater: req.sediment.poreWater,
+        }
+      : undefined;
+    let bank: ModernSurfaceWaterInput['bank'];
+    if (scenario && source) {
+      const { time: _t, ...fixed } = at123dInput(scenario, 0);
+      void _t;
+      bank = {
+        kind: 'plane',
+        concentration: at123dBankPlane(fixed, source.bankX, scenario.zOf(0)),
+        plane: {
+          reachLength,
+          thickness: source.thickness,
+          darcyFlux: source.darcyFlux,
+        },
+        times,
+        quadrature: BANK_QUADRATURE,
+      };
+    } else {
+      bank = {
+        kind: 'discharge',
+        times,
+        discharge: gw.map((c) => c * legacy.groundwaterFlow),
+        groundwaterFlow: legacy.groundwaterFlow,
+      };
+    }
+    const modernIn: ModernSurfaceWaterInput = {
+      body: body.type === 'river' ? { ...body, reachLength } : body,
+      upstreamFlow: req.upstreamFlow,
+      background: req.background,
+      mixingFraction: req.mixingFraction,
+      decay: req.decay,
+      bank,
+      centrelineConcentrations: gw,
+      ...(req.downstream !== undefined && body.type === 'river'
+        ? { downstream: { distance: req.downstream } }
+        : {}),
+      ...(sedimentIn ? { sediment: sedimentIn } : {}),
+      ...(req.solubility !== undefined ? { solubility: req.solubility } : {}),
+    };
+    const modern = runModernSurfaceWater(modernIn);
+
+    return {
+      ok: true,
+      result: {
+        times,
+        linked: scenario !== null,
+        ...(link ? { linkLabel: link.label } : {}),
+        reachLength,
+        legacy: {
+          groundwaterConcentrations: legacy.groundwaterConcentrations,
+          surfaceWater: legacy.surfaceWater,
+          groundwaterFlow: legacy.groundwaterFlow,
+          sediment: sedimentOut(legacy.sediment),
+          warnings: legacy.warnings,
+        },
+        modern: {
+          surfaceWater: modern.surfaceWater,
+          fluxAveraged: modern.fluxAveragedConcentration,
+          groundwaterFlow: modern.groundwaterFlow,
+          residenceTime: modern.residenceTime,
+          ...(modern.downstream ? { downstream: modern.downstream } : {}),
+          sediment: sedimentOut(modern.sediment),
+          warnings: modern.warnings,
+        },
+      },
+    };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}

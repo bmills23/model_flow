@@ -138,7 +138,7 @@ function concentrationLoading(s: Scenario): ConcentrationStep[] | undefined {
     .map((t) => ({ start: t.start, end: t.end, concentration: s.c0 * t.factor }));
 }
 
-function at123dInput(s: Scenario, time: number): At123dInput {
+export function at123dInput(s: Scenario, time: number): At123dInput {
   return {
     aquifer: {
       velocity: s.velocity,

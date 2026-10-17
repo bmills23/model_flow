@@ -1,0 +1,12 @@
+/* Surface water screen. Reuses the transport screen's layout, controls and chart classes. */
+.surface-water .example {
+  margin-top: 12px;
+}
+
+.surface-water .panel h2 {
+  text-transform: none;
+}
+
+.surface-water .readouts dd {
+  overflow-wrap: anywhere;
+}

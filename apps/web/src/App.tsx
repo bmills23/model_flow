@@ -5,6 +5,9 @@ import { SaturatedPage } from './saturated/SaturatedPage';
 import { VadosePage } from './vadose/VadosePage';
 
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
+const SurfaceWaterScreen = lazy(() =>
+  import('./surfaceWater/SurfaceWaterScreen').then((m) => ({ default: m.SurfaceWaterScreen })),
+);
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
@@ -17,6 +20,7 @@ const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
+const SURFACE_WATER_HASH = '#/surface-water';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -30,10 +34,15 @@ export function App() {
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
   const onRisk = hash === RISK_HASH;
+  const onSurfaceWater = hash === SURFACE_WATER_HASH;
 
   return (
     <div
-      className={onTransport || onVadose || onSaturated || onRisk ? 'shell shell-wide' : 'shell'}
+      className={
+        onTransport || onVadose || onSaturated || onRisk || onSurfaceWater
+          ? 'shell shell-wide'
+          : 'shell'
+      }
     >
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
@@ -71,6 +80,13 @@ export function App() {
           >
             Saturated soil source
           </a>
+          <a
+            className="nav-link"
+            href={SURFACE_WATER_HASH}
+            aria-current={onSurfaceWater ? 'page' : undefined}
+          >
+            Surface water and sediment
+          </a>
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
@@ -88,6 +104,10 @@ export function App() {
           <VadosePage />
         ) : onSaturated ? (
           <SaturatedPage />
+        ) : onSurfaceWater ? (
+          <Suspense fallback={<p className="muted">Loading the surface water screen...</p>}>
+            <SurfaceWaterScreen />
+          </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
@@ -98,8 +118,8 @@ export function App() {
             <p className="lede">
               An open reimplementation of RISC5-class methods with a switch between legacy and
               modern alternatives for each process. Groundwater transport, vadose leaching, the
-              saturated soil source and exposure and risk are working; the other steps are
-              placeholders for the milestones on the roadmap.
+              saturated soil source, surface water and sediment, and exposure and risk are working;
+              the other steps are placeholders for the milestones on the roadmap.
             </p>
             <p>
               <a className="button" href={TRANSPORT_HASH}>
@@ -110,6 +130,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={SATURATED_HASH}>
                 Open saturated soil source
+              </a>{' '}
+              <a className="button" href={SURFACE_WATER_HASH}>
+                Open surface water and sediment
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk
