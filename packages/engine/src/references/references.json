@@ -945,7 +945,7 @@
   {
     "key": "epanpdwr",
     "type": "data",
-    "status": "planned",
+    "status": "data",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2026,
     "title": "National Primary Drinking Water Regulations",
@@ -953,7 +953,7 @@
     "identifier": "Codified at 40 CFR Part 141",
     "tags": ["cleanup", "data"],
     "url": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations",
-    "notes": "EPA web page read 2026-10-16 (last updated August 31, 2026; the year is that of the page read); it lists the maximum contaminant levels and points to 40 CFR 141. Origin of the MCLs that the RSL tables (epa2024rsl) carry in their MCL column, which is what the engine reads; becomes a data reference when the data build reads that column."
+    "notes": "EPA web page read 2026-10-16 (last updated August 31, 2026; the year is that of the page read); it lists the maximum contaminant levels and points to 40 CFR 141. Origin of the MCLs that the RSL tables (epa2024rsl) carry in their MCL column, which is what the engine reads; a data reference since the data build (slice D2) reads that column into tox.json."
   },
   {
     "key": "epairis",

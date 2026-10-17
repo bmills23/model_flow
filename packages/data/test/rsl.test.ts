@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import readXlsxFile from 'read-excel-file/node';
 import { modernChemical, modernPathway, modernResident } from '@model-flow/engine';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { partitionFactor } from '../../engine/src/processes/cleanup/ssg.js';
 import { buildRsl, type RslBuild } from '../src/rsl/build.js';
 import { verifyManifest } from '../src/rsl/checksums.js';
 
@@ -314,4 +315,90 @@ describe('dermal water form (organic lag-time or inorganic Kp times t)', () => {
     });
     expect(checked).toBeGreaterThan(600);
   }, 60_000);
+});
+
+describe('MCL and published soil-to-groundwater SSL columns (slice D2)', () => {
+  const rows = () => built.tox.toxicity;
+
+  it('reads the MCL cell for 108 rows, the "(G)" cells parsed to their number', () => {
+    const withCell = rows().filter((t) => t.mcl !== undefined || t.mclGroup === true);
+    expect(withCell).toHaveLength(108);
+    expect(tox('71-43-2')!.mcl).toBe(5);
+    expect(tox('71-43-2')!.mclGroup).toBeUndefined();
+    // chloroform prints 8.0E+01(G): the number is kept and the marker flagged
+    expect(tox('67-66-3')!.mcl).toBe(80);
+    expect(tox('67-66-3')!.mclGroup).toBe(true);
+  });
+
+  it('flags every "(G)" cell, and a bare "(G)" carries the flag with no number', () => {
+    const grouped = rows().filter((t) => t.mclGroup === true);
+    expect(grouped).toHaveLength(25);
+    const bare = grouped.filter((t) => t.mcl === undefined);
+    expect(bare.map((t) => t.name).sort()).toEqual([
+      'Perfluorobutanesulfonate',
+      'Perfluorobutanesulfonic acid (PFBS)',
+    ]);
+    expect(rows().filter((t) => t.mcl !== undefined)).toHaveLength(106);
+  });
+
+  it('keeps the published SSLs as comparison values: 747 risk-based with a key, 91 MCL-based', () => {
+    const risk = rows().filter((t) => t.publishedSsl?.risk);
+    const mcl = rows().filter((t) => t.publishedSsl?.mcl !== undefined);
+    expect(risk).toHaveLength(747);
+    expect(mcl).toHaveLength(91);
+    for (const t of risk) expect(['c', 'c*', 'c**', 'n']).toContain(t.publishedSsl!.risk!.key);
+    expect(tox('71-43-2')!.publishedSsl!.mcl).toBeGreaterThan(0);
+    expect(built.tox.units.mcl).toBe('ug/L');
+    expect(built.tox.units.publishedSsl).toBe('mg/kg');
+  });
+
+  it('fixture 2: all 91 MCL-based SSLs reproduce with the engine partition factor', () => {
+    const byId = new Map(built.chemicals.chemicals.map((c) => [c.id, c]));
+    let checked = 0;
+    for (const t of rows()) {
+      const published = t.publishedSsl?.mcl;
+      if (published === undefined) continue;
+      expect(t.mcl, t.name).toBeDefined();
+      const v = byId.get(t.id)!.values;
+      const p = partitionFactor({
+        soil: { rhoB: 1500, rhoS: 2650, foc: 0.002, theta: 0.3 },
+        ...(v.kd ? { kd: v.kd.value * 1e-3 } : { koc: v.koc!.value * 1e-3 }),
+        H: v.hPrime?.value ?? 0,
+      });
+      const mgPerKg = t.mcl! * 1e-6 * p * 1e6;
+      const unit = 10 ** (Math.floor(Math.log10(published)) - 1);
+      expect(
+        Math.abs(mgPerKg - published),
+        `${t.name}: ${mgPerKg} vs ${published}`,
+      ).toBeLessThanOrEqual(0.5 * unit * (1 + 1e-9));
+      checked++;
+    }
+    expect(checked).toBe(91);
+  });
+
+  it('writes cleanup-chemicals.json as exactly the derived subset', () => {
+    const file = readFileSync(join(generatedDir, 'cleanup-chemicals.json'), 'utf8');
+    expect(file).toBe(JSON.stringify(built.cleanup, null, 2) + '\n');
+    const byId = new Map(built.chemicals.chemicals.map((c) => [c.id, c]));
+    const keys = ['koc', 'kd', 'hPrime', 's', 'mw'] as const;
+    const expected = built.chemicals.chemicals
+      .filter((c) => keys.some((k) => c.values[k]))
+      .map((c) => c.id);
+    expect(built.cleanup.chemicals.map((c) => c.id)).toEqual(expected);
+    for (const r of built.cleanup.chemicals) {
+      const c = byId.get(r.id)!;
+      expect(Object.keys(r.values).sort()).toEqual(keys.filter((k) => c.values[k]).sort());
+      for (const k of keys) {
+        const v = c.values[k];
+        if (v) expect(r.values[k]!.value).toBe(v.value);
+      }
+      expect(r.values.kd?.ref).toBe(c.values.kd?.ref);
+    }
+    expect(Object.keys(built.cleanup.units).sort()).toEqual([...keys].sort());
+    const full = readFileSync(join(generatedDir, 'chemicals.json'), 'utf8');
+    expect(file.length).toBeLessThan(full.length * 0.5);
+    expect(built.cleanup.chemicals.find((c) => c.id === '71-43-2')!.values.koc!.value).toBe(
+      byId.get('71-43-2')!.values.koc!.value,
+    );
+  });
 });

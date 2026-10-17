@@ -5,6 +5,9 @@ import { inorganicDermalWater } from './dermal-form.js';
 import { sourceKeys } from './source-keys.js';
 import type {
   ChemicalEntry,
+  CleanupChemicalEntry,
+  CleanupChemicalsFile,
+  CleanupValueKey,
   ChemicalsFile,
   ChemicalValueKey,
   RiskChemicalEntry,
@@ -21,6 +24,8 @@ export interface RslBuild {
   chemicals: ChemicalsFile;
   /** The subset of `chemicals` the risk screen reads, derived here and never edited by hand. */
   risk: RiskChemicalsFile;
+  /** The subset the cleanup screen reads (Koc, Kd, H', S, MW), derived here. */
+  cleanup: CleanupChemicalsFile;
   tox: ToxFile;
 }
 
@@ -107,6 +112,10 @@ const SUMMARY = {
   csat: 12,
   name: 13,
   cas: 14,
+  mcl: 25,
+  riskSsl: 26,
+  riskSslKey: 27,
+  mclSsl: 28,
 } as const;
 
 const PARAMS = {
@@ -179,6 +188,32 @@ const buildTox = (rows: Row[], ids: string[]): ToxEntry[] =>
     if (absd !== undefined) entry.absd = absd;
     const csat = num(row[SUMMARY.csat], `${where} Csat`);
     if (csat !== undefined) entry.csat = csat;
+    const mclCell = row[SUMMARY.mcl];
+    if (typeof mclCell === 'number') {
+      entry.mcl = mclCell;
+    } else if (mclCell !== null && mclCell !== undefined) {
+      const m = /^\s*(\S*?)\(G\)\s*$/.exec(String(mclCell));
+      if (!m) throw new Error(`${where}: unexpected MCL cell ${JSON.stringify(mclCell)}`);
+      entry.mclGroup = true;
+      if (m[1]) {
+        const v = Number(m[1]);
+        if (!Number.isFinite(v)) throw new Error(`${where}: unreadable MCL ${m[1]}`);
+        entry.mcl = v;
+      }
+    }
+    const riskSsl = num(row[SUMMARY.riskSsl], `${where} risk-based SSL`);
+    const mclSsl = num(row[SUMMARY.mclSsl], `${where} MCL-based SSL`);
+    if (riskSsl !== undefined || mclSsl !== undefined) {
+      const published: NonNullable<ToxEntry['publishedSsl']> = {};
+      if (riskSsl !== undefined) {
+        const key = text(row[SUMMARY.riskSslKey]);
+        if (!key || !['c', 'c*', 'c**', 'n'].includes(key))
+          throw new Error(`${where}: risk-based SSL without a valid key (${key})`);
+        published.risk = { value: riskSsl, key };
+      }
+      if (mclSsl !== undefined) published.mcl = mclSsl;
+      entry.publishedSsl = published;
+    }
     const sp = ident.cas ? special[ident.cas] : undefined;
     if (sp) entry.special = sp;
     return entry;
@@ -277,6 +312,30 @@ export const deriveRiskChemicals = (file: ChemicalsFile): RiskChemicalsFile => {
   };
 };
 
+const CLEANUP_KEYS: readonly CleanupValueKey[] = ['koc', 'kd', 'hPrime', 's', 'mw'];
+
+/** The cleanup screen's subset of the chemical file: chemicals with none of the five values are left out. */
+export const deriveCleanupChemicals = (file: ChemicalsFile): CleanupChemicalsFile => {
+  const chemicals: CleanupChemicalEntry[] = [];
+  for (const c of file.chemicals) {
+    const entry: CleanupChemicalEntry = { id: c.id, values: {} };
+    for (const k of CLEANUP_KEYS) {
+      const v = c.values[k];
+      if (!v) continue;
+      entry.values[k] = k === 'kd' && v.ref ? { value: v.value, ref: v.ref } : { value: v.value };
+    }
+    if (Object.keys(entry.values).length > 0) chemicals.push(entry);
+  }
+  return {
+    edition: file.edition,
+    source: file.source,
+    units: Object.fromEntries(
+      CLEANUP_KEYS.map((k) => [k, file.units[k]]),
+    ) as CleanupChemicalsFile['units'],
+    chemicals,
+  };
+};
+
 /** Verifies the committed raw files against the manifest, then builds both database files. */
 export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
   const manifest = verifyManifest(rawDir);
@@ -334,6 +393,7 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
   return {
     chemicals,
     risk: deriveRiskChemicals(chemicals),
+    cleanup: deriveCleanupChemicals(chemicals),
     tox: {
       edition: manifest.edition,
       source: source([summary.semsId]),
@@ -343,6 +403,8 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
         rfdo: 'mg/kg-d',
         rfci: 'mg/m3',
         csat: 'mg/kg',
+        mcl: 'ug/L',
+        publishedSsl: 'mg/kg',
       },
       sourceKeys: { ...sourceKeys },
       toxicity: buildTox(summaryRows, ids),

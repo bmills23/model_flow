@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-16 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-17 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -291,7 +291,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites].
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air.
-- U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations>
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
@@ -306,6 +305,7 @@ Public datasets that the chemical and toxicity database is built from.
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS).
+- U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations>
 
 ## Validation sources
 
@@ -395,7 +395,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
-- U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations> [planned]
+- U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations> [data]
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]

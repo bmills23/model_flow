@@ -507,8 +507,8 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
 14. **Search caps.** Soil at 1e6 mg/kg (pure substance, RISC5 choice); a dissolved source at its
     solubility when known; a target not met at the cap is reported as not reachable, never capped
     silently. DEFAULT.
-15. **Data plan.** The data build (slice D2) reads the summary table's MCL (108 rows, ug/L, four "(G)"
-    cells) and published SSL columns (risk-based 747 rows with a c / n key, MCL-based 91 rows, both at
+15. **Data plan.** The data build (slice D2) reads the summary table's MCL (108 rows, ug/L, 25 "(G)"
+    cells, two of them bare) and published SSL columns (risk-based 747 rows with a c / n key, MCL-based 91 rows, both at
     DAF 1) into `tox.json`, the published SSLs as comparison values only, and writes a derived
     `cleanup-chemicals.json`. Kd comes from the parameters table (56 rows) for metals and PFAS, Koc times
     f_oc otherwise; no pH table. DEFAULT.
