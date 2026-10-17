@@ -14,6 +14,7 @@ import { ALLOCATIONS, SOURCES, TARGET_KINDS, defaultCleanupForm, type CleanupFor
 import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
+import { SsgInputs, SsgResults } from './SsgPanel';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<CleanupBuildResult, { ok: true }>;
@@ -344,6 +345,11 @@ export function CleanupPage() {
             )}
           </section>
 
+          <SsgInputs
+            form={form.ssg}
+            onChange={(next) => patch({ ssg: { ...form.ssg, ...next } })}
+          />
+
           <section className="panel" aria-label="Receptors">
             <h2>Receptors</h2>
             <ReceptorPanel tag="Receptor A" id="a" form={form.a} onChange={(a) => patch({ a })} />
@@ -458,6 +464,7 @@ export function CleanupPage() {
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
             </div>
           )}
+          <SsgResults form={form} db={db} />
         </div>
       </div>
     </section>

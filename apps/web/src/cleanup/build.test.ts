@@ -5,10 +5,13 @@ import { buildCleanup } from './build';
 import { runCleanup } from './compute';
 import { defaultCleanupForm, type CleanupForm } from './form';
 import { newChemicalRow } from '../risk/form';
+import { computeSsg, loadCleanupProps, type CleanupProps } from './ssg';
 
 let db: ChemicalDb;
+let props: CleanupProps;
 beforeAll(async () => {
   db = await loadChemicalDb();
+  props = await loadCleanupProps();
 }, 30000);
 
 const BENZENE = '71-43-2';
@@ -139,5 +142,80 @@ describe('buildCleanup', () => {
     const two = buildCleanup({ ...form, b: { ...form.a, preset: 'worker' } }, db);
     expect(two.ok).toBe(true);
     if (two.ok) expect(two.legacy.additive).toBe(true);
+  });
+});
+
+describe('computeSsg (H3 through the screen)', () => {
+  const ssgForm = (over: Partial<CleanupForm['ssg']> = {}, ids: string[] = [BENZENE]) => {
+    const f = formWith(ids.map((id) => ({ id })));
+    return { ...f, ssg: { ...f.ssg, on: true, ...over } };
+  };
+  const rowOf = (form: CleanupForm, i = 0) => {
+    const r = computeSsg(form, db, props);
+    if (!r.ok) throw new Error(r.errors.join('; '));
+    const row = r.rows[i]!;
+    if (!row.ok) throw new Error(row.reason);
+    return row;
+  };
+
+  it('site-specific DAF, aquifer 10 m: DAF 12.71548841 and benzene 3.25430114e-2 mg/kg', () => {
+    const row = rowOf(ssgForm({ daf: 'site', targetKind: 'mcl' }));
+    expect(rel(row.result.daf, 12.71548841)).toBeLessThan(1e-9);
+    expect(row.result.mixingDepth).toBeCloseTo(5.19619198, 8);
+    expect(rel(row.result.level * 1e6, 3.25430114e-2)).toBeLessThan(1e-9);
+    expect(row.warnings.map((w) => w.code)).not.toContain('cleanup.mixing-depth-capped');
+  });
+
+  it('a 3 m aquifer caps the mixing depth, DAF 7.76388889, and says so', () => {
+    const row = rowOf(ssgForm({ daf: 'site', siteDa: '3' }));
+    expect(rel(row.result.daf, 7.76388889)).toBeLessThan(1e-9);
+    expect(row.result.mixingDepth).toBe(3);
+    expect(row.warnings.map((w) => w.code)).toContain('cleanup.mixing-depth-capped');
+  });
+
+  it('generic DAF 1 and 20 scale the level by 20 and sit beside the published MCL-based SSL', () => {
+    const one = rowOf(ssgForm({ daf: '1' }));
+    const twenty = rowOf(ssgForm({ daf: '20' }));
+    expect(rel(twenty.result.level / one.result.level, 20)).toBeLessThan(1e-12);
+    expect(one.published.mcl).toBe(0.0026);
+    expect(one.compare?.kind).toBe('mcl');
+    expect(one.compare!.ratio).toBeGreaterThan(0.98);
+    expect(one.compare!.ratio).toBeLessThan(1.02);
+    expect(twenty.compare).toBeUndefined();
+  });
+
+  it('the mass-limit level governs for a shallow source and is warned', () => {
+    const deep = rowOf(ssgForm({ daf: '20', sourceDepth: '2000' }));
+    expect(deep.result.governs).toBe('partition');
+    const shallow = rowOf(ssgForm({ daf: '20', sourceDepth: '0.01' }));
+    expect(shallow.result.governs).toBe('mass-limit');
+    expect(shallow.warnings.map((w) => w.code)).toContain('cleanup.mass-limit-governs');
+  });
+
+  it('a user target replaces the MCL; the risk-based tap water level warns for a volatile chemical', () => {
+    const user = rowOf(ssgForm({ daf: '1', targetKind: 'user', userTarget: '10' }));
+    const mcl = rowOf(ssgForm({ daf: '1' }));
+    expect(rel(user.result.level / mcl.result.level, 2)).toBeLessThan(1e-12);
+    const tap = rowOf(ssgForm({ daf: '1', targetKind: 'tap' }));
+    expect(tap.targetUgL).toBeGreaterThan(0);
+    expect(tap.warnings.map((w) => w.code)).toContain('cleanup.tapwater-inhalation-omitted');
+    expect(tap.compare?.kind).toBe('risk');
+  });
+
+  it('flags a level above the soil saturation limit', () => {
+    const row = rowOf(ssgForm({ daf: '20', targetKind: 'user', userTarget: '1e9' }));
+    expect(row.warnings.map((w) => w.code)).toContain('cleanup.csat-exceeded');
+  });
+
+  it('says why a chemical without an MCL or partition data has no level, and rejects bad numbers', () => {
+    const noMcl = computeSsg(ssgForm({}, ['91-20-3', BENZENE]), db, props);
+    if (!noMcl.ok) throw new Error('should build');
+    expect(noMcl.rows).toHaveLength(2);
+    const first = noMcl.rows[0]!;
+    expect(first.ok).toBe(false);
+    if (!first.ok) expect(first.reason).toMatch(/no mcl/i);
+    expect(noMcl.rows[1]!.ok).toBe(true);
+    const bad = computeSsg(ssgForm({ siteK: '-1', daf: 'site' }), db, props);
+    expect(bad.ok).toBe(false);
   });
 });

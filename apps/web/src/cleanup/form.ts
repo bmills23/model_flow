@@ -6,7 +6,62 @@ export type SourceKind = 'direct' | 'dissolved' | 'vadose' | 'saturated';
 /** What a modeled chain is solved to meet: the risk targets, or a concentration at the well. */
 export type TargetKind = 'risk' | 'well';
 
+export type SsgDaf = '1' | '20' | 'site';
+export type SsgTargetKind = 'mcl' | 'user' | 'tap';
+
+/** The soil screening guidance leaching level: a screening-level check beside the modeled chains. */
+export interface SsgForm {
+  on: boolean;
+  daf: SsgDaf;
+  targetKind: SsgTargetKind;
+  /** User groundwater target, ug/L. */
+  userTarget: string;
+  /** Source depth, m; blank leaves the mass-limit level out. */
+  sourceDepth: string;
+  /** Soil: dry bulk density kg/L, organic carbon fraction, water-filled porosity. */
+  rhoB: string;
+  foc: string;
+  theta: string;
+  /** Site-specific DAF: conductivity m/d, gradient, infiltration cm/yr, source length m, aquifer thickness m. */
+  siteK: string;
+  siteGradient: string;
+  siteInfiltration: string;
+  siteL: string;
+  siteDa: string;
+}
+
+export function defaultSsgForm(): SsgForm {
+  return {
+    on: false,
+    daf: '1',
+    targetKind: 'mcl',
+    userTarget: '',
+    sourceDepth: '',
+    rhoB: '1.5',
+    foc: '0.002',
+    theta: '0.3',
+    siteK: '10',
+    siteGradient: '0.005',
+    siteInfiltration: '18',
+    siteL: '45',
+    siteDa: '10',
+  };
+}
+
+export const SSG_DAFS: readonly { value: SsgDaf; label: string }[] = [
+  { value: '1', label: 'DAF 1 (RSL)' },
+  { value: '20', label: 'DAF 20 (up to 0.5 acre)' },
+  { value: 'site', label: 'Site-specific' },
+];
+
+export const SSG_TARGETS: readonly { value: SsgTargetKind; label: string }[] = [
+  { value: 'mcl', label: 'MCL' },
+  { value: 'user', label: 'My value' },
+  { value: 'tap', label: 'Tap water level' },
+];
+
 export interface CleanupForm {
+  ssg: SsgForm;
   source: SourceKind;
   targetKind: TargetKind;
   /** Well concentration target, mg/L; blank uses the database MCL. */
@@ -42,6 +97,7 @@ export const ALLOCATIONS: readonly { value: Allocation; label: string }[] = [
 
 export function defaultCleanupForm(): CleanupForm {
   return {
+    ssg: defaultSsgForm(),
     source: 'direct',
     targetKind: 'risk',
     wellTarget: '',
