@@ -1,0 +1,89 @@
+{
+  "source": "epa2004je, Appendix C, SL-ADV worked example for benzene (data entry, chemical properties and intermediate calculations sheets)",
+  "readings": "Strata are measured from grade; the floor lies at 200 cm, so stratum A is above the floor and drops out of the diffusion column; the column is B (100 cm) plus C (100 cm). The crack diffusion coefficient is stratum A's. The source soil is stratum C (bulk density 1.66). Q_soil is entered (5 L/min). Initial soil concentration is the sheet's unit value of 1 ug/kg.",
+  "inputs": {
+    "soilTemperatureC": 10,
+    "floorDepthCm": 200,
+    "topOfContaminationCm": 400,
+    "bottomOfContaminationCm": 600,
+    "strata": [
+      {
+        "texture": "L",
+        "thicknessCm": 200,
+        "bulkDensityGPerCm3": 1.59,
+        "porosity": 0.399,
+        "moisture": 0.148,
+        "foc": 0.002
+      },
+      {
+        "texture": "L",
+        "thicknessCm": 100,
+        "bulkDensityGPerCm3": 1.59,
+        "porosity": 0.399,
+        "moisture": 0.148,
+        "foc": 0.002
+      },
+      {
+        "texture": "S",
+        "thicknessCm": 100,
+        "bulkDensityGPerCm3": 1.66,
+        "porosity": 0.375,
+        "moisture": 0.054,
+        "foc": 0.002
+      }
+    ],
+    "building": {
+      "floorThicknessCm": 10,
+      "pressureDifferenceGPerCmS2": 40,
+      "lengthCm": 1000,
+      "widthCm": 1000,
+      "heightCm": 366,
+      "crackWidthCm": 0.1,
+      "airExchangePerHour": 0.25,
+      "qsoilLPerMin": 5
+    },
+    "exposureYears": 30,
+    "initialSoilConcentrationUgPerKg": 1,
+    "benzene": {
+      "DaCm2PerS": 0.088,
+      "DwCm2PerS": 9.8e-6,
+      "henryAtmM3PerMol": 5.54e-3,
+      "enthalpyCalPerMol": 7342,
+      "boilingPointK": 353.24,
+      "criticalTemperatureK": 562.16,
+      "kocCm3PerG": 58.9,
+      "solubilityMgPerL": 1790,
+      "molarMassGPerMol": 78.11
+    }
+  },
+  "printed": {
+    "enthalpyAtSoilTemperatureCalPerMol": "8,122",
+    "henryAtmM3PerMol": "2.68E-03",
+    "henryDimensionless": "1.15E-01",
+    "enclosedSpaceAreaCm2": "1.80E+06",
+    "crackToTotalAreaRatio": "2.22E-04",
+    "sourceBuildingSeparationCm": "200",
+    "airFilledPorosityA": "0.251",
+    "airFilledPorosityC": "0.321",
+    "effectiveSaturationA": "0.257",
+    "intrinsicPermeabilityCm2": "1.85E-09",
+    "relativeAirPermeability": "0.854",
+    "effectiveVaporPermeabilityCm2": "1.58E-09",
+    "seamPerimeterCm": "4,000",
+    "buildingVentilationCm3PerS": "2.54E+04",
+    "exposureSeconds": "9.46E+08",
+    "effectiveDiffusionA": "5.54E-03",
+    "effectiveDiffusionC": "1.42E-02",
+    "effectiveDiffusionTotal": "7.97E-03",
+    "kdCm3PerG": "1.18E-01",
+    "sourceVaporUgPerM3": "6.68E+02",
+    "crackRadiusCm": "0.10",
+    "qsoilCm3PerS": "8.33E+01",
+    "crackAreaCm2": "4.00E+02",
+    "beta": "1.86E+00",
+    "psiPerS": "8.02E-08",
+    "depletionTimeS": "2.94E+07",
+    "massLimitBuildingUgPerM3": "2.49E-02"
+  },
+  "note": "The printed viscosity of air at 10 deg C (1.75e-4 g/(cm s)) and the crack Peclet exponent (exp = 2.06e163) are not asserted: the guide does not state the viscosity formula, and the example enters Q_soil."
+}

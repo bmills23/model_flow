@@ -486,7 +486,7 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
     temperature correction come from the lookup table in `epa2004je` (Appendix C copy, 108 chemicals),
     transcribed with the PDF checksum into the derived `vapor-chemicals.json` (slice V0, built);
     enthalpies not at the normal boiling point, and crotonaldehyde's misprinted one, are omitted from the
-    merged row. Without them the modern method uses H at 25 deg C and warns. DeVaull rates by class from
+    merged row. Without them the modern method uses H at 25 deg C and warns (when the system temperature is not 25 deg C; at 25 deg C there is nothing to correct). DeVaull rates by class from
     `api2012biovapor` Appendix C (one rate per class; the alkylbenzene class is applied to the propyl and
     butyl benzenes as well as the six chemicals Appendix C names, a reading of its heading); a chemical
     with no class is non-degrading and warned. Oxygen mass ratios come from committed formulas for the
@@ -528,3 +528,26 @@ Fixture readings recorded in the note: Table R-3 takes its source soil from Tabl
 places the lens outside the 2.60 m vadose zone (L_T 2.80 m); Table R-5 is a diffusion-only run (Q_soil 0);
 Table R-4's degradation rate is 0.09 /d in the water-phase form. With RISC4 benzene properties these
 reproduce 8.57, 8.57e-2, 3.23e5, 7.28, 7.27 and 2.27e-3 as printed.
+
+Slice V4 (modern EPA J&E, built 2026-10-17) readings, all verified against the Appendix C worked example
+(`test/fixtures/vapor/epa2004-sl-adv.json`):
+
+- **Millington and Quirk exponent 3.33 in the modern method.** The guide prints 3.33 (Equation 6 and the
+  soil equation); the worked example's coefficients (5.54e-3 and 1.42e-2 cm^2/s, total 7.97e-3) reproduce
+  only with 3.33, whereas the exact 10/3 gives 5.51e-3, 1.41e-2 and 7.94e-3. The legacy methods and the
+  vadose process keep 10/3. The fixture tolerance was not widened.
+- **Strata run from grade and the floor trims them.** Layers above the floor drop out of the diffusion
+  column, the crack coefficient is that of the layer in contact with the floor, and the source soil for
+  C_source and the finite source is the deepest stratum (the example reproduces with the bulk density of
+  stratum C, 1.66 g/cm^3). For a groundwater source the capillary zone is carved from the bottom of the
+  column and must leave its top below the floor (a RangeError otherwise, as the guide states).
+- **Registration.** `vapor.je-1991` and `vapor.dominant-layer-1998` (slice V2) are registered together with
+  `vapor.je-epa`, as the registry test pairs each legacy process with a modern one; `johnsonettinger1991`,
+  `johnson1998`, `epa2004je` and `epa2017je` are now `used`. The outdoor air and Jury descriptors stay
+  unregistered until slice V7.
+- **Air viscosity** is an input (default 1.75e-5 Pa s, the value the guide prints at 10 deg C), because
+  the guide gives no temperature formula; it is not asserted by the fixture.
+- **Building presets** are the Version 6.0 residential defaults (Table 9: 150 m^2 square floor, mixing
+  height 2.44, 3.66 or 1.30 m by foundation, 0.45 exchanges per hour, crack fraction 0.001, Q_soil / Q_B
+  0.003). The commercial floor area (1,500 m^2) and mixing height (3 m, basement) are in the document but
+  its commercial air exchange rate was not found, so no commercial preset is built; they are entered.

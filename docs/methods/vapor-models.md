@@ -10,11 +10,13 @@ and becomes the method's `risc5Choice` metadata.
 
 Status: stage 1 (methods note, reference check, data plan, fixture plan and slice plan) done 2026-10-16.
 Slices V0 (vapor chemical data in `packages/data`), V1 (shared kernels in
-`packages/engine/src/processes/vapor`: units, Henry correction, building coupling, source vapor) and V2
+`packages/engine/src/processes/vapor`: units, Henry correction, building coupling, source vapor), V2
 (`vapor.je-1991` and `vapor.dominant-layer-1998` as method descriptors; Tables R-3, R-4, R-5 and Appendix J
-reproduce) are built. The descriptors are not yet in the default registry, because the registry test requires
-a modern method for every process that has a legacy one: the registering slice is V4 (first modern vapor
-method), which also flips `johnsonettinger1991` and `johnson1998` to `used`. No web code exists yet. The scope calls below are the DEFAULT rulings
+reproduce) and V4 (`vapor.je-epa`; the Appendix C example reproduces) are built. The V2 descriptors and
+`vapor.je-epa` are registered in the default registry (V4 registered them together, because the registry
+test requires a modern method for every process that has a legacy one), and V4 flipped
+`johnsonettinger1991`, `johnson1998`, `epa2004je` and `epa2017je` to `used`. The outdoor air and Jury
+descriptors (V3) are registered by V7. No web code exists yet. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
@@ -102,6 +104,8 @@ Millington and Quirk tortuosity model in the form `epa1996ssg` and `epa2004je` u
 (`millingtonquirk1961`; the engine already has it as `millingtonQuirkDeff` in `processes/vadose`):
 
     D_i = [ D_a theta_a,i^(10/3) + (D_w / H) theta_w,i^(10/3) ] / n_i^2
+
+The modern EPA method uses the exponent 3.33 the guide prints instead of 10/3 (see its section).
 
 Layers in series between the source and the foundation (or the ground surface) combine as resistances:
 
@@ -267,7 +271,16 @@ Differences from the legacy method:
 - **Henry's constant at the soil or groundwater temperature** (shared block above). Default temperature
   as entered, no default (EPA prints a map of shallow groundwater temperatures; we do not reproduce it).
   Without T_B, T_C and dH_v,b the method uses H at 25 deg C and warns
-  (`vapor.henry-not-temperature-corrected`).
+  (`vapor.henry-not-temperature-corrected`) when the system temperature is not 25 deg C.
+- **Millington and Quirk exponent 3.33**, as the guide prints it (Equation 6 and the soil equation), in
+  place of the exact 10/3 the legacy methods use: the worked example reproduces only with 3.33 (see
+  "Fixture plan", item 6). The effective diffusion coefficient is `epaLayerDeff`.
+- **Geometry.** Strata are entered from grade down and total the depth to the source (top of
+  contamination, water table or soil gas sample point); the floor depth trims them, so layers above the
+  floor drop out of the diffusion column. The enclosed space is a rectangle: A_B = L W + 2 (L + W) L_F,
+  seam length 2 (L + W), crack area eta A_B or crack width times seam. The source soil is the deepest
+  stratum. A groundwater column has its capillary zone carved from the bottom (the zone's height from the
+  deepest stratum's texture, or entered); its top must lie below the floor.
 - **Capillary zone moisture** at the air-entry head from the van Genuchten retention curve
   (`vangenuchten1980`): theta_w,cz = theta_r + (theta_s - theta_r) / [1 + (alpha_1 h)^N]^M with
   h = 1 / alpha_1 and M = 1 - 1/N, so theta_w,cz = theta_r + (theta_s - theta_r) 2^-M. Capillary zone
@@ -280,13 +293,16 @@ Differences from the legacy method:
 - **Q_soil**: (a) entered; (b) the cylinder-sink formula with k_v = k_i k_rg, intrinsic permeability
   k_i = K_s mu_w / (rho_w g) and relative air permeability k_rg = (1 - S_te)^(1/2) (1 - S_te^(1/M))^(2M),
   S_te = (theta_w - theta_r) / (n - theta_r) (the Parker-type form quoted by `epa2004je`), with water
-  viscosity at 10 deg C as EPA prints it; or (c) the Version 6.0 default ratio Q_soil / Q_B = 0.003 at
+  viscosity at 10 deg C as EPA prints it (the guide gives no viscosity formula, so viscosity is an input,
+  default 1.75e-5 Pa s, the guide's value at 10 deg C); or (c) the Version 6.0 default ratio Q_soil / Q_B = 0.003 at
   0.45 air changes per hour, scaled by 0.45 / ER when another exchange rate is entered (`epa2017je`).
   Default (c), as the current EPA tool.
 - **Foundation types** (`epa2017je`): slab on grade, basement with slab, closed crawlspace with slab use
   the full alpha; basement or closed crawlspace with a dirt floor use alpha = A / (1 + A). Default
   building values (floor area, mixing height, exchange rate, crack fraction, foundation thickness) are the
-  Version 6.0 residential and commercial defaults, transcribed with their table reference in the slice.
+  Version 6.0 residential defaults of its Table 9 (`epaBuildingDefaults`). The commercial floor area (1,500
+  m^2) and mixing height (3 m, basements) are printed in section 4.5 but the commercial air exchange rate
+  was not found, so there is no commercial preset; those values are entered.
 - **Finite soil source** (`epa2004je` section 2.6): with the initial thickness of contamination dH_c and
   exposure interval tau, the time-averaged attenuation is
 
@@ -608,7 +624,7 @@ Warnings (codes are part of the result):
 | `vapor.residual-phase` | soil sources | a separate phase is present; reports x, x S and C_eq (as M2 and M3) |
 | `vapor.source-above-solubility` | groundwater sources | C_gw > x S |
 | `vapor.quasi-steady` | linked series | the source changes by more than 10 percent within the vapor equilibration time |
-| `vapor.henry-not-temperature-corrected` | `vapor.je-epa`, AF | T_B, T_C or dH_v,b missing |
+| `vapor.henry-not-temperature-corrected` | `vapor.je-epa`, AF | T_B, T_C or dH_v,b missing and the system temperature is not 25 deg C |
 | `vapor.soil-source-not-recommended` | `vapor.je-epa` | a soil source is used (removed from EPA Version 6.0) |
 | `vapor.advection-dominated` | J&E methods | xi > 10: entry is controlled by Q_soil, so the result is sensitive to k_v and dP (informational) |
 | `vapor.crack-depth` | J&E methods | Z_crack greater than the depth to the source, or the source within the foundation's zone of influence (L_T < Z_crack) |
@@ -678,7 +694,13 @@ printed values, not from these trials.
    2.54e4 cm^3/s; beta 1.86; psi 8.02e-8 /s; depletion time 2.94e7 s (shorter than the exposure, so the mass
    limit applies); building concentration 2.49e-2 ug/m^3 per ug/kg. Trial: dH_v 8,122, H' 0.1154, K_d 0.1178,
    C_source 668.4, D_T 7.97e-3, mass-limit 2.487e-2 (the rest checked in the slice). Tolerance: half a unit
-   in the third printed figure. The printed air viscosity at 10 deg C (1.75e-4 g/(cm s)) is not asserted
+   in the third printed figure (met, 2026-10-17, by `test/vapor-epa-je.test.ts`). Readings: strata A, B, C are
+   measured from grade and the floor lies at 200 cm, so A drops out of the diffusion column (D_T = 200 /
+   (100 / 5.54e-3 + 100 / 1.42e-2)); the crack coefficient is the floor layer's; the source soil is stratum C
+   (bulk density 1.66, which reproduces psi); the Millington and Quirk exponent is 3.33 as printed (10/3 misses
+   5.54e-3, 1.42e-2 and 7.97e-3); the exposure interval is 30 x 365 days; the example enters Q_soil, so the
+   sheet's permeability terms (S_te 0.257, k_i 1.85e-9, k_rg 0.854, k_v 1.58e-9 cm^2) are checked as
+   computed values only. The printed air viscosity at 10 deg C (1.75e-4 g/(cm s)) is not asserted
    because the guide does not state the formula and the example enters Q_soil.
 7. **VISL calculator values.** Slice V6 runs EPA's online VISL calculator once for five chemicals
    (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; residential, target risk
@@ -713,9 +735,9 @@ tests first, runs the engine test file alone, then the gate once.
 |---|---|---|---|---|
 | V0 data | `packages/data/raw/vapor/epa2004je/` (transcribed CSV, manifest with the PDF's SHA-256), `packages/data/src/vapor/` (build, class list, formulas), `packages/data/generated/vapor/vapor-chemicals.json`, `packages/data/test/vapor.test.ts`, root `data:check` coverage | benzene, TCE and PCE rows match the PDF; every merged row's RSL values are byte-identical to `chemicals.json`; k_w classes cover BTEX and naphthalene | none | none |
 | V1 shared kernels | `packages/engine/src/processes/vapor/{units,source,building,henry,index}.ts`, `test/vapor-building.test.ts`, `test/vapor-source.test.ts` | J&E alpha limits (identity 8d); Q_soil hand case; source vapor for soil, soil gas, groundwater, residual phase; Henry correction reproduces the EPA example's 8,122 cal/mol, 2.68e-3 and 0.115 | none (reuses `vadose` diffusion and partitioning helpers) | none |
-| V2 legacy indoor (built; registration deferred to V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
+| V2 legacy indoor (built; registered by V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
 | V3 outdoor and Jury (built; registration deferred to V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
-| V4 modern J&E | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` |
+| V4 modern J&E (built) | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` (registers `vapor.je-1991` and `vapor.dominant-layer-1998` too) |
 | V5 DeVaull | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` |
 | V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
 | V7 coupling and registration | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |

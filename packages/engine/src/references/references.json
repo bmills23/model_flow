@@ -384,7 +384,7 @@
   {
     "key": "johnsonettinger1991",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Johnson, P.C., Ettinger, R.A.",
     "year": 1991,
     "title": "Heuristic model for predicting the intrusion rate of contaminant vapors into buildings",
@@ -407,7 +407,7 @@
   {
     "key": "epa2004je",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2004,
     "title": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings",
@@ -508,7 +508,7 @@
   {
     "key": "johnson1998",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Johnson, P.C., Kemblowski, M.W., Johnson, R.L.",
     "year": 1998,
     "title": "Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates",
@@ -592,7 +592,7 @@
   {
     "key": "epa2017je",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2017,
     "title": "Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0",

@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-16 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-17 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -245,6 +245,60 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf>
   - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252>
 
+### vapor
+
+#### Johnson and Ettinger soil, soil gas or groundwater to indoor air
+
+- Kind: Legacy (RISC5 default)
+- Method id: `vapor.je-1991`
+- Summary: Steady one-dimensional diffusion through clean soil layers (and an entered capillary fringe for a groundwater source) coupled to advection and diffusion through foundation cracks and a well-mixed building, for an infinite source.
+- Assumptions:
+  - Steady, one-dimensional vapor transport through homogeneous layers; the source extends under the whole building footprint.
+  - Infinite source: the source vapor concentration does not change with time; linked to a time-varying source the method is applied quasi-steadily.
+  - No sorption to building materials and no indoor background; no biodegradation.
+  - Henry constant as entered (25 deg C); foundation diffusion from the foundation layer itself.
+- RISC5 choice: RISC5 takes the crack diffusion coefficient from the foundation layer entered as a soil layer, enters the capillary fringe as a layer of given moisture, asks for hydraulic conductivity to estimate the vapor permeability, takes air exchanges per day, holds the source constant, and uses an air viscosity of 1.8e-4 g/(cm s).
+- Sources:
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### Dominant-layer vapor model with first-order degradation
+
+- Kind: Legacy (RISC5 default)
+- Method id: `vapor.dominant-layer-1998`
+- Summary: Three homogeneous soil layers above the source, the middle one degrading vapor at a first-order rate acting on the dissolved concentration, solved in closed form (hyperbolic profile) and coupled to the Johnson and Ettinger building for indoor air or to a zero-concentration ground surface for outdoor air.
+- Assumptions:
+  - Steady, one-dimensional transport; layers 1 and 3 do not degrade the chemical.
+  - Degradation is proportional to the dissolved concentration and the water content of layer 2.
+  - Infinite source; the receptor coefficient is linear in the source vapor concentration.
+  - Outdoor: zero vapor concentration at the ground surface; the result is an area emission.
+- RISC5 choice: RISC5 applies degradation to the water phase times moisture in the middle layer only, takes the source soil properties separately from the transport layers, and reports the indoor or outdoor result for the same column; with zero degradation the result equals the legacy Johnson and Ettinger model.
+- Sources:
+  - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998.
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### EPA Johnson and Ettinger soil, soil gas or groundwater to indoor air
+
+- Kind: Modern
+- Method id: `vapor.je-epa`
+- Summary: The EPA implementation of the Johnson and Ettinger model: layered soil with texture presets, Henry constant at the soil temperature, a capillary zone from the van Genuchten curve, five foundation types, soil gas flow from a ratio or the soil permeability, and an optional finite soil source.
+- Assumptions:
+  - Steady, one-dimensional vapor transport through homogeneous layers; the source extends under the whole building footprint.
+  - Infinite source unless a finite soil source is requested; linked to a time-varying source the method is applied quasi-steadily.
+  - No sorption to building materials, no indoor background and no biodegradation.
+  - The crack diffusion coefficient is that of the soil layer in contact with the floor; the source-building separation excludes the floor.
+  - The capillary zone is uncontaminated and its top must lie below the floor.
+- RISC5 choice: RISC5 holds Henry constant at 25 deg C, takes the crack diffusion coefficient from a foundation layer, enters the capillary fringe as a layer, and keeps the source infinite; this method follows EPA on each point.
+- Sources:
+  - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf>
+  - U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf>
+  - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
+  - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
+  - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -265,8 +319,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
-- Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
-- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998.
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013>
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x>
 - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005>
@@ -288,11 +340,9 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
-- U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf>
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites>
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf>
-- U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf>
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
 - U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
@@ -348,8 +398,8 @@ Every entry in the reference database, alphabetical by author.
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
 - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables]. [planned]
-- Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [planned]
-- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [planned]
+- Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
+- Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013> [planned]
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x> [planned]
 - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [planned]
@@ -383,7 +433,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [planned]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). [planned]
-- U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [planned]
+- U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [used]
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf> [used]
@@ -394,7 +444,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9200.1-120, February 6, 2014. <https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf> [used]
 - U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites> [planned]
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf> [planned]
-- U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [planned]
+- U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [used]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]

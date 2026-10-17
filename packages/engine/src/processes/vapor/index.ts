@@ -5,3 +5,5 @@ export * from './source.js';
 export * from './legacyJe.js';
 export * from './dominantLayer.js';
 export * from './jury.js';
+export * from './textures.js';
+export * from './epaJe.js';
