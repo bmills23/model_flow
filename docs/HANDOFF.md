@@ -5,12 +5,11 @@ and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting
 a done one.
 
 ## State of the tree
-- `m4-exposure-risk` carries M4 (not yet merged to main; merge and push are Bryan's call). Before M4 the
-  tree was `main` at M3. Gate: lint, prettier, typecheck, engine 574 (40 files), data 39 (3 files), web 234
+- M4 is merged to main (`2d1a452`) and pushed. Before M4 the tree was `main` at M3. Gate: lint, prettier, typecheck, engine 574 (40 files), data 39 (3 files), web 234
   (29 files), `docs:check`, `data:check`, build. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Branches: `m0-foundation`, `m1-groundwater-engine`, `m2-vadose-leaching` and `m3-saturated-source` are
-  ancestors of main (safe to delete). `m1-groundwater-ui` is NOT an ancestor of main (its commits from
+- Branches: `m0-foundation`, `m1-groundwater-engine`, `m2-vadose-leaching`, `m3-saturated-source` and
+  `m4-exposure-risk` are ancestors of main (safe to delete). `m1-groundwater-ui` is NOT an ancestor of main (its commits from
   10931c1 to 5d6c6c7 carry different hashes from what landed); confirm its content is on main before
   deleting it.
 - CI cost: about 3 billed minutes per push to main; docs-only pushes trigger nothing.

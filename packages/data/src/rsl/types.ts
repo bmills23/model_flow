@@ -73,12 +73,28 @@ export interface ToxEntry {
   absd?: number;
   csat?: number;
   special?: SpecialCase;
+  /** Maximum contaminant level, ug/L, as printed (a "(G)" cell parsed to its number). */
+  mcl?: number;
+  /** The MCL cell carries the RSL "(G)" marker (see the user's guide). Absent otherwise. */
+  mclGroup?: true;
+  /** Set only when the MCL is not in ug/L (asbestos, fibers/L): such a value is never a mass concentration. */
+  mclUnit?: string;
+  /** Published soil-to-groundwater SSLs at DAF 1: comparison values only, never engine inputs. */
+  publishedSsl?: { risk?: { value: number; key: string }; mcl?: number };
 }
 
 export interface ToxFile {
   edition: string;
   source: { reference: string; documents: number[]; retrieved: string };
-  units: { sfo: string; iur: string; rfdo: string; rfci: string; csat: string };
+  units: {
+    sfo: string;
+    iur: string;
+    rfdo: string;
+    rfci: string;
+    csat: string;
+    mcl: string;
+    publishedSsl: string;
+  };
   sourceKeys: Record<string, string>;
   toxicity: ToxEntry[];
 }
@@ -101,4 +117,21 @@ export interface RiskChemicalsFile {
   source: ChemicalsFile['source'];
   units: Pick<ChemicalsFile['units'], RiskValueKey>;
   chemicals: RiskChemicalEntry[];
+}
+
+/** The values the cleanup screen reads: partition and solubility inputs. */
+export type CleanupValueKey = 'koc' | 'kd' | 'hPrime' | 's' | 'mw';
+
+export interface CleanupChemicalEntry {
+  id: string;
+  /** Kd carries its RSL reference (provenance of the L/kg value); the others are plain values. */
+  values: Partial<Record<CleanupValueKey, { value: number; ref?: string }>>;
+}
+
+/** A subset of `ChemicalsFile` derived by the data build for the cleanup screen. */
+export interface CleanupChemicalsFile {
+  edition: string;
+  source: ChemicalsFile['source'];
+  units: Pick<ChemicalsFile['units'], CleanupValueKey>;
+  chemicals: CleanupChemicalEntry[];
 }

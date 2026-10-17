@@ -7,6 +7,10 @@ import { VadosePage } from './vadose/VadosePage';
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
+const CleanupPage = lazy(() =>
+  import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
+);
+
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
 
 const NON_AFFILIATION =
@@ -17,6 +21,7 @@ const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
+const CLEANUP_HASH = '#/cleanup';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -30,10 +35,13 @@ export function App() {
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
   const onRisk = hash === RISK_HASH;
+  const onCleanup = hash === CLEANUP_HASH;
 
   return (
     <div
-      className={onTransport || onVadose || onSaturated || onRisk ? 'shell shell-wide' : 'shell'}
+      className={
+        onTransport || onVadose || onSaturated || onRisk || onCleanup ? 'shell shell-wide' : 'shell'
+      }
     >
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
@@ -74,6 +82,9 @@ export function App() {
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
+          <a className="nav-link" href={CLEANUP_HASH} aria-current={onCleanup ? 'page' : undefined}>
+            Cleanup levels
+          </a>
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
@@ -91,6 +102,10 @@ export function App() {
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
+          </Suspense>
+        ) : onCleanup ? (
+          <Suspense fallback={<p className="muted">Loading the cleanup levels screen...</p>}>
+            <CleanupPage />
           </Suspense>
         ) : (
           <section>
@@ -113,6 +128,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk
+              </a>{' '}
+              <a className="button" href={CLEANUP_HASH}>
+                Open cleanup levels
               </a>{' '}
               <a className="button" href={METHODS_HASH}>
                 Read how each calculation is sourced

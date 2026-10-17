@@ -6,3 +6,4 @@ docs/
 *.md
 packages/data/generated/
 packages/data/raw/
+worktrees/

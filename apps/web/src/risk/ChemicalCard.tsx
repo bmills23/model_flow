@@ -12,10 +12,14 @@ export function ChemicalCard(props: {
   rec: ChemicalRecord;
   db: ChemicalDb;
   well: WellFeed | null;
+  /** Default true. The cleanup screen shows the concentration fields only where the ratios matter. */
+  showConcentrations?: boolean;
+  concentrationNote?: string;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
   const { row, rec, db, well } = props;
+  const showConc = props.showConcentrations ?? true;
   const rows = toxRows(rec, db.sourceKeys);
   const t = rec.tox;
   const setConc = (m: Medium, v: string): void =>
@@ -69,23 +73,26 @@ export function ChemicalCard(props: {
       )}
       {facts.length > 0 && <p className="muted">{facts.join(' ')}</p>}
 
-      <div className="fields">
-        {MEDIA.map((m) =>
-          m.key === 'groundwater' && row.groundwaterFromWell ? (
-            <p className="muted well-note" key={m.key}>
-              Groundwater concentration: {well ? well.label : 'no well result held'}.
-            </p>
-          ) : (
-            <Field
-              key={m.key}
-              label={`${m.label} (${m.unit})`}
-              value={row.conc[m.key] ?? ''}
-              onChange={(v) => setConc(m.key, v)}
-            />
-          ),
-        )}
-      </div>
-      {(well !== null || row.groundwaterFromWell) && (
+      {showConc && props.concentrationNote && <p className="muted">{props.concentrationNote}</p>}
+      {showConc && (
+        <div className="fields">
+          {MEDIA.map((m) =>
+            m.key === 'groundwater' && row.groundwaterFromWell ? (
+              <p className="muted well-note" key={m.key}>
+                Groundwater concentration: {well ? well.label : 'no well result held'}.
+              </p>
+            ) : (
+              <Field
+                key={m.key}
+                label={`${m.label} (${m.unit})`}
+                value={row.conc[m.key] ?? ''}
+                onChange={(v) => setConc(m.key, v)}
+              />
+            ),
+          )}
+        </div>
+      )}
+      {showConc && (well !== null || row.groundwaterFromWell) && (
         <label className="check">
           <input
             type="checkbox"

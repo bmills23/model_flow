@@ -46,4 +46,19 @@ describe('App shell', () => {
     const link = screen.getAllByRole('link', { name: /exposure and risk/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/risk');
   });
+
+  it('links to the cleanup levels screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /cleanup levels/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/cleanup');
+  });
+
+  it('opens the cleanup levels screen at #/cleanup', async () => {
+    window.location.hash = '#/cleanup';
+    render(<App />);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: /cleanup levels/i }, { timeout: 20000 }),
+    ).toBeTruthy();
+    window.location.hash = '';
+  }, 30000);
 });

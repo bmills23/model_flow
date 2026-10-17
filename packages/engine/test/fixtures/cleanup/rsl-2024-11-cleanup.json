@@ -1,0 +1,39 @@
+{
+  "edition": "RSL November 2024, target risk 1e-6, hazard quotient 1",
+  "retrieved": "2026-10-16",
+  "note": "Chemical toxicity and dermal inputs are those of test/fixtures/exposure/rsl-2024-11.json (keys match). Published values are read from the RSL spreadsheets named by document number. A null cancer value is a blank cell in the table.",
+  "tapWaterCombined": {
+    "table": "resident tap water",
+    "document": 405290,
+    "unit": "ug/L",
+    "receptor": "modern resident, drinking water ingestion plus bathing dermal",
+    "cases": [
+      { "chemical": "arsenic", "cancer": 0.052, "noncancer": 6.0 },
+      { "chemical": "cadmium_water", "cancer": null, "noncancer": 1.8 },
+      { "chemical": "chromium_vi", "cancer": 0.11, "noncancer": 13 },
+      { "chemical": "mercuric_chloride", "cancer": null, "noncancer": 5.7 },
+      { "chemical": "nickel_soluble_salts", "cancer": null, "noncancer": 390 },
+      { "chemical": "zinc", "cancer": null, "noncancer": 6000 },
+      { "chemical": "acetone", "cancer": null, "noncancer": 18000 }
+    ]
+  },
+  "riskBasedSsl": {
+    "table": "summary table, risk-based soil-to-groundwater SSL (DAF 1)",
+    "document": 405270,
+    "unit": "mg/kg",
+    "soil": {
+      "bulkDensityKgPerL": 1.5,
+      "particleDensityKgPerL": 2.65,
+      "foc": 0.002,
+      "waterFilledPorosity": 0.3
+    },
+    "cases": [
+      { "chemical": "arsenic", "published": 0.0015, "kdLPerKg": 29, "hPrime": 0 },
+      { "chemical": "cadmium_water", "published": 0.14, "kdLPerKg": 75, "hPrime": 0 },
+      { "chemical": "chromium_vi", "published": 0.0021, "kdLPerKg": 19, "hPrime": 0 },
+      { "chemical": "nickel_soluble_salts", "published": 26, "kdLPerKg": 65, "hPrime": 0 },
+      { "chemical": "zinc", "published": 370, "kdLPerKg": 62, "hPrime": 0 },
+      { "chemical": "acetone", "published": 3.7, "kocLPerKg": 2.364, "hPrime": 0.00143090760425 }
+    ]
+  }
+}

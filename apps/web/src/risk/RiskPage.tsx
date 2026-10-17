@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Seg, Field } from '../ui/controls';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { buildInputs, ENTER_CONCENTRATION, type BuildResult } from './build';
 import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
-import { loadChemicalDb, type ChemicalDb } from './chemicalDb';
+import { useChemicalDb } from './useChemicalDb';
 import { runRisk, type RiskOutcome } from './compute';
 import {
   defaultForm,
@@ -23,25 +23,6 @@ interface Snapshot {
 }
 
 const EXAMPLE_ID = '71-43-2';
-
-function useChemicalDb(): { db: ChemicalDb | null; error: string | null } {
-  const [state, setState] = useState<{ db: ChemicalDb | null; error: string | null }>({
-    db: null,
-    error: null,
-  });
-  useEffect(() => {
-    let live = true;
-    loadChemicalDb().then(
-      (db) => live && setState({ db, error: null }),
-      (e: unknown) =>
-        live && setState({ db: null, error: e instanceof Error ? e.message : String(e) }),
-    );
-    return () => {
-      live = false;
-    };
-  }, []);
-  return state;
-}
 
 export function RiskPage() {
   const [form, setForm] = useState<RiskForm>(defaultForm);

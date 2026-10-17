@@ -445,3 +445,94 @@ finding changed them (E2 dermal form, 5, 11 and 14). Judgment calls, open to ove
   2026-10-16 (the content change day). The date still moves only when the content changes.
 - **`epa2003toxhier` is a `data` reference.** The RSL tables apply its tiers; the memorandum is not a
   method citation, so it is not `planned` (a planned status reads as an unverified citation).
+
+## 2026-10-16: M5 cleanup levels scope (stage 1)
+
+Bryan's "continue" started M5 with a methods note first: `docs/methods/cleanup-levels.md` (scope,
+equations, root finding, allocation options, MCL and RSL columns, the Soil Screening Guidance leaching
+level, warnings, fixture plan, and the stage 2 and stage 3 slice plan). No engine, data or web code is
+written in this stage. Four references were added as `planned` (`brent1973`, `ragsb1991`,
+`epa1996ssgug`, `epanpdwr`); the notes of `epa1996ssg` and `epa2002ssg` record the sections read. The
+EPA SEMS host did not answer on 2026-10-16, so the three Soil Screening Guidance documents were read from
+Internet Archive captures of their SEMS URLs, and RAGS Part B from the copy on epa-dccs.ornl.gov that
+EPA's RAGS Part B page points to through SEMS.
+
+Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the source named):
+
+1. **Scope.** DEFAULT. M5 covers the nine M4 direct pathways (legacy and modern), the modeled chains of
+   M1 (dissolved source), M2 (VADSAT and layered) and M3 (two-region and exponential) through the M1
+   receptor well into drinking water and bathing, and the Soil Screening Guidance soil-to-groundwater
+   level. Deferred: vapour chains (M6), shower inhalation from tap water, particulates and irrigation
+   (M7), surface water as a target medium (M8), plant uptake and TPH fraction levels (M9), probabilistic
+   levels (M10), target-organ segregation, pH-dependent Kd and Koc.
+2. **Solver.** Brent's method is forced by the standing assumption of 2026-10-15; the details are
+   DEFAULT: solve in u = ln C with g(u) = metric(e^u) / target - 1; try the linear shortcut first and
+   accept it only when one more forward run meets |g| <= 1e-9; bracket upward against the cap (or with
+   `bracketRoot`, growth 10, 40 expansions) and downward with `bracketRoot` on 1 / C; `brent` with an
+   absolute tolerance of 1e-12 in u and 200 iterations, non-convergence an Error. The secant is a
+   diagnostic only (`secantParity`), never the reported value. `numerics/roots.ts` is not changed.
+3. **One cleanup level per source medium.** DEFAULT. Pathways of the same medium are summed; media are
+   not summed (`ragsb1991` combines pathways for a given medium; the manual says both "per medium" and
+   "all media summed").
+4. **Individual is the default allocation.** DEFAULT (RISC5 opens on it; the RSL and SSG levels are per
+   chemical). Cumulative proportional scaling (RISC5 choice) and equal allocation (TR / N and THQ / N,
+   after `epa1996ssgug` section 2.5.3) are options.
+5. **Cumulative scaling is solved for one scale factor directly**, s = min(s_cancer, s_noncancer), closed
+   form for direct pathways and one Brent solve per endpoint for modeled ones. DEFAULT; it reaches the
+   fixed point of RISC5's limiting-chemical procedure. The summed HI is over all organs and is warned.
+6. **A soil source is linked to the receptor's direct soil pathways** (their EPC is the source
+   concentration), so both kinds of pathway count toward the target. DEFAULT, following RISC5's rule that
+   all pathways of a source add.
+7. **TPH-bearing sources keep the original mole fraction** (TPH scaled with the chemical), with the
+   implied TPH reported in individual mode; holding TPH fixed is an option. DEFAULT (RISC5 choice).
+8. **A groundwater concentration target is met by the peak well concentration** (moving-average window 0),
+   with a user window in years as an option. DEFAULT.
+9. **Receptors.** One or two; with two non-additive receptors the lower level is reported; the legacy
+   additive option sums cancer coefficients only, and is refused (RangeError) with an age-segmented modern
+   receptor, as in M4. DEFAULT (RISC5 allows one receptor for modeled chains).
+10. **SSG dilution.** The default DAF is 1, the RSL's choice, with 20 (the guidance's 0.5-acre default)
+    and the site-specific equations as options: DEFAULT. Capping the mixing depth at the aquifer
+    thickness and keeping the higher of the partition and mass-limit levels are forced by
+    `epa1996ssgug` and `epa1996ssg`.
+11. **SSG target groundwater concentration**: the MCL, a user value, or the back-calculated risk-based tap
+    water level (drinking plus bathing), in that order of offer; the guidance's nonzero MCLG is not
+    offered because the database has none. DEFAULT. The tap water level omits the household-use
+    inhalation term (M7) and warns for volatile chemicals with an inhalation value.
+12. **Csat for the SSG check uses the partition equation's own soil inputs** (theta_w 0.3, f_oc 0.002),
+    through the M3 helper; a level above Csat is reported unchanged and warned. DEFAULT.
+13. **Targets.** TR 1e-6 and THQ 1 by default (DEFAULT; the values of `ragsb1991` section 2.7 and the
+    RSL). The lower of the cancer and noncancer levels is the cleanup level (forced by `ragsb1991`). A
+    concentration target replaces the risk targets for that chemical and is refused with cumulative or
+    equal allocation (DEFAULT, RISC5 choice). An MCL with the RSL "(G)" marker is used as printed and
+    warned. An MCL not in mass per volume (asbestos, fibers/L) is flagged `mclUnit` in `tox.json` and
+    never used as a target. A cumulative chemical with a blank or zero entered concentration has no
+    level (not a level of zero) and is listed as not quantified.
+14. **Search caps.** Soil at 1e6 mg/kg (pure substance, RISC5 choice); a dissolved source at its
+    solubility when known; a target not met at the cap is reported as not reachable, never capped
+    silently. DEFAULT.
+15. **Data plan.** The data build (slice D2) reads the summary table's MCL (108 rows, ug/L, 25 "(G)"
+    cells, two of them bare) and published SSL columns (risk-based 747 rows with a c / n key, MCL-based 91 rows, both at
+    DAF 1) into `tox.json`, the published SSLs as comparison values only, and writes a derived
+    `cleanup-chemicals.json`. Kd comes from the parameters table (56 rows) for metals and PFAS, Koc times
+    f_oc otherwise; no pH table. DEFAULT.
+16. **Air-filled porosity is n - theta_w unrounded** (0.1340 with rho_s 2.65), as the RSL computes it, not
+    the TBD's printed 0.13; every fixture reproduces either way. DEFAULT.
+17. **Tolerances.** DEFAULT. SSG Table A-1: the table's own rounding (two significant figures from 10 up,
+    one below), half a unit in the last printed digit. RSL MCL-based SSL (91 rows), risk-based SSL (6
+    rows) and combined tap water levels: half a unit in the second significant figure, as the M4 RSL
+    check. Hand cases 1e-9 relative, except H1 at 1e-7 (it inherits the eight printed figures of M4 case
+    M1) and H4 at 1e-12. Round trip 1e-9 for analytic chains and 1e-3 for the layered finite-volume chain
+    (its own convergence level); verified shortcut against Brent 1e-10; secant parity 1e-8; ratio
+    preservation and SSG identities 1e-12.
+18. **Fixture selection.** DEFAULT. Volatile chemicals with an inhalation value are left out of the RSL
+    risk-based SSL check and the resident soil totals are not used (both include M6 or M7 terms);
+    benzo(a)pyrene is left out of the tap water checks (the RSL drops its dermal term outside the
+    prediction domain, M4 computes and warns). There is no RISC5 fixture: chapter 8 has no worked example
+    and Appendix R no back-calculation table.
+19. **Method ids and citations.** DEFAULT. `cleanup.rags-b-1991` (legacy: `ragsb1991`, `rags1989`,
+    `epa1991sdef`, `epa1992dea`), `cleanup.rags-e-f-2014` (modern: `ragsb1991`, `ragse2004`, `ragsf2009`,
+    `epa2014ef`, `epa2005adaf`), `cleanup.ssg-leaching` (modern: `epa1996ssg`, `epa1996ssgug`, `epa2002ssg`)
+    and `cleanup.modeled-chains` (modern: `brent1973`), registered in slice C4, which flips the new
+    citations to `used`. The two RAGS methods are the closed-form direct back-calculation and describe only
+    that; the Brent solve over the modeled chains is its own registered method (`solveModeled`), so the
+    registry cites the root finder exactly where it runs.

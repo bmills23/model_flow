@@ -1,0 +1,153 @@
+{
+  "id": "ssg1996-table-a1",
+  "source": "U.S. EPA Soil Screening Guidance: Technical Background Document, EPA/540/R-95/128 (1996), Table A-1 (generic soil-to-groundwater levels, MCL-based rows); inputs from Tables 1, 36 and 46 and the User's Guide Table C-1",
+  "page": "Table A-1 on pages A-2 to A-5",
+  "tolerance": {
+    "rule": "half a unit in the last printed digit: two significant figures from 10 up, one significant figure below 10",
+    "note": "styrene at DAF 20 (3.52 against the 3.5 edge) and arsenic at DAF 1 (1.46 against 1.5) sit close to a rounding edge, so the input digits must be exactly those printed"
+  },
+  "units": "MCL mg/L, Koc and Kd L/kg, H' dimensionless, levels mg/kg",
+  "soil": {
+    "bulkDensityKgPerL": 1.5,
+    "particleDensityKgPerL": 2.65,
+    "foc": 0.002,
+    "waterFilledPorosity": 0.3
+  },
+  "chemicals": [
+    {
+      "name": "benzene",
+      "kind": "organic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 0.228,
+      "printedDaf20MgPerKg": 0.03,
+      "printedDaf1MgPerKg": 0.002,
+      "kocLPerKg": 58.9
+    },
+    {
+      "name": "toluene",
+      "kind": "organic",
+      "mclMgPerL": 1,
+      "henryDimensionless": 0.272,
+      "printedDaf20MgPerKg": 12,
+      "printedDaf1MgPerKg": 0.6,
+      "kocLPerKg": 182
+    },
+    {
+      "name": "ethylbenzene",
+      "kind": "organic",
+      "mclMgPerL": 0.7,
+      "henryDimensionless": 0.323,
+      "printedDaf20MgPerKg": 13,
+      "printedDaf1MgPerKg": 0.7,
+      "kocLPerKg": 363
+    },
+    {
+      "name": "trichloroethylene",
+      "kind": "organic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 0.422,
+      "printedDaf20MgPerKg": 0.06,
+      "printedDaf1MgPerKg": 0.003,
+      "kocLPerKg": 166
+    },
+    {
+      "name": "tetrachloroethylene",
+      "kind": "organic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 0.753,
+      "printedDaf20MgPerKg": 0.06,
+      "printedDaf1MgPerKg": 0.003,
+      "kocLPerKg": 155
+    },
+    {
+      "name": "carbon tetrachloride",
+      "kind": "organic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 1.25,
+      "printedDaf20MgPerKg": 0.07,
+      "printedDaf1MgPerKg": 0.003,
+      "kocLPerKg": 174
+    },
+    {
+      "name": "1,2-dichloroethane",
+      "kind": "organic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 0.0401,
+      "printedDaf20MgPerKg": 0.02,
+      "printedDaf1MgPerKg": 0.001,
+      "kocLPerKg": 17.4
+    },
+    {
+      "name": "vinyl chloride",
+      "kind": "organic",
+      "mclMgPerL": 0.002,
+      "henryDimensionless": 1.11,
+      "printedDaf20MgPerKg": 0.01,
+      "printedDaf1MgPerKg": 0.0007,
+      "kocLPerKg": 18.6
+    },
+    {
+      "name": "styrene",
+      "kind": "organic",
+      "mclMgPerL": 0.1,
+      "henryDimensionless": 0.113,
+      "printedDaf20MgPerKg": 4,
+      "printedDaf1MgPerKg": 0.2,
+      "kocLPerKg": 776
+    },
+    {
+      "name": "antimony",
+      "kind": "inorganic",
+      "mclMgPerL": 0.006,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 5,
+      "printedDaf1MgPerKg": 0.3,
+      "kdLPerKg": 45
+    },
+    {
+      "name": "arsenic",
+      "kind": "inorganic",
+      "mclMgPerL": 0.05,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 29,
+      "printedDaf1MgPerKg": 1,
+      "kdLPerKg": 29
+    },
+    {
+      "name": "barium",
+      "kind": "inorganic",
+      "mclMgPerL": 2,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 1600,
+      "printedDaf1MgPerKg": 82,
+      "kdLPerKg": 41
+    },
+    {
+      "name": "cadmium",
+      "kind": "inorganic",
+      "mclMgPerL": 0.005,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 8,
+      "printedDaf1MgPerKg": 0.4,
+      "kdLPerKg": 75
+    },
+    {
+      "name": "chromium(VI)",
+      "kind": "inorganic",
+      "mclMgPerL": 0.1,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 38,
+      "printedDaf1MgPerKg": 2,
+      "kdLPerKg": 19
+    },
+    {
+      "name": "selenium",
+      "kind": "inorganic",
+      "mclMgPerL": 0.05,
+      "henryDimensionless": 0,
+      "printedDaf20MgPerKg": 5,
+      "printedDaf1MgPerKg": 0.3,
+      "kdLPerKg": 5
+    }
+  ]
+}
