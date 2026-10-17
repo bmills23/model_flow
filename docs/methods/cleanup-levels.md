@@ -11,8 +11,9 @@ legacy method's `risc5Choice` metadata. The process reuses the M4 exposure kerne
 
 Status: methods note, reference check, fixture plan and slice plan done 2026-10-16 (stage 1). Slice C1 (the SSG
 leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) and slice C2 (direct back-calculation in
-`cleanup/direct.ts` and `cleanup/targets.ts`, H1, H2, fixtures 3 and 4, identities d and g) landed on the
-branch; no other engine, data or web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
+`cleanup/direct.ts` and `cleanup/targets.ts`, H1, H2, fixtures 3 and 4, identities d and g), the data slice D2, slice C3 (the solver and modeled chains in `cleanup/solve.ts` and
+`cleanup/chains.ts`) and slice C4 (registration of `cleanup.rags-b-1991`, `cleanup.rags-e-f-2014` and
+`cleanup.ssg-leaching` in `cleanup/index.ts`) landed on the branch; no web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
 (2026-10-16, M5 block), open to Bryan's overturn.
 
 ## What the process is
@@ -519,8 +520,8 @@ reading below. "Half a unit" means half a unit in the last printed digit of the 
 | `epanpdwr` | EPA's National Primary Drinking Water Regulations page (last updated August 31, 2026), which points to 40 CFR Part 141 | Page read; the MCLs used come from the RSL MCL column |
 | `epa2024rsl`, `epa2024rslug` | As in `docs/methods/chemical-database.md`; the user's guide section 4.8 (soil to groundwater) gives its equations as images, so its defaults were read from the RSL Default Exposure Parameters file (SEMS 404323, SHA-256 matching the data plan), sheet "Soil to Groundwater" | |
 
-New keys enter `references.json` as `planned`; `ragsb1991`, `brent1973`, `epa1996ssgug` and `epa2002ssg`
-become `used` when slice C4 registers the methods that cite them. The guidance credits the mixing-zone
+New keys entered `references.json` as `planned`; `ragsb1991`, `brent1973`, `epa1996ssgug` and `epa2002ssg`
+became `used` when slice C4 registered the methods that cite them. The guidance credits the mixing-zone
 depth estimate to the MULTIMED model (Sharp-Hansen et al. 1990) and the vertical dispersivity ratio to
 Gelhar and Axness 1981; those are the guidance's sources, not ours, and are not added.
 

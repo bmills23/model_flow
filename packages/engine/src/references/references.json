@@ -345,7 +345,7 @@
   {
     "key": "epa2002ssg",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2002,
     "title": "Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites",
@@ -358,7 +358,7 @@
   {
     "key": "epa1996ssgug",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1996,
     "title": "Soil Screening Guidance: User's Guide",
@@ -702,7 +702,7 @@
   {
     "key": "ragsb1991",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1991,
     "title": "Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim",
@@ -856,7 +856,7 @@
   {
     "key": "brent1973",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Brent, R.P.",
     "year": 1973,
     "title": "Algorithms for Minimization without Derivatives",

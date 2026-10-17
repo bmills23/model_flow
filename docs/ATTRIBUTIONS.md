@@ -245,6 +245,66 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf>
   - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252>
 
+### cleanup
+
+#### RAGS Part B preliminary remediation goals with 1989 exposure coefficients
+
+- Kind: Legacy (RISC5 default)
+- Method id: `cleanup.rags-b-1991`
+- Summary: Back-calculates a concentration in soil, groundwater, air or surface water from a target risk and hazard quotient, using the RAGS Part A (1989) intake coefficients with the 1991 default factors, summed over pathways within a receptor, with modeled source-to-well chains solved by Brent root finding.
+- Assumptions:
+  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; the forward models are the registered exposure, vadose, groundwater and saturated-source methods.
+  - Target risk and target hazard quotient are user inputs (defaults 1e-6 and 1); a risk target above 0.01 is warned because the dose-response is linear only at low dose.
+  - Cancer and noncancer endpoints are solved separately and the lower level governs; hazard quotients are grouped by life stage or receptor and never added across groups.
+  - Individual levels treat each chemical alone; cumulative and equal allocation scale the entered ratios or split the target equally across chemicals, and are refused for concentration targets.
+  - A pathway or medium without toxicity or exposure data is reported as not quantified, never as an unlimited level.
+  - Modeled chains are solved in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.
+  - Cancer risks of two receptors are added only when the additive option is switched on.
+- RISC5 choice: RISC5 back-calculates a cleanup level for each medium from a target risk and hazard quotient with the legacy exposure equations, optionally additive over two receptors, and for modeled pathways solves for the source concentration whose forward result meets the target.
+- Sources:
+  - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739>
+  - U.S. Environmental Protection Agency (1989). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/1-89/002, December 1989. <https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf>
+  - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: "Standard Default Exposure Factors", Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. OSWER Directive 9285.6-03, PB91-921314, March 25, 1991. <https://semspub.epa.gov/src/document/HQ/190591>
+  - U.S. Environmental Protection Agency (1992). Dermal Exposure Assessment: Principles and Applications, Interim Report. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-91/011B, January 1992. <https://rais.ornl.gov/documents/DERM_EXP.PDF>
+  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
+
+#### RAGS Parts E and F back-calculation with 2014 default factors
+
+- Kind: Modern
+- Method id: `cleanup.rags-e-f-2014`
+- Summary: Back-calculates cleanup levels with age-segmented intakes, the Part E dermal event model, Part F concentration-based inhalation and the age-dependent adjustment factors, with individual, cumulative and equal allocation and modeled source-to-well chains.
+- Assumptions:
+  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; the forward models are the registered exposure, vadose, groundwater and saturated-source methods.
+  - Target risk and target hazard quotient are user inputs (defaults 1e-6 and 1); a risk target above 0.01 is warned because the dose-response is linear only at low dose.
+  - Cancer and noncancer endpoints are solved separately and the lower level governs; hazard quotients are grouped by life stage or receptor and never added across groups.
+  - Individual levels treat each chemical alone; cumulative and equal allocation scale the entered ratios or split the target equally across chemicals, and are refused for concentration targets.
+  - A pathway or medium without toxicity or exposure data is reported as not quantified, never as an unlimited level.
+  - Modeled chains are solved in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.
+  - Mutagens use the four age segments with the adjustment factors 10, 3, 3 and 1; life-stage hazard quotients are never added.
+- Sources:
+  - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739>
+  - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf>
+  - U.S. Environmental Protection Agency (2009). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA-540-R-070-002, OSWER 9285.7-82, January 2009. <https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf>
+  - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9200.1-120, February 6, 2014. <https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf>
+  - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf>
+  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
+
+#### Soil screening guidance soil-to-groundwater leaching level
+
+- Kind: Modern
+- Method id: `cleanup.ssg-leaching`
+- Summary: Soil concentration whose equilibrium leachate, divided by a dilution attenuation factor, meets a groundwater target, using the three-phase partition equation, the generic or site-specific dilution attenuation factor with a capped mixing zone, and the mass-limit alternative for a finite source.
+- Assumptions:
+  - Equilibrium partitioning among soil, pore water and soil gas, with no biodegradation, no colloidal transport and no leachate attenuation in the vadose zone.
+  - The dilution attenuation factor is 20 (half-acre source), 1 (no dilution) or computed from the aquifer hydraulics with the mixing depth capped at the aquifer thickness.
+  - The mass-limit level applies only when a source depth is given, and the higher of the partition and mass-limit levels is reported.
+  - Levels above the soil saturation concentration or a leachate above solubility are warned, not corrected.
+- RISC5 choice: RISC5 evaluates leaching to groundwater with its own vadose-zone and aquifer models rather than the generic dilution attenuation factor; this method reproduces the screening-guidance equations for comparison.
+- Sources:
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf>
+  - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -254,7 +314,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - American Petroleum Institute (2010). BioVapor.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
-- Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley].
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
@@ -281,11 +340,8 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999].
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation].
-- U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739>
-- U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf>
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
-- U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
 - U.S. Environmental Protection Agency (2004). [Johnson and Ettinger (1991) vapor intrusion model spreadsheets].
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
@@ -328,7 +384,7 @@ Every entry in the reference database, alphabetical by author.
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
-- Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [planned]
+- Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [used]
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]. [planned]
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
@@ -371,13 +427,13 @@ Every entry in the reference database, alphabetical by author.
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation]. [planned]
 - U.S. Environmental Protection Agency (1989). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/1-89/002, December 1989. <https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf> [used]
 - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: "Standard Default Exposure Factors", Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. OSWER Directive 9285.6-03, PB91-921314, March 25, 1991. <https://semspub.epa.gov/src/document/HQ/190591> [used]
-- U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739> [planned]
+- U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739> [used]
 - U.S. Environmental Protection Agency (1992). Dermal Exposure Assessment: Principles and Applications, Interim Report. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-91/011B, January 1992. <https://rais.ornl.gov/documents/DERM_EXP.PDF> [used]
 - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf> [used]
-- U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf> [planned]
+- U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf> [used]
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001. [planned]
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [planned]
-- U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [planned]
+- U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). [planned]
 - U.S. Environmental Protection Agency (2004). [Johnson and Ettinger (1991) vapor intrusion model spreadsheets]. [planned]

@@ -11,6 +11,7 @@ import {
 } from './processes/groundwater/index.js';
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 import { exposureLegacy, exposureModern } from './processes/exposure/index.js';
+import { cleanupLegacy, cleanupModern, cleanupSsgLeaching } from './processes/cleanup/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -26,6 +27,7 @@ export * from './processes/vadose/index.js';
 export * from './processes/saturatedSource/index.js';
 export * from './processes/exposure/index.js';
 export * from './processes/risk/index.js';
+export * from './processes/cleanup/index.js';
 
 export const registry = new MethodRegistry();
 registry.register(gelhar1985Api1987);
@@ -40,3 +42,6 @@ registry.register(saturatedTwoRegion);
 registry.register(saturatedExponential);
 registry.register(exposureLegacy);
 registry.register(exposureModern);
+registry.register(cleanupLegacy);
+registry.register(cleanupModern);
+registry.register(cleanupSsgLeaching);
