@@ -77,6 +77,8 @@ export interface ToxEntry {
   mcl?: number;
   /** The MCL cell carries the RSL "(G)" marker (see the user's guide). Absent otherwise. */
   mclGroup?: true;
+  /** Set only when the MCL is not in ug/L (asbestos, fibers/L): such a value is never a mass concentration. */
+  mclUnit?: string;
   /** Published soil-to-groundwater SSLs at DAF 1: comparison values only, never engine inputs. */
   publishedSsl?: { risk?: { value: number; key: string }; mcl?: number };
 }

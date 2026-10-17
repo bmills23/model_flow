@@ -120,9 +120,11 @@ export function CleanupPage() {
     : [];
   const mclRec = form.chemicals[0] ? db?.byId.get(form.chemicals[0].id) : undefined;
   const mclHint =
-    mclRec?.tox.mcl !== undefined
-      ? `Blank uses the MCL of ${mclRec.name}: ${mclRec.tox.mcl} ug/L${mclRec.tox.mclGroup ? ' (a group value)' : ''}.`
-      : 'Blank uses the database MCL, which this chemical does not have.';
+    mclRec?.tox.mclUnit !== undefined
+      ? `The MCL of ${mclRec.name} is ${mclRec.tox.mcl} ${mclRec.tox.mclUnit}, not a mass per volume, so a blank has no target; enter one.`
+      : mclRec?.tox.mcl !== undefined
+        ? `Blank uses the MCL of ${mclRec.name}: ${mclRec.tox.mcl} ug/L${mclRec.tox.mclGroup ? ' (a group value)' : ''}.`
+        : 'Blank uses the database MCL, which this chemical does not have.';
   const cumulative = !modeledOn && form.allocation === 'cumulative';
 
   return (

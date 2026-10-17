@@ -201,6 +201,8 @@ const buildTox = (rows: Row[], ids: string[]): ToxEntry[] =>
         entry.mcl = v;
       }
     }
+    if (entry.mcl !== undefined && /units in fibers/i.test(ident.rslName))
+      entry.mclUnit = 'fibers/L';
     const riskSsl = num(row[SUMMARY.riskSsl], `${where} risk-based SSL`);
     const mclSsl = num(row[SUMMARY.mclSsl], `${where} MCL-based SSL`);
     if (riskSsl !== undefined || mclSsl !== undefined) {

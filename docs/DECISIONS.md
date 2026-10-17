@@ -504,7 +504,9 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
     RSL). The lower of the cancer and noncancer levels is the cleanup level (forced by `ragsb1991`). A
     concentration target replaces the risk targets for that chemical and is refused with cumulative or
     equal allocation (DEFAULT, RISC5 choice). An MCL with the RSL "(G)" marker is used as printed and
-    warned.
+    warned. An MCL not in mass per volume (asbestos, fibers/L) is flagged `mclUnit` in `tox.json` and
+    never used as a target. A cumulative chemical with a blank or zero entered concentration has no
+    level (not a level of zero) and is listed as not quantified.
 14. **Search caps.** Soil at 1e6 mg/kg (pure substance, RISC5 choice); a dissolved source at its
     solubility when known; a target not met at the cap is reported as not reachable, never capped
     silently. DEFAULT.

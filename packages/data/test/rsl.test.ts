@@ -330,6 +330,14 @@ describe('MCL and published soil-to-groundwater SSL columns (slice D2)', () => {
     expect(tox('67-66-3')!.mclGroup).toBe(true);
   });
 
+  it('records the unit of an MCL that is not a mass per volume (asbestos is fibers/L, not ug/L)', () => {
+    const asbestos = tox('1332-21-4')!;
+    expect(asbestos.mcl).toBe(7000000);
+    expect(asbestos.mclUnit).toBe('fibers/L');
+    expect(rows().filter((t) => t.mclUnit !== undefined)).toHaveLength(1);
+    expect(tox('71-43-2')!.mclUnit).toBeUndefined();
+  });
+
   it('flags every "(G)" cell, and a bare "(G)" carries the flag with no number', () => {
     const grouped = rows().filter((t) => t.mclGroup === true);
     expect(grouped).toHaveLength(25);

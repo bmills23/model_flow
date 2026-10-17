@@ -890,7 +890,8 @@
       "mutagen": false,
       "giabs": 1,
       "mclGroup": true,
-      "mcl": 7000000
+      "mcl": 7000000,
+      "mclUnit": "fibers/L"
     },
     {
       "id": "3337-71-1",

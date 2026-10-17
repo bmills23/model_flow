@@ -1,3 +1,4 @@
+import { usableMcl } from './mcl';
 import { PATHWAYS, type DirectReceptor, type PathwayId } from '@model-flow/engine';
 import { PATHWAY_LABELS } from '../risk/chartData';
 import type { ChemicalDb } from '../risk/chemicalDb';
@@ -96,8 +97,12 @@ export function buildModeled(form: CleanupForm, db: ChemicalDb, feeds: Feeds): M
   if (rec.tox.csat !== undefined) chemical.csat = rec.tox.csat * 1e-6;
   if (solubility !== undefined && form.source === 'dissolved')
     chemical.solubility = solubility * 1e-3;
-  if (rec.tox.mcl !== undefined) chemical.mcl = rec.tox.mcl * 1e-6;
-  if (rec.tox.mclGroup === true) chemical.mclGroup = true;
+  const mcl = usableMcl(rec.tox);
+  if (mcl.value !== undefined) chemical.mcl = mcl.value;
+  if (mcl.value !== undefined && mcl.group) chemical.mclGroup = true;
+  if (mcl.unusable !== undefined && form.targetKind === 'well' && wellTarget === undefined) {
+    notes.push(`${rec.name}: ${mcl.unusable}; enter a concentration at the well.`);
+  }
 
   // A chain supplies the well-water pathways, and the soil pathways when the source is soil. A pathway
   // on a medium the chain does not describe (air, surface water, soil under a groundwater source) has

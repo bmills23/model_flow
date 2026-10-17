@@ -1,3 +1,4 @@
+import { usableMcl } from './mcl';
 import {
   PATHWAY_IDS,
   backCalculateModern,
@@ -189,9 +190,9 @@ export function computeSsg(form: CleanupForm, db: ChemicalDb, props: CleanupProp
       const r = resolveConcentrationTarget(
         name,
         { kind: 'mcl' },
-        rec.tox.mcl === undefined
+        usableMcl(rec.tox).value === undefined
           ? undefined
-          : { value: rec.tox.mcl * 1e-6, ...(rec.tox.mclGroup ? { group: true } : {}) },
+          : { value: usableMcl(rec.tox).value!, ...(rec.tox.mclGroup ? { group: true } : {}) },
       );
       target = r.value;
       extra.push(...r.warnings);

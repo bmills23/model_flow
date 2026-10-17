@@ -145,6 +145,40 @@ describe('buildCleanup', () => {
   });
 });
 
+describe('review fixes', () => {
+  it('modern additive with an age-segmented receptor is refused for the modern method alone, with a reason', () => {
+    const form = {
+      ...only(formWith([{ id: BENZENE }]), TAP),
+      additive: true,
+    };
+    const two = { ...form, b: { ...form.a, preset: 'worker' as const } };
+    const out = runCleanup(built(two));
+    expect(out.legacy.ok).toBe(true);
+    expect(out.modern.ok).toBe(false);
+    if (!out.modern.ok) expect(out.modern.error).toMatch(/age|segment|additive/i);
+  });
+
+  it('cumulative: a blank chemical beside a measured one has no level, never a level of zero', () => {
+    const form = only(
+      formWith(
+        [
+          { id: BENZENE, conc: { groundwater: '0.01' } },
+          { id: '7440-38-2', conc: {} },
+        ],
+        { allocation: 'cumulative' },
+      ),
+      TAP,
+    );
+    const out = runCleanup(built(form));
+    for (const m of ['legacy', 'modern'] as const) {
+      const o = out[m];
+      if (!o.ok) throw new Error(o.error);
+      const arsenic = o.result.media[0]!.levels[1]!;
+      expect(arsenic.level).toBeNull();
+    }
+  });
+});
+
 describe('computeSsg (H3 through the screen)', () => {
   const ssgForm = (over: Partial<CleanupForm['ssg']> = {}, ids: string[] = [BENZENE]) => {
     const f = formWith(ids.map((id) => ({ id })));

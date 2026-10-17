@@ -7,7 +7,7 @@ import { toScenario as vadoseScenario, DEFAULT_FORM as VADOSE_FORM } from '../va
 import type { TransportFeed } from '../transport/chainFeed';
 import type { VadoseFeed } from '../vadose/feed';
 import { buildModeled, NEEDS_TRANSPORT, ONE_CHEMICAL } from './modeledBuild';
-import { computeModeled } from './compute';
+import { chainChemicalFor, computeModeled } from './compute';
 import { defaultCleanupForm, type CleanupForm } from './form';
 
 let db: ChemicalDb;
@@ -212,4 +212,34 @@ describe('computeModeled', () => {
       }
     }
   }, 120000);
+});
+
+describe('review fixes (data and web)', () => {
+  it('an MCL not in mass per volume (asbestos, fibers/L) is never a concentration target', () => {
+    const asb = db.byId.get('1332-21-4');
+    expect(asb).toBeDefined();
+    const f = form({ chemicals: [newChemicalRow(asb!)], targetKind: 'well' });
+    const r = buildModeled(f, db, { transport: transportFeed(), vadose: null, saturated: null });
+    if (!r.ok) throw new Error(r.errors.join('; '));
+    expect(r.request.chemical.mcl).toBeUndefined();
+    expect(r.notes.join(' ')).toMatch(/fibers\/L/);
+  });
+
+  it('the chart and the solver share one start: a blank start behaves as the source concentration typed in', () => {
+    const v = vadoseScenario({ ...VADOSE_FORM });
+    if (!v.ok) throw new Error('vadose scenario');
+    const vadose: VadoseFeed = { scenario: v.scenario, method: 'modern', label: 'v' };
+    const r = buildModeled(form({ source: 'vadose' }), db, {
+      transport: transportFeed(),
+      vadose,
+      saturated: null,
+    });
+    if (!r.ok) throw new Error(r.errors.join('; '));
+    const { cc, start, chain } = chainChemicalFor(r.request, 'modern');
+    expect(start).toBeGreaterThan(chain.reference);
+    expect(cc.entered).toBe(start);
+    const typed = chainChemicalFor({ ...r.request, start: 2e-4 }, 'modern');
+    expect(typed.cc.entered).toBe(2e-4);
+    expect(typed.start).toBe(2e-4);
+  }, 60000);
 });

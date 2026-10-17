@@ -195,12 +195,16 @@ export function NotQuantified(props: {
       for (const lv of r.levels) {
         const name = props.names[lv.chemical] ?? lv.chemical;
         if (lv.level === null) {
+          const entered = props.inputs[method].chemicals.find((c) => c.id === lv.chemical)?.entered;
+          const zeroEntered = r.allocation === 'cumulative' && entered?.[r.medium] === 0;
           items.push({
             key: `${method}|${r.medium}|${lv.chemical}`,
             method,
             chemical: name,
             where: mediumLabel(r.medium),
-            what: 'no toxicity value for any switched-on pathway of this medium; no risk-based level',
+            what: zeroEntered
+              ? 'no concentration entered (blank or zero) in this medium; with cumulative allocation it has no level, which is not the same as a required level of zero'
+              : 'no toxicity value for any switched-on pathway of this medium; no risk-based level',
           });
           continue;
         }

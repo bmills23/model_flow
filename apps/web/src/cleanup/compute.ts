@@ -56,16 +56,22 @@ export function runCleanup(inputs: {
 
 const CURVE_POINTS = 21;
 
-function runMethod(req: ModeledRequest, method: Method): ModeledRun {
+/**
+ * The chain chemical a request solves and the one start both the solver and the chart use: the typed
+ * start, else the source screen's own concentration, else the chain's reference.
+ */
+export function chainChemicalFor(
+  req: ModeledRequest,
+  method: Method,
+): { cc: ChainChemical<never>; start: number; chain: ReturnType<typeof buildChain>['chain'] } {
   const { chain, tph, sourceStart } = buildChain(req, method);
   const side = method === 'legacy' ? req.legacy : req.modern;
-  const pathways = [...new Set(side.receptors.flatMap((r) => r.pathways))] as PathwayId[];
   const start = req.start ?? sourceStart ?? chain.reference;
   const cc: ChainChemical<never> = {
     id: req.chemical.id,
     chemical: side.chemical as never,
     chain,
-    ...(req.start !== undefined ? { entered: req.start } : {}),
+    entered: start,
     ...(tph ? { tph } : {}),
     ...(req.chemical.csat !== undefined ? { csat: req.chemical.csat } : {}),
   };
@@ -76,6 +82,13 @@ function runMethod(req: ModeledRequest, method: Method): ModeledRun {
       cc.mcl = { value: req.chemical.mcl, ...(req.chemical.mclGroup ? { group: true } : {}) };
     }
   }
+  return { cc, start, chain };
+}
+
+function runMethod(req: ModeledRequest, method: Method): ModeledRun {
+  const { cc, start, chain } = chainChemicalFor(req, method);
+  const side = method === 'legacy' ? req.legacy : req.modern;
+  const pathways = [...new Set(side.receptors.flatMap((r) => r.pathways))] as PathwayId[];
   const evaluate =
     method === 'legacy'
       ? legacyEvaluator(req.legacy.receptors, req.additive)

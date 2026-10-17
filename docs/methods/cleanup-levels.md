@@ -99,7 +99,10 @@ L, d_a, mixing-zone depth d.
   (`cleanup.mcl-missing`) when the user asked for the MCL. An MCL cell carrying the RSL "(G)" marker (25
   rows in November 2024, four distinct values: 60, 80, 4,000 and 0.01 ug/L, plus asbestos 7e6 fibers/L, perchlorate 15 and two PFBS cells with no number; the 80 ug/L value is the total trihalomethanes MCL
   that the RSL user's guide section 5.25 names) is used as printed and warned (`cleanup.mcl-group-value`),
-  because it applies to a group of chemicals, not to the one chemical alone.
+  because it applies to a group of chemicals, not to the one chemical alone. An MCL that is not a mass per
+  volume (asbestos, 7e6 fibers/L; `tox.json` carries `mclUnit: 'fibers/L'` on that row) is never a
+  concentration target: the screen leaves it out, the target counts as missing, the risk targets stay in
+  force and the screen says so.
 
 ## Direct pathways: closed-form inversion
 
@@ -205,8 +208,9 @@ bracketed root).
    g(u) = metric(e^u) / target - 1. The log variable makes Brent's absolute tolerance a relative one on C
    and spans many decades in few steps; g is bounded below by -1, so a source that does not reach the
    receptor at all (metric zero) is still a finite value.
-2. **Linear shortcut, verified.** First evaluate at a reference C_ref (the entered source concentration,
-   or 1 mg/kg or 1 mg/L when none). Take C* = C_ref times target over metric(C_ref) and evaluate once
+2. **Linear shortcut, verified.** First evaluate at a reference C_ref (the entered source concentration;
+   on the modeled screen, the typed start, else the source screen's own concentration, else 1 mg/kg or
+   1 mg/L; the solver and the chart use the same start). Take C* = C_ref times target over metric(C_ref) and evaluate once
    more. If |g(ln C*)| <= 1e-9 the shortcut is the root (for a monotone metric any root is the root);
    otherwise go on to the bracket. This is exact for every linear chain and costs two forward runs.
 3. **Bracket.** Upward (g(u_ref) < 0): if the chain has a cap (pure substance for soil, solubility for a
@@ -276,7 +280,7 @@ cites. These are recorded as RSL data provenance under `epa2024rsl`, not as sepa
 
 Data fields added by slice D2 (landed):
 
-- `tox.json`: `mcl` (ug/L, as printed; the "(G)" cells parsed to their number, 106 rows) and `mclGroup: true` where
+- `tox.json`: `mcl` (ug/L, as printed; the "(G)" cells parsed to their number, 106 rows) and `mclUnit: 'fibers/L'` on the asbestos row (the only MCL not in ug/L, never a mass target) and `mclGroup: true` where
   the cell carries "(G)" (25 rows; the two bare "(G)" cells for PFBS have the flag and no `mcl`); `publishedSsl: { risk?: { value, key }, mcl?: value }` (mg/kg, DAF 1), kept as
   published comparison values, never engine inputs.
 - A derived `cleanup-chemicals.json` (the risk screen's pattern): Koc, Kd with its ref, H', S and MW for
