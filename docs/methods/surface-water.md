@@ -9,7 +9,8 @@ source. Where a choice is RISC5's rather than a publication's, it is marked "RIS
 method's `risc5Choice` metadata.
 
 Status: stage 1 done 2026-10-16 (this note, the reference check, the data plan, the fixture plan and the
-slice plan). No engine, data or web code exists yet. The scope calls below are the rulings recorded in
+slice plan). Slice E1 (legacy kernels: units, box, Darcy discharge, reach length, sediment, checks;
+fixtures 1, 2, H3 and H4) is implemented; no modern, criteria, data or web code exists yet. The scope calls below are the rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M8 stage 1 block); those marked DEFAULT are open to Bryan's overturn.
 
 ## What the process is

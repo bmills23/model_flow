@@ -1,0 +1,46 @@
+{
+  "id": "arcadis2001-table-r8",
+  "source": "Arcadis 2001 review of RISC (arcadis2001), Table R-8, legacy surface water mixing; Koc from spence2001 (RISC4 benzene)",
+  "page": "Table R-8 of Appendix R",
+  "tolerance": {
+    "kind": "half a unit in the last printed digit",
+    "concentrationMgPerL": 0.005,
+    "sedimentMgPerKg": 0.005,
+    "massFluxMgPerDay": 0.5
+  },
+  "note": "The review reports exact agreement between RISC and its hand calculation, so this reproduces arithmetic and is not evidence of model accuracy. The table lists no Koc; 59 mL/g is a fixture input for this case only. The depth of SW is read as the discharge thickness d.",
+  "common": {
+    "bedConductivityMPerDay": 10,
+    "fractionOrganicCarbon": 0.01,
+    "thicknessM": 5,
+    "reachLengthM": 100,
+    "gradient": 0.05,
+    "upstreamFlowM3PerDay": 180,
+    "groundwaterMgPerL": 5,
+    "backgroundMgPerL": 0,
+    "kocMlPerG": 59
+  },
+  "expected": {
+    "groundwaterFlowM3PerDay": 250,
+    "massFluxMgPerDay": 1250000,
+    "sedimentMgPerKg": 2.95
+  },
+  "cases": [
+    {
+      "name": "river",
+      "crossSectionM2": 5,
+      "mixingFraction": 1,
+      "decayPerDay": 0,
+      "printedMgPerL": 2.91,
+      "engineMgPerL": 2.906977
+    },
+    {
+      "name": "lake",
+      "volumeM3": 100000,
+      "mixingFraction": 0.1,
+      "decayPerDay": 0.005,
+      "printedMgPerL": 3.93,
+      "engineMgPerL": 3.930818
+    }
+  ]
+}
