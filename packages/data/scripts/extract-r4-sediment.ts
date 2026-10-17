@@ -6,8 +6,9 @@
 // Reads Tables 2a, 2b and 2c from the committed PDF with `pdftotext -layout` and writes
 // raw/sediment/epa-r4-2018/table-2{a,b,c}.csv. Values and source letters are kept as printed; the
 // page of each row is the PDF page number. Blank cells are placed by the horizontal position of each
-// printed token against the column headings of its page. Review the printed anomalies and the diff of
-// the CSVs, then refresh manifest.json (scripts/build-sediment.ts --manifest).
+// printed token against the column headings of its page. Then run scripts/read-r4-shading.ts, which
+// adds the cell fill (the report's unit marker) as shade columns. Review the printed anomalies and the
+// diff of the CSVs, then refresh manifest.json (scripts/build-sediment.ts --manifest).
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -199,7 +200,7 @@ const header = (table: string, pagesUsed: number[]): string[] => [
   `# Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update, Table ${table}`,
   `# Transcribed by scripts/extract-r4-sediment.ts from report.pdf (see manifest.json for the checksum); PDF pages ${Math.min(...pagesUsed)} to ${Math.max(...pagesUsed)}; the page column is the PDF page of each row.`,
   '# Values and source letters are as printed; thousands separators are removed; a blank cell is a value the table does not print. Source letters are the table notes keys.',
-  '# unit and sectionBasis come from the section heading above the row; the basis of a value is decided in the build from its source letter.',
+  '# unit and sectionBasis come from the section heading above the row; scripts/read-r4-shading.ts adds the shade columns.',
 ];
 
 for (const table of ['2a', '2b'] as const) {

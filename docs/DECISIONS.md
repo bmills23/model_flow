@@ -553,15 +553,28 @@ above:
   horizontal position of each token against its page's column headings; every row carries its PDF page. The
   extraction was reviewed row by row against the page text, and the build tests read spot values from the
   pages.
-- **Basis of a value.** The report gives the unit in the notes under each table, by source letter, and the
-  gray shading that also marks dry weight cells is not in the extracted text, so the letter decides the
-  basis. Letters whose note states no unit are inferred and flagged `basisInferred`: Table 2a k (section
-  heading: 1 percent OC), Table 2b d and j (dry weight, as the identical Florida coastal and New York
-  citations are in Table 2a), Table 2b h (unused). A Table 2a source l value is dry weight except a wildlife
-  based row, which the note makes 1 percent OC. A cell with no source letter takes the letter of the other
-  value in its row, flagged inferred (one cell: Triphenyl phosphate marine, 0.55). The inorganic sections
-  are dry weight whatever the letter (Table 2a g, an organic carbon note, is printed against iron and
-  manganese in mg/kg).
+- **Basis of a value.** The report marks the unit of each Table 2a and 2b value by the fill of its cell:
+  the notes under the tables (PDF pages 84 and 87) say a gray shaded cell is ug/kg dry weight, and the
+  organic section headings read "ug/kg @ 1% OC unless denoted by shading". The fill does not survive text
+  extraction, so `scripts/read-r4-shading.ts` renders each table page at 150 dpi, finds every printed value
+  by its word box and records the fill behind it (`none`, `gray`, `tan`) in shade columns of the CSVs; every
+  row keeps its PDF page. A gray cell is dry weight; an unshaded cell under a "1% OC" heading is at 1 percent
+  OC. The fill decides, not the source letter. A first build inferred the basis from the source letter and
+  had 45 values wrong against the shading, among them every individual compound marine value with Table 2b
+  letter d (benzo(a)pyrene 89, chrysene 108, bis(2-ethylhexyl)phthalate 182 and 2,647, unshaded, so 1
+  percent OC) and the dioxins/furans values (Table 2a letter k, gray, so dry weight). `basisInferred` is kept
+  only where the report is ambiguous about a cell: (1) the note of the cell's own letter states the other
+  unit (for example bis(2-ethylhexyl)phthalate freshwater 2,600, unshaded with letter f, whose note says dry
+  weight; Dicamba marine 630, unshaded with letter l; a gray Table 2a l value of a wildlife based row, which
+  note l makes 1 percent OC); (2) the cell is shaded tan, the fill of the heading rows, which the legend does
+  not name: the PAH totals 600, 1,000 and 1,610 freshwater and 655 and 1,684 marine are taken as dry weight
+  because they are shaded ("unless denoted by shading"), flagged (the gray marine total LMW-PAHs, 312, is dry
+  weight unflagged); (3) an unshaded cell under the heading "Other SVOCs - ug/kg", which states no basis,
+  with no source letter (Triphenyl phosphate marine, 0.55): it takes the letter of the other value in its row,
+  1 percent OC. Under that heading a letter whose note states a unit gives the basis. Table 2c is unshaded
+  under a "1% OC" heading throughout, and the build fails on any other fill there. The inorganic sections
+  are dry weight whatever the letter or fill. The Table 2b note for letter d (Florida coastal) states no
+  unit while the Table 2a note for the same citation says dry weight; the Table 2b cells' fill governs.
 - **Application of the values.** Section 6.2.3 of the report applies the Step 2 values as ug/kg dry weight,
   which equals the 1 percent organic carbon normalization at f_oc 0.01. The rows keep the published basis
   (`ocBasis` 0.01) and the criteria comparison normalizes by the user's f_oc, as the methods note says.

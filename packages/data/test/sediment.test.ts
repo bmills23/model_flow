@@ -7,6 +7,7 @@ import { buildSediment, serialize, type SedimentBuild } from '../src/sediment/bu
 import { verifySedimentManifest } from '../src/sediment/manifest.js';
 import type { BenchmarkRow } from '../src/sediment/types.js';
 import { casCheckDigitValid } from '../src/nrwqc/parse.js';
+import { parseCsv } from '../src/sediment/csv.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const rawDir = resolve(here, '../raw/sediment');
@@ -231,6 +232,147 @@ describe('Region 4 Table 2b', () => {
         r.table === '2b' && r.name === 'Total PAHs' && r.endpoint === 'region4-marine-screening',
     )!;
     expect(m.value).toBe(1684);
+  });
+});
+
+describe('Region 4 basis from the cell shading (gray is dry weight, notes on PDF pages 84 and 87)', () => {
+  const byName = (table: string, name: string, endpoint: string) =>
+    built.rows.find((r) => r.table === table && r.name === name && r.endpoint === endpoint)!;
+  const shadeRows = (file: string) =>
+    parseCsv(readFileSync(join(rawDir, 'epa-r4-2018', file), 'utf8'));
+
+  it('records a shade for every printed value of Tables 2a, 2b and 2c', () => {
+    for (const file of ['table-2a.csv', 'table-2b.csv']) {
+      for (const r of shadeRows(file)) {
+        for (const c of ['fwEsv', 'fwRsv', 'mEsv', 'mRsv']) {
+          if (r[c] === '') expect(r[`${c}Shade`], `${file} ${r['chemical']} ${c}`).toBe('');
+          else
+            expect(['none', 'gray', 'tan'], `${file} ${r['chemical']} ${c}`).toContain(
+              r[`${c}Shade`],
+            );
+        }
+      }
+    }
+    for (const r of shadeRows('table-2c.csv')) expect(r['rsvShade'], r['chemical']).toBe('none');
+  });
+
+  it('benzo(a)pyrene marine 89 (source d, unshaded) is at 1 percent OC, page 86', () => {
+    const r = find('2b', '50-32-8', 'region4-marine-screening')!;
+    expect(r).toMatchObject({ value: 89, basis: 'oc1pct', ocBasis: 0.01, page: 86 });
+    expect(r.basisInferred).toBeUndefined();
+    // f_oc 0.05, 445 ug/kg dw: the benchmark at the site is 89 x 0.05 / 0.01 = 445, a ratio of 1.
+    expect((445 / (r.value * (0.05 / r.ocBasis!))).toFixed(3)).toBe('1.000');
+    // The freshwater 150 (source f) is gray: dry weight.
+    expect(find('2b', '50-32-8', 'region4-freshwater-screening')).toMatchObject({
+      value: 150,
+      basis: 'dw',
+    });
+  });
+
+  it('chrysene 108 and bis(2-ethylhexyl)phthalate 182 and 2,647 (source d, unshaded) are at 1 percent OC', () => {
+    expect(find('2b', '218-01-9', 'region4-marine-screening')).toMatchObject({
+      value: 108,
+      basis: 'oc1pct',
+    });
+    expect(find('2b', '117-81-7', 'region4-marine-screening')).toMatchObject({
+      value: 182,
+      basis: 'oc1pct',
+    });
+    expect(find('2b', '117-81-7', 'region4-marine-refinement')).toMatchObject({
+      value: 2647,
+      basis: 'oc1pct',
+    });
+    expect(find('2b', '117-81-7', 'region4-freshwater-screening')).toMatchObject({
+      value: 180,
+      basis: 'dw',
+    });
+  });
+
+  it('bis(2-ethylhexyl)phthalate freshwater 2,600 is unshaded: 1 percent OC, flagged because note f says dry weight', () => {
+    expect(find('2b', '117-81-7', 'region4-freshwater-refinement')).toMatchObject({
+      value: 2600,
+      basis: 'oc1pct',
+      sourceLetter: 'f',
+      basisInferred: true,
+    });
+  });
+
+  it('every individual compound marine value with source d in Table 2b is at 1 percent OC', () => {
+    const d = built.rows.filter(
+      (r) =>
+        r.table === '2b' &&
+        r.sourceLetter === 'd' &&
+        r.waterType === 'salt' &&
+        !r.name.startsWith('Total'),
+    );
+    expect(d.length).toBe(16);
+    for (const r of d) expect(r.basis, r.id).toBe('oc1pct');
+  });
+
+  it('the PAH totals: gray 312 is dry weight; the tan 600, 1,000, 1,610, 655 and 1,684 are shaded, dry weight, flagged', () => {
+    expect(byName('2b', 'Total LMW-PAHs', 'region4-marine-screening')).toMatchObject({
+      value: 312,
+      basis: 'dw',
+    });
+    expect(
+      byName('2b', 'Total LMW-PAHs', 'region4-marine-screening').basisInferred,
+    ).toBeUndefined();
+    for (const [name, endpoint, value] of [
+      ['Total LMW-PAHs', 'region4-freshwater-screening', 600],
+      ['Total HMW-PAHs', 'region4-freshwater-screening', 1000],
+      ['Total PAHs', 'region4-freshwater-screening', 1610],
+      ['Total HMW-PAHs', 'region4-marine-screening', 655],
+      ['Total PAHs', 'region4-marine-screening', 1684],
+    ] as const) {
+      expect(byName('2b', name, endpoint), name).toMatchObject({
+        value,
+        basis: 'dw',
+        basisInferred: true,
+      });
+    }
+  });
+
+  it('spot checks in Table 2a: the shade decides, a note that states the other unit flags the value', () => {
+    // Carbaryl freshwater 6 (source l, gray, page 83): dry weight as note l states.
+    const carbaryl = find('2a', '63-25-2', 'region4-freshwater-refinement')!;
+    expect(carbaryl).toMatchObject({ value: 6, basis: 'dw', page: 83 });
+    expect(carbaryl.basisInferred).toBeUndefined();
+    // Chlordane marine 2.7 (source c, gray): dry weight.
+    expect(find('2a', '57-74-9', 'region4-marine-screening', null)).toMatchObject({
+      value: 2.7,
+      basis: 'dw',
+    });
+    // Dicamba marine 630 (source l, unshaded): 1 percent OC, flagged.
+    expect(find('2a', '1918-00-9', 'region4-marine-refinement')).toMatchObject({
+      value: 630,
+      basis: 'oc1pct',
+      basisInferred: true,
+    });
+    // Heptachlor freshwater 0.6 (source j, CCME dw, unshaded): 1 percent OC, flagged.
+    expect(find('2a', '76-44-8', 'region4-freshwater-screening')).toMatchObject({
+      value: 0.6,
+      basis: 'oc1pct',
+      basisInferred: true,
+    });
+    // Dioxins/furans 0.0025 (source k, gray, page 84): dry weight.
+    expect(find('2a', '1746-01-6', 'region4-freshwater-screening', null)).toMatchObject({
+      value: 0.0025,
+      basis: 'dw',
+      page: 84,
+    });
+    // Phenol 175 (source d, unshaded): 1 percent OC, as note d states.
+    const phenol = find('2a', '108-95-2', 'region4-freshwater-screening')!;
+    expect(phenol.basis).toBe('oc1pct');
+    expect(phenol.basisInferred).toBeUndefined();
+  });
+
+  it('benzene 10 (source i, gray, page 85) is dry weight and its 2,185 (source c, unshaded) is at 1 percent OC', () => {
+    expect(find('2b', '71-43-2', 'region4-freshwater-screening')).toMatchObject({
+      value: 10,
+      basis: 'dw',
+      page: 85,
+    });
+    expect(find('2b', '71-43-2', 'region4-freshwater-refinement')!.basis).toBe('oc1pct');
   });
 });
 

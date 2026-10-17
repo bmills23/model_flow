@@ -15,22 +15,22 @@
       "file": "table-2a.csv",
       "role": "table",
       "reference": "epa2018r4era",
-      "bytes": 16978,
-      "sha256": "4ef53c4c3a68517b8c728b639ee59578d6b3b8ebe0a98d59d9f639085caf99c6"
+      "bytes": 19514,
+      "sha256": "264b7c0c31a4215eddcc428ab06c5367476a4686d6d49b48499b87c5b42a5f5c"
     },
     {
       "file": "table-2b.csv",
       "role": "table",
       "reference": "epa2018r4era",
-      "bytes": 14020,
-      "sha256": "857a68ec0940945b4e9c9a587c610668383ea5bd5831ce01c8a7be4dddeee9ee"
+      "bytes": 15955,
+      "sha256": "8fd0ee8a4b9bf0ce0ed0af5d93fc8227a62f730770a021e77b53b1d3bd5ca86e"
     },
     {
       "file": "table-2c.csv",
       "role": "table",
       "reference": "epa2018r4era",
-      "bytes": 4028,
-      "sha256": "7e4bac7a3548a40c588330ac81d5d754ef826c670dd8695a04e2f83ddd817706"
+      "bytes": 4384,
+      "sha256": "c9863cb79c3c871fd9c2409ac2535070f3954a28d855bdb9cea1716860a4edc8"
     }
   ]
 }

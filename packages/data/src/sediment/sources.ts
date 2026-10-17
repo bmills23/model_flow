@@ -1,9 +1,11 @@
 import type { SedimentBasis } from './types.js';
 
 /**
- * What each Region 4 source letter says about the unit of the value, from the notes under the tables.
- * `inferred` marks a letter whose note states no unit; the basis then follows an identical citation
- * elsewhere in the report (DECISIONS.md, M8 slice D2).
+ * What each Region 4 source letter's note says about the unit of a value, from the notes under the
+ * tables. `inferred` marks a note that states no unit; its `basis` is then only the basis most of its
+ * cells carry by their shading. The build decides the basis of each value from the fill of its cell,
+ * not from the letter, and uses a note's stated unit only to flag a cell whose fill contradicts it and
+ * under a heading that states no basis (DECISIONS.md, M8 slice D2).
  */
 export interface LetterInfo {
   basis: SedimentBasis;
@@ -68,10 +70,10 @@ export const LETTERS_2B: Record<string, LetterInfo> = {
     citation: 'Region 4 sediment model from McGrath and Di Toro 2009, ug/kg at 1% OC',
   },
   d: {
-    basis: 'dw',
+    basis: 'oc1pct',
     inferred: true,
     citation:
-      'Florida coastal sediment guidelines; the note states no unit, taken as dry weight like the same citation in Table 2a',
+      'Florida coastal sediment guidelines; the note states no unit. The Table 2b cells are unshaded (1% OC) except the gray total LMW-PAHs and two shaded totals; the Table 2a note for the same citation says dw',
   },
   e: {
     basis: 'oc1pct',
@@ -91,15 +93,16 @@ export const LETTERS_2B: Record<string, LetterInfo> = {
   },
   i: { basis: 'dw', inferred: false, citation: 'Los Alamos ECORISK database, ug/kg dw' },
   j: {
+    basis: 'oc1pct',
+    inferred: true,
+    citation:
+      'New York DEC 2014; the note states no unit. Its one Table 2b cell is unshaded (1% OC); the Table 2a note for the same citation says dw',
+  },
+  k: {
     basis: 'dw',
     inferred: true,
     citation:
-      'New York DEC 2014; the note states no unit, taken as dry weight like the same citation in Table 2a',
-  },
-  k: {
-    basis: 'oc1pct',
-    inferred: false,
-    citation: 'Median of the Table 2c refinement values divided by 10, ug/kg at 1% OC',
+      'Median of the Table 2c refinement values divided by 10; the note states no unit. Both cells are shaded (tan, not the legend gray), so dry weight, flagged',
   },
 };
 

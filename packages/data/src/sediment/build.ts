@@ -54,29 +54,47 @@ interface Basis {
   inferred: boolean;
 }
 
-/** The basis of one Region 4 value: the source letter's note, the section for the inorganics. */
+/**
+ * The basis of one Region 4 value, from the fill of its cell (DECISIONS.md, M8 slice D2). The notes
+ * under Tables 2a and 2b say a gray cell is ug/kg dry weight, and the organic section headings read
+ * "ug/kg @ 1% OC unless denoted by shading", so a gray cell is dry weight and an unshaded cell under
+ * such a heading is at 1 percent organic carbon. A tan cell (some PAH totals) is shaded but not in the
+ * legend's gray: dry weight, flagged. A value is also flagged when the note of its own source letter
+ * states the other unit, since the report then contradicts itself. Under a heading that states no
+ * basis ("Other SVOCs - ug/kg") an unshaded value takes the unit its letter's note states.
+ */
 const basisOf = (
-  table: '2a' | '2b' | '2c',
+  table: '2a' | '2b',
   letter: string,
   fallbackLetter: string,
   name: string,
   unit: SedimentUnit,
   sectionBasis: string,
+  /** The fill of the value cell read by scripts/read-r4-shading.ts: none, gray or tan. */
+  shade: string,
+  where: string,
 ): Basis => {
-  if (table === '2c') return { basis: 'oc1pct', inferred: false };
   // Inorganic sections (mg/kg dry weight) are never organic carbon normalized, whatever the letter.
   if (unit === 'mg/kg') return { basis: 'dw', inferred: false };
+  if (shade !== 'none' && shade !== 'gray' && shade !== 'tan') {
+    throw new Error(`${where}: no cell shade recorded (run scripts/read-r4-shading.ts)`);
+  }
   const letters: Record<string, LetterInfo> = table === '2a' ? LETTERS_2A : LETTERS_2B;
-  const used = letter !== '' ? letter : fallbackLetter;
-  const info = letters[used];
-  if (info === undefined) {
-    return { basis: sectionBasis === 'oc1pct' ? 'oc1pct' : 'dw', inferred: true };
-  }
-  // Table 2a note l: a NYDEC wildlife number is ug/kg at 1% OC, the rest are dry weight.
-  if (table === '2a' && used === 'l' && /wildlife/i.test(name)) {
-    return { basis: 'oc1pct', inferred: letter === '' };
-  }
-  return { basis: info.basis, inferred: info.inferred || letter === '' };
+  /** The unit the note of a letter states, or null when the note states none. */
+  const noted = (l: string): SedimentBasis | null => {
+    const info = letters[l];
+    if (info === undefined || info.inferred) return null;
+    // Table 2a note l: a NYDEC wildlife number is ug/kg at 1% OC, the rest are dry weight.
+    if (table === '2a' && l === 'l' && /wildlife/i.test(name)) return 'oc1pct';
+    return info.basis;
+  };
+  const own = letter !== '' ? noted(letter) : null;
+  if (shade === 'gray') return { basis: 'dw', inferred: own === 'oc1pct' };
+  if (shade === 'tan') return { basis: 'dw', inferred: true };
+  if (sectionBasis === 'oc1pct') return { basis: 'oc1pct', inferred: own === 'dw' };
+  if (own !== null) return { basis: own, inferred: false };
+  const fallback = noted(fallbackLetter);
+  return { basis: fallback ?? 'dw', inferred: true };
 };
 
 const num = (s: string): number | null => {
@@ -113,7 +131,16 @@ function region4Rows(dir: string): BenchmarkRow[] {
         const value = num(r[c.value]!);
         if (value === null) continue;
         const letter = r[c.src]!;
-        const b = basisOf(table, letter, rowLetter, name, unit, r['sectionBasis']!);
+        const b = basisOf(
+          table,
+          letter,
+          rowLetter,
+          name,
+          unit,
+          r['sectionBasis']!,
+          r[`${c.value}Shade`]!,
+          `Table ${table} ${name} ${c.value}`,
+        );
         rows.push({
           id: '',
           chemicalId: chemicalId(cas, r['code']!, name),
@@ -147,6 +174,10 @@ function region4Rows(dir: string): BenchmarkRow[] {
     const cas = r['cas']! === '' ? '' : checkedCas(r['cas']!, `Table 2c ${name}`);
     const value = num(r['rsv']!);
     if (value === null) continue;
+    // Table 2c prints every value unshaded under its "ug/kg @ 1% OC" heading (PDF pages 88 and 89).
+    if (r['rsvShade'] !== 'none') {
+      throw new Error(`Table 2c ${name}: cell shade ${r['rsvShade']}, expected none`);
+    }
     rows.push({
       id: '',
       chemicalId: chemicalId(cas, '', name),
