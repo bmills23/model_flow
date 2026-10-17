@@ -104,8 +104,9 @@ a done one.
   verified published title when a milestone marks it `used` (a test enforces this).
 - Timing checks under load: `vadose-legacy.test.ts` (speed, now best of nine under 250 ms) and
   `groundwater-kernel.test.ts` (plan-view grid, now best of three under 1 s) were made robust to parallel test
-  load. The groundwater-kernel file has no 5 s timeout of its own; the 5 s is vitest's default, and the
-  earlier closing-gate failure was not reproduced. If a timing check fails again, re-run that file alone.
+  load. The mass-conservation test in `groundwater-kernel.test.ts` is a triple nested quadrature that timed out
+  at vitest's 5 s default in a failed gate run (5.4 s); it now has a 30 s timeout, asserts mass only, and passes
+  alone. If a timing check fails again, re-run that file alone before treating it as a regression.
 - `docs/ATTRIBUTIONS.md` was dated 2026-10-17 (a UTC day) for a 2026-10-16 change. The generator now uses the
   local calendar date (`localIsoDate`), and the header reads 2026-10-16.
 - Optional extras, not scheduled: persist the vadose, saturated and well feeds across reloads; the transport

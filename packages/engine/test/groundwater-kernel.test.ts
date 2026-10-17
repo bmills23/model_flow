@@ -71,26 +71,37 @@ describe('well-screen averaging with half-weight end points', () => {
 });
 
 describe('instantaneous box release (Green function)', () => {
-  it('conserves mass: porosity times retardation times the volume integral is M exp(-lambda tau)', () => {
-    const a: At123dAquifer = { ...aquifer, retardation: 2, decayRate: 0.01 };
-    const tau = 8;
-    const tol = { relTol: 1e-6, absTol: 1e-12 };
-    const m = integrate(
-      (x) =>
-        integrate(
-          (y) =>
-            integrate((z) => instantaneousBoxConcentration(a, box, { x, y, z }, tau, 1), -4, 4, tol)
-              .value,
-          -12,
-          12,
-          tol,
-        ).value,
-      -10,
-      30,
-      tol,
-    ).value;
-    expect(m * a.porosity * 2).toBeCloseTo(Math.exp(-0.01 * tau), 4);
-  });
+  // A triple nested adaptive quadrature. It took 5.4 s in a failed gate run under parallel load, past vitest's
+  // 5 s default, and it is most of the file's 6 s when run alone. The test asserts mass, not time, so only its
+  // wall-clock guard is widened.
+  it(
+    'conserves mass: porosity times retardation times the volume integral is M exp(-lambda tau)',
+    { timeout: 30000 },
+    () => {
+      const a: At123dAquifer = { ...aquifer, retardation: 2, decayRate: 0.01 };
+      const tau = 8;
+      const tol = { relTol: 1e-6, absTol: 1e-12 };
+      const m = integrate(
+        (x) =>
+          integrate(
+            (y) =>
+              integrate(
+                (z) => instantaneousBoxConcentration(a, box, { x, y, z }, tau, 1),
+                -4,
+                4,
+                tol,
+              ).value,
+            -12,
+            12,
+            tol,
+          ).value,
+        -10,
+        30,
+        tol,
+      ).value;
+      expect(m * a.porosity * 2).toBeCloseTo(Math.exp(-0.01 * tau), 4);
+    },
+  );
 
   it('is symmetric about the centreline in y and z for a centred source', () => {
     const p1 = instantaneousBoxConcentration(aquifer, box, { x: 3, y: 1.3, z: 0.2 }, 5);

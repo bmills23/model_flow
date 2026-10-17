@@ -437,7 +437,9 @@ finding changed them (E2 dermal form, 5, 11 and 14). Judgment calls, open to ove
 - **Timing checks allow for load.** A speed check is a regression tripwire, not a benchmark, so it takes
   the best of several runs after a warm-up. The vadose speed test (`vadose-legacy.test.ts`) uses the best
   of nine runs under 250 ms, a 5x margin on its 50 ms design budget; the plan-view grid check
-  (`groundwater-kernel.test.ts`) uses the best of three under 1 s. An order-of-magnitude slowdown still fails.
+  (`groundwater-kernel.test.ts`) uses the best of three under 1 s. The mass-conservation quadrature there has
+  a 30 s wall-clock timeout (vitest's 5 s default failed under load); it asserts mass, not time. An
+  order-of-magnitude slowdown still fails.
 - **Generated document dates use the local calendar day.** `toISOString` gives the UTC day, which is a day
   ahead in the evening in Mountain time. `localIsoDate` fixes this, and the attributions header moves to
   2026-10-16 (the content change day). The date still moves only when the content changes.
