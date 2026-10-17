@@ -68,6 +68,23 @@ describe('buildCleanup', () => {
     expect(lv.noncancerGroup).toBe('child');
   });
 
+  it('passes the database volatile flag so the direct tap water level warns that shower inhalation is omitted', () => {
+    const run = (id: string, on: PathwayId[]) => {
+      const out = runCleanup(built(only(formWith([{ id }]), on)));
+      if (!out.modern.ok || !out.legacy.ok) throw new Error('did not run');
+      return [out.modern.result.warnings, out.legacy.result.warnings].map((w) =>
+        w.map((x) => x.code),
+      );
+    };
+    for (const codes of run(BENZENE, TAP)) {
+      expect(codes).toContain('cleanup.tapwater-inhalation-omitted');
+    }
+    // the warning is for the volatile with no shower inhalation; a non-volatile never gets it
+    for (const codes of run('7440-38-2', TAP)) {
+      expect(codes).not.toContain('cleanup.tapwater-inhalation-omitted');
+    }
+  });
+
   it('passes the target risk and hazard quotient, defaulting blanks to 1e-6 and 1', () => {
     const base = only(formWith([{ id: BENZENE }]), TAP);
     expect(built(base).modern.targets).toEqual({});

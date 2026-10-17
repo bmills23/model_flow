@@ -175,6 +175,7 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
   ): DirectChemical<C>[] =>
     records.map(({ row, rec }) => {
       const out: DirectChemical<C> = { id: row.id, chemical: make(rec!, row.dermalForm) };
+      if (rec!.tox.volatile) out.volatile = true;
       const e = enteredFor(row.id);
       if (e !== undefined) out.entered = e;
       return out;

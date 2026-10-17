@@ -497,7 +497,8 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
 11. **SSG target groundwater concentration**: the MCL, a user value, or the back-calculated risk-based tap
     water level (drinking plus bathing), in that order of offer; the guidance's nonzero MCLG is not
     offered because the database has none. DEFAULT. The tap water level omits the household-use
-    inhalation term (M7) and warns for volatile chemicals with an inhalation value.
+    inhalation term (M7) and warns for volatile chemicals with an inhalation value, on the SSG panel and on
+    the direct-pathway table alike (the screen passes the database `volatile` flag to the engine).
 12. **Csat for the SSG check uses the partition equation's own soil inputs** (theta_w 0.3, f_oc 0.002),
     through the M3 helper; a level above Csat is reported unchanged and warned. DEFAULT.
 13. **Targets.** TR 1e-6 and THQ 1 by default (DEFAULT; the values of `ragsb1991` section 2.7 and the
