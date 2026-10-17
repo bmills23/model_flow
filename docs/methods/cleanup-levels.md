@@ -10,8 +10,9 @@ legacy method's `risc5Choice` metadata. The process reuses the M4 exposure kerne
 `packages/engine/src/numerics/roots.ts`.
 
 Status: methods note, reference check, fixture plan and slice plan done 2026-10-16 (stage 1). Slice C1 (the SSG
-leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) landed on the branch; no other engine,
-data or web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
+leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) and slice C2 (direct back-calculation in
+`cleanup/direct.ts` and `cleanup/targets.ts`, H1, H2, fixtures 3 and 4, identities d and g) landed on the
+branch; no other engine, data or web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
 (2026-10-16, M5 block), open to Bryan's overturn.
 
 ## What the process is
@@ -395,6 +396,7 @@ Warnings (codes are part of the result):
 
 | Code | Method | Condition |
 |---|---|---|
+| `cleanup.pathway-not-computable` | rags | a switched-on pathway lacks an exposure factor or chemical input; it contributes nothing and is named |
 | `cleanup.not-quantified` | rags | no toxicity value for any linked pathway of the chemical; no risk-based level |
 | `cleanup.target-above-0.01` | rags | TR above 0.01 (linear risk form) |
 | `cleanup.target-not-reachable` | rags | the metric at the cap (pure substance, or solubility for a dissolved source) is below the target |

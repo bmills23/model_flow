@@ -19,3 +19,26 @@ checked by reproducing all thirty printed values, and the metal Kd values agree 
 table (reference `SSL`).
 
 The hand cases H3 and H4 live in `test/cleanup-ssg.test.ts` with their derivations beside them.
+
+## rsl-2024-11-cleanup.json: RSL combined tap water levels and risk-based SSLs (`epa2024rsl`)
+
+Retrieved 2026-10-16 (checked against the M4 kernels the same day). Chemical toxicity and dermal inputs
+are those of `../exposure/rsl-2024-11.json`; this file adds only the published values and, for the SSLs,
+the partition inputs copied from the committed RSL build (`packages/data/generated/rsl-2024-11/`, Kd with
+reference `SSL` for the metals, Koc and H' for acetone).
+
+- `tapWaterCombined` (fixture 4): the resident tap water table's carcinogenic and child noncarcinogenic
+  screening levels in ug/L, each the combined level over ingestion and bathing dermal. A null cancer
+  value is a blank cell. Tolerance: half a unit in the second significant figure.
+- `riskBasedSsl` (fixture 3): the summary table's risk-based soil-to-groundwater SSL (DAF 1) in mg/kg for
+  the six chemicals with no household-use inhalation term. The engine value is the unrounded lower of
+  the cancer and noncancer tap water levels (TR 1e-6, THQ 1) times the partition factor. Tolerance: half a
+  unit in the second significant figure. Volatile chemicals with an IUR or RfC and benzo(a)pyrene are
+  excluded (see the methods note, fixture 3).
+
+## Hand case H2 (cumulative proportional scaling), recorded values
+
+Modern resident, drinking water plus bathing, benzene 0.01 mg/L and arsenic 0.002 mg/L entered. The test
+recomputes the scale from the M4 coefficients independently (1e-9 relative); the engine's values on
+2026-10-17 are s = 0.021372453 (cancer limits), giving 2.1372453e-4 mg/L benzene and 4.2744906e-5 mg/L
+arsenic, ratio exactly 5.
