@@ -40,4 +40,10 @@ describe('App shell', () => {
     const link = screen.getAllByRole('link', { name: /saturated soil source/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/saturated');
   });
+
+  it('links to the exposure and risk screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /exposure and risk/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/risk');
+  });
 });

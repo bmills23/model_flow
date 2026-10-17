@@ -1,4 +1,4 @@
-> Status: M3 DONE 2026-10-16 (saturated soil source: legacy two-region and modern exponential release with water-table fluctuation, fed into M1). Next: M4 chemical and toxicity database, direct exposure and forward risk. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M4 DONE 2026-10-16 (RSL-derived chemical and toxicity database, direct exposure and forward risk, legacy RAGS 1989 and modern RAGS E/F with the 2014 defaults and ADAF; screen at #/risk). Next: M5 cleanup levels. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
@@ -180,12 +180,7 @@ after the first run.
   seasonal step-cap ruling in DECISIONS.md; the general power-law source exponent and the mixture-wide
   residual test deferred, region 1 volatilization to M6, cleanup back-calculation to M5). Two-region
   source with water-table fluctuation; feeds M1.
-- **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7).** RSL-derived
-  database with source tags; 9 direct pathways (soil ingestion, dermal soil, GW ingestion, dermal water,
-  shower inhalation and dermal, indoor/outdoor air inhalation, surface water ingestion and dermal);
-  carcinogenic risk and hazard index; two simultaneous receptor scenarios and additivity rules. Legacy
-  RAGS 1989 intake vs modern RAGS Part F / Part E / 2014 defaults / ADAF. Table R-9 fixture. Risk
-  contribution charts.
+- **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7). DONE 2026-10-16** (rulings in the DECISIONS.md M4 block; methods note `docs/methods/exposure-and-risk.md`). RSL November 2024 database with source tags; the nine direct pathways in legacy and modern variants; carcinogenic risk and hazard index; two receptors with additivity rules; the risk contribution charts. Deferred: target-organ segregation of the hazard index, CompTox gap filling (ruling 10), series EPCs on soil pathways.
 - **M5 Cleanup levels (Ch. 8).** Back-calculation for direct and modeled pathways, individual vs cumulative
   options, MCL/user targets; Brent solver (and secant for parity checks). EPA Soil Screening Guidance
   1996/2002 leaching with a dilution attenuation factor (moved here from M2, see DECISIONS.md).
@@ -249,7 +244,8 @@ BIOCHLOR/REMChlor (spreadsheets/exe, no source), EPA PVIScreen (Java; source lic
 open-source tool covers RISC5's scope.
 
 Items still to confirm during the relevant milestone (not blockers): current VISL default attenuation
-factors; PVIScreen source availability; which RSL edition is current when M4 starts; whether ANALGWST
+factors; PVIScreen source availability; which RSL edition is current when M4 starts (checked 2026-10-16: November 2024, see
+docs/methods/chemical-database.md); whether ANALGWST
 compiles cleanly with modern gfortran (fallback: port the ~500-line Fortran kernels, public domain).
 
 ## 9. Verification (per milestone and before any push)

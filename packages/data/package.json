@@ -9,14 +9,21 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "build": "echo 'nothing to build'",
-    "generate": "tsx scripts/generate-docs.ts"
+    "generate": "tsx scripts/generate-docs.ts",
+    "build:rsl": "tsx scripts/build-rsl.ts",
+    "fetch:rsl": "tsx scripts/fetch-rsl.ts"
   },
   "dependencies": {
     "@model-flow/engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
+    "read-excel-file": "9.3.12",
     "tsx": "4.23.15",
     "vitest": "5.0.5"
+  },
+  "exports": {
+    "./rsl-types": "./src/rsl/types.ts",
+    "./generated/*": "./generated/*"
   }
 }

@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@model-flow/data": "workspace:*",
     "@model-flow/engine": "workspace:*",
     "d3-contour": "4.0.2",
     "d3-scale": "4.0.2",

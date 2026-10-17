@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { references, registry } from '@model-flow/engine';
 import { renderAttributions } from '../src/attributions.js';
-import { renderStable } from '../src/stable.js';
+import { localIsoDate, renderStable } from '../src/stable.js';
 import { renderThirdPartyLicenses, type PnpmLicenseReport } from '../src/licenses.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -12,7 +12,7 @@ const docs = resolve(root, 'docs');
 mkdirSync(docs, { recursive: true });
 
 // A document keeps its previous date unless its content changes.
-const today = new Date().toISOString().slice(0, 10);
+const today = localIsoDate(new Date());
 
 const pnpm = process.env['npm_execpath'];
 const [cmd, args] =

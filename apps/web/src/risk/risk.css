@@ -1,0 +1,228 @@
+/* Exposure and risk screen. Reuses the vadose and transport layout, controls, panel and table classes. */
+:root {
+  /* categorical slots for pathways and chemicals */
+  --r-0: #2a78d6;
+  --r-1: #eb6834;
+  --r-2: #1baf7a;
+  --r-3: #eda100;
+  --r-4: #e87ba4;
+  --r-5: #6250d6;
+  --r-6: #0b8a99;
+  --r-7: #7b8794;
+  --tag-bg: #e8efee;
+  --tag-text: #1c2326;
+  --track: #eceeea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --r-0: #3987e5;
+    --r-1: #d95926;
+    --r-2: #199e70;
+    --r-3: #c98500;
+    --r-4: #d55181;
+    --r-5: #9085e9;
+    --r-6: #3bb3c2;
+    --r-7: #9aa7b2;
+    --tag-bg: #26332f;
+    --tag-text: #e6eae9;
+    --track: #222b2d;
+  }
+}
+
+.risk .picker {
+  min-width: 0;
+}
+
+.risk .hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.risk .btn.hit {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+  text-align: left;
+  min-width: 0;
+}
+
+.risk .hit-name {
+  font-weight: 600;
+}
+
+.risk .hit-tox {
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+fieldset.chem-card,
+fieldset.receptor {
+  min-width: 0;
+  margin: 12px 0;
+  padding: 4px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.chem-card legend,
+.receptor legend {
+  font-weight: 600;
+  padding: 0 6px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.risk .card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.risk .source-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+table.tox tbody th {
+  font-weight: 600;
+}
+
+table.tox .tox-unit {
+  display: block;
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+table.tox .tox-value {
+  white-space: nowrap;
+}
+
+.risk .well-note {
+  grid-column: 1 / -1;
+}
+
+table.cmp caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 0 4px;
+}
+
+.stack-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stack-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
+  align-items: center;
+}
+
+.stack-label {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.stack-track {
+  min-width: 0;
+  height: 28px;
+  background: var(--track);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stack-bar {
+  display: flex;
+  height: 100%;
+}
+
+.stack-seg {
+  flex: none;
+  min-width: 1px;
+  border-right: 1px solid var(--surface);
+}
+
+.stack-none {
+  display: block;
+  padding: 0 8px;
+  line-height: 28px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.stack-total {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 4.2rem;
+  text-align: right;
+}
+
+.legend {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.85rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.data-table {
+  margin-top: 10px;
+}
+
+.data-table summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.stale .stack-rows {
+  opacity: 0.55;
+}
+
+@media (min-width: 640px) {
+  .stack-row {
+    grid-template-columns: 13rem minmax(0, 1fr) auto;
+  }
+
+  .stack-label {
+    grid-column: auto;
+  }
+}

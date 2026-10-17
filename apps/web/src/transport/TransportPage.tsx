@@ -11,6 +11,7 @@ import { Field, Group, Seg } from '../ui/controls';
 import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
+import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
 
@@ -69,6 +70,8 @@ const fmtAlpha = (v: number): string => String(Number(v.toPrecision(3)));
 export function TransportPage() {
   const [form, setForm] = useState<TransportForm>(DEFAULT_FORM);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const [wellMethod, setWellMethod] = useState<MethodKey>('modern');
+  const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
 
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
   const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
@@ -550,6 +553,51 @@ export function TransportPage() {
                     </div>
                   ))}
                 </dl>
+              </section>
+              <section className="panel" aria-label="Exposure and risk">
+                <h2>Use the well result for exposure and risk</h2>
+                <p>
+                  The receptor concentration history above can be the drinking-water and bathing
+                  concentration of the exposure and risk screen. Pick the method whose curve to
+                  send; the screen averages it over the exposure windows.
+                </p>
+                <Seg
+                  legend="Method to send"
+                  name="wellMethod"
+                  value={keys.includes(wellMethod) ? wellMethod : 'modern'}
+                  onChange={setWellMethod}
+                  options={keys.map((k) => ({ value: k, label: SERIES[k].label }))}
+                />
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !parsed.ok}
+                    onClick={() => {
+                      const k = keys.includes(wellMethod) ? wellMethod : 'modern';
+                      const values = result.series[k];
+                      if (!values) return;
+                      setWellFeed({
+                        method: k,
+                        label: `Receptor well, ${SERIES[k].label}, ${form.timeYr} years`,
+                        times: [...result.times],
+                        values: [...values],
+                      });
+                    }}
+                  >
+                    Use as exposure well concentration
+                  </button>{' '}
+                  {wellHeld && (
+                    <a className="button" href="#/risk">
+                      Open exposure and risk
+                    </a>
+                  )}
+                </p>
+                {wellHeld && (
+                  <p className="muted" role="status">
+                    Exposure and risk can use: {wellHeld.label}.
+                  </p>
+                )}
               </section>
               <section className="panel" aria-label="Warnings and notes">
                 <h2>Warnings and notes ({result.warnings.length + (engineError ? 1 : 0)})</h2>

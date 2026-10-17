@@ -547,11 +547,15 @@
   {
     "key": "epa2011efh",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2011,
-    "title": "Exposure Factors Handbook",
-    "tags": ["shower", "irrigation", "exposure"]
+    "title": "Exposure Factors Handbook: 2011 Edition (Final)",
+    "tags": ["shower", "irrigation", "exposure"],
+    "venue": "U.S. Environmental Protection Agency, National Center for Environmental Assessment",
+    "identifier": "EPA/600/R-09/052F, September 2011",
+    "url": "https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252",
+    "notes": "Bibliographic data verified through the Federal Register notice of availability (76 FR, October 3, 2011, FR Doc 2011-25412: final report released September 30, 2011) and the EPA record (2026-10-16). The handbook itself was not read; M4 uses only the values the RSL default-parameter list cites from it."
   },
   {
     "key": "waldenspence1997",
@@ -646,51 +650,132 @@
   {
     "key": "rags1989",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1989,
-    "title": "Risk Assessment Guidance for Superfund, Part A",
-    "tags": ["exposure", "risk"]
+    "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final",
+    "tags": ["exposure", "risk"],
+    "venue": "U.S. Environmental Protection Agency, Office of Emergency and Remedial Response",
+    "identifier": "EPA/540/1-89/002, December 1989",
+    "url": "https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16; the copy carries margin comments EPA added later, which are not part of the 1989 text). Chapter 6 intake equations and chapter 8 risk characterization read for M4; the chapter 6 exhibits are images in this copy."
   },
   {
     "key": "ragsf2009",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2009,
-    "title": "Risk Assessment Guidance for Superfund, Part F, Supplemental Guidance for Inhalation Risk Assessment",
-    "venue": "U.S. Environmental Protection Agency",
-    "identifier": "OSWER 9285.7-82",
-    "tags": ["exposure", "risk"]
+    "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final",
+    "venue": "U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation",
+    "identifier": "EPA-540-R-070-002, OSWER 9285.7-82, January 2009",
+    "tags": ["exposure", "risk"],
+    "url": "https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16). Section 1 and the exposure concentration equations read for M4."
   },
   {
     "key": "ragse2004",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2004,
-    "title": "Risk Assessment Guidance for Superfund, Part E, Supplemental Guidance for Dermal Risk Assessment",
-    "tags": ["exposure", "risk"]
+    "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final",
+    "tags": ["exposure", "risk"],
+    "venue": "U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation",
+    "identifier": "EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004",
+    "url": "https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16). Equations 3.1 to 3.4 (dermal water), 3.11 and 3.12 (dermal soil) and the chapter 4 GIABS cutoff of 50 percent read for M4."
   },
   {
     "key": "epa2014ef",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2014,
     "title": "Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors",
-    "venue": "U.S. Environmental Protection Agency",
-    "identifier": "OSWER 9200.1-120",
-    "tags": ["exposure", "risk"]
+    "venue": "U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response",
+    "identifier": "OSWER Directive 9200.1-120, February 6, 2014",
+    "tags": ["exposure", "risk"],
+    "url": "https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf",
+    "notes": "Verified from the memorandum (EPA copy, retrieved 2026-10-16); its attachment tabulates the 1991 and updated default values side by side. Supersedes parts of OSWER Directive 9285.6-03 (epa1991sdef)."
   },
   {
     "key": "epa2005adaf",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2005,
     "title": "Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens",
+    "tags": ["exposure", "risk"],
+    "venue": "U.S. Environmental Protection Agency, Risk Assessment Forum",
+    "identifier": "EPA/630/R-03/003F, March 2005",
+    "url": "https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16). Source of the age-dependent adjustment factors (10 before age 2, 3 from 2 to before 16, 1 after) for carcinogens with a mutagenic mode of action."
+  },
+  {
+    "key": "epa1991sdef",
+    "type": "guidance",
+    "status": "used",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 1991,
+    "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: \"Standard Default Exposure Factors\", Interim Final",
+    "venue": "U.S. Environmental Protection Agency, Office of Emergency and Remedial Response",
+    "identifier": "OSWER Directive 9285.6-03, PB91-921314, March 25, 1991",
+    "url": "https://semspub.epa.gov/src/document/HQ/190591",
+    "notes": "Verified from the document (EPA SEMS copy, retrieved 2026-10-16; cover and default factor tables read). Partly superseded by OSWER Directive 9200.1-120 (epa2014ef). Source of the legacy receptor presets.",
+    "tags": ["exposure"]
+  },
+  {
+    "key": "epa1992dea",
+    "type": "guidance",
+    "status": "used",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 1992,
+    "title": "Dermal Exposure Assessment: Principles and Applications, Interim Report",
+    "venue": "U.S. Environmental Protection Agency, Office of Health and Environmental Assessment",
+    "identifier": "EPA/600/8-91/011B, January 1992",
+    "url": "https://rais.ornl.gov/documents/DERM_EXP.PDF",
+    "notes": "Verified from the cover of the copy hosted by ORNL RAIS (2026-10-16); the EPA record (deid 12188) marks it archived. Only the cover was read. Listed for the legacy steady-state permeability approach to dermal contact with water.",
+    "tags": ["exposure"]
+  },
+  {
+    "key": "epa2005cancer",
+    "type": "guidance",
+    "status": "used",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2005,
+    "title": "Guidelines for Carcinogen Risk Assessment",
+    "venue": "U.S. Environmental Protection Agency, Risk Assessment Forum",
+    "identifier": "EPA/630/P-03/001F, March 2005",
+    "url": "https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16); cover and contents only. The guidelines under which a mutagenic mode of action is determined; epa2005adaf is their supplement.",
     "tags": ["risk"]
+  },
+  {
+    "key": "epa2012asrba",
+    "type": "guidance",
+    "status": "used",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2012,
+    "title": "Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil",
+    "venue": "U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response",
+    "identifier": "OSWER 9200.1-113, December 2012",
+    "url": "https://semspub.epa.gov/work/HQ/175338.pdf",
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Source of the default relative bioavailability of 0.6 for arsenic in soil.",
+    "tags": ["exposure"]
+  },
+  {
+    "key": "epa2003toxhier",
+    "type": "guidance",
+    "status": "data",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2003,
+    "title": "Human Health Toxicity Values in Superfund Risk Assessments",
+    "venue": "U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation",
+    "identifier": "OSWER Directive 9285.7-53, December 5, 2003",
+    "url": "https://semspub.epa.gov/work/HQ/136.pdf",
+    "notes": "Verified from the memorandum (EPA SEMS copy, retrieved 2026-10-16). The three-tier toxicity hierarchy that the RSL tables apply.",
+    "tags": ["toxicity"]
   },
   {
     "key": "mckay1979",
@@ -793,15 +878,30 @@
     "notes": "Year is the retrieval year (accessed 2026); no publication year is recorded."
   },
   {
-    "key": "epa2026rsl",
+    "key": "epa2024rsl",
     "type": "data",
     "status": "data",
     "authors": "U.S. Environmental Protection Agency",
-    "year": 2026,
-    "title": "Regional Screening Levels (RSLs), Generic Tables",
+    "year": 2024,
+    "title": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
     "url": "https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables",
-    "notes": "Edition and date to be fixed when the chemical database is built; accessed 2026. Year is the retrieval year (accessed 2026); no publication year is recorded.",
-    "tags": ["chemistry", "toxicity"]
+    "notes": "Edition verified 2026-10-16: the Generic Tables page (last updated March 13, 2026) lists the November 2024 tables (SEMS collection 36504, all dated 11/13/2024) and the What's New page lists no later update. Public domain (U.S. government work). Also the source of the M4 independent-check fixture values (resident soil, composite worker soil, resident tap water and resident air tables). See docs/methods/chemical-database.md for the files and checksums.",
+    "tags": ["chemistry", "toxicity", "exposure"],
+    "venue": "U.S. Environmental Protection Agency",
+    "identifier": "SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1"
+  },
+  {
+    "key": "epa2024rslug",
+    "type": "guidance",
+    "status": "fixture",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2024,
+    "title": "Regional Screening Levels (RSLs), User's Guide",
+    "venue": "U.S. Environmental Protection Agency",
+    "identifier": "Web page accompanying the November 2024 tables",
+    "url": "https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide",
+    "notes": "Read 2026-10-16 (page last updated March 13, 2026; year is that of the tables it documents). Sections 2.3 (toxicity hierarchy), 4.9 (dermal parameters), 5.10 (arsenic relative bioavailability), 5.17 (mutagens) and 5.18 (trichloroethylene). Used to build the M4 independent-check fixture and for the life-stage convention of the modern exposure method.",
+    "tags": ["validation", "exposure"]
   },
   {
     "key": "epairis",
@@ -830,8 +930,8 @@
     "authors": "Arcadis Geraghty & Miller",
     "year": 2001,
     "title": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
-    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures.",
-    "tags": ["validation"]
+    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures. The RISC5 guide reproduces only page 1 of the three pages of Table R-9 (direct exposure pathways); pages 2 and 3 are not available.",
+    "tags": ["validation", "exposure"]
   },
   {
     "key": "spence2001",
@@ -843,8 +943,8 @@
     "venue": "BP Oil International",
     "identifier": "Version 4.0, October 2001",
     "url": "https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf",
-    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Planned fixture use only: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list. No table is reproduced.",
-    "tags": ["validation", "vadose"]
+    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Fixture use only: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list, and, planned for M4, the adult resident reasonable-maximum factors (Table 6-2) and four chemicals' toxicity and permeability values (Table 11-1) that the Table R-9 comparison depends on but does not list. No table is reproduced.",
+    "tags": ["validation", "vadose", "exposure"]
   },
   {
     "key": "analgwst",
