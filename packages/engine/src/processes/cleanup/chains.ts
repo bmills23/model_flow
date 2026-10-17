@@ -25,6 +25,7 @@ import type { ConcentrationStep } from '../groundwater/loading.js';
 import {
   patchfConcentration,
   patchiConcentration,
+  type VerticalBounds,
   type WexlerInput,
 } from '../groundwater/wexler.js';
 import {
@@ -83,6 +84,8 @@ export type Transport =
   | {
       kind: 'wexler';
       params: WexlerInput;
+      /** Vertical boundaries of PATCHI (no-flux water table or finite thickness); none gives the whole space. */
+      bounds?: VerticalBounds | undefined;
       /** Both give PATCHF; neither gives PATCHI. */
       width?: number;
       thickness?: number;
@@ -121,7 +124,7 @@ export function wellConcentrations(t: Transport, load: WellLoad, time: number): 
       t.width !== undefined && t.thickness !== undefined
         ? patchfConcentration(t.params, p, time, { width: t.width, thickness: t.thickness }, conc)
             .value
-        : patchiConcentration(t.params, p, time, conc),
+        : patchiConcentration(t.params, p, time, conc, t.bounds),
     );
   }
   return t.points.map((p) => domenicoConcentration(t.params, p, time, conc));
@@ -414,9 +417,10 @@ function epcMap<C>(
   c: ChainChemical<C>,
   pathways: readonly PathwayId[],
   conc: number,
+  spec?: EpcSpec,
 ): Partial<Record<PathwayId, EpcSpec>> {
   const linked = c.linkedSoil ?? c.chain.medium === 'soil';
-  const series = c.chain.epc(conc);
+  const series = spec ?? c.chain.epc(conc);
   const out: Partial<Record<PathwayId, EpcSpec>> = {};
   for (const p of pathways) {
     const medium = PATHWAYS[p].medium;
@@ -426,6 +430,28 @@ function epcMap<C>(
     }
   }
   return out;
+}
+
+/**
+ * The receptor metrics at one source concentration for chemical `index`, through the same chain and
+ * evaluator the solver inverts: total cancer risk, headline hazard index and, for a chain that gives a
+ * well series, the averaged peak concentration (`averagingWindow`). The screen draws its metric curve
+ * with this so the curve and the solution cannot disagree.
+ */
+export function evaluateModeled<C>(
+  input: ModeledInput<C>,
+  index: number,
+  conc: number,
+): { cancer: number; hi: number; peak: number | null } {
+  const c = input.chemicals[index];
+  if (c === undefined) throw new RangeError(`no chemical at index ${index}`);
+  const spec = c.chain.epc(conc);
+  const r = input.evaluate([
+    { id: c.id, chemical: c.chemical, epcs: epcMap(c, input.pathways, conc, spec) },
+  ]);
+  const peak =
+    spec.kind === 'series' ? wellConcentrationMetric(spec.series, input.averagingWindow) : null;
+  return { cancer: r.cancer, hi: r.hi, peak };
 }
 
 const memoized = <T>(f: (c: number) => T): ((c: number) => T) => {

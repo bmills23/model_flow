@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dissolvedChain,
+  evaluateModeled,
   layeredChain,
   legacyEvaluator,
   modernEvaluator,
@@ -518,4 +519,33 @@ describe('layered chain (numerical)', () => {
       expect(codes).toContain('cleanup.target-not-reachable');
     }
   }, 300000);
+});
+
+describe('screen-facing helpers (slice W2)', () => {
+  it('a wexler transport honours vertical bounds: the no-flux water table keeps mass in the aquifer', () => {
+    const open = dissolved({ ...wexler, bounds: undefined } as Transport);
+    const bounded = dissolved({ ...wexler, bounds: { waterTable: 3 } } as Transport);
+    const a = peak(open, 1e-3);
+    const b = peak(bounded, 1e-3);
+    expect(b).toBeGreaterThan(0);
+    expect(b).not.toBe(a);
+  });
+
+  it('evaluateModeled gives the same metrics the solver inverts (round trip at the level)', () => {
+    const chain = dissolved(at123d);
+    const input = {
+      evaluate: modern,
+      pathways: WATER,
+      chemicals: [
+        one(chain, { concentrationTarget: { kind: 'mcl' as const }, mcl: { value: MCL } }),
+      ],
+    };
+    const r = solveModeled(input);
+    const level = r.levels[0]!.level!;
+    const m = evaluateModeled(input, 0, level);
+    expect(rel(m.peak!, MCL)).toBeLessThan(1e-9);
+    expect(m.cancer).toBeGreaterThanOrEqual(0);
+    expect(m.hi).toBeGreaterThanOrEqual(0);
+    expect(evaluateModeled(input, 0, level * 2).peak!).toBeGreaterThan(m.peak!);
+  });
 });

@@ -63,3 +63,37 @@
     font-weight: 600;
   }
 }
+
+/* Modeled chains: target line, solution drop line, convergence readout. */
+.cleanup .chart .target-line {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.cleanup .chart .solution-drop {
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.cleanup .converge {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 6px 16px;
+  margin: 8px 0 0;
+}
+
+.cleanup .converge dt {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.cleanup .converge dd {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.cleanup .source-hint {
+  margin: 8px 0 0;
+}

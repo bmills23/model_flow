@@ -12,6 +12,7 @@ import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
+import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
 
@@ -72,6 +73,11 @@ export function TransportPage() {
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const [wellMethod, setWellMethod] = useState<MethodKey>('modern');
   const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
+  const chainHeld = useSyncExternalStore(
+    subscribeTransportFeed,
+    getTransportFeed,
+    getTransportFeed,
+  );
 
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
   const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
@@ -596,6 +602,40 @@ export function TransportPage() {
                 {wellHeld && (
                   <p className="muted" role="status">
                     Exposure and risk can use: {wellHeld.label}.
+                  </p>
+                )}
+                <h2>Use this aquifer for cleanup levels</h2>
+                <p>
+                  The cleanup levels screen can solve for the source concentration (a dissolved
+                  groundwater source, or a soil source fed by the vadose or saturated screens) whose
+                  breakthrough at this receptor well just meets a target. It takes the aquifer,
+                  source box, receptor and evaluation time from this screen; the source strength is
+                  replaced by the one it solves for.
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !parsed.ok}
+                    onClick={() => {
+                      if (!scenario) return;
+                      setTransportFeed({
+                        scenario,
+                        label: `${form.timeYr} years, receptor at ${form.rx} m`,
+                      });
+                    }}
+                  >
+                    Use for cleanup levels
+                  </button>{' '}
+                  {chainHeld && (
+                    <a className="button" href="#/cleanup">
+                      Open cleanup levels
+                    </a>
+                  )}
+                </p>
+                {chainHeld && (
+                  <p className="muted" role="status">
+                    Cleanup levels can use: {chainHeld.label}.
                   </p>
                 )}
               </section>
