@@ -21,5 +21,9 @@
     "read-excel-file": "9.3.12",
     "tsx": "4.23.15",
     "vitest": "5.0.5"
+  },
+  "exports": {
+    "./rsl-types": "./src/rsl/types.ts",
+    "./generated/*": "./generated/*"
   }
 }

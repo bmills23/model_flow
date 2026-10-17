@@ -193,6 +193,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@model-flow/data':
+        specifier: workspace:*
+        version: link:../../packages/data
       '@model-flow/engine':
         specifier: workspace:*
         version: link:../../packages/engine
