@@ -1,0 +1,71 @@
+{
+  "source": "Tables R-3, R-4 and R-5 of Appendix R (review of RISC v4.0, arcadis2001 and spence2001), numeric inputs and results only",
+  "benzene": {
+    "molarMassGPerMol": 78,
+    "solubilityMgPerL": 1750,
+    "henry": 0.228,
+    "kocMlPerG": 59,
+    "DaCm2PerS": 0.088,
+    "DwCm2PerS": 9.8e-6
+  },
+  "sourceSoil": { "porosity": 0.35, "moisture": 0.15, "bulkDensityGPerCm3": 1.7, "foc": 0.01 },
+  "building": {
+    "volumeM3": 400,
+    "airExchangesPerDay": 12,
+    "floorAreaM2": 150,
+    "crackFraction": 0.001,
+    "zcrackM": 2.0,
+    "perimeterM": 50,
+    "dPGPerCmS2": 10,
+    "kvCm2": 1e-9,
+    "viscosityGPerCmS": 1.8e-4,
+    "foundation": { "thicknessM": 0.15, "porosity": 0.25, "moisture": 0 }
+  },
+  "r3": {
+    "layers": [
+      { "name": "vadose", "thicknessM": 2.6, "porosity": 0.35, "moisture": 0.05 },
+      { "name": "lens", "thicknessM": 0.2, "porosity": 0.35, "moisture": 0.15 }
+    ],
+    "caseA": {
+      "benzeneMgPerKg": 1000,
+      "tphMgPerKg": 0,
+      "riscMgPerM3": 8.57,
+      "independentMgPerM3": 8.59
+    },
+    "caseB": {
+      "benzeneMgPerKg": 10,
+      "tphMgPerKg": 1000,
+      "riscMgPerM3": 8.57e-2,
+      "independentMgPerM3": 8.59e-2
+    }
+  },
+  "r4": {
+    "layers": [
+      { "name": "layer1", "thicknessM": 1.3, "porosity": 0.35, "moisture": 0.05 },
+      {
+        "name": "layer2",
+        "thicknessM": 0.2,
+        "porosity": 0.35,
+        "moisture": 0.15,
+        "degradationPerDay": 0.09
+      },
+      { "name": "layer3", "thicknessM": 1.3, "porosity": 0.35, "moisture": 0.05 }
+    ],
+    "benzeneMgPerKg": 1000,
+    "sourceVaporMgPerM3": 3.23e5,
+    "indoorMgPerM3": 7.28,
+    "indoorFromSoilGasMgPerM3": 7.27
+  },
+  "r5": {
+    "layers": [
+      { "name": "vadose", "thicknessM": 1.2, "porosity": 0.35, "moisture": 0.05 },
+      { "name": "lens", "thicknessM": 0.2, "porosity": 0.35, "moisture": 0.15 }
+    ],
+    "capillaryFringe": { "thicknessM": 0.2, "porosity": 0.35, "moisture": 0.345 },
+    "foundation": { "thicknessM": 0.1, "porosity": 0.25, "moisture": 0 },
+    "qsoil": 0,
+    "groundwaterMgPerL": 1.0,
+    "riscMgPerM3": 2.27e-3
+  },
+  "tolerance": "0.5 percent of the RISC value (DECISIONS.md, M6 ruling 17)"
+}

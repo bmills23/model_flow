@@ -9,9 +9,12 @@ labels are not used here. Where a choice is RISC5's rather than a paper's, it is
 and becomes the method's `risc5Choice` metadata.
 
 Status: stage 1 (methods note, reference check, data plan, fixture plan and slice plan) done 2026-10-16.
-Slices V0 (vapor chemical data in `packages/data`) and V1 (shared kernels in
-`packages/engine/src/processes/vapor`: units, Henry correction, building coupling, source vapor) are built;
-no registered method or web code exists yet for this process. The scope calls below are the DEFAULT rulings
+Slices V0 (vapor chemical data in `packages/data`), V1 (shared kernels in
+`packages/engine/src/processes/vapor`: units, Henry correction, building coupling, source vapor) and V2
+(`vapor.je-1991` and `vapor.dominant-layer-1998` as method descriptors; Tables R-3, R-4, R-5 and Appendix J
+reproduce) are built. The descriptors are not yet in the default registry, because the registry test requires
+a modern method for every process that has a legacy one: the registering slice is V4 (first modern vapor
+method), which also flips `johnsonettinger1991` and `johnson1998` to `used`. No web code exists yet. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
@@ -632,7 +635,8 @@ printed values, not from these trials.
    the RISC4 properties, layers 1.2, 1.2 and 2.5 m (distances 1.2, 2.4 and 4.9 m above the source),
    degradation 0.07 /d in layer 2. Readings: base case layer 1 n 0.36 theta_w 0.10, layer 2 n 0.29
    theta_w 0.10, layer 3 n 0.36 theta_w 0.19; "dry" layer 1 n 0.40 theta_w 0.05; "wet" layer 2 n 0.35
-   theta_w 0.30. Expected normalized concentration at the top of layer 1: 0.65, 0.8, 0.95 (values stated in
+   theta_w 0.30, applied together with the dry layer 1 (the cases are cumulative; wetting layer 2 alone
+   gives 0.907 and misses the printed 0.95). Expected normalized concentration at the top of layer 1: 0.65, 0.8, 0.95 (values stated in
    the manual's prose from its figures); trial 0.657, 0.807, 0.955. Tolerance 0.01 absolute (DEFAULT ruling
    17: the values are figure readings).
 6. **EPA 2004 worked example, SL-ADV benzene (`epa2004je` Appendix C).** Inputs as printed on the data
@@ -682,7 +686,7 @@ tests first, runs the engine test file alone, then the gate once.
 |---|---|---|---|---|
 | V0 data | `packages/data/raw/vapor/epa2004je/` (transcribed CSV, manifest with the PDF's SHA-256), `packages/data/src/vapor/` (build, class list, formulas), `packages/data/generated/vapor/vapor-chemicals.json`, `packages/data/test/vapor.test.ts`, root `data:check` coverage | benzene, TCE and PCE rows match the PDF; every merged row's RSL values are byte-identical to `chemicals.json`; k_w classes cover BTEX and naphthalene | none | none |
 | V1 shared kernels | `packages/engine/src/processes/vapor/{units,source,building,henry,index}.ts`, `test/vapor-building.test.ts`, `test/vapor-source.test.ts` | J&E alpha limits (identity 8d); Q_soil hand case; source vapor for soil, soil gas, groundwater, residual phase; Henry correction reproduces the EPA example's 8,122 cal/mol, 2.68e-3 and 0.115 | none (reuses `vadose` diffusion and partitioning helpers) | none |
-| V2 legacy indoor | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
+| V2 legacy indoor (built; registration deferred to V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
 | V3 outdoor and Jury | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF transcription check against a value printed in `epa1996ssg` if one is found | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` |
 | V5 DeVaull | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` |

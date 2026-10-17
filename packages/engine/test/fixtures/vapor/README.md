@@ -1,0 +1,30 @@
+# Vapor fixtures
+
+Hand-entered validation data for the M6 vapor methods. Test inputs and printed results only, not a
+product database. Readings and tolerances are recorded in `docs/methods/vapor-models.md`, "Fixture plan".
+
+## risc-r3-r5.json: Tables R-3, R-4 and R-5 (`arcadis2001`)
+
+Source: Appendix R of the RISC5 user's guide (review of RISC v4.0). Inputs and the RISC result column are
+copied in the table's own units; the independent column of R-3 is recorded, not asserted. Benzene properties
+are the RISC4 database values (`spence2001`), fixture inputs for these cases only.
+
+Readings (all in the methods note): the source soil block of Table R-4 (porosity 0.35, moisture 0.15, bulk
+density 1.7, f_oc 0.01) is used for R-3 and R-4; the lens lies outside the 2.60 m vadose zone (L_T 2.80 m);
+Table R-5 is a diffusion-only run (Q_soil = 0); the degradation rate of 0.09 per day is applied in the water
+phase form lambda theta_w C_w; air viscosity 1.8e-4 g/(cm s). Tolerance 0.5 percent of the RISC value.
+
+## appendix-j.json: Appendix J worked example
+
+Source: Appendix J of the RISC5 user's guide. The "normalized concentration at the top of layer 1" values
+(0.65, 0.8, 0.95) are stated in its prose from figures, so they are figure readings: absolute tolerance 0.01.
+Outdoor case (zero concentration at the ground surface); the layer inputs of the base, dry and wet cases are
+the readings in the methods note. The "wet" case is cumulative: it keeps the dry layer 1 (porosity 0.40,
+moisture 0.05) and wets layer 2 (porosity 0.35, moisture 0.30). Wetting layer 2 alone gives 0.907, outside
+the tolerance; the cumulative reading gives 0.9553.
+
+## Named exception: Table R-6
+
+Table R-6 (groundwater to outdoor air) prints 2.27e-3 mg/m^3, equal to Table R-5's indoor result to three
+figures, and no box reading reproduces it (the box gives 2.54e-6 mg/m^3). It belongs to slice V3 and is
+treated as a transcription error in the review; it is never widened into a tolerance.
