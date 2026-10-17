@@ -4,6 +4,7 @@ import { buildInputs } from './build';
 import { runRisk } from './compute';
 import { defaultForm, defaultReceptor, newChemicalRow, type RiskForm } from './form';
 import type { WellFeed } from '../transport/wellFeed';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -14,7 +15,7 @@ beforeAll(async () => {
 const YR = 365.25 * 86400;
 
 function formWith(
-  rows: { id: string; conc: Record<string, string>; fromWell?: boolean }[],
+  rows: { id: string; conc: Record<string, string>; fromWell?: boolean; fromSurface?: boolean }[],
   over: Partial<RiskForm> = {},
 ): RiskForm {
   return {
@@ -23,6 +24,7 @@ function formWith(
       ...newChemicalRow(db.byId.get(r.id)!),
       conc: r.conc,
       groundwaterFromWell: r.fromWell ?? false,
+      surfaceWaterFromModel: r.fromSurface ?? false,
     })),
     ...over,
   };
@@ -30,8 +32,12 @@ function formWith(
 
 const benzeneWater = () => formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
 
-function built(form: RiskForm, well: WellFeed | null = null) {
-  const r = buildInputs(form, db, well);
+function built(
+  form: RiskForm,
+  well: WellFeed | null = null,
+  surface: SurfaceWaterFeed | null = null,
+) {
+  const r = buildInputs(form, db, well, surface);
   if (!r.ok) throw new Error(r.errors.join('; '));
   return r;
 }
@@ -108,6 +114,68 @@ describe('buildInputs', () => {
     const out = runRisk(r);
     expect(out.legacy.ok && out.legacy.result.epcs[0]![0]!.kind).toBe('series');
     expect(out.modern.ok && out.modern.result.startTimes[0]).not.toBeNull();
+  });
+
+  it('uses the surface water series as the swimming concentration, tagged surfaceWater.well-mixed', () => {
+    const surface: SurfaceWaterFeed = {
+      method: 'well-mixed',
+      origin: 'surfaceWater.well-mixed',
+      label: 'Legacy well-mixed surface water',
+      times: [10 * YR, 20 * YR, 40 * YR],
+      values: [1e-6, 4e-6, 2e-6],
+    };
+    const form = formWith([{ id: '71-43-2', conc: {}, fromSurface: true }]);
+    form.a.pathways.swimIngestion = true;
+    form.a.pathways.swimDermal = true;
+    form.a.swimTime = '2';
+    form.a.swimDays = '30';
+    form.a.waterSkinArea = '18000';
+    const r = built(form, null, surface);
+    const receptor = r.legacy.receptors[0]!;
+    expect(receptor.pathways).toEqual(expect.arrayContaining(['swimIngestion', 'swimDermal']));
+    const epcs = receptor.chemicals[0]!.epcs;
+    expect(epcs.swimIngestion).toMatchObject({ kind: 'series', origin: 'surfaceWater.well-mixed' });
+    expect(epcs.swimDermal).toMatchObject({ kind: 'series', origin: 'surfaceWater.well-mixed' });
+    const out = runRisk(r);
+    expect(out.legacy.ok).toBe(true);
+    if (!out.legacy.ok) return;
+    const swim = out.legacy.result.summary.receptors[0]!.byPathway.find(
+      (p) => p.id === 'swimIngestion',
+    );
+    expect(swim?.risk).toBeGreaterThan(0);
+  });
+
+  it('drives the swimming risk with the series: a larger series gives a larger risk', () => {
+    const risk = (scale: number): number => {
+      const surface: SurfaceWaterFeed = {
+        method: 'well-mixed',
+        origin: 'surfaceWater.well-mixed',
+        label: 'x',
+        times: [10 * YR, 20 * YR],
+        values: [1e-6 * scale, 2e-6 * scale],
+      };
+      const form = formWith([{ id: '71-43-2', conc: {}, fromSurface: true }]);
+      form.a.pathways.swimIngestion = true;
+      form.a.swimTime = '2';
+      form.a.swimDays = '30';
+      const out = runRisk(built(form, null, surface));
+      if (!out.legacy.ok) throw new Error('legacy failed');
+      return out.legacy.result.summary.receptors[0]!.byPathway.find(
+        (p) => p.id === 'swimIngestion',
+      )!.risk;
+    };
+    expect(risk(2) / risk(1)).toBeCloseTo(2, 6);
+  });
+
+  it('asks for a surface water result when a chemical is set to use one and none exists', () => {
+    const r = buildInputs(
+      formWith([{ id: '71-43-2', conc: {}, fromSurface: true }]),
+      db,
+      null,
+      null,
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join(' ')).toMatch(/surface water result/i);
   });
 
   it('asks for a well result when a chemical is set to use one and none exists', () => {

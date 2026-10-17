@@ -14,6 +14,7 @@ import {
   rfcFromMgPerM3,
   rfdFromMgPerKgDay,
   seriesEpc,
+  surfaceWaterEpc,
   sfFromPerMgKgDay,
   type EpcSpec,
   type LegacyChemical,
@@ -30,6 +31,7 @@ import {
 } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { WellFeed } from '../transport/wellFeed';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
@@ -224,7 +226,12 @@ function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundary {
  * so the two methods are compared on equal footing. A pathway is switched on only when the receptor has
  * it on and some chemical has a concentration for its medium; the rest are listed in `notes`.
  */
-export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | null): BuildResult {
+export function buildInputs(
+  form: RiskForm,
+  db: ChemicalDb,
+  well: WellFeed | null,
+  surface: SurfaceWaterFeed | null = null,
+): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
 
@@ -249,6 +256,16 @@ export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | nul
           { times: well.times, values: well.values },
           `transport.${well.method}`,
         );
+        continue;
+      }
+      if (medium === 'surfaceWater' && row.surfaceWaterFromModel) {
+        if (surface === null) {
+          errors.add(
+            `${row.name}: no surface water result to use; run the surface water screen and send its result here`,
+          );
+          continue;
+        }
+        byPathway[pathway] = surfaceWaterEpc(surface.times, surface.values, surface.origin);
         continue;
       }
       const v = parse(

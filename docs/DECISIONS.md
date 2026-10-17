@@ -580,3 +580,22 @@ above:
 - **Duplicates.** Rows the report prints twice (acrolein in two Table 2a sections with different values,
   phenanthrene and 4-bromophenyl phenyl ether in two Table 2b sections with equal values) are both kept; ids
   carry a `#2` suffix for the repeat.
+
+M8 slice W2 (criteria panel and risk feed, 2026-10-17) implementation choices, none overturning a ruling above:
+
+- **Criteria loaded on demand.** `criteriaDb.ts` imports the four generated files (aquatic, human health,
+  hardness, benchmarks) dynamically, so each is a chunk of its own; the panel mounts only after the user asks
+  for the comparison, so the surface water screen itself never fetches them.
+- **Record mapping.** A freshwater cell of a metal in Appendix B becomes a hardness criterion (the equation,
+  no tabulated value, dissolved); other value cells keep their printed value; a cell with no value on a row
+  marked site-specific for that water type becomes a site-specific criterion (shown, never computed). Cells
+  whose unit is not a water concentration (pH in standard units, million fibers/L, mg/kg tissue values) are
+  dropped. Water type is passed to the comparison, so freshwater and saltwater criteria and benchmarks are
+  never mixed. The organic carbon fraction for benchmarks at a stated basis is the screen's f_oc, entered with
+  the sediment inputs; when it is missing or invalid the comparison reports that instead of a ratio.
+- **Risk feed.** The surface water screen holds the legacy or modern surface water series in memory
+  (`surfaceWater/feed.ts`, like the transport well feed) and the risk screen offers a per-chemical checkbox
+  "Use the surface water result for the swimming concentration". The series goes through `surfaceWaterEpc`
+  with origin `surfaceWater.well-mixed` (legacy) or `surfaceWater.mass-discharge` (modern), replacing the
+  typed surface water concentration for that chemical, for both risk methods. Swimming time, frequency and
+  skin area still come from the receptor panel.

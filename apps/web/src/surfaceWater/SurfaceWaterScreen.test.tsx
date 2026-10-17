@@ -1,10 +1,14 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { clearSurfaceWaterFeed, getSurfaceWaterFeed } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
 
-afterEach(() => clearBankFeed());
+afterEach(() => {
+  clearBankFeed();
+  clearSurfaceWaterFeed();
+});
 
 async function loaded() {
   render(<SurfaceWaterScreen />);
@@ -82,4 +86,44 @@ describe('SurfaceWaterScreen', () => {
       timeout: 40000,
     });
   }, 60000);
+
+  it('compares with criteria on demand: zinc ratios, exceedance flags and the hardness input', async () => {
+    await loaded();
+    expect(screen.queryByRole('region', { name: /comparison with criteria/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /compare with water quality criteria/i }));
+    const panel = await screen.findByRole('region', { name: /comparison with criteria/i });
+    const search = await within(panel).findByLabelText(/find a chemical for the criteria/i);
+    await waitFor(() => expect((search as HTMLInputElement).disabled).toBe(false), {
+      timeout: 15000,
+    });
+    fireEvent.change(search, { target: { value: '7440-66-6' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare zinc/i }));
+    const table = await within(panel).findByRole('table', {
+      name: /legacy surface water, ratio of the peak/i,
+    });
+    // 2.91 mg/L of zinc against a 120 ug/L criterion is far above 1
+    expect(within(table).getAllByText('exceeds').length).toBeGreaterThan(0);
+    expect(within(table).getByText(/aquatic freshwater acute/i)).toBeTruthy();
+    const before = within(table)
+      .getByText(/aquatic freshwater acute/i)
+      .closest('tr')!.textContent;
+    fireEvent.change(within(panel).getByLabelText(/^hardness/i), { target: { value: '200' } });
+    await waitFor(() => {
+      const after = within(panel)
+        .getAllByText(/aquatic freshwater acute/i)[0]!
+        .closest('tr')!.textContent;
+      expect(after).not.toBe(before);
+    });
+  }, 60000);
+
+  it('sends the surface water series to the risk screen with its method origin', async () => {
+    await loaded();
+    expect(getSurfaceWaterFeed()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
+    const held = getSurfaceWaterFeed();
+    expect(held?.origin).toBe('surfaceWater.well-mixed');
+    expect(held?.times.length).toBe(held?.values.length);
+    fireEvent.click(screen.getByRole('button', { name: /use modern surface water for swimming/i }));
+    expect(getSurfaceWaterFeed()?.origin).toBe('surfaceWater.mass-discharge');
+  }, 30000);
 });

@@ -2,6 +2,7 @@ import type { Medium } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import { Field, Seg } from '../ui/controls';
 import type { WellFeed } from '../transport/wellFeed';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow } from './form';
 import { fmtTox } from './format';
@@ -12,10 +13,11 @@ export function ChemicalCard(props: {
   rec: ChemicalRecord;
   db: ChemicalDb;
   well: WellFeed | null;
+  surface: SurfaceWaterFeed | null;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
-  const { row, rec, db, well } = props;
+  const { row, rec, db, well, surface } = props;
   const rows = toxRows(rec, db.sourceKeys);
   const t = rec.tox;
   const setConc = (m: Medium, v: string): void =>
@@ -75,6 +77,11 @@ export function ChemicalCard(props: {
             <p className="muted well-note" key={m.key}>
               Groundwater concentration: {well ? well.label : 'no well result held'}.
             </p>
+          ) : m.key === 'surfaceWater' && row.surfaceWaterFromModel ? (
+            <p className="muted well-note" key={m.key}>
+              Surface water concentration:{' '}
+              {surface ? surface.label : 'no surface water result held'}.
+            </p>
           ) : (
             <Field
               key={m.key}
@@ -93,6 +100,16 @@ export function ChemicalCard(props: {
             onChange={(e) => props.onChange({ ...row, groundwaterFromWell: e.target.checked })}
           />
           <span>Use the transport well result for the groundwater concentration</span>
+        </label>
+      )}
+      {(surface !== null || row.surfaceWaterFromModel) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.surfaceWaterFromModel}
+            onChange={(e) => props.onChange({ ...row, surfaceWaterFromModel: e.target.checked })}
+          />
+          <span>Use the surface water result for the swimming concentration</span>
         </label>
       )}
       {rec.phys?.values.kp !== undefined && (

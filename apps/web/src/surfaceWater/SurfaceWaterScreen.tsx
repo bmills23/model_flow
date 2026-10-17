@@ -3,7 +3,14 @@ import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
 import { Field, Group, Seg } from '../ui/controls';
+import { CriteriaPanel } from './CriteriaPanel';
 import { SedimentChart, SurfaceWaterChart } from './charts';
+import {
+  getSurfaceWaterFeed,
+  setSurfaceWaterFeed,
+  subscribeSurfaceWaterFeed,
+  type SurfaceWaterFeedMethod,
+} from './feed';
 import type { SwResult } from './compute';
 import { DEFAULT_FORM, LAKE_FORM, R8_PUBLISHED, isR8Case, toRequest, type SwForm } from './inputs';
 import { useSurfaceWaterResult } from './useSurfaceWaterResult';
@@ -87,6 +94,12 @@ function R8Check({ form, result }: { form: SwForm; result: SwResult }) {
 export function SurfaceWaterScreen() {
   const [form, setForm] = useState<SwForm>(DEFAULT_FORM);
   const resultsRef = useRef<HTMLDivElement | null>(null);
+  const [showCriteria, setShowCriteria] = useState(false);
+  const held = useSyncExternalStore(
+    subscribeSurfaceWaterFeed,
+    getSurfaceWaterFeed,
+    getSurfaceWaterFeed,
+  );
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const feed = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
 
@@ -100,6 +113,20 @@ export function SurfaceWaterScreen() {
   const river = form.bodyType === 'river';
   const last = result ? result.times.length - 1 : 0;
   const linkedOn = form.linked && feed !== null;
+
+  const sendToRisk = (method: SurfaceWaterFeedMethod): void => {
+    if (!result) return;
+    const legacy = method === 'well-mixed';
+    const values = legacy ? result.legacy.surfaceWater : result.modern.surfaceWater;
+    setSurfaceWaterFeed({
+      method,
+      origin: `surfaceWater.${method}`,
+      label: `${legacy ? 'Legacy well-mixed' : 'Modern mass-discharge'} surface water, ${(result.times[last]! / (365.25 * DAY)).toFixed(1)} years`,
+      times: [...result.times],
+      values: [...values],
+    });
+  };
+  const foc = Number(form.foc);
 
   const setLinked = (on: boolean): void =>
     setForm((f) => ({
@@ -481,6 +508,56 @@ export function SurfaceWaterScreen() {
 
               <SurfaceWaterChart result={result} scale={form.scale} />
               <SedimentChart result={result} scale={form.scale} />
+
+              <section className="panel" aria-label="Criteria and exposure">
+                <h2>Criteria and exposure</h2>
+                {showCriteria ? (
+                  <CriteriaPanel
+                    result={result}
+                    foc={
+                      form.sedimentOn && form.foc.trim() !== '' && Number.isFinite(foc)
+                        ? foc
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <p>
+                    <button type="button" className="btn" onClick={() => setShowCriteria(true)}>
+                      Compare with water quality criteria and sediment benchmarks
+                    </button>
+                  </p>
+                )}
+                <p className="muted">
+                  Send the surface water series to the exposure and risk screen as the swimming
+                  concentration. Pick the method to send.
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !parsed.ok}
+                    onClick={() => sendToRisk('well-mixed')}
+                  >
+                    Use legacy surface water for swimming risk
+                  </button>{' '}
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !parsed.ok}
+                    onClick={() => sendToRisk('mass-discharge')}
+                  >
+                    Use modern surface water for swimming risk
+                  </button>
+                </p>
+                {held && (
+                  <p>
+                    <span className="muted">Held for the risk screen: {held.label}. </span>
+                    <a className="button" href="#/risk">
+                      Open exposure and risk
+                    </a>
+                  </p>
+                )}
+              </section>
 
               <section className="panel" aria-label="Warnings and notes">
                 <h2>

@@ -48,6 +48,8 @@ export interface ChemicalRow {
   conc: Partial<Record<Medium, string>>;
   /** Use the transport screen's well result as the groundwater concentration. */
   groundwaterFromWell: boolean;
+  /** Use the surface water screen's result as the swimming (surface water) concentration series. */
+  surfaceWaterFromModel: boolean;
 }
 
 export interface RiskForm {
@@ -96,5 +98,6 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     dermalForm: rec.phys?.dermalForm,
     conc: {},
     groundwaterFromWell: false,
+    surfaceWaterFromModel: false,
   };
 }
