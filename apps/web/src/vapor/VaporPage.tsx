@@ -481,7 +481,7 @@ export function VaporPage() {
                     label="Capillary zone thickness (m)"
                     value={form.capHeight}
                     onChange={(v) => set('capHeight', v)}
-                    hint="Legacy: the fringe is used only when all three are entered. Modern: blank = from the texture of the deepest stratum."
+                    hint="The fringe sits on the water table and replaces the lowest strata in both methods, so both describe the same site. Legacy uses it only when all three are entered. Modern: blank = from the texture of the deepest stratum."
                   />
                   <Field
                     label="Capillary zone porosity (-)"
@@ -598,9 +598,10 @@ export function VaporPage() {
               options={[
                 { value: 'pressure', label: 'From the pressure difference' },
                 { value: 'entered', label: 'Entered' },
+                { value: 'default', label: 'Modern default ratio' },
               ]}
             />
-            {form.soilGasMode === 'pressure' ? (
+            {form.soilGasMode !== 'entered' ? (
               <div className="fields">
                 <Field
                   label="Indoor-outdoor pressure difference (Pa)"
@@ -618,10 +619,17 @@ export function VaporPage() {
                   onChange={(v) => set('seam', v)}
                 />
                 <Field
-                  label="Air viscosity (g/(cm s))"
+                  label="Air viscosity, legacy (g/(cm s))"
                   value={form.viscosity}
                   onChange={(v) => set('viscosity', v)}
                 />
+                {form.soilGasMode === 'pressure' ? (
+                  <Field
+                    label="Air viscosity, modern (g/(cm s))"
+                    value={form.viscosityModern}
+                    onChange={(v) => set('viscosityModern', v)}
+                  />
+                ) : null}
               </div>
             ) : (
               <div className="fields">

@@ -8,7 +8,7 @@ import {
   type Warning,
 } from '@model-flow/engine';
 import type { VaporOutcome } from './compute';
-import type { Parsed, VaporForm } from './form';
+import { carveFromSource, type Parsed, type VaporForm } from './form';
 
 export interface OutdoorForm {
   windSpeed: string; // m/s
@@ -55,13 +55,14 @@ const message = (e: unknown): string => (e instanceof Error ? e.message : String
 
 /** The full soil column to the ground surface, listed from the source upward (the legacy order). */
 export function columnToGrade(parsed: Extract<Parsed, { ok: true }>): SoilLayer[] {
-  const column: SoilLayer[] = [];
-  const fringe = parsed.legacy.capillaryFringe;
-  if (fringe) column.push(fringe);
+  let column: SoilLayer[] = [];
   for (let i = parsed.modern.strata.length - 1; i >= 0; i--) {
     const s = parsed.modern.strata[i]!;
     column.push({ thickness: s.thickness, porosity: s.porosity, moisture: s.moisture });
   }
+  // The fringe sits on the water table: it replaces the lowest strata, as in both indoor methods.
+  const fringe = parsed.legacy.capillaryFringe;
+  if (fringe) column = [fringe, ...(carveFromSource(column, fringe.thickness) ?? [])];
   return column;
 }
 

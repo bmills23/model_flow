@@ -15,7 +15,7 @@ import {
 
 export type TextureChoice = SoilTextureCode | 'custom';
 export type SourceKind = 'soil' | 'soilGas' | 'groundwater';
-export type SoilGasMode = 'pressure' | 'entered';
+export type SoilGasMode = 'pressure' | 'entered' | 'default';
 
 /** One stratum in the units the person types, listed from the ground surface down. */
 export interface LayerForm {
@@ -65,7 +65,8 @@ export interface VaporForm {
   dP: string; // Pa
   kv: string; // cm2
   seam: string; // m
-  viscosity: string; // g/(cm s)
+  viscosity: string; // g/(cm s), legacy method
+  viscosityModern: string; // g/(cm s), modern method
   qsoil: string; // L/min
   method: 'legacy' | 'modern';
 }
@@ -132,6 +133,7 @@ export const DEFAULT_FORM: VaporForm = {
   kv: '1e-9',
   seam: '50',
   viscosity: '1.8e-4',
+  viscosityModern: '1.75e-4',
   qsoil: '5',
   method: 'legacy',
 };
@@ -172,6 +174,25 @@ export function newLayer(index: number): LayerForm {
     bulkDensity: '1.7',
     foc: '0.01',
   };
+}
+
+/**
+ * Removes the lowest `height` metres from a column listed source first, so a capillary fringe that
+ * sits on the water table replaces the bottom of the strata rather than adding to them (the modern
+ * method carves its capillary zone the same way). Returns null when the fringe would use the column up.
+ */
+export function carveFromSource(column: SoilLayer[], height: number): SoilLayer[] | null {
+  let left = height;
+  const out: SoilLayer[] = [];
+  for (const l of column) {
+    if (left >= l.thickness * (1 - 1e-9)) {
+      left -= l.thickness;
+      continue;
+    }
+    out.push(left > 0 ? { ...l, thickness: l.thickness - left } : l);
+    left = 0;
+  }
+  return out.length > 0 ? out : null;
 }
 
 export type Parsed =
@@ -255,18 +276,25 @@ export function toInputs(f: VaporForm): Parsed {
   const fPor = r.num(f.foundationPorosity, 'Foundation porosity', 'fracpos');
   const fMoist = r.num(f.foundationMoisture, 'Foundation moisture', 'frac');
   let legacyFlow;
-  let modernFlow;
+  let modernFlow: EpaJeInput['building']['soilGas'];
   if (f.soilGasMode === 'entered') {
     const q = (r.num(f.qsoil, 'Soil gas flow into the building', 'nonneg') * 1e-3) / 60;
     legacyFlow = { Qsoil: q };
     modernFlow = { Qsoil: q };
   } else {
+    // The legacy method always needs the pressure-driven inputs. In 'default' mode the modern
+    // method ignores them and takes the Version 6.0 ratio Q_soil / Q_B = 0.003 x 0.45 / ER.
     const dP = r.num(f.dP, 'Pressure difference', 'nonneg');
     const kv = r.num(f.kv, 'Soil vapor permeability') * 1e-4;
     const seam = r.num(f.seam, 'Crack seam length');
-    const mu = convertGcmsToPa(r.num(f.viscosity, 'Air viscosity'));
+    const mu = convertGcmsToPa(r.num(f.viscosity, 'Air viscosity (legacy)'));
     legacyFlow = { dP, kv, mu, Xcrack: seam, Zcrack: floorDepth };
-    modernFlow = { dP, kv, mu, Xcrack: seam };
+    if (f.soilGasMode === 'default') {
+      modernFlow = undefined;
+    } else {
+      const muModern = convertGcmsToPa(r.num(f.viscosityModern, 'Air viscosity (modern)'));
+      modernFlow = { dP, kv, mu: muModern, Xcrack: seam };
+    }
   }
 
   // Source
@@ -299,6 +327,20 @@ export function toInputs(f: VaporForm): Parsed {
     }
     top = hi;
   }
+  const fringeEntered =
+    f.source === 'groundwater' && capH !== undefined && capP !== undefined && capM !== undefined;
+  if (fringeEntered) {
+    // The water table is the base of the strata for both methods, so the fringe replaces the
+    // lowest strata rather than lying under them.
+    const carved = carveFromSource(below, capH);
+    if (carved === null) {
+      return {
+        ok: false,
+        errors: ['The capillary zone must leave soil between its top and the floor'],
+      };
+    }
+    below.splice(0, below.length, ...carved);
+  }
   const H = Hp;
   const chem = { Da: Da * 1e-4, Dw: Dw * 1e-4, H };
   const kdLegacy = KocRaw * 1e-3 * deepest.foc;
@@ -325,8 +367,8 @@ export function toInputs(f: VaporForm): Parsed {
   const legacy: LegacyJeInput = {
     chemical: chem,
     layers: below,
-    ...(f.source === 'groundwater' && capH !== undefined && capP !== undefined && capM !== undefined
-      ? { capillaryFringe: { thickness: capH, porosity: capP, moisture: capM } }
+    ...(fringeEntered
+      ? { capillaryFringe: { thickness: capH!, porosity: capP!, moisture: capM! } }
       : {}),
     building: {
       volume,
@@ -377,7 +419,7 @@ export function toInputs(f: VaporForm): Parsed {
       airExchangeRate: ach / 3600,
       foundationThickness: fThick,
       crackFraction: crack,
-      soilGas: modernFlow,
+      ...(modernFlow ? { soilGas: modernFlow } : {}),
     },
     source: modernSource,
     ...(f.source === 'groundwater' && Object.keys(capillary).length > 0 ? { capillary } : {}),

@@ -181,7 +181,9 @@ Citations: `johnsonettinger1991`, `millingtonquirk1961`, `epa1996ssg` (soil-wate
 
 - Column: clean soil above the source, an optional lens, and for a groundwater source a capillary fringe
   of entered thickness and moisture (RISC5 choice: the fringe is a user-entered layer, as in Table R-5; no
-  retention model is applied). L_T is the sum of those layers; the foundation is not part of L_T.
+  retention model is applied). L_T is the sum of those layers; the foundation is not part of L_T. The engine
+  adds the fringe below the layers it is given; the web form removes the fringe thickness from the lowest
+  strata first, so the legacy and modern runs share one water table.
 - D_crack: the Millington-Quirk coefficient of the foundation layer itself, from its entered porosity
   and moisture (RISC5 choice: Tables R-3 and R-5 list the foundation as a soil layer with porosity 0.25
   and moisture 0). This differs from `epa2004je`, which takes D_crack equal to the coefficient of the soil
@@ -635,7 +637,7 @@ slices):
 |---|---|---|
 | Raoult's law source: vapor pressure form or effective solubility times H | x S H, consistent with the residual test of M2 and M3 | DEFAULT ruling 4 |
 | Diffusion through the cracks: foundation layer's own porosity or the soil's | The foundation layer's Millington-Quirk coefficient (legacy); the soil at the floor (modern, EPA) | DEFAULT ruling 5 |
-| Air viscosity in the soil gas flow formula | 1.8e-4 g/(cm s), which reproduces Tables R-3 and R-4 | DEFAULT ruling 6 |
+| Air viscosity in the soil gas flow formula | 1.8e-4 g/(cm s), which reproduces Tables R-3 and R-4 (legacy); the modern run uses 1.75e-4 g/(cm s) (1.75e-5 Pa s) | DEFAULT ruling 6 |
 | Table R-3 lists no source soil properties and no f_oc | The source soil block of Table R-4 (porosity 0.35, moisture 0.15, bulk density 1.7, f_oc 0.01), with the lens outside the 2.60 m vadose zone (L_T = 2.80 m) | Fixture reading, reproduces both cases |
 | Table R-5 gives no pressure, permeability or perimeter | Q_soil = 0 (diffusion only) | Fixture reading, reproduces; with the R-3 soil gas flow it would not |
 | Table R-6's output repeats Table R-5's to three figures | Not reproducible by any box reading (the box gives 2.54e-6 mg/m^3 for those inputs, also by the ASTM-type closed form); treated as a transcription error in the review | Named exception, see "Fixture plan" |

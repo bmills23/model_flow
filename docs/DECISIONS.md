@@ -565,7 +565,8 @@ Rulings, DEFAULT (Bryan's to overturn):
    data table. It is not a smooth profile; no interpolation is invented.
 2. **Outdoor air on the vapor screen.** Legacy: the outdoor box (2.25 m/s wind, 2 m mixing height, 10 m box,
    the Table R-6 inputs) over the steady diffusion flux from the legacy source vapor through the whole soil
-   column to grade (the legacy capillary fringe, when entered, is the lowest layer). Modern: the Soil
+   column to grade (the legacy capillary fringe, when entered, is the lowest layer and replaces the
+   lowest strata, as in the indoor runs). Modern: the Soil
    Screening Guidance volatilization factor, offered for a soil source only, with the deepest stratum as the
    source soil and the soil's own porosity, moisture, density and Koc times f_oc; Q/C is entered (default
    68.81). The factor treats the source as exposed at grade, so a buried source is warned
@@ -595,3 +596,15 @@ Rulings, DEFAULT (Bryan's to overturn):
    (conflict with the slice brief's wording, resolved to the coupling section of the methods note). The
    outdoor series comes from the legacy box only; the modern factor gives a constant from the entered soil
    source. The risk screen offers a chemical's checkboxes only when the held feed is for that chemical.
+
+Web form rulings that keep the two methods on one site (DEFAULT, Bryan's to overturn):
+
+- **One water table.** The water table is the base of the entered strata for both methods. An entered
+  capillary fringe replaces the lowest strata (the modern method carves its capillary zone from the bottom;
+  the form now carves the legacy fringe the same way before the engine prepends it), so the comparison
+  table, the profile plot and the outdoor column describe the same site. A fringe that leaves no soil
+  between its top and the floor is refused in the form.
+- **Soil gas flow.** The form offers "Modern default ratio": the modern run takes the Version 6.0 default
+  Q_soil = 0.003 x 0.45 / ER x Q_B (ruling 9, default c) and the legacy run, which has no such default,
+  keeps using the pressure-difference inputs. The modern run has its own air viscosity field (default
+  1.75e-4 g/(cm s), the engine default); the legacy field keeps 1.8e-4 (ruling 6).
