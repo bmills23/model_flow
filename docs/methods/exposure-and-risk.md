@@ -9,8 +9,11 @@ RISC5's rather than a guidance document's, it is marked "RISC5 choice" and becom
 `risc5Choice` metadata. The chemical and toxicity database that feeds this process is planned in
 `docs/methods/chemical-database.md`.
 
-Status: methods note, reference check, data plan and fixture plan done 2026-10-16 (stage 1). Engine,
-data build and screen not started. The scope calls below are DEFAULT rulings recorded in
+Status: methods note, reference check, data plan and fixture plan done 2026-10-16 (stage 1). The
+legacy kernels, receptor presets and the Table R-9 and hand-case L1 tests are written (slice E1,
+`packages/engine/src/processes/exposure/{units,legacy,receptorsLegacy}.ts`); the legacy method is not
+yet registered, and the modern kernels, the series windows, the risk process and the screen are not
+started. The scope calls below are DEFAULT rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
 
 ## What the process is
@@ -256,18 +259,31 @@ Values the engine carries as presets (the user may change any of them). Legacy p
 | Soil ingestion (mg/d) | 100 | 200 | 50 | 200 | 100 | 100 |
 | Inhalation (legacy) | 20 m^3/d | (entered) | 20 m^3 per workday | not used | not used | not used |
 | Air ET (h/d) | 24 indoor | 24 indoor | 8 | 24 | 24 | 8 |
-| Soil skin area (cm^2/d), AF (mg/cm^2) | from `rags1989` exhibit 6-15 | idem | idem | 2373, 0.2 | 6032, 0.07 | 3527, 0.12 |
-| Bathing skin area (cm^2), event time (h), events/d | from `rags1989` exhibit 6-13 | idem | none | 6365, 0.54, 1 | 19652, 0.71, 1 | none |
-| Swimming: IRsw, t_ev, EF | from `rags1989` exhibit 6-12, frequency site-specific | idem | none | 0.12 L/h, site-specific | 0.11 L/h, site-specific | none |
+| Soil skin area (cm^2/d), AF (mg/cm^2) | blank, entered (exhibit 6-15, see below) | idem | idem | 2373, 0.2 | 6032, 0.07 | 3527, 0.12 |
+| Bathing skin area (cm^2), time (h/d), days/yr | 19,400, blank, blank (exhibit 6-13) | 7,280, blank, blank | none | 6365, 0.54, 1 | 19652, 0.71, 1 | none |
+| Swimming: IRsw, time, EF | 50 mL/h (exhibit 6-12), time and frequency blank; skin area as bathing | idem | none | 0.12 L/h, site-specific | 0.11 L/h, site-specific | none |
 
 Sources: `epa1991sdef` for the legacy body weights, frequencies, durations, ingestion and inhalation
 rates; `epa2014ef` for the modern resident and composite worker values (the directive tabulates the
 1991 and 2014 values side by side); `epa2011efh` for the modern surface-water ingestion rates as the
-RSL default-parameter list cites them. The legacy dermal and swimming values sit in `rags1989` exhibits
-6-12, 6-13 and 6-15, which are images in the EPA copy; the engine slice reads them from the rendered
-pages and records page numbers, and leaves any entry the exhibit gives as pathway-specific blank. No
-national default exists for recreational frequency or event time in either method: the swimming
-pathways require them (`exposure.site-specific-required` until entered).
+RSL default-parameter list cites them. The legacy dermal and swimming values sit in `rags1989` exhibits 6-12, 6-13 and 6-15, which are images in
+the EPA copy; they were read from 110 dpi renders of the PDF pages (PDF pages 145 to 151; printed pages
+6-36, 6-37, 6-38, 6-40, 6-41, 6-42) on 2026-10-16. What the exhibits give, and what the presets carry:
+
+| Exhibit (printed page) | What it gives | Preset |
+|---|---|---|
+| 6-12 swimming ingestion (6-36) | contact rate 50 mL/h; frequency pathway-specific, 7 d/yr as the national average for swimming; ED 70 (lifetime), 30 (90th percentile at one residence), 9 (median); BW 70 kg adult | IRsw 50 mL/h. Frequency left blank: see the ruling below |
+| 6-13 dermal water (6-37, 6-38) | total body surface area, 50th percentile, male/female (m^2): 3 to under 6 yr 0.728/0.711, 6 to under 9 0.931/0.919, 9 to under 12 1.16/1.16, 12 to under 15 1.49/1.48, 15 to under 18 1.75/1.60, adult 1.94/1.69; body parts for males (arms, hands, legs): adult 0.23, 0.082, 0.55; permeability constant chemical-specific; exposure time pathway-specific (2.6 h/d is the national swimming average); EF pathway-specific (7 d/yr swimming) | water skin area: adult 19,400 cm^2, child (3 to under 6 yr) 7,280 cm^2, both male values. Time and frequency blank |
+| 6-14 soil ingestion (6-40) | 200 mg/d for ages 1 to 6, 100 mg/d older; EF 365 d/yr; BW 70 kg adult, 16 kg for ages 1 to 6 | 200 and 100 mg/d from `epa1991sdef`; BW 15 kg and EF 350 d/yr from `epa1991sdef` (the exhibit is the 1989 value) |
+| 6-15 dermal soil (6-41, 6-42) | the same body surface and body-part tables; adherence 1.45 mg/cm^2 (commercial potting soil, hands) and 2.77 mg/cm^2 (kaolin clay, hands); ABS chemical-specific; EF pathway-specific | Skin area and adherence blank. The exhibit names no exposed body parts and its two adherence values are single-soil experiments on hands, so neither is a default |
+
+Sources for the other legacy values: `epa1991sdef` for body weights, frequencies, durations, ingestion
+and inhalation rates; `epa2014ef` for the modern resident and composite worker values (the directive
+tabulates the 1991 and 2014 values side by side); `epa2011efh` for the modern surface-water ingestion
+rates as the RSL default-parameter list cites them. No national default exists for recreational
+frequency or event time in either method: the swimming pathways require them
+(`exposure.site-specific-required` until entered), and so do the bathing time and frequency, the dermal
+soil area and adherence, the outdoor air time, and the child's drinking-water and inhalation rates.
 
 ## Where the manual is ambiguous, and what we chose
 

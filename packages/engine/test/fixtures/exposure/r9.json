@@ -1,0 +1,116 @@
+{
+  "source": "Table R-9 (page 1 of 3), Verification Calculations for the Direct Exposure Pathways, review of RISC v4.0 (arcadis2001), as reproduced in Appendix R of the RISC5 user guide (Nov 2014), page R-19",
+  "inputs": {
+    "interpretation": {
+      "yearLengthDays": 365,
+      "cdiIsNoncancerDose": true,
+      "riskIsSfTimesCdiTimesEdOverLt": true,
+      "dermalSoilProductCm2MgPerCm2": 5750
+    },
+    "receptor": {
+      "bwKg": 70,
+      "lifetimeYr": 70,
+      "edYr": 30,
+      "efDaysPerYr": 350,
+      "soilIngestionMgPerDay": 100,
+      "waterIngestionLPerDay": 2,
+      "showerSkinAreaCm2": 23000,
+      "showerHoursPerDay": 0.2,
+      "dermalSoilSkinAreaCm2": 5750,
+      "dermalSoilAdherenceMgPerCm2": 1
+    },
+    "concentrations": { "soilMgPerKg": 5, "waterMgPerL": 2 },
+    "chemicals": {
+      "arsenic": { "sfo": 1.5, "rfdo": 0.0003, "aaf": 0.03, "kpCmPerH": 0.001 },
+      "benzene": { "sfo": 0.029, "aaf": 0.1, "kpCmPerH": 0.021 },
+      "benzo(a)pyrene": { "sfo": 7.3, "aaf": 0.1, "kpCmPerH": 1.2 },
+      "tphAliphaticC12C16": { "rfdo": 0.1, "aaf": 0.1, "kpCmPerH": 8.2 }
+    }
+  },
+  "targets": {
+    "soilIngestion": {
+      "cdi": {
+        "arsenic": "6.85e-6",
+        "benzene": "6.85e-6",
+        "benzo(a)pyrene": "6.85e-6",
+        "tphAliphaticC12C16": "6.85e-6"
+      },
+      "risk": {
+        "arsenic": "4.4e-6",
+        "benzene": "8.51e-8",
+        "benzo(a)pyrene": "2.14e-5",
+        "tphAliphaticC12C16": "NQ"
+      },
+      "hi": {
+        "arsenic": "2.28e-2",
+        "benzene": "NQ",
+        "benzo(a)pyrene": "NQ",
+        "tphAliphaticC12C16": "6.85e-5"
+      }
+    },
+    "soilDermal": {
+      "cdi": {
+        "arsenic": "1.18e-5",
+        "benzene": "3.94e-5",
+        "benzo(a)pyrene": "3.94e-5",
+        "tphAliphaticC12C16": "3.94e-5"
+      },
+      "risk": {
+        "arsenic": "7.60e-6",
+        "benzene": "4.9e-7",
+        "benzo(a)pyrene": "1.2e-4",
+        "tphAliphaticC12C16": "NQ"
+      },
+      "hi": {
+        "arsenic": "3.94e-2",
+        "benzene": "NQ",
+        "benzo(a)pyrene": "NQ",
+        "tphAliphaticC12C16": "3.9e-4"
+      }
+    },
+    "waterIngestion": {
+      "cdi": {
+        "arsenic": "5.48e-2",
+        "benzene": "5.48e-2",
+        "benzo(a)pyrene": "5.48e-2",
+        "tphAliphaticC12C16": "5.48e-2"
+      },
+      "risk": {
+        "arsenic": "3.52e-2",
+        "benzene": "6.81e-4",
+        "benzo(a)pyrene": "1.71e-1",
+        "tphAliphaticC12C16": "NQ"
+      },
+      "hi": {
+        "arsenic": "1.83e2",
+        "benzene": "NQ",
+        "benzo(a)pyrene": "NQ",
+        "tphAliphaticC12C16": "5.48e-1"
+      }
+    },
+    "waterDermal": {
+      "cdi": {
+        "arsenic": "1.26e-4",
+        "benzene": "2.65e-3",
+        "benzo(a)pyrene": "1.51e-1",
+        "tphAliphaticC12C16": "1.03e0"
+      },
+      "risk": {
+        "arsenic": "8.10e-5",
+        "benzene": "3.29e-5",
+        "benzo(a)pyrene": "4.73e-1",
+        "tphAliphaticC12C16": "NQ"
+      },
+      "hi": {
+        "arsenic": "4.20e-1",
+        "benzene": "NQ",
+        "benzo(a)pyrene": "NQ",
+        "tphAliphaticC12C16": "1.03e1"
+      }
+    }
+  },
+  "deferred": [
+    "Inhalation in Shower (needs the M7 shower model)",
+    "Ingestion of Root Vegetables (M9)"
+  ]
+}

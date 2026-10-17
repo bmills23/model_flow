@@ -318,3 +318,25 @@ tree for a read-only job). Raw files are committed and verified by SHA-256 again
 `packages/data/raw/rsl/2024-11/manifest.json` before every build; all three downloads matched the
 checksums in the data plan. The root gate gained `data:check` (regenerate, then `git diff --quiet` on
 `packages/data/generated`). Generated JSON and raw files are excluded from Prettier.
+
+## 2026-10-16: M4 slice E1, legacy exposure kernels and presets
+
+Implemented `exposure/{units,legacy,receptorsLegacy}.ts` (not yet registered as a method; the registry
+and `index.ts` exports wait for the modern kernels). Judgment calls, open to overturn:
+
+- **Exhibit readings (RAGS A 6-12, 6-13, 6-15).** Read from page renders (see the methods note's table
+  of printed pages). Two values are ambiguous. (1) Surface area is given for males and females; the
+  presets use the male values (adult 1.94 m^2, child 3 to under 6 yr 0.728 m^2) because the exhibit
+  lists males first and its 70 kg adult is the male reference. A female value is a user entry. (2) The
+  exhibits give 2.6 h/d and 7 d/yr as national swimming averages and two single-soil adherence values
+  for hands. Ruling 14 stands (no national default for recreational time or frequency), so none of
+  them is a preset, and soil skin area and adherence are blank; the values are recorded in the methods
+  note. A pathway lacking a factor is not computed and warned, never computed as zero.
+- **Child body weight 15 kg** (`epa1991sdef`, as the methods note's table) although the 1989 exhibit
+  6-14 lists 16 kg; the 1991 directive supersedes it.
+- **Legacy kernels take SI and EPC averages.** The receptor is built from RISC-style units by
+  `legacyReceptor`; an EPC is a constant or the two window averages (cancer, noncancer). Reducing a
+  series to those windows is a separate piece and is not in this slice.
+- **Inhalation breathing rate is entered per hour while exposed** (m^3/h, as the note's table), so the
+  20 m^3 of a workday is 2.5 m^3/h over an 8 h exposure time.
+
