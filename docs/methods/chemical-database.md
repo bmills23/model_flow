@@ -2,8 +2,9 @@
 
 The plan for `chemicals.json` and `tox.json`, the database that replaces RISC5's hand-maintained
 128-chemical table (ROADMAP section 3, row "Ch. 10"). RISC5's database is not copied or consulted for
-values; its chapter 10 was read only to see which properties RISC5 carries. Status: plan written
-2026-10-16 (M4 stage 1); build landed in slice D1 (`packages/data/src/rsl`, output in `packages/data/generated/rsl-2024-11/`). The choices below are DEFAULT rulings recorded in
+values; its chapter 10 was read only to see which properties RISC5 carries. Status: DONE 2026-10-16 (M4). The plan was
+written in M4 stage 1; the build landed in slice D1 (`packages/data/src/rsl`, output in `packages/data/generated/rsl-2024-11/`); the
+web screen reads it through `apps/web/src/risk/chemicalDb.ts` (slice W1). The choices below are DEFAULT rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M4 block).
 
 ## Which edition is current

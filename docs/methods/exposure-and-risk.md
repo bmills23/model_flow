@@ -9,18 +9,7 @@ RISC5's rather than a guidance document's, it is marked "RISC5 choice" and becom
 `risc5Choice` metadata. The chemical and toxicity database that feeds this process is planned in
 `docs/methods/chemical-database.md`.
 
-Status: methods note, reference check, data plan and fixture plan done 2026-10-16 (stage 1). The
-legacy kernels, receptor presets and the Table R-9 and hand-case L1 tests are written (slice E1,
-`packages/engine/src/processes/exposure/{units,legacy,receptorsLegacy}.ts`). The modern kernels,
-life-stage receptors and presets, and the hand cases M1 and M2, the RSL independent check and the RSL
-default-parameter comparison are written (slice E2,
-`packages/engine/src/processes/exposure/{modern,dermal,lifeStages,receptorsModern}.ts`). The scenario
-runner (series windows, the maximizing start time, the M1 breakthrough adapter, two receptors and the
-additivity rules, slice E3: `exposure/{averaging,epc,checks,scenario,index}.ts` and
-`risk/{additivity,summary}.ts`) is written, and both methods are registered
-(`exposure.rags-a-1989`, `exposure.rags-e-f-2014`) with their citations marked used. The database
-adapter and the screen are not started. The scope calls below are DEFAULT rulings recorded in
-`docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
+Status: DONE 2026-10-16 (M4). Methods note, reference check, data plan and fixture plan (stage 1); legacy and modern kernels, presets and hand cases (slices E1 and E2, `packages/engine/src/processes/exposure/`); the scenario runner, series windows, the M1 adapter, additivity and registration (slice E3, `exposure/` and `risk/additivity.ts`, `risk/summary.ts`, registered as `exposure.rags-a-1989` and `exposure.rags-e-f-2014`); and the screen at `#/risk` (slice W1, `apps/web/src/risk/`). The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
 
 ## What the process is
 
