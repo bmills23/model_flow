@@ -35,3 +35,10 @@ No published numeric example of the DeVaull model could be verified (the paper i
 BioVapor manual prints no worked case with outputs), so slice V5 (`test/vapor-devaull.test.ts`) rests on
 identities (L_a = 0 and k_w = 0 equal Johnson and Ettinger, L_a entered equals the dominant-layer model
 with layer 3 absent) and hand cases built from independent closed forms. There is no fixture file.
+
+## visl.json: VISL calculator values (not obtained)
+
+The online VISL calculator was not run, so slice V6 (`test/vapor-screening.test.ts`) uses the fallback in the
+methods note: identity 8c (groundwater screening level times AF times H' times 1000 L/m^3 equals the target
+indoor air) against the RSL resident air values for benzene and naphthalene already used by M4. No printed
+VISL figure is asserted.

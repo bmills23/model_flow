@@ -518,8 +518,8 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
     printed output repeats Table R-5's and no box reading reproduces it, so the box hand value (2.5444e-6
     mg/m^3) is asserted at 1e-9 and the printed value is a named exception. Appendix J example: 0.01
     absolute on the normalized concentrations (they are figure readings). EPA 2004 Appendix C example:
-    half a unit in the third printed figure, viscosity not asserted. VISL calculator values: the engine
-    rounds to the printed figures. Identities 1e-12 (1e-9 for limits, 1e-6 for quadrature mass balances);
+    half a unit in the third printed figure, viscosity not asserted. VISL calculator values: not obtained
+    (calculator not run), so identity 8c against the RSL resident air values stands in at 1e-12. Identities 1e-12 (1e-9 for limits, 1e-6 for quadrature mass balances);
     hand cases 1e-9. SSG volatilization factor against Table 3-A: 4 percent (the printed values have two
     significant figures and the table's Koc, H' and diffusivity inputs are rounded; observed 0.8 to 3.6
     percent). Jury against the finite-volume solution: 2e-4 (observed 6e-5 at most).

@@ -420,7 +420,7 @@
   {
     "key": "epa2015vi",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2015,
     "title": "OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air",
@@ -433,7 +433,7 @@
   {
     "key": "epa2015pvi",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2015,
     "title": "Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites",
@@ -579,7 +579,7 @@
   {
     "key": "lahvis2013",
     "type": "review",
-    "status": "planned",
+    "status": "used",
     "authors": "Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E.",
     "year": 2013,
     "title": "Vapor intrusion screening at petroleum UST sites",
@@ -605,7 +605,7 @@
   {
     "key": "epavisl",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2026,
     "title": "Vapor Intrusion Screening Level User's Guide",

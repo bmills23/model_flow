@@ -316,6 +316,33 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013>
   - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
 
+#### Empirical attenuation factors (EPA 2015)
+
+- Kind: Modern
+- Method id: `vapor.attenuation-factor-2015`
+- Summary: Indoor air as a generic attenuation factor times the vapor concentration of the medium (groundwater through its equilibrium vapor at the groundwater temperature, sub-slab or exterior soil gas, crawlspace air). An empirical screening option, not a fate model.
+- Assumptions:
+  - Generic residential factors from the EPA 2015 technical guide, upper-percentile empirical values.
+  - The groundwater factor acts on the vapor in equilibrium with groundwater, H prime at the groundwater temperature.
+  - Not intended for a source less than 5 ft below the foundation or where preferential pathways exist.
+- Sources:
+  - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf>
+  - U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide>
+  - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf>
+
+#### Petroleum vapor intrusion vertical separation screen (EPA 2015)
+
+- Kind: Modern
+- Method id: `vapor.pvi-screen-2015`
+- Summary: A screened-out or further-assessment verdict from the clean-soil separation between the contamination and the building: 6 ft for a dissolved source, 15 ft for LNAPL under a building with a side shorter than 66 ft, with precluding factors forcing further assessment.
+- Assumptions:
+  - The Table 3 thresholds classify the source as dissolved or LNAPL; the separation is clean, biologically active soil.
+  - A verdict, not a concentration: it does not predict indoor air.
+  - Precluding factors (preferential pathways, high-ethanol blends, lead scavengers, a larger building over LNAPL, extensive impermeable cover, contamination in contact with the building) force further assessment.
+- Sources:
+  - U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites>
+  - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -336,7 +363,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013>
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x>
-- Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems].
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
@@ -356,10 +382,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
-- U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites>
-- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf>
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
-- U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
@@ -417,7 +440,7 @@ Every entry in the reference database, alphabetical by author.
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013> [planned]
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x> [planned]
-- Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [planned]
+- Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [used]
 - Lenhard, R.J., Parker, J.C., Mishra, S. (1989). On the correspondence between Brooks-Corey and van Genuchten models. Journal of Irrigation and Drainage Engineering. 115(4):744-751. <https://doi.org/10.1061/(ASCE)0733-9437(1989)115:4(744)> [used]
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers]. [planned]
 - MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems]. [planned]
@@ -457,15 +480,15 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252> [used]
 - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf> [used]
 - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9200.1-120, February 6, 2014. <https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf> [used]
-- U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites> [planned]
-- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf> [planned]
+- U.S. Environmental Protection Agency (2015). Technical Guide for Addressing Petroleum Vapor Intrusion at Leaking Underground Storage Tank Sites. U.S. Environmental Protection Agency, Office of Underground Storage Tanks. EPA 510-R-15-001, June 2015. <https://www.epa.gov/ust/technical-guide-addressing-petroleum-vapor-intrusion-leaking-underground-storage-tank-sites> [used]
+- U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf> [used]
 - U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [used]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
-- U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide> [planned]
+- U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide> [used]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x> [used]

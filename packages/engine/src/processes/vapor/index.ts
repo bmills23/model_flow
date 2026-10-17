@@ -8,3 +8,5 @@ export * from './jury.js';
 export * from './textures.js';
 export * from './epaJe.js';
 export * from './devaull.js';
+export * from './attenuationFactor.js';
+export * from './pviScreen.js';

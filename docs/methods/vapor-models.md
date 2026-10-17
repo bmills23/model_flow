@@ -378,7 +378,9 @@ calculator does, at 25 deg C unless a groundwater temperature is entered); groun
 laterally extensive vadose soils 0.0005 (an explicit option, warned as needing site geology); sub-slab
 soil gas 0.03; near-source exterior soil gas 0.03; crawlspace air 1.0. Warnings when the guide says the
 generic factor does not apply: a water table less than five feet below the foundation, or a vadose-zone
-source less than five feet below it (`vapor.af-shallow-source`), and preferential pathways (a user flag).
+source less than five feet below it (`vapor.af-shallow-source`), and preferential pathways (a user flag, `vapor.af-preferential-pathway`). The shallow-source warning applies
+to the groundwater and exterior soil gas media. The module also inverts the factor to a screening level
+(`attenuationFactorScreeningLevel`).
 These factors are empirical upper percentiles, not a fate model, and they are offered as the screening
 option beside the models.
 
@@ -398,8 +400,11 @@ size and 15 feet for LNAPL under a building with at least one side shorter than 
 pathways, a high-ethanol blend (E20 or greater), lead scavengers (EDB, 1,2-DCA) in the fuel, a larger
 building over LNAPL, extensive impermeable surface cover, contamination in contact with the building
 (`vapor.pvi-precluded`). The guide's note that a dissolved source above 1 mg/L benzene may behave like
-LNAPL is shown as information. Distances are entered in feet or metres; the thresholds are stored in
-feet, as published.
+LNAPL is shown as information. Distances are metres in the engine (the web converts feet); the thresholds are stored in
+feet, as published. A concentration exactly at a threshold is not above it. A building with every side at
+least 66 ft counts as larger (precluding for LNAPL); an LNAPL source needs the shortest building side.
+With no concentration and no source type the source is treated as dissolved with a warning
+(`vapor.pvi-source-unclassified`).
 
 ## Modern outdoor air: soil volatilization factor (`outdoorAir.ssg-vf-1996`)
 
@@ -645,6 +650,9 @@ Warnings (codes are part of the result):
 | `vapor.no-degradation-rate` | DeVaull | a chemical has no k_w class |
 | `vapor.oxygen-demand-incomplete` | DeVaull options 2 and 3 | no total hydrocarbon vapor concentration given |
 | `vapor.af-shallow-source` | AF | water table or vadose source less than 5 ft below the foundation |
+| `vapor.af-fine-grained` | AF | the fine-grained groundwater factor (0.0005) is chosen; it needs site geology |
+| `vapor.af-preferential-pathway` | AF | the user flags preferential pathways |
+| `vapor.pvi-source-unclassified` | PVI screen | no concentration or source type was given; treated as dissolved |
 | `vapor.pvi-precluded` | PVI screen | a precluding factor is flagged |
 | `outdoorAir.box-shorter-than-source` | box | box length < source length along the wind |
 | `outdoorAir.mixed-dispersion` | outdoor input | box and Q/C contributions for the same area |
@@ -715,12 +723,12 @@ printed values, not from these trials.
    sheet's permeability terms (S_te 0.257, k_i 1.85e-9, k_rg 0.854, k_v 1.58e-9 cm^2) are checked as
    computed values only. The printed air viscosity at 10 deg C (1.75e-4 g/(cm s)) is not asserted
    because the guide does not state the formula and the example enters Q_soil.
-7. **VISL calculator values.** Slice V6 runs EPA's online VISL calculator once for five chemicals
-   (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; residential, target risk
-   1e-6, hazard quotient 1, 25 deg C) and records inputs and outputs with the date, as ROADMAP section 6
-   allows for EPA calculators; the engine's groundwater and soil gas screening levels must round to the
-   calculator's printed figures. If the calculator cannot be run, the fixture becomes the identity
-   below (8c) against the RSL resident air table values already used by M4, and the README says so.
+7. **VISL calculator values (not obtained).** The online VISL calculator could not be run in slice V6, so the
+   fixture is the fallback: identity (8c) against the RSL resident air table values already used by M4
+   (benzene 0.36 and naphthalene 0.083 ug/m^3 at target risk 1e-6), in `test/fixtures/vapor/visl.json`, and
+   the README says so. No printed VISL figure is asserted; running the calculator for the five chemicals
+   (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; residential, 1e-6, hazard
+   quotient 1, 25 deg C) remains open.
 8. **Identities** (1e-12 relative unless stated). (a) Dominant layer with lambda = 0 equals J&E for the
    same column. (b) DeVaull with L_a = 0 equals J&E with the same foundation term; DeVaull with L_a entered
    equals the dominant layer with layer 3 = 0 (1e-10). (c) Attenuation-factor groundwater screening level

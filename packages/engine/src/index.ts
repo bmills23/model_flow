@@ -12,10 +12,12 @@ import {
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 import { exposureLegacy, exposureModern } from './processes/exposure/index.js';
 import {
+  vaporAttenuationFactor2015,
   vaporDevaull2007,
   vaporDominantLayer1998,
   vaporJe1991,
   vaporJeEpa,
+  vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
@@ -50,3 +52,5 @@ registry.register(vaporJe1991);
 registry.register(vaporDominantLayer1998);
 registry.register(vaporJeEpa);
 registry.register(vaporDevaull2007);
+registry.register(vaporAttenuationFactor2015);
+registry.register(vaporPviScreen2015);
