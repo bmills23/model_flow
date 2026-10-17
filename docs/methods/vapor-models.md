@@ -349,10 +349,19 @@ water-phase first-order rate k_w (loss per soil volume k_w theta_w C_v / H).
   arriving from the source. With R = 0 this is a quadratic with the closed form
   L_a / L_T = D_O O / (D_O O + Y D C_T); with R > 0 it is a cubic with a single root in [0, L_max]
   (L_max = L_T, or the depth sqrt(2 D_O O / R) at which respiration alone exhausts the oxygen), found with
-  Brent. (3) the coupled solution: L_a is found so that the oxygen supply D_O O / L_a just meets the demand,
-  R L_a plus the oxygen mass ratio times the chemical degraded in the aerobic layer with finite rates
-  (a monotone one-dimensional root find on L_a in [0, L_T], Brent from `numerics`); if the supply exceeds the
-  demand at L_a = L_T the layer is wholly aerobic, and with no oxygen it is wholly anaerobic. In both
+  Brent. (3) the coupled solution, derived from the same governing equation: with s the depth below the
+  foundation, oxygen obeys D_O O'' = R + Y kappa C(s) across the aerobic layer, with O(0) = O and, at the
+  aerobic base where the oxygen is used up and nothing below consumes it, O(L_a) = 0 and O'(L_a) = 0.
+  Integrating twice gives D_O O = integral from 0 to L_a of s (R + Y kappa C(s)) ds: the supply meets the
+  first moment of the demand, R L_a^2 / 2 plus Y kappa times the first moment of the hyperbolic hydrocarbon
+  profile, which in closed form is D [C_a (a coth a - 1) + C_b (1 - a / sinh a)] for the profile with C_a at
+  the aerobic base and C_b at the foundation. L_a is the root of that balance on [0, L_T] (Brent from
+  `numerics`); if the supply exceeds the demand at L_a = L_T the layer is wholly aerobic, and with no oxygen
+  it is wholly anaerobic. Option 2 is the same balance with the hydrocarbon consumed at a point sink at
+  the front (its first moment is L_a times the flux), so the two options share the oxygen physics: with no
+  hydrocarbon both give sqrt(2 D_O O / R), and option 3 tends to option 2 as the degradation rate grows.
+  Tests check option 3 against a finite-difference solve of the oxygen equation and both options against
+  those two limits. In both
   options the total hydrocarbon is assumed to move with the diffusivity of, and degrade at the rate of, the
   chemical of concern. Baseline respiration defaults to 1.69 mg O2 per g organic carbon per day times
   f_oc (`api2012biovapor` Appendix C, from `devaull2007`). The oxygen demand of each chemical uses its
@@ -750,7 +759,10 @@ printed values, not from these trials.
    the source doubles; the soil source stops responding above saturation.
 9. **Hand cases** (constructed here, 1e-9 relative): one per method with round inputs, including a
    DeVaull fast-reaction case where the quadratic for L_a / L_T has its root inside (0, 1), and one where
-   oxygen supply exceeds demand (wholly aerobic).
+   oxygen supply exceeds demand (wholly aerobic). The DeVaull coupled option is checked against a
+   finite-difference solve of the oxygen diffusion-reaction equation (1e-5 of O at the aerobic base), the
+   analytic respiration-only depth sqrt(2 D_O O / R) (both options, 1e-9) and the fast-reaction limit at a
+   large degradation rate (1e-3).
 
 No published numeric example of `devaull2007` could be verified (the paper is paywalled and the BioVapor
 manual prints no worked case with outputs), so the DeVaull method rests on the identities and hand cases;
@@ -768,7 +780,7 @@ tests first, runs the engine test file alone, then the gate once.
 | V2 legacy indoor (built; registered by V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
 | V3 outdoor and Jury (built; registered by V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E (built) | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` (registers `vapor.je-1991` and `vapor.dominant-layer-1998` too) |
-| V5 DeVaull (built; registered) | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` (flips `devaull2007` and `api2012biovapor` to `used`) |
+| V5 DeVaull (built; registered) | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction hand cases; coupled against a numerical oxygen solve and the respiration-only and fast-reaction limits; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` (flips `devaull2007` and `api2012biovapor` to `used`) |
 | V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
 | V7 coupling and registration (built) | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |
 

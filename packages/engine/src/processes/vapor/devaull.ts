@@ -212,17 +212,37 @@ function oxygenDepth(
     return { La: brent(f, 0, Lmax, { tol: 1e-14 * LT }).root, DO };
   }
 
-  // Coupled: oxygen supply D_O Oa / La (zero oxygen at the base of the aerobic layer) against the
-  // baseline respiration plus Y times the hydrocarbon degraded in the aerobic layer.
+  // Coupled: oxygen obeys D_O O'' = R + Y kappa C(s) in the aerobic layer (s the depth below the
+  // foundation) with O(0) = Oa; at the aerobic base La the oxygen is used up and nothing below consumes
+  // it, so O(La) = 0 and O'(La) = 0. Integrating twice gives D_O Oa = int_0^La s (R + Y kappa C) ds:
+  // the supply meets the first moment of the demand, R La^2 / 2 plus Y kappa times the first moment of
+  // the hydrocarbon profile. A point sink at the front gives option 2 exactly.
   const g = (La: number): number => {
     const s = solveColumn(La, LT - La, p.D, p.kappa, p.G);
-    const degraded = p.D * s.k * (s.ca + s.cb) * s.tanhHalf * p.demandVapor;
-    return (DO * Oa) / La - R * La - Y * degraded;
+    const moment = p.D * aerobicMoment(s) * p.demandVapor;
+    return DO * Oa - (R * La * La) / 2 - Y * moment;
   };
   if (g(LT) >= 0) return { La: LT, DO, wholly: 'aerobic' };
-  const lo = LT * 1e-9;
-  if (g(lo) <= 0) return { La: 0, DO, wholly: 'anaerobic' };
-  return { La: brent(g, lo, LT, { tol: 1e-14 * LT }).root, DO };
+  return { La: brent(g, 0, LT, { tol: 1e-14 * LT }).root, DO };
+}
+
+/**
+ * kappa int_0^La s C(s) ds / (D Cs), the first moment (depth below the foundation) of the degradation
+ * in the aerobic layer for the hyperbolic profile C(s) = [Cb sinh(k (La - s)) + Ca sinh(k s)] / sinh a:
+ * ca (a coth a - 1) + cb (1 - a / sinh a), written with e^-2a so that large a neither overflows nor
+ * cancels, and with the series for small a (both brackets are a^2 / 3 and a^2 / 6 to leading order).
+ */
+function aerobicMoment(s: ColumnSolution): number {
+  const a = s.a;
+  if (a < 1e-3) {
+    const a2 = a * a;
+    return s.ca * (a2 / 3 - (a2 * a2) / 45) + s.cb * (a2 / 6 - (7 * a2 * a2) / 360);
+  }
+  const E = Math.exp(-2 * a);
+  const oneMinusE = -Math.expm1(-2 * a);
+  const cothTerm = (a * (1 + E)) / oneMinusE - 1;
+  const cschTerm = 1 - (2 * a * Math.exp(-a)) / oneMinusE;
+  return s.ca * cothTerm + s.cb * cschTerm;
 }
 
 export function devaullRun(input: DevaullInput): DevaullResult {

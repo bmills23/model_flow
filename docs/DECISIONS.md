@@ -492,7 +492,9 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
     with no class is non-degrading and warned. Oxygen mass ratios come from committed formulas for the
     classed chemicals. Oxygen diffusivities are required inputs until a verifiable source is found.
 11. **DeVaull oxygen options:** entered aerobic depth, fast-reaction depth (closed form without respiration, a
-    bracketed root with it), and the coupled solution (a monotone root find); baseline respiration 1.69 mg O2/(g organic carbon day) times f_oc
+    bracketed root with it), and the coupled solution (a bracketed root find); both use one oxygen balance,
+    derived from D_O O'' = R + Y kappa C with the oxygen and its flux zero at the aerobic base, so the supply
+    D_O O meets the first moment of the demand (option 2 is its point-sink limit); baseline respiration 1.69 mg O2/(g organic carbon day) times f_oc
     (forced by `api2012biovapor`).
 12. **Empirical attenuation factors** are those of `epa2015vi` Table 6-1 (forced by the source); the
     groundwater factor applies to H'(T_gw) C_gw at 25 deg C unless a temperature is entered, as VISL does.

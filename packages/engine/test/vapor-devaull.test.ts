@@ -279,36 +279,113 @@ describe('oxygen option 3: coupled solution', () => {
     ...over,
   });
 
-  /** Independent oxygen residual with plain cosh and sinh. */
-  function residual(La: number, G3: number, total: number, R: number): number {
+  /**
+   * Independent oracle: the oxygen diffusion-reaction equation D_O O'' = R + Y kappa C(s) on the aerobic
+   * layer (s the depth below the foundation), solved by second-order finite differences with O(0) = O_a
+   * and no oxygen flux into the anaerobic layer (O'(L_a) = 0). The hydrocarbon profile is the plain
+   * cosh / sinh solution. Returns O(L_a) / O_a, which is zero when L_a is the oxygen-limited depth.
+   */
+  function oxygenAtBase(La: number, G3: number, total: number, R: number, n = 4000): number {
     const LT = layer.thickness;
     const k = Math.sqrt(kappa / D);
     const a = k * La;
-    const gb = D / (LT - La);
-    const cb = cbOverCs(La, LT, G3);
+    const cb = cbOverCs(La, LT, G3) * total;
     const ca = (Math.cosh(a) + (G3 * Math.sinh(a)) / (D * k)) * cb;
-    const degraded = D * k * (ca + cb) * Math.tanh(a / 2) * total;
-    void gb;
-    return (DO * O2atm) / La - R * La - Y * degraded;
+    const conc = (s: number): number =>
+      (cb * Math.sinh(k * (La - s)) + ca * Math.sinh(k * s)) / Math.sinh(a);
+    const h = La / n;
+    // Unknowns O_1..O_n (O_0 = O_a); Thomas algorithm on the tridiagonal system.
+    const sub: number[] = [];
+    const diag: number[] = [];
+    const sup: number[] = [];
+    const rhs: number[] = [];
+    for (let i = 1; i <= n; i++) {
+      const S = (R + Y * kappa * conc(i * h)) / DO;
+      if (i < n) {
+        sub.push(1);
+        diag.push(-2);
+        sup.push(1);
+        rhs.push(S * h * h - (i === 1 ? O2atm : 0));
+      } else {
+        sub.push(2);
+        diag.push(-2);
+        sup.push(0);
+        rhs.push(S * h * h);
+      }
+    }
+    for (let i = 1; i < n; i++) {
+      const m = sub[i]! / diag[i - 1]!;
+      diag[i] = diag[i]! - m * sup[i - 1]!;
+      rhs[i] = rhs[i]! - m * rhs[i - 1]!;
+    }
+    return rhs[n - 1]! / diag[n - 1]! / O2atm;
   }
 
-  it('finds La where the oxygen supply just meets the demand (root inside the column)', () => {
+  it('finds La where oxygen just runs out (numerical oxygen diffusion-reaction solve)', () => {
     const out = devaullRun(base({ foundation: { h: Infinity }, oxygen: o3() }));
     expect(out.aerobicDepth).toBeGreaterThan(0);
     expect(out.aerobicDepth).toBeLessThan(layer.thickness);
-    expect(
-      Math.abs(residual(out.aerobicDepth, q, 0.5, 0)) / ((DO * O2atm) / out.aerobicDepth),
-    ).toBeLessThan(1e-8);
+    expect(Math.abs(oxygenAtBase(out.aerobicDepth, q, 0.5, 0))).toBeLessThan(1e-5);
   });
 
-  it('includes baseline respiration in the demand', () => {
+  it('includes baseline respiration in the demand (numerical oxygen solve)', () => {
     const R = 2e-8;
     const out = devaullRun(base({ foundation: { h: Infinity }, oxygen: o3({ respiration: R }) }));
     const without = devaullRun(base({ foundation: { h: Infinity }, oxygen: o3() }));
     expect(out.aerobicDepth).toBeLessThan(without.aerobicDepth);
-    expect(
-      Math.abs(residual(out.aerobicDepth, q, 0.5, R)) / ((DO * O2atm) / out.aerobicDepth),
-    ).toBeLessThan(1e-8);
+    expect(Math.abs(oxygenAtBase(out.aerobicDepth, q, 0.5, R))).toBeLessThan(1e-5);
+  });
+
+  it('respiration alone gives the analytic penetration depth sqrt(2 D_O O / R), as option 2 does', () => {
+    const R = 1e-7;
+    const Lmax = Math.sqrt((2 * DO * O2atm) / R);
+    expect(Lmax).toBeLessThan(layer.thickness);
+    const coupled = devaullRun(
+      base({ oxygen: o3({ respiration: R, totalHydrocarbonVapor: 0 }) }),
+    ).aerobicDepth;
+    const fast = devaullRun(
+      base({
+        oxygen: {
+          mode: 'fastReaction',
+          ...oxy,
+          atmosphericConcentration: O2atm,
+          massRatio: Y,
+          respiration: R,
+          totalHydrocarbonVapor: 0,
+        },
+      }),
+    ).aerobicDepth;
+    expect(rel(coupled, Lmax)).toBeLessThan(1e-9);
+    expect(rel(fast, Lmax)).toBeLessThan(1e-9);
+  });
+
+  it('tends to the fast-reaction depth as the degradation rate grows', () => {
+    const R = 5e-9;
+    const fast = devaullRun(
+      base({
+        oxygen: {
+          mode: 'fastReaction',
+          ...oxy,
+          atmosphericConcentration: O2atm,
+          massRatio: Y,
+          respiration: R,
+          totalHydrocarbonVapor: cvs,
+        },
+      }),
+    ).aerobicDepth;
+    let prevGap = Infinity;
+    for (const rate of [1, 100, 10000]) {
+      const out = devaullRun(
+        base({
+          degradationRate: rate,
+          oxygen: o3({ respiration: R, totalHydrocarbonVapor: cvs }),
+        }),
+      );
+      const gap = rel(out.aerobicDepth, fast);
+      expect(gap).toBeLessThan(prevGap);
+      prevGap = gap;
+    }
+    expect(prevGap).toBeLessThan(1e-3);
   });
 
   it('is wholly aerobic when the supply exceeds the demand over the whole column', () => {
