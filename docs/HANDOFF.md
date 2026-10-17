@@ -1,18 +1,104 @@
-# HANDOFF (written from the tree, 2026-10-16, end of M4)
+# HANDOFF (written from the tree, 2026-10-17, end of M5, M6 and M8)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (sections 7
 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or skipping
 a done one.
 
 ## State of the tree
-- M4 is merged to main (`2d1a452`) and pushed. Before M4 the tree was `main` at M3. Gate: lint, prettier, typecheck, engine 574 (40 files), data 39 (3 files), web 234
-  (29 files), `docs:check`, `data:check`, build. Pages deploys from main:
-  https://bmills23.github.io/model_flow/
-- Branches: `m0-foundation`, `m1-groundwater-engine`, `m2-vadose-leaching`, `m3-saturated-source` and
-  `m4-exposure-risk` are ancestors of main (safe to delete). `m1-groundwater-ui` is NOT an ancestor of main (its commits from
-  10931c1 to 5d6c6c7 carry different hashes from what landed); confirm its content is on main before
-  deleting it.
-- CI cost: about 3 billed minutes per push to main; docs-only pushes trigger nothing.
+- Branch `wave-m5-m6-m8` (tip `c27a387`) holds M5, M6 and M8 merged on top of main at M4 (`2d1a452`). It
+  is not on main and not pushed; merging to main and pushing are Bryan's call. Gate on the branch: lint,
+  prettier, typecheck, engine 954 tests (62 files), data 130 (6 files), web 407 (54 files), `docs:check`,
+  `data:check`, build. Pages deploys from main: https://bmills23.github.io/model_flow/
+- Branches that are ancestors of this branch (safe to delete once it lands): `m0-foundation`,
+  `m1-groundwater-engine`, `m2-vadose-leaching`, `m3-saturated-source`, `m4-exposure-risk`,
+  `m5-cleanup-levels`, `m6-vapor-models`, `m8-surface-water`. `m1-groundwater-ui` is NOT an ancestor (its
+  commits from 10931c1 to 5d6c6c7 carry different hashes from what landed); confirm its content is on main
+  before deleting it.
+- Test time: `apps/web/src/surfaceWater/compute.test.ts` takes about 200 s, the web suite about 206 s, and
+  the full local gate about 4 min 45 s.
+- CI cost: about 3 billed minutes per push to main before this wave; re-measure after the next
+  push. Docs-only pushes trigger nothing.
+- Reference counts (`packages/engine/src/references/references.json`, 102 entries): 51 `used`, 38
+  `planned`, 8 `data`, 5 `fixture`. The 18 `planned` entries with square-bracketed descriptor titles are
+  the only bracketed titles.
+
+## M5 landed (cleanup levels, Ch. 8)
+- Methods note `docs/methods/cleanup-levels.md`. Rulings: DECISIONS.md "M5 cleanup levels scope" block
+  (19 rulings).
+- Engine `packages/engine/src/processes/cleanup/`: `direct.ts` (closed-form inversion of the nine M4
+  direct pathways), `chains.ts` (modeled chains from the M1 dissolved source, the M2 vadose source and the
+  M3 saturated source through the receptor well), `solve.ts` (Brent in ln C with a verified linear shortcut,
+  secant as a parity diagnostic only), `targets.ts` (cancer risk, hazard quotient, MCL and user
+  concentrations; individual, cumulative and equal allocation), `ssg.ts` (Soil Screening Guidance
+  soil-to-groundwater level, DAF 1, 20 or site-specific, mass-limit level, Csat check), `checks.ts`,
+  `index.ts`. Registered: `cleanup.rags-b-1991` (legacy), `cleanup.rags-e-f-2014`, `cleanup.ssg-leaching`
+  and `cleanup.modeled-chains` (modern; the Brent solve is its own method so the root finder is cited where
+  it runs).
+- Web `apps/web/src/cleanup/` at `#/cleanup`: direct-pathway table, the soil screening leaching panel (DAF,
+  MCL, user or tap water target, mass-limit level, published RSL SSL beside the computed level) and the
+  modeled-chain section (worker run, convergence panel, metric chart on log axes). A blank or zero
+  cumulative entry is shown as not quantified; an MCL not in mass per volume is never a target.
+- Data: the RSL build (`packages/data/src/rsl/`) now carries the MCL (106 rows with a value, 25 `(G)`
+  flagged by `mclGroup`, one `mclUnit` for asbestos fibers/L) and the published SSL columns (750 rows) in
+  `generated/rsl-2024-11/tox.json`, and writes `cleanup-chemicals.json` (864 rows). Same RSL November 2024
+  provenance as M4.
+- Fixtures: SSG 1996 Table A-1 (30 values), the RSL MCL-based SSL (91 of 91 rows, in the data package
+  test), RSL risk-based SSL and tap water levels, hand cases, round trips and identities.
+- Deferred (the methods note and ROADMAP row list them): vapor chains as modeled targets, shower inhalation
+  from tap water, particulates, irrigation, surface water as a target medium, plant uptake, TPH fractions,
+  probabilistic levels, target-organ segregation, pH-dependent Kd and Koc.
+- References: wave totals above (51 used, 38 planned, 8 data, 5 fixture).
+
+## M6 landed (vapor models, App. D, E, F, J; K replaced)
+- Methods note `docs/methods/vapor-models.md`. Rulings: DECISIONS.md "M6 vapor models scope" block and
+  "M6 web slices W2 and W3" block.
+- Engine `packages/engine/src/processes/vapor/` (`legacyJe.ts`, `dominantLayer.ts`, `epaJe.ts`,
+  `devaull.ts`, `attenuationFactor.ts`, `pviScreen.ts`, `jury.ts`, `coupling.ts`, `source.ts`,
+  `building.ts`, `henry.ts`, `textures.ts`, `units.ts`, `index.ts`) and
+  `packages/engine/src/processes/outdoorAir/` (`box.ts`, `ssgVf.ts`, `qOverC.ts`, `emissions.ts`,
+  `index.ts`; the interface M7 plugs into). Registered: `vapor.je-1991` (soil, soil gas and groundwater
+  sources), `vapor.dominant-layer-1998`, `vapor.je-epa`, `vapor.devaull-2007`,
+  `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` (a verdict, not a concentration),
+  `vapor.jury-bam` (zero water flux only), `outdoorAir.box` and `outdoorAir.ssg-vf-1996`.
+- Web `apps/web/src/vapor/` at `#/vapor`: legacy and modern J&E on one input set, chemical picker over the
+  vapor chemical data, log-axis vapor profile with strata bands, outdoor air box and SSG volatilization
+  factor, attenuation factor and petroleum screen panels, Table R-3 check. Feeds: water table, vadose and
+  saturated sources into the vapor screen; indoor and outdoor air (with method origins) into exposure and
+  risk.
+- Data: `packages/data/src/vapor/` builds `generated/vapor/vapor-chemicals.json` (112 chemicals) from the
+  committed EPA 2004 J&E lookup table (`packages/data/raw/vapor/epa2004je/`, checksummed PDF and CSV)
+  merged with the RSL values, plus the BioVapor k_w classes. Two lookup entries fail the plausibility
+  screen and are listed in `screenedEpa2004je`; three rows are unmatched.
+- Fixtures: Tables R-3, R-4 and R-5 (0.5 percent), the Appendix J example (loose), the EPA 2004 Appendix C
+  worked example, VISL identity fallback, identities and hand cases, DeVaull against a finite-difference
+  oxygen solve. Table R-6 is a named exception (printed value duplicates R-5).
+- Deferred: Appendix K (see open items), PVIScreen sampling (M10), shower, sprinkler and particulates (M7),
+  vapor cleanup levels, Jury with nonzero water flux, lateral offsets and three-dimensional models.
+- References: wave totals above.
+
+## M8 landed (surface water and sediment, App. L, M, N)
+- Methods note `docs/methods/surface-water.md`. Rulings: DECISIONS.md "M8 surface water and sediment scope"
+  block (stage 1 and the data slices D1 and D2).
+- Engine `packages/engine/src/processes/surfaceWater/`: `legacy.ts` (well-mixed box), `discharge.ts`
+  (Darcy), `reach.ts`, `sediment.ts`, `modern.ts` (bank-plane mass discharge), `transient.ts`,
+  `downstream.ts`, `coupling.ts` (M1 and M4), `criteria.ts` (comparison, hardness equation), `scenario.ts`,
+  `checks.ts`, `units.ts`, `index.ts`. Registered: `surfaceWater.well-mixed` (legacy) and
+  `surfaceWater.mass-discharge` (modern).
+- Web `apps/web/src/surfaceWater/` at `#/surface-water`: river and lake inputs, Darcy or entered discharge,
+  legacy and modern curves overlaid for surface water and sediment, Table R-8 check, criteria panel with
+  hardness input, and a surface water series offered to the risk screen as the swimming EPC (origin
+  `surfaceWater.well-mixed` or `surfaceWater.mass-discharge`).
+- Data: `packages/data/src/nrwqc/` builds `generated/nrwqc-2026-10-16/` (aquatic life 61 rows, human health
+  128 rows, hardness table for 6 metals) from the committed EPA NRWQC pages in
+  `packages/data/raw/nrwqc/2026-10-16/` (public domain, checksum manifest). `packages/data/src/sediment/`
+  builds `generated/sediment-2026-10-16/benchmarks.json` (811 rows) from EPA Region 4 2018 Tables 2a, 2b and
+  2c (committed PDF with checksum, CSVs with PDF pages and cell shading). 28 rows carry `basisInferred`.
+- Fixtures: Table R-8, kernel identities (box limit, mass balance), hand cases, NRWQC and Region 4 spot
+  values from the pages.
+- Deferred: MacDonald et al. 2000 TEC and PEC (see open items), two-dimensional river mixing, estuaries,
+  site-chemistry criteria, international criteria, ESBs and marine ERL and ERM, human contact with
+  sediment, fish ingestion.
+- References: wave totals above; `epanrwqc`, `epanrwqchh` and `epa2018r4era` are `data`.
 
 ## M4 landed (chemical and toxicity database, direct exposure and forward risk, Ch. 3, 6, 7)
 - Methods note `docs/methods/exposure-and-risk.md` and data plan `docs/methods/chemical-database.md`
@@ -46,10 +132,7 @@ a done one.
   bars, warnings and toxicity sources. `transport/wellFeed.ts` lets a transport result feed the well
   concentration, with origin shown as `transport.<method>`. Zero overflowing elements at 390x844 and 1280,
   light and dark (check script `scratchpad/cdp-check.mjs`, outside the repo).
-- References: 32 `used`, 44 `planned`, 5 `fixture`, 4 `data` (`epa2003toxhier` is `data`: the RSL tables
-  apply its tiers, and `docs/methods/chemical-database.md` cites it as verified). Ten references were
-  flipped to `used` by the M4 methods (titles were already real). The 28 `planned` references with
-  square-bracketed descriptor titles are unchanged.
+- References at the end of M4: 32 `used`, 44 `planned`, 5 `fixture`, 4 `data` (`epa2003toxhier` is `data`).
 - Deferred from M4 (the ROADMAP row says so too): target-organ segregation of the hazard index (the total HI
   is reported with a warning above 1), CompTox gap filling (a blank RSL value stays absent), series EPCs on
   soil pathways (RangeError, soil is constant).
@@ -87,9 +170,8 @@ a done one.
   at 390x844 and 1280, light and dark.
 - The M2 speed test asserts on the fastest of nine timed runs with a 250 ms bound (it flaked under full-suite
   load at a 50 ms bound; see the M4 review fixes for the rationale).
-- References: 22 `used`, 50 `planned`, 4 `fixture`, 3 `data`. `cline1991` stays `planned` and is not
-  cited (only its Crossref metadata could be checked); `feenstra1991` and `falta2005` were checked against
-  their abstracts only.
+- `cline1991` stays `planned` and is not cited (only its Crossref metadata could be checked);
+  `feenstra1991` and `falta2005` were checked against their abstracts only.
 
 ## Open items
 - Schulze-Makuch 2005 coefficients (0.20, 0.44) come from lecture notes quoting the paper, not from the
@@ -99,15 +181,36 @@ a done one.
   they were not checked against the EPRI report.
 - Galya 1987 is a horizontal plane-source paper; the box source derives from Yeh 1981 (the methods note
   says so; the ROADMAP section 3 row is annotated).
-- 28 references still carry square-bracketed descriptor titles (status `planned`); replace each with its
-  verified published title when a milestone marks it `used` (a test enforces this).
-- Timing checks under load: `vadose-legacy.test.ts` (speed, now best of nine under 250 ms) and
-  `groundwater-kernel.test.ts` (plan-view grid, now best of three under 1 s) were made robust to parallel test
-  load. The mass-conservation test in `groundwater-kernel.test.ts` is a triple nested quadrature that timed out
-  at vitest's 5 s default in a failed gate run (5.4 s); it now has a 30 s timeout, asserts mass only, and passes
-  alone. If a timing check fails again, re-run that file alone before treating it as a regression.
-- `docs/ATTRIBUTIONS.md` was dated 2026-10-17 (a UTC day) for a 2026-10-16 change. The generator now uses the
-  local calendar date (`localIsoDate`), and the header reads 2026-10-16.
+- 18 references still carry square-bracketed descriptor titles (all status `planned`); replace each with
+  its verified published title when a milestone marks it `used` (a test enforces this).
+- MacDonald et al. 2000 TEC and PEC values are not shipped. They were removed because they could not be
+  verified; EPA 905/R-00/007 lists the PEC column only. Enter them, each with a page, when the article or a
+  full public reproduction is available (`macdonald2000` is `planned`).
+- The outdoor box cites Hanna, Briggs and Hosker 1982 (`hanna1982`). An ASTM E1739 attribution is
+  unconfirmed and not cited.
+- The Region 4 2018 sediment basis (dry weight or 1 percent OC) comes from cell shading. Rows flagged
+  `basisInferred` (28) include the tan-shaded totals. The report contradicts itself on Florida coastal
+  (Table 2a note says dry weight, the Table 2b note states no unit); recorded in DECISIONS.md.
+- DeVaull 2007: no published numeric example was verified and the Appendix B text was unavailable. The
+  oxygen balances are derived from the governing equation and checked against a numerical solve.
+- VISL calculator values were not obtained. The attenuation-factor identity (against the RSL resident air
+  values) covers two chemicals, benzene and naphthalene. Running the calculator for benzene,
+  trichloroethylene, tetrachloroethylene, naphthalene and ethylbenzene remains open.
+- SSG 1996 Table A-1 fixture: its Koc and H' inputs are unverified, so it checks the partition formula only.
+  The RSL MCL-based SSL fixture (91 of 91) is the binding check.
+- The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not
+  used. The RISC5 Table R-6 printed value duplicates R-5 and is a named exception.
+- RISC5 Appendix K (oxygen-limited, degradation) is not implemented: its only source is an unpublished
+  draft. DeVaull 2007 is the modern alternative.
+- Two EPA 2004 lookup values fail the plausibility screen and are omitted: the sec-butylbenzene enthalpy and
+  the tert-butylbenzene row. No substitutes.
+- Test time: `apps/web/src/surfaceWater/compute.test.ts` takes about 200 s, the web suite about 206 s, and
+  the full local gate about 4 min 45 s. CI cost per push was about 3 billed minutes before this wave;
+  re-measure after the next push.
+- Timing checks under load: `vadose-legacy.test.ts` (speed, best of nine under 250 ms) and
+  `groundwater-kernel.test.ts` (plan-view grid, best of three under 1 s) were made robust to parallel test
+  load. The mass-conservation test in `groundwater-kernel.test.ts` has a 30 s timeout. If a timing check
+  fails again, re-run that file alone before treating it as a regression.
 - Optional extras, not scheduled: persist the vadose, saturated and well feeds across reloads; the transport
   charts measure the padded figure and render about 7 percent small; the web bundle is over 500 kB.
 - The 390x844 viewport check scripts are not in the repo. Recreate them when needed: headless Chrome with
@@ -117,7 +220,10 @@ a done one.
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
-## Queued: M5 cleanup levels (ROADMAP section 7)
-- Back-calculation for direct and modeled pathways, individual vs cumulative options, MCL and user targets;
-  Brent solver (secant for parity checks). EPA Soil Screening Guidance 1996/2002 leaching with a dilution
-  attenuation factor. Start from `docs/ROADMAP.md` section 7 and `docs/DECISIONS.md`.
+## Queued: three tracks (ROADMAP section 7), approved by Bryan
+- M7 (shower, irrigation, particulates, App. G, H, I) after M6. It depends on the outdoor box interface in
+  `packages/engine/src/processes/outdoorAir/` (`outdoorAir.box` and the emission source types): M7 sources
+  plug in through it. M5 follow-up: shower inhalation from tap water joins the cleanup levels then.
+- M9 (plant uptake, ecological screening, TPH fractions) after M7.
+- M10 (uncertainty: Monte Carlo, LHS, Sobol) after M5. PVIScreen sampling lands here.
+- M11 (projects, reports, polish) last.

@@ -1,4 +1,4 @@
-> Status: M4 DONE 2026-10-16 (RSL-derived chemical and toxicity database, direct exposure and forward risk, legacy RAGS 1989 and modern RAGS E/F with the 2014 defaults and ADAF; screen at #/risk). Next: M5 cleanup levels. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
+> Status: M5, M6 and M8 DONE 2026-10-17 (cleanup levels at #/cleanup, vapor models at #/vapor, surface water and sediment at #/surface-water; built on the M4 database and exposure engine, DONE 2026-10-16). Next, on three approved tracks: M7 after M6 (through the outdoorAir interface), M9 after M7, M10 after M5, M11 last. Milestone statuses are maintained in place in section 7; a status here is a claim, grep the tree before trusting it.
 
 # model_flow: open, web-based reimplementation of RISC5-class risk and fate-and-transport modeling
 
@@ -181,16 +181,10 @@ after the first run.
   residual test deferred, region 1 volatilization to M6, cleanup back-calculation to M5). Two-region
   source with water-table fluctuation; feeds M1.
 - **M4 Chemical and toxicity database + direct exposure and forward risk (Ch. 3, 6, 7). DONE 2026-10-16** (rulings in the DECISIONS.md M4 block; methods note `docs/methods/exposure-and-risk.md`). RSL November 2024 database with source tags; the nine direct pathways in legacy and modern variants; carcinogenic risk and hazard index; two receptors with additivity rules; the risk contribution charts. Deferred: target-organ segregation of the hazard index, CompTox gap filling (ruling 10), series EPCs on soil pathways.
-- **M5 Cleanup levels (Ch. 8).** Back-calculation for direct and modeled pathways, individual vs cumulative
-  options, MCL/user targets; Brent solver (and secant for parity checks). EPA Soil Screening Guidance
-  1996/2002 leaching with a dilution attenuation factor (moved here from M2, see DECISIONS.md).
-- **M6 Vapor models (App. D, E, J, K, F).** J&E, GW-to-indoor, dominant layer, oxygen-limited, outdoor box;
-  modern EPA 2004 J&E, DeVaull 2007 oxygen-limited, VISL attenuation factors, PVI vertical-separation
-  screen. Tables R-3..R-6 fixtures. Depth-attenuation plots. Jury et al. 1983 behaviour-assessment
-  volatilization from soil (moved here from M2).
+- **M5 Cleanup levels (Ch. 8). DONE 2026-10-17** (rulings in the DECISIONS.md M5 block; methods note `docs/methods/cleanup-levels.md`). Closed-form back-calculation for the nine direct pathways (legacy RAGS A 1989 and modern RAGS E/F 2014), Brent-solved cleanup levels for the M1, M2 and M3 modeled chains through the receptor well, individual, cumulative and equal allocation, MCL and user targets, and the Soil Screening Guidance 1996/2002 soil-to-groundwater level with a dilution attenuation factor (moved here from M2); screen at `#/cleanup`. Deferred: vapor pathway chains as modeled targets, shower inhalation from tap water, particulates and irrigation (M7), surface water as a target medium, plant uptake and TPH fraction levels (M9), probabilistic levels (M10), target-organ segregation of the hazard index, pH-dependent Kd and Koc.
+- **M6 Vapor models (App. D, E, J, K, F). DONE 2026-10-17** (rulings in the DECISIONS.md M6 block and its web slices block; methods note `docs/methods/vapor-models.md`). Legacy Johnson and Ettinger for soil, soil gas and groundwater sources, the legacy dominant-layer model, the outdoor air box, the modern EPA J&E (2004 equations, 2017 defaults), DeVaull 2007, the EPA 2015 attenuation factors and PVI vertical-separation screen, the Soil Screening Guidance volatilization factor, and Jury behaviour-assessment volatilization (moved here from M2); screen at `#/vapor`. Tables R-3, R-4 and R-5 reproduce; Table R-6 is a named exception. Deferred: the legacy oxygen-limited model (Appendix K, only source an unpublished draft; DeVaull 2007 is the modern alternative), PVIScreen sampling (M10), Jury with nonzero water flux, vapor cleanup levels (the M5 follow-up), lateral offsets and three-dimensional models.
 - **M7 Shower, irrigation, particulates (App. G, H, I).** Foster & Chrostowski vs Little; PEF variants.
-- **M8 Surface water and sediment (App. L, M, N).** Mixing models; criteria tables from public sources
-  only. Table R-8 fixture.
+- **M8 Surface water and sediment (App. L, M, N). DONE 2026-10-17** (rulings in the DECISIONS.md M8 block; methods note `docs/methods/surface-water.md`). Legacy well-mixed river and lake box with Darcy discharge, modern bank-plane mass discharge, transient box, downstream decay and selectable pore water sediment; comparison against EPA national recommended water quality criteria and EPA Region 4 2018 sediment benchmarks, both built from committed public sources; a surface water series feeds the M4 swimming pathways; screen at `#/surface-water`. Table R-8 reproduces. Deferred: the MacDonald et al. 2000 TEC and PEC (not shipped, values unverified), two-dimensional river mixing, estuaries, site-chemistry criteria (copper BLM, aluminum, ammonia, selenium), international criteria, equilibrium partitioning sediment benchmarks and marine ERL and ERM, human contact with sediment, fish ingestion.
 - **M9 Plant uptake and ecological screening (App. O, P, Q).** Trapp & Matthies vs Trapp 2015; Eco-SSLs;
   TPH fractions.
 - **M10 Uncertainty (Monte Carlo).** Legacy exposure-only simple sampling vs modern LHS with rank
@@ -243,10 +237,13 @@ BIOCHLOR/REMChlor (spreadsheets/exe, no source), EPA PVIScreen (Java; source lic
 (free spreadsheet), Italy's Risk-net (free), GSI RBCA Tool Kit (commercial), RISC5 (commercial). No
 open-source tool covers RISC5's scope.
 
-Items still to confirm during the relevant milestone (not blockers): current VISL default attenuation
-factors; PVIScreen source availability; which RSL edition is current when M4 starts (checked 2026-10-16: November 2024, see
+Items still to confirm during the relevant milestone (not blockers): PVIScreen source availability; which RSL edition is current when M4 starts (checked 2026-10-16: November 2024, see
 docs/methods/chemical-database.md); whether ANALGWST
 compiles cleanly with modern gfortran (fallback: port the ~500-line Fortran kernels, public domain).
+Confirmed in M6 (2026-10-17): the VISL default attenuation factors are those of the EPA 2015 Technical
+Guide Table 6-1 (groundwater 0.001, sub-slab and near-source exterior soil gas 0.03), as encoded in
+`vapor.attenuation-factor-2015` (docs/methods/vapor-models.md); the VISL calculator's own printed values
+were not obtained (see HANDOFF open items).
 
 ## 9. Verification (per milestone and before any push)
 
