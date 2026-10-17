@@ -445,3 +445,76 @@ finding changed them (E2 dermal form, 5, 11 and 14). Judgment calls, open to ove
   2026-10-16 (the content change day). The date still moves only when the content changes.
 - **`epa2003toxhier` is a `data` reference.** The RSL tables apply its tiers; the memorandum is not a
   method citation, so it is not `planned` (a planned status reads as an unverified citation).
+
+## 2026-10-16: M6 vapor models scope (stage 1)
+
+The M6 track was approved to start with a methods note first. The note is `docs/methods/vapor-models.md`
+(scope, equations in our own words, coupling, the outdoor interface for M7, data plan, fixture plan and
+the stage 2 and stage 3 slice plan). No engine, data or web code is written in this stage. Nine planned
+references received their verified published titles and six were added (`abreu2006`, `jury1990`,
+`lahvis2013`, `epa2017je`, `epavisl`, `api2012biovapor`), all `planned`.
+
+Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
+
+1. **Scope.** M6 ships `vapor.je-1991` (legacy J&E, soil, soil gas or groundwater to indoor air),
+   `vapor.dominant-layer-1998`, `outdoorAir.box`, `vapor.je-epa` (modern EPA J&E), `vapor.devaull-2007`,
+   `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015`, `outdoorAir.ssg-vf-1996` and `vapor.jury-bam`.
+   Deferred: PVIScreen sampling (M10), shower, sprinkler and particulates (M7), vapor cleanup levels (M5),
+   Jury with nonzero water flux, lateral offsets and three-dimensional models.
+2. **The legacy oxygen-limited model (Appendix K) is not implemented.** Its only source is an unpublished
+   draft, so there is no primary publication to implement from (forced by the clean-room rule), and the
+   Appendix R review says its output was never validated. DeVaull 2007 is the oxygen-limited option.
+3. **One legacy indoor method for all three source kinds.** Appendices D and E share the J&E physics; the
+   groundwater source adds a Henry's-law source and an entered capillary fringe layer.
+4. **Residual-phase source vapor is x S H**, not x P_v M / (R T), matching the M2 and M3 residual test;
+   the vapor-pressure form is reported for comparison only.
+5. **Crack diffusion.** Legacy: the foundation layer's own Millington-Quirk coefficient from its entered
+   porosity and moisture (RISC5 choice, as Tables R-3 and R-5 list the foundation as a layer). Modern: the
+   coefficient of the soil layer at the floor, and L_T excludes the floor (forced by `epa2004je`).
+6. **Legacy air viscosity 1.8e-4 g/(cm s)**, the value with which Tables R-3 and R-4 both reproduce to
+   their printed figures (1.81e-4 gives 8.565 and 7.272, so Table R-4 would round to 7.27 instead of 7.28;
+   both values pass the 0.5 percent tolerance of ruling 17).
+7. **Quasi-steady coupling.** Steady vapor models applied to a source series give an air series at the
+   same times, with `vapor.quasi-steady` warned when the source changes by more than 10 percent within
+   the vapor equilibration time.
+8. **No volatilization loss is added to M3.** Region 1 pore water may serve as a vapor source, but the M3
+   mass balance and its results stay as they are (conservative for groundwater).
+9. **Modern J&E** uses the `epa2004je` equations with the Version 6.0 defaults of `epa2017je` (Q_soil / Q_B
+   0.003 scaled by 0.45 / ER, foundation types, building defaults). The soil-source option, which Version
+   6.0 removed, is kept for M2 and M3 sources and warned (`vapor.soil-source-not-recommended`).
+10. **Chemical data.** RSL values stay primary for every property they carry. T_B, T_C and dH_v,b for the
+    temperature correction come from the lookup table in `epa2004je`, transcribed with the PDF checksum
+    into a derived `vapor-chemicals.json` (slice V0); without them the modern method uses H at 25 deg C
+    and warns. DeVaull rates by class from `api2012biovapor` Appendix C; a chemical with no class is
+    non-degrading and warned. Oxygen diffusivities are required inputs until a verifiable source is found.
+11. **DeVaull oxygen options:** entered aerobic depth, fast-reaction explicit depth, and the coupled
+    solution (a monotone root find); baseline respiration 1.69 mg O2/(g organic carbon day) times f_oc
+    (forced by `api2012biovapor`).
+12. **Empirical attenuation factors** are those of `epa2015vi` Table 6-1 (forced by the source); the
+    groundwater factor applies to H'(T_gw) C_gw at 25 deg C unless a temperature is entered, as VISL does.
+13. **The PVI screen is a verdict, not a concentration**, with the `epa2015pvi` Table 3 thresholds and the
+    6 ft and 15 ft separations stored in feet as published (forced by the source); precluding factors
+    force further assessment.
+14. **Outdoor air.** Legacy box C = sum(E) / (u delta W) (an area flux over the footprint gives F L / (u
+    delta)). Modern SSG volatilization factor with Q/C user-entered by default; tabulated Q/C values are
+    added only when transcribed from the documents with references.
+15. **Jury volatilization:** the closed form derived in the note for zero water flux (semi-infinite soil,
+    clean cover, finite layer, optional boundary layer, first-order decay), checked by identities because
+    neither paper's full text was read; no boundary layer by default.
+16. **Outdoor interface for M7:** `outdoorAirEpc({ box, emissions, direct })`, with emissions as area
+    fluxes or mass rates into the box and direct contributions as concentrations from dispersion-factor
+    models; contributions keep their origins, and mixing a box emission and a Q/C contribution for the
+    same area is warned. M9 needs no vapor interface.
+17. **Tolerances.** Tables R-3, R-4 and R-5: 0.5 percent of the RISC column (trial reproductions are
+    within 0.12 percent; tighter than the ROADMAP's 2 to 3 percent maximum). Table R-6: not asserted; its
+    printed output repeats Table R-5's and no box reading reproduces it, so the box hand value (2.5444e-6
+    mg/m^3) is asserted at 1e-9 and the printed value is a named exception. Appendix J example: 0.01
+    absolute on the normalized concentrations (they are figure readings). EPA 2004 Appendix C example:
+    half a unit in the third printed figure, viscosity not asserted. VISL calculator values: the engine
+    rounds to the printed figures. Identities 1e-12 (1e-9 for limits, 1e-6 for quadrature mass balances);
+    hand cases 1e-9.
+
+Fixture readings recorded in the note: Table R-3 takes its source soil from Table R-4's source block and
+places the lens outside the 2.60 m vadose zone (L_T 2.80 m); Table R-5 is a diffusion-only run (Q_soil 0);
+Table R-4's degradation rate is 0.09 /d in the water-phase form. With RISC4 benzene properties these
+reproduce 8.57, 8.57e-2, 3.23e5, 7.28, 7.27 and 2.27e-3 as printed.
