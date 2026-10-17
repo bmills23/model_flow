@@ -5,6 +5,7 @@ import { SaturatedPage } from './saturated/SaturatedPage';
 import { VadosePage } from './vadose/VadosePage';
 
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
+const VaporPage = lazy(() => import('./vapor/VaporPage').then((m) => ({ default: m.VaporPage })));
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
@@ -17,6 +18,7 @@ const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
+const VAPOR_HASH = '#/vapor';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -30,10 +32,13 @@ export function App() {
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
   const onRisk = hash === RISK_HASH;
+  const onVapor = hash === VAPOR_HASH;
 
   return (
     <div
-      className={onTransport || onVadose || onSaturated || onRisk ? 'shell shell-wide' : 'shell'}
+      className={
+        onTransport || onVadose || onSaturated || onRisk || onVapor ? 'shell shell-wide' : 'shell'
+      }
     >
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
@@ -71,6 +76,9 @@ export function App() {
           >
             Saturated soil source
           </a>
+          <a className="nav-link" href={VAPOR_HASH} aria-current={onVapor ? 'page' : undefined}>
+            Vapor intrusion
+          </a>
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
@@ -88,6 +96,10 @@ export function App() {
           <VadosePage />
         ) : onSaturated ? (
           <SaturatedPage />
+        ) : onVapor ? (
+          <Suspense fallback={<p className="muted">Loading the vapor intrusion screen...</p>}>
+            <VaporPage />
+          </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
@@ -110,6 +122,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={SATURATED_HASH}>
                 Open saturated soil source
+              </a>{' '}
+              <a className="button" href={VAPOR_HASH}>
+                Open vapor intrusion
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk

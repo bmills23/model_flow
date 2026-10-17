@@ -1,0 +1,59 @@
+/* Vapor intrusion screen. Reuses the transport screen's layout, controls and panel classes. */
+.vapor .example {
+  margin-top: 12px;
+}
+
+.vapor .panel h2,
+.vapor .example h2 {
+  text-transform: none;
+}
+
+.vapor .table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table.compare {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+table.compare th,
+table.compare td {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+table.compare thead th {
+  text-align: right;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+table.compare thead th:first-child,
+table.compare tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+
+table.compare td {
+  text-align: right;
+}
+
+.vapor select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vapor .warn-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.vapor ul.warnings li {
+  overflow-wrap: anywhere;
+}

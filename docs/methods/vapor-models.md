@@ -773,7 +773,7 @@ Stage 3 (web), new route `#/vapor`, lazy-loaded like `#/risk`:
 
 | Slice | Files | Failing tests first | Depends on |
 |---|---|---|---|
-| W1 screen | `apps/web/src/vapor/` (inputs: source kind, chemical picker over `vapor-chemicals.json`, layers with texture presets, building, method switch legacy or modern with comparison), `App.tsx` route and nav link, `App.test.tsx` | route renders; legacy and modern results for the R-3 inputs match the engine; warnings listed; zero overflow at 390x844 and 1280, light and dark | V7 |
+| W1 screen (built) | `apps/web/src/vapor/` (inputs: source kind, chemical picker over `vapor-chemicals.json`, layers with texture presets, building, method switch legacy or modern with comparison), `App.tsx` route and nav link, `App.test.tsx` | route renders; legacy and modern results for the R-3 inputs match the engine; warnings listed; zero overflow at 390x844 and 1280, light and dark | V7 |
 | W2 plots and screens | depth-attenuation plot (vapor concentration versus height above the source for each method, log scale, layer bands), indoor and outdoor results, AF and PVI panels | plot data equals the engine profiles; PVI verdict and reasons shown | W1 |
 | W3 feeds | feeds from `#/transport` (water table under the building), `#/vadose` and `#/saturated` (soil source, flux) into `#/vapor`, and from `#/vapor` into `#/risk` indoor and outdoor EPCs with origin `vapor.<method>` | the risk screen shows the vapor origin; a series feed produces a series EPC | W1 |
 
