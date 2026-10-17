@@ -483,10 +483,14 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
    0.003 scaled by 0.45 / ER, foundation types, building defaults). The soil-source option, which Version
    6.0 removed, is kept for M2 and M3 sources and warned (`vapor.soil-source-not-recommended`).
 10. **Chemical data.** RSL values stay primary for every property they carry. T_B, T_C and dH_v,b for the
-    temperature correction come from the lookup table in `epa2004je`, transcribed with the PDF checksum
-    into a derived `vapor-chemicals.json` (slice V0); without them the modern method uses H at 25 deg C
-    and warns. DeVaull rates by class from `api2012biovapor` Appendix C; a chemical with no class is
-    non-degrading and warned. Oxygen diffusivities are required inputs until a verifiable source is found.
+    temperature correction come from the lookup table in `epa2004je` (Appendix C copy, 108 chemicals),
+    transcribed with the PDF checksum into the derived `vapor-chemicals.json` (slice V0, built);
+    enthalpies not at the normal boiling point, and crotonaldehyde's misprinted one, are omitted from the
+    merged row. Without them the modern method uses H at 25 deg C and warns. DeVaull rates by class from
+    `api2012biovapor` Appendix C (one rate per class; the alkylbenzene class is applied to the propyl and
+    butyl benzenes as well as the six chemicals Appendix C names, a reading of its heading); a chemical
+    with no class is non-degrading and warned. Oxygen mass ratios come from committed formulas for the
+    classed chemicals. Oxygen diffusivities are required inputs until a verifiable source is found.
 11. **DeVaull oxygen options:** entered aerobic depth, fast-reaction explicit depth, and the coupled
     solution (a monotone root find); baseline respiration 1.69 mg O2/(g organic carbon day) times f_oc
     (forced by `api2012biovapor`).

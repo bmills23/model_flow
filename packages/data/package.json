@@ -11,6 +11,7 @@
     "build": "echo 'nothing to build'",
     "generate": "tsx scripts/generate-docs.ts",
     "build:rsl": "tsx scripts/build-rsl.ts",
+    "build:vapor": "tsx scripts/build-vapor.ts",
     "fetch:rsl": "tsx scripts/fetch-rsl.ts"
   },
   "dependencies": {

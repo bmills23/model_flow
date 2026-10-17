@@ -9,7 +9,8 @@ labels are not used here. Where a choice is RISC5's rather than a paper's, it is
 and becomes the method's `risc5Choice` metadata.
 
 Status: stage 1 (methods note, reference check, data plan, fixture plan and slice plan) done 2026-10-16.
-No engine, data or web code exists yet for this process. The scope calls below are the DEFAULT rulings
+Slice V0 (vapor chemical data in `packages/data`) is built; no engine or web code exists yet for this
+process. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
@@ -515,23 +516,35 @@ The RSL tables are the primary source for every property they carry (DEFAULT rul
 overrides an RSL value. Plan for the missing fields (slice V0, data package, separate from the engine
 slices):
 
-- **T_B, T_C, dH_v,b** from the chemical properties lookup table printed in `epa2004je` (a public-domain
-  EPA document; the same values appear in its Appendix C worked example, for benzene 353.24 K, 562.16 K
-  and 7,342 cal/mol). The table is transcribed into a committed CSV with the source PDF's SHA-256, page
-  references and a check that re-derives the benzene, trichloroethylene and tetrachloroethylene rows; the
-  build merges by CAS number into a derived `vapor-chemicals.json` (the vapor screen's subset, as M4's
-  `risk-chemicals.json`), each value tagged `epa2004je`. If `epa2017je`'s workbook (whose chemical table
-  was updated from the 2015 RSLs) is downloadable as an EPA file, slice V0 records it as the alternative
-  and asks for a ruling before switching.
-- **k_w and chemical class** from `api2012biovapor` Appendix C, as a committed id-to-class list for the
-  petroleum chemicals (as `dermal-form.ts` is for M4), tagged `api2012biovapor`.
-- **Oxygen mass ratio** computed from a committed molecular formula (carbon and hydrogen counts, plus
-  oxygen for oxygenates) for the same petroleum list: complete oxidation needs (c + h/4 - o/2) mol of O2 per
-  mol.
+- **T_B, T_C, dH_v,b** (slice V0, built): from the chemical properties lookup table printed in
+  `epa2004je` (a public-domain EPA document; the same values appear in its Appendix C worked example, for
+  benzene 353.24 K, 562.16 K and 7,342 cal/mol). The complete table (108 chemicals, full precision) is the
+  VLOOKUP copy in Appendix C, PDF pages 113 and 114; Appendix B prints a shorter copy (95 chemicals, no
+  benzene) at three significant figures, used only for its enthalpy flags. The table is transcribed into
+  `packages/data/raw/vapor/epa2004je/lookup-table.csv` beside the PDF and a manifest with its SHA-256;
+  the data test checks the benzene, trichloroethylene and tetrachloroethylene rows against the values
+  printed on the example worksheets, and the build merges by CAS number into the derived
+  `packages/data/generated/vapor/vapor-chemicals.json` (112 chemicals, the vapor screen's subset as M4's
+  `risk-chemicals.json`), each value tagged `epa2004je`. Three lookup chemicals are not in the RSL table
+  (chlordane, 2-chloropropane, 1,3-dichlorobenzene) and are listed as unmatched. An enthalpy that Appendix B
+  marks as taken at a temperature other than the normal boiling point (trichlorofluoromethane,
+  1,1,2-trichloro-1,2,2-trifluoroethane, dibenzofuran), and crotonaldehyde's (printed as 9, apparently
+  kcal/mol), are left out of the merged row; T_B and T_C stay, so those chemicals get the
+  `vapor.henry-not-temperature-corrected` warning. `epa2017je`'s workbook (chemical table updated from the
+  2015 RSLs) was not downloaded; it remains the alternative and switching to it needs a ruling.
+- **k_w and chemical class** (slice V0, built) from `api2012biovapor` Appendix C, as a committed
+  id-to-class list for the petroleum chemicals in the RSL table (`packages/data/src/vapor/classes.ts`, as
+  `dermal-form.ts` is for M4), tagged `api2012biovapor`: 22 chemicals (alkylbenzenes including BTEX,
+  xylenes, trimethylbenzenes, cumene and the propyl and butyl benzenes; naphthalene; n-pentane, hexane,
+  heptane and nonane; cyclohexane and methylcyclohexane). Appendix C publishes one rate per class and
+  names no per-chemical rate, so extending the alkylbenzene class beyond the six named there is a reading
+  (DECISIONS.md).
+- **Oxygen mass ratio** (slice V0, built) computed from a committed molecular formula (carbon and
+  hydrogen counts, plus oxygen for oxygenates) for the same petroleum list: complete oxidation needs
+  (c + h/4 - o/2) mol of O2 per mol; benzene gives 7.5 mol and 3.07 g/g.
 - **Oxygen diffusivities**: slice V5 finds a verifiable public source; until then they are required user
   inputs with no default, and options 2 and 3 cannot run without them.
 
-`packages/data` is not edited in this stage.
 
 ## Where the manual is ambiguous, and what we chose
 
