@@ -333,6 +333,10 @@ export interface ModernSurfaceWaterResult {
   sediment: SedimentSeriesResult;
   epc: EpcSpec;
   downstreamEpc?: EpcSpec;
+  /** Smallest share of the full-width discharge inside the reach (plane bank with a declared full width). */
+  reachFraction?: number;
+  /** Smallest share of the full-depth discharge above the thickness (plane bank with a declared full depth). */
+  depthFraction?: number;
   warnings: SurfaceWaterWarning[];
 }
 
@@ -349,6 +353,8 @@ export function runModernSurfaceWater(i: ModernSurfaceWaterInput): ModernSurface
   let groundwaterFlow: number;
   let fluxAveraged: number[];
   let planeReach: number | undefined;
+  let reachFraction: number | undefined;
+  let depthFraction: number | undefined;
   if (i.bank.kind === 'plane') {
     const r = bankPlaneDischarge(
       i.bank.concentration,
@@ -361,6 +367,8 @@ export function runModernSurfaceWater(i: ModernSurfaceWaterInput): ModernSurface
     groundwaterFlow = r.groundwaterFlow;
     fluxAveraged = r.fluxAveragedConcentration;
     planeReach = i.bank.plane.reachLength;
+    reachFraction = r.reachFraction;
+    depthFraction = r.depthFraction;
     warnings.push(...r.warnings);
   } else {
     checkTimes(i.bank.times);
@@ -480,6 +488,8 @@ export function runModernSurfaceWater(i: ModernSurfaceWaterInput): ModernSurface
     ...(downstream !== undefined
       ? { downstreamEpc: surfaceWaterEpc(times, downstream, ORIGIN_MODERN) }
       : {}),
+    ...(reachFraction !== undefined ? { reachFraction } : {}),
+    ...(depthFraction !== undefined ? { depthFraction } : {}),
     warnings: dedupe(warnings),
   };
 }

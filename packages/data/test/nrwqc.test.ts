@@ -138,6 +138,23 @@ describe('aquatic life table', () => {
     expect(aq('7782-49-2')!.siteSpecificFor).toEqual(['fresh']);
   });
 
+  it('marks aluminum site-specific for freshwater only: the page tabulates no saltwater criterion', () => {
+    expect(aq('7429-90-5')!.siteSpecificFor).toEqual(['fresh']);
+    expect(aq('7664-41-7')!.siteSpecificFor).toEqual(['fresh', 'salt']);
+  });
+
+  it('flags the pH-dependent pentachlorophenol freshwater values with the pH they are printed at', () => {
+    const pcp = aq('87-86-5')!;
+    expect(pcp.freshwater.cmc.value).toBe(19);
+    expect(pcp.freshwater.ccc.value).toBe(15);
+    expect(pcp.phDependentFor).toEqual(['fresh']);
+    expect(pcp.printedAtPh).toBe(7.8);
+    const others = built.aquatic.rows.filter((r) => r.id !== '87-86-5');
+    expect(others.every((r) => r.phDependentFor.length === 0 && r.printedAtPh === undefined)).toBe(
+      true,
+    );
+  });
+
   it('keeps non-chemical rows as parameters, and chemicals without a CAS number as groups', () => {
     expect(byName('Temperature')!.kind).toBe('parameter');
     expect(byName('pH')!.kind).toBe('parameter');

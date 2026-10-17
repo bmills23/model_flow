@@ -70,6 +70,22 @@ describe('criteriaDb', () => {
     expect(al.every((c) => c.siteSpecific === true && c.value === undefined)).toBe(true);
   });
 
+  it('has no saltwater aluminum criterion at all, so the panel says no criterion', () => {
+    const al = criteriaFor(db, '7429-90-5', 'surfaceWater');
+    expect(al.some((c) => c.waterType === 'salt')).toBe(false);
+    expect(al.some((c) => c.waterType === 'fresh' && c.siteSpecific === true)).toBe(true);
+  });
+
+  it('carries the pH the pentachlorophenol freshwater values are printed at, and not on saltwater', () => {
+    const pcp = criteriaFor(db, '87-86-5', 'surfaceWater').filter((c) => c.waterType !== undefined);
+    const fresh = pcp.filter((c) => c.waterType === 'fresh');
+    expect(fresh.length).toBe(2);
+    expect(fresh.every((c) => c.printedAtPh === 7.8)).toBe(true);
+    expect(
+      pcp.filter((c) => c.waterType === 'salt').every((c) => c.printedAtPh === undefined),
+    ).toBe(true);
+  });
+
   it('carries human health criteria with no water type, and benchmarks with their organic carbon basis', () => {
     const hh = criteriaFor(db, '83-32-9', 'surfaceWater').filter((c) =>
       c.endpoint.startsWith('human-health'),

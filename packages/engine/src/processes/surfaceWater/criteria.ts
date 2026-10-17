@@ -36,6 +36,8 @@ export interface Criterion {
   hardness?: HardnessEquation | undefined;
   /** The criterion depends on site water chemistry and is not computed. */
   siteSpecific?: boolean | undefined;
+  /** The criterion is a function of pH; the value is the one the table prints, at this pH. */
+  printedAtPh?: number | undefined;
   /** A dissolved-metal criterion (the model's concentration is taken as all dissolved). */
   dissolved?: boolean | undefined;
   /** Freshwater or saltwater (aquatic life only; human health criteria have none). */
@@ -201,6 +203,12 @@ export function compareToCriteria(input: CompareInput): CompareResult {
       warn(
         'criteria.oc-normalized',
         `${c.endpoint} for ${c.chemicalId} is at ${100 * c.ocBasis} percent organic carbon; the sediment value is normalized to it`,
+      );
+    }
+    if (c.printedAtPh !== undefined) {
+      warn(
+        'criteria.ph-dependent',
+        `${c.endpoint} for ${c.chemicalId} is a function of pH; the value printed for pH ${c.printedAtPh} is compared`,
       );
     }
     if (c.dissolved === true && c.medium === 'surfaceWater') {

@@ -42,6 +42,7 @@
       "publicationYear": "2009",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -70,6 +71,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -104,6 +106,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -134,6 +137,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The CCC of 20mg/L is a minimum value except where alkalinity is naturally lower, in which case the criterion is the natural alkalinity of the water in question. Where natural alkalinity is > 20 mg/L, the criterion cannot be lower than 25% of the natural level, or 20 mg/L whichever is higher."
     },
@@ -172,6 +176,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for endosulfan and is most appropriately applied to the sum of alpha-endosulfan and beta-endosulfan."
     },
@@ -202,9 +207,9 @@
       "publicationYear": "2018",
       "siteSpecific": true,
       "siteSpecificFor": [
-        "fresh",
-        "salt"
+        "fresh"
       ],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The criteria is based on the water chemistry data (for pH, hardness and DOC) entered into the criteria calculator for a given location."
     },
@@ -238,6 +243,7 @@
         "fresh",
         "salt"
       ],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Freshwater criteria are ph, temperature and life-stage dependent. Saltwater criteria are pH and temperature dependent."
     },
@@ -276,6 +282,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "This recommended water quality criterion was derived from data for arsenic (III), but is applied here to total arsenic. Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
     },
@@ -306,6 +313,7 @@
       "publicationYear": "",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -344,6 +352,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for endosulfan and is most appropriately applied to the sum of alpha-endosulfan and beta-endosulfan."
     },
@@ -372,6 +381,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -408,6 +418,7 @@
       "publicationYear": "2016",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "On August 18, 2023, the U.S. District Court for the District of Arizona issued an order vacating EPA’s 2016 national recommended chronic freshwater cadmium aquatic life criterion. EPA is continuing to evaluate the Order. But as a result of that Order, the current national recommended chronic freshwater cadmium aquatic life criterion can be found in EPA’s 2001 Update of Ambient Water Quality Criteria for Cadmium. Freshwater acute and chronic criteria are hardness-dependent and were normalized to a hardness of 100 mg/L as CaCO3 to allow the presentation of representative criteria values. . Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
     },
@@ -444,6 +455,7 @@
       "publicationYear": "2012",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -482,6 +494,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -516,6 +529,7 @@
       "publicationYear": "1988",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -554,6 +568,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -592,6 +607,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -626,6 +642,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
     },
@@ -664,6 +681,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
     },
@@ -692,6 +710,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -728,6 +747,7 @@
       "siteSpecificFor": [
         "fresh"
       ],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Freshwater criteria calculated using the Biotic Ligand Model. Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
     },
@@ -766,6 +786,7 @@
       "publicationYear": "1985",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These recommended water quality criteria are expressed as µg free cyanide (CN/L)."
     },
@@ -800,6 +821,7 @@
       "publicationYear": "1985",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -838,6 +860,7 @@
       "publicationYear": "2005",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -876,6 +899,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The freshwater CCC criterion and both Saltwater criteria are based are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -914,6 +938,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The derivation of the CCC for this pollutant did not consider exposure through the diet, which is probably important for aquatic life occupying upper trophic levels."
     },
@@ -948,6 +973,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The Saltwater CCC criterion is based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -976,6 +1002,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1010,6 +1037,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1038,6 +1066,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1076,6 +1105,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -1114,6 +1144,7 @@
       "publicationYear": "1981",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for heptachlor and there was insufficient data to determine relative toxicities of heptachlor and heptachlor epoxide."
     },
@@ -1146,6 +1177,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1184,6 +1216,7 @@
       "publicationYear": "1984",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
     },
@@ -1218,6 +1251,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1257,6 +1291,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
     },
@@ -1291,6 +1326,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1319,6 +1355,7 @@
       "publicationYear": "",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -1353,6 +1390,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1391,6 +1429,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
     },
@@ -1429,6 +1468,7 @@
       "publicationYear": "2005",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -1457,6 +1497,7 @@
       "publicationYear": "-",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to EPA'S nutrient criteria by waterbody type."
     },
@@ -1485,6 +1526,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1515,6 +1557,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for freshwater. For saltwater, Refer to Aquatic Life Criteria for Dissolved Oxygen (Saltwater) Cape Cod to Cape Hatteras."
     },
@@ -1549,6 +1592,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -1587,6 +1631,10 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [
+        "fresh"
+      ],
+      "printedAtPh": 7.8,
       "hardnessDependent": false,
       "notes": "Freshwater aquatic life values for pentachlorophenol are expressed as a function of pH and values displayed in table correspond to a pH of 7.8."
     },
@@ -1642,6 +1690,7 @@
       "publicationYear": "2024",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The chronic freshwater-based and chronic tissue-based criteria are independently applicable and no one criterion takes primacy. The value listed as the saltwater CMC represents a benchmark value, not a criterion. Data limitations precluded the development of a CCC in saltwater."
     },
@@ -1700,6 +1749,7 @@
       "publicationYear": "2024",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "The chronic freshwater-based and chronic tissue-based criteria are independently applicable and no one criterion takes primacy. The value listed as the saltwater CMC represents a benchmark value, not a criterion. Data limitations precluded the development of a CCC in saltwater."
     },
@@ -1734,6 +1784,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement. For open ocean waters where the depth is substantially greater than the euphotic zone, the pH should not be changed more than 0.2 units from the naturally occurring variation or any case outside the range of 6.5 to 8.5. For shallow, highly productive coastal and estuarine areas where naturally occurring pH variations approach the lethal limits of some species, changes in pH should be avoided but in any case should not exceed the limits established for fresh water, i.e., 6.5-9.0."
     },
@@ -1764,6 +1815,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -1796,6 +1848,7 @@
       "publicationYear": "-",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "This criterion applies to total PCBs, (e.g., the sum of all congener or all isomer or homolog or Aroclor analyses.)"
     },
@@ -1832,6 +1885,7 @@
       "siteSpecificFor": [
         "fresh"
       ],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Aquatic Life Ambient Water Quality Criterion for Selenium - Freshwater 2016 for narrative statement."
     },
@@ -1866,6 +1920,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
     },
@@ -1894,6 +1949,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1928,6 +1984,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -1956,6 +2013,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
     },
@@ -1984,6 +2042,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": "Criteria is species dependent. Refer to Quality Criteria for Water, 1986 (\"Gold Book\")."
     },
@@ -2022,6 +2081,7 @@
       "publicationYear": "1986",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -2058,6 +2118,7 @@
       "publicationYear": "2004",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     },
@@ -2096,6 +2157,7 @@
       "publicationYear": "1995",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": true,
       "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
     },
@@ -2134,6 +2196,7 @@
       "publicationYear": "1980",
       "siteSpecific": false,
       "siteSpecificFor": [],
+      "phDependentFor": [],
       "hardnessDependent": false,
       "notes": ""
     }

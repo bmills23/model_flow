@@ -194,7 +194,15 @@ Reach and depth checks: the plane integral over the reach and depth is compared 
 full plane (all y, and all depths for a finite aquifer or a depth well below the plume for an infinite
 one); less than 99 percent of the full-width flux inside the reach is warned
 (`surfaceWater.reach-truncates-plume`) and less than 95 percent of the full-depth flux above d is warned
-(`surfaceWater.plume-underflow`, RISC5's own limitation: a plume passing beneath the water body). For
+(`surfaceWater.plume-underflow`, RISC5's own limitation: a plume passing beneath the water body). The
+linked screen declares a full plane of eight spreading standard deviations (and the aquifer thickness
+when finite), runs the modern bank first and hands its measured depth share to the legacy run as
+`link.plumeDepthFraction`, so both methods warn. The plane quadrature first narrows each range to the
+extent of the field, found by probes on geometric ladders (two per decade, eight decades) from the
+centreline and the ends plus a uniform set, then integrates over that extent cut at y = 0; without that
+a plume much narrower than the range falls between the nodes of a fixed number of panels and reads about
+zero (a 2 m source and a 2,000 m reach lost 100 percent). Tests compare the result with a closed-form
+oracle for plume widths of 1 m to 10 m over reaches up to 200 km. For
 AT123D the full-width integral is exact in closed form (the lateral factor integrates to 1), which the
 tests use as an oracle for the general adaptive quadrature over y and z of the point function.
 
@@ -277,7 +285,13 @@ to the criterion and flags ratios above 1. Ratios are never summed across chemic
   dissolved (`criteria.dissolved-assumed`, conservative).
 - **Site-chemistry criteria** (copper, aluminum, ammonia, selenium and any row whose table note says the
   criterion depends on site water chemistry): "site-specific criterion, not computed"
-  (`criteria.site-specific`); the user may enter a value, tagged `user`.
+  (`criteria.site-specific`); the user may enter a value, tagged `user`. The flag applies to a water type
+  only where the table tabulates no value for it and the row's note covers it: aluminum has no saltwater
+  criterion, so saltwater aluminum reads "no criterion", while ammonia (whose note names both) is
+  site-specific in both.
+- **pH-dependent criteria**: pentachlorophenol's freshwater values (19 and 15 ug/L) are one point of a
+  function of pH, printed at pH 7.8. They are compared as printed and warned (`criteria.ph-dependent`);
+  the pH function is not computed.
 - **Sediment benchmarks**: dry-weight concentration against dry-weight benchmarks; a benchmark published at
   1 percent organic carbon is compared with C_sed times 0.01 / f_oc (`criteria.oc-normalized`).
 - **No criterion**: "no criterion" (`criteria.not-available`), never a pass.
@@ -367,6 +381,7 @@ Warnings (codes are part of the result; thresholds are screening choices, not ru
 | `criteria.not-available` | comparison | no criterion or benchmark for a chemical and medium |
 | `criteria.site-specific` | comparison | the criterion depends on site water chemistry and is not computed |
 | `criteria.hardness-range` | comparison | hardness outside 25 to 400 mg/L as CaCO3 |
+| `criteria.ph-dependent` | comparison | a criterion that is a function of pH (pentachlorophenol, freshwater) is compared at the pH its value is printed for (7.8) |
 | `criteria.dissolved-assumed` | comparison | a dissolved-metal criterion compared with a total modelled concentration |
 | `criteria.oc-normalized` | comparison | a benchmark at 1 percent organic carbon compared after normalization |
 
@@ -385,9 +400,11 @@ discharges or upstream sources other than the background; the mixing volume is u
   `porosity`; for AT123D the mass rate is concentration times Darcy flux times source area,
   `massRateFromConcentration`).
 - **What M8 takes from them.** Legacy: the screen-averaged centreline concentration at the bank,
-  C_gw(t) = mean over the trapezoid points in [0, d] at (x_s, 0), at the sample times; this is the same
-  reduction as the M4 adapter `groundwaterBreakthrough` (`exposure/epc.ts`), so the surface water
-  coupling reuses it with the bank points. Modern: the plane integral W(t) of q C over [-L_r/2, L_r/2] and
+  C_gw(t) = trapezoid average over equally spaced points in [0, d] at (x_s, 0), at the sample times, the
+  M1 well-screen rule (`wellScreenAverage`: end points at half weight, so a plume confined to the water
+  table reads 1/8 of its top value with five points, not 1/5); `bankScreenAverage` in
+  `surfaceWater/coupling.ts` applies it to the bank points (the M4 adapter `groundwaterBreakthrough` takes a
+  plain mean of its own screen points and is a different reduction). Modern: the plane integral W(t) of q C over [-L_r/2, L_r/2] and
   [0, d] at x_s, computed by a new `bankPlaneDischarge(runPoint, plane, times)` in
   `surfaceWater/discharge.ts` that calls the point function. For a Wexler run the source is a held
   concentration, not a release rate, so the mass identities below apply to AT123D only; Wexler and Domenico

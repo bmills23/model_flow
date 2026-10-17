@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { integrate } from '../src/numerics/quadrature.js';
+import { erf } from '../src/numerics/special.js';
 import {
   at123dConcentration,
   instantaneousBoxConcentration,
@@ -197,5 +198,35 @@ describe('linearity and input checks', () => {
     expect(() => bankPlaneDischarge(g, { ...ok, fullDepth: 4 }, [1])).toThrow(RangeError);
     expect(() => bankPlaneDischarge(g, ok, [2, 1])).toThrow(RangeError);
     expect(() => bankPlaneDischarge(g, ok, [])).toThrow(RangeError);
+  });
+});
+
+describe('narrow plume over a long reach (closed-form oracle)', () => {
+  // C = exp(-y^2 / (2 s^2)) exp(-depth / lam): the integral over y in [-L/2, L/2], depth in [0, d] is
+  // s sqrt(2 pi) erf(L / (2 s sqrt 2)) lam (1 - exp(-d / lam)). The fast setting of the web app is used.
+  const fast = { relTol: 1e-3, panels: 1 } as const;
+  const exact = (s: number, lam: number, L: number, d: number): number =>
+    s * Math.sqrt(2 * Math.PI) * erf(L / (2 * s * Math.SQRT2)) * lam * (1 - Math.exp(-d / lam));
+  const field =
+    (s: number, lam: number): PlaneConcentration =>
+    (y, z) =>
+      Math.exp(-(y * y) / (2 * s * s) - z / lam);
+  const cases: [string, number, number, number, number][] = [
+    ['1 m plume, 1,000 m reach', 0.5, 0.3, 1000, 3],
+    ['1 m plume, 2,000 m reach', 0.5, 0.3, 2000, 3],
+    ['1 m plume, 20,000 m reach', 0.5, 0.3, 20000, 3],
+    ['10 m plume, 200,000 m reach', 5, 1, 200000, 3],
+    ['thin plume at the water table, 5,000 m reach', 2, 0.01, 5000, 3],
+  ];
+  for (const [name, s, lam, L, d] of cases) {
+    for (const opts of [fast, {}]) {
+      it(`captures the plume: ${name} (${Object.keys(opts).length ? 'fast' : 'default'})`, () => {
+        const got = planeIntegral(field(s, lam), 1, -L / 2, L / 2, d, opts);
+        expect(rel(got, exact(s, lam, L, d))).toBeLessThan(1e-3);
+      });
+    }
+  }
+  it('returns zero for a field that is zero everywhere', () => {
+    expect(planeIntegral(() => 0, 1, -50, 50, 3, fast)).toBe(0);
   });
 });

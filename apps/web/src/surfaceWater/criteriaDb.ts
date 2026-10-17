@@ -55,6 +55,9 @@ function aquatic(
           waterType,
           source: 'database' as const,
           ...(dissolved ? { dissolved: true } : {}),
+          ...(row.printedAtPh !== undefined && row.phDependentFor.includes(waterType)
+            ? { printedAtPh: row.printedAtPh }
+            : {}),
         };
         const eq = waterType === 'fresh' ? equations.get(row.id)?.[kind] : undefined;
         if (eq !== undefined) {

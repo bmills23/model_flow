@@ -130,6 +130,38 @@ describe('hardness-dependent criteria from a parameter record', () => {
   });
 });
 
+describe('pH-dependent criteria', () => {
+  it('compares at the printed value and warns that the criterion depends on pH', () => {
+    const r = compareToCriteria({
+      medium: 'surfaceWater',
+      chemicalId: '87-86-5',
+      series: [1e-5],
+      criteria: [
+        water({
+          id: 'pcp',
+          value: 19,
+          chemicalId: '87-86-5',
+          printedAtPh: 7.8,
+          waterType: 'fresh',
+        }),
+      ],
+    });
+    expect(r.results[0]!.status).toBe('compared');
+    const w = r.warnings.find((x) => x.code === 'criteria.ph-dependent');
+    expect(w).toBeDefined();
+    expect(w!.message).toContain('7.8');
+  });
+  it('does not warn for a criterion with no pH dependence', () => {
+    const r = compareToCriteria({
+      medium: 'surfaceWater',
+      chemicalId: '7440-66-6',
+      series: [1e-5],
+      criteria: [water({ id: 'zn', value: 19, chemicalId: '7440-66-6' })],
+    });
+    expect(r.warnings.map((x) => x.code)).not.toContain('criteria.ph-dependent');
+  });
+});
+
 describe('site-specific and missing criteria', () => {
   it('a site-chemistry criterion is not computed, never a pass', () => {
     const crit = [

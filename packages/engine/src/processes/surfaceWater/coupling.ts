@@ -10,10 +10,10 @@ import { checkFinite, checkNonNegative } from './checks.js';
  */
 
 /**
- * Legacy edge series: the plain mean of the M1 concentrations at the trapezoid points of the discharge
- * thickness on the plume centreline at the bank, at each sample time. This is the same reduction as the M4
- * adapter `groundwaterBreakthrough` (DEFAULT ruling 3), without making an EPC of it. Negative round-off is
- * clipped to zero.
+ * Legacy edge series: the screen average of the M1 concentrations at equally spaced points from the water
+ * table to the discharge thickness on the plume centreline at the bank, at each sample time, by the M1
+ * well-screen trapezoid rule (`wellScreenAverage`, DEFAULT ruling 3): the two end points carry half weight.
+ * A single point is its own average. Negative round-off is clipped to zero.
  */
 export function bankScreenAverage(
   run: (time: number) => { concentrations: readonly number[] },
@@ -23,7 +23,12 @@ export function bankScreenAverage(
   const values = times.map((t) => {
     const { concentrations } = run(t);
     if (concentrations.length === 0) throw new RangeError('the run returned no concentrations');
-    const mean = concentrations.reduce((a, c) => a + c, 0) / concentrations.length;
+    const n = concentrations.length;
+    const mean =
+      n === 1
+        ? (concentrations[0] as number)
+        : concentrations.reduce((a, c, i) => a + (i === 0 || i === n - 1 ? 0.5 * c : c), 0) /
+          (n - 1);
     return Math.max(0, mean);
   });
   return { times: [...times], values };

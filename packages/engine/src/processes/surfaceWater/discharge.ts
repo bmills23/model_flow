@@ -62,7 +62,61 @@ function panelled(
   return sum;
 }
 
-/** Integral of C dy dz over y in [yLo, yHi], depth in [0, depth], at time t (adaptive Gauss-Kronrod, nested). */
+/** Steps of each geometric probe ladder, two per decade (a plume narrower than 1e-8 of the span is not looked for). */
+const LADDER_STEPS = 16;
+/** Uniform probes across a range, besides the geometric ladders at its anchors. */
+const UNIFORM_PROBES = 17;
+/** A probe is significant when it exceeds this share of the largest probe. */
+const SUPPORT_TOL = 1e-12;
+
+/**
+ * The part of [lo, hi] that holds the field. A plume far narrower than the range (a short source and a long
+ * reach) falls between the nodes of a fixed number of panels and its integral reads about zero, so the range
+ * is first narrowed to the probes that see the field: geometric ladders (two per decade, eight decades) from
+ * each anchor and from both ends, plus a uniform set. The bounds are the probe nodes next to the outermost
+ * significant ones, so the plume is inside them. Returns null when every probe is zero.
+ */
+function fieldSupport(
+  g: (x: number) => number,
+  lo: number,
+  hi: number,
+  anchors: readonly number[],
+): [number, number] | null {
+  const span = hi - lo;
+  const nodes = new Set<number>([lo, hi]);
+  for (let i = 0; i < UNIFORM_PROBES; i++) nodes.add(lo + (span * i) / (UNIFORM_PROBES - 1));
+  for (const a of [lo, hi, ...anchors]) {
+    if (a < lo || a > hi) continue;
+    nodes.add(a);
+    for (let k = 0; k <= LADDER_STEPS; k++) {
+      const r = span * 10 ** (-k / 2);
+      if (a + r <= hi) nodes.add(a + r);
+      if (a - r >= lo) nodes.add(a - r);
+    }
+  }
+  const xs = [...nodes].sort((p, q) => p - q);
+  const gs = xs.map((x) => Math.abs(g(x)));
+  const top = Math.max(...gs);
+  if (!(top > 0)) return null;
+  let first = -1;
+  let last = -1;
+  gs.forEach((v, i) => {
+    if (v > SUPPORT_TOL * top) {
+      if (first < 0) first = i;
+      last = i;
+    }
+  });
+  return [xs[Math.max(0, first - 1)] as number, xs[Math.min(xs.length - 1, last + 1)] as number];
+}
+
+/** Probe depths (shares of the thickness) at which the lateral extent of the field is looked for. */
+const DEPTH_PROBES = [1e-6, 0.25, 0.5, 1] as const;
+
+/**
+ * Integral of C dy dz over y in [yLo, yHi], depth in [0, depth], at time t (adaptive Gauss-Kronrod, nested).
+ * The ranges are first narrowed to the extent of the field (see `fieldSupport`) and cut at the centreline
+ * y = 0, so a narrow plume is captured for any reach.
+ */
 export function planeIntegral(
   c: PlaneConcentration,
   t: number,
@@ -73,13 +127,23 @@ export function planeIntegral(
 ): number {
   const relTol = opts.relTol ?? 1e-9;
   const panels = Math.max(1, Math.floor(opts.panels ?? 8));
-  return panelled(
-    (y) => panelled((z) => c(y, z, t), 0, depth, panels, relTol),
+  const centre = Math.min(yHi, Math.max(yLo, 0));
+  const ySupport = fieldSupport(
+    (y) => Math.max(...DEPTH_PROBES.map((share) => Math.abs(c(y, depth * share, t)))),
     yLo,
     yHi,
-    panels,
-    relTol,
+    [0],
   );
+  if (ySupport === null) return 0;
+  const zSupport = fieldSupport((z) => c(centre, z, t), 0, depth, []);
+  if (zSupport === null) return 0;
+  const inner = (y: number): number =>
+    panelled((z) => c(y, z, t), zSupport[0], zSupport[1], panels, relTol);
+  const [a, b] = ySupport;
+  if (a < 0 && b > 0) {
+    return panelled(inner, a, 0, panels, relTol) + panelled(inner, 0, b, panels, relTol);
+  }
+  return panelled(inner, a, b, panels, relTol);
 }
 
 export interface BankDischargeResult {
@@ -129,12 +193,29 @@ export function bankPlaneDischarge(
   }
   const groundwaterFlow = plane.darcyFlux * plane.thickness * plane.reachLength;
   const discharge: number[] = [];
-  let reachFraction: number | undefined;
-  let depthFraction: number | undefined;
+  const insides: number[] = [];
   for (const t of times) {
     const inside = planeIntegral(c, t, -half, half, plane.thickness, opts);
+    insides.push(inside);
     discharge.push(plane.darcyFlux * inside);
-    if (!(inside > 0)) continue;
+  }
+  // The shares are measured at the time of the largest discharge and at the last positive one (a plume
+  // spreads with time, so the reach and the thickness hold the least of it late): two full-plane
+  // integrals instead of two per sample time keeps a long series affordable.
+  const checkAt = new Set<number>();
+  const peak = Math.max(...insides);
+  if (peak > 0) checkAt.add(insides.indexOf(peak));
+  for (let k = insides.length - 1; k >= 0; k--) {
+    if ((insides[k] as number) > 0) {
+      checkAt.add(k);
+      break;
+    }
+  }
+  let reachFraction: number | undefined;
+  let depthFraction: number | undefined;
+  for (const k of checkAt) {
+    const t = times[k] as number;
+    const inside = insides[k] as number;
     let fullWidthAtThickness = inside;
     if (plane.fullHalfWidth !== undefined && plane.fullHalfWidth > half) {
       fullWidthAtThickness = planeIntegral(

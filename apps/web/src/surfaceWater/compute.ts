@@ -92,6 +92,23 @@ function releaseRate(s: Omit<Scenario, 'zOf'>, t: number): number {
   );
 }
 
+/**
+ * Half width and depth of the "full" plane for the reach and underflow checks: generous (eight standard
+ * deviations of the spreading) so that the share inside the reach and above the thickness is measured
+ * against essentially the whole plume. The plane quadrature narrows to the plume, so the size is cheap.
+ */
+function fullExtent(
+  s: Omit<Scenario, 'zOf'>,
+  reachLength: number,
+  thickness: number,
+): { fullHalfWidth: number; fullDepth: number } {
+  const spread = (d: number): number => 8 * Math.sqrt(2 * Math.max(d, 0) * Math.max(s.time, 0));
+  return {
+    fullHalfWidth: Math.max(reachLength / 2, s.srcWidth / 2 + spread(s.dy)),
+    fullDepth: Math.max(thickness, s.thickness ?? 0, s.srcDepth + spread(s.dz)),
+  };
+}
+
 export function compute(req: SwRequest): SwOutcome {
   try {
     const link = req.link;
@@ -181,7 +198,14 @@ export function compute(req: SwRequest): SwOutcome {
           }
         : {}),
     };
-    const legacy = runLegacySurfaceWater(legacyIn);
+    const runLegacy = (plumeDepthFraction?: number) =>
+      runLegacySurfaceWater(
+        plumeDepthFraction !== undefined && legacyIn.link
+          ? { ...legacyIn, link: { ...legacyIn.link, plumeDepthFraction } }
+          : legacyIn,
+      );
+    // unlinked: the legacy run fixes the groundwater flow that the typed discharge series needs
+    const legacyFirst = scenario && source ? null : runLegacy();
 
     // modern: mass discharge across the bank plane (linked) or the typed concentration times the flow
     const sedimentIn = req.sediment
@@ -203,6 +227,7 @@ export function compute(req: SwRequest): SwOutcome {
           reachLength,
           thickness: source.thickness,
           darcyFlux: source.darcyFlux,
+          ...fullExtent(scenario, reachLength, source.thickness),
         },
         times,
         quadrature: BANK_QUADRATURE,
@@ -211,8 +236,8 @@ export function compute(req: SwRequest): SwOutcome {
       bank = {
         kind: 'discharge',
         times,
-        discharge: gw.map((c) => c * legacy.groundwaterFlow),
-        groundwaterFlow: legacy.groundwaterFlow,
+        discharge: gw.map((c) => c * legacyFirst!.groundwaterFlow),
+        groundwaterFlow: legacyFirst!.groundwaterFlow,
       };
     }
     const modernIn: ModernSurfaceWaterInput = {
@@ -230,6 +255,8 @@ export function compute(req: SwRequest): SwOutcome {
       ...(req.solubility !== undefined ? { solubility: req.solubility } : {}),
     };
     const modern = runModernSurfaceWater(modernIn);
+    // linked: the legacy underflow check takes the depth share measured on the modern bank plane
+    const legacy = legacyFirst ?? runLegacy(modern.depthFraction);
 
     return {
       ok: true,

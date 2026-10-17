@@ -4,7 +4,6 @@ import {
   bankScreenAverage,
   constantEpc,
   groundwaterAt123d,
-  groundwaterBreakthrough,
   modernChemical,
   modernReceptor,
   MODERN_RESIDENT_BOUNDARY,
@@ -54,20 +53,22 @@ describe('M1 bank screen average (legacy edge series)', () => {
   const times = Array.from({ length: 11 }, (_, i) => i * 4 * Y);
   const run = (time: number) => groundwaterAt123d.run({ ...input, time, points });
 
-  it('equals the screen-averaged M1 value at every sample time', () => {
+  it('is the trapezoid rule over the equally spaced screen points at every sample time', () => {
     const s = bankScreenAverage(run, times);
     expect(s.times).toEqual(times);
     times.forEach((t, i) => {
       const c = run(t).concentrations;
-      expect(s.values[i]).toBeCloseTo(c.reduce((a, x) => a + x, 0) / c.length, 22);
+      const trap = (0.5 * c[0]! + c[1]! + 0.5 * c[2]!) / 2;
+      expect(s.values[i]).toBeCloseTo(trap, 22);
     });
     expect(Math.max(...s.values)).toBeGreaterThan(0);
   });
 
-  it('is the same reduction as the M4 groundwater adapter', () => {
-    const s = bankScreenAverage(run, times);
-    const e = groundwaterBreakthrough(run, times, 'groundwater.at123d');
-    expect(e.kind === 'series' && e.series.values).toEqual(s.values);
+  it('gives a plume confined to the top of five points 0.125 of the top value, not 0.2', () => {
+    const s = bankScreenAverage(() => ({ concentrations: [1, 0, 0, 0, 0] }), [1]);
+    expect(s.values[0]).toBeCloseTo(0.125, 15);
+    const one = bankScreenAverage(() => ({ concentrations: [3] }), [1]);
+    expect(one.values[0]).toBe(3);
   });
 
   it('feeds the legacy box: C_sw = Q_gw C_gw / Q_mix at each time', () => {

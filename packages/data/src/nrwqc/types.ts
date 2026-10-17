@@ -66,6 +66,10 @@ export interface AquaticRow extends RowBase {
   siteSpecific: boolean;
   /** The water types whose criteria are not tabulated because of that dependence. */
   siteSpecificFor: WaterType[];
+  /** The water types whose printed values are one point of a function of pH. */
+  phDependentFor: WaterType[];
+  /** The pH the printed values correspond to, when `phDependentFor` is not empty. */
+  printedAtPh?: number;
   /** Listed in Appendix B (freshwater criteria are a function of hardness). */
   hardnessDependent: boolean;
 }

@@ -539,7 +539,12 @@ in `units.ts`); the surface water series becomes a swimming EPC through `surface
 constant EPC, since M4 series need two samples); the modern run reads the bank either as a plane
 concentration function (computing `bankPlaneDischarge`) or as a given discharge series; a ratio within 1e-12
 of 1 is not an exceedance (unit-conversion rounding), found when a concentration equal to its criterion
-computed 1.0000000000000002; the legacy plume-underflow check takes its depth fraction from the caller.
+computed 1.0000000000000002; the legacy plume-underflow check takes its depth fraction from the caller (the screen passes the share
+the modern bank plane measured, and declares a full plane of eight spreading standard deviations so both
+methods warn of reach truncation and underflow). The plane integral narrows to the extent of the field
+before its fixed panels, so a narrow plume over a long reach is not lost; the legacy C_gw follows ruling 3
+(trapezoid, end points at half weight). Pentachlorophenol's freshwater criteria are flagged pH-dependent
+(`criteria.ph-dependent`) and saltwater aluminum, which the table does not tabulate, reads "no criterion".
 
 Screening thresholds in the note's warning table (99 percent reach capture, 95 percent depth capture, a
 30-day residence time, groundwater above the mixing upstream flow, a factor of 2 on the Darcy flux) are

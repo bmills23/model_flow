@@ -33,6 +33,8 @@ const PARAMETER =
   /^(aesthetic qualities|alkalinity|color|gases, total dissolved|hardness|nutrients|oil and grease|oxygen, dissolved|ph$|solids|tainting substances|temperature|pathogen)/i;
 
 /** A note that makes the aquatic criterion depend on site water chemistry. */
+/** Values printed for one pH although the criterion is a function of pH (pentachlorophenol). */
+const PH_DEPENDENT = /expressed as a function of pH/i;
 const SITE_SPECIFIC = /water chemistry|biotic ligand|\bph, temperature|criterion for selenium/i;
 
 const letters = (s: string): string => s.toLowerCase().replace(/[^a-z]/g, '');
@@ -225,7 +227,21 @@ export const buildNrwqc = (rawDir: string): NrwqcBuild => {
       w.cmc.status !== 'value' && w.ccc.status !== 'value';
     const siteSpecificFor: WaterType[] = [];
     if (siteSpecific && missing(freshwater)) siteSpecificFor.push('fresh');
-    if (siteSpecific && missing(saltwater)) siteSpecificFor.push('salt');
+    // the calculators the notes name are for saltwater only where the notes say so (aluminum has no
+    // saltwater criterion at all, which is "no criterion", not "site-specific")
+    if (siteSpecific && missing(saltwater) && /salt/i.test(notes)) siteSpecificFor.push('salt');
+    const phDependent = PH_DEPENDENT.test(notes);
+    const phDependentFor: WaterType[] = [];
+    let printedAtPh: number | undefined;
+    if (phDependent) {
+      const m = /corresponds? to a pH of (\d+(?:\.\d+)?)/i.exec(notes);
+      if (!m) throw new Error(`the pH the values are printed at is not stated: ${id.name}`);
+      printedAtPh = Number(m[1]);
+      const fresh = /freshwater/i.test(notes);
+      const salt = /saltwater/i.test(notes);
+      if (fresh || !salt) phDependentFor.push('fresh');
+      if (salt || !fresh) phDependentFor.push('salt');
+    }
     aqRows.push({
       ...id,
       freshwater,
@@ -233,6 +249,8 @@ export const buildNrwqc = (rawDir: string): NrwqcBuild => {
       publicationYear: year,
       siteSpecific,
       siteSpecificFor,
+      phDependentFor,
+      ...(printedAtPh !== undefined ? { printedAtPh } : {}),
       hardnessDependent: false,
       notes,
     });

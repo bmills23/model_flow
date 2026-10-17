@@ -97,3 +97,44 @@ describe('surface water compute, linked to a transport run', () => {
     expect(Math.abs(fast - tight) / tight).toBeLessThan(0.01);
   }, 60000);
 });
+
+describe('surface water compute, plane checks and long reaches', () => {
+  const linkedRun = (over: Partial<typeof DEFAULT_FORM>, fast = true) => {
+    const s = toScenario({ ...TRANSPORT_FORM, timeYr: '5' });
+    if (!s.ok) throw new Error('scenario');
+    const { zOf: _z, ...scenario } = s.scenario;
+    void _z;
+    const r = toRequest(
+      { ...DEFAULT_FORM, linked: true, bankX: '50', ...over },
+      { scenario, label: 'test run' },
+    );
+    if (!r.ok) throw new Error(r.errors.join('; '));
+    const out = compute(r.request);
+    if (!out.ok) throw new Error(out.error);
+    void fast;
+    return out.result;
+  };
+
+  it('warns on both methods when the discharge thickness is far shallower than the plume', () => {
+    const res = linkedRun({ reachLength: '5', thickness: '0.5' });
+    const codes = (w: { code: string }[]) => w.map((x) => x.code);
+    expect(codes(res.modern.warnings)).toContain('surfaceWater.plume-underflow');
+    expect(codes(res.legacy.warnings)).toContain('surfaceWater.plume-underflow');
+  }, 120000);
+
+  it('warns that a short reach truncates the plume', () => {
+    const res = linkedRun({ reachLength: '1', thickness: '3' });
+    expect(res.modern.warnings.map((w) => w.code)).toContain('surfaceWater.reach-truncates-plume');
+  }, 120000);
+
+  it('keeps the modern loading for a long entered reach (it must not collapse to zero)', () => {
+    const short = linkedRun({ reachLength: '40', thickness: '3' });
+    const long = linkedRun({ reachLength: '2000', thickness: '3' });
+    const peak = (a: number[]) => Math.max(...a);
+    // the same plume flux over a 50 times longer reach: the flux-averaged concentration falls by
+    // about the reach ratio, never to zero
+    const ratio = peak(long.modern.fluxAveraged) / peak(short.modern.fluxAveraged);
+    expect(ratio).toBeGreaterThan(0.5 * (40 / 2000));
+    expect(ratio).toBeLessThan(1.5 * (40 / 2000));
+  }, 180000);
+});
