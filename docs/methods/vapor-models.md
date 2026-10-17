@@ -1,6 +1,6 @@
 # Vapor models (methods note for M6)
 
-Equations to be implemented in `packages/engine/src/processes/vapor/` and
+Equations implemented in `packages/engine/src/processes/vapor/` and
 `packages/engine/src/processes/outdoorAir/`, in our own words, derived from the primary publications
 and agency documents cited by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The RISC5
 manual (Appendices D, E, F, J and K, and Tables R-3 to R-6 of its Appendix R review) was used only as a

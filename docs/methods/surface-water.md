@@ -1,6 +1,6 @@
 # Surface water and sediment (methods note for M8)
 
-Equations to be implemented in `packages/engine/src/processes/surfaceWater/`, in our own words, derived
+Equations implemented in `packages/engine/src/processes/surfaceWater/`, in our own words, derived
 from the primary publications cited by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The
 RISC5 manual (Appendix L for the models, Appendices M and N for the criteria databases, and Table R-8 of
 its Appendix R review) was used only as a map of which choices RISC5 made; none of its text, figures or
@@ -247,10 +247,10 @@ too, which is what a benchmark expressed per unit organic carbon is compared wit
 
 Each model is exposed as a forward function from source to receptor concentration, so M5 can wrap it:
 
-| Function (planned) | From, to | Linear? |
+| Function | From, to | Linear? |
 |---|---|---|
 | `legacyBox` | C_gw (or a series) to C_sw | Affine: C_sw = a C_gw + b with b = f Q_u C_u / (Q_mix + k V); linear when the background is zero |
-| `legacySediment`, `modernSediment` | pore-water concentration to C_sed | Linear |
+| `sedimentConcentration` (legacy), `modernSediment` | pore-water concentration to C_sed | Linear |
 | `domenicoReachLength` | geometry to L_r | Independent of concentration |
 | `bankPlaneDischarge` | M1 run to W(t) | Linear in the M1 source strength |
 | `transientBox` | W(t) series to C(t) | Affine in W (linear with zero background) |
@@ -519,7 +519,7 @@ stays `planned`.
 | E2 Modern kernels and M1 discharge | 2 | `surfaceWater/{discharge,transient,downstream,modern}.ts` | `surfacewater-transient.test.ts` (H1, box identities 5a to 5d); `surfacewater-discharge.test.ts` (mass balance 4a to 4d, reach and underflow fractions with their warnings); H2 | E1 (units, sediment) |
 | E3 Coupling, criteria comparison, registration | 2 | `surfaceWater/{coupling,criteria,index}.ts`; `packages/engine/src/index.ts` (register two methods); `references.json` (`chapra1997`, `ditoro1991` to `used`) | `surfacewater-registry.test.ts` (ids, citations used, validity warnings surfaced); `surfacewater-coupling.test.ts` (legacy edge series equals the screen-averaged M1 value; the series feeds `runModernScenario` swimming pathways with origin `surfaceWater.*`; identity 5e); `surfacewater-criteria.test.ts` (ratios, peak rule, hardness equation from a parameter record, site-specific and missing criteria, OC normalization; fixture 6b and 6c). The engine defines the criterion record type; D1 and D2 emit that shape | E1, E2 |
 | W1 Screen and run | 3 | `apps/web/src/surfaceWater/{SurfaceWaterScreen,inputs,compute.worker,charts}.tsx` and tests; `apps/web/src/App.tsx` (route `#/surface-water`, lazy-loaded); a feed from the transport screen like `transport/wellFeed.ts` | App routing test for `#/surface-water`; the screen opens on the R-8 river case and shows 2.91 mg/L and 2.95 mg/kg; linked to a transport run it draws C_sw and C_sed against time with the legacy and modern curves overlaid and the warnings listed; zero overflowing elements at 390x844 and 1280, light and dark (CDP check) | E3 |
-| W2 Criteria panel and risk feed | 3 | `apps/web/src/surfaceWater/{CriteriaPanel,criteriaDb}.tsx`; `apps/web/src/risk/` (accept a surface water feed for the swimming EPC) | the criteria JSON loads on demand as separate chunks; ratios and exceedance flags for a chosen chemical; hardness input changes the zinc criterion; feeding the risk screen sets the swimming EPC with origin `surfaceWater.well-mixed` and the series drives the swimming risk; overflow check as W1 | W1, D1, D2 |
+| W2 Criteria panel and risk feed | 3 | `apps/web/src/surfaceWater/CriteriaPanel.tsx`, `apps/web/src/surfaceWater/criteriaDb.ts`; `apps/web/src/risk/` (accept a surface water feed for the swimming EPC) | the criteria JSON loads on demand as separate chunks; ratios and exceedance flags for a chosen chemical; hardness input changes the zinc criterion; feeding the risk screen sets the swimming EPC with origin `surfaceWater.well-mixed` and the series drives the swimming risk; overflow check as W1 | W1, D1, D2 |
 
 D1, D2 and E1 can run in parallel; E2 follows E1; E3 follows E2; W1 follows E3; W2 follows W1 and both data
 slices.

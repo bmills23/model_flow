@@ -5,7 +5,7 @@ and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting
 a done one.
 
 ## State of the tree
-- Branch `wave-m5-m6-m8` (tip `c27a387`) holds M5, M6 and M8 merged on top of main at M4 (`2d1a452`). It
+- Branch `wave-m5-m6-m8` holds M5, M6 and M8 merged on top of main at M4 (`2d1a452`). It
   is not on main and not pushed; merging to main and pushing are Bryan's call. Gate on the branch: lint,
   prettier, typecheck, engine 954 tests (62 files), data 130 (6 files), web 407 (54 files), `docs:check`,
   `data:check`, build. Pages deploys from main: https://bmills23.github.io/model_flow/

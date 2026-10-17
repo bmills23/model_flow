@@ -1,6 +1,6 @@
 # Cleanup levels (methods note for M5)
 
-Equations to be implemented in `packages/engine/src/processes/cleanup/`, in our own words, derived from the
+Equations implemented in `packages/engine/src/processes/cleanup/`, in our own words, derived from the
 primary publications cited by reference key (see `docs/ATTRIBUTIONS.md` for full entries). The RISC5
 manual (chapter 8 and section R.6 of its Appendix R review) was used only as a map of which options RISC5
 offers; none of its text, figures or tables is reproduced and its equation labels are not used here.
