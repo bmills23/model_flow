@@ -338,9 +338,9 @@
     "title": "Soil Screening Guidance: Technical Background Document",
     "venue": "U.S. Environmental Protection Agency",
     "identifier": "EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996",
-    "tags": ["vadose", "saturatedSource", "outdoorAir", "particulate"],
+    "tags": ["vadose", "saturatedSource", "outdoorAir", "particulate", "cleanup"],
     "url": "https://semspub.epa.gov/work/HQ/207.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture. For M5 (2026-10-16; the SEMS host was unreachable, so the Internet Archive capture of the same URL was read): sections 2.5.1, 2.5.2, 2.5.5 and 2.5.6, equations 22 to 24 (soil-water partition) and 28 to 45 (dilution factor and mixing-zone depth), Table 1 (MCLs), Table 46 (inorganic Kd at pH 4.9, 6.8 and 8.0) and Appendix A Table A-1 (generic SSLs at DAF 20 and DAF 1)."
   },
   {
     "key": "epa2002ssg",
@@ -351,9 +351,22 @@
     "title": "Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites",
     "venue": "U.S. Environmental Protection Agency",
     "identifier": "OSWER 9355.4-24, December 2002",
-    "tags": ["vadose", "particulate"],
+    "tags": ["vadose", "particulate", "cleanup"],
     "url": "https://semspub.epa.gov/work/HQ/175878.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16)."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). For M5 (2026-10-16, Internet Archive capture of the same URL): section 4.2.3, equations 4-10 to 4-14 (partition equation, DAF, mixing-zone depth, mass-limit levels), which the RSL default-parameter file cites for its soil-to-groundwater defaults."
+  },
+  {
+    "key": "epa1996ssgug",
+    "type": "guidance",
+    "status": "planned",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 1996,
+    "title": "Soil Screening Guidance: User's Guide",
+    "venue": "U.S. Environmental Protection Agency, Office of Emergency and Remedial Response",
+    "identifier": "EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996",
+    "tags": ["cleanup", "vadose"],
+    "url": "https://semspub.epa.gov/work/HQ/211.pdf",
+    "notes": "Verified from the document cover and text (2026-10-16; the SEMS host was unreachable, so the Internet Archive capture of this URL was read). Equations 10 to 14 (printed pages 29 to 31: partition equation, dilution factor, mixing-zone depth, mass-limit levels), Exhibit 12 (simplifying assumptions), section 2.5.3 (multiple chemicals) and Attachment C Table C-1 (Koc, H') read for M5."
   },
   {
     "key": "celia1990",
@@ -687,6 +700,19 @@
     "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-16). Equations 3.1 to 3.4 (dermal water), 3.11 and 3.12 (dermal soil) and the chapter 4 GIABS cutoff of 50 percent read for M4."
   },
   {
+    "key": "ragsb1991",
+    "type": "guidance",
+    "status": "planned",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 1991,
+    "title": "Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim",
+    "venue": "U.S. Environmental Protection Agency, Office of Emergency and Remedial Response",
+    "identifier": "EPA/540/R-92/003, Publication 9285.7-01B, December 1991",
+    "tags": ["cleanup", "exposure", "risk"],
+    "url": "https://semspub.epa.gov/src/document/HQ/156739",
+    "notes": "The URL is the PDF link on EPA's RAGS Part B page (page last updated September 2, 2026). The SEMS host was unreachable on 2026-10-16; the cover, contents and sections 2.7 (target risk levels) and 3.1.1 (combining pathways for one medium) were read from the copy at https://epa-dccs.ornl.gov/documents/HHEMB.pdf, whose cover carries the identifiers above. Source of the back-calculation of risk-based goals from a target risk and hazard quotient."
+  },
+  {
     "key": "epa2014ef",
     "type": "guidance",
     "status": "used",
@@ -828,6 +854,19 @@
     "tags": ["montecarlo"]
   },
   {
+    "key": "brent1973",
+    "type": "method",
+    "status": "planned",
+    "authors": "Brent, R.P.",
+    "year": 1973,
+    "title": "Algorithms for Minimization without Derivatives",
+    "venue": "Prentice-Hall, Englewood Cliffs, New Jersey",
+    "identifier": "ISBN 0-13-022335-2",
+    "tags": ["numerics", "cleanup"],
+    "url": "https://maths-people.anu.edu.au/~brent/pub/pub011.html",
+    "notes": "Verified from the author's publication page (2026-10-16): Prentice-Hall, 1973, 195 pages; reprinted by Dover Publications, Mineola, New York, 2002 (ISBN 0-486-41998-3). Chapter 4 gives the zero finder for a function that changes sign in an interval (successive linear interpolation with bisection). The book itself was not read. Source of the root finder used for cleanup-level back-calculation."
+  },
+  {
     "key": "epa1997mc",
     "type": "guidance",
     "status": "planned",
@@ -902,6 +941,19 @@
     "url": "https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide",
     "notes": "Read 2026-10-16 (page last updated March 13, 2026; year is that of the tables it documents). Sections 2.3 (toxicity hierarchy), 4.9 (dermal parameters), 5.10 (arsenic relative bioavailability), 5.17 (mutagens) and 5.18 (trichloroethylene). Used to build the M4 independent-check fixture and for the life-stage convention of the modern exposure method.",
     "tags": ["validation", "exposure"]
+  },
+  {
+    "key": "epanpdwr",
+    "type": "data",
+    "status": "planned",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2026,
+    "title": "National Primary Drinking Water Regulations",
+    "venue": "U.S. Environmental Protection Agency",
+    "identifier": "Codified at 40 CFR Part 141",
+    "tags": ["cleanup", "data"],
+    "url": "https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations",
+    "notes": "EPA web page read 2026-10-16 (last updated August 31, 2026; the year is that of the page read); it lists the maximum contaminant levels and points to 40 CFR 141. Origin of the MCLs that the RSL tables (epa2024rsl) carry in their MCL column, which is what the engine reads; becomes a data reference when the data build reads that column."
   },
   {
     "key": "epairis",
