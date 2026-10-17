@@ -48,13 +48,7 @@ export function App() {
   return (
     <div
       className={
-        onTransport ||
-          onVadose ||
-          onSaturated ||
-          onRisk ||
-          onVapor ||
-          onCleanup ||
-          onSurfaceWater
+        onTransport || onVadose || onSaturated || onRisk || onVapor || onCleanup || onSurfaceWater
           ? 'shell shell-wide'
           : 'shell'
       }
