@@ -199,6 +199,14 @@ Water (eq. 3.2 to 3.4, then 3.1), per event of duration t_ev:
 - inorganic chemicals: DA_ev = Kp C t_ev
 
 and the dose rate is DA_ev EV EF ED SAw / (BW AT), summed over life stages with their ADAFs for cancer.
+
+Which form applies is a property of the chemical, not of the columns present: the RSL fills tau, t* and B
+for inorganics too (using the lag-time form for cadmium, mercury salts, nickel or zinc overstates the
+dermal hazard 1.8 to 7 times). The RSL has no organic flag, so the database classifies each analyte from
+its published November 2024 tap water dermal value: the one form that reproduces it (`dermalForm`, 569
+organic, 121 inorganic; see `docs/DECISIONS.md`, slice E2). Where the table publishes no dermal value the
+form is unknown, the engine does not quantify dermal water (`organic` has no default) and the pathway is
+reported as not quantified until the caller states a form.
 The branch is chosen per life stage, because child and adult event times differ (0.54 and 0.71 h for
 bathing in `epa2014ef`). For the cancer dose the RSL tables use one time-weighted event time for every
 stage, 0.6708 h (the RSL default-parameter file's `ETevent-res-adj` and `ETevent-res-madj`, which holds for

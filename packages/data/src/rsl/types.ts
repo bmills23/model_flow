@@ -4,6 +4,8 @@ export interface TaggedValue {
   ref?: string;
 }
 
+export type DermalForm = 'organic' | 'inorganic';
+
 export type ChemicalValueKey =
   | 'mw'
   | 'hPrime'
@@ -33,6 +35,12 @@ export interface ChemicalEntry {
   fa?: number;
   /** In the RAGS E prediction domain ("In EPD?" in the tap water table). Absent when blank. */
   inEpd?: boolean;
+  /**
+   * How the RSL treats dermal contact with water: the RAGS Part E lag-time model (organic) or Kp times
+   * the event time (inorganic). Absent when the tap water table publishes no dermal value for the
+   * analyte, so the form is not known and a caller must not guess it.
+   */
+  dermalForm?: DermalForm;
 }
 
 export interface ChemicalsFile {

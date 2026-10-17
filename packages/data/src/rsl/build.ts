@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import readXlsxFile from 'read-excel-file/node';
 import { verifyManifest, type Manifest } from './checksums.js';
+import { inorganicDermalWater } from './dermal-form.js';
 import { sourceKeys } from './source-keys.js';
 import type {
   ChemicalEntry,
@@ -124,7 +125,14 @@ const PARAMS = {
   kp: [27, 28],
 } as const;
 
-const TAPWATER = { name: 14, cas: 15, fa: 12, epd: 13 } as const;
+const TAPWATER = {
+  name: 14,
+  cas: 15,
+  fa: 12,
+  epd: 13,
+  dermalCancer: 17,
+  dermalNoncancer: 21,
+} as const;
 
 const toxValue = (row: Row, valueCol: number, where: string): ToxValue | undefined => {
   const value = num(row[valueCol], where);
@@ -205,8 +213,28 @@ const buildChemicals = (paramRows: Row[], tapRows: Row[], ids: string[]): Chemic
       }
       entry.inEpd = epd === 'Yes';
     }
+    const published =
+      num(tap[TAPWATER.dermalCancer], `tap water table ${ident.rslName} dermal cancer SL`) !==
+        undefined ||
+      num(tap[TAPWATER.dermalNoncancer], `tap water table ${ident.rslName} dermal noncancer SL`) !==
+        undefined;
+    if (entry.id in inorganicDermalWater) {
+      if (!published)
+        throw new Error(`${ident.rslName}: listed inorganic but no published dermal SL`);
+      entry.dermalForm = 'inorganic';
+    } else if (published) {
+      entry.dermalForm = 'organic';
+    }
     return entry;
   });
+
+const checkedChemicals = (chemicals: ChemicalEntry[]): ChemicalEntry[] => {
+  const known = new Set(chemicals.map((c) => c.id));
+  for (const id of Object.keys(inorganicDermalWater)) {
+    if (!known.has(id)) throw new Error(`inorganic dermal water list names an unknown id: ${id}`);
+  }
+  return chemicals;
+};
 
 const roleFile = (m: Manifest, role: 'summary' | 'parameters' | 'tapwater') => {
   const f = m.files.find((x) => x.role === role);
@@ -267,7 +295,7 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
         tStar: 'h',
         kp: 'cm/h',
       },
-      chemicals: buildChemicals(paramRows, tapRows, ids),
+      chemicals: checkedChemicals(buildChemicals(paramRows, tapRows, ids)),
     },
     tox: {
       edition: manifest.edition,

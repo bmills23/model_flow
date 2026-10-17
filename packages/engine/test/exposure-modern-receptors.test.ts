@@ -409,6 +409,22 @@ describe('receptor evaluation', () => {
   });
 });
 
+describe('dermal water form is never guessed', () => {
+  it('leaves dermal water unquantified when the form is not stated, even with every lag-time column', () => {
+    const unstated = modernChemical({ ...benzeneB, organic: undefined });
+    expect(unstated.dermalWater).toBeUndefined();
+    const cell = modernPathway('waterDermal', resident, unstated, 1);
+    expect(cell.riskPerEpc).toBeNull();
+    expect(cell.hqPerEpc).toBeNull();
+    expect(cell.missing).toContain('dermalWater');
+  });
+
+  it('uses the stated form', () => {
+    expect(modernChemical(benzeneB).dermalWater?.organic).toBe(true);
+    expect(modernChemical({ ...benzeneB, organic: false }).dermalWater?.organic).toBe(false);
+  });
+});
+
 describe('validation', () => {
   it('rejects chemical values out of range', () => {
     for (const bad of [

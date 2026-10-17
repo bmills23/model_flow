@@ -1,5 +1,6 @@
 import type { Medium } from '@model-flow/engine';
-import { Field } from '../ui/controls';
+import type { DermalForm } from '@model-flow/data/rsl-types';
+import { Field, Seg } from '../ui/controls';
 import type { WellFeed } from '../transport/wellFeed';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow } from './form';
@@ -95,17 +96,26 @@ export function ChemicalCard(props: {
         </label>
       )}
       {rec.phys?.values.kp !== undefined && (
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={row.inorganic}
-            onChange={(e) => props.onChange({ ...row, inorganic: e.target.checked })}
+        <div>
+          <Seg
+            legend="Dermal contact with water (modern method)"
+            name={`dermal-form-${row.id}`}
+            value={row.dermalForm ?? ''}
+            options={[
+              { value: 'organic', label: 'Organic lag-time model' },
+              { value: 'inorganic', label: 'Inorganic, permeability times time' },
+              { value: '', label: 'Not set' },
+            ]}
+            onChange={(v) =>
+              props.onChange({ ...row, dermalForm: v === '' ? undefined : (v as DermalForm) })
+            }
           />
-          <span>
-            Inorganic for dermal water: permeability times event time, not the organic lag-time
-            model (the RSL does not say which applies)
-          </span>
-        </label>
+          <small>
+            {rec.phys.dermalForm === undefined
+              ? 'The RSL publishes no dermal water value for this analyte, so the form is not known. Dermal water is not quantified until you choose one.'
+              : `Set from the RSL's published dermal water values (${rec.phys.dermalForm}).`}
+          </small>
+        </div>
       )}
       <div className="card-actions">
         <button

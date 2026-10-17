@@ -95,7 +95,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-07-0",
@@ -235,7 +236,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-64-1",
@@ -305,7 +307,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-86-5",
@@ -515,7 +518,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "53-96-3",
@@ -581,7 +585,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-02-8",
@@ -651,7 +656,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-06-1",
@@ -721,7 +727,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-10-7",
@@ -791,7 +798,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-13-1",
@@ -861,7 +869,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-69-3",
@@ -1001,7 +1010,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "116-06-3",
@@ -1071,7 +1081,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1646-88-4",
@@ -1137,7 +1148,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1646-87-3",
@@ -1343,7 +1355,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-05-1",
@@ -1413,7 +1426,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7429-90-5",
@@ -1467,7 +1481,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "20859-73-8",
@@ -1513,7 +1528,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "834-12-8",
@@ -1579,7 +1595,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "92-67-1",
@@ -1645,7 +1662,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "591-27-5",
@@ -1711,7 +1729,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-55-6",
@@ -1781,7 +1800,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-30-8",
@@ -1847,7 +1867,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "33089-61-1",
@@ -1917,7 +1938,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7664-41-7",
@@ -2052,7 +2074,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7773-06-0",
@@ -2106,7 +2129,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "75-85-4",
@@ -2246,7 +2270,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "84-65-1",
@@ -2312,7 +2337,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-36-0",
@@ -2366,7 +2392,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1314-60-9",
@@ -2412,7 +2439,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1332-81-6",
@@ -2454,7 +2482,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1309-64-4",
@@ -2550,7 +2579,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7784-42-1",
@@ -2600,7 +2630,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1332-21-4",
@@ -2683,7 +2714,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1912-24-9",
@@ -2753,7 +2785,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "492-80-8",
@@ -2819,7 +2852,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "65195-55-3",
@@ -2955,7 +2989,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "103-33-3",
@@ -3025,7 +3060,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-77-3",
@@ -3095,7 +3131,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-39-3",
@@ -3145,7 +3182,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1861-40-1",
@@ -3215,7 +3253,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "17804-35-2",
@@ -3281,7 +3320,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "83055-99-6",
@@ -3347,7 +3387,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25057-89-0",
@@ -3413,7 +3454,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-52-7",
@@ -3483,7 +3525,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "71-43-2",
@@ -3553,7 +3596,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25551-13-7",
@@ -3759,7 +3803,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "92-87-5",
@@ -3829,7 +3874,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "65-85-0",
@@ -3899,7 +3945,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-07-7",
@@ -3969,7 +4016,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-51-6",
@@ -4039,7 +4087,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-44-7",
@@ -4109,7 +4158,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-41-7",
@@ -4163,7 +4213,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "42576-02-3",
@@ -4233,7 +4284,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "82657-04-3",
@@ -4373,7 +4425,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-60-1",
@@ -4443,7 +4496,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-91-1",
@@ -4509,7 +4563,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-44-4",
@@ -4579,7 +4634,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "542-88-1",
@@ -4649,7 +4705,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "80-05-7",
@@ -4719,7 +4776,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-42-8",
@@ -4769,7 +4827,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10294-34-5",
@@ -4831,7 +4890,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7637-07-2",
@@ -4889,7 +4949,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "15541-45-4",
@@ -4931,7 +4992,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "107-04-0",
@@ -5001,7 +5063,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1073-06-9",
@@ -5071,7 +5134,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "460-00-4",
@@ -5141,7 +5205,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-08-3",
@@ -5211,7 +5276,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-86-1",
@@ -5281,7 +5347,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-97-5",
@@ -5421,7 +5488,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-25-2",
@@ -5491,7 +5559,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-83-9",
@@ -5561,7 +5630,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2104-96-3",
@@ -5631,7 +5701,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-94-5",
@@ -5767,7 +5838,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1689-99-2",
@@ -5837,7 +5909,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-99-0",
@@ -5907,7 +5980,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "71-36-3",
@@ -5977,7 +6051,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-65-0",
@@ -6047,7 +6122,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-92-2",
@@ -6117,7 +6193,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2008-41-5",
@@ -6187,7 +6264,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25013-16-5",
@@ -6253,7 +6331,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "128-37-0",
@@ -6323,7 +6402,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "104-51-8",
@@ -6533,7 +6613,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-60-5",
@@ -6599,7 +6680,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-43-9-cadmium-diet",
@@ -6706,7 +6788,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "105-60-2",
@@ -6776,7 +6859,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2425-06-1",
@@ -6842,7 +6926,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "133-06-2",
@@ -6912,7 +6997,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "63-25-2",
@@ -6982,7 +7068,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1563-66-2",
@@ -7052,7 +7139,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-15-0",
@@ -7122,7 +7210,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "56-23-5",
@@ -7192,7 +7281,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "463-58-1",
@@ -7332,7 +7422,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5234-68-4",
@@ -7398,7 +7489,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1306-38-3",
@@ -7514,7 +7606,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "133-90-4",
@@ -7580,7 +7673,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E701235",
@@ -7655,7 +7749,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5103-71-9",
@@ -7725,7 +7820,8 @@
         }
       },
       "fa": 0.7,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5103-74-2",
@@ -7865,7 +7961,8 @@
         }
       },
       "fa": 0.7,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "143-50-0",
@@ -7935,7 +8032,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "470-90-6",
@@ -8001,7 +8099,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "90982-32-4",
@@ -8067,7 +8166,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7782-50-5",
@@ -8137,7 +8237,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10049-04-4",
@@ -8199,7 +8300,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7758-19-2",
@@ -8245,7 +8347,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "75-68-3",
@@ -8385,7 +8488,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3165-93-3",
@@ -8451,7 +8555,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-69-2",
@@ -8517,7 +8622,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-20-0",
@@ -8587,7 +8693,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-11-8",
@@ -8657,7 +8764,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "532-27-4",
@@ -8797,7 +8905,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-90-7",
@@ -8867,7 +8976,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-66-8",
@@ -8933,7 +9043,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "510-15-6",
@@ -9003,7 +9114,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-11-3",
@@ -9073,7 +9185,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-56-6",
@@ -9143,7 +9256,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-69-3",
@@ -9213,7 +9327,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-45-6",
@@ -9353,7 +9468,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-66-3",
@@ -9423,7 +9539,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-87-3",
@@ -9563,7 +9680,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88-73-3",
@@ -9633,7 +9751,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-00-5",
@@ -9703,7 +9822,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-57-8",
@@ -9773,7 +9893,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76-06-2",
@@ -9913,7 +10034,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-49-8",
@@ -9983,7 +10105,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-43-4",
@@ -10053,7 +10176,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "54749-90-5",
@@ -10119,7 +10243,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-21-3",
@@ -10189,7 +10314,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2921-88-2",
@@ -10255,7 +10381,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5598-13-0",
@@ -10321,7 +10448,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "64902-72-3",
@@ -10387,7 +10515,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1861-32-1",
@@ -10453,7 +10582,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60238-56-4",
@@ -10519,7 +10649,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "16065-83-1-chromium-iii-soluble-compounds",
@@ -10619,7 +10750,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "18540-29-9",
@@ -10665,7 +10797,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-47-3",
@@ -10781,7 +10914,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-48-4",
@@ -10835,7 +10969,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E649830",
@@ -10921,7 +11056,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "108-39-4",
@@ -10991,7 +11127,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-48-7",
@@ -11061,7 +11198,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-44-5",
@@ -11131,7 +11269,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "59-50-7",
@@ -11197,7 +11336,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1319-77-3",
@@ -11263,7 +11403,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-73-9",
@@ -11333,7 +11474,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-82-8",
@@ -11403,7 +11545,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "135-20-6",
@@ -11469,7 +11612,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "21725-46-2",
@@ -11535,7 +11679,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "cyanides",
@@ -11579,7 +11724,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "544-92-3",
@@ -11625,7 +11771,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "57-12-5",
@@ -11687,7 +11834,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "460-19-5",
@@ -11753,7 +11901,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "506-68-3",
@@ -11811,7 +11960,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "506-77-4",
@@ -11873,7 +12023,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "74-90-8",
@@ -11943,7 +12094,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "151-50-8",
@@ -11997,7 +12149,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "506-61-6",
@@ -12035,7 +12188,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "506-64-9",
@@ -12085,7 +12239,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "143-33-9",
@@ -12139,7 +12294,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "557-21-1",
@@ -12189,7 +12345,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "110-82-7",
@@ -12325,7 +12482,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-94-1",
@@ -12395,7 +12553,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "110-83-8",
@@ -12465,7 +12624,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-91-8",
@@ -12535,7 +12695,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "68359-37-5",
@@ -12601,7 +12762,8 @@
         }
       },
       "fa": 0.7,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "66215-27-8",
@@ -12667,7 +12829,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-99-0",
@@ -12737,7 +12900,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1596-84-5",
@@ -12803,7 +12967,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1163-19-5",
@@ -12935,7 +13100,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "103-23-1",
@@ -13071,7 +13237,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "333-41-5",
@@ -13141,7 +13308,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-12-8",
@@ -13211,7 +13379,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "631-64-1",
@@ -13277,7 +13446,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-36-1",
@@ -13347,7 +13517,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-37-6",
@@ -13417,7 +13588,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "124-48-1",
@@ -13487,7 +13659,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-93-4",
@@ -13557,7 +13730,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-95-3",
@@ -13706,7 +13880,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3400-09-7",
@@ -13995,7 +14170,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-50-1",
@@ -14065,7 +14241,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-46-7",
@@ -14135,7 +14312,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "91-94-1",
@@ -14201,7 +14379,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "90-98-2",
@@ -14271,7 +14450,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-71-8",
@@ -14341,7 +14521,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72-54-8",
@@ -14407,7 +14588,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72-55-9",
@@ -14613,7 +14795,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-06-2",
@@ -14683,7 +14866,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-35-4",
@@ -14753,7 +14937,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "156-59-2",
@@ -14823,7 +15008,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "156-60-5",
@@ -14893,7 +15079,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "120-83-2",
@@ -14963,7 +15150,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "94-75-7",
@@ -15033,7 +15221,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-87-5",
@@ -15103,7 +15292,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "142-28-9",
@@ -15173,7 +15363,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "616-23-9",
@@ -15243,7 +15434,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "542-75-6",
@@ -15313,7 +15505,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "62-73-7",
@@ -15383,7 +15576,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "141-66-2",
@@ -15453,7 +15647,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "77-73-6",
@@ -15523,7 +15718,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60-57-1",
@@ -15593,7 +15789,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E17136615",
@@ -15671,7 +15868,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "112-34-5",
@@ -15741,7 +15939,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-90-0",
@@ -15811,7 +16010,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "617-84-5",
@@ -15881,7 +16081,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "56-53-1",
@@ -15947,7 +16148,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "43222-48-6",
@@ -16005,7 +16207,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "35367-38-5",
@@ -16071,7 +16274,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-37-6",
@@ -16281,7 +16485,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-20-3",
@@ -16421,7 +16626,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "55290-64-7",
@@ -16487,7 +16693,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60-51-5",
@@ -16557,7 +16764,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "119-90-4",
@@ -16623,7 +16831,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-18-3",
@@ -16693,7 +16902,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "756-79-6",
@@ -16763,7 +16973,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60-11-7",
@@ -16829,7 +17040,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "21436-96-4",
@@ -16895,7 +17107,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-68-1",
@@ -16965,7 +17178,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "121-69-7",
@@ -17035,7 +17249,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "119-93-7",
@@ -17101,7 +17316,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "68-12-2",
@@ -17171,7 +17387,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "57-14-7",
@@ -17241,7 +17458,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "540-73-8",
@@ -17311,7 +17529,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "105-67-9",
@@ -17381,7 +17600,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "576-26-1",
@@ -17447,7 +17667,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-65-8",
@@ -17517,7 +17738,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "513-37-1",
@@ -17587,7 +17809,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "534-52-1",
@@ -17653,7 +17876,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "131-89-5",
@@ -17719,7 +17943,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "618-87-1",
@@ -17789,7 +18014,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "528-29-0",
@@ -17859,7 +18085,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-65-0",
@@ -17929,7 +18156,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-25-4",
@@ -17999,7 +18227,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "51-28-5",
@@ -18069,7 +18298,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1615210",
@@ -18135,7 +18365,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "121-14-2",
@@ -18205,7 +18436,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "606-20-2",
@@ -18275,7 +18507,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "35572-78-2",
@@ -18341,7 +18574,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "19406-51-0",
@@ -18407,7 +18641,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25321-14-6",
@@ -18473,7 +18708,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88-85-7",
@@ -18543,7 +18779,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-91-1",
@@ -18613,7 +18850,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "dioxins",
@@ -18829,7 +19067,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-84-8",
@@ -18969,7 +19208,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "122-39-4",
@@ -19039,7 +19279,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "122-66-7",
@@ -19109,7 +19350,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2764-72-9",
@@ -19175,7 +19417,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1937-37-7",
@@ -19435,7 +19678,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "505-29-3",
@@ -19505,7 +19749,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "330-54-1",
@@ -19571,7 +19816,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2439-10-3",
@@ -19637,7 +19883,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "759-94-4",
@@ -19707,7 +19954,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "115-29-7",
@@ -19777,7 +20025,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1031-07-8",
@@ -19843,7 +20092,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "145-73-3",
@@ -19913,7 +20163,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72-20-8",
@@ -19979,7 +20230,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-89-8",
@@ -20049,7 +20301,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-88-7",
@@ -20185,7 +20438,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "16672-87-0",
@@ -20255,7 +20509,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "563-12-2",
@@ -20325,7 +20580,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-15-9",
@@ -20395,7 +20651,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "110-80-5",
@@ -20465,7 +20722,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "141-78-6",
@@ -20535,7 +20793,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "140-88-5",
@@ -20605,7 +20864,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-00-3",
@@ -20745,7 +21005,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "97-63-2",
@@ -20885,7 +21146,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2104-64-5",
@@ -20955,7 +21217,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-41-4",
@@ -21025,7 +21288,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-78-4",
@@ -21095,7 +21359,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-15-3",
@@ -21235,7 +21500,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-76-2",
@@ -21305,7 +21571,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-21-8",
@@ -21375,7 +21642,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-45-7",
@@ -21441,7 +21709,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "151-56-4",
@@ -21511,7 +21780,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "84-72-0",
@@ -21577,7 +21847,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "22224-92-6",
@@ -21647,7 +21918,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "39515-41-8",
@@ -21713,7 +21985,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "51630-58-1",
@@ -21849,7 +22122,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "16984-48-8",
@@ -21899,7 +22173,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7782-41-4",
@@ -21953,7 +22228,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "59756-60-4",
@@ -22019,7 +22295,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "56425-91-3",
@@ -22085,7 +22362,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "85509-19-9",
@@ -22151,7 +22429,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "66332-96-5",
@@ -22217,7 +22496,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "69409-94-5",
@@ -22349,7 +22629,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72178-02-0",
@@ -22419,7 +22700,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "944-22-9",
@@ -22489,7 +22771,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "50-00-0",
@@ -22559,7 +22842,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "64-18-6",
@@ -22629,7 +22913,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "39148-24-8",
@@ -22771,7 +23056,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "110-00-9",
@@ -22841,7 +23127,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-99-9",
@@ -22911,7 +23198,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-45-8",
@@ -22977,7 +23265,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-01-1",
@@ -23047,7 +23336,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "531-82-8",
@@ -23113,7 +23403,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60568-05-0",
@@ -23179,7 +23470,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "77182-82-2",
@@ -23311,7 +23603,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "765-34-4",
@@ -23381,7 +23674,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1071-83-6",
@@ -23517,7 +23811,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "50-01-1",
@@ -23715,7 +24010,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76-44-8",
@@ -23785,7 +24081,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1024-57-3",
@@ -23855,7 +24152,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-71-7",
@@ -24241,7 +24539,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "319-84-6",
@@ -24307,7 +24606,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "319-85-7",
@@ -24377,7 +24677,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "319-86-8",
@@ -24443,7 +24744,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "58-89-9",
@@ -24509,7 +24811,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "608-73-1",
@@ -24575,7 +24878,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "77-47-4",
@@ -24645,7 +24949,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-72-1",
@@ -24715,7 +25020,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "70-30-4",
@@ -24851,7 +25157,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "822-06-0",
@@ -25127,7 +25434,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E5241997",
@@ -25337,7 +25645,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "104-76-7",
@@ -25407,7 +25716,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "591-78-6",
@@ -25477,7 +25787,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "51235-04-2",
@@ -25547,7 +25858,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78587-05-0",
@@ -25613,7 +25925,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67485-29-4",
@@ -25679,7 +25992,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "302-01-2",
@@ -25749,7 +26063,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10034-93-2",
@@ -25799,7 +26114,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7647-01-0",
@@ -25927,7 +26243,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7783-06-4",
@@ -26063,7 +26380,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "35554-44-0",
@@ -26133,7 +26451,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "81335-37-7",
@@ -26199,7 +26518,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "81335-77-5",
@@ -26265,7 +26585,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7553-56-2",
@@ -26327,7 +26648,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "36734-19-7",
@@ -26393,7 +26715,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-89-6",
@@ -26447,7 +26770,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "78-83-1",
@@ -26517,7 +26841,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-59-1",
@@ -26587,7 +26912,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "33820-53-0",
@@ -26657,7 +26983,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-63-0",
@@ -26727,7 +27054,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1832-54-8",
@@ -26793,7 +27121,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-87-6",
@@ -26863,7 +27192,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "82558-50-7",
@@ -26929,7 +27259,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1737665",
@@ -27033,7 +27364,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-97-7",
@@ -27103,7 +27435,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-91-0",
@@ -27149,7 +27482,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "100587-90-4",
@@ -27223,7 +27557,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10099-58-8",
@@ -27273,7 +27608,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10277-43-7",
@@ -27319,7 +27655,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "lead-compounds",
@@ -27375,7 +27712,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "301-04-2",
@@ -27437,7 +27775,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-92-1-lead-and-compounds",
@@ -27672,7 +28011,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "541-25-3",
@@ -27742,7 +28082,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "330-55-2",
@@ -27808,7 +28149,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-93-2",
@@ -27858,7 +28200,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "94-74-6",
@@ -27928,7 +28271,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "94-81-5",
@@ -27994,7 +28338,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "93-65-2",
@@ -28064,7 +28409,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "121-75-5",
@@ -28134,7 +28480,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-31-6",
@@ -28204,7 +28551,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-33-1",
@@ -28270,7 +28618,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-77-3",
@@ -28340,7 +28689,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "8018-01-7",
@@ -28410,7 +28760,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "12427-38-2",
@@ -28476,7 +28827,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-96-5-manganese-diet",
@@ -28583,7 +28935,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "950-10-7",
@@ -28649,7 +29002,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "24307-26-4",
@@ -28785,7 +29139,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "mercury-compounds",
@@ -28845,7 +29200,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7439-97-6",
@@ -28957,7 +29313,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "62-38-4",
@@ -29023,7 +29380,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "150-50-5",
@@ -29159,7 +29517,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "126-98-7",
@@ -29229,7 +29588,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "10265-92-6",
@@ -29299,7 +29659,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67-56-1",
@@ -29369,7 +29730,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "950-37-8",
@@ -29435,7 +29797,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "16752-77-5",
@@ -29505,7 +29868,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-59-2",
@@ -29575,7 +29939,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72-43-5",
@@ -29645,7 +30010,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "110-49-6",
@@ -29715,7 +30081,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-86-4",
@@ -29785,7 +30152,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-20-9",
@@ -29855,7 +30223,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-33-3",
@@ -29995,7 +30364,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60-34-4",
@@ -30065,7 +30435,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-10-1",
@@ -30275,7 +30646,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "298-00-0",
@@ -30345,7 +30717,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "993-13-5",
@@ -30411,7 +30784,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25013-15-4",
@@ -30481,7 +30855,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "66-27-3",
@@ -30551,7 +30926,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1634-04-4",
@@ -30621,7 +30997,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "615-45-2",
@@ -30687,7 +31064,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-11-2",
@@ -30823,7 +31201,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "70-25-7",
@@ -30889,7 +31268,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "636-21-5",
@@ -30955,7 +31335,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "124-58-3",
@@ -31013,7 +31394,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74612-12-7",
@@ -31279,7 +31661,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-14-4",
@@ -31345,7 +31728,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-61-1",
@@ -31411,7 +31795,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-77-9",
@@ -31477,7 +31862,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101-68-8",
@@ -31617,7 +32003,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "51218-45-2",
@@ -31687,7 +32074,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "21087-64-9",
@@ -31757,7 +32145,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74223-64-6",
@@ -31823,7 +32212,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1790669",
@@ -32103,7 +32493,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7439-98-7",
@@ -32157,7 +32548,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10599-90-3",
@@ -32199,7 +32591,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "100-61-8",
@@ -32269,7 +32662,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88671-89-0",
@@ -32335,7 +32729,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "74-31-7",
@@ -32401,7 +32796,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "300-76-5",
@@ -32471,7 +32867,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "64742-95-6",
@@ -32567,7 +32964,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "15299-99-7",
@@ -32633,7 +33031,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "373-02-4",
@@ -32691,7 +33090,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3333-67-3",
@@ -32741,7 +33141,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13463-39-3",
@@ -32831,7 +33232,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1313-99-1",
@@ -32877,7 +33279,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E715532",
@@ -32895,7 +33298,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-02-0",
@@ -32949,7 +33353,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "12035-72-2",
@@ -32995,7 +33400,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1271-28-9",
@@ -33065,7 +33471,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E701177",
@@ -33117,7 +33524,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "88-74-4",
@@ -33187,7 +33595,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-01-6",
@@ -33257,7 +33666,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "98-95-3",
@@ -33327,7 +33737,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "9004-70-0",
@@ -33459,7 +33870,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "59-87-0",
@@ -33525,7 +33937,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "55-63-0",
@@ -33595,7 +34008,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "556-88-7",
@@ -33665,7 +34079,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-52-5",
@@ -33871,7 +34286,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "684-93-5",
@@ -33937,7 +34353,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "924-16-3",
@@ -34007,7 +34424,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1116-54-7",
@@ -34073,7 +34491,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "55-18-5",
@@ -34143,7 +34562,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "62-75-9",
@@ -34213,7 +34633,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "86-30-6",
@@ -34279,7 +34700,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "621-64-7",
@@ -34349,7 +34771,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "10595-95-6",
@@ -34419,7 +34842,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "59-89-2",
@@ -34485,7 +34909,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-75-4",
@@ -34555,7 +34980,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "930-55-2",
@@ -34625,7 +35051,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-08-1",
@@ -34695,7 +35122,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88-72-2",
@@ -34765,7 +35193,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-99-0",
@@ -34835,7 +35264,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-84-2",
@@ -34971,7 +35401,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "32536-52-0",
@@ -35103,7 +35534,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "152-16-9",
@@ -35173,7 +35605,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "19044-88-3",
@@ -35239,7 +35672,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "19666-30-9",
@@ -35305,7 +35739,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "23135-22-0",
@@ -35375,7 +35810,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "42874-03-3",
@@ -35445,7 +35881,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76738-62-0",
@@ -35515,7 +35952,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1910-42-5",
@@ -35651,7 +36089,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1114-71-2",
@@ -35721,7 +36160,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "40487-42-1",
@@ -35791,7 +36231,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "32534-81-9",
@@ -35997,7 +36438,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76-01-7",
@@ -36067,7 +36509,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "82-68-8",
@@ -36137,7 +36580,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "87-86-5",
@@ -36207,7 +36651,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-11-5",
@@ -36277,7 +36722,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "10159-46-3",
@@ -36347,7 +36793,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "109-66-0",
@@ -36485,7 +36932,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "10495-86-0",
@@ -36555,7 +37003,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3108-42-7",
@@ -36691,7 +37140,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3825-26-1",
@@ -36765,7 +37215,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "82113-65-3",
@@ -36835,7 +37286,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13252-13-6",
@@ -36905,7 +37357,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "90076-65-6",
@@ -36974,7 +37427,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "122499-17-6",
@@ -37118,7 +37572,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "375-73-5",
@@ -37192,7 +37647,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "45048-62-2",
@@ -37262,7 +37718,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "375-22-4",
@@ -37332,7 +37789,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "73829-36-4",
@@ -37600,7 +38058,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "355-46-4",
@@ -37658,7 +38117,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "92612-52-7",
@@ -37728,7 +38188,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "307-24-4",
@@ -37798,7 +38259,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "72007-68-2",
@@ -37864,7 +38326,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "375-95-1",
@@ -37930,7 +38393,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "16517-11-6",
@@ -38222,7 +38686,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "335-67-1",
@@ -38296,7 +38761,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "422-64-0",
@@ -38366,7 +38832,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "376-06-7",
@@ -38580,7 +39047,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2966-54-3",
@@ -38650,7 +39118,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "51604-85-4",
@@ -38864,7 +39333,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3830-45-3",
@@ -39000,7 +39470,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "perchlorates",
@@ -39052,7 +39523,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7791-03-9",
@@ -39102,7 +39574,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "14797-73-0",
@@ -39144,7 +39617,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7778-74-7",
@@ -39194,7 +39668,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7601-89-0",
@@ -39244,7 +39719,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "52645-53-1",
@@ -39380,7 +39856,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13684-63-4",
@@ -39446,7 +39923,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-95-2",
@@ -39516,7 +39994,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "114-26-1",
@@ -39586,7 +40065,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "92-84-2",
@@ -39656,7 +40136,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "103-72-0",
@@ -39726,7 +40207,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-45-2",
@@ -39796,7 +40278,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-54-5",
@@ -39862,7 +40345,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-50-3",
@@ -39928,7 +40412,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "90-43-7",
@@ -39998,7 +40483,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "298-02-2",
@@ -40068,7 +40554,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-44-5",
@@ -40204,7 +40691,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "phosphates-inorganic",
@@ -40256,7 +40744,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E524680405",
@@ -40270,7 +40759,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7758-11-4",
@@ -40308,7 +40798,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7558-79-4",
@@ -40346,7 +40837,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "13530-50-2",
@@ -40384,7 +40876,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7778-77-0",
@@ -40422,7 +40915,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7558-80-7",
@@ -40468,7 +40962,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7664-38-2",
@@ -40522,7 +41017,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7784-30-7",
@@ -40568,7 +41064,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7785-88-8",
@@ -40582,7 +41079,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "8017-16-1",
@@ -40620,7 +41118,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E524680403",
@@ -40634,7 +41133,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "13845-36-8",
@@ -40672,7 +41172,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10279-59-1",
@@ -40710,7 +41211,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10305-76-7",
@@ -40748,7 +41250,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10124-56-8",
@@ -40786,7 +41289,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "68915-31-1",
@@ -40824,7 +41328,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7758-16-9",
@@ -40862,7 +41367,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "E524680404",
@@ -40876,7 +41382,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7785-84-4",
@@ -40914,7 +41421,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7758-29-4",
@@ -40952,7 +41460,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7320-34-5",
@@ -40990,7 +41499,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7722-88-5",
@@ -41036,7 +41546,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "15136-87-5",
@@ -41074,7 +41585,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "13939-25-8",
@@ -41112,7 +41624,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7778-53-2",
@@ -41150,7 +41663,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7601-54-9",
@@ -41192,7 +41706,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7803-51-2",
@@ -41258,7 +41773,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7723-14-0",
@@ -41320,7 +41836,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "12185-10-3",
@@ -41394,7 +41911,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "phthalates",
@@ -41540,7 +42058,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "85-70-1",
@@ -41610,7 +42129,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "84-74-2",
@@ -41680,7 +42200,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "84-66-2",
@@ -41750,7 +42271,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "120-61-6",
@@ -41820,7 +42342,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "117-84-0",
@@ -41956,7 +42479,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "85-44-9",
@@ -42026,7 +42550,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1918-02-1",
@@ -42092,7 +42617,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-91-3",
@@ -42158,7 +42684,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88-89-1",
@@ -42228,7 +42755,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "29232-93-7",
@@ -42298,7 +42826,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "36355-01-8",
@@ -42453,7 +42982,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "11141-16-5",
@@ -42523,7 +43053,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "53469-21-9",
@@ -44063,7 +44594,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "120-12-7",
@@ -44133,7 +44665,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "56-55-3",
@@ -44684,7 +45217,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "218-01-9",
@@ -45096,7 +45630,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "193-39-5",
@@ -45236,7 +45771,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "91-57-6",
@@ -45306,7 +45842,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "91-20-3",
@@ -45376,7 +45913,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "57835-92-4",
@@ -45442,7 +45980,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "198-55-0",
@@ -45582,7 +46121,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "67747-09-5",
@@ -45648,7 +46188,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "26399-36-0",
@@ -45718,7 +46259,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1610-18-0",
@@ -45784,7 +46326,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7287-19-6",
@@ -45854,7 +46397,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "23950-58-5",
@@ -45920,7 +46464,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1918-16-7",
@@ -45990,7 +46535,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "709-98-8",
@@ -46060,7 +46606,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2312-35-8",
@@ -46130,7 +46677,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "107-19-7",
@@ -46200,7 +46748,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "139-40-2",
@@ -46270,7 +46819,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "122-42-9",
@@ -46340,7 +46890,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "60207-90-1",
@@ -46410,7 +46961,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "123-38-6",
@@ -46550,7 +47102,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "115-07-1",
@@ -46690,7 +47243,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "6423-43-4",
@@ -46826,7 +47380,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-56-9",
@@ -46896,7 +47451,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "110-86-1",
@@ -46966,7 +47522,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13593-03-8",
@@ -47032,7 +47589,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "91-22-5",
@@ -47102,7 +47660,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76578-14-8",
@@ -47168,7 +47727,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E715557",
@@ -47247,7 +47807,8 @@
         }
       },
       "fa": 0.7,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "299-84-3",
@@ -47317,7 +47878,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "83-79-4",
@@ -47383,7 +47945,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "94-59-7",
@@ -47453,7 +48016,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7783-00-8",
@@ -47503,7 +48067,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7782-49-2",
@@ -47557,7 +48122,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7446-34-6",
@@ -47595,7 +48161,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "74051-80-2",
@@ -47665,7 +48232,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7631-86-9",
@@ -47765,7 +48333,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "122-34-9",
@@ -47835,7 +48404,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "62476-59-9",
@@ -47901,7 +48471,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "26628-22-8",
@@ -47951,7 +48522,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "148-18-5",
@@ -48009,7 +48581,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7681-49-4",
@@ -48067,7 +48640,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "62-74-8",
@@ -48179,7 +48753,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "13472-45-2",
@@ -48229,7 +48804,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10213-10-2",
@@ -48279,7 +48855,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "961-11-5",
@@ -48345,7 +48922,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-24-6",
@@ -48395,7 +48973,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "57-24-9",
@@ -48465,7 +49044,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "100-42-5",
@@ -48535,7 +49115,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "57964-39-3",
@@ -48589,7 +49170,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "57964-40-6",
@@ -48643,7 +49225,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "126-33-0",
@@ -48713,7 +49296,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "80-07-9",
@@ -48779,7 +49363,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7446-11-9",
@@ -48953,7 +49538,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "34014-18-1",
@@ -49019,7 +49605,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3383-96-8",
@@ -49159,7 +49746,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13071-79-9",
@@ -49229,7 +49817,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "886-50-0",
@@ -49299,7 +49888,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "540-88-5",
@@ -49365,7 +49955,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5436-43-1",
@@ -49501,7 +50092,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "630-20-6",
@@ -49571,7 +50163,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-34-5",
@@ -49641,7 +50234,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "127-18-4",
@@ -49711,7 +50305,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "58-90-2",
@@ -49777,7 +50372,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "5216-25-1",
@@ -49847,7 +50443,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "3689-24-5",
@@ -49917,7 +50514,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "811-97-2",
@@ -50053,7 +50651,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "479-45-8",
@@ -50123,7 +50722,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1314-32-5",
@@ -50169,7 +50769,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "10102-45-1",
@@ -50219,7 +50820,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-28-0",
@@ -50269,7 +50871,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "563-68-8",
@@ -50331,7 +50934,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "6533-73-9",
@@ -50393,7 +50997,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7791-12-0",
@@ -50443,7 +51048,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "12039-52-0",
@@ -50485,7 +51091,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7446-18-6",
@@ -50535,7 +51142,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "79277-27-3",
@@ -50601,7 +51209,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "28249-77-6",
@@ -50671,7 +51280,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1790665",
@@ -50685,7 +51295,8 @@
         }
       },
       "fa": 0,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "463-56-9",
@@ -50739,7 +51350,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "21564-17-0",
@@ -50805,7 +51417,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "111-48-8",
@@ -50875,7 +51488,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "39196-18-4",
@@ -50941,7 +51555,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "23564-05-8",
@@ -51007,7 +51622,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "137-26-8",
@@ -51077,7 +51693,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-31-5",
@@ -51131,7 +51748,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7550-45-0",
@@ -51251,7 +51869,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "584-84-9",
@@ -51321,7 +51940,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "91-08-7",
@@ -51387,7 +52007,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2687-25-4",
@@ -51453,7 +52074,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-70-5",
@@ -51519,7 +52141,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "496-72-0",
@@ -51589,7 +52212,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-94-5",
@@ -51659,7 +52283,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-53-4",
@@ -51729,7 +52354,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-49-0",
@@ -51799,7 +52425,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1790670",
@@ -51939,7 +52566,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1790668",
@@ -52149,7 +52777,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "8001-35-2",
@@ -52425,7 +53054,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "102-76-1",
@@ -52495,7 +53125,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "43121-43-3",
@@ -52565,7 +53196,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "2303-17-5",
@@ -52635,7 +53267,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "82097-50-5",
@@ -52701,7 +53334,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "101200-48-0",
@@ -52767,7 +53401,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "615-54-3",
@@ -52837,7 +53472,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "118-79-6",
@@ -52907,7 +53543,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-48-8",
@@ -52977,7 +53614,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "126-73-8",
@@ -53047,7 +53685,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "E1790679",
@@ -53126,7 +53765,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "10025-85-1",
@@ -53205,7 +53845,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "76-03-9",
@@ -53275,7 +53916,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "33663-50-2",
@@ -53341,7 +53983,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "634-93-5",
@@ -53407,7 +54050,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "87-61-6",
@@ -53477,7 +54121,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "120-82-1",
@@ -53547,7 +54192,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "71-55-6",
@@ -53617,7 +54263,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-00-5",
@@ -53687,7 +54334,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "79-01-6",
@@ -53757,7 +54405,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "75-69-4",
@@ -53827,7 +54476,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-95-4",
@@ -53897,7 +54547,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "88-06-2",
@@ -53967,7 +54618,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "93-76-5",
@@ -54037,7 +54689,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "93-72-1",
@@ -54107,7 +54760,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "598-77-6",
@@ -54177,7 +54831,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-18-4",
@@ -54247,7 +54902,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "96-19-5",
@@ -54317,7 +54973,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1330-78-5",
@@ -54387,7 +55044,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "58138-08-2",
@@ -54453,7 +55111,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "121-44-8",
@@ -54593,7 +55252,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "420-46-2",
@@ -54729,7 +55389,8 @@
         }
       },
       "fa": 0.8,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "512-56-1",
@@ -54799,7 +55460,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "526-73-8",
@@ -54869,7 +55531,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-63-6",
@@ -54939,7 +55602,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-67-8",
@@ -55009,7 +55673,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "25167-70-8",
@@ -55079,7 +55744,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "99-35-4",
@@ -55149,7 +55815,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "118-96-7",
@@ -55219,7 +55886,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "791-28-6",
@@ -55289,7 +55957,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13674-87-8",
@@ -55355,7 +56024,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "13674-84-5",
@@ -55421,7 +56091,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "126-72-7",
@@ -55561,7 +56232,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "78-42-2",
@@ -55685,7 +56357,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-61-1",
@@ -55739,7 +56412,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "51-79-6",
@@ -55809,7 +56483,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1314-62-1",
@@ -55863,7 +56538,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-62-2",
@@ -55913,7 +56589,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "1929-77-7",
@@ -55983,7 +56660,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "50471-44-8",
@@ -56053,7 +56731,8 @@
         }
       },
       "fa": 0.9,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-05-4",
@@ -56123,7 +56802,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "593-60-2",
@@ -56263,7 +56943,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "81-81-2",
@@ -56329,7 +57010,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "108-38-3",
@@ -56399,7 +57081,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "95-47-6",
@@ -56469,7 +57152,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "106-42-3",
@@ -56539,7 +57223,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1330-20-7",
@@ -56609,7 +57294,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "1314-84-7",
@@ -56655,7 +57341,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "7440-66-6",
@@ -56705,7 +57392,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     },
     {
       "id": "12122-67-7",
@@ -56771,7 +57459,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "organic"
     },
     {
       "id": "7440-67-7",
@@ -56825,7 +57514,8 @@
         }
       },
       "fa": 1,
-      "inEpd": true
+      "inEpd": true,
+      "dermalForm": "inorganic"
     }
   ]
 }

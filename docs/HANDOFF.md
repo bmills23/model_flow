@@ -43,8 +43,9 @@ a done one.
 - Deferred from M4 (the ROADMAP row says so too): target-organ segregation of the hazard index (the total HI
   is reported with a warning above 1), CompTox gap filling (a blank RSL value stays absent), series EPCs on
   soil pathways (RangeError, soil is constant).
-- Dermal water: the organic or inorganic form is a caller statement (per-chemical checkbox on the screen,
-  default on for arsenic). The database does not carry it.
+- Dermal water: the organic or inorganic form comes from the database (`dermalForm`, derived from the
+  published tap water dermal values, see DECISIONS.md slice E2). The screen starts at that form and lets
+  the user change it; with no database form the dermal water pathway is not quantified until one is set.
 
 ## M3 landed (saturated soil source, Appendix C)
 - Methods note `docs/methods/saturated-soil-source.md` (scope, equations in our words, validity checks,

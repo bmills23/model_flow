@@ -128,9 +128,58 @@ describe('buildInputs', () => {
     expect(neg.ok).toBe(false);
   });
 
-  it('flags inorganic arsenic as inorganic for dermal water by default', () => {
-    expect(newChemicalRow(db.byId.get('7440-38-2')!).inorganic).toBe(true);
-    expect(newChemicalRow(db.byId.get('71-43-2')!).inorganic).toBe(false);
+  it('takes the dermal water form from the database, never from the presence of lag-time columns', () => {
+    const form = (id: string) => newChemicalRow(db.byId.get(id)!).dermalForm;
+    expect(form('7440-38-2')).toBe('inorganic');
+    expect(form('71-43-2')).toBe('organic');
+    expect(form('7440-66-6')).toBe('inorganic');
+    expect(form('7440-43-9-cadmium-diet')).toBeUndefined();
+  });
+
+  // Published resident tap water dermal values, child hazard quotient 1 (ug/L), November 2024 RSL.
+  it.each([
+    ['Cadmium (Water)', 23],
+    ['Chromium(VI)', 51],
+    ['~Mercuric Chloride (and other Mercury salts)', 96],
+    ['Nickel Soluble Salts', 18000],
+    ['Zinc and Compounds', 2300000],
+    ['Benzene', 610],
+  ])(
+    'runs the default path for %s to the published dermal screening level',
+    (rslName, published) => {
+      const rec = db.chemicals.find((c) => c.phys?.rslName === rslName)!;
+      const form = formWith([{ id: rec.id, conc: { groundwater: '1' } }], {});
+      form.a.pathways.waterIngestion = false;
+      const out = runRisk(built(form));
+      expect(out.modern.ok).toBe(true);
+      if (!out.modern.ok) return;
+      const hq = out.modern.result.summary.receptors[0]!.hi;
+      // 1 mg/L = 1000 ug/L, so the screening level is 1000 / HQ.
+      const sl = 1000 / hq;
+      expect(Math.abs(Math.log(sl / published))).toBeLessThan(0.03);
+    },
+  );
+
+  it('leaves dermal water unquantified for a chemical whose form the RSL does not give', () => {
+    const rec = db.byId.get('7440-43-9-cadmium-diet')!;
+    expect(rec.phys?.dermalForm).toBeUndefined();
+    const form = formWith([{ id: rec.id, conc: { groundwater: '1' } }]);
+    form.a.pathways.waterIngestion = false;
+    const out = runRisk(built(form));
+    expect(out.modern.ok).toBe(true);
+    if (!out.modern.ok) return;
+    const r0 = out.modern.result.summary.receptors[0]!;
+    expect(r0.hi).toBe(0);
+    expect(r0.notQuantified.map((n) => n.pathway)).toContain('waterDermal');
+  });
+
+  it('lets the caller state the form for a chemical the database leaves open', () => {
+    const rec = db.byId.get('7440-43-9-cadmium-diet')!;
+    const form = formWith([{ id: rec.id, conc: { groundwater: '1' } }]);
+    form.a.pathways.waterIngestion = false;
+    form.chemicals[0]!.dermalForm = 'inorganic';
+    const out = runRisk(built(form));
+    expect(out.modern.ok && out.modern.result.summary.receptors[0]!.hi).toBeGreaterThan(0);
   });
 
   it('leaves the soil dermal pathway unquantified until the skin area and adherence are entered', () => {

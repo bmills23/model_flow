@@ -57,9 +57,10 @@ export interface ModernChemicalBoundary {
   b?: number | undefined;
   fa?: number | undefined;
   /**
-   * Lag-time model (true) or Kp times the event time (false) for dermal water. The database does not say
-   * (arsenic carries lag-time columns yet is treated as inorganic), so the caller states it; absent, it is
-   * true when tau, t* and B are all present.
+   * Lag-time model (true) or Kp times the event time (false) for dermal water. The RSL's lag-time columns
+   * are filled for inorganics too (cadmium, mercury salts, nickel, zinc), so their presence does not say
+   * which applies, and guessing overstates metals' dermal hazard 1.8 to 7 times. Absent, dermal water is
+   * not quantified (reported missing), never defaulted. The database field `dermalForm` carries it.
    */
   organic?: boolean | undefined;
   inEpd?: boolean | undefined;
@@ -79,20 +80,24 @@ export function modernChemical(b: ModernChemicalBoundary): ModernChemical {
   if (b.csat !== undefined) out.csat = mgPerKgToKgPerKg(b.csat);
   if (b.inEpd !== undefined) out.inEpd = b.inEpd;
   if (b.special !== undefined) out.special = b.special;
-  if (b.kp !== undefined) {
-    const dw: DermalWaterParams = {
-      organic:
-        b.organic ?? (b.tauEvent !== undefined && b.tStar !== undefined && b.b !== undefined),
-      kp: cmPerHourToMPerS(b.kp),
-    };
-    if (b.tauEvent !== undefined) dw.tauEvent = hoursToSeconds(b.tauEvent);
-    if (b.tStar !== undefined) dw.tStar = hoursToSeconds(b.tStar);
-    if (b.b !== undefined) dw.b = b.b;
-    if (b.fa !== undefined) dw.fa = b.fa;
-    out.dermalWater = dw;
+  if (b.kp !== undefined && b.organic !== undefined) {
+    out.dermalWater = dermalWaterParams(b, b.kp, b.organic);
   }
   validateModernChemical(out);
   return out;
+}
+
+function dermalWaterParams(
+  b: ModernChemicalBoundary,
+  kp: number,
+  organic: boolean,
+): DermalWaterParams {
+  const dw: DermalWaterParams = { organic, kp: cmPerHourToMPerS(kp) };
+  if (b.tauEvent !== undefined) dw.tauEvent = hoursToSeconds(b.tauEvent);
+  if (b.tStar !== undefined) dw.tStar = hoursToSeconds(b.tStar);
+  if (b.b !== undefined) dw.b = b.b;
+  if (b.fa !== undefined) dw.fa = b.fa;
+  return dw;
 }
 
 const INDOOR_ALL_DAY = 24;

@@ -361,10 +361,28 @@ from the package index). Judgment calls, open to overturn:
   computed per group with that group's own frequency (the duration cancels in the averaging time), the
   headline HQ and HI are the largest over groups, and groups are never added. A mutagen's four cancer
   segments therefore still give two hazard quotients.
-- **Dermal-water organic or inorganic is stated by the caller.** The database carries lag-time columns
-  for inorganic arsenic too, so presence of tau, B and t* does not identify an inorganic. The chemical
-  boundary has an `organic` flag (default: true when tau, t* and B are all present); the RSL check
-  states `organic: false` for arsenic. The database adapter slice must decide where the flag comes from.
+- **Dermal-water organic or inorganic comes from the database, and an unknown form is never defaulted.**
+  (Amended 2026-10-16 after review: the earlier rule defaulted to organic whenever tau, t* and B were
+  present, which the RSL fills for all but 9 of 863 Kp rows, so every inorganic except arsenic ran the
+  lag-time model and its dermal hazard quotient came out 1.8 to 7 times too high: mercuric chloride tap
+  water dermal SL 13.6 against the published 96 ug/L, cadmium 9.0 against 23, Cr(VI) 29 against 51,
+  nickel soluble salts 9,947 against 18,000, zinc 1.2e6 against 2.3e6.) The RSL tables have no organic
+  flag and the RAGS Part E guidance gives no list, so the classification is read from the published
+  November 2024 tap water table (SEMS 405290): for every analyte with a Kp and a published dermal value
+  (690 rows) exactly one form reproduces it, 569 the lag-time form and 121 the inorganic form (the metals,
+  but also cyanides, phosphates, perchlorates, thallium salts, fluoride, hydrazine and others, so no
+  element or formula rule works; nickel acetate and carbonate are lag-time while nickel soluble salts
+  are inorganic). The 121 ids are a committed list, `packages/data/src/rsl/dermal-form.ts`; the data
+  build writes `dermalForm` ('organic' or 'inorganic') on each analyte, 'organic' for a published value
+  not on the list, and leaves it absent when the table publishes no dermal value (173 rows with a Kp, such
+  as cadmium (diet) and antimony trioxide). `packages/data/test/rsl.test.ts` re-derives the split from the
+  raw table with the engine on every run, so a new edition that moves an analyte fails the test. The
+  chemical boundary's `organic` flag has no default: absent, dermal water is not quantified and the
+  pathway is reported as not quantified, never as zero and never guessed. The screen starts each chemical
+  at the database form and offers organic, inorganic or not set; for an analyte with no database form the
+  user may state one. The RSL check fixture states `organic` for each chemical from the build and adds
+  cadmium (water), Cr(VI), mercuric chloride, nickel soluble salts and zinc with their published values;
+  the web `build.test.ts` runs the default path for those and benzene to the published dermal level.
 - **Arsenic RBA 0.6 is applied by CAS number in `modernChemical`** (id or cas equal to 7440-38-2) unless
   the caller gives an RBA; the kernels default to 1.
 - **EPCs are constants or per-stage averages.** The kernels take a number, or one concentration per cancer

@@ -2,6 +2,8 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import readXlsxFile from 'read-excel-file/node';
+import { modernChemical, modernPathway, modernResident } from '@model-flow/engine';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildRsl, type RslBuild } from '../src/rsl/build.js';
 import { verifyManifest } from '../src/rsl/checksums.js';
@@ -215,4 +217,79 @@ describe('generated files', () => {
     expect(chemicals).toBe(JSON.stringify(built.chemicals, null, 2) + '\n');
     expect(toxicity).toBe(JSON.stringify(built.tox, null, 2) + '\n');
   });
+});
+
+describe('dermal water form (organic lag-time or inorganic Kp times t)', () => {
+  it('classifies the metals and the organics the screen needs', () => {
+    const form = (name: string) =>
+      built.chemicals.chemicals.find((c) => c.rslName === name)?.dermalForm;
+    expect(form('Cadmium (Water)')).toBe('inorganic');
+    expect(form('Chromium(VI)')).toBe('inorganic');
+    expect(form('~Mercuric Chloride (and other Mercury salts)')).toBe('inorganic');
+    expect(form('Zinc and Compounds')).toBe('inorganic');
+    expect(form('Arsenic, Inorganic')).toBe('inorganic');
+    expect(form('Benzene')).toBe('organic');
+    expect(form('Acetone')).toBe('organic');
+  });
+
+  it('leaves the form absent where the tap water table publishes no dermal value', () => {
+    const none = built.chemicals.chemicals.find((c) => c.rslName === 'Cadmium (Diet)');
+    expect(none?.dermalForm).toBeUndefined();
+  });
+
+  it('reproduces every published tap water dermal value with the stated form, and not the other', async () => {
+    const sheets = await readXlsxFile(join(rawDir, 'sems-405290.xlsx'));
+    const rows = (sheets[0]!.data as unknown[][]).slice(3);
+    const chemicals = built.chemicals.chemicals;
+    const toxById = new Map(built.tox.toxicity.map((t) => [t.id, t]));
+    expect(rows.length).toBe(chemicals.length);
+    let checked = 0;
+    chemicals.forEach((c, n) => {
+      const v = c.values;
+      const t = toxById.get(c.id)!;
+      const pub = [
+        ['risk', rows[n]![17]],
+        ['hq', rows[n]![21]],
+      ].filter((p): p is [string, number] => typeof p[1] === 'number');
+      if (v.kp === undefined) return;
+      if (pub.length === 0) {
+        expect(c.dermalForm, `${c.rslName} has no published dermal value`).toBeUndefined();
+        return;
+      }
+      // log distance from the published values for one form
+      const distance = (organic: boolean): number => {
+        const chem = modernChemical({
+          id: c.id,
+          mutagen: t.mutagen,
+          sfo: t.sfo?.value,
+          iur: t.iur?.value,
+          rfdo: t.rfdo?.value,
+          rfci: t.rfci?.value,
+          giabs: t.giabs,
+          absd: t.absd,
+          csat: t.csat,
+          kp: v.kp?.value,
+          tauEvent: v.tauEvent?.value,
+          tStar: v.tStar?.value,
+          b: v.b?.value,
+          fa: c.fa,
+          inEpd: c.inEpd,
+          special: t.special,
+          organic,
+        });
+        const cell = modernPathway('waterDermal', modernResident(), chem, 1);
+        let worst = 0;
+        for (const [kind, published] of pub) {
+          const per = kind === 'risk' ? cell.riskPerEpc : cell.hqPerEpc;
+          const sl = per === null ? Number.NaN : (kind === 'risk' ? 1e-6 : 1) / per / 1e-6;
+          worst = Math.max(worst, Number.isFinite(sl) ? Math.abs(Math.log(sl / published)) : 9);
+        }
+        return worst;
+      };
+      const form = distance(true) <= distance(false) ? 'organic' : 'inorganic';
+      expect(c.dermalForm, `${c.rslName}`).toBe(form);
+      checked += 1;
+    });
+    expect(checked).toBeGreaterThan(600);
+  }, 60_000);
 });

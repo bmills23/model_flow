@@ -29,6 +29,7 @@ import {
   type PathwayId,
   type ScenarioChemical,
 } from '@model-flow/engine';
+import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { WellFeed } from '../transport/wellFeed';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
@@ -98,7 +99,7 @@ function legacyChemical(rec: ChemicalRecord): LegacyChemical {
   return out;
 }
 
-function modernChem(rec: ChemicalRecord, inorganic: boolean) {
+function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefined) {
   const t = rec.tox;
   const v = rec.phys?.values;
   return modernChemical({
@@ -119,7 +120,7 @@ function modernChem(rec: ChemicalRecord, inorganic: boolean) {
     fa: rec.phys?.fa,
     inEpd: rec.phys?.inEpd,
     special: t.special,
-    organic: inorganic ? false : undefined,
+    organic: dermalForm === undefined ? undefined : dermalForm === 'organic',
   });
 }
 
@@ -295,7 +296,7 @@ export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | nul
         pathways,
         chemicals: records.map(({ row, rec }) => ({
           id: row.id,
-          chemical: modernChem(rec!, row.inorganic),
+          chemical: modernChem(rec!, row.dermalForm),
           epcs: epcs.get(row.id) ?? {},
         })),
       });

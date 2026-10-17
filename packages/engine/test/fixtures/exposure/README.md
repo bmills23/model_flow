@@ -46,8 +46,9 @@ Retrieved 2026-10-16. Each case is a published two-figure screening level (targe
 quotient 1) read from the November 2024 RSL spreadsheet named by its SEMS document number: resident soil
 (405274), composite worker soil (405278), resident tap water (405290) and resident air (405282). The
 chemical inputs (toxicity, ABSd, GIABS, Kp, tau, B, t*, FA, EPD flag, Csat) are copied from the committed
-RSL build in `packages/data/generated/rsl-2024-11/`, plus `organic` (false for arsenic, which the RSL
-treats as inorganic for dermal water) and `rba` 0.6 for arsenic. A null cancer or noncancer value is a
+RSL build in `packages/data/generated/rsl-2024-11/`, plus `organic` (copied from the build's `dermalForm`: false for arsenic and for the five other
+inorganics added here, cadmium (water), Cr(VI), mercuric chloride, nickel soluble salts and zinc, whose published
+tap water ingestion and dermal values are included) and `rba` 0.6 for arsenic. A null cancer or noncancer value is a
 blank cell in the table, and the test asserts the engine has no coefficient for that endpoint. The test
 requires the engine's screening level to round to the published value (half a unit in its second
 significant figure). Tap-water inhalation, soil inhalation and the noncancer worker air value are not

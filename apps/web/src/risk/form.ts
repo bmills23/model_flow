@@ -1,4 +1,5 @@
-import { ARSENIC_CAS, PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
+import { PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
+import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { ChemicalRecord } from './chemicalDb';
 
 /** The six media a concentration is entered for, with the unit shown (the RSL's units). */
@@ -34,8 +35,12 @@ export interface ReceptorForm {
 export interface ChemicalRow {
   id: string;
   name: string;
-  /** Dermal water by permeability times event time (inorganic) rather than the organic lag-time model. */
-  inorganic: boolean;
+  /**
+   * Dermal water by the organic lag-time model or by permeability times event time (inorganic). Starts as
+   * the RSL's classification of the analyte; undefined when the RSL gives none, which leaves dermal
+   * water unquantified until the user states it. It is never guessed.
+   */
+  dermalForm: DermalForm | undefined;
   /** Concentration per medium, in the screen unit; blank or absent means none entered. */
   conc: Partial<Record<Medium, string>>;
   /** Use the transport screen's well result as the groundwater concentration. */
@@ -82,7 +87,7 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
   return {
     id: rec.id,
     name: rec.name,
-    inorganic: rec.id === ARSENIC_CAS || rec.cas === ARSENIC_CAS,
+    dermalForm: rec.phys?.dermalForm,
     conc: {},
     groundwaterFromWell: false,
   };
