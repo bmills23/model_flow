@@ -11,7 +11,12 @@ import {
 } from './processes/groundwater/index.js';
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 import { exposureLegacy, exposureModern } from './processes/exposure/index.js';
-import { cleanupLegacy, cleanupModern, cleanupSsgLeaching } from './processes/cleanup/index.js';
+import {
+  cleanupLegacy,
+  cleanupModeledChains,
+  cleanupModern,
+  cleanupSsgLeaching,
+} from './processes/cleanup/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -45,3 +50,4 @@ registry.register(exposureModern);
 registry.register(cleanupLegacy);
 registry.register(cleanupModern);
 registry.register(cleanupSsgLeaching);
+registry.register(cleanupModeledChains);

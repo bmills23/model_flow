@@ -7,6 +7,7 @@ import {
   type DirectInput,
   type DirectResult,
 } from './direct.js';
+import { solveModeled, type ModeledInput, type ModeledResult } from './chains.js';
 import { ssgLeachingLevel, type SsgLeachingInput, type SsgLeachingResult } from './ssg.js';
 
 export * from './ssg.js';
@@ -16,12 +17,11 @@ export * from './solve.js';
 export * from './chains.js';
 
 const COMMON_ASSUMPTIONS = [
-  'A cleanup level is the source concentration whose forward risk or well concentration equals the target; the forward models are the registered exposure, vadose, groundwater and saturated-source methods.',
+  'A cleanup level is the source concentration whose forward risk or well concentration equals the target; direct pathways are linear in the exposure point concentration, so the level is the target divided by the summed coefficient.',
   'Target risk and target hazard quotient are user inputs (defaults 1e-6 and 1); a risk target above 0.01 is warned because the dose-response is linear only at low dose.',
   'Cancer and noncancer endpoints are solved separately and the lower level governs; hazard quotients are grouped by life stage or receptor and never added across groups.',
   'Individual levels treat each chemical alone; cumulative and equal allocation scale the entered ratios or split the target equally across chemicals, and are refused for concentration targets.',
   'A pathway or medium without toxicity or exposure data is reported as not quantified, never as an unlimited level.',
-  'Modeled chains are solved in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.',
 ];
 
 export type CleanupLegacyInput = DirectInput<LegacyReceptor, LegacyChemical>;
@@ -33,14 +33,14 @@ export const cleanupLegacy: MethodDescriptor<CleanupLegacyInput, DirectResult> =
   kind: 'legacy',
   name: 'RAGS Part B preliminary remediation goals with 1989 exposure coefficients',
   summary:
-    'Back-calculates a concentration in soil, groundwater, air or surface water from a target risk and hazard quotient, using the RAGS Part A (1989) intake coefficients with the 1991 default factors, summed over pathways within a receptor, with modeled source-to-well chains solved by Brent root finding.',
-  citations: ['ragsb1991', 'rags1989', 'epa1991sdef', 'epa1992dea', 'brent1973'],
+    'Back-calculates a concentration in soil, groundwater, air or surface water from a target risk and hazard quotient, using the RAGS Part A (1989) intake coefficients with the 1991 default factors, summed over pathways within a receptor, in closed form for the linear direct pathways.',
+  citations: ['ragsb1991', 'rags1989', 'epa1991sdef', 'epa1992dea'],
   assumptions: [
     ...COMMON_ASSUMPTIONS,
     'Cancer risks of two receptors are added only when the additive option is switched on.',
   ],
   risc5Choice:
-    'RISC5 back-calculates a cleanup level for each medium from a target risk and hazard quotient with the legacy exposure equations, optionally additive over two receptors, and for modeled pathways solves for the source concentration whose forward result meets the target.',
+    'RISC5 back-calculates a cleanup level for each medium from a target risk and hazard quotient with the legacy exposure equations, optionally additive over two receptors, and for modeled pathways solves for the source concentration whose forward result meets the target (here the registered modeled-chains method).',
   validate: (input): Warning[] => backCalculateLegacy(input).warnings,
   run: backCalculateLegacy,
 };
@@ -51,8 +51,8 @@ export const cleanupModern: MethodDescriptor<CleanupModernInput, DirectResult> =
   kind: 'modern',
   name: 'RAGS Parts E and F back-calculation with 2014 default factors',
   summary:
-    'Back-calculates cleanup levels with age-segmented intakes, the Part E dermal event model, Part F concentration-based inhalation and the age-dependent adjustment factors, with individual, cumulative and equal allocation and modeled source-to-well chains.',
-  citations: ['ragsb1991', 'ragse2004', 'ragsf2009', 'epa2014ef', 'epa2005adaf', 'brent1973'],
+    'Back-calculates cleanup levels with age-segmented intakes, the Part E dermal event model, Part F concentration-based inhalation and the age-dependent adjustment factors, with individual, cumulative and equal allocation, in closed form for the linear direct pathways.',
+  citations: ['ragsb1991', 'ragse2004', 'ragsf2009', 'epa2014ef', 'epa2005adaf'],
   assumptions: [
     ...COMMON_ASSUMPTIONS,
     'Mutagens use the four age segments with the adjustment factors 10, 3, 3 and 1; life-stage hazard quotients are never added.',
@@ -79,4 +79,22 @@ export const cleanupSsgLeaching: MethodDescriptor<SsgLeachingInput, SsgLeachingR
     'RISC5 evaluates leaching to groundwater with its own vadose-zone and aquifer models rather than the generic dilution attenuation factor; this method reproduces the screening-guidance equations for comparison.',
   validate: (input): Warning[] => ssgLeachingLevel(input).warnings,
   run: ssgLeachingLevel,
+};
+
+export const cleanupModeledChains: MethodDescriptor<ModeledInput<unknown>, ModeledResult> = {
+  id: 'cleanup.modeled-chains',
+  process: 'cleanup',
+  kind: 'modern',
+  name: 'Modeled source-to-well cleanup levels by root finding',
+  summary:
+    'Solves for the source concentration (soil or dissolved) whose modeled receptor risk, hazard index or well concentration meets the target, through the registered vadose, groundwater and saturated-source chains and the exposure evaluator, using Brent root finding in the logarithm of the concentration, with a verified linear shortcut where the chain is linear.',
+  citations: ['brent1973'],
+  assumptions: [
+    'The level is the source concentration whose forward result equals the target; the forward chain and evaluator are passed in and are the same ones the screen draws.',
+    'The solve is in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.',
+    'Cancer and noncancer endpoints are solved separately and the lower level governs; a concentration target replaces them and is refused for cumulative and equal allocation.',
+    'A well concentration target uses the largest moving average over the averaging window; a window longer than the breakthrough series is warned.',
+  ],
+  validate: (input): Warning[] => solveModeled(input).warnings,
+  run: solveModeled,
 };

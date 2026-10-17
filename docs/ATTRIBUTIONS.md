@@ -251,35 +251,32 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 
 - Kind: Legacy (RISC5 default)
 - Method id: `cleanup.rags-b-1991`
-- Summary: Back-calculates a concentration in soil, groundwater, air or surface water from a target risk and hazard quotient, using the RAGS Part A (1989) intake coefficients with the 1991 default factors, summed over pathways within a receptor, with modeled source-to-well chains solved by Brent root finding.
+- Summary: Back-calculates a concentration in soil, groundwater, air or surface water from a target risk and hazard quotient, using the RAGS Part A (1989) intake coefficients with the 1991 default factors, summed over pathways within a receptor, in closed form for the linear direct pathways.
 - Assumptions:
-  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; the forward models are the registered exposure, vadose, groundwater and saturated-source methods.
+  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; direct pathways are linear in the exposure point concentration, so the level is the target divided by the summed coefficient.
   - Target risk and target hazard quotient are user inputs (defaults 1e-6 and 1); a risk target above 0.01 is warned because the dose-response is linear only at low dose.
   - Cancer and noncancer endpoints are solved separately and the lower level governs; hazard quotients are grouped by life stage or receptor and never added across groups.
   - Individual levels treat each chemical alone; cumulative and equal allocation scale the entered ratios or split the target equally across chemicals, and are refused for concentration targets.
   - A pathway or medium without toxicity or exposure data is reported as not quantified, never as an unlimited level.
-  - Modeled chains are solved in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.
   - Cancer risks of two receptors are added only when the additive option is switched on.
-- RISC5 choice: RISC5 back-calculates a cleanup level for each medium from a target risk and hazard quotient with the legacy exposure equations, optionally additive over two receptors, and for modeled pathways solves for the source concentration whose forward result meets the target.
+- RISC5 choice: RISC5 back-calculates a cleanup level for each medium from a target risk and hazard quotient with the legacy exposure equations, optionally additive over two receptors, and for modeled pathways solves for the source concentration whose forward result meets the target (here the registered modeled-chains method).
 - Sources:
   - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739>
   - U.S. Environmental Protection Agency (1989). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/1-89/002, December 1989. <https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf>
   - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: "Standard Default Exposure Factors", Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. OSWER Directive 9285.6-03, PB91-921314, March 25, 1991. <https://semspub.epa.gov/src/document/HQ/190591>
   - U.S. Environmental Protection Agency (1992). Dermal Exposure Assessment: Principles and Applications, Interim Report. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-91/011B, January 1992. <https://rais.ornl.gov/documents/DERM_EXP.PDF>
-  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
 
 #### RAGS Parts E and F back-calculation with 2014 default factors
 
 - Kind: Modern
 - Method id: `cleanup.rags-e-f-2014`
-- Summary: Back-calculates cleanup levels with age-segmented intakes, the Part E dermal event model, Part F concentration-based inhalation and the age-dependent adjustment factors, with individual, cumulative and equal allocation and modeled source-to-well chains.
+- Summary: Back-calculates cleanup levels with age-segmented intakes, the Part E dermal event model, Part F concentration-based inhalation and the age-dependent adjustment factors, with individual, cumulative and equal allocation, in closed form for the linear direct pathways.
 - Assumptions:
-  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; the forward models are the registered exposure, vadose, groundwater and saturated-source methods.
+  - A cleanup level is the source concentration whose forward risk or well concentration equals the target; direct pathways are linear in the exposure point concentration, so the level is the target divided by the summed coefficient.
   - Target risk and target hazard quotient are user inputs (defaults 1e-6 and 1); a risk target above 0.01 is warned because the dose-response is linear only at low dose.
   - Cancer and noncancer endpoints are solved separately and the lower level governs; hazard quotients are grouped by life stage or receptor and never added across groups.
   - Individual levels treat each chemical alone; cumulative and equal allocation scale the entered ratios or split the target equally across chemicals, and are refused for concentration targets.
   - A pathway or medium without toxicity or exposure data is reported as not quantified, never as an unlimited level.
-  - Modeled chains are solved in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.
   - Mutagens use the four age segments with the adjustment factors 10, 3, 3 and 1; life-stage hazard quotients are never added.
 - Sources:
   - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739>
@@ -287,7 +284,6 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2009). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA-540-R-070-002, OSWER 9285.7-82, January 2009. <https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf>
   - U.S. Environmental Protection Agency (2014). Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9200.1-120, February 6, 2014. <https://www.epa.gov/sites/default/files/2015-11/documents/oswer_directive_9200.1-120_exposurefactors_corrected2.pdf>
   - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf>
-  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
 
 #### Soil screening guidance soil-to-groundwater leaching level
 
@@ -304,6 +300,19 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
   - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf>
   - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
+
+#### Modeled source-to-well cleanup levels by root finding
+
+- Kind: Modern
+- Method id: `cleanup.modeled-chains`
+- Summary: Solves for the source concentration (soil or dissolved) whose modeled receptor risk, hazard index or well concentration meets the target, through the registered vadose, groundwater and saturated-source chains and the exposure evaluator, using Brent root finding in the logarithm of the concentration, with a verified linear shortcut where the chain is linear.
+- Assumptions:
+  - The level is the source concentration whose forward result equals the target; the forward chain and evaluator are passed in and are the same ones the screen draws.
+  - The solve is in the logarithm of the source concentration with Brent root finding after a bracket search capped at the solubility or saturation limit; a target that cannot be reached is reported as such, not extrapolated.
+  - Cancer and noncancer endpoints are solved separately and the lower level governs; a concentration target replaces them and is refused for cumulative and equal allocation.
+  - A well concentration target uses the largest moving average over the averaging window; a window longer than the breakthrough series is warned.
+- Sources:
+  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
 
 ## Planned methods
 

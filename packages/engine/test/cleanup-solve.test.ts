@@ -164,8 +164,7 @@ describe('solveSourceLevel: secant parity (identity c)', () => {
       secantParity: true,
     });
     expect(r.secant).toBeDefined();
-    if (!r.secant!.converged) {
-      expect(r.warnings.map((w) => w.code)).toContain('cleanup.secant-not-converged');
-    }
+    expect(r.secant!.converged).toBe(false);
+    expect(r.warnings.map((w) => w.code)).toContain('cleanup.secant-not-converged');
   });
 });

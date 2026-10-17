@@ -380,3 +380,52 @@ describe('targets module', () => {
     expect(resolveConcentrationTarget('x', { kind: 'mcl' }).value).toBeNull();
   });
 });
+
+describe('review fixes: additive, zero entered, volatile tap water', () => {
+  it('modern additive with an age-segmented receptor is refused (M4 rule)', () => {
+    expect(() =>
+      backCalculateModern({
+        receptors: [
+          { label: 'resident', receptor: resident, pathways: ['soilIngestion'] },
+          { label: 'worker', receptor: modernWorker(), pathways: ['soilIngestion'] },
+        ],
+        chemicals: [{ id: 'benzene', chemical: chem('benzene') }],
+        additive: true,
+      }),
+    ).toThrow(RangeError);
+  });
+
+  it('cumulative: a chemical entered as zero gets no level, not a level of zero', () => {
+    const r = tapWater(
+      [
+        { id: 'benzene', chemical: chem('benzene'), entered: { groundwater: 1e-5 } },
+        { id: 'arsenic', chemical: chem('arsenic'), entered: { groundwater: 0 } },
+      ],
+      { allocation: 'cumulative' },
+    );
+    const [b, a] = r.media[0]!.levels;
+    expect(b!.level).toBeGreaterThan(0);
+    for (const lv of [a!]) {
+      expect(lv.level).toBeNull();
+      expect(lv.limiting).toBeNull();
+      expect(lv.cancerLevel).toBeNull();
+      expect(lv.noncancerLevel).toBeNull();
+    }
+    expect(
+      r.warnings.some((w) => w.code === 'cleanup.not-quantified' && /arsenic/.test(w.message)),
+    ).toBe(true);
+  });
+
+  it('a volatile chemical with an inhalation value warns that tap water omits household inhalation', () => {
+    const run = (volatile: boolean, pathways: PathwayId[]) =>
+      backCalculateModern({
+        receptors: [{ label: 'resident', receptor: resident, pathways }],
+        chemicals: [{ id: 'benzene', chemical: chem('benzene'), volatile }],
+      }).warnings.map((w) => w.code);
+    expect(run(true, TAP)).toContain('cleanup.tapwater-inhalation-omitted');
+    expect(run(false, TAP)).not.toContain('cleanup.tapwater-inhalation-omitted');
+    expect(run(true, [...TAP, 'showerInhalation'])).not.toContain(
+      'cleanup.tapwater-inhalation-omitted',
+    );
+  });
+});

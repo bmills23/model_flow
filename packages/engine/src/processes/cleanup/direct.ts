@@ -2,7 +2,8 @@ import type { Warning } from '../../registry/index.js';
 import { checkReceptorCount, checkUniqueChemicals } from '../exposure/checks.js';
 import { legacyPathway, type LegacyChemical, type LegacyReceptor } from '../exposure/legacy.js';
 import { modernPathway, type ModernChemical } from '../exposure/modern.js';
-import type { ModernReceptor } from '../exposure/lifeStages.js';
+import { isAgeSegmented, type ModernReceptor } from '../exposure/lifeStages.js';
+import { assertAdditiveAllowed } from '../risk/additivity.js';
 import { PATHWAYS, type Medium, type PathwayId } from '../exposure/units.js';
 import {
   checkAllocationTargets,
@@ -37,6 +38,12 @@ export interface DirectChemical<C> {
   mcl?: Mcl;
   /** Solubility in water, kg/m^3, for the groundwater level warning. */
   solubility?: number;
+  /**
+   * The chemical is volatile (the engine holds no volatility data; the caller's database does). With an
+   * inhalation toxicity value and no shower inhalation pathway on, a groundwater level warns that the
+   * household-use inhalation term is omitted.
+   */
+  volatile?: boolean;
 }
 
 export interface DirectReceptor<R> {
@@ -241,11 +248,13 @@ function combine(
 
 interface Core {
   receptors: readonly { label: string; pathways: readonly PathwayId[] }[];
-  chemicals: readonly DirectChemical<{ csat?: number }>[];
+  chemicals: readonly DirectChemical<{ csat?: number; iur?: number; rfc?: number }>[];
   coef: CoefFn;
   targets: RiskTargets | undefined;
   allocation: Allocation;
   additive: boolean;
+  /** Per receptor, whether it is age-segmented (the additive option is refused for those). */
+  segmented: readonly boolean[];
 }
 
 const MEDIA_ORDER: Medium[] = [
@@ -260,6 +269,7 @@ const MEDIA_ORDER: Medium[] = [
 function runCore(core: Core): DirectResult {
   const { receptors, chemicals, allocation } = core;
   checkReceptorCount(receptors.length, core.additive);
+  if (core.additive) assertAdditiveAllowed(core.segmented);
   checkUniqueChemicals(
     'chemicals',
     chemicals.map((c) => c.id),
@@ -330,6 +340,16 @@ function runCore(core: Core): DirectResult {
         }
         return v;
       });
+      // a quantified chemical entered as zero has no ratio to scale: not quantified, never a level of zero
+      const usable = chemicals.map((_, ci) => quantified[ci]! && entered[ci]! > 0);
+      chemicals.forEach((c, ci) => {
+        if (quantified[ci] && !usable[ci]) {
+          warnings.push({
+            code: 'cleanup.not-quantified',
+            message: `${c.id}: entered concentration in ${medium} is zero; no cumulative level (it adds nothing to the totals)`,
+          });
+        }
+      });
       if (!entered.some((v) => v > 0) && quantified.some(Boolean)) {
         throw new RangeError(
           `cumulative allocation needs a positive entered concentration in ${medium}`,
@@ -380,7 +400,7 @@ function runCore(core: Core): DirectResult {
             byPathway: [],
           };
         });
-        const ok = quantified[ci]!;
+        const ok = usable[ci]!;
         return {
           chemical: c.id,
           medium,
@@ -425,6 +445,19 @@ function runCore(core: Core): DirectResult {
           }
         }
         return lv;
+      });
+    }
+
+    if (medium === 'groundwater') {
+      const showerOn = receptors.some((r) => r.pathways.includes('showerInhalation'));
+      chemicals.forEach((c, ci) => {
+        const hasInhalation = c.chemical.iur !== undefined || c.chemical.rfc !== undefined;
+        if (c.volatile === true && hasInhalation && !showerOn && levels[ci]!.level !== null) {
+          warnings.push({
+            code: 'cleanup.tapwater-inhalation-omitted',
+            message: `${c.id}: the groundwater level omits the household-use inhalation term, so it can be higher than the RSL tap water level`,
+          });
+        }
       });
     }
 
@@ -507,6 +540,7 @@ export function backCalculateLegacy(
     targets: input.targets,
     allocation: input.allocation ?? 'individual',
     additive: input.additive === true,
+    segmented: input.receptors.map(() => false),
   });
 }
 
@@ -521,5 +555,6 @@ export function backCalculateModern(
     targets: input.targets,
     allocation: input.allocation ?? 'individual',
     additive: input.additive === true,
+    segmented: input.receptors.map((r) => isAgeSegmented(r.receptor)),
   });
 }

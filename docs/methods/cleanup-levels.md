@@ -12,8 +12,8 @@ legacy method's `risc5Choice` metadata. The process reuses the M4 exposure kerne
 Status: methods note, reference check, fixture plan and slice plan done 2026-10-16 (stage 1). Slice C1 (the SSG
 leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) and slice C2 (direct back-calculation in
 `cleanup/direct.ts` and `cleanup/targets.ts`, H1, H2, fixtures 3 and 4, identities d and g), the data slice D2, slice C3 (the solver and modeled chains in `cleanup/solve.ts` and
-`cleanup/chains.ts`) and slice C4 (registration of `cleanup.rags-b-1991`, `cleanup.rags-e-f-2014` and
-`cleanup.ssg-leaching` in `cleanup/index.ts`) landed on the branch. Slice W1 (the screen at `#/cleanup` with direct levels, `apps/web/src/cleanup/`) landed. Slice W2 (modeled chains and MCL targets on the screen: dissolved, vadose and saturated sources through the groundwater screen's aquifer, run in a worker) landed with one deviation from the slice plan: a modeled source is solved for one chemical (the feeds describe one chemical's transport; the picked chemical supplies toxicity only), so allocation among chemicals applies to direct media only, and a dissolved source's solubility ceiling is a typed field because the risk subset of the database carries no solubility. Slice W3 (the SSG leaching panel, `apps/web/src/cleanup/ssg.ts` and `SsgPanel.tsx`) landed: DAF 1, 20 or site-specific with the mixing-depth readout and cap warning, an MCL, user or risk-based tap water target, an optional source depth for the mass-limit level, the Csat flag, and the published RSL SSL at DAF 1 beside the computed one (a ratio is shown only when the DAF is 1 and the target kind matches the published column). Deviations from the slice plan: the panel is a switch beside the chosen source rather than a source of its own; the `cleanup.tapwater-inhalation-omitted` warning is raised by the web layer (the engine does not emit it); no Kd or Koc override is offered, the database values are used. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
+`cleanup/chains.ts`) and slice C4 (registration of `cleanup.rags-b-1991`, `cleanup.rags-e-f-2014`,
+`cleanup.ssg-leaching` and `cleanup.modeled-chains` in `cleanup/index.ts`) landed on the branch. Slice W1 (the screen at `#/cleanup` with direct levels, `apps/web/src/cleanup/`) landed. Slice W2 (modeled chains and MCL targets on the screen: dissolved, vadose and saturated sources through the groundwater screen's aquifer, run in a worker) landed with one deviation from the slice plan: a modeled source is solved for one chemical (the feeds describe one chemical's transport; the picked chemical supplies toxicity only), so allocation among chemicals applies to direct media only, and a dissolved source's solubility ceiling is a typed field because the risk subset of the database carries no solubility. Slice W3 (the SSG leaching panel, `apps/web/src/cleanup/ssg.ts` and `SsgPanel.tsx`) landed: DAF 1, 20 or site-specific with the mixing-depth readout and cap warning, an MCL, user or risk-based tap water target, an optional source depth for the mass-limit level, the Csat flag, and the published RSL SSL at DAF 1 beside the computed one (a ratio is shown only when the DAF is 1 and the target kind matches the published column). Deviations from the slice plan: the panel is a switch beside the chosen source rather than a source of its own; the `cleanup.tapwater-inhalation-omitted` warning is raised by the web SSG panel from the database flag, and by the engine's direct back-calculation only for a chemical the caller marks `volatile`; no Kd or Koc override is offered, the database values are used. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
 (2026-10-16, M5 block), open to Bryan's overturn.
 
 ## What the process is
@@ -132,7 +132,9 @@ quantified, never as infinity or zero).
 - **Receptors.** One receptor, or two. With two non-additive receptors each gets its own level and the
   reported level is the lower (DEFAULT ruling 9). With the legacy additive option (child plus adult) the
   cancer coefficient is A's plus B's and the noncancer level uses each receptor's own groups, never summed
-  (the M4 rule). The modern age-segmented resident is one receptor already.
+  (the M4 rule). The modern age-segmented resident is one receptor already, so the additive option with an
+  age-segmented receptor is a RangeError (the child would be counted twice), in `backCalculateModern` as in
+  `runModernScenario` (`assertAdditiveAllowed`).
 - **Legacy and modern.** The same equations, with the coefficients of `exposure.rags-a-1989` or
   `exposure.rags-e-f-2014`. The legacy dose form, the 7-year noncancer window, route extrapolation and
   the inhalation conversion at 20 m^3/d and 70 kg all live inside the coefficients.
@@ -186,7 +188,9 @@ For risk targets the metric is the receptor's total cancer risk and, separately,
 (largest group) from the linked pathways, evaluated by the M4 scenario runner on the breakthrough series.
 For a concentration target at the well the metric is the largest moving average of the screen-averaged well
 concentration over a user window (RISC5 offers an averaging time for exactly this); the window defaults to
-zero, that is the peak concentration (DEFAULT ruling 8). The breakthrough sample times are those of the
+zero, that is the peak concentration (DEFAULT ruling 8). A window longer than the breakthrough series
+averages only the covered span, which gives a lower metric and so a higher level than the window asks for;
+the result carries `cleanup.averaging-window-exceeds-series`. The breakthrough sample times are those of the
 transport run; the peak of a piecewise-linear series is exact at its samples, and the moving average is
 the M4 `maximizeWindows` scan.
 
@@ -242,7 +246,8 @@ and medium).
   s_noncancer = THQ / HI(C0) in closed form. Modeled pathways: one Brent solve on ln s for each endpoint,
   the TPH scaled with the chemicals. RISC5 reaches the same proportional solution through a limiting
   chemical and a fractional target followed by re-runs; solving for s directly lands on the same fixed
-  point in one solve. The HI is a total over all organs (no segregation yet) and is warned
+  point in one solve. A chemical entered as zero (or, when quantified, not entered) has no ratio to scale:
+  it gets no level (`null`, warned `cleanup.not-quantified`), never a level of zero. The HI is a total over all organs (no segregation yet) and is warned
   (`cleanup.hi-unsegregated`). The result depends on the entered ratios, not on their magnitude.
 - **Equal allocation (modern option).** Each chemical is solved individually against TR / N_c and
   THQ / N_nc, with N_c and N_nc the numbers of chemicals carrying a cancer or noncancer value for the
@@ -399,7 +404,7 @@ Warnings (codes are part of the result):
 | Code | Method | Condition |
 |---|---|---|
 | `cleanup.pathway-not-computable` | rags | a switched-on pathway lacks an exposure factor or chemical input; it contributes nothing and is named |
-| `cleanup.not-quantified` | rags | no toxicity value for any linked pathway of the chemical; no risk-based level |
+| `cleanup.not-quantified` | rags | no toxicity value for any linked pathway of the chemical, or (cumulative allocation) an entered concentration of zero; no level |
 | `cleanup.target-above-0.01` | rags | TR above 0.01 (linear risk form) |
 | `cleanup.target-not-reachable` | rags | the metric at the cap (pure substance, or solubility for a dissolved source) is below the target |
 | `cleanup.round-trip-tolerance` | rags | the returned level misses the acceptance level (|g| above 1e-9, or 1e-3 for the layered chain) |
@@ -409,7 +414,8 @@ Warnings (codes are part of the result):
 | `cleanup.hi-unsegregated` | rags | cumulative or equal allocation sums or divides HQs over all organs |
 | `cleanup.mcl-missing` | rags, ssg | an MCL target was asked for and the database has none |
 | `cleanup.mcl-group-value` | rags, ssg | the MCL cell carries the RSL "(G)" marker |
-| `cleanup.tapwater-inhalation-omitted` | rags, ssg | a volatile chemical with an inhalation value: the risk-based tap water level omits the household-use inhalation term (M7) |
+| `cleanup.tapwater-inhalation-omitted` | rags (caller flags `volatile`), ssg (web panel) | a volatile chemical with an inhalation value and no shower inhalation pathway on: the risk-based tap water level omits the household-use inhalation term (M7). The engine holds no volatility data, so `backCalculate*` emits it only for a chemical the caller marks `volatile`; the SSG panel raises it from the database flag |
+| `cleanup.averaging-window-exceeds-series` | rags | a concentration target's averaging window is longer than the breakthrough series; only the covered span is averaged |
 | `cleanup.csat-exceeded` | rags, ssg | a soil level above the soil saturation limit |
 | `cleanup.above-solubility` | rags | a groundwater level above S |
 | `cleanup.leachate-above-solubility` | ssg | C_w above S |
@@ -456,7 +462,13 @@ reading below. "Half a unit" means half a unit in the last printed digit of the 
    above. Tolerance: the table's own rounding (two significant figures at 10 and above, one below 10),
    half a unit. All thirty reproduce with theta_a 0.13 and with 0.1340 (checked 2026-10-16). Closest to a
    rounding edge: styrene at DAF 20 (3.52 against the 3.5 edge) and arsenic at DAF 1 (1.46 against 1.5),
-   so the inputs must be exactly those printed.
+   so the inputs must be exactly those printed. What this fixture does and does not validate: it checks the
+   three-phase partition formula and the DAF arithmetic to the table's rounding, and the metal Kd values
+   (which also agree with the RSL parameters table). It does not validate the typed organic Koc and H'. At
+   one or two significant figures most organic rows leave Koc and H' loose (benzene's H' is unconstrained
+   from 0 to about 0.5 and its Koc only to about 40 to 65 L/kg); only styrene at DAF 20 and arsenic at
+   DAF 1 bind tightly. Those Koc and H' were not read from the primary document and are not claimed as
+   sourced. Fixture 2 (91 RSL rows at two significant figures) is the real constraint on the formula.
 2. **RSL MCL-based SSL (DAF 1), every row, `epa2024rsl`.** All 91 summary-table rows with an MCL-based
    SSL, recomputed from the committed raw files with the engine's partition factor: MCL (the "(G)" cells
    parsed), Kd where the parameters table has one, else Koc x 0.002, H' (blank = 0), theta_w 0.3, rho_b 1.5,

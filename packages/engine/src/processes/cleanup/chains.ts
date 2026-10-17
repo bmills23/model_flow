@@ -345,11 +345,20 @@ export function modernEvaluator(
  * well-screen concentration over `window` seconds (default 0, the peak; default ruling 8).
  */
 export function wellConcentrationMetric(series: EpcSeries, window = 0): number {
+  return wellConcentrationWindow(series, window).value;
+}
+
+/** The windowed metric and whether the series was shorter than the window (so a shorter span was averaged). */
+export function wellConcentrationWindow(
+  series: EpcSeries,
+  window = 0,
+): { value: number; shorter: boolean } {
   if (!(window >= 0 && Number.isFinite(window))) {
     throw new RangeError('the averaging window must be finite and not negative');
   }
-  if (window === 0) return Math.max(0, ...series.values);
-  return maximizeWindows([{ series, windows: [{ offset: 0, length: window, weight: 1 }] }]).value;
+  if (window === 0) return { value: Math.max(0, ...series.values), shorter: false };
+  const r = maximizeWindows([{ series, windows: [{ offset: 0, length: window, weight: 1 }] }]);
+  return { value: r.value, shorter: r.shorter };
 }
 
 // ---------------------------------------------------------------- the solver driver
@@ -632,13 +641,22 @@ export function solveModeled<C>(input: ModeledInput<C>): ModeledResult {
       const t = resolveConcentrationTarget(c.id, c.concentrationTarget, c.mcl);
       warnings.push(...t.warnings);
       if (t.value !== null) {
+        let windowShorter = false;
         const metric = memoized((conc: number) => {
           const spec = c.chain.epc(conc);
           if (spec.kind !== 'series')
             throw new Error('a concentration target needs a series chain');
-          return wellConcentrationMetric(spec.series, input.averagingWindow);
+          const w = wellConcentrationWindow(spec.series, input.averagingWindow);
+          if (w.shorter) windowShorter = true;
+          return w.value;
         });
         const s = endpointSolve(metric, t.value, reference, c.chain.cap, [c.chain]);
+        if (windowShorter) {
+          warnings.push({
+            code: 'cleanup.averaging-window-exceeds-series',
+            message: `${c.id}: the averaging window is longer than the breakthrough series, so only the covered span is averaged and the level is lower than the window asks for`,
+          });
+        }
         solves.concentration = s;
         level = s.level;
         limiting = s.reachable ? 'concentration' : null;

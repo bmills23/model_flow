@@ -488,7 +488,8 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
 8. **A groundwater concentration target is met by the peak well concentration** (moving-average window 0),
    with a user window in years as an option. DEFAULT.
 9. **Receptors.** One or two; with two non-additive receptors the lower level is reported; the legacy
-   additive option sums cancer coefficients only. DEFAULT (RISC5 allows one receptor for modeled chains).
+   additive option sums cancer coefficients only, and is refused (RangeError) with an age-segmented modern
+   receptor, as in M4. DEFAULT (RISC5 allows one receptor for modeled chains).
 10. **SSG dilution.** The default DAF is 1, the RSL's choice, with 20 (the guidance's 0.5-acre default)
     and the site-specific equations as options: DEFAULT. Capping the mixing depth at the aquifer
     thickness and keeping the higher of the partition and mass-limit levels are forced by
@@ -527,7 +528,9 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
     prediction domain, M4 computes and warns). There is no RISC5 fixture: chapter 8 has no worked example
     and Appendix R no back-calculation table.
 19. **Method ids and citations.** DEFAULT. `cleanup.rags-b-1991` (legacy: `ragsb1991`, `rags1989`,
-    `epa1991sdef`, `epa1992dea`, `brent1973`), `cleanup.rags-e-f-2014` (modern: `ragsb1991`, `ragse2004`,
-    `ragsf2009`, `epa2014ef`, `epa2005adaf`, `brent1973`) and `cleanup.ssg-leaching` (modern:
-    `epa1996ssg`, `epa1996ssgug`, `epa2002ssg`), registered in slice C4, which flips the new citations to
-    `used`.
+    `epa1991sdef`, `epa1992dea`), `cleanup.rags-e-f-2014` (modern: `ragsb1991`, `ragse2004`, `ragsf2009`,
+    `epa2014ef`, `epa2005adaf`), `cleanup.ssg-leaching` (modern: `epa1996ssg`, `epa1996ssgug`, `epa2002ssg`)
+    and `cleanup.modeled-chains` (modern: `brent1973`), registered in slice C4, which flips the new
+    citations to `used`. The two RAGS methods are the closed-form direct back-calculation and describe only
+    that; the Brent solve over the modeled chains is its own registered method (`solveModeled`), so the
+    registry cites the root finder exactly where it runs.

@@ -233,6 +233,14 @@ describe('dissolved source chains: MCL target at the well', () => {
     expect(rel(wellConcentrationMetric(spec.series, 5 * YEAR), MCL)).toBeLessThan(1e-9);
   });
 
+  it('an averaging window longer than the breakthrough series is warned, not silently shortened', () => {
+    const chain = dissolved(at123d);
+    const codes = (w: number) => concentrationLevel(chain, w).warnings.map((x) => x.code);
+    expect(codes(30 * YEAR)).toContain('cleanup.averaging-window-exceeds-series');
+    expect(codes(5 * YEAR)).not.toContain('cleanup.averaging-window-exceeds-series');
+    expect(codes(0)).not.toContain('cleanup.averaging-window-exceeds-series');
+  });
+
   it('caps at the solubility and reports not reachable above it', () => {
     const chain = dissolvedChain({ times, transport: at123d, cap: 1e-9 });
     const r = concentrationLevel(chain);
@@ -513,11 +521,10 @@ describe('layered chain (numerical)', () => {
     const codes = r.warnings.map((w) => w.code);
     expect(codes).toContain('cleanup.numerical-chain');
     const lv = r.levels[0]!;
-    if (lv.level !== null) {
-      expect(rel(peak(chain, lv.level), MCL)).toBeLessThan(1e-3);
-    } else {
-      expect(codes).toContain('cleanup.target-not-reachable');
-    }
+    // the layered case must reach the MCL; an all-unreachable regression fails here
+    expect(lv.level).not.toBeNull();
+    expect(codes).not.toContain('cleanup.target-not-reachable');
+    expect(rel(peak(chain, lv.level!), MCL)).toBeLessThan(1e-3);
   }, 300000);
 });
 
