@@ -10,3 +10,4 @@ export * from './epaJe.js';
 export * from './devaull.js';
 export * from './attenuationFactor.js';
 export * from './pviScreen.js';
+export * from './coupling.js';

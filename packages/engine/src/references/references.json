@@ -371,7 +371,7 @@
   {
     "key": "jury1983",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Jury, W.A., Spencer, W.F., Farmer, W.J.",
     "year": 1983,
     "title": "Behavior assessment model for trace organics in soil: I. Model description",
@@ -566,7 +566,7 @@
   {
     "key": "jury1990",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Jury, W.A., Russo, D., Streile, G., El Abd, H.",
     "year": 1990,
     "title": "Evaluation of volatilization by organic chemicals residing below the soil surface",
@@ -1029,24 +1029,24 @@
   {
     "key": "arcadis2001",
     "type": "review",
-    "status": "fixture",
+    "status": "used",
     "authors": "Arcadis Geraghty & Miller",
     "year": 2001,
     "title": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
-    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures. The RISC5 guide reproduces only page 1 of the three pages of Table R-9 (direct exposure pathways); pages 2 and 3 are not available.",
+    "notes": "Reproduced as Appendix R of the RISC5 user guide; source of numeric validation fixtures, and cited by outdoorAir.box for the RISC5 choice and its Table R-6 value. The RISC5 guide reproduces only page 1 of the three pages of Table R-9 (direct exposure pathways); pages 2 and 3 are not available.",
     "tags": ["validation", "exposure"]
   },
   {
     "key": "spence2001",
     "type": "data",
-    "status": "fixture",
+    "status": "used",
     "authors": "Spence, L.R., Walden, T.",
     "year": 2001,
     "title": "RISC4 User's Manual",
     "venue": "BP Oil International",
     "identifier": "Version 4.0, October 2001",
     "url": "https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf",
-    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Fixture use only: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list, and, planned for M4, the adult resident reasonable-maximum factors (Table 6-2) and four chemicals' toxicity and permeability values (Table 11-1) that the Table R-9 comparison depends on but does not list. No table is reproduced.",
+    "notes": "Verified from the public copy on the ISPRA site (cover, retrieved 2026-10-16). Cited by outdoorAir.box for the RISC5 choice. Fixture use otherwise: the benzene properties that the Table R-7 comparison (arcadis2001) depends on but does not list, and, planned for M4, the adult resident reasonable-maximum factors (Table 6-2) and four chemicals' toxicity and permeability values (Table 11-1) that the Table R-9 comparison depends on but does not list. No table is reproduced.",
     "tags": ["validation", "vadose", "exposure"]
   },
   {

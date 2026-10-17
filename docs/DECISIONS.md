@@ -543,8 +543,8 @@ Slice V4 (modern EPA J&E, built 2026-10-17) readings, all verified against the A
   column and must leave its top below the floor (a RangeError otherwise, as the guide states).
 - **Registration.** `vapor.je-1991` and `vapor.dominant-layer-1998` (slice V2) are registered together with
   `vapor.je-epa`, as the registry test pairs each legacy process with a modern one; `johnsonettinger1991`,
-  `johnson1998`, `epa2004je` and `epa2017je` are now `used`. The outdoor air and Jury descriptors stay
-  unregistered until slice V7.
+  `johnson1998`, `epa2004je` and `epa2017je` are now `used`. The outdoor air and Jury descriptors were
+  registered in slice V7.
 - **Air viscosity** is an input (default 1.75e-5 Pa s, the value the guide prints at 10 deg C), because
   the guide gives no temperature formula; it is not asserted by the fixture.
 - **Building presets** are the Version 6.0 residential defaults (Table 9: 150 m^2 square floor, mixing

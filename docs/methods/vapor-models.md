@@ -16,7 +16,7 @@ reproduce) and V4 (`vapor.je-epa`; the Appendix C example reproduces) are built.
 `vapor.je-epa` are registered in the default registry (V4 registered them together, because the registry
 test requires a modern method for every process that has a legacy one), and V4 flipped
 `johnsonettinger1991`, `johnson1998`, `epa2004je` and `epa2017je` to `used`. The outdoor air and Jury
-descriptors (V3) are registered by V7. No web code exists yet. The scope calls below are the DEFAULT rulings
+descriptors (V3) were registered by V7. No web code exists yet. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
@@ -232,7 +232,7 @@ R-4 and the Appendix J example (see "Fixture plan").
 
 ## Legacy method: outdoor air box (`outdoorAir.box`)
 
-Citations: `arcadis2001` and `spence2001` (Table R-6 and the RISC5 review). The attribution of the box
+Citations: `arcadis2001` and `spence2001` (Table R-6 and the RISC5 review; both are `used` since V7 registered the method, which must cite a used reference). The attribution of the box
 to the ASTM RBCA guide (`astme1739`) could not be confirmed in slice V3: a public search found only state
 rules that adopt RBCA-style equations as images (Illinois 35 IAC 742 Appendix C, which lists a wind speed
 default of 225 cm/s and a source width W parallel to the wind), not the standard's own equations, which
@@ -757,15 +757,15 @@ tests first, runs the engine test file alone, then the gate once.
 | V0 data | `packages/data/raw/vapor/epa2004je/` (transcribed CSV, manifest with the PDF's SHA-256), `packages/data/src/vapor/` (build, class list, formulas), `packages/data/generated/vapor/vapor-chemicals.json`, `packages/data/test/vapor.test.ts`, root `data:check` coverage | benzene, TCE and PCE rows match the PDF; every merged row's RSL values are byte-identical to `chemicals.json`; k_w classes cover BTEX and naphthalene | none | none |
 | V1 shared kernels | `packages/engine/src/processes/vapor/{units,source,building,henry,index}.ts`, `test/vapor-building.test.ts`, `test/vapor-source.test.ts` | J&E alpha limits (identity 8d); Q_soil hand case; source vapor for soil, soil gas, groundwater, residual phase; Henry correction reproduces the EPA example's 8,122 cal/mol, 2.68e-3 and 0.115 | none (reuses `vadose` diffusion and partitioning helpers) | none |
 | V2 legacy indoor (built; registered by V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
-| V3 outdoor and Jury (built; registration deferred to V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
+| V3 outdoor and Jury (built; registered by V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E (built) | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` (registers `vapor.je-1991` and `vapor.dominant-layer-1998` too) |
 | V5 DeVaull (built; registered) | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` (flips `devaull2007` and `api2012biovapor` to `used`) |
 | V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
-| V7 coupling and registration | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |
+| V7 coupling and registration (built) | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |
 
 References each method cites (all must be `used` when registered; V7 flips them, or each registering
 slice flips its own): `johnsonettinger1991`, `millingtonquirk1961` (already used), `epa1996ssg` (already
-used), `johnson1998`, `astme1739` (not cited: V3 could not confirm it), `epa2004je`, `epa2017je`, `vangenuchten1980`
+used), `johnson1998`, `arcadis2001` and `spence2001` (box), `astme1739` (not cited: V3 could not confirm it), `epa2004je`, `epa2017je`, `vangenuchten1980`
 (already used), `devaull2007`, `api2012biovapor`, `epa2015vi`, `epavisl`, `epa2015pvi`, `lahvis2013`,
 `jury1983`, `jury1990`, and `epa2002ssg` only if the Q/C regression is used.
 
@@ -796,7 +796,7 @@ Stage 3 (web), new route `#/vapor`, lazy-loaded like `#/risk`:
 | `yao2011`, `yao2013`, `abreu2005`, `abreu2006`, `abreu2009` | Crossref | No; cited only in warnings |
 | `epa1996ssg` | As in the saturated-source note | Part 2 Section 2.4.2 (Equation 6, Table 3 Q/C), Section 2.6.3 (Equation 55), Table 3-A, Tables 36, 37 and 39 and Appendix C (Jury equations 1 to 12), read in slice V3 on 2026-10-17 |
 | `astme1739` | Not verified beyond its designation; V3 found no public reproduction of the equations | No (a purchased standard); not cited by any method |
-| `arcadis2001`, `spence2001` | As in the vadose note; Tables R-3 to R-6 read in the RISC5 guide | Fixture use only |
+| `arcadis2001`, `spence2001` | As in the vadose note; Tables R-3 to R-6 read in the RISC5 guide | Fixture use, and cited by `outdoorAir.box` (hence `used`) |
 
 `biovapor2010` (software, year not verified) is superseded for citation by `api2012biovapor` and stays
 `planned`. `pviscreen` stays `planned` for M10.
