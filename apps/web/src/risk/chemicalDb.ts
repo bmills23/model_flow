@@ -1,6 +1,6 @@
 import type {
-  ChemicalEntry,
-  ChemicalsFile,
+  RiskChemicalEntry,
+  RiskChemicalsFile,
   ToxEntry,
   ToxFile,
   ToxValue,
@@ -12,7 +12,7 @@ export interface ChemicalRecord {
   cas?: string;
   name: string;
   tox: ToxEntry;
-  phys: ChemicalEntry | undefined;
+  phys: RiskChemicalEntry | undefined;
 }
 
 export interface ChemicalDb {
@@ -23,7 +23,7 @@ export interface ChemicalDb {
   byId: Map<string, ChemicalRecord>;
 }
 
-export function buildDb(chem: ChemicalsFile, tox: ToxFile): ChemicalDb {
+export function buildDb(chem: RiskChemicalsFile, tox: ToxFile): ChemicalDb {
   const phys = new Map(chem.chemicals.map((c) => [c.id, c]));
   const chemicals = tox.toxicity.map((t): ChemicalRecord => {
     const rec: ChemicalRecord = { id: t.id, name: t.name, tox: t, phys: phys.get(t.id) };
@@ -42,14 +42,14 @@ let loading: Promise<ChemicalDb> | null = null;
 
 /**
  * Loads the generated RSL files on first use. They are dynamic imports, so the bundler puts the
- * roughly 1.5 MB of JSON in chunks of their own and the main bundle never carries them.
+ * roughly 0.3 MB of JSON (the risk subset of the chemical file, not the full 1.2 MB one) in chunks of their own and the main bundle never carries them.
  */
 export function loadChemicalDb(): Promise<ChemicalDb> {
   loading ??= Promise.all([
-    import('@model-flow/data/generated/rsl-2024-11/chemicals.json'),
+    import('@model-flow/data/generated/rsl-2024-11/risk-chemicals.json'),
     import('@model-flow/data/generated/rsl-2024-11/tox.json'),
   ]).then(([c, t]) =>
-    buildDb(c.default as unknown as ChemicalsFile, t.default as unknown as ToxFile),
+    buildDb(c.default as unknown as RiskChemicalsFile, t.default as unknown as ToxFile),
   );
   loading.catch(() => {
     loading = null;

@@ -1,6 +1,6 @@
 import type { EpcRecord, ReceptorRiskSummary, Warning } from '@model-flow/engine';
-import { YEAR_S } from '@model-flow/engine';
 import { PATHWAY_LABELS, barRows, fmtHi, fmtRisk, type BarRow } from './chartData';
+import { TRANSPORT_YEAR_S } from './build';
 import type { RiskOutcome } from './compute';
 import { StackedBars } from './StackedBars';
 import type { PathwayId } from '@model-flow/engine';
@@ -237,7 +237,9 @@ export function EpcTable(props: { outcome: RiskOutcome; names: Record<string, st
           Modern exposure start (the time that maximizes the cancer risk):{' '}
           {starts
             .map((t, i) =>
-              t === null ? null : `${labels[i]} year ${Number((t / YEAR_S).toPrecision(3))}`,
+              t === null
+                ? null
+                : `${labels[i]} year ${Number((t / TRANSPORT_YEAR_S).toPrecision(3))}`,
             )
             .filter(Boolean)
             .join('; ')}

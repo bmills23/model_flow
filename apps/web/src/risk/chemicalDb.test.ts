@@ -9,7 +9,11 @@ beforeAll(async () => {
 describe('chemical database', () => {
   it('joins the 890 chemical and toxicity rows by id', () => {
     expect(db.chemicals.length).toBe(890);
-    expect(db.chemicals.every((c) => c.tox.id === c.id && c.phys?.id === c.id)).toBe(true);
+    expect(
+      db.chemicals.every((c) => c.tox.id === c.id && (c.phys === undefined || c.phys.id === c.id)),
+    ).toBe(true);
+    // the risk subset leaves out chemicals with no dermal water input
+    expect(db.chemicals.filter((c) => c.phys !== undefined).length).toBeGreaterThan(600);
     expect(db.edition).toBe('2024-11');
   });
 

@@ -65,6 +65,23 @@ export function ReceptorPanel(props: {
             onChange={(v) => set('soilAdherence', v)}
           />
           <Field
+            label="Drinking water (L/day)"
+            value={form.waterIngestion}
+            onChange={(v) => set('waterIngestion', v)}
+          />
+          <Field
+            label="Skin area for water (cm2)"
+            value={form.waterSkinArea}
+            onChange={(v) => set('waterSkinArea', v)}
+            hint="Bathing and swimming."
+          />
+          <Field
+            label="Breathing rate (m3/h)"
+            value={form.inhalationRate}
+            onChange={(v) => set('inhalationRate', v)}
+            hint="Legacy method only; the modern method works from air concentration."
+          />
+          <Field
             label="Bathing time (h/day)"
             value={form.bathTime}
             onChange={(v) => set('bathTime', v)}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LEGACY_PRESETS,
+  MODERN_RESIDENT_BOUNDARY,
   constantEpc,
   groundwaterBreakthrough,
   legacyReceptor,
@@ -196,6 +197,28 @@ describe('modern scenario: identities', () => {
         additive: true,
       }),
     ).toThrow(/age-segmented receptor \(it would count the child twice\)/);
+  });
+
+  it('a child-only receptor with two mutagen age segments is not age-segmented, so child plus worker may be added', () => {
+    const child = modernReceptor({
+      label: 'Child resident',
+      stages: MODERN_RESIDENT_BOUNDARY.stages.slice(0, 1),
+      mutagenStages: MODERN_RESIDENT_BOUNDARY.mutagenStages!.slice(0, 2),
+    });
+    const chems = [chem('b', benzene, { soilIngestion: constantEpc('soilIngestion', 5) })];
+    const r = runModernScenario({
+      receptors: [
+        rec({ receptor: child, pathways: ['soilIngestion'], chemicals: chems }),
+        rec({
+          label: 'B',
+          receptor: modernWorker(),
+          pathways: ['soilIngestion'],
+          chemicals: chems,
+        }),
+      ],
+      additive: true,
+    });
+    expect(r.additiveCancerRisk).toBeGreaterThan(0);
   });
 
   it('the headline HI is the larger of child and adult, both shown, never added', () => {

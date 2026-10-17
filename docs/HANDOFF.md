@@ -33,7 +33,8 @@ a done one.
   `summary.ts`). Registered as `exposure.rags-a-1989` (legacy) and `exposure.rags-e-f-2014` (modern); there
   is no separate risk method.
 - Web `apps/web/src/risk/` at `#/risk` (lazy-loaded): chemical picker over the RSL JSON (separate chunks,
-  loaded on demand), receptor panels (one or two), legacy versus modern comparison, stacked contribution
+  loaded on demand; the physical-property chunk is the derived `risk-chemicals.json`, about a quarter
+  of the full `chemicals.json`), receptor panels (one or two), legacy versus modern comparison, stacked contribution
   bars, warnings and toxicity sources. `transport/wellFeed.ts` lets a transport result feed the well
   concentration, with origin shown as `transport.<method>`. Zero overflowing elements at 390x844 and 1280,
   light and dark (check script `scratchpad/cdp-check.mjs`, outside the repo).

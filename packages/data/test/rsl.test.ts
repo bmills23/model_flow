@@ -217,6 +217,28 @@ describe('generated files', () => {
     expect(chemicals).toBe(JSON.stringify(built.chemicals, null, 2) + '\n');
     expect(toxicity).toBe(JSON.stringify(built.tox, null, 2) + '\n');
   });
+
+  it('carries the risk subset, derived from the chemical file and under a third of its size', () => {
+    const risk = readFileSync(join(generatedDir, 'risk-chemicals.json'), 'utf8');
+    expect(risk).toBe(JSON.stringify(built.risk, null, 2) + '\n');
+    const full = readFileSync(join(generatedDir, 'chemicals.json'), 'utf8');
+    expect(risk.length).toBeLessThan(full.length * 0.3);
+    const byId = new Map(built.chemicals.chemicals.map((c) => [c.id, c]));
+    for (const r of built.risk.chemicals) {
+      const c = byId.get(r.id)!;
+      expect(r.fa).toBe(c.fa);
+      expect(r.inEpd).toBe(c.inEpd);
+      expect(r.dermalForm).toBe(c.dermalForm);
+      for (const [k, v] of Object.entries(r.values)) {
+        expect(v.value).toBe(c.values[k as keyof typeof c.values]!.value);
+      }
+    }
+    // every chemical with a Kp or a dermal form is in the subset
+    for (const c of built.chemicals.chemicals) {
+      if (c.values.kp || c.dermalForm)
+        expect(byId.has(c.id) && built.risk.chemicals.some((r) => r.id === c.id)).toBe(true);
+    }
+  });
 });
 
 describe('dermal water form (organic lag-time or inorganic Kp times t)', () => {

@@ -85,7 +85,9 @@ in kg/(kg s); reference concentration in kg/m^3. Conversions happen only at the 
 Exposure years are 365 days, as in every guidance document cited here (the averaging time is the
 duration in years times 365 days), not the 365.25-day year used for transport time. When an M1 series
 is averaged, the window length is the exposure duration times 365 days on the transport time axis; the
-difference from a 365.25-day year (0.07 percent of the window) is not corrected.
+difference from a 365.25-day year (0.07 percent of the window) is not corrected. A pinned exposure
+start, and the start year the screen reports, are times on the transport axis and use 365.25-day years,
+so year 30 on the risk screen is year 30 on the transport screen.
 
 ## Notation
 
@@ -245,8 +247,10 @@ and both are shown. Life-stage HQs are never added to each other.
   chemicals (`rags1989` sections 8.2.2 and 8.3). Pathways are combined only for the same receptor.
 - **Across receptors:** never, except the legacy additive option, which adds A's and B's cancer risks
   (the RISC5 way to build a child-plus-adult resident) and never their HIs. The modern resident is
-  already age-segmented, so the additive option combined with a modern resident is a RangeError (it
-  would count the child twice); it stays available for two non-segmented modern receptors.
+  already age-segmented (it covers a child and an adult), so the additive option combined with a modern
+  resident is a RangeError (it would count the child twice); it stays available for two non-segmented
+  modern receptors, including the child resident alone (its two mutagen segments are both the child) plus
+  the worker.
 - **A chemical without a value for a route** contributes nothing to that route and the cell is "not
   quantified" (`null`), never zero. A run whose totals omit a pathway because no value exists says so
   (`exposure.not-quantified`).
@@ -292,6 +296,9 @@ rates as the RSL default-parameter list cites them. No national default exists f
 frequency or event time in either method: the swimming pathways require them
 (`exposure.site-specific-required` until entered), and so do the bathing time and frequency, the dermal
 soil area and adherence, the outdoor air time, and the child's drinking-water and inhalation rates.
+The risk screen's site-specific panel offers an entry for each of these blanks (drinking water, skin area
+for water and swimming, breathing rate for the legacy method), so no pathway a warning names is
+unreachable.
 
 ## Where the manual is ambiguous, and what we chose
 

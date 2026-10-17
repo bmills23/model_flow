@@ -268,6 +268,10 @@ export function timeWeightedBathingTime(stages: readonly LifeStage[]): number | 
   return den > 0 ? num / den : undefined;
 }
 
-/** True when the receptor has more than one life stage (it already covers a child and an adult). */
+/**
+ * True when the receptor already covers both a child and an adult: its stages (or mutagen age
+ * segments) fall into more than one noncancer group. A child alone split into two mutagen segments
+ * (0-2, 2-6) is one group and is not age-segmented.
+ */
 export const isAgeSegmented = (r: ModernReceptor): boolean =>
-  r.stages.length > 1 || (r.mutagenStages?.length ?? 0) > 1;
+  new Set([...r.stages, ...(r.mutagenStages ?? [])].map((s) => s.group)).size > 1;

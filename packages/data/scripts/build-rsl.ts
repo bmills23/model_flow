@@ -12,6 +12,7 @@ const outDir = join(pkg, 'generated', `rsl-${edition}`);
 const built = await buildRsl(rawDir);
 mkdirSync(outDir, { recursive: true });
 writeFileSync(join(outDir, 'chemicals.json'), serialize(built.chemicals));
+writeFileSync(join(outDir, 'risk-chemicals.json'), serialize(built.risk));
 writeFileSync(join(outDir, 'tox.json'), serialize(built.tox));
 console.log(
   `rsl ${edition}: ${built.chemicals.chemicals.length} chemicals, ${built.tox.toxicity.length} toxicity rows`,

@@ -82,3 +82,23 @@ export interface ToxFile {
   sourceKeys: Record<string, string>;
   toxicity: ToxEntry[];
 }
+
+/** The physical-property keys the risk screen reads, the dermal water inputs. */
+export type RiskValueKey = 'kp' | 'tauEvent' | 'tStar' | 'b';
+
+/** One chemical in the risk-screen subset: only what the exposure engine reads, values without references. */
+export interface RiskChemicalEntry {
+  id: string;
+  values: Partial<Record<RiskValueKey, { value: number }>>;
+  fa?: number;
+  inEpd?: boolean;
+  dermalForm?: DermalForm;
+}
+
+/** A subset of `ChemicalsFile` derived by the data build, small enough to load on demand on a phone. */
+export interface RiskChemicalsFile {
+  edition: string;
+  source: ChemicalsFile['source'];
+  units: Pick<ChemicalsFile['units'], RiskValueKey>;
+  chemicals: RiskChemicalEntry[];
+}

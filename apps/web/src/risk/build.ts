@@ -4,7 +4,6 @@ import {
   MODERN_WORKER_BOUNDARY,
   PATHWAYS,
   PATHWAY_IDS,
-  YEAR_S,
   cmPerHourToMPerS,
   constantEpc,
   iurFromPerUgM3,
@@ -34,6 +33,12 @@ import type { WellFeed } from '../transport/wellFeed';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
+
+/**
+ * One year on the transport time axis, which counts 365.25-day years. The exposure start the user
+ * enters, and the start year shown, are on that axis. The engine's exposure durations stay 365-day years.
+ */
+export const TRANSPORT_YEAR_S = 365.25 * 86400;
 
 /** The one input error that means "nothing to compute yet" rather than "something is wrong". */
 export const ENTER_CONCENTRATION =
@@ -127,6 +132,9 @@ function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefined) {
 interface Site {
   soilSkinArea: number | undefined;
   soilAdherence: number | undefined;
+  waterIngestion: number | undefined;
+  waterSkinArea: number | undefined;
+  inhalationRate: number | undefined;
   bathTime: number | undefined;
   swimTime: number | undefined;
   swimDays: number | undefined;
@@ -138,6 +146,9 @@ function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
   return {
     soilSkinArea: p(rf.soilSkinArea, 'soil skin area'),
     soilAdherence: p(rf.soilAdherence, 'soil adherence'),
+    waterIngestion: p(rf.waterIngestion, 'drinking water ingestion'),
+    waterSkinArea: p(rf.waterSkinArea, 'skin area for water'),
+    inhalationRate: p(rf.inhalationRate, 'breathing rate'),
     bathTime: p(rf.bathTime, 'bathing time'),
     swimTime: p(rf.swimTime, 'swimming time'),
     swimDays: p(rf.swimDays, 'swimming days per year'),
@@ -152,6 +163,12 @@ function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundary {
   const b: LegacyReceptorBoundary = { ...base, etHoursPerDay: et, efDaysPerYrByPathway: ef };
   if (s.soilSkinArea !== undefined) b.soilSkinAreaCm2 = s.soilSkinArea;
   if (s.soilAdherence !== undefined) b.soilAdherenceMgPerCm2 = s.soilAdherence;
+  if (s.waterIngestion !== undefined) b.waterIngestionLPerDay = s.waterIngestion;
+  if (s.waterSkinArea !== undefined) {
+    b.waterSkinAreaCm2 = s.waterSkinArea;
+    b.swimSkinAreaCm2 = s.waterSkinArea;
+  }
+  if (s.inhalationRate !== undefined) b.inhalationM3PerHour = s.inhalationRate;
   if (s.bathTime !== undefined) {
     et.waterDermal = s.bathTime;
     et.showerInhalation = s.bathTime;
@@ -176,6 +193,11 @@ function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundary {
     const out: LifeStageBoundary = { ...st, etHoursPerDay: et, efDaysPerYrByPathway: ef };
     if (s.soilSkinArea !== undefined) out.soilSkinAreaCm2 = s.soilSkinArea;
     if (s.soilAdherence !== undefined) out.soilAdherenceMgPerCm2 = s.soilAdherence;
+    if (s.waterIngestion !== undefined) out.waterIngestionLPerDay = s.waterIngestion;
+    if (s.waterSkinArea !== undefined) {
+      out.waterSkinAreaCm2 = s.waterSkinArea;
+      out.swimSkinAreaCm2 = s.waterSkinArea;
+    }
     if (s.bathTime !== undefined) {
       out.bathingTimeHr = s.bathTime;
       et.showerInhalation = s.bathTime;
@@ -248,7 +270,7 @@ export function buildInputs(form: RiskForm, db: ChemicalDb, well: WellFeed | nul
   let startOption: { exposureStart: 'max-risk' | number } = { exposureStart: 'max-risk' };
   if (form.startMode === 'pinned') {
     const yr = parse(form.startYr, 'Exposure start', errors);
-    if (yr !== undefined) startOption = { exposureStart: yr * YEAR_S };
+    if (yr !== undefined) startOption = { exposureStart: yr * TRANSPORT_YEAR_S };
   }
 
   const receptors: { tag: string; rf: ReceptorForm }[] = [

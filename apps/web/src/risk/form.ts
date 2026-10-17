@@ -26,6 +26,9 @@ export interface ReceptorForm {
   /** Site-specific entries; blank keeps the preset's value or, where it has none, leaves the pathway unquantified. */
   soilSkinArea: string;
   soilAdherence: string;
+  waterIngestion: string;
+  waterSkinArea: string;
+  inhalationRate: string;
   bathTime: string;
   swimTime: string;
   swimDays: string;
@@ -64,6 +67,9 @@ export function defaultReceptor(preset: PresetId = 'resident'): ReceptorForm {
     pathways: Object.fromEntries(PATHWAY_IDS.map((p) => [p, true])) as Record<PathwayId, boolean>,
     soilSkinArea: '',
     soilAdherence: '',
+    waterIngestion: '',
+    waterSkinArea: '',
+    inhalationRate: '',
     bathTime: '',
     swimTime: '',
     swimDays: '',

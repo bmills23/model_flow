@@ -7,6 +7,9 @@ import type {
   ChemicalEntry,
   ChemicalsFile,
   ChemicalValueKey,
+  RiskChemicalEntry,
+  RiskChemicalsFile,
+  RiskValueKey,
   SpecialCase,
   TaggedValue,
   ToxEntry,
@@ -16,6 +19,8 @@ import type {
 
 export interface RslBuild {
   chemicals: ChemicalsFile;
+  /** The subset of `chemicals` the risk screen reads, derived here and never edited by hand. */
+  risk: RiskChemicalsFile;
   tox: ToxFile;
 }
 
@@ -242,6 +247,36 @@ const roleFile = (m: Manifest, role: 'summary' | 'parameters' | 'tapwater') => {
   return f;
 };
 
+const RISK_KEYS: readonly RiskValueKey[] = ['kp', 'tauEvent', 'tStar', 'b'];
+
+/** The risk screen's subset of the chemical file: dermal water inputs only, chemicals with none are left out. */
+export const deriveRiskChemicals = (file: ChemicalsFile): RiskChemicalsFile => {
+  const chemicals: RiskChemicalEntry[] = [];
+  for (const c of file.chemicals) {
+    const entry: RiskChemicalEntry = { id: c.id, values: {} };
+    for (const k of RISK_KEYS) {
+      const v = c.values[k];
+      if (v) entry.values[k] = { value: v.value };
+    }
+    if (c.fa !== undefined) entry.fa = c.fa;
+    if (c.inEpd !== undefined) entry.inEpd = c.inEpd;
+    if (c.dermalForm !== undefined) entry.dermalForm = c.dermalForm;
+    if (Object.keys(entry.values).length > 0 || Object.keys(entry).length > 2)
+      chemicals.push(entry);
+  }
+  return {
+    edition: file.edition,
+    source: file.source,
+    units: {
+      kp: file.units.kp,
+      tauEvent: file.units.tauEvent,
+      tStar: file.units.tStar,
+      b: file.units.b,
+    },
+    chemicals,
+  };
+};
+
 /** Verifies the committed raw files against the manifest, then builds both database files. */
 export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
   const manifest = verifyManifest(rawDir);
@@ -273,30 +308,32 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
     documents,
     retrieved: manifest.retrieved,
   });
-  return {
-    chemicals: {
-      edition: manifest.edition,
-      source: source([params.semsId, tap.semsId]),
-      units: {
-        mw: 'g/mol',
-        hPrime: '1',
-        hlc: 'atm-m3/mol',
-        vp: 'mmHg',
-        mp: 'C',
-        density: 'g/cm3',
-        dia: 'cm2/s',
-        diw: 'cm2/s',
-        kd: 'L/kg',
-        koc: 'L/kg',
-        logKow: '1',
-        s: 'mg/L',
-        b: '1',
-        tauEvent: 'h',
-        tStar: 'h',
-        kp: 'cm/h',
-      },
-      chemicals: checkedChemicals(buildChemicals(paramRows, tapRows, ids)),
+  const chemicals: ChemicalsFile = {
+    edition: manifest.edition,
+    source: source([params.semsId, tap.semsId]),
+    units: {
+      mw: 'g/mol',
+      hPrime: '1',
+      hlc: 'atm-m3/mol',
+      vp: 'mmHg',
+      mp: 'C',
+      density: 'g/cm3',
+      dia: 'cm2/s',
+      diw: 'cm2/s',
+      kd: 'L/kg',
+      koc: 'L/kg',
+      logKow: '1',
+      s: 'mg/L',
+      b: '1',
+      tauEvent: 'h',
+      tStar: 'h',
+      kp: 'cm/h',
     },
+    chemicals: checkedChemicals(buildChemicals(paramRows, tapRows, ids)),
+  };
+  return {
+    chemicals,
+    risk: deriveRiskChemicals(chemicals),
     tox: {
       edition: manifest.edition,
       source: source([summary.semsId]),

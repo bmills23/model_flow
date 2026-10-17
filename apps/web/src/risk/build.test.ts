@@ -10,7 +10,8 @@ beforeAll(async () => {
   db = await loadChemicalDb();
 }, 30000);
 
-const YR = 365 * 86400;
+/** The transport time axis counts 365.25-day years. */
+const YR = 365.25 * 86400;
 
 function formWith(
   rows: { id: string; conc: Record<string, string>; fromWell?: boolean }[],
@@ -147,7 +148,7 @@ describe('buildInputs', () => {
   ])(
     'runs the default path for %s to the published dermal screening level',
     (rslName, published) => {
-      const rec = db.chemicals.find((c) => c.phys?.rslName === rslName)!;
+      const rec = db.chemicals.find((c) => c.tox.rslName === rslName)!;
       const form = formWith([{ id: rec.id, conc: { groundwater: '1' } }], {});
       form.a.pathways.waterIngestion = false;
       const out = runRisk(built(form));
@@ -242,6 +243,65 @@ describe('buildInputs', () => {
     expect(out.modern.ok && out.modern.result.startTimes[0]).toBe(5 * YR);
     const bad = buildInputs({ ...form, startYr: '-3' }, db, well);
     expect(bad.ok).toBe(false);
+  });
+
+  it('lets the user enter the blanks the warnings ask for: drinking water, skin area for water, breathing rate', () => {
+    const codes = (r: ReturnType<typeof runRisk>, m: 'legacy' | 'modern'): string[] => {
+      const x = r[m];
+      return x.ok ? x.result.warnings.map((w) => w.code) : ['failed'];
+    };
+    const risk = (r: ReturnType<typeof runRisk>, m: 'legacy' | 'modern'): number => {
+      const x = r[m];
+      return x.ok ? x.result.summary.receptors[0]!.cancerRisk : 0;
+    };
+    // legacy child: no drinking-water rate and no breathing rate in the preset
+    const drink = formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
+    drink.a = defaultReceptor('child');
+    drink.a.pathways.waterDermal = false;
+    expect(codes(runRisk(built(drink)), 'legacy')).toContain('exposure.site-specific-required');
+    drink.a.waterIngestion = '0.78';
+    const drunk = runRisk(built(drink));
+    expect(codes(drunk, 'legacy')).not.toContain('exposure.site-specific-required');
+    expect(risk(drunk, 'legacy')).toBeGreaterThan(0);
+
+    const breathe = formWith([{ id: '71-43-2', conc: { indoorAir: '0.01' } }]);
+    breathe.a = defaultReceptor('child');
+    expect(codes(runRisk(built(breathe)), 'legacy')).toContain('exposure.site-specific-required');
+    breathe.a.inhalationRate = '0.3';
+    const breathed = runRisk(built(breathe));
+    expect(codes(breathed, 'legacy')).not.toContain('exposure.site-specific-required');
+    expect(risk(breathed, 'legacy')).toBeGreaterThan(0);
+
+    // worker: no water skin area in either preset, no drinking water in the modern one
+    const bath = formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
+    bath.a = defaultReceptor('worker');
+    bath.a.pathways.waterIngestion = false;
+    bath.a.bathTime = '0.5';
+    expect(codes(runRisk(built(bath)), 'legacy')).toContain('exposure.site-specific-required');
+    expect(codes(runRisk(built(bath)), 'modern')).toContain('exposure.site-specific-required');
+    bath.a.waterSkinArea = '19400';
+    const bathed = runRisk(built(bath));
+    expect(codes(bathed, 'legacy')).not.toContain('exposure.site-specific-required');
+    expect(codes(bathed, 'modern')).not.toContain('exposure.site-specific-required');
+    expect(risk(bathed, 'modern')).toBeGreaterThan(0);
+
+    const work = formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
+    work.a = defaultReceptor('worker');
+    work.a.pathways.waterDermal = false;
+    expect(codes(runRisk(built(work)), 'modern')).toContain('exposure.site-specific-required');
+    work.a.waterIngestion = '1';
+    const worked = runRisk(built(work));
+    expect(codes(worked, 'modern')).not.toContain('exposure.site-specific-required');
+    expect(risk(worked, 'modern')).toBeGreaterThan(0);
+  });
+
+  it('allows the additive option for a child resident plus a worker under the modern method', () => {
+    const form = formWith([{ id: '71-43-2', conc: { soil: '5' } }]);
+    form.a = defaultReceptor('child');
+    form.b = defaultReceptor('worker');
+    form.additive = true;
+    const out = runRisk(built(form));
+    expect(out.modern.ok).toBe(true);
   });
 
   it('builds a child receptor for both methods', () => {
