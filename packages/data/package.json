@@ -11,7 +11,9 @@
     "build": "echo 'nothing to build'",
     "generate": "tsx scripts/generate-docs.ts",
     "build:rsl": "tsx scripts/build-rsl.ts",
-    "fetch:rsl": "tsx scripts/fetch-rsl.ts"
+    "fetch:rsl": "tsx scripts/fetch-rsl.ts",
+    "build:nrwqc": "tsx scripts/build-nrwqc.ts",
+    "fetch:nrwqc": "tsx scripts/fetch-nrwqc.ts"
   },
   "dependencies": {
     "@model-flow/engine": "workspace:*"
@@ -24,6 +26,7 @@
   },
   "exports": {
     "./rsl-types": "./src/rsl/types.ts",
+    "./nrwqc-types": "./src/nrwqc/types.ts",
     "./generated/*": "./generated/*"
   }
 }

@@ -1,0 +1,328 @@
+{
+  "edition": "2026-10-16",
+  "source": {
+    "reference": "epanrwqc",
+    "url": "https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table",
+    "pageDate": "2026-06-09",
+    "retrieved": "2026-10-17",
+    "licence": "U.S. government work, public domain in the United States; the page states no restriction."
+  },
+  "units": {
+    "criterion": "ug/L",
+    "hardness": "mg/L as CaCO3"
+  },
+  "metals": [
+    {
+      "id": "7440-43-9",
+      "name": "Cadmium",
+      "freshwater": {
+        "acute": {
+          "slope": 0.9789,
+          "intercept": -3.866,
+          "conversionFactor": {
+            "intercept": 1.136672,
+            "slope": -0.041838
+          }
+        }
+      }
+    },
+    {
+      "id": "16065-83-1",
+      "name": "Chromium III",
+      "freshwater": {
+        "acute": {
+          "slope": 0.819,
+          "intercept": 3.7256,
+          "conversionFactor": {
+            "constant": 0.316
+          }
+        },
+        "chronic": {
+          "slope": 0.819,
+          "intercept": 0.6848,
+          "conversionFactor": {
+            "constant": 0.86
+          }
+        }
+      }
+    },
+    {
+      "id": "7439-92-1",
+      "name": "Lead",
+      "freshwater": {
+        "acute": {
+          "slope": 1.273,
+          "intercept": -1.46,
+          "conversionFactor": {
+            "intercept": 1.46203,
+            "slope": -0.145712
+          }
+        },
+        "chronic": {
+          "slope": 1.273,
+          "intercept": -4.705,
+          "conversionFactor": {
+            "intercept": 1.46203,
+            "slope": -0.145712
+          }
+        }
+      }
+    },
+    {
+      "id": "7440-02-0",
+      "name": "Nickel",
+      "freshwater": {
+        "acute": {
+          "slope": 0.846,
+          "intercept": 2.255,
+          "conversionFactor": {
+            "constant": 0.998
+          }
+        },
+        "chronic": {
+          "slope": 0.846,
+          "intercept": 0.0584,
+          "conversionFactor": {
+            "constant": 0.997
+          }
+        }
+      }
+    },
+    {
+      "id": "7440-22-4",
+      "name": "Silver",
+      "freshwater": {
+        "acute": {
+          "slope": 1.72,
+          "intercept": -6.59,
+          "conversionFactor": {
+            "constant": 0.85
+          }
+        }
+      }
+    },
+    {
+      "id": "7440-66-6",
+      "name": "Zinc",
+      "freshwater": {
+        "acute": {
+          "slope": 0.8473,
+          "intercept": 0.884,
+          "conversionFactor": {
+            "constant": 0.978
+          }
+        },
+        "chronic": {
+          "slope": 0.8473,
+          "intercept": 0.884,
+          "conversionFactor": {
+            "constant": 0.986
+          }
+        }
+      }
+    }
+  ],
+  "conversionFactors": [
+    {
+      "name": "Arsenic",
+      "freshwater": {
+        "cmc": {
+          "constant": 1
+        },
+        "ccc": {
+          "constant": 1
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 1
+        },
+        "ccc": {
+          "constant": 1
+        }
+      }
+    },
+    {
+      "name": "Cadmium",
+      "freshwater": {
+        "cmc": {
+          "intercept": 1.136672,
+          "slope": -0.041838
+        },
+        "ccc": {
+          "intercept": 1.101672,
+          "slope": -0.041838
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.994
+        },
+        "ccc": {
+          "constant": 0.994
+        }
+      }
+    },
+    {
+      "name": "Chromium III",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.316
+        },
+        "ccc": {
+          "constant": 0.86
+        }
+      },
+      "saltwater": {
+        "cmc": null,
+        "ccc": null
+      }
+    },
+    {
+      "name": "Chromium VI",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.982
+        },
+        "ccc": {
+          "constant": 0.962
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.993
+        },
+        "ccc": {
+          "constant": 0.993
+        }
+      }
+    },
+    {
+      "name": "Copper",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.96
+        },
+        "ccc": {
+          "constant": 0.96
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.83
+        },
+        "ccc": {
+          "constant": 0.83
+        }
+      }
+    },
+    {
+      "name": "Lead",
+      "freshwater": {
+        "cmc": {
+          "intercept": 1.46203,
+          "slope": -0.145712
+        },
+        "ccc": {
+          "intercept": 1.46203,
+          "slope": -0.145712
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.951
+        },
+        "ccc": {
+          "constant": 0.951
+        }
+      }
+    },
+    {
+      "name": "Mercury",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.85
+        },
+        "ccc": {
+          "constant": 0.85
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.85
+        },
+        "ccc": {
+          "constant": 0.85
+        }
+      }
+    },
+    {
+      "name": "Nickel",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.998
+        },
+        "ccc": {
+          "constant": 0.997
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.99
+        },
+        "ccc": {
+          "constant": 0.99
+        }
+      }
+    },
+    {
+      "name": "Selenium",
+      "freshwater": {
+        "cmc": null,
+        "ccc": null
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.998
+        },
+        "ccc": {
+          "constant": 0.998
+        }
+      }
+    },
+    {
+      "name": "Silver",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.85
+        },
+        "ccc": null
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.85
+        },
+        "ccc": null
+      }
+    },
+    {
+      "name": "Zinc",
+      "freshwater": {
+        "cmc": {
+          "constant": 0.978
+        },
+        "ccc": {
+          "constant": 0.986
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "constant": 0.946
+        },
+        "ccc": {
+          "constant": 0.946
+        }
+      }
+    }
+  ]
+}

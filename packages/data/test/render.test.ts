@@ -110,6 +110,31 @@ describe('renderAttributions', () => {
     );
   });
 
+  it('records the edition, retrieval date and public domain status of committed criteria pages', () => {
+    const withEditions = renderAttributions({
+      methods,
+      references: refs,
+      generatedOn: '2026-10-15',
+      dataEditions: [
+        {
+          label: 'Water quality criteria table',
+          pageDate: '2026-06-09',
+          retrieved: '2026-10-17',
+          licence: 'U.S. government work, public domain in the United States.',
+        },
+      ],
+    });
+    const data = withEditions.slice(
+      withEditions.indexOf('## Data sources'),
+      withEditions.indexOf('## Validation sources'),
+    );
+    expect(data).toContain('Water quality criteria table');
+    expect(data).toContain('page dated 2026-06-09');
+    expect(data).toContain('retrieved 2026-10-17');
+    expect(data).toContain('public domain in the United States');
+    expect(md).not.toContain('retrieved 2026');
+  });
+
   it('separates software licences: they are not part of this document', () => {
     expect(md).not.toMatch(/MIT License|Apache-2\.0/);
     expect(md).toContain('THIRD_PARTY_LICENSES.md');

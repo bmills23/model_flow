@@ -14,7 +14,7 @@ fixtures 1, 2, H3 and H4) and slice E2 (modern kernels: `bankPlaneDischarge`, th
 downstream, the selectable-pore-water sediment; fixtures 3 H1 and H2, 4a to 4d, 5a to 5d) are implemented,
 and so is slice E3 (coupling to M1 and M4, criteria comparison, registration of `surfaceWater.well-mixed`
 and `surfaceWater.mass-discharge`; fixtures 5e, 6b and 6c; the two runs live in `surfaceWater/scenario.ts`).
-The criteria data builds (D1, D2) and the web code (W1, W2) do not exist yet, and fixture 6a waits on D1. The scope calls below are the rulings recorded in
+Slice D1 (the NRWQC criteria build: raw pages with a checksum manifest, reader, generated JSON, `data:check`) is implemented, so fixture 6a no longer waits on it; the sediment benchmark build (D2) and the web code (W1, W2) do not exist yet. The scope calls below are the rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M8 stage 1 block); those marked DEFAULT are open to Bryan's overturn.
 
 ## What the process is
@@ -271,8 +271,8 @@ to the criterion and flags ratios above 1. Ratios are never summed across chemic
   the published form, exp(m ln(hardness) + b) times the conversion factor of Appendix A (some conversion
   factors depend on hardness themselves, as the appendix states), at a user hardness, default 100 mg/L as
   CaCO3, the hardness at which the table prints its values. A hardness outside 25 to 400 mg/L is warned
-  (`criteria.hardness-range`, a screening choice; slice D1 replaces the bounds if the appendix states
-  others).
+  (`criteria.hardness-range`, a screening choice; slice D1 read the page and its appendices and found no
+  stated range, so the bounds stay).
 - **Dissolved metals**: the criteria are for the dissolved metal; the model's concentration is taken as all
   dissolved (`criteria.dissolved-assumed`, conservative).
 - **Site-chemistry criteria** (copper, aluminum, ammonia, selenium and any row whose table note says the
@@ -305,8 +305,9 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
 
 - **Raw files committed with a checksummed manifest** (DEFAULT ruling 14): `packages/data/raw/nrwqc/2026-10-16/`
   holds the two HTML pages as served, with `manifest.json` recording each URL, the retrieval date, the
-  page's "last updated" date, size and SHA-256. The directory is named by retrieval date because the pages
-  are not numbered editions; each page's last-updated date is its edition (DEFAULT ruling 15).
+  page's "last updated" date, size and SHA-256. The directory is named by the date of the first check (2026-10-16) because the pages
+  are not numbered editions, and the manifest records the actual fetch date of the committed bytes
+  (2026-10-17, same sizes as the first check); each page's last-updated date is its edition (DEFAULT ruling 15).
   `packages/data/raw/sediment/epa-r4-2018/` holds the Region 4 PDF and the transcribed CSVs of Tables 2a,
   2b and 2c; `packages/data/raw/sediment/macdonald2000/` holds a hand-transcribed CSV of the TEC and PEC
   with the page of each value. The build never touches the network and fails on a checksum mismatch.
@@ -327,7 +328,7 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
 - **Attribution wording**: `docs/ATTRIBUTIONS.md` lists the sources under data provenance with edition
   dates; the screen and exports carry, for the criteria, "Water quality criteria are from the U.S. EPA
   National Recommended Water Quality Criteria (aquatic life table, page dated June 9, 2026; human health
-  table, page dated December 18, 2025; retrieved 2026-10-16), a work of the U.S. federal government in the
+  table, page dated December 18, 2025; retrieved 2026-10-17), a work of the U.S. federal government in the
   public domain in the United States. Their use does not imply endorsement by EPA." and the equivalent for
   the Region 4 values; the MacDonald values carry their citation.
 
@@ -466,7 +467,7 @@ implementation. Method ids to register: `surfaceWater.well-mixed` (legacy, citat
 `domenico1987`, `ditoro1991`) and `surfaceWater.mass-discharge` (modern, citations `chapra1997`,
 `ditoro1991`). The registering slice marks those references `used` (they are `planned` now; titles are
 already verified, a test enforces both). The data references (`epanrwqc`, `epanrwqchh`, `epa2018r4era`,
-`macdonald2000`) move to status `data` when their build lands; `stephan1985` is cited by this note only and
+`macdonald2000`) move to status `data` when their build lands (`epanrwqc` and `epanrwqchh` have, with D1); `stephan1985` is cited by this note only and
 stays `planned`.
 
 | Slice | Stage | Files to create or touch | Failing tests first | Depends on |

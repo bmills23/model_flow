@@ -863,25 +863,25 @@
   {
     "key": "epanrwqc",
     "type": "data",
-    "status": "planned",
+    "status": "data",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2026,
     "title": "National Recommended Water Quality Criteria - Aquatic Life Criteria Table",
     "venue": "U.S. Environmental Protection Agency",
     "url": "https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table",
-    "notes": "Web page, last updated June 9, 2026 (checked 2026-10-16); the year is that page date. HTML table only (freshwater and saltwater CMC and CCC in ug/L, publication year, notes), with Appendix A (conversion factors for dissolved metals) and Appendix B (parameters for hardness-dependent metals criteria) on the same page. U.S. government work, public domain in the United States.",
+    "notes": "Web page, last updated June 9, 2026 (checked 2026-10-16); the year is that page date. HTML table only (freshwater and saltwater CMC and CCC in ug/L, publication year, notes), with Appendix A (conversion factors for dissolved metals) and Appendix B (parameters for hardness-dependent metals criteria) on the same page. U.S. government work, public domain in the United States. Committed raw copy under packages/data/raw/nrwqc/2026-10-16, retrieved 2026-10-17.",
     "tags": ["surfaceWater"]
   },
   {
     "key": "epanrwqchh",
     "type": "data",
-    "status": "planned",
+    "status": "data",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2025,
     "title": "National Recommended Water Quality Criteria - Human Health Criteria Table",
     "venue": "U.S. Environmental Protection Agency",
     "url": "https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table",
-    "notes": "Web page, last updated December 18, 2025 (checked 2026-10-16); the year is that page date. HTML table only (water plus organism and organism only, ug/L except where a row states another unit). U.S. government work, public domain in the United States.",
+    "notes": "Web page, last updated December 18, 2025 (checked 2026-10-16); the year is that page date. HTML table only (water plus organism and organism only, ug/L except where a row states another unit). U.S. government work, public domain in the United States. Committed raw copy under packages/data/raw/nrwqc/2026-10-16, retrieved 2026-10-17.",
     "tags": ["surfaceWater"]
   },
   {

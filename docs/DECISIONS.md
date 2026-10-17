@@ -518,8 +518,10 @@ Bryan to overturn) unless marked forced by a source:
     entered twice and compared. HTML is read without a new dependency if the markup allows, otherwise with
     an exact-pinned build-time devDependency recorded here.
 15. **Edition naming (DEFAULT).** The NRWQC pages are not numbered editions, so the raw and generated
-    directories are named by retrieval date (2026-10-16) and each page's last-updated date (aquatic life
-    June 9, 2026; human health December 18, 2025) is recorded as its edition. Rows are keyed by hyphenated
+    directories are named by the date of the first check (2026-10-16), the manifest records the date the
+    committed bytes were fetched (2026-10-17, same sizes as the first check), and each page's last-updated
+    date (aquatic life June 9, 2026; human health December 18, 2025) is recorded as its edition. The raw HTML
+    keeps the pages' own em dash glyphs for empty cells; the generated JSON stores no em dash. Rows are keyed by hyphenated
     CAS number (the NRWQC prints them without hyphens) so they join the RSL database.
 16. **Tolerances (DEFAULT).** Table R-8 and the manual's two Appendix L examples: half a unit in the last
     printed digit, stricter than the 2 to 3 percent of ROADMAP section 6 because no approximate erf is

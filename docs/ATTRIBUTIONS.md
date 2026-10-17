@@ -331,8 +331,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites].
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air.
-- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
-- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table>
 - U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
@@ -345,8 +343,15 @@ Public datasets that the chemical and toxicity database is built from.
 
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
+- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS).
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table>
+
+Editions of committed web pages (the pages are not numbered editions, so each is identified by its own last-updated date):
+
+- EPA National Recommended Water Quality Criteria, Aquatic Life Criteria Table (page dated 2026-06-09; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
+- EPA National Recommended Water Quality Criteria, Human Health Criteria Table (page dated 2025-12-18; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
 
 ## Validation sources
 
@@ -435,10 +440,10 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. [planned]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
-- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table> [planned]
+- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table> [data]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
-- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table> [planned]
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table> [data]
 - U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf> [planned]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
