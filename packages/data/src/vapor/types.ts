@@ -51,6 +51,8 @@ export interface VaporChemicalsFile {
     massRatio: string;
   };
   chemicals: VaporChemicalEntry[];
+  /** Published lookup values left out because they fail the physical plausibility screen. */
+  screenedEpa2004je: { id: string; field: 'dhvb' | 'tc'; reason: string }[];
   /** CAS numbers of lookup-table chemicals that the RSL table does not carry (not merged). */
   unmatchedEpa2004je: string[];
 }

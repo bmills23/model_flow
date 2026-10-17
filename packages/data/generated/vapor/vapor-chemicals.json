@@ -898,8 +898,7 @@
       "epa2004je": {
         "tbK": 446.5,
         "tcK": 679,
-        "ref": "epa2004je",
-        "dhvbCalPerMol": 88730
+        "ref": "epa2004je"
       },
       "biodegradation": {
         "class": "alkylbenzene",
@@ -952,12 +951,6 @@
           "value": 29.5,
           "ref": "PHYSPROP"
         }
-      },
-      "epa2004je": {
-        "tbK": 442.1,
-        "tcK": 1220,
-        "ref": "epa2004je",
-        "dhvbCalPerMol": 8980
       },
       "biodegradation": {
         "class": "alkylbenzene",
@@ -5225,6 +5218,18 @@
         "molO2PerMol": 10.5,
         "massRatio": 3.164597618868209
       }
+    }
+  ],
+  "screenedEpa2004je": [
+    {
+      "id": "135-98-8",
+      "field": "dhvb",
+      "reason": "Trouton ratio 198.7 cal/(mol K) outside 10 to 40"
+    },
+    {
+      "id": "98-06-6",
+      "field": "tc",
+      "reason": "T_C/T_B 2.76 outside 1.2 to 2.2"
     }
   ],
   "unmatchedEpa2004je": [

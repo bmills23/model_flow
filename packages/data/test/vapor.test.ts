@@ -6,7 +6,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import type { ChemicalsFile } from '../src/rsl/types.js';
 import type { VaporRslKey } from '../src/vapor/types.js';
 import { serialize } from '../src/rsl/build.js';
-import { buildVapor, readLookupTable, verifyVaporManifest } from '../src/vapor/build.js';
+import { buildVapor, readLookupTable, screenLookupRow, verifyVaporManifest } from '../src/vapor/build.js';
 import { biodegradationClasses, petroleumChemicals } from '../src/vapor/classes.js';
 import { oxygenDemand } from '../src/vapor/formulas.js';
 
@@ -112,7 +112,9 @@ describe('merged vapor chemicals', () => {
 
   it('reports lookup chemicals the RSL does not carry rather than dropping them silently', () => {
     expect(built.unmatchedEpa2004je.length).toBe(
-      108 - built.chemicals.filter((c) => c.epa2004je).length,
+      108 -
+        built.chemicals.filter((c) => c.epa2004je).length -
+        built.screenedEpa2004je.filter((x) => x.field === 'tc').length,
     );
     for (const cas of built.unmatchedEpa2004je) {
       expect(rsl.chemicals.some((r) => r.id === cas)).toBe(false);
@@ -206,5 +208,41 @@ describe('oxygen demand from the molecular formula', () => {
 
   it('rejects a formula that is not a positive carbon count', () => {
     expect(() => oxygenDemand({ c: 0, h: 4 })).toThrow(RangeError);
+  });
+});
+
+describe('plausibility screen on the lookup table', () => {
+  const rows = readLookupTable(rawDir);
+  const row = (cas: string) => rows.find((r) => r.cas === cas)!;
+
+  it('rejects the sec-butylbenzene enthalpy (Trouton ratio near 199 cal/(mol K))', () => {
+    expect(screenLookupRow(row('135-98-8'))).toMatchObject({ dhvb: expect.any(String) });
+    const e = entry('135-98-8');
+    expect(e?.epa2004je?.dhvbCalPerMol).toBeUndefined();
+  });
+  it('rejects the tert-butylbenzene critical temperature (T_C/T_B 2.76)', () => {
+    expect(screenLookupRow(row('98-06-6'))).toMatchObject({ tc: expect.any(String) });
+    expect(entry('98-06-6')?.epa2004je).toBeUndefined();
+  });
+  it('lists every screened value in the generated file', () => {
+    const ids = built.screenedEpa2004je.map((s) => s.id);
+    expect(ids).toEqual(expect.arrayContaining(['135-98-8', '98-06-6']));
+  });
+  it('passes benzene, trichloroethylene, tetrachloroethylene and elemental mercury', () => {
+    for (const cas of ['71-43-2', '79-01-6', '127-18-4', '7439-97-6']) {
+      expect(screenLookupRow(row(cas)), cas).toEqual({});
+    }
+  });
+  it('keeps every merged enthalpy inside the Trouton band and every T_C inside the ratio band', () => {
+    for (const c of built.chemicals) {
+      const e = c.epa2004je;
+      if (!e) continue;
+      if (e.dhvbCalPerMol !== undefined) {
+        const t = e.dhvbCalPerMol / e.tbK;
+        expect(t, c.id).toBeGreaterThan(10);
+        expect(t, c.id).toBeLessThan(40);
+      }
+      if (c.id !== '7439-97-6') expect(e.tcK / e.tbK, c.id).toBeLessThan(2.2);
+    }
   });
 });

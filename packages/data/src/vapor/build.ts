@@ -108,6 +108,39 @@ export const readLookupTable = (dir: string): LookupRow[] => {
 };
 
 /**
+ * Physical plausibility bands for a published lookup row. A published value outside them is a misprint
+ * or a unit slip (sec-butylbenzene's enthalpy, tert-butylbenzene's critical temperature) and must not
+ * reach the engine, where the Watson correction would amplify it. No replacement value is substituted.
+ */
+export const TROUTON_BAND_CAL_PER_MOL_K = { min: 10, max: 40 } as const;
+export const TC_OVER_TB_BAND = { min: 1.2, max: 2.2 } as const;
+/** Elemental mercury is a liquid metal whose T_C/T_B (about 2.8) is genuine, so the ratio band skips it. */
+const TC_RATIO_EXEMPT = new Set(['7439-97-6']);
+
+export interface LookupScreen {
+  /** Reason the enthalpy is implausible, when it is. */
+  dhvb?: string;
+  /** Reason the critical temperature is implausible, when it is. */
+  tc?: string;
+}
+
+export const screenLookupRow = (r: LookupRow): LookupScreen => {
+  const out: LookupScreen = {};
+  if (!(r.tbK < r.tcK)) out.tc = `T_B ${r.tbK} K is not below T_C ${r.tcK} K`;
+  else if (!TC_RATIO_EXEMPT.has(r.cas)) {
+    const ratio = r.tcK / r.tbK;
+    if (ratio < TC_OVER_TB_BAND.min || ratio > TC_OVER_TB_BAND.max)
+      out.tc = `T_C/T_B ${ratio.toFixed(2)} outside ${TC_OVER_TB_BAND.min} to ${TC_OVER_TB_BAND.max}`;
+  }
+  if (r.dhvbAtNormalBoilingPoint) {
+    const trouton = r.dhvbCalPerMol / r.tbK;
+    if (trouton < TROUTON_BAND_CAL_PER_MOL_K.min || trouton > TROUTON_BAND_CAL_PER_MOL_K.max)
+      out.dhvb = `Trouton ratio ${trouton.toFixed(1)} cal/(mol K) outside ${TROUTON_BAND_CAL_PER_MOL_K.min} to ${TROUTON_BAND_CAL_PER_MOL_K.max}`;
+  }
+  return out;
+};
+
+/**
  * Builds the vapor screen's chemical subset: RSL rows that have EPA 2004 temperature-correction data,
  * a published biodegradation class, or both. RSL values are copied unchanged; new data never overrides one.
  */
@@ -121,6 +154,7 @@ export const buildVapor = (rawDir: string, rsl: ChemicalsFile): VaporChemicalsFi
   }
 
   const chemicals: VaporChemicalEntry[] = [];
+  const screenedEpa2004je: { id: string; field: 'dhvb' | 'tc'; reason: string }[] = [];
   for (const c of rsl.chemicals) {
     const row = lookup.get(c.id);
     const petro = petroleumChemicals[c.id];
@@ -131,8 +165,16 @@ export const buildVapor = (rawDir: string, rsl: ChemicalsFile): VaporChemicalsFi
       if (v) entry.rsl[k] = v;
     }
     if (row) {
-      entry.epa2004je = { tbK: row.tbK, tcK: row.tcK, ref: 'epa2004je' };
-      if (row.dhvbAtNormalBoilingPoint) entry.epa2004je.dhvbCalPerMol = row.dhvbCalPerMol;
+      const screen = screenLookupRow(row);
+      if (screen.tc) {
+        // A bad T_C poisons the Watson exponent and the correction itself: drop the whole block.
+        screenedEpa2004je.push({ id: c.id, field: 'tc', reason: screen.tc });
+        if (screen.dhvb) screenedEpa2004je.push({ id: c.id, field: 'dhvb', reason: screen.dhvb });
+      } else {
+        entry.epa2004je = { tbK: row.tbK, tcK: row.tcK, ref: 'epa2004je' };
+        if (screen.dhvb) screenedEpa2004je.push({ id: c.id, field: 'dhvb', reason: screen.dhvb });
+        else if (row.dhvbAtNormalBoilingPoint) entry.epa2004je.dhvbCalPerMol = row.dhvbCalPerMol;
+      }
     }
     if (petro) {
       entry.biodegradation = {
@@ -171,6 +213,7 @@ export const buildVapor = (rawDir: string, rsl: ChemicalsFile): VaporChemicalsFi
       massRatio: 'g/g',
     },
     chemicals,
+    screenedEpa2004je,
     unmatchedEpa2004je: [...lookup.keys()].filter((cas) => !byId.has(cas)),
   };
 };
