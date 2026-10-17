@@ -445,3 +445,91 @@ finding changed them (E2 dermal form, 5, 11 and 14). Judgment calls, open to ove
   2026-10-16 (the content change day). The date still moves only when the content changes.
 - **`epa2003toxhier` is a `data` reference.** The RSL tables apply its tiers; the memorandum is not a
   method citation, so it is not `planned` (a planned status reads as an unverified citation).
+
+## 2026-10-16: M8 surface water and sediment scope (stage 1)
+
+M8 started with a methods note first, on the parallel track Bryan approved ("M8" as its own track). The
+note is `docs/methods/surface-water.md` (scope, equations, validity checks, coupling, criteria data plan,
+fixture plan and the slice plan for stages 2 and 3). No engine, data or web code is written in this stage.
+Current criteria sources were checked on the official sites on 2026-10-16. Rulings, each DEFAULT (open for
+Bryan to overturn) unless marked forced by a source:
+
+1. **Scope (DEFAULT).** In M8: the legacy well-mixed box for a river reach or a lake
+   (`surfaceWater.well-mixed`) with Darcy discharge across the bed, the 5 percent Domenico reach width and
+   equilibrium-partitioning sediment; the modern method (`surfaceWater.mass-discharge`) with the M1
+   bank-plane mass discharge, the transient well-mixed box, plug flow with first-order decay to a
+   downstream river receptor, and equilibrium-partitioning sediment with a selectable pore water and an
+   organic-carbon-normalized output; comparison with the EPA national recommended water quality criteria
+   (aquatic life and human health) and with sediment benchmarks. Deferred: incomplete lateral mixing,
+   estuaries and stratified lakes, site-chemistry criteria (biotic ligand copper, aluminum, ammonia,
+   selenium; shown as site-specific), international criteria, EPA equilibrium partitioning sediment
+   benchmarks and the `long1995` marine ERL and ERM, sediment processes beyond partitioning, runoff and
+   point discharges, and cleanup back-calculation (M5).
+2. **Mixing fraction on flow and volume (forced by Table R-8).** C_sw = W / (f Q_u + Q_gw + k f V_b). The
+   review's lake value (3.93 mg/L) is reproduced only with f on both the upstream flow and the volume; f on
+   the volume alone gives 2.60 and on neither 1.34. The manual's own adjusted-volume lake example is not
+   reproduced by its stated form and is not used.
+3. **Centreline concentration at the bank (DEFAULT).** The legacy C_gw is the M1 centreline profile at the
+   bank averaged over the discharge thickness (water table to depth d) with the M1 well-screen trapezoid
+   rule, not a single depth.
+4. **Reach width (DEFAULT, RISC5 choice kept).** Linked runs use the full width between the points where the
+   steady Domenico concentration falls to 5 percent of the centreline, with RISC5's alpha_x = 0.1 x_s and
+   alpha_y = alpha_x / 3 (the groundwater run's alpha_T is an option), x_s measured from the downgradient
+   source face; the user may enter the reach length instead.
+5. **Storage (DEFAULT).** The legacy box is quasi-steady at each sample time (RISC5 choice); the modern box
+   is the exact transient solution for a piecewise-linear loading, starting from the steady state of the
+   first sample unless an initial concentration is given.
+6. **Modern loading (DEFAULT).** The advective mass flux q C integrated over the reach and the discharge
+   thickness at the bank plane; the dispersive flux across the plane is neglected and the plane passes the
+   plume through (the M1 aquifer is unbounded downstream). This conserves the mass M1 delivers (fixture 4
+   of the note).
+7. **Modern groundwater flow (DEFAULT).** Q_gw = q d L_r with the M1 Darcy flux; the legacy method keeps
+   K_b d L_r i_b (RISC5 choice) and warns when K_b i_b differs from q by more than a factor of 2.
+8. **Sediment (DEFAULT).** Kd = f_oc Koc when the database has a Koc, otherwise the database Kd; neither
+   means not quantified. Pore water: legacy the centreline groundwater (RISC5 choice); modern the
+   flux-averaged discharging groundwater by default, with the centreline or the mixed surface water as
+   options.
+9. **No fish ingestion pathway (DEFAULT).** RISC5 has none and M4 has none; it needs a bioaccumulation
+   factor source. The human health "organism only" criterion is offered as the fish consumption screen.
+10. **No human sediment pathways in M8 (DEFAULT).** RISC5 routes sediment through its soil equations;
+    adding pathways to M4's pathway list now would collide with the parallel M5 track. They follow once
+    M8 and M5 merge; meanwhile a sediment value can be typed into the M4 soil pathways as a constant. The
+    surface water series feeds the existing M4 swimming pathways unchanged (`seriesEpc` with origin
+    `surfaceWater.<method>`).
+11. **Criteria comparison on the peak (DEFAULT).** The peak of the surface water series is compared with
+    every criterion (acute, chronic and human health), because the model's steps cannot resolve one-hour or
+    four-day averages and the peak is never below them; ratios are reported per chemical and criterion and
+    never summed across chemicals.
+12. **Hardness-dependent metals (DEFAULT).** Computed from the aquatic life table's Appendix A and B
+    parameters at a user hardness, default 100 mg/L as CaCO3 (the table's basis); outside 25 to 400 mg/L is
+    warned (a screening choice to be replaced if the appendix states other bounds). Metals criteria are
+    dissolved and the model concentration is taken as dissolved (warned).
+13. **Sediment benchmark sources (DEFAULT).** EPA Region 4 Ecological Risk Assessment Supplemental Guidance,
+    March 2018 update (Tables 2a, 2b, 2c; public domain) and the MacDonald et al. 2000 consensus TEC and
+    PEC (numeric values with the citation, as facts; the article is copyrighted, so no layout or prose).
+    NOAA SQuiRTs are not a data source: NOAA's Office of Response and Restoration removed them on April 4,
+    2024 as out of date, and they may be redistributed only whole and unmodified. This departs from the
+    ROADMAP rows M, N, which name SQuiRTs; their TEC and PEC columns may serve as a transcription
+    cross-check only.
+14. **Raw criteria files committed (DEFAULT).** As for the RSL (M4 ruling 9): the two NRWQC HTML pages as
+    served, the Region 4 PDF (about 1.3 MB) and transcribed CSVs, and a hand-entered MacDonald CSV, each
+    under a SHA-256 manifest; the build reads only committed files and fails on a mismatch. The PDF is
+    never parsed in the build or CI: a hand-run extraction script writes the CSVs; the MacDonald values are
+    entered twice and compared. HTML is read without a new dependency if the markup allows, otherwise with
+    an exact-pinned build-time devDependency recorded here.
+15. **Edition naming (DEFAULT).** The NRWQC pages are not numbered editions, so the raw and generated
+    directories are named by retrieval date (2026-10-16) and each page's last-updated date (aquatic life
+    June 9, 2026; human health December 18, 2025) is recorded as its edition. Rows are keyed by hyphenated
+    CAS number (the NRWQC prints them without hyphens) so they join the RSL database.
+16. **Tolerances (DEFAULT).** Table R-8 and the manual's two Appendix L examples: half a unit in the last
+    printed digit, stricter than the 2 to 3 percent of ROADMAP section 6 because no approximate erf is
+    involved and the review reports exact agreement; hand cases 1e-9 relative; mass balance with M1 1e-6
+    relative (the M2 and M3 aquifer-mass tolerance); box identities 1e-9; hardness equations reproduce the
+    printed table values to the table's two significant figures. The Table R-8 Koc (59 mL/g, benzene) comes
+    from the RISC4 database for this case only, following the Table R-7 convention.
+17. **Background (DEFAULT).** The upstream background enters as f Q_u C_u, consistent with the share of the
+    flow it rides in; Table R-8 has zero background and cannot decide it.
+
+Screening thresholds in the note's warning table (99 percent reach capture, 95 percent depth capture, a
+30-day residence time, groundwater above the mixing upstream flow, a factor of 2 on the Darcy flux) are
+screening choices, not rulings, as in M2 and M3.
