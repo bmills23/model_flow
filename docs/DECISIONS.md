@@ -306,3 +306,15 @@ DEFAULT rulings (applied in the notes, Bryan's to overturn):
     time have no default in either method and are required; soil EPCs are constants (RISC5 choice, no
     depleting-soil coupling in M4); the arsenic relative bioavailability of 0.6 is a modern default
     only.
+
+## 2026-10-16: M4 slice D1, xlsx reader for the RSL build
+
+The RSL build needs to read three .xlsx files. `read-excel-file` 9.3.12 (MIT, maintained, last release
+2026-10-07, eight small packages in total, no native code) is a devDependency of `@model-flow/data`,
+pinned exactly. It is build-time only, so it does not enter `docs/THIRD_PARTY_LICENSES.md` (the shipped
+production set) and nothing ships in the web bundle. Rejected: SheetJS `xlsx` (the npm registry copy is
+stale and has known advisories; current releases are distributed outside npm) and `exceljs` (much larger
+tree for a read-only job). Raw files are committed and verified by SHA-256 against
+`packages/data/raw/rsl/2024-11/manifest.json` before every build; all three downloads matched the
+checksums in the data plan. The root gate gained `data:check` (regenerate, then `git diff --quiet` on
+`packages/data/generated`). Generated JSON and raw files are excluded from Prettier.
