@@ -276,9 +276,10 @@ DEFAULT rulings (applied in the notes, Bryan's to overturn):
    The headline HI is the larger of the life stages' HIs, both shown, never added. The additive
    two-receptor option with a modern age-segmented resident is a RangeError (it would count the child
    twice).
-6. **Dermal water event time for cancer.** For a non-mutagen the modern cancer dose uses the
-   time-weighted resident event time (0.6708 h), as the RSL tables do; mutagen segments and every HQ use
-   each stage's own event time.
+6. **Dermal water event time for cancer.** The modern cancer dose, for mutagens as well as other
+   carcinogens, uses the one time-weighted resident event time (0.6708 h), as the RSL tables do (amended
+   in slice E2: the RSL check for methylene chloride fails with per-segment mutagen times); every HQ uses
+   each life stage's own event time.
 7. **Outside the RAGS E prediction domain** a dermal-water dose is computed and warned
    (`exposure.dermal-outside-epd`), where the RSL tables omit it.
 8. **Additivity.** Within a receptor, risks and HQs each sum over pathways and chemicals; across
@@ -340,3 +341,32 @@ and `index.ts` exports wait for the modern kernels). Judgment calls, open to ove
 - **Inhalation breathing rate is entered per hour while exposed** (m^3/h, as the note's table), so the
   20 m^3 of a workday is 2.5 m^3/h over an 8 h exposure time.
 
+## 2026-10-16: M4 slice E2, modern exposure kernels and presets
+
+Implemented `exposure/{modern,dermal,lifeStages,receptorsModern}.ts` (not yet registered or exported
+from the package index). Judgment calls, open to overturn:
+
+- **Ruling 6 amended: mutagens use the 0.6708 h cancer event time too.** The independent check against
+  the RSL tap water table fails for methylene chloride (dermal cancer SL 364 against the published 350)
+  when each ADAF segment uses its own event time, and passes with the single time-weighted value; the
+  RSL default-parameter file lists the same 0.6708 h for the mutagenic case (`ETevent-res-madj`). The
+  resident preset carries it as `cancerBathingTimeHr: 0.6708` (the exact ED-weighted mean is 0.67077 h,
+  which misses the printed hand case M1 by 2e-5 relative); a receptor without one falls back to the
+  ED-weighted mean. No tolerance was widened.
+- **Surface-water ingestion rates follow the RSL file, not the methods note's two numbers.** Child
+  0.12 L/h and adult 0.11 L/h for the non-mutagen stages (as the note); the mutagen segments use the
+  file's own 0.12, 0.12, 0.124 and 0.0985 L/h. Swimming time, frequency and the outdoor air time stay
+  blank (ruling 14); swimming skin area equals the bathing area.
+- **Noncancer groups.** Each life stage carries a group (child, adult, worker). A hazard quotient is
+  computed per group with that group's own frequency (the duration cancels in the averaging time), the
+  headline HQ and HI are the largest over groups, and groups are never added. A mutagen's four cancer
+  segments therefore still give two hazard quotients.
+- **Dermal-water organic or inorganic is stated by the caller.** The database carries lag-time columns
+  for inorganic arsenic too, so presence of tau, B and t* does not identify an inorganic. The chemical
+  boundary has an `organic` flag (default: true when tau, t* and B are all present); the RSL check
+  states `organic: false` for arsenic. The database adapter slice must decide where the flag comes from.
+- **Arsenic RBA 0.6 is applied by CAS number in `modernChemical`** (id or cas equal to 7440-38-2) unless
+  the caller gives an RBA; the kernels default to 1.
+- **EPCs are constants or per-stage averages.** The kernels take a number, or one concentration per cancer
+  stage and per noncancer group, so the series windows (not in this slice) plug in without changing the
+  kernels. Linear coefficients are returned per stage and per group.

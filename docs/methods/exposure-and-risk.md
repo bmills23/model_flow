@@ -12,8 +12,11 @@ RISC5's rather than a guidance document's, it is marked "RISC5 choice" and becom
 Status: methods note, reference check, data plan and fixture plan done 2026-10-16 (stage 1). The
 legacy kernels, receptor presets and the Table R-9 and hand-case L1 tests are written (slice E1,
 `packages/engine/src/processes/exposure/{units,legacy,receptorsLegacy}.ts`); the legacy method is not
-yet registered, and the modern kernels, the series windows, the risk process and the screen are not
-started. The scope calls below are DEFAULT rulings recorded in
+yet registered, and the series windows, the risk process and the screen are not
+started. The modern kernels, life-stage receptors and presets, and the hand cases M1 and M2, the RSL
+independent check and the RSL default-parameter comparison are written (slice E2,
+`packages/engine/src/processes/exposure/{modern,dermal,lifeStages,receptorsModern}.ts`); the modern
+method is not yet registered. The scope calls below are DEFAULT rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
 
 ## What the process is
@@ -202,10 +205,12 @@ Water (eq. 3.2 to 3.4, then 3.1), per event of duration t_ev:
 
 and the dose rate is DA_ev EV EF ED SAw / (BW AT), summed over life stages with their ADAFs for cancer.
 The branch is chosen per life stage, because child and adult event times differ (0.54 and 0.71 h for
-bathing in `epa2014ef`). For the cancer dose of a non-mutagen the RSL user's guide uses one
-time-weighted event time for both stages (0.6708 h); the engine follows that convention so the
-independent check reproduces the published values, and the per-stage form is used for mutagens and for
-the HQ (DEFAULT ruling 6).
+bathing in `epa2014ef`). For the cancer dose the RSL tables use one time-weighted event time for every
+stage, 0.6708 h (the RSL default-parameter file's `ETevent-res-adj` and `ETevent-res-madj`, which holds for
+mutagens as well); the engine follows that convention so the independent check reproduces the published
+values, carrying 0.6708 h as the resident preset's `cancerBathingTimeHr` (the ED-weighted mean of the
+stages' own times, 0.67077 h, is the fallback for a receptor without one). The hazard quotient uses each
+group's own event time (DEFAULT ruling 6, amended: see `docs/DECISIONS.md`, slice E2).
 
 Dermal toxicity values (`ragse2004`, chapter 4): SF_derm = SFo / GIABS and RfD_derm = RfDo x GIABS when
 GIABS is below 0.5; otherwise the oral values are used unchanged. A chemical without ABSd has no soil
@@ -261,7 +266,7 @@ Values the engine carries as presets (the user may change any of them). Legacy p
 | Air ET (h/d) | 24 indoor | 24 indoor | 8 | 24 | 24 | 8 |
 | Soil skin area (cm^2/d), AF (mg/cm^2) | blank, entered (exhibit 6-15, see below) | idem | idem | 2373, 0.2 | 6032, 0.07 | 3527, 0.12 |
 | Bathing skin area (cm^2), time (h/d), days/yr | 19,400, blank, blank (exhibit 6-13) | 7,280, blank, blank | none | 6365, 0.54, 1 | 19652, 0.71, 1 | none |
-| Swimming: IRsw, time, EF | 50 mL/h (exhibit 6-12), time and frequency blank; skin area as bathing | idem | none | 0.12 L/h, site-specific | 0.11 L/h, site-specific | none |
+| Swimming: IRsw, time, EF | 50 mL/h (exhibit 6-12), time and frequency blank; skin area as bathing | idem | none | 0.12 L/h, site-specific | 0.11 L/h (mutagen segments 0.12, 0.12, 0.124, 0.0985 L/h, as the RSL file), site-specific | none |
 
 Sources: `epa1991sdef` for the legacy body weights, frequencies, durations, ingestion and inhalation
 rates; `epa2014ef` for the modern resident and composite worker values (the directive tabulates the

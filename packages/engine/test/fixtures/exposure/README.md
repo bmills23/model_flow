@@ -39,3 +39,25 @@ Readings (recorded in `docs/methods/exposure-and-risk.md`, fixture plan):
   cm^3) and Kp in cm/h.
 
 This reproduces the review's arithmetic and is not evidence of model accuracy.
+
+## rsl-2024-11.json: RSL independent check (`epa2024rsl`), modern method
+
+Retrieved 2026-10-16. Each case is a published two-figure screening level (target risk 1e-6, hazard
+quotient 1) read from the November 2024 RSL spreadsheet named by its SEMS document number: resident soil
+(405274), composite worker soil (405278), resident tap water (405290) and resident air (405282). The
+chemical inputs (toxicity, ABSd, GIABS, Kp, tau, B, t*, FA, EPD flag, Csat) are copied from the committed
+RSL build in `packages/data/generated/rsl-2024-11/`, plus `organic` (false for arsenic, which the RSL
+treats as inorganic for dermal water) and `rba` 0.6 for arsenic. A null cancer or noncancer value is a
+blank cell in the table, and the test asserts the engine has no coefficient for that endpoint. The test
+requires the engine's screening level to round to the published value (half a unit in its second
+significant figure). Tap-water inhalation, soil inhalation and the noncancer worker air value are not
+checked (M7 and M6). The benzo(a)pyrene tap-water dermal value is omitted by the RSL (outside the
+prediction domain), so it has no case.
+
+## rsl-2024-11-default-parameters.json: RSL default exposure parameters
+
+Values typed from the "Default Exposure Parameters and Definitions" workbook (SEMS 404323, SHA-256 in
+the file), sheets "Ingestion and Dermal Rates", "EF, ED, ET" and "Miscellaneous Variables". The presets
+test compares the modern resident and composite worker boundary presets, the ADAF age segments and the
+sheet's own age-adjusted factors (327.95, 1019.9, 36750, 166833.33, 103390, 428260, 2610650, 8191633).
+
