@@ -11,12 +11,15 @@ RISC5's rather than a guidance document's, it is marked "RISC5 choice" and becom
 
 Status: methods note, reference check, data plan and fixture plan done 2026-10-16 (stage 1). The
 legacy kernels, receptor presets and the Table R-9 and hand-case L1 tests are written (slice E1,
-`packages/engine/src/processes/exposure/{units,legacy,receptorsLegacy}.ts`); the legacy method is not
-yet registered, and the series windows, the risk process and the screen are not
-started. The modern kernels, life-stage receptors and presets, and the hand cases M1 and M2, the RSL
-independent check and the RSL default-parameter comparison are written (slice E2,
-`packages/engine/src/processes/exposure/{modern,dermal,lifeStages,receptorsModern}.ts`); the modern
-method is not yet registered. The scope calls below are DEFAULT rulings recorded in
+`packages/engine/src/processes/exposure/{units,legacy,receptorsLegacy}.ts`). The modern kernels,
+life-stage receptors and presets, and the hand cases M1 and M2, the RSL independent check and the RSL
+default-parameter comparison are written (slice E2,
+`packages/engine/src/processes/exposure/{modern,dermal,lifeStages,receptorsModern}.ts`). The scenario
+runner (series windows, the maximizing start time, the M1 breakthrough adapter, two receptors and the
+additivity rules, slice E3: `exposure/{averaging,epc,checks,scenario,index}.ts` and
+`risk/{additivity,summary}.ts`) is written, and both methods are registered
+(`exposure.rags-a-1989`, `exposure.rags-e-f-2014`) with their citations marked used. The database
+adapter and the screen are not started. The scope calls below are DEFAULT rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M4 block), open to Bryan's overturn.
 
 ## What the process is
@@ -124,8 +127,11 @@ methods reduce a series to the window averages their equations need:
 
 A series that ends before the window does is averaged over the span it covers and warned
 (`exposure.series-shorter-than-window`). Averages are exact for the piecewise-linear series
-(trapezoids), and the scan is over the sample times and the times at which a window edge meets a
-sample, which is where the maximum of a piecewise-linear window average lies.
+(trapezoids). The moving average is piecewise quadratic in the window start, so the scan visits the
+sample-aligned starts (where a window edge meets a sample) and the root of the derivative inside each
+piece, which is where the maximum lies; starts are confined to windows fully inside the series, and
+only when the series is shorter than the exposure is a covered span averaged (see `docs/DECISIONS.md`,
+slice E3).
 
 ## Legacy method: RAGS Part A doses (`exposure.rags-a-1989`)
 
@@ -438,4 +444,6 @@ every reading below.
 | `epa2024rsl`, `epa2024rslug`, `epa2003toxhier` | See `docs/methods/chemical-database.md` | |
 | `arcadis2001`, `spence2001` | As in the vadose note; Table R-9 page 1 read in the RISC5 guide, RISC4 Tables 6-2 and 11-1 read | Fixture use only |
 
-All stay `planned` (or `data` / `fixture`) until the engine slice registers the two methods.
+The ten keys cited by the two registered methods (`rags1989`, `epa1991sdef`, `epa1992dea`, `ragse2004`,
+`ragsf2009`, `epa2014ef`, `epa2005adaf`, `epa2005cancer`, `epa2012asrba`, `epa2011efh`) were marked `used`
+when slice E3 registered the methods (2026-10-16); the others stay `data` or `fixture`.

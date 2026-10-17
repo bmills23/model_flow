@@ -547,7 +547,7 @@
   {
     "key": "epa2011efh",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2011,
     "title": "Exposure Factors Handbook: 2011 Edition (Final)",
@@ -650,7 +650,7 @@
   {
     "key": "rags1989",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1989,
     "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final",
@@ -663,7 +663,7 @@
   {
     "key": "ragsf2009",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2009,
     "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final",
@@ -676,7 +676,7 @@
   {
     "key": "ragse2004",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2004,
     "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final",
@@ -689,7 +689,7 @@
   {
     "key": "epa2014ef",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2014,
     "title": "Human Health Evaluation Manual, Supplemental Guidance: Update of Standard Default Exposure Factors",
@@ -702,7 +702,7 @@
   {
     "key": "epa2005adaf",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2005,
     "title": "Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens",
@@ -715,7 +715,7 @@
   {
     "key": "epa1991sdef",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1991,
     "title": "Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: \"Standard Default Exposure Factors\", Interim Final",
@@ -728,7 +728,7 @@
   {
     "key": "epa1992dea",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1992,
     "title": "Dermal Exposure Assessment: Principles and Applications, Interim Report",
@@ -741,7 +741,7 @@
   {
     "key": "epa2005cancer",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2005,
     "title": "Guidelines for Carcinogen Risk Assessment",
@@ -754,7 +754,7 @@
   {
     "key": "epa2012asrba",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2012,
     "title": "Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil",

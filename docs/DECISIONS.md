@@ -370,3 +370,37 @@ from the package index). Judgment calls, open to overturn:
 - **EPCs are constants or per-stage averages.** The kernels take a number, or one concentration per cancer
   stage and per noncancer group, so the series windows (not in this slice) plug in without changing the
   kernels. Linear coefficients are returned per stage and per group.
+
+## 2026-10-16: M4 slice E3, scenario runner, series windows and registration
+
+Implemented `exposure/{averaging,epc,checks,scenario,index}.ts` and `risk/{additivity,summary}.ts`, and
+registered `exposure.rags-a-1989` (legacy) and `exposure.rags-e-f-2014` (modern) in the engine registry
+(there is no separate `risk` method: risk characterization is part of each exposure method's run). The
+ten references the two methods cite were marked `used`. Judgment calls, open to overturn:
+
+- **The maximizing start is exact, not sampled.** The moving average of a piecewise-linear series is
+  piecewise quadratic in the window start, so its maximum can sit strictly between sample-aligned starts
+  (the methods note said "the sample times and the times at which a window edge meets a sample", which
+  misses it for a hump-shaped plume). The scan also visits the root of the derivative inside each piece.
+  The note's sentence is corrected in place.
+- **Starts are confined to fully covered windows.** The start scans from the latest first sample to the
+  earliest last sample minus the longest reach, so no window is partly outside a series (a partly
+  covered window would let a tiny end span dominate a rising plume). When no such start exists the start
+  is the latest first sample, the covered span is averaged, a stage the series does not reach at all
+  gets a concentration of zero, and `exposure.series-shorter-than-window` is warned. A pinned
+  `exposureStart` (modern only) skips the scan and warns the same way.
+- **One start per receptor.** The start maximizes the receptor's total cancer risk over every series
+  EPC (each chemical and pathway weighted by its per-stage risk coefficient, mutagens on their four
+  segments). Noncancer groups do not follow the start: each takes the largest average over a window of
+  its own duration anywhere in the series.
+- **Series are for non-soil media only.** A series on a soil pathway is a RangeError (soil is constant,
+  RISC5 choice). A chemical listed twice in one receptor is a RangeError (it would be counted twice).
+- **The M1 adapter is generic.** `groundwaterBreakthrough(run, times, origin)` takes a function that
+  evaluates a groundwater method at one time and returns the concentrations at the well-screen points,
+  averages them with equal weights and clips round-off below zero. It does not choose the screen points
+  or times.
+- **EPCs in the scenario are SI specs.** `constantEpc` converts the pathway's boundary unit (mg/kg,
+  mg/L, mg/m3); `seriesEpc` and the adapter are already SI. Every EPC record in the result carries its
+  origin.
+- **Legacy hazard summary.** The legacy method has no life stages, so its summary reports one group
+  named `total`.
