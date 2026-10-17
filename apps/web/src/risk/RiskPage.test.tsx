@@ -2,11 +2,13 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
+import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { RiskPage } from './RiskPage';
 
 afterEach(() => {
   clearWellFeed();
   clearVaporRiskFeed();
+  clearSurfaceWaterFeed();
 });
 
 async function loaded() {
@@ -155,6 +157,31 @@ describe('RiskPage', () => {
     await addChemical('71-43-2', /add benzene/i);
     const card = screen.getByRole('group', { name: /benzene/i });
     expect(within(card).queryByRole('checkbox', { name: /vapor screen indoor air/i })).toBeNull();
+  }, 30000);
+
+  it('feeds the swimming concentration from the surface water result when one exists', async () => {
+    const YR = 365 * 86400;
+    setSurfaceWaterFeed({
+      method: 'well-mixed',
+      origin: 'surfaceWater.well-mixed',
+      label: 'Legacy well-mixed surface water',
+      times: [10 * YR, 20 * YR, 40 * YR],
+      values: [1e-6, 4e-6, 2e-6],
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    fireEvent.click(within(card).getByRole('checkbox', { name: /surface water result/i }));
+    const table = await screen.findByRole('table', { name: /exposure point concentrations/i });
+    expect(within(table).getAllByText('surfaceWater.well-mixed').length).toBeGreaterThan(0);
+    expect(within(card).queryByLabelText(/surface water \(mg\/L\)/i)).toBeNull();
+  }, 30000);
+
+  it('does not offer the surface water feed when the surface water screen has not produced one', async () => {
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    expect(within(card).queryByRole('checkbox', { name: /surface water result/i })).toBeNull();
   }, 30000);
 
   it('does not offer the well feed when the transport screen has not produced one', async () => {

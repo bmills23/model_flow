@@ -645,6 +645,178 @@ Slice V4 (modern EPA J&E, built 2026-10-17) readings, all verified against the A
   0.003). The commercial floor area (1,500 m^2) and mixing height (3 m, basement) are in the document but
   its commercial air exchange rate was not found, so no commercial preset is built; they are entered.
 
+## 2026-10-16: M8 surface water and sediment scope (stage 1)
+
+M8 started with a methods note first, on the parallel track Bryan approved ("M8" as its own track). The
+note is `docs/methods/surface-water.md` (scope, equations, validity checks, coupling, criteria data plan,
+fixture plan and the slice plan for stages 2 and 3). No engine, data or web code is written in this stage.
+Current criteria sources were checked on the official sites on 2026-10-16. Rulings, each DEFAULT (open for
+Bryan to overturn) unless marked forced by a source:
+
+1. **Scope (DEFAULT).** In M8: the legacy well-mixed box for a river reach or a lake
+   (`surfaceWater.well-mixed`) with Darcy discharge across the bed, the 5 percent Domenico reach width and
+   equilibrium-partitioning sediment; the modern method (`surfaceWater.mass-discharge`) with the M1
+   bank-plane mass discharge, the transient well-mixed box, plug flow with first-order decay to a
+   downstream river receptor, and equilibrium-partitioning sediment with a selectable pore water and an
+   organic-carbon-normalized output; comparison with the EPA national recommended water quality criteria
+   (aquatic life and human health) and with sediment benchmarks. Deferred: incomplete lateral mixing,
+   estuaries and stratified lakes, site-chemistry criteria (biotic ligand copper, aluminum, ammonia,
+   selenium; shown as site-specific), international criteria, EPA equilibrium partitioning sediment
+   benchmarks and the `long1995` marine ERL and ERM, sediment processes beyond partitioning, runoff and
+   point discharges, and cleanup back-calculation (M5).
+2. **Mixing fraction on flow and volume (forced by Table R-8).** C_sw = W / (f Q_u + Q_gw + k f V_b). The
+   review's lake value (3.93 mg/L) is reproduced only with f on both the upstream flow and the volume; f on
+   the volume alone gives 2.60 and on neither 1.34. The manual's own adjusted-volume lake example is not
+   reproduced by its stated form and is not used.
+3. **Centreline concentration at the bank (DEFAULT).** The legacy C_gw is the M1 centreline profile at the
+   bank averaged over the discharge thickness (water table to depth d) with the M1 well-screen trapezoid
+   rule, not a single depth.
+4. **Reach width (DEFAULT, RISC5 choice kept).** Linked runs use the full width between the points where the
+   steady Domenico concentration falls to 5 percent of the centreline, with RISC5's alpha_x = 0.1 x_s and
+   alpha_y = alpha_x / 3 (the groundwater run's alpha_T is an option), x_s measured from the downgradient
+   source face; the user may enter the reach length instead.
+5. **Storage (DEFAULT).** The legacy box is quasi-steady at each sample time (RISC5 choice); the modern box
+   is the exact transient solution for a piecewise-linear loading, starting from the steady state of the
+   first sample unless an initial concentration is given.
+6. **Modern loading (DEFAULT).** The advective mass flux q C integrated over the reach and the discharge
+   thickness at the bank plane; the dispersive flux across the plane is neglected and the plane passes the
+   plume through (the M1 aquifer is unbounded downstream). This conserves the mass M1 delivers (fixture 4
+   of the note).
+7. **Modern groundwater flow (DEFAULT).** Q_gw = q d L_r with the M1 Darcy flux; the legacy method keeps
+   K_b d L_r i_b (RISC5 choice) and warns when K_b i_b differs from q by more than a factor of 2.
+8. **Sediment (DEFAULT).** Kd = f_oc Koc when the database has a Koc, otherwise the database Kd; neither
+   means not quantified. Pore water: legacy the centreline groundwater (RISC5 choice); modern the
+   flux-averaged discharging groundwater by default, with the centreline or the mixed surface water as
+   options.
+9. **No fish ingestion pathway (DEFAULT).** RISC5 has none and M4 has none; it needs a bioaccumulation
+   factor source. The human health "organism only" criterion is offered as the fish consumption screen.
+10. **No human sediment pathways in M8 (DEFAULT).** RISC5 routes sediment through its soil equations;
+    adding pathways to M4's pathway list now would collide with the parallel M5 track. They follow once
+    M8 and M5 merge; meanwhile a sediment value can be typed into the M4 soil pathways as a constant. The
+    surface water series feeds the existing M4 swimming pathways unchanged (`seriesEpc` with origin
+    `surfaceWater.<method>`).
+11. **Criteria comparison on the peak (DEFAULT).** The peak of the surface water series is compared with
+    every criterion (acute, chronic and human health), because the model's steps cannot resolve one-hour or
+    four-day averages and the peak is never below them; ratios are reported per chemical and criterion and
+    never summed across chemicals.
+12. **Hardness-dependent metals (DEFAULT).** Computed from the aquatic life table's Appendix A and B
+    parameters at a user hardness, default 100 mg/L as CaCO3 (the table's basis); outside 25 to 400 mg/L is
+    warned (a screening choice to be replaced if the appendix states other bounds). Metals criteria are
+    dissolved and the model concentration is taken as dissolved (warned).
+13. **Sediment benchmark sources (DEFAULT, amended in slice D2b).** EPA Region 4 Ecological Risk Assessment
+    Supplemental Guidance, March 2018 update (Tables 2a, 2b, 2c; public domain). The MacDonald et al. 2000
+    consensus TEC and PEC were part of this ruling (numeric values with the citation, as facts) but are not
+    shipped: the first build typed them from recall because the article is paywalled, and recalled values
+    must never ship. Open until a copy of the article or a complete public reproduction is available.
+    NOAA SQuiRTs are not a data source: NOAA's Office of Response and Restoration removed them on April 4,
+    2024 as out of date, and they may be redistributed only whole and unmodified. This departs from the
+    ROADMAP rows M, N, which name SQuiRTs; their TEC and PEC columns may serve as a transcription
+    cross-check only.
+14. **Raw criteria files committed (DEFAULT).** As for the RSL (M4 ruling 9): the two NRWQC HTML pages as
+    served, the Region 4 PDF (about 1.3 MB) and transcribed CSVs, each
+    under a SHA-256 manifest; the build reads only committed files and fails on a mismatch. The PDF is
+    never parsed in the build or CI: a hand-run extraction script writes the CSVs; HTML is read without a new dependency if the markup allows, otherwise with
+    an exact-pinned build-time devDependency recorded here.
+15. **Edition naming (DEFAULT).** The NRWQC pages are not numbered editions, so the raw and generated
+    directories are named by the date of the first check (2026-10-16), the manifest records the date the
+    committed bytes were fetched (2026-10-17, same sizes as the first check), and each page's last-updated
+    date (aquatic life June 9, 2026; human health December 18, 2025) is recorded as its edition. The raw HTML
+    keeps the pages' own em dash glyphs for empty cells; the generated JSON stores no em dash. Rows are keyed by hyphenated
+    CAS number (the NRWQC prints them without hyphens) so they join the RSL database.
+16. **Tolerances (DEFAULT).** Table R-8 and the manual's two Appendix L examples: half a unit in the last
+    printed digit, stricter than the 2 to 3 percent of ROADMAP section 6 because no approximate erf is
+    involved and the review reports exact agreement; hand cases 1e-9 relative; mass balance with M1 1e-6
+    relative (the M2 and M3 aquifer-mass tolerance); box identities 1e-9; hardness equations reproduce the
+    printed table values to the table's two significant figures. The Table R-8 Koc (59 mL/g, benzene) comes
+    from the RISC4 database for this case only, following the Table R-7 convention.
+17. **Background (DEFAULT).** The upstream background enters as f Q_u C_u, consistent with the share of the
+    flow it rides in; Table R-8 has zero background and cannot decide it.
+
+Slice E3 (registration and coupling, 2026-10-17) implementation choices, none overturning a ruling above:
+the runs for both methods are in `surfaceWater/scenario.ts` and take SI inputs (boundary conversions stay
+in `units.ts`); the surface water series becomes a swimming EPC through `surfaceWaterEpc` (one time gives a
+constant EPC, since M4 series need two samples); the modern run reads the bank either as a plane
+concentration function (computing `bankPlaneDischarge`) or as a given discharge series; a ratio within 1e-12
+of 1 is not an exceedance (unit-conversion rounding), found when a concentration equal to its criterion
+computed 1.0000000000000002; the legacy plume-underflow check takes its depth fraction from the caller (the screen passes the share
+the modern bank plane measured, and declares a full plane of eight spreading standard deviations so both
+methods warn of reach truncation and underflow). The plane integral narrows to the extent of the field
+before its fixed panels, so a narrow plume over a long reach is not lost; the legacy C_gw follows ruling 3
+(trapezoid, end points at half weight). Pentachlorophenol's freshwater criteria are flagged pH-dependent
+(`criteria.ph-dependent`) and saltwater aluminum, which the table does not tabulate, reads "no criterion".
+
+Screening thresholds in the note's warning table (99 percent reach capture, 95 percent depth capture, a
+30-day residence time, groundwater above the mixing upstream flow, a factor of 2 on the Darcy flux) are
+screening choices, not rulings, as in M2 and M3.
+
+M8 slice D2 (sediment benchmark data build, 2026-10-17) implementation choices, none overturning a ruling
+above:
+- **Region 4 PDF.** Fetched 2026-10-17; the bytes match the checksum recorded on 2026-10-16
+  (SHA-256 `7c89bc7c...2d0889`, 1,284,613 bytes). Tables 2a, 2b and 2c are on PDF pages 81 to 89. The CSVs
+  are written by `scripts/extract-r4-sediment.ts` from `pdftotext -layout`, with blank cells placed by the
+  horizontal position of each token against its page's column headings; every row carries its PDF page. The
+  extraction was reviewed row by row against the page text, and the build tests read spot values from the
+  pages.
+- **Basis of a value.** The report marks the unit of each Table 2a and 2b value by the fill of its cell:
+  the notes under the tables (PDF pages 84 and 87) say a gray shaded cell is ug/kg dry weight, and the
+  organic section headings read "ug/kg @ 1% OC unless denoted by shading". The fill does not survive text
+  extraction, so `scripts/read-r4-shading.ts` renders each table page at 150 dpi, finds every printed value
+  by its word box and records the fill behind it (`none`, `gray`, `tan`) in shade columns of the CSVs; every
+  row keeps its PDF page. A gray cell is dry weight; an unshaded cell under a "1% OC" heading is at 1 percent
+  OC. The fill decides, not the source letter. A first build inferred the basis from the source letter and
+  had 45 values wrong against the shading, among them every individual compound marine value with Table 2b
+  letter d (benzo(a)pyrene 89, chrysene 108, bis(2-ethylhexyl)phthalate 182 and 2,647, unshaded, so 1
+  percent OC) and the dioxins/furans values (Table 2a letter k, gray, so dry weight). `basisInferred` is kept
+  only where the report is ambiguous about a cell: (1) the note of the cell's own letter states the other
+  unit (for example bis(2-ethylhexyl)phthalate freshwater 2,600, unshaded with letter f, whose note says dry
+  weight; Dicamba marine 630, unshaded with letter l; a gray Table 2a l value of a wildlife based row, which
+  note l makes 1 percent OC); (2) the cell is shaded tan, the fill of the heading rows, which the legend does
+  not name: the PAH totals 600, 1,000 and 1,610 freshwater and 655 and 1,684 marine are taken as dry weight
+  because they are shaded ("unless denoted by shading"), flagged (the gray marine total LMW-PAHs, 312, is dry
+  weight unflagged); (3) an unshaded cell under the heading "Other SVOCs - ug/kg", which states no basis,
+  with no source letter (Triphenyl phosphate marine, 0.55): it takes the letter of the other value in its row,
+  1 percent OC. Under that heading a letter whose note states a unit gives the basis. Table 2c is unshaded
+  under a "1% OC" heading throughout, and the build fails on any other fill there. The inorganic sections
+  are dry weight whatever the letter or fill. The Table 2b note for letter d (Florida coastal) states no
+  unit while the Table 2a note for the same citation says dry weight; the Table 2b cells' fill governs.
+- **Application of the values.** Section 6.2.3 of the report applies the Step 2 values as ug/kg dry weight,
+  which equals the 1 percent organic carbon normalization at f_oc 0.01. The rows keep the published basis
+  (`ocBasis` 0.01) and the criteria comparison normalizes by the user's f_oc, as the methods note says.
+- **Transposed CAS.** The report prints sulfide as 18946-25-8, which fails the CAS check digit; the
+  registry number of sulfide, 18496-25-8, passes it and is used, with the printed form kept in `casPrinted`.
+  Every other printed CAS number passes. Monobutyltin is printed `78763-54 -9` and is repaired by removing
+  the space.
+- **MacDonald values (slice D2b, 2026-10-17).** The D2 build typed the 28 TEC and PEC pairs from recall and
+  checked them only against each other and against Region 4 b-source rows; that is not provenance, so all
+  MacDonald values, both CSVs, the manifest and the generated rows were removed (811 rows remain, Region 4
+  only). Verification was tried against public-domain documents: EPA 905/R-00/007 (June 2000, Ingersoll et
+  al., USGS report for EPA GLNPO) prints only the consensus PEC column in its Table 1, no TEC, and the USGS
+  fact sheet 068-01 table covers trace metals only, so neither verifies all 28 pairs. `macdonald2000` is back
+  to status `planned`. Open item: enter the values, each with a page, when a copy of the article or a
+  complete public reproduction is available. NOAA SQuiRTs were not used.
+- **Duplicates.** Rows the report prints twice (acrolein in two Table 2a sections with different values,
+  phenanthrene and 4-bromophenyl phenyl ether in two Table 2b sections with equal values) are both kept; ids
+  carry a `#2` suffix for the repeat.
+
+M8 slice W2 (criteria panel and risk feed, 2026-10-17) implementation choices, none overturning a ruling above:
+
+- **Criteria loaded on demand.** `criteriaDb.ts` imports the four generated files (aquatic, human health,
+  hardness, benchmarks) dynamically, so each is a chunk of its own; the panel mounts only after the user asks
+  for the comparison, so the surface water screen itself never fetches them.
+- **Record mapping.** A freshwater cell of a metal in Appendix B becomes a hardness criterion (the equation,
+  no tabulated value, dissolved); other value cells keep their printed value; a cell with no value on a row
+  marked site-specific for that water type becomes a site-specific criterion (shown, never computed). Cells
+  whose unit is not a water concentration (pH in standard units, million fibers/L, mg/kg tissue values) are
+  dropped. Water type is passed to the comparison, so freshwater and saltwater criteria and benchmarks are
+  never mixed. The organic carbon fraction for benchmarks at a stated basis is the screen's f_oc, entered with
+  the sediment inputs; when it is missing or invalid the comparison reports that instead of a ratio.
+- **Risk feed.** The surface water screen holds the legacy or modern surface water series in memory
+  (`surfaceWater/feed.ts`, like the transport well feed) and the risk screen offers a per-chemical checkbox
+  "Use the surface water result for the swimming concentration". The series goes through `surfaceWaterEpc`
+  with origin `surfaceWater.well-mixed` (legacy) or `surfaceWater.mass-discharge` (modern), replacing the
+  typed surface water concentration for that chemical, for both risk methods. Swimming time, frequency and
+  skin area still come from the receptor panel.
+
 ## 2026-10-17: M6 web slices W2 and W3
 
 The `#/vapor` screen gained its plot and screening panels (W2) and its feeds (W3). No engine process changed.

@@ -27,6 +27,7 @@ import {
   vaporJeEpa,
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
+import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -46,6 +47,11 @@ export * from './processes/vapor/index.js';
 export { cm2ToM2 } from './processes/exposure/index.js';
 export { cm2ToM2 as vaporCm2ToM2 } from './processes/vapor/index.js';
 export * from './processes/outdoorAir/index.js';
+// Outdoor air (M6) and cleanup (M5) both define SsgSoil; the package root keeps the cleanup one,
+// outdoor air's is exported under an explicit name.
+export type { SsgSoil as OutdoorAirSsgSoil } from './processes/outdoorAir/index.js';
+export type { SsgSoil } from './processes/cleanup/index.js';
+export * from './processes/surfaceWater/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
 
@@ -75,3 +81,5 @@ registry.register(vaporPviScreen2015);
 registry.register(outdoorAirBox);
 registry.register(outdoorAirSsgVf1996);
 registry.register(vaporJuryBam);
+registry.register(surfaceWaterLegacy);
+registry.register(surfaceWaterModern);

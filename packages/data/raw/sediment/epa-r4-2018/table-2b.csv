@@ -1,0 +1,107 @@
+# Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update, Table 2b
+# Transcribed by scripts/extract-r4-sediment.ts from report.pdf (see manifest.json for the checksum); PDF pages 85 to 87; the page column is the PDF page of each row.
+# Values and source letters are as printed; thousands separators are removed; a blank cell is a value the table does not print. Source letters are the table notes keys.
+# unit and sectionBasis come from the section heading above the row; each shade column is the fill of the value cell read from the page by scripts/read-r4-shading.ts (none, gray, or tan), and the build decides the basis of a value from it.
+page,section,unit,sectionBasis,chemical,cas,code,mode,bothReceptors,fwEsv,fwEsvSrc,fwRsv,fwRsvSrc,mEsv,mEsvSrc,mRsv,mRsvSrc,fwEsvShade,fwRsvShade,mEsvShade,mRsvShade
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,1,2-Tetrachloroethane",630-20-6,,,,99,a,418,c,,,418,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,2,2-Tetrachloroethane",79-34-5,,,,250,a,2230,c,13,a,2230,c,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,1-Trichloroethane",71-55-6,,,,70,i,367,c,,,367,c,gray,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,2-Trichloroethane",79-00-5,,,,538,a,1545,c,,,1545,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1-Dichloroethane",75-34-3,,,,20,i,1666,c,,,1666,c,gray,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-Dichloroethane",107-06-2,,,,986,a,1131,c,,,1131,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-Dichloropropane",78-87-5,,,,428,a,876,c,,,876,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dichloromethane (methylene chloride),75-09-2,,,,18,i,2404,c,667,a,2404,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Hexachloroethane,67-72-1,,,,27,a,75,b,,,75,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Trichloromethane (Chloroform),67-66-3,,,,87,a,3352,c,291,a,3352,c,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Tetrachloromethane (Carbon tetrachloride),56-23-5,,,,57,a,706,c,3.3,a,706,c,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1-Dichloroethene (1,1-Dichloroethylene)",75-35-4,,,,100,i,753,c,2.0,a,753,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-Dichloroethene (1,2-Dichloroethylene)",540-59-0,,,,200,i,1135,c,569,a,1135,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-cis-Dichloroethyene",156-59-2,,,,432,a,1135,c,,,1135,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-trans-Dichloroethylene",156-60-5,,,,389,a,1135,c,,,1135,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3-Dichloropropene",542-75-6,,,,1.5,a,75,b,35,a,75,b,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,2,2-Tetrachloroethylene (PCE)",127-18-4,,,,2,i,415,c,11,a,415,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1,2-Trichloroethylene (TCE)",79-01-6,,,,78,i,692,c,73,a,692,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chloroethene (Vinyl chloride),75-01-4,,,,482,a,1178,c,,,1178,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chlorobenzene,108-90-7,,,,30,i,939,c,66,a,939,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2-Dichlorobenzene",95-50-1,,,,95,a,477,c,173,a,477,c,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3-Dichlorobenzene",541-73-1,,,,89,a,468,c,,,468,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,4-Dichlorobenzene",106-46-7,,,,30,i,468,c,,,468,c,gray,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2,3-Trichlorobenzene",87-61-6,,,,113,a,495,b,71,a,495,b,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2,4-Trichlorobenzene",120-82-1,,,,11,i,485,b,75,a,485,b,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3,5-Trichlorobenzene",108-70-3,,,,68,a,476,b,68,a,476,b,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Trichlorobenzene (mixed isomers),12002-48-1,,,,68,a,476,b,68,a,476,b,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2,3-Trimethylbenzene",526-73-8,,,,,,368,b,,,368,b,,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,2,4-Trimethylbenzene",95-63-6,,,,97,a,361,b,,,361,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3,5-Trimethylbenzene",108-67-8,,,,164,a,354,b,,,354,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Benzene,71-43-2,,,,10,i,2185,c,111,a,2185,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"Cymene, p- (4-Isopropyltoluene)",99-87-6,,,,184,a,242,b,,,242,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Ethylbenzene,100-41-4,,,,290,a,1467,b,119,a,1467,b,none,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Isopropylbenzene (Cumene),98-82-8,,,,35,a,713,b,,,713,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Styrene (Vinyl benzene),100-42-5,,,,126,a,1621,c,,,1621,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Toluene,108-88-3,,,,10,i,2074,c,568,a,2074,c,gray,none,none,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Xylenes (total),1330-20-7,,,,130,i,1074,b,,,1074,b,gray,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,2-Butanone (methyl ethyl ketone),78-93-3,,,,7604,a,22707,b,,,22707,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,2-Hexanone (methyl butyl ketone),591-78-6,,,,45,a,7598,b,,,7598,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,2-Octanone (methyl hexyl ketone),111-13-7,,,,6.6,a,2240,c,,,2240,c,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,4-Methyl-2-pentanone (MIBK),108-10-1,,,,73,a,8165,b,,,8165,b,none,none,,none
+85,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acetone,67-64-1,,,,65,i,38133,b,,,38133,b,gray,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,1-Pentanol,71-41-0,,,,40,a,4597,b,,,4597,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,2-Propanol,67-63-0,,,,2.4,a,16700,b,,,16700,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Ethylene glycol,107-21-1,,,,42389,a,145224,b,1272,a,145224,b,none,none,none,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Methanol,67-56-1,,,,102,a,34983,b,,,34983,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Propylene glycol,57-55-6,,,,22,a,100268,b,,,100268,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acetonitrile,75-05-8,,,,4167,a,25498,b,,,25498,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,4-Bromophenyl phenyl ether,101-55-3,,,,47,a,62,b,,,62,b,none,none,,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Carbon disulfide,75-15-0,,,,7.8,a,1580,c,131,a,1580,c,none,none,none,none
+86,Volatile Organic Compounds (VOCs) - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Methyl tert-butyl ether (MTBE),1634-04-4,,,,304,a,4433,c,2081,a,4433,c,none,none,none,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,"1,2,3,4-Tetrachlorobenzene",634-66-2,,,,69,a,138,b,,,138,b,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,"1,2,4,5-Tetrachlorobenzene",95-94-3,,,,187,a,135,b,,,135,b,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,Pentachlorobenzene,608-93-5,,,,116,a,150,j,,,36,b,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,"2,4-Dichlorophenol",120-83-2,,,,57,a,1886,c,,,1886,c,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,"2,4,6-Tribromophenol",118-79-6,,,,47,a,308,c,,,308,c,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,"2,3,4,6-Tetrachlorophenol",58-90-2,,,,30,a,948,c,,,948,c,none,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,Nonylphenol,25154-52-3,,,,,,203,c,,,203,c,,none,,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,2-Nitrotoluene,88-72-2,,,,207,a,5042,c,3448,a,5042,c,none,none,none,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,3-Nitrotoluene,99-08-1,,,,145,a,5995,c,4787,a,5995,c,none,none,none,none
+86,Semivolatile Organic Compounds (SVOCs) - µg/kg @ 1% OC,ug/kg,oc1pct,4-Nitrotoluene,99-99-0,,,,145,a,5465,c,4534,a,5465,c,none,none,none,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Bis(2-ethylhexyl)phthalate,117-81-7,,,,180,f,2600,f,182,d,2647,d,gray,none,none,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Butyl benzyl phthalate,85-68-7,,,,100,i,481,c,,,481,c,gray,none,,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Diethyl phthalate,84-66-2,,,,630,f,1105,b,80,a,1105,b,gray,none,none,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dimethyl phthalate,131-11-3,,,,678,a,2031,b,530,e,2031,b,none,none,none,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Di-n-butyl phthalate,84-74-2,,,,11,i,319,c,,,319,c,gray,none,,none
+86,Phthalates - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Di-n-octyl phthalate,117-84-0,,,,39,e,1100,e,580,e,45000,e,none,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,1-Methylnaphthalene,90-12-0,,,,141,a,*,,,,*,,none,none,,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,2-Methylnaphthalene,91-57-6,,,,20.2,g,*,,20.2,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acenaphthene,83-32-9,,,,6.7,f,*,,6.7,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acenaphthylene,208-96-8,,,,5.9,f,*,,5.9,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Anthracene,120-12-7,,,,57,f,*,,47,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Fluorene,86-73-7,,,,77,f,*,,21,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Naphthalene,91-20-3,,,,176,f,*,,35,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Phenanthrene,85-01-8,,,,204,f,*,,87,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total LMW-PAHs,,,,,600,k,,,312,d,,,tan,,gray,
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Benz(a)anthracene,56-55-3,,,,108,f,*,,75,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Benzo(a)pyrene,50-32-8,,,,150,f,*,,89,d,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Benzo(b)fluoranthene,205-99-2,,,,190,i,*,,,,*,,gray,none,,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"Benzo(g,h,i)perylene",191-24-2,,,,170,i,*,,310,e,*,,gray,none,none,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Benzo(k)fluoranthene,207-08-9,,,,240,i,*,,,,*,,gray,none,,none
+86,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chrysene,218-01-9,,,,166,f,*,,108,d,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"Dibenz(a,h)anthracene",53-70-3,,,,33,f,*,,6.2,d,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Fluoranthene,206-44-0,,,,423,f,*,,113,d,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"Indeno(1,2,3-cd)pyrene",193-39-5,,,,200,i,*,,340,e,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Phenanthrene,85-01-8,,,,204,f,*,,87,d,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Pyrene,129-00-0,,,,195,f,*,,153,d,*,,gray,none,none,none
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total HMW-PAHs,,,,,1000,k,,,655,d,,,tan,,tan,
+87,PAHs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total PAHs,,,,,1610,f,,,1684,d,,,tan,,tan,
+87,PAH-like Compounds - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,1-Biphenyl",92-52-4,,,,198,a,1494,b,,,1494,b,none,none,,none
+87,PAH-like Compounds - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dibenzofuran,132-64-9,,,,510,i,2313,b,,,2313,b,gray,none,,none
+87,PAH-like Compounds - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Quinoline,91-22-5,,,,3.0,a,2398,c,1435,a,2398,c,none,none,none,none
+87,PAH-like Compounds - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Tetrahydrofuran,109-99-9,,,,4488,a,8000,c,,,8000,c,none,none,,none
+87,Other SVOCs - µg/kg,ug/kg,dw,4-Bromophenyl Phenyl Ether,101-55-3,,,,47,a,62,b,,,62,b,none,none,,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Benzoic Acid,65-85-0,,,,19,a,2000,c,,,2000,c,none,none,,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Benzyl alcohol,100-51-6,,,,3.7,a,6729,b,522,a,6729,b,none,none,none,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Carbazole,86-74-8,,,,69,a,4561,b,1928,a,4561,b,none,none,none,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Isodecyl diphenyl phosphate,29761-21-5,,,,89,a,,,,,,,none,,,
+87,Other SVOCs - µg/kg,ug/kg,dw,Isophorone,78-59-1,,,,876,a,948,c,,,948,c,none,none,,none
+87,Other SVOCs - µg/kg,ug/kg,dw,N-Nitrosodiphenylamine,86-30-6,,,,110,a,370,b,211,a,370,b,none,none,none,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Nitrobenzene,98-95-3,,,,407,a,9007,c,1853,a,9007,c,none,none,none,none
+87,Other SVOCs - µg/kg,ug/kg,dw,Triphenyl phosphate,115-86-6,,,,70,a,,,,,0.55,,none,,,none

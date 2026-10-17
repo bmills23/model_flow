@@ -1,0 +1,77 @@
+/* Surface water screen. Reuses the transport screen's layout, controls and chart classes. */
+.surface-water .example {
+  margin-top: 12px;
+}
+
+.surface-water .panel h2 {
+  text-transform: none;
+}
+
+.surface-water .readouts dd {
+  overflow-wrap: anywhere;
+}
+
+.surface-water .hits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.surface-water .btn.hit {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 6px 12px;
+  text-align: left;
+  min-width: 0;
+}
+
+.surface-water .hit-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.surface-water .hit-tox {
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.surface-water .criteria h3 {
+  font-size: 0.95rem;
+  margin: 14px 0 4px;
+}
+
+.surface-water table.crit th,
+.surface-water table.crit td {
+  min-width: 0;
+}
+
+.surface-water table.crit tr.exceeds th,
+.surface-water table.crit tr.exceeds td {
+  font-weight: 600;
+}
+
+.surface-water .flag {
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--modern-bg);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.surface-water .flag.on {
+  background: var(--legacy-bg);
+  color: var(--legacy);
+  border: 1px solid var(--legacy);
+}

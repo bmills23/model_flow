@@ -1,0 +1,2204 @@
+{
+  "edition": "2026-10-16",
+  "source": {
+    "reference": "epanrwqc",
+    "url": "https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table",
+    "pageDate": "2026-06-09",
+    "retrieved": "2026-10-17",
+    "licence": "U.S. government work, public domain in the United States; the page states no restriction."
+  },
+  "units": {
+    "criterion": "ug/L"
+  },
+  "rows": [
+    {
+      "id": "107-02-8",
+      "name": "Acrolein",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "107-02-8"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 3,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 3,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2009",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "aesthetic-qualities",
+      "name": "Aesthetic Qualities",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "309-00-2",
+      "name": "Aldrin",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "309-00-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 3,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.3,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "alkalinity",
+      "name": "Alkalinity",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 20000,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The CCC of 20mg/L is a minimum value except where alkalinity is naturally lower, in which case the criterion is the natural alkalinity of the water in question. Where natural alkalinity is > 20 mg/L, the criterion cannot be lower than 25% of the natural level, or 20 mg/L whichever is higher."
+    },
+    {
+      "id": "959-98-8",
+      "name": "alpha-Endosulfan",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "959-98-8"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.22,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.056,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.034,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0087,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for endosulfan and is most appropriately applied to the sum of alpha-endosulfan and beta-endosulfan."
+    },
+    {
+      "id": "7429-90-5",
+      "name": "Aluminum pH 5.0 - 10.5",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7429-90-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2018",
+      "siteSpecific": true,
+      "siteSpecificFor": [
+        "fresh"
+      ],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The criteria is based on the water chemistry data (for pH, hardness and DOC) entered into the criteria calculator for a given location."
+    },
+    {
+      "id": "7664-41-7",
+      "name": "Ammonia",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7664-41-7"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2013 (Freshwater), 1989 (Saltwater)",
+      "siteSpecific": true,
+      "siteSpecificFor": [
+        "fresh",
+        "salt"
+      ],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Freshwater criteria are ph, temperature and life-stage dependent. Saltwater criteria are pH and temperature dependent."
+    },
+    {
+      "id": "7440-38-2",
+      "name": "Arsenic",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-38-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 340,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 150,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 69,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 36,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "This recommended water quality criterion was derived from data for arsenic (III), but is applied here to total arsenic. Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
+    },
+    {
+      "id": "1912-24-9",
+      "name": "Atrazine",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "1912-24-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "33213-65-9",
+      "name": "beta-Endosulfan",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "33213-65-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.22,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.056,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.034,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0087,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for endosulfan and is most appropriately applied to the sum of alpha-endosulfan and beta-endosulfan."
+    },
+    {
+      "id": "boron",
+      "name": "Boron",
+      "kind": "group",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7440-43-9",
+      "name": "Cadmium",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-43-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.8,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "vacated"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 33,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 7.9,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2016",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "On August 18, 2023, the U.S. District Court for the District of Arizona issued an order vacating EPA’s 2016 national recommended chronic freshwater cadmium aquatic life criterion. EPA is continuing to evaluate the Order. But as a result of that Order, the current national recommended chronic freshwater cadmium aquatic life criterion can be found in EPA’s 2001 Update of Ambient Water Quality Criteria for Cadmium. Freshwater acute and chronic criteria are hardness-dependent and were normalized to a hardness of 100 mg/L as CaCO3 to allow the presentation of representative criteria values. . Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
+    },
+    {
+      "id": "63-25-2",
+      "name": "Carbaryl",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "63-25-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 2.1,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 2.1,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.6,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2012",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "57-74-9",
+      "name": "Chlordane",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "57-74-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 2.4,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0043,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.09,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.004,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "16887-00-6",
+      "name": "Chloride",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "16887-00-6"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 860000,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 230000,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1988",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "7782-50-5",
+      "name": "Chlorine",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7782-50-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 19,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 11,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 13,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 7.5,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "2921-88-2",
+      "name": "Chlorpyrifos",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "2921-88-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.083,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.041,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.011,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0056,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "16065-83-1",
+      "name": "Chromium (III)",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "16065-83-1"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 570,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 74,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
+    },
+    {
+      "id": "18540-29-9",
+      "name": "Chromium (VI)",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "18540-29-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 16,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 11,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1100,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 50,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
+    },
+    {
+      "id": "color",
+      "name": "Color",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7440-50-8",
+      "name": "Copper",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-50-8"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 4.8,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 3.1,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2007",
+      "siteSpecific": true,
+      "siteSpecificFor": [
+        "fresh"
+      ],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Freshwater criteria calculated using the Biotic Ligand Model. Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
+    },
+    {
+      "id": "57-12-5",
+      "name": "Cyanide",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "57-12-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 22,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 5.2,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 1,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1985",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These recommended water quality criteria are expressed as µg free cyanide (CN/L)."
+    },
+    {
+      "id": "8065-48-3",
+      "name": "Demeton",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "8065-48-3"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.1,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.1,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1985",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "333-41-5",
+      "name": "Diazinon",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "333-41-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.17,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.17,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.82,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.82,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2005",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "60-57-1",
+      "name": "Dieldrin",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "60-57-1"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.24,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.056,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.71,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0019,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The freshwater CCC criterion and both Saltwater criteria are based are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "72-20-8",
+      "name": "Endrin",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "72-20-8"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.086,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.036,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.037,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0023,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The derivation of the CCC for this pollutant did not consider exposure through the diet, which is probably important for aquatic life occupying upper trophic levels."
+    },
+    {
+      "id": "58-89-9",
+      "name": "gamma-BHC (Lindane)",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "58-89-9"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.95,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.16,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The Saltwater CCC criterion is based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "gases-total-dissolved",
+      "name": "Gases, Total Dissolved",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "86-50-0",
+      "name": "Guthion",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "86-50-0"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.01,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.01,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "hardness",
+      "name": "Hardness",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "76-44-8",
+      "name": "Heptachlor",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "76-44-8"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.52,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0038,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.053,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0036,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "1024-57-3",
+      "name": "Heptachlor Epoxide",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "1024-57-3"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.52,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0038,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.053,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0036,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1981",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "These criteria are based on the 1980 criteria which used different Minimum Data Requirements and derivation procedures from the 1985 Guidelines. If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines. This value was derived from data for heptachlor and there was insufficient data to determine relative toxicities of heptachlor and heptachlor epoxide."
+    },
+    {
+      "id": "7439-89-6",
+      "name": "Iron",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7439-89-6"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 1000,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7439-92-1",
+      "name": "Lead",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7439-92-1"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 65,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 2.5,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 210,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 8.1,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1984",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
+    },
+    {
+      "id": "121-75-5",
+      "name": "Malathion",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "121-75-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.1,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.1,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7439-97-6",
+      "name": "Mercury",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7439-97-6",
+        "22967-92-6"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.4,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.77,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.8,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.94,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria."
+    },
+    {
+      "id": "72-43-5",
+      "name": "Methoxychlor",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "72-43-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.03,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.03,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "methyl-tertiary-butyl-ether-mtbe",
+      "name": "Methyl Tertiary-Butyl Ether (MTBE)",
+      "kind": "group",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "2385-85-5",
+      "name": "Mirex",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "2385-85-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.001,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.001,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7440-02-0",
+      "name": "Nickel",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-02-0"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 470,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 52,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 74,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 8.2,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
+    },
+    {
+      "id": "84852-15-3",
+      "name": "Nonylphenol",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "84852-15-3"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 28,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 6.6,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 7,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 1.7,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2005",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "nutrients",
+      "name": "Nutrients",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "-",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to EPA'S nutrient criteria by waterbody type."
+    },
+    {
+      "id": "oil-and-grease",
+      "name": "Oil and Grease",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7782-44-7",
+      "name": "Oxygen, Dissolved Freshwater Oxygen, Dissolved Saltwater",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [
+        "7782-44-7"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for freshwater. For saltwater, Refer to Aquatic Life Criteria for Dissolved Oxygen (Saltwater) Cape Cod to Cape Hatteras."
+    },
+    {
+      "id": "56-38-2",
+      "name": "Parathion",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "56-38-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.065,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.013,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "87-86-5",
+      "name": "Pentachlorophenol",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "87-86-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 19,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 15,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 13,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 7.9,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [
+        "fresh"
+      ],
+      "printedAtPh": 7.8,
+      "hardnessDependent": false,
+      "notes": "Freshwater aquatic life values for pentachlorophenol are expressed as a function of pH and values displayed in table correspond to a pH of 7.8."
+    },
+    {
+      "id": "45285-51-6",
+      "name": "Perfluorooctanoic Acid (PFOA)",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "45285-51-6",
+        "335-67-1",
+        "3825-26-1"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 3100,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 100,
+          "unit": "ug/L",
+          "tissue": [
+            {
+              "value": 1.18,
+              "unit": "mg/kg",
+              "description": "Wet Weight in Invertebrate Whole-Body Tissue"
+            },
+            {
+              "value": 6.49,
+              "unit": "mg/kg",
+              "description": "Wet Weight Fish Whole-Body Tissue"
+            },
+            {
+              "value": 0.133,
+              "unit": "mg/kg",
+              "description": "Wet Weight Fish Muscle Tissue"
+            }
+          ]
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 7000,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2024",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The chronic freshwater-based and chronic tissue-based criteria are independently applicable and no one criterion takes primacy. The value listed as the saltwater CMC represents a benchmark value, not a criterion. Data limitations precluded the development of a CCC in saltwater."
+    },
+    {
+      "id": "45298-90-6",
+      "name": "Perfluorooctane Sulfonate (PFOS)",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "45298-90-6",
+        "1763-23-1",
+        "2795-39-3",
+        "56773-42-3",
+        "4021-47-0",
+        "29457-72-5"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 71,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.25,
+          "unit": "ug/L",
+          "tissue": [
+            {
+              "value": 0.028,
+              "unit": "mg/kg",
+              "description": "Wet Weight in Invertebrate Whole-Body Tissue"
+            },
+            {
+              "value": 0.201,
+              "unit": "mg/kg",
+              "description": "Wet Weight in Fish Whole-Body Tissues"
+            },
+            {
+              "value": 0.087,
+              "unit": "mg/kg",
+              "description": "Wet Weight in Fish Muscle Tissue"
+            }
+          ]
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 550,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "2024",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "The chronic freshwater-based and chronic tissue-based criteria are independently applicable and no one criterion takes primacy. The value listed as the saltwater CMC represents a benchmark value, not a criterion. Data limitations precluded the development of a CCC in saltwater."
+    },
+    {
+      "id": "ph",
+      "name": "pH",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 6.5,
+          "valueHigh": 9,
+          "unit": "standard units"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 6.5,
+          "valueHigh": 8.5,
+          "unit": "standard units"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement. For open ocean waters where the depth is substantially greater than the euphotic zone, the pH should not be changed more than 0.2 units from the naturally occurring variation or any case outside the range of 6.5 to 8.5. For shallow, highly productive coastal and estuarine areas where naturally occurring pH variations approach the lethal limits of some species, changes in pH should be avoided but in any case should not exceed the limits established for fresh water, i.e., 6.5-9.0."
+    },
+    {
+      "id": "7723-14-0",
+      "name": "Phosphorus Elemental",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7723-14-0"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "polychlorinated-biphenyls-pcbs",
+      "name": "Polychlorinated Biphenyls (PCBs)",
+      "kind": "group",
+      "priority": true,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.014,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.03,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "-",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "This criterion applies to total PCBs, (e.g., the sum of all congener or all isomer or homolog or Aroclor analyses.)"
+    },
+    {
+      "id": "7782-49-2",
+      "name": "Selenium",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7782-49-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 290,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 71,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2016 Freshwater 1999 Saltwater",
+      "siteSpecific": true,
+      "siteSpecificFor": [
+        "fresh"
+      ],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Aquatic Life Ambient Water Quality Criterion for Selenium - Freshwater 2016 for narrative statement."
+    },
+    {
+      "id": "7440-22-4",
+      "name": "Silver",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-22-4"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 3.2,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.9,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "If evaluation is to be done using an averaging period, the acute criteria values given should be divided by 2 to obtain a value that is more comparable to a CMC derived using the 1985 Guidelines."
+    },
+    {
+      "id": "solids-suspended-and-turbidity",
+      "name": "Solids Suspended and Turbidity",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "7783-06-4",
+      "name": "Sulfide-Hydrogen Sulfide",
+      "kind": "chemical",
+      "priority": false,
+      "cas": [
+        "7783-06-4"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 2,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 2,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "tainting-substances",
+      "name": "Tainting Substances",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Refer to Quality Criteria for Water, 1986 (\"Gold Book\") for narrative statement."
+    },
+    {
+      "id": "temperature",
+      "name": "Temperature",
+      "kind": "parameter",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "none"
+        },
+        "ccc": {
+          "status": "none"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": "Criteria is species dependent. Refer to Quality Criteria for Water, 1986 (\"Gold Book\")."
+    },
+    {
+      "id": "8001-35-2",
+      "name": "Toxaphene",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "8001-35-2"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.73,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0002,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.21,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0002,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1986",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "tributyltin-tbt",
+      "name": "Tributyltin (TBT)",
+      "kind": "group",
+      "priority": false,
+      "cas": [],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.46,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.072,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.42,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.0074,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "2004",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    },
+    {
+      "id": "7440-66-6",
+      "name": "Zinc",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "7440-66-6"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 120,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 120,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 90,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 81,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1995",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": true,
+      "notes": "Freshwater and saltwater criteria for metals are expressed in terms of the dissolved metal in the water column. Refer to Office of Water Policy and Technical Guidance on Interpretation and Implementation of Aquatic Life Metals Criteria. The freshwater criterion for this metal is expressed as a function of hardness (mg/L). The value given here corresponds to a hardness of 100 mg/L."
+    },
+    {
+      "id": "50-29-3",
+      "name": "4,4'-DDT",
+      "kind": "chemical",
+      "priority": true,
+      "cas": [
+        "50-29-3"
+      ],
+      "freshwater": {
+        "cmc": {
+          "status": "value",
+          "value": 1.1,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.001,
+          "unit": "ug/L"
+        }
+      },
+      "saltwater": {
+        "cmc": {
+          "status": "value",
+          "value": 0.13,
+          "unit": "ug/L"
+        },
+        "ccc": {
+          "status": "value",
+          "value": 0.001,
+          "unit": "ug/L"
+        }
+      },
+      "publicationYear": "1980",
+      "siteSpecific": false,
+      "siteSpecificFor": [],
+      "phDependentFor": [],
+      "hardnessDependent": false,
+      "notes": ""
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+# Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update, Table 2a
+# Transcribed by scripts/extract-r4-sediment.ts from report.pdf (see manifest.json for the checksum); PDF pages 81 to 84; the page column is the PDF page of each row.
+# Values and source letters are as printed; thousands separators are removed; a blank cell is a value the table does not print. Source letters are the table notes keys.
+# unit and sectionBasis come from the section heading above the row; each shade column is the fill of the value cell read from the page by scripts/read-r4-shading.ts (none, gray, or tan), and the build decides the basis of a value from it.
+page,section,unit,sectionBasis,chemical,cas,code,mode,bothReceptors,fwEsv,fwEsvSrc,fwRsv,fwRsvSrc,mEsv,mEsvSrc,mRsv,mRsvSrc,fwEsvShade,fwRsvShade,mEsvShade,mRsvShade
+81,Metals - mg/kg dw,mg/kg,dw,Aluminum,7429-90-5,,,,25000,i,58000,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Antimony,7440-36-0,,,,2,a,25,a,2,a,25,a,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Arsenic,7440-38-2,,,,9.8,b,33,b,7.24,c,41.6,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Barium,7440-39-3,,,,20,b,60,b,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Cadmium,7440-43-9,,,,1,b,5,b,0.68,c,4.21,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Chromium (Total),7440-47-3,,,,43.4,b,111,b,52.3,c,160,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Cobalt,7440-48-4,,,,50,b,,,,,,,none,,,
+81,Metals - mg/kg dw,mg/kg,dw,Copper,7440-50-8,,,,31.6,b,149,b,18.7,c,108,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Iron,7439-89-6,,,,20000,g,40000,g,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Lead,7439-92-1,,,,35.8,b,128,b,30.2,c,112,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Manganese,7439-96-5,,,,460,g,1100,g,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Mercury (inorganic - aquatic life),7439-97-6,,,,0.18,b,1.1,b,0.13,c,0.7,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Mercury (inorganic - wildlife based),7439-97-6,,,,0.17,i,0.17,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Methylmercury (wildlife based),22967-92-6,,,,0.00045,i,0.0045,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Nickel,7440-02-0,,,,22.7,b,48.6,b,15.9,c,42.8,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Selenium,7782-49-2,,,,0.72,i,2.9,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Selenium (wildlife),7782-49-2,,,,0.8,i,1.2,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Silver,7440-22-4,,,,1,b,2.2,b,0.73,c,1.77,c,none,none,none,none
+81,Metals - mg/kg dw,mg/kg,dw,Uranium,7440-61-1,,,,100,i,1000,i,,,,,none,none,,
+81,Metals - mg/kg dw,mg/kg,dw,Zinc,7440-66-6,,,,121,b,459,b,124,c,271,c,none,none,none,none
+81,Other Inorganics - mg/kg dw,mg/kg,dw,Ammonia,7664-41-7,,,,230,h,300,h,,,,,none,none,,
+81,Other Inorganics - mg/kg dw,mg/kg,dw,Sulfides (Total),18946-25-8,,,,39,h,61,h,,,,,none,none,,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Acetaldehyde,75-07-0,,R,,40,d,1291,e,6.2,d,1291,e,none,none,none,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Acrolein,107-02-8,,,,0.93,d,3.4,e,0.6,d,3.4,e,none,none,none,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Acrylonitrile,107-13-1,,R,,30,d,151,e,,,151,e,none,none,,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Bromoform (tribromomethane),75-25-2,,,,142,d,,,223,d,,,none,,none,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Bromomethane (methyl bromide),74-83-9,,,,6.5,d,,,108,d,,,none,,none,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Cyclohexane,110-82-7,,,,,,278,e,,,278,e,,none,,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,"1,3-Dichloropropene (cis and trans)",542-75-6,,,,1.5,d,75,e,34.7,d,75,e,none,none,none,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,"1,2-Diphenylhydrazine",122-66-7,,R,,3.9,d,106,e,,,106,e,none,none,,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Dibromochloromethane,124-48-1,,,,198,d,,,21,d,,,none,,none,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Dichlorobromomethane,75-27-4,,,,210,d,,,2172,d,,,none,,none,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Hexane,110-54-3,,,,0.94,d,186,e,,,186,e,none,none,,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Hydrazine,302-01-2,,R,,0.87,d,,,14.6,d,,,none,,none,
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Methylamine,74-89-5,,R,,292,d,586,e,,,586,e,none,none,,none
+81,Volatile Organic Compounds (VOCs) - µg/kg @1% OC,ug/kg,oc1pct,Vinyl acetate,108-05-4,,N3,,5.7,d,2230,e,1030,d,2230,e,none,none,none,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,2-Chlorophenol,95-57-8,,N2,,55,i,550,i,885,d,2302,e,gray,gray,none,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,2-Methylphenol (o-cresol),95-48-7,,N2,,119,d,1773,e,63,h,1773,d,none,none,gray,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2,3-Dimethylphenol",526-75-0,,N2,,385,d,1765,e,,,1765,e,none,none,,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2,4-Dimethylphenol",105-67-9,,N2,,39,d,1437,e,29,h,504,d,none,none,gray,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"3-Methylphenol (Cresol, m-)",108-39-4,,N2,,112,d,1792,e,,,1792,e,none,none,,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,4-Methylphenol (p-Cresol),106-44-5,,N2,,93,d,260,h,670,h,714,d,none,gray,gray,none
+81,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,2-Nitrophenol,88-75-5,,N2,,168,d,3589,e,2070,d,3589,e,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,4-Nitrophenol,100-02-7,,N2,,153,d,4105,e,1579,d,4105,e,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2,4-Dinitrophenol",51-28-5,,U,,223,d,2961,e,45,d,2961,e,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2-Methyl-4,6-Dinitrophenol",534-52-1,,U,,1477,d,2304,e,1477,d,2304,e,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2,4,5-Trichlorophenol",95-95-4,,N2,,34,d,1964,f,217,d,1964,f,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,"2,4,6-Trichlorophenol",88-06-2,,N2,,89,d,1964,f,117,d,1964,f,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,3-Methyl-4-Chlorophenol,59-50-7,,N2,,5,d,2035,f,1257,d,2035,f,none,none,none,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,Pentachlorophenol (aquatic life),87-86-5,,U,,10,i,1200,h,360,h,394,d,gray,gray,gray,none
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,Pentachlorophenol (wildlife based),87-86-5,,U,,65,l,,,,,,,none,,,
+82,Phenols - µg/kg @1% OC unless denoted by shading,ug/kg,oc1pct,Phenol,108-95-2,,N2,,175,d,210,h,63,d,420,h,none,gray,none,gray
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2-Amino-4,6-dinitrotoluene",35572-78-2,,U,,47,d,140,e,52,d,140,e,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"4-Amino-2,6-dinitrotoluene",19406-51-0,,U,,28,d,70,e,,,70,e,none,none,,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"3,5-Dinitroanaline (DNA)",618-87-1,,,,126,d,140,e,120,d,126,e,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3-Dinitrobenzene (DNB)",99-65-0,,U,,40,d,105,e,37,d,105,e,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,3-Dinitrotoluene",602-01-7,,R,,8,d,122,e,,,122,e,none,none,,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,4-Dinitrotoluene",121-14-2,,R,,290,i,2900,i,29,d,114,e,gray,gray,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,5-Dinitrotoluene",619-15-8,,R,,22,d,144,e,,,144,e,none,none,,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,6-Dinitrotoluene",606-20-2,,R,,296,d,131,e,,,131,e,none,none,,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"3,5-Dinitrotoluene",618-85-9,,R,,381,d,144,e,,,144,e,none,none,,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"HMX (Octahydro-tetranitro-1,3,5…)",2691-41-0,,C,,108,d,64709,f,162,d,64709,f,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Nitroglycerine,55-63-0,,R,,10,d,12704,f,133,d,12704,f,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"RDX (Hexahydro-1,3,5-trinitro-1,3,5...)",121-82-4,,R,,65,d,312,e,155,d,312,e,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"1,3,5-Trinitrobenzene (TNB)",99-35-4,,R,,15,d,116,e,15,d,116,e,none,none,none,none
+82,Energetic SVOAs - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,4,6-Trinitrotoluene (TNT)",118-96-7,,R,,27,d,112,f,,,112,e,none,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,4-Chloroaniline,106-47-8,,N2,,0.9,d,21,e,0.9,d,21,e,none,none,none,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,"2,4-Dichloroaniline",554-00-7,,N2,,,,32,e,,,32,e,,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Pentachloroaniline,527-20-8,,U,,,,621,e,,,621,e,,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,"2,2-Dibromo-3-nitrilopropionamide",10222-01-2,,R,,,,7.1,e,3.4,d,7.1,e,,none,none,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,"3,3'-Dichlorobenzidine",91-94-1,,N2,,31,d,90,e,,,90,e,none,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Aniline,62-53-3,,N2,,2.3,d,12,e,5.6,d,12,e,none,none,none,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzaldehyde,100-52-7,,R,,59,d,580,e,59,d,580,e,none,none,none,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzidine,92-87-5,,N2,,1.1,d,17,e,,,17,e,none,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,bis(2-Chloroethyl) Ether,111-44-4,,R,,,,8163,f,,,8163,f,,none,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Decane,124-18-5,,N2,,726,d,,,,,65,d,none,,,none
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Hexachlorobenzene,118-74-1,,,yes,20,f,240,b,10,f,23,h,none,none,none,gray
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Hexachlorocyclopentadiene (aquatic life),77-47-4,,R,,6.5,d,810,l,1,d,130,l,none,gray,none,gray
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Hexachlorocyclopentadiene (wildlife based),77-47-4,,R,,69,l,,,,,,,none,,,
+82,Other SVOCs - µg/kg @ 1% OC,ug/kg,oc1pct,Hydroquinone,123-31-9,,R,,1.5,d,8.2,e,4.1,d,8.2,e,none,none,none,none
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"4,4'-DDD",72-54-8,,C,yes,3.5,j,8.5,j,1.2,c,8,c,none,none,gray,gray
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total DDD,,DDD,C,yes,4.9,b,28,b,,,13,e,gray,gray,,none
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"4,4'-DDE",72-55-9,,C,yes,1.4,j,6.8,j,2.1,c,374,c,none,none,gray,gray
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total DDE,,DDE,C,yes,3.2,b,31,b,,,13,e,gray,gray,,none
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"4,4'-DDT (aquatic life)",50-29-3,,C,,1.0,a,7,a,,,5,c,gray,gray,,gray
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total DDT,,DDT,C,yes,4.2,b,63,b,0.7,c,52,c,gray,gray,gray,gray
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,DDT/DDE/DDD (total),,DDTR,C,yes,5.3,b,572,b,,,44,l,gray,gray,,gray
+82,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total DDTs (Wildlife based),,DDTR,C,,10,b,,,,,,,gray,,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acephate,30560-19-1,,A,,50,d,,,,,,,none,,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Acrolein,107-02-8,,,,0.9,d,3.4,e,0.6,d,3,e,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Aldrin (aquatic life),309-00-2,,C,,29,d,80,g,0.1,d,48,e,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Aldrin (wildlife based),309-00-2,,C,,42,i,210,i,,,,,gray,gray,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Atrazine,1912-24-9,,,,0.3,b,89,e,,,,,none,none,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,BHC (alpha),319-84-6,,C,,0.3,d,6,g,1.3,d,567,e,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,BHC (beta) (aquatic life),319-85-7,,C,,5.0,i,7.2,h,,,567,e,none,gray,,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,BHC (beta) (wildlife based),319-85-7,,C,,300,i,1500,i,,,,,gray,gray,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,BHC-gamma (Lindane) (aquatic life),58-89-9,,C,,2.4,b,5,b,0.6,c,0.99,c,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,BHC-gamma (Lindane) (wildlife based),58-89-9,,C,,10,i,100,i,,,,,none,none,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Carbaryl,63-25-2,,A,,0.3,d,6,l,0.5,d,1,l,none,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Carbofuran,1563-66-2,,A,,0.9,d,4,l,0.4,d,20,e,none,gray,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chlordane,57-74-9,,C,yes,3.2,b,18,b,2.7,c,5,c,gray,gray,gray,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chlordane (Wildlife based),57-74-9,,C,,0.06,b,1700,i,,,,,gray,gray,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Chloropyrifos,2921-88-2,,A,,3,d,12,l,0.4,d,8,l,none,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Cyanazine,21725-46-2,,H,,30,d,117,e,,,,,none,none,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Demeton,126-75-0,,A,,0.2,d,0.35,e,0.2,d,0.35,e,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Diazinon,333-41-5,,A,,0.4,b,9,l,18,d,91,l,none,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dieldrin,60-57-1,,C,yes,1.9,b,62,b,0.1,c,4.3,c,gray,gray,gray,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dieldrin (Wildlife based),60-57-1,,C,,7.7,b,10,i,,,,,gray,gray,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dimethoate,60-51-5,,A,,0.2,d,1.7,e,,,,,none,none,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Endosulfan,115-29-7,,C,,0.01,i,1,l,0.1,l,3,l,gray,gray,gray,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Endosulfan-beta,33213-65-9,,C,,0.9,d,,,0.14,d,,,none,,none,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Endosulfan Sulfate,1031-07-8,,C,,0.7,d,,,0.11,d,,,none,,none,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Endrin,72-20-8,,C,,2.2,b,207,b,0.12,a,6,l,gray,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Endrin (wildlife based),72-20-8,,C,,8.0,b,18,i,,,,,gray,gray,,
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Guthion,86-50-0,,A,,0.06,b,,,0.008,d,0.1,l,gray,,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Heptachlor,76-44-8,,C,yes,0.6,j,75,l,1.5,d,71,l,none,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Heptachlor epoxide,1024-57-3,,C,,2.5,b,16,b,0.14,d,15,l,gray,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Malathion,121-75-5,,A,,0.67,b,,,0.06,d,0.42,l,gray,,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Methoxychlor,72-43-5,,C,yes,30,i,59,l,2.1,d,59,l,gray,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Mirex (aquatic life),2385-85-5,,C,,3.6,d,120,l,3.6,d,120,l,none,gray,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Mirex (wildlife based),2385-85-5,,C,,37,b,,,3.6,d,120,l,gray,,none,gray
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Parathion,56-38-2,,A,,0.2,d,1.2,e,0.6,d,1.2,e,none,none,none,none
+83,Pesticides - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Toxaphene,8001-35-2,,C,yes,0.1,b,32,b,0.15,d,54,l,gray,gray,none,gray
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,"2,4-D",94-75-7,,H,,47,d,436,f,42,d,436,f,none,none,none,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Captan,133-06-2,,F,,47,d,51,e,,,51,e,none,none,,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Chlorothalonil,1897-45-6,,R,,6.4,d,62,l,3.9,d,4,l,none,gray,none,gray
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Dicamba,1918-00-9,,H,,8.4,d,180,l,,,630,l,none,gray,,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Dinoseb,88-85-7,,H,,15,d,1817,e,,,1817,e,none,none,,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Diquat,2764-72-9,,H,,25,d,2498,f,43,d,2498,f,none,none,none,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,MCPA (2-methyl-4-chlorophenoxyacetic acid),94-74-6,,H,,1.6,d,,,2.5,d,,,none,,none,
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Metolachlor,51218-45-2,,H,,22,d,240,l,,,290,l,none,gray,,gray
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,"Silvex (2,4,5-TP)",93-72-1,,H,,62,d,184,f,103,d,184,f,none,none,none,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Simazine,122-34-9,,H,,0.3,b,72,e,,,72,e,none,none,,none
+83,"Herbicides, Fungicides - µg/kg @ 1% OC",ug/kg,oc1pct,Trifluralin,1582-09-8,,H,,79,d,493,e,,,493,e,none,none,,none
+84,Polychlorinated Biphenyls (PCBs) and Dioxins/Furans - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total PCBs,1336-36-3,,E,,59.8,b,676,b,21.6,b,189,b,gray,gray,gray,gray
+84,Polychlorinated Biphenyls (PCBs) and Dioxins/Furans - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Total PCBs (wildlife based),1336-36-3,,E,,14,b,,,14,b,,,none,,none,
+84,Polychlorinated Biphenyls (PCBs) and Dioxins/Furans - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,Dioxins/Furans,1746-01-6,,E,,0.0025,k,0.025,k,0.0025,k,0.025,k,gray,gray,gray,gray
+84,Polychlorinated Biphenyls (PCBs) and Dioxins/Furans - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,3,7,8-TCDD (Dioxin) (aquatic life)",1746-01-6,,E,,0.0005,i,0.0085,i,,,0.0005,l,gray,gray,,gray
+84,Polychlorinated Biphenyls (PCBs) and Dioxins/Furans - µg/kg @ 1% OC unless denoted by shading,ug/kg,oc1pct,"2,3,7,8-TCDD (Dioxin) (wildlife based)",1746-01-6,,E,,0.002,b,0.0022,i,,,,,gray,gray,,
+84,Butyltins - mg/kg dw,mg/kg,dw,Monobutyltin,78763-54-9,,,,0.54,h,4.8,h,,,,,none,none,,
+84,Butyltins - mg/kg dw,mg/kg,dw,Dibutyltin,818-08-6,,,,0.91,h,130,h,,,,,none,none,,
+84,Butyltins - mg/kg dw,mg/kg,dw,Tributyltin,688-73-3,,,,0.047,h,0.32,h,,,,,none,none,,
+84,Butyltins - mg/kg dw,mg/kg,dw,Tetrabutyltin,1461-25-2,,,,0.097,h,0.097,h,,,,,none,none,,
+84,Bulk Petroleum Hydrocarbons - mg/kg dw,mg/kg,dw,Total Petroleum Hydrocarbons - Diesel,68334-30-5,,,,340,h,510,h,,,,,none,none,,
+84,Bulk Petroleum Hydrocarbons - mg/kg dw,mg/kg,dw,Total Petroleum Hydrocarbons - Residual,68476-53-9,,,,3600,h,4400,h,,,,,none,none,,

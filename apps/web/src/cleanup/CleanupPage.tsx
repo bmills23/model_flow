@@ -179,6 +179,7 @@ export function CleanupPage() {
                     well={null}
                     showConcentrations={cumulative}
                     vapor={null}
+                    surface={null}
                     concentrationNote="These concentrations set only the ratios between chemicals. The levels keep those ratios and are scaled together."
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>

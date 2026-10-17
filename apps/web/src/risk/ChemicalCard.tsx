@@ -3,6 +3,7 @@ import type { DermalForm } from '@model-flow/data/rsl-types';
 import { Field, Seg } from '../ui/controls';
 import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow } from './form';
 import { fmtTox } from './format';
@@ -17,10 +18,11 @@ export function ChemicalCard(props: {
   showConcentrations?: boolean;
   concentrationNote?: string;
   vapor: VaporRiskFeed | null;
+  surface: SurfaceWaterFeed | null;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
-  const { row, rec, db, well, vapor } = props;
+  const { row, rec, db, well, vapor, surface } = props;
   const showConc = props.showConcentrations ?? true;
   const vaporHere = vapor !== null && vapor.chemicalId === row.id;
   const rows = toxRows(rec, db.sourceKeys);
@@ -90,6 +92,11 @@ export function ChemicalCard(props: {
                 {m.label} concentration:{' '}
                 {vaporHere ? vapor.label : 'no vapor result held for this chemical'}.
               </p>
+            ) : m.key === 'surfaceWater' && row.surfaceWaterFromModel ? (
+              <p className="muted well-note" key={m.key}>
+                Surface water concentration:{' '}
+                {surface ? surface.label : 'no surface water result held'}.
+              </p>
             ) : (
               <Field
                 key={m.key}
@@ -129,6 +136,16 @@ export function ChemicalCard(props: {
             onChange={(e) => props.onChange({ ...row, outdoorFromVapor: e.target.checked })}
           />
           <span>Use the vapor screen outdoor air for the outdoor air concentration</span>
+        </label>
+      )}
+      {(surface !== null || row.surfaceWaterFromModel) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.surfaceWaterFromModel}
+            onChange={(e) => props.onChange({ ...row, surfaceWaterFromModel: e.target.checked })}
+          />
+          <span>Use the surface water result for the swimming concentration</span>
         </label>
       )}
       {rec.phys?.values.kp !== undefined && (

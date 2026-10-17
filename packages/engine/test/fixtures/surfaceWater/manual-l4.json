@@ -1,0 +1,32 @@
+{
+  "id": "risc5-appendix-l-examples",
+  "source": "RISC5 user manual, Appendix L worked examples (numeric values only), legacy surface water mixing",
+  "page": "Appendix L, worked examples",
+  "tolerance": { "kind": "half a unit in the last printed digit", "concentrationMgPerL": 0.05 },
+  "note": "The adjusted-volume lake example is not used: its printed result is not reproduced by its own stated form (methods note, ambiguity table).",
+  "cases": [
+    {
+      "name": "river",
+      "upstreamFlowM3PerDay": 900,
+      "groundwaterFlowM3PerDay": 100,
+      "groundwaterMgPerL": 316,
+      "decayPerDay": 0.05,
+      "reachLengthM": 100,
+      "crossSectionM2": 5,
+      "mixingFraction": 1,
+      "printedMgPerL": 30.8,
+      "engineMgPerL": 30.8293
+    },
+    {
+      "name": "lake",
+      "volumeM3": 50000,
+      "upstreamFlowM3PerDay": 100,
+      "groundwaterFlowM3PerDay": 100,
+      "groundwaterMgPerL": 316,
+      "decayPerDay": 0.05,
+      "mixingFraction": 1,
+      "printedMgPerL": 11.7,
+      "engineMgPerL": 11.7037
+    }
+  ]
+}

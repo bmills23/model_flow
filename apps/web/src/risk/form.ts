@@ -51,6 +51,8 @@ export interface ChemicalRow {
   /** Use the vapor screen's indoor and outdoor air for this chemical. */
   indoorFromVapor: boolean;
   outdoorFromVapor: boolean;
+  /** Use the surface water screen's result as the swimming (surface water) concentration series. */
+  surfaceWaterFromModel: boolean;
 }
 
 export interface RiskForm {
@@ -101,5 +103,6 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     groundwaterFromWell: false,
     indoorFromVapor: false,
     outdoorFromVapor: false,
+    surfaceWaterFromModel: false,
   };
 }

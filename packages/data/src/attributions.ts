@@ -5,6 +5,17 @@ export interface AttributionInput {
   methods: readonly MethodDescriptor<unknown, unknown>[];
   references: readonly Reference[];
   generatedOn: string;
+  /** Committed web pages that carry no numbered edition: their page date, fetch date and licence status. */
+  dataEditions?: readonly DataEdition[];
+}
+
+export interface DataEdition {
+  label: string;
+  /** The page's own "last updated" date, ISO 8601. */
+  pageDate: string;
+  /** Date the committed copy was fetched, ISO 8601. */
+  retrieved: string;
+  licence: string;
 }
 
 const KIND_LABEL = { legacy: 'Legacy (RISC5 default)', modern: 'Modern' } as const;
@@ -20,7 +31,12 @@ function citationLine(ref: Reference): string {
 const compareRefs = (a: Reference, b: Reference): number =>
   a.authors.localeCompare(b.authors) || a.year - b.year || a.key.localeCompare(b.key);
 
-export function renderAttributions({ methods, references, generatedOn }: AttributionInput): string {
+export function renderAttributions({
+  methods,
+  references,
+  generatedOn,
+  dataEditions = [],
+}: AttributionInput): string {
   const byKey = new Map(references.map((r) => [r.key, r]));
   const out: string[] = [];
 
@@ -62,13 +78,19 @@ export function renderAttributions({ methods, references, generatedOn }: Attribu
     }
   }
 
-  const section = (title: string, intro: string, items: Reference[]): void => {
+  const section = (
+    title: string,
+    intro: string,
+    items: Reference[],
+    extra: readonly string[] = [],
+  ): void => {
     out.push(`## ${title}`, '', intro, '');
     if (items.length === 0) out.push('None yet.', '');
     else {
       for (const ref of [...items].sort(compareRefs)) out.push(`- ${citationLine(ref)}`);
       out.push('');
     }
+    if (extra.length > 0) out.push(...extra, '');
   };
 
   section(
@@ -80,6 +102,16 @@ export function renderAttributions({ methods, references, generatedOn }: Attribu
     'Data sources',
     'Public datasets that the chemical and toxicity database is built from.',
     references.filter((r) => r.status === 'data'),
+    dataEditions.length === 0
+      ? []
+      : [
+          'Editions of committed web pages (the pages are not numbered editions, so each is identified by its own last-updated date):',
+          '',
+          ...dataEditions.map(
+            (e) =>
+              `- ${e.label} (page dated ${e.pageDate}; retrieved ${e.retrieved}). ${e.licence}`,
+          ),
+        ],
   );
   section(
     'Validation sources',

@@ -14,6 +14,7 @@ import {
   rfcFromMgPerM3,
   rfdFromMgPerKgDay,
   seriesEpc,
+  surfaceWaterEpc,
   sfFromPerMgKgDay,
   type EpcSpec,
   type LegacyChemical,
@@ -31,6 +32,7 @@ import {
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
@@ -230,6 +232,7 @@ export function buildInputs(
   db: ChemicalDb,
   well: WellFeed | null,
   vapor: VaporRiskFeed | null = null,
+  surface: SurfaceWaterFeed | null = null,
 ): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
@@ -273,6 +276,16 @@ export function buildInputs(
         } else {
           byPathway[pathway] = vaporSpec.spec;
         }
+        continue;
+      }
+      if (medium === 'surfaceWater' && row.surfaceWaterFromModel) {
+        if (surface === null) {
+          errors.add(
+            `${row.name}: no surface water result to use; run the surface water screen and send its result here`,
+          );
+          continue;
+        }
+        byPathway[pathway] = surfaceWaterEpc(surface.times, surface.values, surface.origin);
         continue;
       }
       const v = parse(

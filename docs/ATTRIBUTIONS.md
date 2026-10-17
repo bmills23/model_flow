@@ -456,6 +456,47 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
   - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200>
 
+### surfaceWater
+
+#### Well-mixed surface water box with Darcy groundwater discharge and equilibrium sediment
+
+- Kind: Legacy (RISC5 default)
+- Method id: `surfaceWater.well-mixed`
+- Summary: The groundwater concentration at the bank times a Darcy discharge across the bed, mixed into a fraction of the upstream flow and the water body volume with first-order decay, evaluated at steady state for the loading at each time, and sediment in equilibrium with the groundwater.
+- Assumptions:
+  - The plume discharges into the water body (a gaining reach); a losing reach is refused.
+  - The mixing volume is uniformly mixed; the mixing fraction f scales both the upstream flow and the volume.
+  - The sediment is in equilibrium with its pore water; there is no degradation, burial, resuspension or sorption kinetics in the bed.
+  - There is no runoff, erosion, point discharge or upstream source other than the background concentration.
+  - A chemical with neither a Koc nor a Kd has no sediment concentration and is reported as not quantified, never as zero.
+  - Storage in the water body is ignored: the box is re-evaluated at steady state at each sample time (warned when the residence time exceeds 30 d).
+  - The groundwater concentration is the plume centreline value at the bank averaged over the discharge thickness, held across the whole reach width, so the loading can exceed the mass the source releases.
+  - The reach length is entered or the full width of the steady Domenico plume between its 5 percent points.
+- RISC5 choice: RISC5 loads the water body with the centreline groundwater concentration times a Darcy flow across the bed (bed conductivity, discharge thickness, reach length and gradient), mixes it with a fraction of the upstream flow and the body volume at steady state for each time, sets the reach length from the 5 percent Domenico plume width with its own dispersivities, and takes sediment as Kd times the groundwater concentration.
+- Sources:
+  - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
+  - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2>
+  - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
+
+#### Mass discharge across the bank plane into a transient well-mixed box
+
+- Kind: Modern
+- Method id: `surfaceWater.mass-discharge`
+- Summary: The advective mass the groundwater run carries across the vertical plane at the bank over the reach and the discharge thickness, a transient well-mixed box with storage, plug flow with first-order decay to a river receptor, and equilibrium sediment with a selectable pore water and an organic-carbon-normalized output.
+- Assumptions:
+  - The plume discharges into the water body (a gaining reach); a losing reach is refused.
+  - The mixing volume is uniformly mixed; the mixing fraction f scales both the upstream flow and the volume.
+  - The sediment is in equilibrium with its pore water; there is no degradation, burial, resuspension or sorption kinetics in the bed.
+  - There is no runoff, erosion, point discharge or upstream source other than the background concentration.
+  - A chemical with neither a Koc nor a Kd has no sediment concentration and is reported as not quantified, never as zero.
+  - The loading is the mass discharge across the plane, so the mass the groundwater run delivers is conserved; dispersive flux across the plane is neglected and the plane passes the plume without reflection.
+  - The groundwater flow is the Darcy flux of the groundwater run over the same area, so no bed conductivity or gradient is needed.
+  - The loading is linear between sample times and held after the last; the box starts at the steady state of the first loading unless an initial concentration is given.
+  - Downstream of the reach the whole river is mixed and moves as plug flow with first-order decay.
+- Sources:
+  - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
+  - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -467,6 +508,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley].
+- Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
@@ -475,16 +517,17 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
-- MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems].
+- Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
+- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
-- National Oceanic and Atmospheric Administration (2026). Screening Quick Reference Tables (SQuiRTs).
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory.
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
+- Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf>
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999].
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation].
@@ -492,7 +535,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
-- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC).
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
@@ -504,9 +546,18 @@ Public datasets that the chemical and toxicity database is built from.
 
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
+- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS).
 - U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations>
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table>
+- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf>
+
+Editions of committed web pages (the pages are not numbered editions, so each is identified by its own last-updated date):
+
+- EPA National Recommended Water Quality Criteria, Aquatic Life Criteria Table (page dated 2026-06-09; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
+- EPA National Recommended Water Quality Criteria, Human Health Criteria Table (page dated 2025-12-18; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
+- EPA Region 4 Ecological Risk Assessment Supplemental Guidance, sediment Tables 2a, 2b and 2c (page dated 2018-03-19; retrieved 2026-10-17). U.S. government work, public domain in the United States.
 
 ## Validation sources
 
@@ -534,10 +585,13 @@ Every entry in the reference database, alphabetical by author.
 - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [used]
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]. [planned]
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
+- Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327> [planned]
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
+- Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5. [used]
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013> [planned]
 - Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
 - DeVaull, G.E. (2007). Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source. Environmental Science and Technology. 41(9):3241-3248. <https://doi.org/10.1021/es060672a> [used]
+- Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203> [used]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78(4):259-280. <https://doi.org/10.1016/j.jconhyd.2005.05.010> [used]
@@ -556,13 +610,13 @@ Every entry in the reference database, alphabetical by author.
 - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [used]
 - Lenhard, R.J., Parker, J.C., Mishra, S. (1989). On the correspondence between Brooks-Corey and van Genuchten models. Journal of Irrigation and Drainage Engineering. 115(4):744-751. <https://doi.org/10.1061/(ASCE)0733-9437(1989)115:4(744)> [used]
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers]. [planned]
-- MacDonald, D.D., et al. (2000). [Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems]. [planned]
+- Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
+- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites]. [planned]
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code]. [planned]
 - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200> [used]
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments]. [planned]
 - Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research. 12(3):513-522. <https://doi.org/10.1029/WR012i003p00513> [used]
-- National Oceanic and Atmospheric Administration (2026). Screening Quick Reference Tables (SQuiRTs). [planned]
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087, Version 1.3, August 1996. <https://nepis.epa.gov/Adobe/PDF/P1007K50.pdf> [used]
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output]. [planned]
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
@@ -572,6 +626,7 @@ Every entry in the reference database, alphabetical by author.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]
 - Srinivasan, V., Clement, T.P., Lee, K.K. (2007). Domenico solution: is it valid?. Ground Water. 45(2):136-146. <https://doi.org/10.1111/j.1745-6584.2006.00281.x> [used]
+- Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf> [planned]
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999]. [planned]
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals]. [planned]
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation]. [planned]
@@ -600,11 +655,13 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [used]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
+- U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table> [data]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
 - U.S. Environmental Protection Agency (2026). National Primary Drinking Water Regulations. U.S. Environmental Protection Agency. Codified at 40 CFR Part 141. <https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations> [data]
-- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria (NRWQC). [planned]
+- U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table> [data]
 - U.S. Environmental Protection Agency (2026). Vapor Intrusion Screening Level User's Guide. U.S. Environmental Protection Agency. <https://www.epa.gov/vaporintrusion/visl-users-guide> [used]
+- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf> [data]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x> [used]

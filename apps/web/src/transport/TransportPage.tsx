@@ -11,6 +11,7 @@ import { Field, Group, Seg } from '../ui/controls';
 import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
+import { getBankFeed, setBankFeed, subscribeBankFeed } from './bankFeed';
 import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
@@ -86,6 +87,7 @@ export function TransportPage() {
     getWaterTableFeed,
   );
 
+  const bankHeld = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
   const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
   const satOn = form.feedFromSaturated && satFeed !== null;
@@ -682,6 +684,42 @@ export function TransportPage() {
                 {tableHeld && (
                   <p className="muted" role="status">
                     The vapor screen can use: {tableHeld.label}.
+                  </p>
+                )}
+              </section>
+              <section className="panel" aria-label="Surface water">
+                <h2>Use the plume for surface water and sediment</h2>
+                <p>
+                  The surface water screen can take this run as the plume that discharges at a river
+                  or lake bank. It reads the legacy AT123D-class solution at the bank for both of
+                  its methods, whichever method the map shows.
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !scenario}
+                    onClick={() => {
+                      if (!scenario) return;
+                      const { zOf: _zOf, ...plain } = scenario;
+                      void _zOf;
+                      setBankFeed({
+                        scenario: plain,
+                        label: `Groundwater transport run, ${form.timeYr} years`,
+                      });
+                    }}
+                  >
+                    Use as surface water source
+                  </button>{' '}
+                  {bankHeld && (
+                    <a className="button" href="#/surface-water">
+                      Open surface water and sediment
+                    </a>
+                  )}
+                </p>
+                {bankHeld && (
+                  <p className="muted" role="status">
+                    Surface water and sediment can use: {bankHeld.label}.
                   </p>
                 )}
               </section>
