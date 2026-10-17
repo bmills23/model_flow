@@ -28,3 +28,10 @@ the tolerance; the cumulative reading gives 0.9553.
 Table R-6 (groundwater to outdoor air) prints 2.27e-3 mg/m^3, equal to Table R-5's indoor result to three
 figures, and no box reading reproduces it (the box gives 2.54e-6 mg/m^3). It is asserted by slice V3 (`test/outdoor-air.test.ts`, box hand value at 1e-9) and is
 treated as a transcription error in the review; it is never widened into a tolerance.
+
+## DeVaull 2007: no published numeric fixture
+
+No published numeric example of the DeVaull model could be verified (the paper is paywalled and the
+BioVapor manual prints no worked case with outputs), so slice V5 (`test/vapor-devaull.test.ts`) rests on
+identities (L_a = 0 and k_w = 0 equal Johnson and Ettinger, L_a entered equals the dominant-layer model
+with layer 3 absent) and hand cases built from independent closed forms. There is no fixture file.

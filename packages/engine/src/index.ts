@@ -11,7 +11,12 @@ import {
 } from './processes/groundwater/index.js';
 import { vadoseLayered, vadoseVadsat } from './processes/vadose/index.js';
 import { exposureLegacy, exposureModern } from './processes/exposure/index.js';
-import { vaporDominantLayer1998, vaporJe1991, vaporJeEpa } from './processes/vapor/index.js';
+import {
+  vaporDevaull2007,
+  vaporDominantLayer1998,
+  vaporJe1991,
+  vaporJeEpa,
+} from './processes/vapor/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -44,3 +49,4 @@ registry.register(exposureModern);
 registry.register(vaporJe1991);
 registry.register(vaporDominantLayer1998);
 registry.register(vaporJeEpa);
+registry.register(vaporDevaull2007);

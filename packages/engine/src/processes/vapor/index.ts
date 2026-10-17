@@ -7,3 +7,4 @@ export * from './dominantLayer.js';
 export * from './jury.js';
 export * from './textures.js';
 export * from './epaJe.js';
+export * from './devaull.js';

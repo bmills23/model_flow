@@ -327,8 +327,11 @@ water-phase first-order rate k_w (loss per soil volume k_w theta_w C_v / H).
 
 - **Foundation:** a mass transfer coefficient h (m/s) across the foundation, from the Johnson and
   Ettinger crack model (h = D_crack eta / L_crack with no soil gas flow; with flow, the advective form in
-  `api2012biovapor` B.6, which that appendix takes from `johnsonettinger1991`; slice V5 checks that the
-  two give the same indoor concentration for the same inputs) or entered; the building-to-subslab ratio is
+  `api2012biovapor` B.6, which that appendix takes from `johnsonettinger1991`) or entered. The built method takes the mass
+  transfer coefficient h (with a helper h = D_crack eta / L_crack) and an optional soil gas velocity
+  Q_soil / A_B, and applies the Johnson and Ettinger crack advection-diffusion form with that velocity; a
+  test confirms it gives the same indoor concentration as the Johnson and Ettinger alpha for the same
+  inputs, with and without soil gas flow, and a dirt floor is h infinite; the building-to-subslab ratio is
   c_e / c_f = (1 / (L_mix ER)) / (1 / (L_mix ER) + 1 / h).
 - **Aerobic layer:** with L_R = (D_eff H / (k_w theta_w))^(1/2) and a = L_a / L_R, the profile across the
   aerobic layer is the hyperbolic solution of the same equation as the dominant-layer middle layer (with
@@ -337,10 +340,19 @@ water-phase first-order rate k_w (loss per soil volume k_w theta_w C_v / H).
   asymptote to avoid overflow.
 - **Oxygen:** three options, as BioVapor offers: (1) the aerobic depth L_a entered; (2) the fast-reaction
   explicit depth, where chemical and oxygen meet at a reaction front, from an oxygen mass balance that
-  includes a zero-order baseline soil respiration (a quadratic in L_a / L_T, `api2012biovapor` B.5); (3)
-  the coupled solution, in which L_a is found so that the oxygen flux or concentration constraint below
-  the foundation is just met with finite rates (a monotone one-dimensional root find on L_a in [0, L_T],
-  Brent from `numerics`). Baseline respiration defaults to 1.69 mg O2 per g organic carbon per day times
+  includes a zero-order baseline soil respiration. The built form (the primary equations were not
+  available, so this is derived from the stated physics): oxygen at a fixed concentration at the base of
+  the foundation diffuses down to a front at depth L_a, where its flux D_O O / L_a - R L_a / 2 (R the
+  respiration per soil volume) equals the oxygen mass ratio times the hydrocarbon flux D C_T / (L_T - L_a)
+  arriving from the source. With R = 0 this is a quadratic with the closed form
+  L_a / L_T = D_O O / (D_O O + Y D C_T); with R > 0 it is a cubic with a single root in [0, L_max]
+  (L_max = L_T, or the depth sqrt(2 D_O O / R) at which respiration alone exhausts the oxygen), found with
+  Brent. (3) the coupled solution: L_a is found so that the oxygen supply D_O O / L_a just meets the demand,
+  R L_a plus the oxygen mass ratio times the chemical degraded in the aerobic layer with finite rates
+  (a monotone one-dimensional root find on L_a in [0, L_T], Brent from `numerics`); if the supply exceeds the
+  demand at L_a = L_T the layer is wholly aerobic, and with no oxygen it is wholly anaerobic. In both
+  options the total hydrocarbon is assumed to move with the diffusivity of, and degrade at the rate of, the
+  chemical of concern. Baseline respiration defaults to 1.69 mg O2 per g organic carbon per day times
   f_oc (`api2012biovapor` Appendix C, from `devaull2007`). The oxygen demand of each chemical uses its
   stoichiometric mass ratio of oxygen to chemical; oxygen limits need every oxygen-consuming hydrocarbon
   in the source, so options (2) and (3) require a total hydrocarbon vapor concentration and warn
@@ -589,8 +601,9 @@ slices):
 - **Oxygen mass ratio** (slice V0, built) computed from a committed molecular formula (carbon and
   hydrogen counts, plus oxygen for oxygenates) for the same petroleum list: complete oxidation needs
   (c + h/4 - o/2) mol of O2 per mol; benzene gives 7.5 mol and 3.07 g/g.
-- **Oxygen diffusivities**: slice V5 finds a verifiable public source; until then they are required user
-  inputs with no default, and options 2 and 3 cannot run without them.
+- **Oxygen diffusivities**: slice V5 found no verifiable public source, so they remain required user
+  inputs with no default (oxygen D_a, D_w and Henry's constant), and options 2 and 3 cannot run without
+  them.
 
 
 ## Where the manual is ambiguous, and what we chose
@@ -738,7 +751,7 @@ tests first, runs the engine test file alone, then the gate once.
 | V2 legacy indoor (built; registered by V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
 | V3 outdoor and Jury (built; registration deferred to V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E (built) | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` (registers `vapor.je-1991` and `vapor.dominant-layer-1998` too) |
-| V5 DeVaull | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` |
+| V5 DeVaull (built; registered) | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` (flips `devaull2007` and `api2012biovapor` to `used`) |
 | V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
 | V7 coupling and registration | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |
 

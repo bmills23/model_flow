@@ -520,7 +520,7 @@
   {
     "key": "devaull2007",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "DeVaull, G.E.",
     "year": 2007,
     "title": "Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source",
@@ -617,7 +617,7 @@
   {
     "key": "api2012biovapor",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "American Petroleum Institute",
     "year": 2012,
     "title": "BioVapor: A 1-D Vapor Intrusion Model with Oxygen-Limited Aerobic Biodegradation, Users Manual, Version 2.1",
