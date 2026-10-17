@@ -40,6 +40,12 @@ const nrwqcEdition = (file: string, label: string): DataEdition => {
   };
   return { label, pageDate: source.pageDate, retrieved: source.retrieved, licence: source.licence };
 };
+const sediment = JSON.parse(
+  readFileSync(
+    resolve(root, 'packages/data/generated/sediment-2026-10-16/benchmarks.json'),
+    'utf8',
+  ),
+) as { sources: { epa2018r4era: { pageDate: string; retrieved: string; licence: string } } };
 const dataEditions = [
   nrwqcEdition(
     'aquatic.json',
@@ -49,6 +55,13 @@ const dataEditions = [
     'human-health.json',
     'EPA National Recommended Water Quality Criteria, Human Health Criteria Table',
   ),
+  {
+    label:
+      'EPA Region 4 Ecological Risk Assessment Supplemental Guidance, sediment Tables 2a, 2b and 2c',
+    pageDate: sediment.sources.epa2018r4era.pageDate,
+    retrieved: sediment.sources.epa2018r4era.retrieved,
+    licence: sediment.sources.epa2018r4era.licence,
+  },
 ];
 
 write('ATTRIBUTIONS.md', (generatedOn) =>

@@ -310,7 +310,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
-- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
@@ -331,7 +330,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2015). [Technical guide for addressing petroleum vapor intrusion at leaking underground storage tank sites].
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air.
-- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Pennell, K.G., Suuberg, E.M. (2011). [Vapor intrusion model comparisons].
@@ -341,17 +339,20 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 
 Public datasets that the chemical and toxicity database is built from.
 
+- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
 - U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS).
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table>
+- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf>
 
 Editions of committed web pages (the pages are not numbered editions, so each is identified by its own last-updated date):
 
 - EPA National Recommended Water Quality Criteria, Aquatic Life Criteria Table (page dated 2026-06-09; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
 - EPA National Recommended Water Quality Criteria, Human Health Criteria Table (page dated 2025-12-18; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
+- EPA Region 4 Ecological Risk Assessment Supplemental Guidance, sediment Tables 2a, 2b and 2c (page dated 2018-03-19; retrieved 2026-10-17). U.S. government work, public domain in the United States.
 
 ## Validation sources
 
@@ -399,7 +400,7 @@ Every entry in the reference database, alphabetical by author.
 - Lenhard, R.J., Parker, J.C., Mishra, S. (1989). On the correspondence between Brooks-Corey and van Genuchten models. Journal of Irrigation and Drainage Engineering. 115(4):744-751. <https://doi.org/10.1061/(ASCE)0733-9437(1989)115:4(744)> [used]
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers]. [planned]
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
-- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
+- MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [data]
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites]. [planned]
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code]. [planned]
 - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200> [used]
@@ -444,7 +445,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
 - U.S. Environmental Protection Agency (2026). National Recommended Water Quality Criteria - Aquatic Life Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table> [data]
-- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf> [planned]
+- U.S. Environmental Protection Agency, Region 4 (2018). Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update. U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section. <https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf> [data]
 - Ünlü, K., Kemblowski, M.W., Parker, J.C., Stevens, D., Chong, P.K., Kamil, I. (1992). A screening model for effects of land-disposed wastes on groundwater quality. Journal of Contaminant Hydrology. 11(1-2):27-49. <https://doi.org/10.1016/0169-7722(92)90032-A> [used]
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x> [used]

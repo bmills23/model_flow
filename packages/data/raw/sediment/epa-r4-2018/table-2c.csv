@@ -1,0 +1,54 @@
+# Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update, Table 2c
+# Transcribed by scripts/extract-r4-sediment.ts from report.pdf (see manifest.json for the checksum); PDF pages 88 to 89; the page column is the PDF page of each row.
+# Values and source letters are as printed; thousands separators are removed; a blank cell is a value the table does not print. Source letters are the table notes keys.
+# unit and sectionBasis come from the section heading above the row; the basis of a value is decided in the build from its source letter.
+page,section,unit,sectionBasis,chemical,cas,rsv,rsvSrc
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Naphthalene,91-20-3,3850,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,1-Methylnaphthalene,90-12-0,4460,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,2-Methylnaphthalene,91-57-6,4470,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Naphthalenes,,4940,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,"2,6-Dimethylnaphthalene",581-42-0,5130,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Naphthalenes,,5100,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,"2,3,5-Trimethylnaphthalene",2245-38-7,5840,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Naphthalenes,,5810,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C4-Naphthalenes,,6570,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Acenaphthylene,208-96-8,4520,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Acenaphthene,83-32-9,4910,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Fluorene,86-73-7,5380,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Fluorenes,,6110,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Fluorenes,,6860,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Fluorenes,,7690,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Anthracene,120-12-7,5940,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Phenanthrene,85-01-8,5960,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,1-Methylphenanthrene,832-69-9,6700,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Phenatherene/anthracenes,,6700,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Phenatherene/anthracenes,,7460,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Phenatherene/anthracenes,,8290,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C4-Phenatherene/anthracenes,,9130,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzothiophene,11095-43-5,3910,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Dibenzothiophene,132-65-0,5950,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Dibenzothiophenes,,6720,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Dibenzothiophenes,,7540,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Dibenzothiophenes,,8440,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C4-Dibenzothiophenes,,9400,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Naphthothiophene,233-02-3,5950,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Fluoranthene,206-44-0,7070,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Pyrene,129-00-0,6970,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Fluoranthene/pyrenes,,7700,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Fluoranthene/pyrenes,,8730,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Fluoranthene/pyrenes,,9490,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C4-Fluoranthene/pyrenes,,10700,b
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzo(a)anthracene,56-55-3,8410,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Chrysene,218-01-9,8440,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C1-Benzanthracene/chrysenes,,9290,a
+88,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C2-Benzanthracene/chrysenes,,10100,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C3-Benzanthracene/chrysenes,,11100,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,C4-Benzanthracene/chrysenes,,12100,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Perylene,198-55-0,9680,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzo(b)fluoranthene,205-99-2,9790,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzo(k)fluoranthene,207-08-9,9810,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzo(a)pyrene,50-32-8,9650,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,Benzo(e)pyrene,192-97-2,9670,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,"Benzo(g,h,i)perylene",191-24-2,10900,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,"Indeno(1,2,3-cd)pyrene",193-39-5,11200,a
+89,PAHs - µg/kg @ 1% OC,ug/kg,oc1pct,"Dibenz(a,h) anthracene",53-70-3,11200,a

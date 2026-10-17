@@ -1,0 +1,30 @@
+# Second entry of the MacDonald et al. (2000) TEC and PEC values, entered in a separate pass in a different order, without the CAS column. The test compares it with tec-pec.csv.
+chemical,unit,tec,pec
+Total DDTs,ug/kg,5.28,572
+Zinc,mg/kg,121,459
+Lindane (gamma-BHC),ug/kg,2.37,4.99
+Pyrene,ug/kg,195,1520
+Nickel,mg/kg,22.7,48.6
+Sum DDT,ug/kg,4.16,62.9
+Cadmium,mg/kg,0.99,4.98
+Chlordane,ug/kg,3.24,17.6
+Fluoranthene,ug/kg,423,2230
+Lead,mg/kg,35.8,128
+Total PCBs,ug/kg,59.8,676
+Benzo(a)pyrene,ug/kg,150,1450
+Arsenic,mg/kg,9.79,33
+Dieldrin,ug/kg,1.9,61.8
+Heptachlor epoxide,ug/kg,2.47,16
+Chromium,mg/kg,43.4,111
+Naphthalene,ug/kg,176,561
+Sum DDD,ug/kg,4.88,28
+Chrysene,ug/kg,166,1290
+Mercury,mg/kg,0.18,1.06
+Phenanthrene,ug/kg,204,1170
+Endrin,ug/kg,2.22,207
+Anthracene,ug/kg,57.2,845
+Sum DDE,ug/kg,3.16,31.3
+Copper,mg/kg,31.6,149
+Benz(a)anthracene,ug/kg,108,1050
+Fluorene,ug/kg,77.4,536
+Total PAHs,ug/kg,1610,22800

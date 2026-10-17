@@ -13,7 +13,9 @@
     "build:rsl": "tsx scripts/build-rsl.ts",
     "fetch:rsl": "tsx scripts/fetch-rsl.ts",
     "build:nrwqc": "tsx scripts/build-nrwqc.ts",
-    "fetch:nrwqc": "tsx scripts/fetch-nrwqc.ts"
+    "fetch:nrwqc": "tsx scripts/fetch-nrwqc.ts",
+    "build:sediment": "tsx scripts/build-sediment.ts",
+    "extract:r4-sediment": "tsx scripts/extract-r4-sediment.ts"
   },
   "dependencies": {
     "@model-flow/engine": "workspace:*"
@@ -27,6 +29,7 @@
   "exports": {
     "./rsl-types": "./src/rsl/types.ts",
     "./nrwqc-types": "./src/nrwqc/types.ts",
+    "./sediment-types": "./src/sediment/types.ts",
     "./generated/*": "./generated/*"
   }
 }

@@ -850,14 +850,14 @@
   {
     "key": "macdonald2000",
     "type": "data",
-    "status": "planned",
+    "status": "data",
     "authors": "MacDonald, D.D., Ingersoll, C.G., Berger, T.A.",
     "year": 2000,
     "title": "Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems",
     "venue": "Archives of Environmental Contamination and Toxicology",
     "identifier": "39(1):20-31",
     "doi": "10.1007/s002440010075",
-    "notes": "Authors, title, volume, issue, pages and DOI verified through Crossref on 2026-10-16. Source of the consensus TEC and PEC for 28 freshwater sediment chemicals planned for M8 (docs/methods/surface-water.md); the article is copyrighted, so only the numeric values are used, with this citation.",
+    "notes": "Authors, title, volume, issue, pages and DOI verified through Crossref on 2026-10-16. Source of the consensus TEC and PEC for 28 freshwater sediment chemicals planned for M8 (docs/methods/surface-water.md); the article is copyrighted, so only the numeric values are used, with this citation. Numeric values transcribed to packages/data/raw/sediment/macdonald2000 (two entries compared) and built into packages/data/generated/sediment-2026-10-16.",
     "tags": ["surfaceWater"]
   },
   {
@@ -887,13 +887,13 @@
   {
     "key": "epa2018r4era",
     "type": "data",
-    "status": "planned",
+    "status": "data",
     "authors": "U.S. Environmental Protection Agency, Region 4",
     "year": 2018,
     "title": "Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update",
     "venue": "U.S. Environmental Protection Agency, Region 4, Superfund Division, Scientific Support Section",
     "url": "https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf",
-    "notes": "Title and date from the document cover; linked from the EPA Regional Ecological Risk Assessment Supplemental Guidance page (last updated March 3, 2026, checked 2026-10-16), which lists no newer version. Tables 2a, 2b and 2c hold the freshwater and marine sediment screening and refinement values planned for M8. U.S. government work, public domain in the United States.",
+    "notes": "Title and date from the document cover; linked from the EPA Regional Ecological Risk Assessment Supplemental Guidance page (last updated March 3, 2026, checked 2026-10-16), which lists no newer version. Tables 2a, 2b and 2c hold the freshwater and marine sediment screening and refinement values planned for M8. U.S. government work, public domain in the United States. Tables 2a, 2b and 2c transcribed to packages/data/raw/sediment/epa-r4-2018 from the committed PDF (retrieved 2026-10-17) and built into packages/data/generated/sediment-2026-10-16.",
     "tags": ["surfaceWater"]
   },
   {

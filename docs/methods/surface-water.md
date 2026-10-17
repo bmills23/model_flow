@@ -14,7 +14,7 @@ fixtures 1, 2, H3 and H4) and slice E2 (modern kernels: `bankPlaneDischarge`, th
 downstream, the selectable-pore-water sediment; fixtures 3 H1 and H2, 4a to 4d, 5a to 5d) are implemented,
 and so is slice E3 (coupling to M1 and M4, criteria comparison, registration of `surfaceWater.well-mixed`
 and `surfaceWater.mass-discharge`; fixtures 5e, 6b and 6c; the two runs live in `surfaceWater/scenario.ts`).
-Slice D1 (the NRWQC criteria build: raw pages with a checksum manifest, reader, generated JSON, `data:check`) is implemented, so fixture 6a no longer waits on it; the sediment benchmark build (D2) and the web code (W1, W2) do not exist yet. The scope calls below are the rulings recorded in
+Slice D1 (the NRWQC criteria build: raw pages with a checksum manifest, reader, generated JSON, `data:check`) is implemented, so fixture 6a no longer waits on it, and so is slice D2 (the sediment benchmark build: Region 4 Tables 2a, 2b and 2c and the MacDonald et al. TEC and PEC, generated `benchmarks.json`); the web code (W1, W2) does not exist yet. The scope calls below are the rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M8 stage 1 block); those marked DEFAULT are open to Bryan's overturn.
 
 ## What the process is
@@ -310,7 +310,7 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
   (2026-10-17, same sizes as the first check); each page's last-updated date is its edition (DEFAULT ruling 15).
   `packages/data/raw/sediment/epa-r4-2018/` holds the Region 4 PDF and the transcribed CSVs of Tables 2a,
   2b and 2c; `packages/data/raw/sediment/macdonald2000/` holds a hand-transcribed CSV of the TEC and PEC
-  with the page of each value. The build never touches the network and fails on a checksum mismatch.
+  and a second entry of the same values (`tec-pec-entry2.csv`); no page is recorded per value because no full-text copy of the article was reachable (see the references table). The build never touches the network and fails on a checksum mismatch.
 - **Reader**: the HTML tables (`id="datatable"` and the two appendix tables) are read in TypeScript at build
   time, with no new dependency if the markup allows (it is regular: one row per `<tr>`); if a parser is
   needed it is an exact-pinned, build-time-only devDependency recorded in DECISIONS.md as in slice D1 of
@@ -460,6 +460,26 @@ No public EPA worked example of a groundwater-to-surface-water mixing calculatio
 found in stage 1; the fixtures above are the review table, the manual's examples, hand cases and
 identities.
 
+### Sediment benchmark data as built (slice D2, 2026-10-17)
+
+`packages/data/generated/sediment-2026-10-16/benchmarks.json` holds one row per published value (867 rows:
+Region 4 Tables 2a and 2b freshwater and marine screening and refinement values, Table 2c toxic unit
+refinement values, and the 28 MacDonald TEC and PEC pairs), each shaped like the engine `Criterion`
+(`medium: "sediment"`, `endpoint`, `value`, `unit`, `ocBasis`, `waterType`) plus provenance (table, PDF page,
+section, source letter, `basis`). Endpoints: `region4-{freshwater,marine}-{screening,refinement}`,
+`region4-pah-toxic-unit-refinement`, `macdonald-tec`, `macdonald-pec`. A blank cell and the PAH refinement
+"*" ("see Total below", Table 2b) produce no row. Rows are keyed by hyphenated CAS number; the group codes
+the report prints in the CAS column (DDD, DDE, DDT, DDTR) become `code-<code>`, and a row with neither is a
+slug of its name. Aquatic life and wildlife based values of one chemical are separate rows with a `variant`.
+
+The unit of a Region 4 value is decided by its source letter, from the notes under each table; the
+inorganic sections (mg/kg dry weight) are always dry weight. Where a note states no unit the basis follows an
+identical citation elsewhere in the report and the row carries `basisInferred`; the letters and their
+decisions are in the file's `sourceLetters` block (DECISIONS.md, "M8 slice D2"). The report's gray shading
+(which also marks dry weight cells) does not survive text extraction and is not used. Region 4 applies the
+Step 2 values as ug/kg dry weight (section 6.2.3), which is the 1 percent organic carbon case of the
+normalization above (f_oc 0.01); the rows keep the published basis so the criteria comparison can normalize.
+
 ## Slice plan (stages 2 and 3)
 
 Each slice is sized for one implementation worker; tests are written first and must fail before the
@@ -467,13 +487,13 @@ implementation. Method ids to register: `surfaceWater.well-mixed` (legacy, citat
 `domenico1987`, `ditoro1991`) and `surfaceWater.mass-discharge` (modern, citations `chapra1997`,
 `ditoro1991`). The registering slice marks those references `used` (they are `planned` now; titles are
 already verified, a test enforces both). The data references (`epanrwqc`, `epanrwqchh`, `epa2018r4era`,
-`macdonald2000`) move to status `data` when their build lands (`epanrwqc` and `epanrwqchh` have, with D1); `stephan1985` is cited by this note only and
+`macdonald2000`) move to status `data` when their build lands (all four have, with D1 and D2); `stephan1985` is cited by this note only and
 stays `planned`.
 
 | Slice | Stage | Files to create or touch | Failing tests first | Depends on |
 |---|---|---|---|---|
 | D1 NRWQC criteria build | 2 | `packages/data/raw/nrwqc/2026-10-16/{aquatic-life.html,human-health.html,manifest.json}`; `packages/data/src/nrwqc/{types,parse,build,index}.ts`; `packages/data/scripts/{fetch-nrwqc,build-nrwqc}.ts`; `packages/data/generated/nrwqc-2026-10-16/*.json`; `packages/data/package.json` (scripts, exports); root `data:check`; Prettier ignore for raw and generated; `references.json` (`epanrwqc`, `epanrwqchh` to `data`) | `packages/data/test/nrwqc.test.ts`: checksum mismatch fails the build; hyphenated CAS with a valid check digit on every chemical row; zinc freshwater CMC and CCC 120, saltwater 90 and 81 ug/L; copper, aluminum, ammonia flagged site-specific; Appendix B has six metals; the hardness equation reproduces each printed value at 100 mg/L to two significant figures; generated output matches the committed JSON byte for byte | none |
-| D2 Sediment benchmarks build | 2 | `packages/data/raw/sediment/epa-r4-2018/{report.pdf,table-2a.csv,table-2b.csv,table-2c.csv,manifest.json}`; `packages/data/raw/sediment/macdonald2000/{tec-pec.csv,manifest.json}`; `packages/data/scripts/{extract-r4-sediment,build-sediment}.ts`; `packages/data/src/sediment/{types,build,index}.ts`; `packages/data/generated/sediment-2026-10-16/benchmarks.json`; `references.json` (`epa2018r4era`, `macdonald2000` to `data`) | `packages/data/test/sediment.test.ts`: checksums; every row has units and a basis (dry weight or 1 percent OC); 28 MacDonald chemicals each with TEC below PEC; spot values read from the PDF pages recorded in the CSV header; the two MacDonald entries agree | none |
+| D2 Sediment benchmarks build | 2 | `packages/data/raw/sediment/epa-r4-2018/{report.pdf,table-2a.csv,table-2b.csv,table-2c.csv,manifest.json}`; `packages/data/raw/sediment/macdonald2000/{tec-pec.csv,tec-pec-entry2.csv,manifest.json}`; `packages/data/scripts/{extract-r4-sediment,build-sediment}.ts`; `packages/data/src/sediment/{types,build,index}.ts`; `packages/data/generated/sediment-2026-10-16/benchmarks.json`; `references.json` (`epa2018r4era`, `macdonald2000` to `data`) | `packages/data/test/sediment.test.ts`: checksums; every row has units and a basis (dry weight or 1 percent OC); 28 MacDonald chemicals each with TEC below PEC; spot values read from the PDF pages (each CSV row carries its PDF page, the header the page range); the two MacDonald entries agree and match the Region 4 b-source values within 5 percent | none |
 | E1 Legacy kernels | 2 | `packages/engine/src/processes/surfaceWater/{units,legacy,reach,sediment,checks}.ts`; `packages/engine/test/fixtures/surfaceWater/{r8.json,manual-l4.json,README.md}` | `surfacewater-legacy.test.ts` (box, Darcy discharge, background, RangeErrors, H3 reach lengths to 1e-9, H4); `surfacewater-r8.test.ts` (fixtures 1 and 2) | none |
 | E2 Modern kernels and M1 discharge | 2 | `surfaceWater/{discharge,transient,downstream,modern}.ts` | `surfacewater-transient.test.ts` (H1, box identities 5a to 5d); `surfacewater-discharge.test.ts` (mass balance 4a to 4d, reach and underflow fractions with their warnings); H2 | E1 (units, sediment) |
 | E3 Coupling, criteria comparison, registration | 2 | `surfaceWater/{coupling,criteria,index}.ts`; `packages/engine/src/index.ts` (register two methods); `references.json` (`chapra1997`, `ditoro1991` to `used`) | `surfacewater-registry.test.ts` (ids, citations used, validity warnings surfaced); `surfacewater-coupling.test.ts` (legacy edge series equals the screen-averaged M1 value; the series feeds `runModernScenario` swimming pathways with origin `surfaceWater.*`; identity 5e); `surfacewater-criteria.test.ts` (ratios, peak rule, hardness equation from a parameter record, site-specific and missing criteria, OC normalization; fixture 6b and 6c). The engine defines the criterion record type; D1 and D2 emit that shape | E1, E2 |
@@ -493,7 +513,7 @@ slices.
 | `stephan1985` | EPA copy (cover: PB85-227049; the 2010 electronic version's cover prints the first author as "Stephen") | Cover and contents |
 | `epanrwqc`, `epanrwqchh` | The two EPA pages (titles, last-updated dates, columns, appendices) | Yes, the pages |
 | `epa2018r4era` | The EPA PDF (cover and table list) and the Regional ERA supplemental guidance page | Cover, table list, section 6.2 headings |
-| `macdonald2000` | Crossref (authors, title, volume, pages, doi) | No; the transcription slice reads a full-text copy |
+| `macdonald2000` | Crossref (authors, title, volume, pages, doi) | No; slice D2 could not reach a full-text copy (the publisher page is paywalled), so the 28 TEC and PEC pairs are not read against the article. They are verified by two entries that agree and by agreement within 5 percent with the Region 4 freshwater values whose source letter b cites the TEC and PEC (12 or more chemicals). A read against the article, or against a licensed copy, is still open |
 | `long1995` | Crossref (Environmental Management 19(1):81-97, doi 10.1007/BF02472006) | No; deferred benchmark source |
 | `noaasquirts` | NOAA repository record (Buchman 2008, OR&R Report 08-1, public domain) and the OR&R page recording the removal on April 4, 2024 | Yes (introduction and terms of use) |
 | `arcadis2001`, `spence2001` | As in the vadose note; Table R-8 read in the RISC5 guide | Fixture use only |

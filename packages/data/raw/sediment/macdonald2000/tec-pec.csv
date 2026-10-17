@@ -1,0 +1,33 @@
+# MacDonald, Ingersoll and Berger (2000), Archives of Environmental Contamination and Toxicology 39(1):20-31, doi 10.1007/s002440010075.
+# Numeric values only (threshold effect concentration, TEC, and probable effect concentration, PEC, in dry weight sediment); no table layout or prose is copied. The article is copyrighted.
+# First entry. A second entry is in tec-pec-entry2.csv (different order, entered in a separate pass) and a test compares the two.
+# The values were not read against a full-text copy of the article in this slice (none was reachable), so no page is recorded: the verification is the agreement of the two entries and the cross-check against the Region 4 freshwater values whose source letter b cites the Florida inland TEC and PEC (test/sediment.test.ts). Metals are mg/kg dry weight; organics are ug/kg dry weight.
+chemical,cas,code,unit,tec,pec
+Arsenic,7440-38-2,,mg/kg,9.79,33
+Cadmium,7440-43-9,,mg/kg,0.99,4.98
+Chromium,7440-47-3,,mg/kg,43.4,111
+Copper,7440-50-8,,mg/kg,31.6,149
+Lead,7439-92-1,,mg/kg,35.8,128
+Mercury,7439-97-6,,mg/kg,0.18,1.06
+Nickel,7440-02-0,,mg/kg,22.7,48.6
+Zinc,7440-66-6,,mg/kg,121,459
+Anthracene,120-12-7,,ug/kg,57.2,845
+Fluorene,86-73-7,,ug/kg,77.4,536
+Naphthalene,91-20-3,,ug/kg,176,561
+Phenanthrene,85-01-8,,ug/kg,204,1170
+Benz(a)anthracene,56-55-3,,ug/kg,108,1050
+Benzo(a)pyrene,50-32-8,,ug/kg,150,1450
+Chrysene,218-01-9,,ug/kg,166,1290
+Fluoranthene,206-44-0,,ug/kg,423,2230
+Pyrene,129-00-0,,ug/kg,195,1520
+Total PAHs,,TPAH,ug/kg,1610,22800
+Total PCBs,1336-36-3,,ug/kg,59.8,676
+Chlordane,57-74-9,,ug/kg,3.24,17.6
+Dieldrin,60-57-1,,ug/kg,1.9,61.8
+Sum DDD,,DDD,ug/kg,4.88,28
+Sum DDE,,DDE,ug/kg,3.16,31.3
+Sum DDT,,DDT,ug/kg,4.16,62.9
+Total DDTs,,DDTR,ug/kg,5.28,572
+Endrin,72-20-8,,ug/kg,2.22,207
+Heptachlor epoxide,1024-57-3,,ug/kg,2.47,16
+Lindane (gamma-BHC),58-89-9,,ug/kg,2.37,4.99

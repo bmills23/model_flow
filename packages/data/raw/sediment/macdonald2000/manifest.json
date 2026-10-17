@@ -1,0 +1,20 @@
+{
+  "edition": "2026-10-16",
+  "retrieved": "2026-10-17",
+  "files": [
+    {
+      "file": "tec-pec.csv",
+      "role": "values",
+      "reference": "macdonald2000",
+      "bytes": 1838,
+      "sha256": "b45b25d9f302427e66d57368a47154216327bb00f25aaccbaf01651057683491"
+    },
+    {
+      "file": "tec-pec-entry2.csv",
+      "role": "values",
+      "reference": "macdonald2000",
+      "bytes": 910,
+      "sha256": "2692d67eaeff3218ef78afd234c97aa2183cbe8deaddcf60206a587081ee7c56"
+    }
+  ]
+}

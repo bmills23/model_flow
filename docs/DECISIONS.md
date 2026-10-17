@@ -543,3 +543,38 @@ computed 1.0000000000000002; the legacy plume-underflow check takes its depth fr
 Screening thresholds in the note's warning table (99 percent reach capture, 95 percent depth capture, a
 30-day residence time, groundwater above the mixing upstream flow, a factor of 2 on the Darcy flux) are
 screening choices, not rulings, as in M2 and M3.
+
+M8 slice D2 (sediment benchmark data build, 2026-10-17) implementation choices, none overturning a ruling
+above:
+- **Region 4 PDF.** Fetched 2026-10-17; the bytes match the checksum recorded on 2026-10-16
+  (SHA-256 `7c89bc7c...2d0889`, 1,284,613 bytes). Tables 2a, 2b and 2c are on PDF pages 81 to 89. The CSVs
+  are written by `scripts/extract-r4-sediment.ts` from `pdftotext -layout`, with blank cells placed by the
+  horizontal position of each token against its page's column headings; every row carries its PDF page. The
+  extraction was reviewed row by row against the page text, and the build tests read spot values from the
+  pages.
+- **Basis of a value.** The report gives the unit in the notes under each table, by source letter, and the
+  gray shading that also marks dry weight cells is not in the extracted text, so the letter decides the
+  basis. Letters whose note states no unit are inferred and flagged `basisInferred`: Table 2a k (section
+  heading: 1 percent OC), Table 2b d and j (dry weight, as the identical Florida coastal and New York
+  citations are in Table 2a), Table 2b h (unused). A Table 2a source l value is dry weight except a wildlife
+  based row, which the note makes 1 percent OC. A cell with no source letter takes the letter of the other
+  value in its row, flagged inferred (one cell: Triphenyl phosphate marine, 0.55). The inorganic sections
+  are dry weight whatever the letter (Table 2a g, an organic carbon note, is printed against iron and
+  manganese in mg/kg).
+- **Application of the values.** Section 6.2.3 of the report applies the Step 2 values as ug/kg dry weight,
+  which equals the 1 percent organic carbon normalization at f_oc 0.01. The rows keep the published basis
+  (`ocBasis` 0.01) and the criteria comparison normalizes by the user's f_oc, as the methods note says.
+- **Transposed CAS.** The report prints sulfide as 18946-25-8, which fails the CAS check digit; the
+  registry number of sulfide, 18496-25-8, passes it and is used, with the printed form kept in `casPrinted`.
+  Every other printed CAS number passes. Monobutyltin is printed `78763-54 -9` and is repaired by removing
+  the space.
+- **MacDonald values.** A full-text copy of the 2000 article was not reachable (the publisher page is
+  paywalled and no open copy was found), so the 28 TEC and PEC pairs are not read against it. They are
+  entered twice (`tec-pec.csv`, `tec-pec-entry2.csv`, a separate pass in another order) and a test checks that
+  the two agree, that each TEC is below its PEC, and that they agree within 5 percent with the Region 4
+  freshwater values whose source b is the TEC and PEC (12 or more chemicals, the report rounds to two or
+  three significant figures). No page is recorded per value. A read against the article is still open. NOAA
+  SQuiRTs were not used.
+- **Duplicates.** Rows the report prints twice (acrolein in two Table 2a sections with different values,
+  phenanthrene and 4-bromophenyl phenyl ether in two Table 2b sections with equal values) are both kept; ids
+  carry a `#2` suffix for the repeat.

@@ -1,0 +1,36 @@
+{
+  "edition": "2026-10-16",
+  "retrieved": "2026-10-17",
+  "files": [
+    {
+      "file": "report.pdf",
+      "role": "report",
+      "reference": "epa2018r4era",
+      "url": "https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf",
+      "pageDate": "2018-03-19",
+      "bytes": 1284613,
+      "sha256": "7c89bc7c5022595c9c09a79fc6726c173c3d2e7d2607186676e5dd52a42d0889"
+    },
+    {
+      "file": "table-2a.csv",
+      "role": "table",
+      "reference": "epa2018r4era",
+      "bytes": 16978,
+      "sha256": "4ef53c4c3a68517b8c728b639ee59578d6b3b8ebe0a98d59d9f639085caf99c6"
+    },
+    {
+      "file": "table-2b.csv",
+      "role": "table",
+      "reference": "epa2018r4era",
+      "bytes": 14020,
+      "sha256": "857a68ec0940945b4e9c9a587c610668383ea5bd5831ce01c8a7be4dddeee9ee"
+    },
+    {
+      "file": "table-2c.csv",
+      "role": "table",
+      "reference": "epa2018r4era",
+      "bytes": 4028,
+      "sha256": "7e4bac7a3548a40c588330ac81d5d754ef826c670dd8695a04e2f83ddd817706"
+    }
+  ]
+}
