@@ -530,6 +530,14 @@ Bryan to overturn) unless marked forced by a source:
 17. **Background (DEFAULT).** The upstream background enters as f Q_u C_u, consistent with the share of the
     flow it rides in; Table R-8 has zero background and cannot decide it.
 
+Slice E3 (registration and coupling, 2026-10-17) implementation choices, none overturning a ruling above:
+the runs for both methods are in `surfaceWater/scenario.ts` and take SI inputs (boundary conversions stay
+in `units.ts`); the surface water series becomes a swimming EPC through `surfaceWaterEpc` (one time gives a
+constant EPC, since M4 series need two samples); the modern run reads the bank either as a plane
+concentration function (computing `bankPlaneDischarge`) or as a given discharge series; a ratio within 1e-12
+of 1 is not an exceedance (unit-conversion rounding), found when a concentration equal to its criterion
+computed 1.0000000000000002; the legacy plume-underflow check takes its depth fraction from the caller.
+
 Screening thresholds in the note's warning table (99 percent reach capture, 95 percent depth capture, a
 30-day residence time, groundwater above the mixing upstream flow, a factor of 2 on the Darcy flux) are
 screening choices, not rulings, as in M2 and M3.

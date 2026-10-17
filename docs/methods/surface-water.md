@@ -11,8 +11,10 @@ method's `risc5Choice` metadata.
 Status: stage 1 done 2026-10-16 (this note, the reference check, the data plan, the fixture plan and the
 slice plan). Slice E1 (legacy kernels: units, box, Darcy discharge, reach length, sediment, checks;
 fixtures 1, 2, H3 and H4) and slice E2 (modern kernels: `bankPlaneDischarge`, the transient box, plug-flow
-downstream, the selectable-pore-water sediment; fixtures 3 H1 and H2, 4a to 4d, 5a to 5d) are implemented as
-kernels not yet registered; no coupling, criteria, data or web code exists yet. The scope calls below are the rulings recorded in
+downstream, the selectable-pore-water sediment; fixtures 3 H1 and H2, 4a to 4d, 5a to 5d) are implemented,
+and so is slice E3 (coupling to M1 and M4, criteria comparison, registration of `surfaceWater.well-mixed`
+and `surfaceWater.mass-discharge`; fixtures 5e, 6b and 6c; the two runs live in `surfaceWater/scenario.ts`).
+The criteria data builds (D1, D2) and the web code (W1, W2) do not exist yet, and fixture 6a waits on D1. The scope calls below are the rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M8 stage 1 block); those marked DEFAULT are open to Bryan's overturn.
 
 ## What the process is
@@ -279,6 +281,12 @@ to the criterion and flags ratios above 1. Ratios are never summed across chemic
 - **Sediment benchmarks**: dry-weight concentration against dry-weight benchmarks; a benchmark published at
   1 percent organic carbon is compared with C_sed times 0.01 / f_oc (`criteria.oc-normalized`).
 - **No criterion**: "no criterion" (`criteria.not-available`), never a pass.
+- **Exactly 1**: a ratio within 1e-12 of 1 is rounding from the unit conversions, not an exceedance, so a
+  concentration equal to its criterion is not flagged.
+- **Record shape** (`Criterion` in `surfaceWater/criteria.ts`, which D1 and D2 emit): chemical id, medium,
+  endpoint, value and unit as published, a `hardness` equation record (slope, intercept, conversion factor
+  constant or intercept plus slope times ln hardness), `siteSpecific`, `dissolved`, `waterType`, `ocBasis`
+  and `source` (`database` or `user`; a user value replaces a site-specific one through `withUserValue`).
 
 ## Criteria data (plan for the data slices)
 
@@ -353,7 +361,7 @@ Warnings (codes are part of the result; thresholds are screening choices, not ru
 | `surfaceWater.domenico-reach` | legacy, linked | the reach length came from the steady Domenico width; the M1 Domenico validity warnings for that geometry are attached |
 | `surfaceWater.quasi-steady` | legacy | the box's residence time V / (Q_mix + k V) exceeds 30 d, so ignoring storage may misstate a changing loading (compare with the modern method) |
 | `surfaceWater.reach-truncates-plume` | modern | the reach holds less than 99 percent of the full-width discharge |
-| `surfaceWater.plume-underflow` | both, linked | less than 95 percent of the full-depth discharge lies above the discharge thickness |
+| `surfaceWater.plume-underflow` | both, linked | less than 95 percent of the full-depth discharge lies above the discharge thickness (the modern run measures it on the bank plane; the legacy run takes the share from the caller's M1 plane check, `link.plumeDepthFraction`) |
 | `surfaceWater.low-dilution` | both | Q_gw exceeds f Q_u (groundwater supplies most of the mixing flow) |
 | `surfaceWater.above-solubility` | both | C_gw or C_sw exceeds the chemical's solubility |
 | `surfaceWater.sediment-not-quantified` | both | no Koc and no Kd for a chemical |
