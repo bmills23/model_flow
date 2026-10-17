@@ -1,0 +1,65 @@
+/* Cleanup levels screen. Reuses the vadose, transport and risk layout, controls, panel and table classes. */
+.cleanup .cleanup-medium {
+  margin-top: 12px;
+  min-width: 0;
+}
+
+.cleanup .cleanup-medium h3 {
+  margin: 0 0 6px;
+}
+
+.cleanup .cleanup-table-wrap {
+  min-width: 0;
+}
+
+.cleanup .cleanup-table {
+  width: 100%;
+}
+
+.cleanup .cleanup-table td.level {
+  white-space: nowrap;
+}
+
+.cleanup .cleanup-pathways {
+  margin-top: 12px;
+}
+
+/* Narrow screens: each row becomes a labelled block so nothing scrolls sideways. */
+@media (max-width: 720px) {
+  .cleanup .cleanup-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .cleanup .cleanup-table,
+  .cleanup .cleanup-table tbody,
+  .cleanup .cleanup-table tr,
+  .cleanup .cleanup-table th,
+  .cleanup .cleanup-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .cleanup .cleanup-table tr {
+    border-top: 1px solid var(--border, currentColor);
+    padding: 8px 0;
+  }
+
+  .cleanup .cleanup-table th,
+  .cleanup .cleanup-table td {
+    border: 0;
+    padding: 2px 0;
+    text-align: left;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .cleanup .cleanup-table td::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+  }
+}

@@ -13,7 +13,7 @@ Status: methods note, reference check, fixture plan and slice plan done 2026-10-
 leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) and slice C2 (direct back-calculation in
 `cleanup/direct.ts` and `cleanup/targets.ts`, H1, H2, fixtures 3 and 4, identities d and g), the data slice D2, slice C3 (the solver and modeled chains in `cleanup/solve.ts` and
 `cleanup/chains.ts`) and slice C4 (registration of `cleanup.rags-b-1991`, `cleanup.rags-e-f-2014` and
-`cleanup.ssg-leaching` in `cleanup/index.ts`) landed on the branch; no web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
+`cleanup.ssg-leaching` in `cleanup/index.ts`) landed on the branch. Slice W1 (the screen at `#/cleanup` with direct levels, `apps/web/src/cleanup/`) landed; modeled chains and MCL targets (W2) and the SSG panel (W3) are not built yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
 (2026-10-16, M5 block), open to Bryan's overturn.
 
 ## What the process is

@@ -48,7 +48,7 @@ export type BuildResult =
   | { ok: true; legacy: LegacyScenarioInput; modern: ModernScenarioInput; notes: string[] }
   | { ok: false; errors: string[] };
 
-const LEGACY_PRESET: Record<PresetId, LegacyPresetId> = {
+export const LEGACY_PRESET: Record<PresetId, LegacyPresetId> = {
   resident: 'residentAdult',
   worker: 'worker',
   child: 'residentChild',
@@ -70,9 +70,9 @@ const MODERN_PRESET: Record<PresetId, ModernReceptorBoundary> = {
   child: MODERN_CHILD_BOUNDARY,
 };
 
-const mediumLabel = (key: string): string => MEDIA.find((m) => m.key === key)?.label ?? key;
+export const mediumLabel = (key: string): string => MEDIA.find((m) => m.key === key)?.label ?? key;
 
-class Errors {
+export class Errors {
   list: string[] = [];
   add(msg: string): void {
     if (!this.list.includes(msg)) this.list.push(msg);
@@ -80,7 +80,7 @@ class Errors {
 }
 
 /** A blank entry is `undefined`; anything else must be a finite number not below zero. */
-function parse(text: string | undefined, label: string, errors: Errors): number | undefined {
+export function parse(text: string | undefined, label: string, errors: Errors): number | undefined {
   if (text === undefined || text.trim() === '') return undefined;
   const v = Number(text.trim());
   if (!Number.isFinite(v) || v < 0) {
@@ -90,7 +90,7 @@ function parse(text: string | undefined, label: string, errors: Errors): number 
   return v;
 }
 
-function legacyChemical(rec: ChemicalRecord): LegacyChemical {
+export function legacyChemical(rec: ChemicalRecord): LegacyChemical {
   const t = rec.tox;
   const out: LegacyChemical = {};
   if (t.sfo) out.sfo = sfFromPerMgKgDay(t.sfo.value);
@@ -104,7 +104,7 @@ function legacyChemical(rec: ChemicalRecord): LegacyChemical {
   return out;
 }
 
-function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefined) {
+export function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefined) {
   const t = rec.tox;
   const v = rec.phys?.values;
   return modernChemical({
@@ -141,7 +141,7 @@ interface Site {
   outdoorTime: number | undefined;
 }
 
-function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
+export function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
   const p = (text: string, what: string) => parse(text, `${tag}, ${what}`, errors);
   return {
     soilSkinArea: p(rf.soilSkinArea, 'soil skin area'),
@@ -156,7 +156,7 @@ function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
   };
 }
 
-function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundary {
+export function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundary {
   const base = LEGACY_PRESETS[LEGACY_PRESET[preset]];
   const et: Partial<Record<PathwayId, number>> = { ...base.etHoursPerDay };
   const ef: Partial<Record<PathwayId, number>> = { ...base.efDaysPerYrByPathway };
@@ -185,7 +185,7 @@ function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundary {
   return b;
 }
 
-function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundary {
+export function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundary {
   const base = MODERN_PRESET[preset];
   const stage = (st: LifeStageBoundary): LifeStageBoundary => {
     const et: Partial<Record<PathwayId, number>> = { ...st.etHoursPerDay };
