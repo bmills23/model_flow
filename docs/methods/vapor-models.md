@@ -9,8 +9,9 @@ labels are not used here. Where a choice is RISC5's rather than a paper's, it is
 and becomes the method's `risc5Choice` metadata.
 
 Status: stage 1 (methods note, reference check, data plan, fixture plan and slice plan) done 2026-10-16.
-Slice V0 (vapor chemical data in `packages/data`) is built; no engine or web code exists yet for this
-process. The scope calls below are the DEFAULT rulings
+Slices V0 (vapor chemical data in `packages/data`) and V1 (shared kernels in
+`packages/engine/src/processes/vapor`: units, Henry correction, building coupling, source vapor) are built;
+no registered method or web code exists yet for this process. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
