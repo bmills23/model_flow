@@ -205,7 +205,7 @@ bracketed root).
    more. If |g(ln C*)| <= 1e-9 the shortcut is the root (for a monotone metric any root is the root);
    otherwise go on to the bracket. This is exact for every linear chain and costs two forward runs.
 3. **Bracket.** Upward (g(u_ref) < 0): if the chain has a cap (pure substance for soil, solubility for a
-   dissolved source), evaluate at the cap; if g is still negative the target is not reachable, otherwise
+   dissolved source), evaluate at the cap; if g is still negative (by more than the 1e-9 acceptance) the target is not reachable, and a metric at the cap within 1e-9 of the target returns the cap itself; otherwise
    [u_ref, ln cap] brackets the root. Without a cap, `bracketRoot` on C with growth 10 and at most 40
    expansions. Downward (g(u_ref) > 0): `bracketRoot` on the reciprocal w = 1 / C with growth 10 and at
    most 40 expansions (40 decades), which finds a concentration small enough that the metric falls below
