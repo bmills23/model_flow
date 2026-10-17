@@ -228,9 +228,12 @@ R-4 and the Appendix J example (see "Fixture plan").
 
 ## Legacy method: outdoor air box (`outdoorAir.box`)
 
-Citation: `astme1739` (the box with a mixing height and wind speed is the ambient-air form of the ASTM
-RBCA guide; slice V3 confirms the attribution from a public reproduction of the standard's equations, and
-if it cannot, records that the method rests on the RISC5 choice alone and asks for a ruling).
+Citations: `arcadis2001` and `spence2001` (Table R-6 and the RISC5 review). The attribution of the box
+to the ASTM RBCA guide (`astme1739`) could not be confirmed in slice V3: a public search found only state
+rules that adopt RBCA-style equations as images (Illinois 35 IAC 742 Appendix C, which lists a wind speed
+default of 225 cm/s and a source width W parallel to the wind), not the standard's own equations, which
+are purchased. The method therefore rests on the RISC5 choice alone and does not cite `astme1739`. RULING
+NEEDED: whether to cite the standard anyway on the strength of the Illinois variable list.
 
 Emissions enter a box over the source, of length L along the wind, width W across it and height
 delta (the breathing zone), ventilated by a wind of speed u and fully mixed (RISC5 choice: the receptor is
@@ -380,11 +383,29 @@ average emission flux over an exposure interval T for a semi-infinite uniformly 
 boundary layer and no degradation, divided into a dispersion factor Q/C (g/(m^2 s) per kg/m^3), and a
 mass-limit VF for a source of finite depth. The apparent diffusivity is the Jury-type
 D_A = D_g / R_g in the notation of the Jury section below, so the infinite-source VF is exactly the
-time-average of the `vapor.jury-bam` flux in its limiting case (identity test). Q/C is user-entered by
-default (DEFAULT ruling 14); the guidance's tabulated city values or the 2002 regression are added in
-slice V3 only if transcribed from the documents with their table references. The equations and defaults
-(T, the soil defaults) are transcribed by slice V3 from `epa1996ssg` with page and equation numbers in
-the code comments; the RSL user's guide renders them only as images.
+time-average of the `vapor.jury-bam` flux in its limiting case (identity test). Q/C is user-entered, with
+the guidance default 68.81 (Los Angeles, 0.5 acre) and Table 3 of `epa1996ssg` (29 cities, six source
+areas) transcribed as data in `processes/outdoorAir/qOverC.ts`; the 2002 regression is not used.
+
+Transcribed in slice V3 from `epa1996ssg` (Part 2, EPA SEMS copy read 2026-10-17), in SI in the code with
+the page and equation numbers in the comments. Equation 6 (page 23), with the printed 3.14 replaced by pi
+(a 0.02 percent difference, DECISIONS.md):
+
+    VF = (Q/C) (pi D_A T)^(1/2) / (2 rho_b D_A) x 1e-4 m^2/cm^2
+    D_A = [(theta_a^(10/3) D_i H' + theta_w^(10/3) D_w) / n^2] / (rho_b K_d + theta_w + theta_a H')
+
+with defaults T = 9.5e8 s, rho_b 1.5 g/cm^3, n 0.43, theta_w 0.15, f_oc 0.006 and Q/C 68.81. The mass-limit
+form is Equation 55 (Section 2.6.3, page 60), VF = (Q/C) T / (rho_b d_s) with T in years times 3.15e7 s/yr
+in the document; here T is in seconds and the same exposure interval serves both forms (the document uses
+30 years in Equation 55 and 9.5e8 s in Equation 6). The document says the Equation 55 value is a minimum
+value for VF (the infinite-source model may be too conservative when it gives the smaller VF), so the
+code uses the larger of the two. The apparent diffusivity equals D_g / R_g of the Jury section (identity
+test, 1e-12). Checked against the VF column of Table 3-A (toluene, ethylbenzene, the two
+dichlorobenzenes, styrene, 1,2,4-trichlorobenzene) using Tables 36, 37 and 39: the six values agree with
+the printed two-figure values within 0.8 to 3.6 percent; the residual
+is the rounding of the printed inputs and values. Appendix H's benzene comparison table (apparent
+diffusion 5.82e-4 cm^2/s, VF 1.82e3 m^3/kg) was not reproduced from its printed inputs (they give 2.1e-3
+cm^2/s) and is not used.
 
 ## Modern emission source: Jury behaviour-assessment volatilization (`vapor.jury-bam`)
 
@@ -394,8 +415,14 @@ The problem posed by `jury1983` and generalized by `jury1990` (abstract read: a 
 concentration in a finite soil layer, covered by a layer of clean soil, moving by vapor and liquid
 diffusion with linear equilibrium sorption and first-order degradation, losing mass to the atmosphere by
 vapor diffusion through a stagnant air boundary layer). Neither paper's full text was read, so the closed
-form below is derived in this note for the zero water flux case (DEFAULT ruling 15) and is checked by
-identities, not by the papers' tables.
+form below is derived in this note for the zero water flux case (DEFAULT ruling 15). Slice V3 checked it
+three ways (all in `test/vapor-jury.test.ts`): against the published reduced solution and the published
+Jury et al. (1983) flux with boundary layer, both as reproduced in Appendix C of `epa1996ssg` (Equations
+1, 7 and 9; agreement 1e-12 and 1e-9; the printed Equation 9 carries the opposite sign because that
+document measures depth downward); against an independent Crank-Nicolson finite-volume solution of the
+same governing equation with a cover, a finite layer, a boundary layer and decay (agreement 4e-6, 1e-5
+and 6e-5 relative in three cases); and by mass balance, quadrature of the closed-form profile plus the
+cumulative emission against the initial mass (1e-6). The papers' own tables remain unchecked.
 
 Total concentration C_T = R_g C_g with the gas-referenced capacity R_g = rho_b K_d / H + theta_w / H +
 theta_a, gas-referenced diffusion D_g (Millington-Quirk, as above) and effective diffusivity
@@ -687,7 +714,7 @@ tests first, runs the engine test file alone, then the gate once.
 | V0 data | `packages/data/raw/vapor/epa2004je/` (transcribed CSV, manifest with the PDF's SHA-256), `packages/data/src/vapor/` (build, class list, formulas), `packages/data/generated/vapor/vapor-chemicals.json`, `packages/data/test/vapor.test.ts`, root `data:check` coverage | benzene, TCE and PCE rows match the PDF; every merged row's RSL values are byte-identical to `chemicals.json`; k_w classes cover BTEX and naphthalene | none | none |
 | V1 shared kernels | `packages/engine/src/processes/vapor/{units,source,building,henry,index}.ts`, `test/vapor-building.test.ts`, `test/vapor-source.test.ts` | J&E alpha limits (identity 8d); Q_soil hand case; source vapor for soil, soil gas, groundwater, residual phase; Henry correction reproduces the EPA example's 8,122 cal/mol, 2.68e-3 and 0.115 | none (reuses `vadose` diffusion and partitioning helpers) | none |
 | V2 legacy indoor (built; registration deferred to V4) | `vapor/legacyJe.ts`, `vapor/dominantLayer.ts`, `test/vapor-legacy.test.ts`, `test/fixtures/vapor/{README.md,risc-r3-r5.json,appendix-j.json}` | Tables R-3, R-4, R-5 at 0.5 percent; Appendix J at 0.01; identity 8a | V1 | `vapor.je-1991`, `vapor.dominant-layer-1998` |
-| V3 outdoor and Jury | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF transcription check against a value printed in `epa1996ssg` if one is found | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
+| V3 outdoor and Jury (built; registration deferred to V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` |
 | V5 DeVaull | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction and coupled hand cases; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` |
 | V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
@@ -695,7 +722,7 @@ tests first, runs the engine test file alone, then the gate once.
 
 References each method cites (all must be `used` when registered; V7 flips them, or each registering
 slice flips its own): `johnsonettinger1991`, `millingtonquirk1961` (already used), `epa1996ssg` (already
-used), `johnson1998`, `astme1739` (subject to the V3 check), `epa2004je`, `epa2017je`, `vangenuchten1980`
+used), `johnson1998`, `astme1739` (not cited: V3 could not confirm it), `epa2004je`, `epa2017je`, `vangenuchten1980`
 (already used), `devaull2007`, `api2012biovapor`, `epa2015vi`, `epavisl`, `epa2015pvi`, `lahvis2013`,
 `jury1983`, `jury1990`, and `epa2002ssg` only if the Q/C regression is used.
 
@@ -724,8 +751,8 @@ Stage 3 (web), new route `#/vapor`, lazy-loaded like `#/risk`:
 | `jury1983` | Crossref (as in the vadose note) | No |
 | `jury1990` | Crossref, with abstract | Abstract only |
 | `yao2011`, `yao2013`, `abreu2005`, `abreu2006`, `abreu2009` | Crossref | No; cited only in warnings |
-| `epa1996ssg` | As in the saturated-source note | The VF section is to be read in slice V3 (the EPA server was unreachable on 2026-10-16) |
-| `astme1739` | Not verified beyond its designation | No (a purchased standard) |
+| `epa1996ssg` | As in the saturated-source note | Part 2 Section 2.4.2 (Equation 6, Table 3 Q/C), Section 2.6.3 (Equation 55), Table 3-A, Tables 36, 37 and 39 and Appendix C (Jury equations 1 to 12), read in slice V3 on 2026-10-17 |
+| `astme1739` | Not verified beyond its designation; V3 found no public reproduction of the equations | No (a purchased standard); not cited by any method |
 | `arcadis2001`, `spence2001` | As in the vadose note; Tables R-3 to R-6 read in the RISC5 guide | Fixture use only |
 
 `biovapor2010` (software, year not verified) is superseded for citation by `api2012biovapor` and stays

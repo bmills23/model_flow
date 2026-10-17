@@ -26,5 +26,5 @@ the tolerance; the cumulative reading gives 0.9553.
 ## Named exception: Table R-6
 
 Table R-6 (groundwater to outdoor air) prints 2.27e-3 mg/m^3, equal to Table R-5's indoor result to three
-figures, and no box reading reproduces it (the box gives 2.54e-6 mg/m^3). It belongs to slice V3 and is
+figures, and no box reading reproduces it (the box gives 2.54e-6 mg/m^3). It is asserted by slice V3 (`test/outdoor-air.test.ts`, box hand value at 1e-9) and is
 treated as a transcription error in the review; it is never widened into a tolerance.

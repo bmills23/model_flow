@@ -500,11 +500,15 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
     6 ft and 15 ft separations stored in feet as published (forced by the source); precluding factors
     force further assessment.
 14. **Outdoor air.** Legacy box C = sum(E) / (u delta W) (an area flux over the footprint gives F L / (u
-    delta)). Modern SSG volatilization factor with Q/C user-entered by default; tabulated Q/C values are
-    added only when transcribed from the documents with references.
+    delta)). Modern SSG volatilization factor (Equations 6 and 55 of `epa1996ssg`) with Q/C user-entered
+    and the guidance default 68.81; Table 3 of the guidance (29 cities, six areas) is transcribed as data.
+    The box could not be attributed to `astme1739` from a public source, so it cites the RISC5 review
+    references only and a ruling on citing the standard is requested. The SSG equation prints pi as 3.14;
+    the code uses pi (0.02 percent).
 15. **Jury volatilization:** the closed form derived in the note for zero water flux (semi-infinite soil,
-    clean cover, finite layer, optional boundary layer, first-order decay), checked by identities because
-    neither paper's full text was read; no boundary layer by default.
+    clean cover, finite layer, optional boundary layer, first-order decay), checked against the published reduced
+    solution and Jury 1983 flux as reproduced in `epa1996ssg` Appendix C, an independent finite-volume
+    solution and mass balance, because neither paper's full text was read; no boundary layer by default.
 16. **Outdoor interface for M7:** `outdoorAirEpc({ box, emissions, direct })`, with emissions as area
     fluxes or mass rates into the box and direct contributions as concentrations from dispersion-factor
     models; contributions keep their origins, and mixing a box emission and a Q/C contribution for the
@@ -516,7 +520,9 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
     absolute on the normalized concentrations (they are figure readings). EPA 2004 Appendix C example:
     half a unit in the third printed figure, viscosity not asserted. VISL calculator values: the engine
     rounds to the printed figures. Identities 1e-12 (1e-9 for limits, 1e-6 for quadrature mass balances);
-    hand cases 1e-9.
+    hand cases 1e-9. SSG volatilization factor against Table 3-A: 4 percent (the printed values have two
+    significant figures and the table's Koc, H' and diffusivity inputs are rounded; observed 0.8 to 3.6
+    percent). Jury against the finite-volume solution: 2e-4 (observed 6e-5 at most).
 
 Fixture readings recorded in the note: Table R-3 takes its source soil from Table R-4's source block and
 places the lens outside the 2.60 m vadose zone (L_T 2.80 m); Table R-5 is a diffusion-only run (Q_soil 0);

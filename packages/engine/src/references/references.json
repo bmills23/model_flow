@@ -340,7 +340,7 @@
     "identifier": "EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996",
     "tags": ["vadose", "saturatedSource", "outdoorAir", "particulate"],
     "url": "https://semspub.epa.gov/work/HQ/207.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture. Equation 6 and Table 3 (Q/C), Equation 55, Table 3-A (VF), Table 37 and Appendix C (Jury equations) read on 2026-10-17 for the volatilization factor."
   },
   {
     "key": "epa2002ssg",
