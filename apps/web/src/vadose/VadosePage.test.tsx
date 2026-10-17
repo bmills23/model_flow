@@ -2,8 +2,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearVadoseFeed, getVadoseFeed } from './feed';
 import { VadosePage } from './VadosePage';
+import { clearVadoseVaporFeed, getVadoseVaporFeed } from '../vapor/feeds';
 
-afterEach(() => clearVadoseFeed());
+afterEach(() => {
+  clearVadoseFeed();
+  clearVadoseVaporFeed();
+});
 
 async function loaded() {
   render(<VadosePage />);
@@ -88,5 +92,15 @@ describe('VadosePage', () => {
     fireEvent.click(screen.getByRole('button', { name: /use as groundwater source/i }));
     expect(getVadoseFeed()?.method).toBe('legacy');
     expect(screen.getByRole('link', { name: /open groundwater transport/i })).toBeTruthy();
+  }, 20000);
+
+  it('offers the source pore water to the vapor screen', async () => {
+    await loaded();
+    expect(getVadoseVaporFeed()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /use as vapor source/i }));
+    const feed = getVadoseVaporFeed();
+    expect(feed?.kind).toBe('poreWater');
+    expect(feed && 'series' in feed && feed.series.times.length).toBeGreaterThan(2);
+    expect(screen.getByRole('link', { name: /open vapor intrusion/i })).toBeTruthy();
   }, 20000);
 });

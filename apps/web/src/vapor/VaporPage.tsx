@@ -1,9 +1,40 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
 import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './chemicals';
+import { layerBands, profileCurves } from './chartData';
 import { runVapor, type VaporOutcome } from './compute';
+import {
+  getSaturatedVaporFeed,
+  getVadoseVaporFeed,
+  getVaporRiskFeed,
+  getWaterTableFeed,
+  setVaporRiskFeed,
+  subscribeSaturatedVaporFeed,
+  subscribeVadoseVaporFeed,
+  subscribeVaporRiskFeed,
+  subscribeWaterTableFeed,
+} from './feeds';
+import { DEFAULT_OUTDOOR, runOutdoor, type OutdoorForm } from './outdoor';
+import { ProfileChart } from './ProfileChart';
+import {
+  DEFAULT_PVI,
+  afMediaFor,
+  runAttenuation,
+  runPvi,
+  type AfOptions,
+  type PviForm,
+} from './screening';
+import { constantEpcs, vaporEpcs, type SourceSeries, type VaporEpcs } from './series';
+import {
+  AttenuationPanel,
+  OutdoorPanel,
+  PviPanel,
+  RiskFeedPanel,
+  SourcePanel,
+  type SourceChoice,
+} from './VaporPanels';
 import {
   DEFAULT_FORM,
   FOUNDATIONS,
@@ -171,8 +202,69 @@ export function VaporPage() {
   const outcome = useMemo(() => (parsed.ok ? runVapor(parsed) : null), [parsed]);
   // An input the form refuses keeps the last good result on screen.
   const [lastGood, setLastGood] = useState<VaporOutcome | null>(null);
+  const [lastParsed, setLastParsed] = useState<Extract<typeof parsed, { ok: true }> | null>(null);
   if (outcome && outcome !== lastGood) setLastGood(outcome);
+  if (parsed.ok && parsed !== lastParsed) setLastParsed(parsed);
   const shown = outcome ?? lastGood;
+  const shownParsed = parsed.ok ? parsed : lastParsed;
+
+  const [outdoorForm, setOutdoorForm] = useState<OutdoorForm>(DEFAULT_OUTDOOR);
+  const [af, setAf] = useState<AfOptions>({
+    medium: 'groundwater',
+    depthBelowFoundation: 0,
+    preferential: false,
+  });
+  const [pvi, setPvi] = useState<PviForm>(DEFAULT_PVI);
+  const [choice, setChoice] = useState<SourceChoice>('entered');
+  const vadoseFeed = useSyncExternalStore(
+    subscribeVadoseVaporFeed,
+    getVadoseVaporFeed,
+    getVadoseVaporFeed,
+  );
+  const tableFeed = useSyncExternalStore(
+    subscribeWaterTableFeed,
+    getWaterTableFeed,
+    getWaterTableFeed,
+  );
+  const satFeed = useSyncExternalStore(
+    subscribeSaturatedVaporFeed,
+    getSaturatedVaporFeed,
+    getSaturatedVaporFeed,
+  );
+  const riskHeld = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
+
+  const held = useMemo(() => {
+    const out: { choice: Exclude<SourceChoice, 'entered'>; source: SourceSeries }[] = [];
+    if (tableFeed) out.push({ choice: 'waterTable', source: tableFeed });
+    if (vadoseFeed) out.push({ choice: 'vadose', source: vadoseFeed });
+    if (satFeed) out.push({ choice: 'saturated', source: satFeed });
+    return out;
+  }, [tableFeed, vadoseFeed, satFeed]);
+  const active = held.find((h) => h.choice === choice)?.source ?? null;
+  const feedEpcs = useMemo<VaporEpcs | null>(
+    () => (active && shownParsed ? vaporEpcs(form, shownParsed, active, outdoorForm) : null),
+    [active, shownParsed, form, outdoorForm],
+  );
+  const outdoor = useMemo(
+    () => (shownParsed && shown ? runOutdoor(form, shownParsed, shown, outdoorForm) : null),
+    [form, shownParsed, shown, outdoorForm],
+  );
+  const lt = shown?.modern.ok
+    ? shown.modern.result.LT
+    : shown?.legacy.ok
+      ? shown.legacy.result.LT
+      : 0;
+  const afResult = useMemo(() => {
+    const media = afMediaFor(form.source);
+    const medium = media.some((m) => m.value === af.medium) ? af.medium : media[0]?.value;
+    return medium === undefined
+      ? runAttenuation(form, { ...af, depthBelowFoundation: lt })
+      : runAttenuation(form, { ...af, medium, depthBelowFoundation: lt });
+  }, [form, af, lt]);
+  const pviResult = useMemo(
+    () => runPvi(pvi, lt, Number(form.floorArea)),
+    [pvi, lt, form.floorArea],
+  );
   const stale = !parsed.ok;
   const r3 = isR3Case(form);
   const method = form.method;
@@ -192,6 +284,29 @@ export function VaporPage() {
     const row = chemicals.find((c) => c.id === id);
     if (row) setForm((f) => ({ ...f, ...chemicalFields(row) }));
   };
+
+  const riskMethod = form.method;
+  const riskChemical = chemicals.find((c) => c.id === form.chemicalId) ?? null;
+  const sendToRisk = (): void => {
+    if (!shownParsed || !shown || riskChemical === null) return;
+    const r: Pick<VaporEpcs, 'indoor' | 'outdoor'> =
+      feedEpcs ?? constantEpcs(form, shownParsed, shown, outdoorForm, riskMethod);
+    const indoor = r.indoor[riskMethod];
+    if (!indoor) return;
+    const outdoorSpec = r.outdoor[riskMethod];
+    setVaporRiskFeed({
+      chemicalId: riskChemical.id,
+      label: `${riskChemical.name}, ${METHOD_LABEL[riskMethod]}${active ? `, ${active.label}` : ', entered source'}`,
+      indoor,
+      ...(outdoorSpec ? { outdoor: outdoorSpec } : {}),
+    });
+  };
+  const riskReason =
+    riskChemical === null
+      ? 'Pick a chemical from the database above to send its air concentrations; the Table R-3 test values are not a chemical.'
+      : feedEpcs && !feedEpcs.indoor[riskMethod]
+        ? `The ${riskMethod} method did not run on this source series.`
+        : null;
 
   const warnings = shown
     ? (['legacy', 'modern'] as const).flatMap((m) => {
@@ -639,6 +754,69 @@ export function VaporPage() {
                   </section>
                 );
               })()}
+
+              {(() => {
+                const curves = profileCurves(shown);
+                if (curves.length === 0 || !shownParsed) return null;
+                const names = form.layers.map((l, i) => l.name || `Stratum ${i + 1}`);
+                const cap =
+                  form.source === 'groundwater'
+                    ? (shownParsed.legacy.capillaryFringe?.thickness ??
+                      shownParsed.modern.capillary?.height)
+                    : undefined;
+                const bands = layerBands(
+                  shownParsed.modern.strata,
+                  names,
+                  shownParsed.modern.floorDepth,
+                  cap,
+                );
+                return (
+                  <section className="panel" aria-label="Vapor profile">
+                    <h2>Vapor profile through the soil</h2>
+                    <ProfileChart curves={curves} bands={bands} />
+                  </section>
+                );
+              })()}
+
+              <OutdoorPanel
+                value={outdoorForm}
+                onChange={(patch) => setOutdoorForm((o) => ({ ...o, ...patch }))}
+                result={outdoor}
+              />
+
+              <AttenuationPanel
+                source={form.source}
+                options={af}
+                onChange={(patch) => setAf((a) => ({ ...a, ...patch }))}
+                indoor={{
+                  legacy: shown.legacy.ok ? shown.legacy.result.concentration : undefined,
+                  modern: shown.modern.ok ? shown.modern.result.concentration : undefined,
+                }}
+                result={afResult}
+              />
+
+              <PviPanel
+                value={pvi}
+                onChange={(patch) => setPvi((p) => ({ ...p, ...patch }))}
+                result={pviResult}
+              />
+
+              <SourcePanel
+                choice={active ? choice : 'entered'}
+                onChoice={setChoice}
+                held={held}
+                epcs={feedEpcs}
+                active={active}
+              />
+
+              <RiskFeedPanel
+                chemicalName={riskChemical?.name ?? null}
+                canSend={riskChemical !== null && riskReason === null}
+                reason={riskReason}
+                onSend={sendToRisk}
+                held={riskHeld ? riskHeld.label : null}
+                mode={METHOD_LABEL[riskMethod]}
+              />
 
               <section className="panel" aria-label="Warnings and notes">
                 <h2>Warnings and notes ({warnings.length})</h2>

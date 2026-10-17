@@ -16,7 +16,7 @@ reproduce) and V4 (`vapor.je-epa`; the Appendix C example reproduces) are built.
 `vapor.je-epa` are registered in the default registry (V4 registered them together, because the registry
 test requires a modern method for every process that has a legacy one), and V4 flipped
 `johnsonettinger1991`, `johnson1998`, `epa2004je` and `epa2017je` to `used`. The outdoor air and Jury
-descriptors (V3) were registered by V7. No web code exists yet. The scope calls below are the DEFAULT rulings
+descriptors (V3) were registered by V7. The web slices W1 to W3 (the `#/vapor` screen with its plot, outdoor air, attenuation factor and petroleum screen panels, and the feeds to and from the other screens) are built. The scope calls below are the DEFAULT rulings
 recorded in `docs/DECISIONS.md` (2026-10-16, M6 vapor models scope, stage 1), open to Bryan's overturn.
 
 ## What the process is
@@ -774,8 +774,16 @@ Stage 3 (web), new route `#/vapor`, lazy-loaded like `#/risk`:
 | Slice | Files | Failing tests first | Depends on |
 |---|---|---|---|
 | W1 screen (built) | `apps/web/src/vapor/` (inputs: source kind, chemical picker over `vapor-chemicals.json`, layers with texture presets, building, method switch legacy or modern with comparison), `App.tsx` route and nav link, `App.test.tsx` | route renders; legacy and modern results for the R-3 inputs match the engine; warnings listed; zero overflow at 390x844 and 1280, light and dark | V7 |
-| W2 plots and screens | depth-attenuation plot (vapor concentration versus height above the source for each method, log scale, layer bands), indoor and outdoor results, AF and PVI panels | plot data equals the engine profiles; PVI verdict and reasons shown | W1 |
-| W3 feeds | feeds from `#/transport` (water table under the building), `#/vadose` and `#/saturated` (soil source, flux) into `#/vapor`, and from `#/vapor` into `#/risk` indoor and outdoor EPCs with origin `vapor.<method>` | the risk screen shows the vapor origin; a series feed produces a series EPC | W1 |
+| W2 plots and screens (built) | depth-attenuation plot (vapor concentration versus height above the source for each method, log scale, layer bands), indoor and outdoor results, AF and PVI panels | plot data equals the engine profiles; PVI verdict and reasons shown | W1 |
+| W3 feeds (built) | feeds from `#/transport` (water table under the building), `#/vadose` and `#/saturated` (soil source, flux) into `#/vapor`, and from `#/vapor` into `#/risk` indoor and outdoor EPCs with origin `vapor.<method>` | the risk screen shows the vapor origin; a series feed produces a series EPC | W1 |
+
+Slice readings W2 and W3 (built 2026-10-17, recorded in `docs/DECISIONS.md`): the engine profile has one
+point per layer boundary, so the plot draws straight segments between them on the log axis; the outdoor
+panel runs the legacy box over the steady flux through the whole column to grade and the SSG volatilization
+factor for a soil source only; the attenuation factor panel is offered for soil gas and groundwater sources
+only; the water-table feed is taken at the transport receptor point (the building is assumed to stand there);
+the risk feed carries the origins `vapor.je-1991` and `vapor.je-epa` for indoor air and `outdoorAir.box` and
+`outdoorAir.ssg-vf-1996` for outdoor air (the producing method ids, as the coupling section states).
 
 ## References and verification (2026-10-16)
 

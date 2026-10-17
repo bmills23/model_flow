@@ -1,9 +1,13 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
+import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { RiskPage } from './RiskPage';
 
-afterEach(() => clearWellFeed());
+afterEach(() => {
+  clearWellFeed();
+  clearVaporRiskFeed();
+});
 
 async function loaded() {
   render(<RiskPage />);
@@ -116,6 +120,41 @@ describe('RiskPage', () => {
     const table = await screen.findByRole('table', { name: /exposure point concentrations/i });
     expect(within(table).getAllByText('transport.modern').length).toBeGreaterThan(0);
     expect(within(card).queryByLabelText(/groundwater \(mg\/L\)/i)).toBeNull();
+  }, 30000);
+
+  it('shows the vapor origin when indoor and outdoor air come from the vapor screen', async () => {
+    const YR = 365 * 86400;
+    setVaporRiskFeed({
+      chemicalId: '71-43-2',
+      label: 'Vapor run, legacy',
+      indoor: {
+        kind: 'series',
+        series: { times: [0, 10 * YR, 20 * YR], values: [2e-8, 1e-8, 5e-9] },
+        origin: 'vapor.je-1991',
+      },
+      outdoor: { kind: 'constant', value: 3e-9, origin: 'outdoorAir.box' },
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    fireEvent.click(within(card).getByRole('checkbox', { name: /vapor screen indoor air/i }));
+    fireEvent.click(within(card).getByRole('checkbox', { name: /vapor screen outdoor air/i }));
+    const table = await screen.findByRole('table', { name: /exposure point concentrations/i });
+    expect(within(table).getAllByText('vapor.je-1991').length).toBeGreaterThan(0);
+    expect(within(table).getAllByText('outdoorAir.box').length).toBeGreaterThan(0);
+    expect(within(card).queryByLabelText(/^indoor air \(mg\/m3\)/i)).toBeNull();
+  }, 30000);
+
+  it('does not offer the vapor feed for a chemical it was not run for', async () => {
+    setVaporRiskFeed({
+      chemicalId: '108-88-3',
+      label: 'Vapor run',
+      indoor: { kind: 'constant', value: 1e-8, origin: 'vapor.je-1991' },
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    expect(within(card).queryByRole('checkbox', { name: /vapor screen indoor air/i })).toBeNull();
   }, 30000);
 
   it('does not offer the well feed when the transport screen has not produced one', async () => {

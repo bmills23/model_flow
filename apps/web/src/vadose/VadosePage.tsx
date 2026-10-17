@@ -7,6 +7,8 @@ import { budgetRows, massRateKgPerDay } from './chartData';
 import { lastYearMean, type RunSummary, type VadoseMethod } from './compute';
 import { DepthProfileChart } from './DepthProfileChart';
 import { getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
+import { getVadoseVaporFeed, setVadoseVaporFeed, subscribeVadoseVaporFeed } from '../vapor/feeds';
+import { vadoseVaporSource } from './vaporFeed';
 import {
   DEFAULT_FORM,
   R7_PUBLISHED,
@@ -131,6 +133,11 @@ export function VadosePage() {
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
   const { outcome, lastGood, computing } = useVadoseResult(request);
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
+  const vaporHeld = useSyncExternalStore(
+    subscribeVadoseVaporFeed,
+    getVadoseVaporFeed,
+    getVadoseVaporFeed,
+  );
 
   // An engine input error keeps the last good result (and the scenario it belongs to) on screen.
   const engineError = outcome && !outcome.ok && parsed.ok ? outcome.error : null;
@@ -158,6 +165,16 @@ export function VadosePage() {
       method: run.method,
       label: `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}`,
     });
+  };
+
+  const useAsVaporSource = (): void => {
+    if (!run) return;
+    setVadoseVaporFeed(
+      vadoseVaporSource(
+        run,
+        `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}, source pore water`,
+      ),
+    );
   };
 
   const sourceStats = (r: RunSummary) => {
@@ -604,6 +621,30 @@ export function VadosePage() {
                     {feedHere
                       ? `Groundwater transport can use: ${feed.label}.`
                       : `Groundwater transport holds an earlier snapshot (${feed.label}). Press the button to update it.`}
+                  </p>
+                )}
+              </section>
+
+              <section className="panel" aria-label="Vapor coupling">
+                <h2>Feed the vapor intrusion screen</h2>
+                <p>
+                  The vapor screen can take the pore water of this source as its soil source: the
+                  vapor concentration at each time is Henry&apos;s constant times the source pore
+                  water, run through the steady vapor methods.
+                </p>
+                <p>
+                  <button type="button" className="btn" onClick={useAsVaporSource} disabled={stale}>
+                    Use as vapor source
+                  </button>{' '}
+                  {vaporHeld && (
+                    <a className="button" href="#/vapor">
+                      Open vapor intrusion
+                    </a>
+                  )}
+                </p>
+                {vaporHeld && (
+                  <p className="muted" role="status">
+                    The vapor screen can use: {vaporHeld.label}.
                   </p>
                 )}
               </section>

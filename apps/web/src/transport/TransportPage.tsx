@@ -12,6 +12,8 @@ import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
+import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
+import { waterTableSource } from './vaporFeed';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
 
@@ -72,6 +74,11 @@ export function TransportPage() {
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const [wellMethod, setWellMethod] = useState<MethodKey>('modern');
   const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
+  const tableHeld = useSyncExternalStore(
+    subscribeWaterTableFeed,
+    getWaterTableFeed,
+    getWaterTableFeed,
+  );
 
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
   const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
@@ -596,6 +603,45 @@ export function TransportPage() {
                 {wellHeld && (
                   <p className="muted" role="status">
                     Exposure and risk can use: {wellHeld.label}.
+                  </p>
+                )}
+              </section>
+              <section className="panel" aria-label="Vapor intrusion">
+                <h2>Use the water table concentration for vapor intrusion</h2>
+                <p>
+                  The vapor intrusion screen can take the groundwater concentration at the water
+                  table as its source, with the building standing at the receptor point: the
+                  solution is evaluated at that point at the water table, not averaged over the well
+                  screen. It uses the method chosen above.
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={computing || !parsed.ok}
+                    onClick={() => {
+                      if (!parsed.ok) return;
+                      const k = keys.includes(wellMethod) ? wellMethod : 'modern';
+                      setWaterTableFeed(
+                        waterTableSource(
+                          parsed.scenario,
+                          k,
+                          `Water table under the receptor point, ${SERIES[k].label}, ${form.timeYr} years`,
+                        ),
+                      );
+                    }}
+                  >
+                    Use as vapor groundwater source
+                  </button>{' '}
+                  {tableHeld && (
+                    <a className="button" href="#/vapor">
+                      Open vapor intrusion
+                    </a>
+                  )}
+                </p>
+                {tableHeld && (
+                  <p className="muted" role="status">
+                    The vapor screen can use: {tableHeld.label}.
                   </p>
                 )}
               </section>

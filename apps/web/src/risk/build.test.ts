@@ -4,6 +4,7 @@ import { buildInputs } from './build';
 import { runRisk } from './compute';
 import { defaultForm, defaultReceptor, newChemicalRow, type RiskForm } from './form';
 import type { WellFeed } from '../transport/wellFeed';
+import type { VaporRiskFeed } from '../vapor/feeds';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -30,8 +31,8 @@ function formWith(
 
 const benzeneWater = () => formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
 
-function built(form: RiskForm, well: WellFeed | null = null) {
-  const r = buildInputs(form, db, well);
+function built(form: RiskForm, well: WellFeed | null = null, vapor: VaporRiskFeed | null = null) {
+  const r = buildInputs(form, db, well, vapor);
   if (!r.ok) throw new Error(r.errors.join('; '));
   return r;
 }
@@ -108,6 +109,63 @@ describe('buildInputs', () => {
     const out = runRisk(r);
     expect(out.legacy.ok && out.legacy.result.epcs[0]![0]!.kind).toBe('series');
     expect(out.modern.ok && out.modern.result.startTimes[0]).not.toBeNull();
+  });
+
+  describe('vapor screen feed', () => {
+    const vaporFeed = (over: Partial<VaporRiskFeed> = {}): VaporRiskFeed => ({
+      chemicalId: '71-43-2',
+      label: 'Vapor run, legacy',
+      indoor: {
+        kind: 'series',
+        series: { times: [0, 10 * YR, 20 * YR], values: [2e-8, 1e-8, 5e-9] },
+        origin: 'vapor.je-1991',
+      },
+      outdoor: { kind: 'constant', value: 3e-9, origin: 'outdoorAir.box' },
+      ...over,
+    });
+    const withVapor = (indoor: boolean, outdoor: boolean) => ({
+      ...formWith([{ id: '71-43-2', conc: {} }]),
+      chemicals: [
+        {
+          ...newChemicalRow(db.byId.get('71-43-2')!),
+          indoorFromVapor: indoor,
+          outdoorFromVapor: outdoor,
+        },
+      ],
+    });
+
+    it('takes indoor air from the vapor series and keeps the producing method as its origin', () => {
+      const r = built(withVapor(true, false), null, vaporFeed());
+      const epcs = r.legacy.receptors[0]!.chemicals[0]!.epcs;
+      expect(epcs.indoorInhalation).toMatchObject({ kind: 'series', origin: 'vapor.je-1991' });
+      expect(epcs.outdoorInhalation).toBeUndefined();
+      const out = runRisk(r);
+      expect(out.legacy.ok && out.legacy.result.epcs[0]![0]!.kind).toBe('series');
+    });
+
+    it('takes outdoor air with its own origin', () => {
+      const r = built(withVapor(false, true), null, vaporFeed());
+      expect(r.modern.receptors[0]!.chemicals[0]!.epcs.outdoorInhalation).toMatchObject({
+        kind: 'constant',
+        origin: 'outdoorAir.box',
+      });
+    });
+
+    it('asks for a vapor result when a chemical is set to use one and none matches', () => {
+      for (const feed of [null, vaporFeed({ chemicalId: '108-88-3' })]) {
+        const r = buildInputs(withVapor(true, false), db, null, feed);
+        expect(r.ok).toBe(false);
+        if (!r.ok) expect(r.errors.join(' ')).toMatch(/vapor/i);
+      }
+    });
+
+    it('says when the feed has no outdoor air', () => {
+      const { outdoor: _omitted, ...noOutdoor } = vaporFeed();
+      void _omitted;
+      const r = buildInputs(withVapor(false, true), db, null, noOutdoor);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.errors.join(' ')).toMatch(/outdoor/i);
+    });
   });
 
   it('asks for a well result when a chemical is set to use one and none exists', () => {

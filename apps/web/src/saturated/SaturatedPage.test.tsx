@@ -2,8 +2,12 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearSaturatedFeed, getSaturatedFeed } from './feed';
 import { SaturatedPage } from './SaturatedPage';
+import { clearSaturatedVaporFeed, getSaturatedVaporFeed } from '../vapor/feeds';
 
-afterEach(() => clearSaturatedFeed());
+afterEach(() => {
+  clearSaturatedFeed();
+  clearSaturatedVaporFeed();
+});
 
 async function loaded() {
   render(<SaturatedPage />);
@@ -71,5 +75,15 @@ describe('SaturatedPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /use as groundwater source/i }));
     expect(getSaturatedFeed()?.method).toBe('legacy');
     expect(screen.getByRole('link', { name: /open groundwater transport/i })).toBeTruthy();
+  }, 20000);
+
+  it('offers the pore water above the water table to the vapor screen', async () => {
+    await loaded();
+    expect(getSaturatedVaporFeed()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /use as vapor source/i }));
+    const feed = getSaturatedVaporFeed();
+    expect(feed?.kind).toBe('poreWater');
+    expect(feed && 'constant' in feed && feed.constant).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: /open vapor intrusion/i })).toBeTruthy();
   }, 20000);
 });

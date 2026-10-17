@@ -12,6 +12,12 @@ import {
   subscribeSaturatedFeed,
   type SaturatedMethod,
 } from './feed';
+import {
+  getSaturatedVaporFeed,
+  setSaturatedVaporFeed,
+  subscribeSaturatedVaporFeed,
+} from '../vapor/feeds';
+import { saturatedVaporSource } from './vaporFeed';
 import { CASE_A, DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
 import { FED_MAX_STEPS, saturatedFedSteps } from './steps';
 import { useSaturatedResult } from './useSaturatedResult';
@@ -118,6 +124,11 @@ export function SaturatedPage() {
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
   const { outcome, lastGood, computing } = useSaturatedResult(request);
   const feed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
+  const vaporHeld = useSyncExternalStore(
+    subscribeSaturatedVaporFeed,
+    getSaturatedVaporFeed,
+    getSaturatedVaporFeed,
+  );
 
   // An engine input error keeps the last good result (and the scenario it belongs to) on screen.
   const engineError = outcome && !outcome.ok && parsed.ok ? outcome.error : null;
@@ -161,6 +172,13 @@ export function SaturatedPage() {
       label: `${caseA ? 'Hand case A' : 'Saturated soil source run'}, ${METHODS[feedable].short} method`,
     });
   };
+
+  const vaporSource = result?.runs[feedable]
+    ? saturatedVaporSource(
+        result.runs[feedable]!,
+        `${caseA ? 'Hand case A' : 'Saturated soil source run'}, ${METHODS[feedable].short} method, pore water above the water table`,
+      )
+    : null;
 
   const series = (kind: 'rate' | 'remaining'): TimeSeries[] =>
     shown.map((m) => ({
@@ -555,6 +573,38 @@ export function SaturatedPage() {
                     {feedHere
                       ? `Groundwater transport can use: ${feed.label}.`
                       : `Groundwater transport holds an earlier snapshot (${feed.label}). Press the button to update it.`}
+                  </p>
+                )}
+              </section>
+
+              <section className="panel" aria-label="Vapor coupling">
+                <h2>Feed the vapor intrusion screen</h2>
+                <p>
+                  The vapor screen can take the pore water of the part of the source above the water
+                  table (region 1) as its soil source, using the method chosen above. The part below
+                  the water table reaches vapor only through the groundwater transport screen.
+                </p>
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={stale || vaporSource === null}
+                    onClick={() => vaporSource && setSaturatedVaporFeed(vaporSource)}
+                  >
+                    Use as vapor source
+                  </button>{' '}
+                  {vaporHeld && (
+                    <a className="button" href="#/vapor">
+                      Open vapor intrusion
+                    </a>
+                  )}
+                </p>
+                {vaporSource === null && (
+                  <p className="muted">This source has no region above the water table.</p>
+                )}
+                {vaporHeld && (
+                  <p className="muted" role="status">
+                    The vapor screen can use: {vaporHeld.label}.
                   </p>
                 )}
               </section>

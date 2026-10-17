@@ -551,3 +551,43 @@ Slice V4 (modern EPA J&E, built 2026-10-17) readings, all verified against the A
   height 2.44, 3.66 or 1.30 m by foundation, 0.45 exchanges per hour, crack fraction 0.001, Q_soil / Q_B
   0.003). The commercial floor area (1,500 m^2) and mixing height (3 m, basement) are in the document but
   its commercial air exchange rate was not found, so no commercial preset is built; they are entered.
+
+## 2026-10-17: M6 web slices W2 and W3
+
+The `#/vapor` screen gained its plot and screening panels (W2) and its feeds (W3). No engine process changed.
+Rulings, DEFAULT (Bryan's to overturn):
+
+1. **The profile plot draws the engine's points.** Both indoor methods return one profile point per layer
+   boundary (three points for the Table R-3 case), so the plot joins them with straight segments on a log
+   concentration axis, with the strata between the source and the floor as bands, and offers the points as a
+   data table. It is not a smooth profile; no interpolation is invented.
+2. **Outdoor air on the vapor screen.** Legacy: the outdoor box (2.25 m/s wind, 2 m mixing height, 10 m box,
+   the Table R-6 inputs) over the steady diffusion flux from the legacy source vapor through the whole soil
+   column to grade (the legacy capillary fringe, when entered, is the lowest layer). Modern: the Soil
+   Screening Guidance volatilization factor, offered for a soil source only, with the deepest stratum as the
+   source soil and the soil's own porosity, moisture, density and Koc times f_oc; Q/C is entered (default
+   68.81). The factor treats the source as exposed at grade, so a buried source is warned
+   (`outdoorAir.ssg-surface-source`).
+3. **Attenuation factor panel.** The 2015 factors act on soil gas and groundwater, so a soil source has none
+   and the panel says so. Groundwater uses the entered Henry constant at 25 deg C (no temperature
+   correction). The depth below the foundation is the source to building distance of the indoor air run.
+4. **Petroleum screen panel.** Concentrations are optional entries; the separation defaults to the source to
+   building distance and the shortest side to the side of a square floor of the entered area. The verdict,
+   the LNAPL indicators and the precluding factors are shown as the engine returns them.
+5. **Feeds into the vapor screen** (in memory for the session, like the existing feeds): the transport screen
+   offers the groundwater concentration at the water table under the receptor point (the building is taken
+   to stand there), 32 steps plus t = 0, built with `groundwaterWaterTableSeries`; the vadose screen offers
+   the source pore water series and the saturated screen the region 1 pore water as one value. A pore water
+   source gives the soil gas H times its concentration with the entered H at 25 deg C in both methods. A long
+   series is thinned to 120 times (ends kept). The steady methods are run at each time; `vapor.quasi-steady`
+   uses L_T^2 / D_T for the establishment time (D_T, the effective diffusivity of the column, not the
+   capacity-corrected one). The tables above the feed panel keep using the entered source. The vadose
+   volatilization flux series is not fed to the outdoor box (the vadose screen does not publish the
+   volatilization velocity); the outdoor series is the box over the steady flux from each time's source vapor.
+6. **Feed into exposure and risk.** The vapor screen sends the shown method's indoor and outdoor air for one
+   database chemical (a CAS id; the Table R-3 benzene test values are not a chemical and cannot be sent).
+   Indoor origins are `vapor.je-1991` and `vapor.je-epa`. Outdoor origins are the producing method ids
+   `outdoorAir.box` and `outdoorAir.ssg-vf-1996`, not `vapor.<method>`, because they are not vapor methods
+   (conflict with the slice brief's wording, resolved to the coupling section of the methods note). The
+   outdoor series comes from the legacy box only; the modern factor gives a constant from the entered soil
+   source. The risk screen offers a chemical's checkboxes only when the held feed is for that chemical.

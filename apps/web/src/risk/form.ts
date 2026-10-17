@@ -48,6 +48,9 @@ export interface ChemicalRow {
   conc: Partial<Record<Medium, string>>;
   /** Use the transport screen's well result as the groundwater concentration. */
   groundwaterFromWell: boolean;
+  /** Use the vapor screen's indoor and outdoor air for this chemical. */
+  indoorFromVapor: boolean;
+  outdoorFromVapor: boolean;
 }
 
 export interface RiskForm {
@@ -96,5 +99,7 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     dermalForm: rec.phys?.dermalForm,
     conc: {},
     groundwaterFromWell: false,
+    indoorFromVapor: false,
+    outdoorFromVapor: false,
   };
 }
