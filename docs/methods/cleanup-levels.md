@@ -9,7 +9,8 @@ legacy method's `risc5Choice` metadata. The process reuses the M4 exposure kerne
 (`docs/methods/exposure-and-risk.md`), the M1, M2 and M3 forward chains, and the root finders of
 `packages/engine/src/numerics/roots.ts`.
 
-Status: methods note, reference check, fixture plan and slice plan done 2026-10-16 (stage 1). No engine,
+Status: methods note, reference check, fixture plan and slice plan done 2026-10-16 (stage 1). Slice C1 (the SSG
+leaching functions in `cleanup/ssg.ts`, fixture 1, H3 and H4) landed on the branch; no other engine,
 data or web code yet. The scope calls below are the DEFAULT rulings recorded in `docs/DECISIONS.md`
 (2026-10-16, M5 block), open to Bryan's overturn.
 
