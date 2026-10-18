@@ -668,8 +668,11 @@
     "status": "planned",
     "authors": "Little, J.C.",
     "year": 1992,
-    "title": "[Applying the two-resistance theory to contaminant volatilization in showers]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "title": "Applying the two-resistance theory to contaminant volatilization in showers",
+    "venue": "Environmental Science & Technology",
+    "identifier": "26(7):1341-1349",
+    "doi": "10.1021/es00031a010",
+    "notes": "Title, author, journal, volume, issue, pages and DOI verified through Crossref (2026-10-18). Full text not read; M7 slice S0 reads it before the modern shower method is coded.",
     "tags": ["shower"]
   },
   {
@@ -691,8 +694,11 @@
     "status": "planned",
     "authors": "Walden, T., Spence, L.R.",
     "year": 1997,
-    "title": "[Irrigation water pathways]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "title": "Risk-based BTEX screening criteria for a groundwater irrigation scenario",
+    "venue": "Human and Ecological Risk Assessment: An International Journal",
+    "identifier": "3(4):699-722",
+    "doi": "10.1080/10807039709383722",
+    "notes": "Title, authors, journal, volume, issue, pages and DOI verified through Crossref (2026-10-18). Full text not read.",
     "tags": ["irrigation"]
   },
   {

@@ -872,3 +872,55 @@ Web form rulings that keep the two methods on one site (DEFAULT, Bryan's to over
   Q_soil = 0.003 x 0.45 / ER x Q_B (ruling 9, default c) and the legacy run, which has no such default,
   keeps using the pressure-difference inputs. The modern run has its own air viscosity field (default
   1.75e-4 g/(cm s), the engine default); the legacy field keeps 1.8e-4 (ruling 6).
+
+## 2026-10-18: M7 shower, irrigation and particulates scope (stage 1)
+
+The M7 track was approved to start with a methods note first. The note is
+`docs/methods/shower-irrigation-particulates.md` (scope, equations in our own words, coupling, the
+irrigation interface for M9, validity checks, fixture plan and the slice plan). No engine, data or web
+code is written in this stage. `little1992` and `waldenspence1997` received their verified published
+titles, venues and DOIs (Crossref, 2026-10-18), both still `planned`.
+
+Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
+
+1. **Scope.** M7 ships `shower.fc-1986`, `shower.little-1992`, `shower.rsl-household`,
+   `irrigation.sprinkler-fc`, `irrigation.pathways`, `particulate.box-emission`,
+   `particulate.ssg-pef-1996` and `particulate.ssg-pef-2002`. Deferred: plant uptake and soil
+   accumulation from irrigation (M9), probabilistic parameters (M10), construction-phase PEFs, multi-zone
+   house models and gas-phase dermal uptake.
+2. **One droplet kernel.** The two-resistance droplet fraction is shared by the legacy shower and the
+   sprinkler; the film coefficients scale from water vapour and carbon dioxide by the square root of the
+   molecular weight ratio, with the reference values verified against `foster1986` in slice S0 before
+   code.
+3. **Legacy stall is stagnant** (RISC5 choice): all mass volatilized during the shower is in the stall
+   from the start, no exchange; a stall value above H C_w is warned, not clipped.
+4. **Modern stall is Little's back-pressure and ventilation balance**, time-averaged over the time in
+   the stall, solved in closed form (linear first-order ODE); the equations in the note are checked line
+   by line against `little1992` in S0 before code.
+5. **The RSL household term** (`shower.rsl-household`, the Andelman factor as the RSL user's guide states
+   it) is a separate modern screening method so M5 can reproduce the RSL tap water levels for volatiles;
+   its factor and volatility criterion are transcribed from `epa2024rslug` in S0 (forced by the source
+   once read).
+6. **Sprinkler width.** The sprinkler emission enters the M6 box as a `massRate` through
+   `outdoorAirEpc` (no interface change); the box width is an input defaulting to the RISC5 1 m, warned
+   when left at the default.
+7. **No modern sprinkler model.** ROADMAP row I keeps Walden and Spence; the modern variant differs only
+   in its exposure factors, which come from `epa2011efh` once its chapters are read. Until then all
+   irrigation factors are required inputs, with no invented defaults.
+8. **Particulates feed the outdoor interface unchanged:** legacy as an `areaFlux` (entered PM10 flux, or
+   the wind-erosion flux, times the soil concentration), modern as a `direct` contribution C_s / PEF;
+   the existing `outdoorAir.mixed-dispersion` warning covers using both for one area.
+9. **F(x) is entered**, not computed; a digitised Cowherd function is deferred. The RISC5-listed SSG
+   defaults (V, U_m, U_t, F(x)) become presets only after S0 verifies each against `epa1996ssg`.
+10. **The 2002 Q/C regression is added as an option** for the PEF and, optionally, the M6 volatilization
+    factor; the M6 default (1996 table, M6 ruling 14) is unchanged.
+11. **Linearity.** Every M7 method is linear in its source concentration and returns its coefficient, so
+    M5 cleanup levels are the target over the coefficient (no root find); M5 wrappers land in slice E4.
+12. **M9 interface.** M7 exposes `IrrigationSource { origin, waterConcentration(t), applicationRate,
+    season?, chemical }`; uptake, interception and soil accumulation belong to M9.
+13. **Tolerances.** Identities 1e-12 (1e-9 for limits), hand cases 1e-9, published Little 1992, RSL and
+    SSG values at half a unit in the last printed figure, Table R-9 shower rows at 3 percent (or a named
+    exception if the review lacks the shower inputs).
+14. **Not cited until verified:** the CRC water viscosity source, the 1994 EQ memo and the Andelman paper
+    are not added to `references.json`; `astme1739` is not cited for the entered PM10 flux default, as in
+    M6 ruling 14.
