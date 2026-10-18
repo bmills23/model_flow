@@ -340,7 +340,7 @@
     "identifier": "EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996",
     "tags": ["vadose", "saturatedSource", "outdoorAir", "particulate", "cleanup"],
     "url": "https://semspub.epa.gov/work/HQ/207.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture. For M5 (2026-10-16; the SEMS host was unreachable, so the Internet Archive capture of the same URL was read): sections 2.5.1, 2.5.2, 2.5.5 and 2.5.6, equations 22 to 24 (soil-water partition) and 28 to 45 (dilution factor and mixing-zone depth), Table 1 (MCLs), Table 46 (inorganic Kd at pH 4.9, 6.8 and 8.0) and Appendix A Table A-1 (generic SSLs at DAF 20 and DAF 1). Equation 6 and Table 3 (Q/C), Equation 55, Table 3-A (VF), Table 37 and Appendix C (Jury equations) read on 2026-10-17 for the volatilization factor."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). Section 2.4.4 (soil saturation limit, equation 9), equation 22 (soil-water partitioning), Table 3-A and Tables 36 and 39 read on 2026-10-16 for the saturated-source fixture. For M5 (2026-10-16; the SEMS host was unreachable, so the Internet Archive capture of the same URL was read): sections 2.5.1, 2.5.2, 2.5.5 and 2.5.6, equations 22 to 24 (soil-water partition) and 28 to 45 (dilution factor and mixing-zone depth), Table 1 (MCLs), Table 46 (inorganic Kd at pH 4.9, 6.8 and 8.0) and Appendix A Table A-1 (generic SSLs at DAF 20 and DAF 1). Equation 6 and Table 3 (Q/C), Equation 55, Table 3-A (VF), Table 37 and Appendix C (Jury equations) read on 2026-10-17 for the volatilization factor. For M7 slice S0 (2026-10-18, Internet Archive capture of the same URL): section 2.4.5, equation 10 (PEF, printed page 32) with its defaults, and Appendix D (the EQ 1994 memo, with the PEF calculation sheets)."
   },
   {
     "key": "epa2002ssg",
@@ -353,7 +353,20 @@
     "identifier": "OSWER 9355.4-24, December 2002",
     "tags": ["vadose", "particulate", "cleanup"],
     "url": "https://semspub.epa.gov/work/HQ/175878.pdf",
-    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). For M5 (2026-10-16, Internet Archive capture of the same URL): section 4.2.3, equations 4-10 to 4-14 (partition equation, DAF, mixing-zone depth, mass-limit levels), which the RSL default-parameter file cites for its soil-to-groundwater defaults."
+    "notes": "Verified from the document cover (EPA SEMS copy, retrieved 2026-10-16). For M5 (2026-10-16, Internet Archive capture of the same URL): section 4.2.3, equations 4-10 to 4-14 (partition equation, DAF, mixing-zone depth, mass-limit levels), which the RSL default-parameter file cites for its soil-to-groundwater defaults. For M7 slice S0 (2026-10-18, Internet Archive capture): equation 4-5 (wind PEF, printed page 4-18) and the Q/C regression form of equations 5-6 and 5-15. The Q/C wind constants are in Appendix D, Exhibit D-2 (printed page D-6), a separate file (semspub.epa.gov/work/HQ/174068.pdf, Appendix D-E)."
+  },
+  {
+    "key": "eq1994pef",
+    "type": "guidance",
+    "status": "planned",
+    "authors": "Environmental Quality Management, Inc.",
+    "year": 1994,
+    "title": "Revisions to VF and PEF Equations",
+    "venue": "Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response",
+    "identifier": "Memorandum 5099-3, 11 July 1994",
+    "tags": ["particulate", "outdoorAir"],
+    "url": "https://semspub.epa.gov/work/HQ/207.pdf",
+    "notes": "Read as Appendix D of epa1996ssg (2026-10-18, Internet Archive capture): author C. Mann, file 5099-3, dated 11 July 1994; AREA-ST derivation of Q/C. Its 0.5-acre regression gave 101.8 before the revision; the PM10 sheet (Table 2) gives 90.74 for Minneapolis where the main text of epa1996ssg gives 90.80 (rounding, stated in the text)."
   },
   {
     "key": "epa1996ssgug",
@@ -524,10 +537,12 @@
     "key": "cowherd1985",
     "type": "method",
     "status": "planned",
-    "authors": "Cowherd, C., et al.",
+    "authors": "Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D.",
     "year": 1985,
-    "title": "[Rapid assessment of exposure to particulate emissions from surface contamination sites]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "title": "Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites",
+    "venue": "U.S. Environmental Protection Agency, Office of Health and Environmental Assessment",
+    "identifier": "EPA/600/8-85/002",
+    "notes": "Authors, title and report number read from the reference list of the 2002 supplemental soil screening guidance (epa2002ssg, 2026-10-18). The report itself was not read: the wind-erosion flux 0.036 (1 - V) (Um/Ut)^3 F(x) is verified only as reproduced in epa1996ssg equation 10 and epa2002ssg equation 4-5, and the F(x) function is not verified against this report.",
     "tags": ["particulate"]
   },
   {
@@ -659,7 +674,7 @@
     "authors": "Foster, S.A., Chrostowski, P.C.",
     "year": 1986,
     "title": "[Inhalation exposures to volatile organic contaminants in the shower]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
+    "notes": "Could not verify (2026-10-18): searches and Crossref found no record of a 1986 paper by these authors, and the title is still a descriptor, not a published title. The year may be wrong. Do not cite in a report until the published record is found.",
     "tags": ["shower"]
   },
   {
@@ -672,7 +687,7 @@
     "venue": "Environmental Science & Technology",
     "identifier": "26(7):1341-1349",
     "doi": "10.1021/es00031a010",
-    "notes": "Title, author, journal, volume, issue, pages and DOI verified through Crossref (2026-10-18). Full text not read; M7 slice S0 reads it before the modern shower method is coded.",
+    "notes": "Title, author, journal, volume, issue, pages and DOI verified through Crossref (2026-10-18). Full text not read in M7 slice S0 (2026-10-18; publisher page not accessible), so the mass balance in the method note is unverified against the paper.",
     "tags": ["shower"]
   },
   {

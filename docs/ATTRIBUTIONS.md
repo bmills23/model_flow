@@ -511,7 +511,8 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
-- Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites].
+- Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002.
+- Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf>
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
@@ -589,10 +590,11 @@ Every entry in the reference database, alphabetical by author.
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
 - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5. [used]
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013> [planned]
-- Cowherd, C., et al. (1985). [Rapid assessment of exposure to particulate emissions from surface contamination sites]. [planned]
+- Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002. [planned]
 - DeVaull, G.E. (2007). Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source. Environmental Science and Technology. 41(9):3241-3248. <https://doi.org/10.1021/es060672a> [used]
 - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203> [used]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
+- Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf> [planned]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78(4):259-280. <https://doi.org/10.1016/j.jconhyd.2005.05.010> [used]
 - Feenstra, S., Mackay, D.M., Cherry, J.A. (1991). A method for assessing residual NAPL based on organic chemical concentrations in soil samples. Ground Water Monitoring Review. 11(2):128-136. <https://doi.org/10.1111/j.1745-6592.1991.tb00374.x> [used]
