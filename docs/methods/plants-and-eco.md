@@ -201,7 +201,7 @@ What the data slice found, so the engine slices do not rediscover it:
   they are not entered here. Slice E3 did not read them either: the engine takes the per-surrogate derivation inputs
   of `wildlife.csv` (or user inputs) and does not carry a default receptor table.
 
-## TPH fraction cleanup levels (`tph.fractions`)
+## TPH fraction cleanup levels (`tph.tphcwg`, `tph.madep`)
 
 - Fraction sets: TPHCWG (`tphcwg1997`) aliphatic and aromatic equivalent carbon ranges, and MADEP
   (`madep2002`) carbon ranges. Each set is a mapping from fraction to a surrogate chemical record.
@@ -215,6 +215,14 @@ What the data slice found, so the engine slices do not rediscover it:
   cleanup levels CL_j from M5 (any M5 pathway set, including the modeled chains), the total level meeting a
   target hazard index HI_t is C_TPH = HI_t / sum_j( f_j / CL_j ). Each fraction is then checked against
   its own saturation limit at f_j C_TPH.
+- Implementation (slice E4): the two registered methods share one kernel and differ in the fraction set
+  and citation, which is what the legacy and modern pairing rule needs: `tph.tphcwg` (legacy, cites
+  `tphcwg1997`) and `tph.madep` (modern, cites `madep2002`). No default fraction ranges ship: the
+  carbon-range tables of the two sets were not read, so the caller supplies each fraction (label, family,
+  mass fraction) with its RSL surrogate record id, and a fraction with no id is unmapped. The engine
+  validates ids against the five RSL records. Per-fraction levels CL_j are those for a hazard quotient of
+  one; the forward run takes a callback that runs one fraction as its own chemical through M4. The
+  saturation check uses the pure-phase limit (mole fraction 1), F_sat = S (rho_b K_d + theta + theta_a H) / rho_b.
 - Fixture anchor: the M4 Table R-9 row for TPH aliphatic C12-C16 already reproduces; it fixes the
   per-fraction side.
 
@@ -272,7 +280,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 | E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.hhrap-2005` (done 2026-10-18, branch t-m9; the Trapp 2015 model was not verified, DECISIONS 11) | R1 |
 | E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type | E1 |
 | E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings (done 2026-10-18, branch t-m9) | D1, R1 |
-| E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check | R1 |
+| E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check (done 2026-10-18, branch t-m9; DECISIONS 16) | R1 |
 | W1 | Web screen `#/plants-eco`: produce pathway inputs and results on the risk screen, eco HQ table, TPH composition editor; CDP check at 390x844 with zero overflow, light and dark | E2, E3, E4 |
 | G | Docs close: methods note status, ROADMAP M9 row, HANDOFF, references moved to `used` or `data` | W1 |
 
@@ -284,5 +292,5 @@ D1, R1 run in parallel; E1 and E4 then run in parallel; E2 and E3 follow; W1 las
 |---|---|
 | `epaecosslguidance` | `used` since slice E3 (wildlife dose model and screening-only status; Attachment 4-1 not read). Added as `planned`; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
 | `epaecossl` | `used` since slice E3 (cited by `eco.ecossl-2005`), `data` since slice D1: documents page URL, its 21 documents, cover dates and directive numbers read 2026-10-18 |
-| `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1. `sample1996` is `used` since slice E3 (cited by `eco.benchmark-hq` as the expected user benchmark source; text not read) |
+| `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1. `sample1996` is `used` since slice E3 (cited by `eco.benchmark-hq` as the expected user benchmark source; text not read); `tphcwg1997` and `madep2002` are `used` since slice E4 (cited by `tph.tphcwg` and `tph.madep` for the fraction concept; the documents were not read) |
 | `epa2005hhrap`, `epa2011efh`, `epa2024rsl` | Existing; used as described above |

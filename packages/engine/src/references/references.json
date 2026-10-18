@@ -779,25 +779,25 @@
   {
     "key": "tphcwg1997",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "Total Petroleum Hydrocarbon Criteria Working Group",
     "year": 1997,
     "title": "Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5",
     "tags": ["cleanup"],
     "venue": "Amherst Scientific Publishers, Amherst, Massachusetts",
-    "notes": "Series title and volume years verified from the AEHS Foundation series page and the EPA HERO records (retrieved 2026-10-18): volumes dated 1997 (3, 4), 1998 (1, 2) and 1999 (5). Volume titles differ slightly between those sources and ISBNs conflict, so no per-volume title or ISBN is recorded; cite the specific volume once its title page is read."
+    "notes": "Series title and volume years verified from the AEHS Foundation series page and the EPA HERO records (retrieved 2026-10-18): volumes dated 1997 (3, 4), 1998 (1, 2) and 1999 (5). Volume titles differ slightly between those sources and ISBNs conflict, so no per-volume title or ISBN is recorded; cite the specific volume once its title page is read. Cited by tph.tphcwg as the source of the TPHCWG fraction concept; the volumes were not read and no fraction range or value ships."
   },
   {
     "key": "madep2002",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "Massachusetts Department of Environmental Protection",
     "year": 2002,
     "title": "Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach",
     "tags": ["cleanup"],
     "venue": "Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup",
     "identifier": "Policy #WSC-02-411, October 31, 2002",
-    "notes": "Title, policy number and date from the mass.gov listing of the policy (retrieved 2026-10-18); the PDF itself returned 403 and was not read."
+    "notes": "Title, policy number and date from the mass.gov listing of the policy (retrieved 2026-10-18); the PDF itself returned 403 and was not read. Cited by tph.madep as the source of the MADEP fraction concept; no fraction range or value ships."
   },
   {
     "key": "rags1989",

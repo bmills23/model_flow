@@ -956,3 +956,12 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
     the engine carries none; callers supply the food web (from `ecossl.json` derivation rows or by hand).
     The three references above move to `used` because registered methods now cite them. `sample1996` is cited
     for its role as the expected user benchmark source; its text was not read and no value from it ships.
+
+### M9 slice E4 rulings (2026-10-18)
+
+16. **TPH fractions are two registered methods over one kernel; no default fraction table (DEFAULT).**
+    The registry requires a legacy and a modern method per process, so `tph.tphcwg` (legacy, `tphcwg1997`)
+    and `tph.madep` (modern, `madep2002`) register under process `tph` with identical arithmetic. The
+    TPHCWG and MADEP carbon-range tables were not read, so none ships: the caller names each fraction and
+    its RSL surrogate record id (ruling 9), and a fraction without one is reported as unmapped and excluded.
+    The saturation check uses the pure-phase limit (mole fraction 1) per fraction.

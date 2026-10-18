@@ -29,6 +29,7 @@ import {
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
 import { ecoBenchmarkHq, ecoEcossl2005 } from './processes/eco/index.js';
+import { tphMadep, tphTphcwg } from './processes/tph/index.js';
 import { plantUptakeLegacy, plantUptakeModern } from './processes/plantUptake/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
@@ -56,6 +57,7 @@ export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
 export * from './processes/plantUptake/index.js';
 export * from './processes/eco/index.js';
+export * from './processes/tph/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
 
@@ -91,3 +93,5 @@ registry.register(plantUptakeLegacy);
 registry.register(plantUptakeModern);
 registry.register(ecoBenchmarkHq);
 registry.register(ecoEcossl2005);
+registry.register(tphTphcwg);
+registry.register(tphMadep);

@@ -558,6 +558,33 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
   - U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
 
+### tph
+
+#### TPH fraction cleanup level with the TPHCWG aliphatic and aromatic fraction set
+
+- Kind: Legacy (RISC5 default)
+- Method id: `tph.tphcwg`
+- Summary: Treats total petroleum hydrocarbon as a set of TPHCWG aliphatic and aromatic equivalent carbon number fractions, each mapped to an RSL surrogate record; the total level meeting a target hazard index is the target over the sum of fraction mass fraction over fraction level, with each fraction checked against its own soil saturation limit.
+- Assumptions:
+  - The fraction set maps onto the five RSL TPH surrogate records; no toxicity values are entered, and a fraction without a surrogate is reported and excluded.
+  - Per-fraction levels are the levels for a hazard quotient of one from the cleanup process; fraction hazard quotients add because the RSL TPH records carry noncancer toxicity only.
+  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total.
+- RISC5 choice: RISC5 offers TPH fraction sets for forward risk and a total TPH level.
+- Sources:
+  - Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts.
+
+#### TPH fraction cleanup level with the MADEP carbon range fraction set
+
+- Kind: Modern
+- Method id: `tph.madep`
+- Summary: The same total level and saturation check as the TPHCWG method, with the fractions taken from the MADEP volatile and extractable petroleum hydrocarbon carbon ranges, each mapped to an RSL surrogate record.
+- Assumptions:
+  - The fraction set maps onto the five RSL TPH surrogate records; no toxicity values are entered, and a fraction without a surrogate is reported and excluded.
+  - Per-fraction levels are the levels for a hazard quotient of one from the cleanup process; fraction hazard quotients add because the RSL TPH records carry noncancer toxicity only.
+  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total.
+- Sources:
+  - Massachusetts Department of Environmental Protection (2002). Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach. Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup. Policy #WSC-02-411, October 31, 2002.
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -579,7 +606,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
-- Massachusetts Department of Environmental Protection (2002). Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach. Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup. Policy #WSC-02-411, October 31, 2002.
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
@@ -587,7 +613,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf>
-- Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts.
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
@@ -669,7 +694,7 @@ Every entry in the reference database, alphabetical by author.
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers]. [planned]
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
-- Massachusetts Department of Environmental Protection (2002). Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach. Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup. Policy #WSC-02-411, October 31, 2002. [planned]
+- Massachusetts Department of Environmental Protection (2002). Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach. Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup. Policy #WSC-02-411, October 31, 2002. [used]
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code]. [planned]
 - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200> [used]
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments]. [planned]
@@ -684,7 +709,7 @@ Every entry in the reference database, alphabetical by author.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]
 - Srinivasan, V., Clement, T.P., Lee, K.K. (2007). Domenico solution: is it valid?. Ground Water. 45(2):136-146. <https://doi.org/10.1111/j.1745-6584.2006.00281.x> [used]
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf> [planned]
-- Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts. [planned]
+- Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts. [used]
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals]. [planned]
 - Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027. [used]
 - U.S. Environmental Protection Agency (1989). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/1-89/002, December 1989. <https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf> [used]
