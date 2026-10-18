@@ -9,6 +9,9 @@ const VaporPage = lazy(() => import('./vapor/VaporPage').then((m) => ({ default:
 const SurfaceWaterScreen = lazy(() =>
   import('./surfaceWater/SurfaceWaterScreen').then((m) => ({ default: m.SurfaceWaterScreen })),
 );
+const HouseholdPage = lazy(() =>
+  import('./household/HouseholdPage').then((m) => ({ default: m.HouseholdPage })),
+);
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
 const CleanupPage = lazy(() =>
@@ -28,6 +31,7 @@ const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
 const VAPOR_HASH = '#/vapor';
 const SURFACE_WATER_HASH = '#/surface-water';
+const HOUSEHOLD_HASH = '#/household';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -44,11 +48,19 @@ export function App() {
   const onCleanup = hash === CLEANUP_HASH;
   const onVapor = hash === VAPOR_HASH;
   const onSurfaceWater = hash === SURFACE_WATER_HASH;
+  const onHousehold = hash === HOUSEHOLD_HASH;
 
   return (
     <div
       className={
-        onTransport || onVadose || onSaturated || onRisk || onVapor || onCleanup || onSurfaceWater
+        onTransport ||
+        onVadose ||
+        onSaturated ||
+        onRisk ||
+        onVapor ||
+        onCleanup ||
+        onSurfaceWater ||
+        onHousehold
           ? 'shell shell-wide'
           : 'shell'
       }
@@ -99,6 +111,13 @@ export function App() {
           >
             Surface water and sediment
           </a>
+          <a
+            className="nav-link"
+            href={HOUSEHOLD_HASH}
+            aria-current={onHousehold ? 'page' : undefined}
+          >
+            Shower, irrigation and particulates
+          </a>
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
@@ -126,6 +145,10 @@ export function App() {
         ) : onSurfaceWater ? (
           <Suspense fallback={<p className="muted">Loading the surface water screen...</p>}>
             <SurfaceWaterScreen />
+          </Suspense>
+        ) : onHousehold ? (
+          <Suspense fallback={<p className="muted">Loading the household screen...</p>}>
+            <HouseholdPage />
           </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
@@ -159,6 +182,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={SURFACE_WATER_HASH}>
                 Open surface water and sediment
+              </a>{' '}
+              <a className="button" href={HOUSEHOLD_HASH}>
+                Open shower, irrigation and particulates
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk

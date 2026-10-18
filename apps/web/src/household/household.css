@@ -1,0 +1,42 @@
+/* Household screen (shower, irrigation, particulates). Reuses the transport screen's layout classes. */
+.household .panel h2 {
+  text-transform: none;
+}
+
+.household .needs {
+  margin: 8px 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.household table.compare {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.household table.compare th,
+.household table.compare td {
+  text-align: left;
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.household table.compare tr[aria-current] th,
+.household table.compare tr[aria-current] td {
+  font-weight: 700;
+}
+
+.household .readouts dd {
+  overflow-wrap: anywhere;
+}
+
+.household table.compare .badge {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}

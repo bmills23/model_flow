@@ -9,6 +9,7 @@ import './risk/risk.css';
 import './cleanup/cleanup.css';
 import './vapor/vapor.css';
 import './surfaceWater/surfaceWater.css';
+import './household/household.css';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Missing #root element');

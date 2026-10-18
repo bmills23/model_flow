@@ -47,6 +47,25 @@ describe('App shell', () => {
     expect(link.getAttribute('href')).toBe('#/risk');
   });
 
+  it('links to the household screen from the navigation', () => {
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /shower, irrigation and particulates/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/household');
+  });
+
+  it('opens the household screen at #/household', async () => {
+    window.location.hash = '#/household';
+    render(<App />);
+    expect(
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: /shower, irrigation/i },
+        { timeout: 20000 },
+      ),
+    ).toBeTruthy();
+    window.location.hash = '';
+  });
+
   it('links to the cleanup levels screen from the navigation', () => {
     render(<App />);
     const link = screen.getAllByRole('link', { name: /cleanup levels/i })[0]!;

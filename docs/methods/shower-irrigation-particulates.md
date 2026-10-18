@@ -366,7 +366,7 @@ Stage 3 (web), new lazy route `#/household` (shower, irrigation, particulates):
 
 | Slice | Files | Failing tests first | Depends on |
 |---|---|---|---|
-| W1 screen | `apps/web/src/household/` (water and soil inputs, method switch with comparison, warnings), `App.tsx` route and nav | route renders; results equal the engine; zero overflow at 390x844 and 1280, light and dark | E4 |
+| W1 screen (built; opens blank for unsourced inputs, no chemical database or feeds yet) | `apps/web/src/household/` (water and soil inputs, method switch with comparison, warnings), `App.tsx` route and nav | route renders; results equal the engine; zero overflow at 390x844 and 1280, light and dark | E4 |
 | W2 feeds | from `#/transport` (well series) and `#/surface-water` into the screen; from the screen into `#/risk` (shower, outdoor, irrigation EPCs with origin) and `#/cleanup` | the risk screen shows the M7 origin; a series feed gives a series EPC | W1 |
 
 ## S0 verification results (2026-10-18)

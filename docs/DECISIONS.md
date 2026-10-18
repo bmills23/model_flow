@@ -1001,3 +1001,22 @@ process folders from the package root. Calls, open to overturn:
 6. **Particulate method inputs.** The method wrappers add a `volatile` flag that raises
    `particulate.volatile-chemical`; the `particulate.wind-below-threshold` warning of the note is not
    implemented (no bound was set from a source), and the note says so.
+
+## 2026-10-18: M7 slice W1, household screen
+
+Added the lazy route `#/household` (`apps/web/src/household/`, nav link and home button). Calls, open to overturn:
+
+1. **Blank by default.** Only the soil screening guidance wind erosion defaults (V, U_m, U_t, F(x), from the
+   engine constants verified in S0) are prefilled. The chemical, shower and sprinkler geometry, flows, the
+   household factor K and the box are entered, because no source supplied defaults for them; the screen lists
+   what is missing per section instead of showing an invented example.
+2. **Units at the boundary.** mg/L, mg/kg, mm, L/min, min, cm/h and mm/h are converted to SI before the engine
+   call (division by the factor, so the result is bit-equal to the engine at the SI inputs); results show mg/m3.
+3. **Film references.** Both blank uses the RISC5 choice and keeps the `shower.film-reference-unverified`
+   warning; entering both removes it; one alone is an error.
+4. **Irrigation.** Spray air is the registered `irrigation.sprinkler-fc`; ingestion and dermal EPCs are the
+   water concentration (E2 ruling 3). The application rate is optional and only feeds the M9 handoff object.
+5. **Comparison.** Each process shows every method in a table with the chosen one marked; the warnings panel
+   merges one warning code across the methods that raise it.
+6. **Not in W1.** No chemical database, no feeds from other screens or into risk and cleanup (slice W2), and
+   no series input (constant water and soil only).
