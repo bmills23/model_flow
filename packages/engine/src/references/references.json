@@ -741,7 +741,21 @@
     "authors": "U.S. Environmental Protection Agency",
     "year": 2003,
     "title": "Ecological Soil Screening Levels (Eco-SSLs)",
-    "notes": "Published 2003 to 2007 in multiple documents; the year is the first of the series.",
+    "notes": "Published 2003 to 2007 in multiple documents; the year is the first of the series. 21 interim final documents (17 metals, 4 organics) listed on the EPA documents page, confirmed 2026-10-18.",
+    "url": "https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents",
+    "tags": ["plantUptake"]
+  },
+  {
+    "key": "epaecosslguidance",
+    "type": "guidance",
+    "status": "planned",
+    "authors": "U.S. Environmental Protection Agency",
+    "year": 2005,
+    "title": "Guidance for Developing Ecological Soil Screening Levels",
+    "venue": "U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response",
+    "identifier": "OSWER Directive 9285.7-55, November 2003, revised February 2005",
+    "url": "https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-18).",
     "tags": ["plantUptake"]
   },
   {

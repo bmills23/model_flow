@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-17 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-18 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -205,7 +205,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered until the vapor, shower and surface-water models arrive.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - Dermal water uses the steady-state permeability with no lag time.
   - Soil bioavailability is 1 unless entered; route-to-route extrapolation is off unless switched on.
@@ -228,7 +228,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered until the vapor, shower and surface-water models arrive.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.
   - The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.
@@ -533,8 +533,9 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation].
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
+- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
+- U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
@@ -640,12 +641,13 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [planned]
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). [planned]
+- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents> [planned]
 - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [used]
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities. [planned]
+- U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf> [planned]
 - U.S. Environmental Protection Agency (2009). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA-540-R-070-002, OSWER 9285.7-82, January 2009. <https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf> [used]
 - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252> [used]
 - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf> [used]
