@@ -115,7 +115,8 @@ For i = 1..n and each input j draw u_ij independently from the seeded generator 
 Inputs are independent (no correlation). Outputs are the sorted sample with summary statistics: minimum,
 the 5th, 25th, 50th, 75th, 90th and 95th percentiles, maximum, arithmetic mean and standard deviation. The
 default n is 500, the count the Table R-2 comparison used (ruling 4, DEFAULT). Citations: `epa1997mc`,
-`rags3a2001`, `blackman2021`.
+`rags3a2001`, `blackman2021`, `wichura1988` (the normal and lognormal inverse CDF) and `hyndmanfan1996` (the
+reported percentiles).
 
 ## Modern method: Latin hypercube with Iman-Conover rank correlation (`uncertainty.lhs-ic`)
 
@@ -147,7 +148,7 @@ Checks: C must be positive definite (Cholesky succeeds); otherwise the run is re
 `uncertainty.correlation-not-positive-definite`. n must exceed k; with n < 5k the achieved correlation is
 noisy and `uncertainty.small-sample-correlation` is warned. The achieved Spearman matrix is reported next to
 the target. Default n is 1000 (ruling 5, DEFAULT). Citations: `mckay1979`, `imanconover1982`, `epa1997mc`,
-`rags3a2001`, `blackman2021`, `wichura1988`.
+`rags3a2001`, `blackman2021`, `wichura1988`, `hyndmanfan1996`.
 
 ### Sampling over transport parameters (ruling 6)
 
@@ -257,6 +258,9 @@ The engine runner is a pure function over rows so the same code runs in Vitest w
 | `uncertainty.sobol-correlated-inputs` | warning | Sobol run with correlations given |
 | `uncertainty.cleanup-censored` | warning | a probabilistic cleanup iteration not reachable below the cap |
 | `uncertainty.run-budget` | refusal | projected runtime above the hard cap |
+| `uncertainty.unknown-input` | refusal | a distribution is given for an id the method does not declare |
+| `uncertainty.bad-specification` | refusal | no distributions, n not a positive integer, correlation on the legacy method, or a correlated id without a distribution |
+| `uncertainty.non-finite-output` | iteration failure | the model returned, or the output extractor produced, a value that is not finite; counted with the failed iterations |
 
 ## Coupling
 
@@ -313,7 +317,9 @@ The engine runner is a pure function over rows so the same code runs in Vitest w
 (candidate data), `arcadis2001` (fixture), `morris1991` (deferred). The 2026-10-18 additions and the four
 title corrections (`mckay1979`, `imanconover1982`, `saltelli2010`, `morris1991`) were verified through
 Crossref; full texts were not read in stage 1. `sobol1993` keeps its descriptor title (no DOI found in
-stage 1). Every M10 reference stays `planned` until a slice cites it in a registered method.
+stage 1). A reference is flipped to `used` when a registered method cites it: `epa1997mc`, `rags3a2001`, `mckay1979`,
+`imanconover1982`, `wichura1988`, `hyndmanfan1996` and `blackman2021` are `used` since slice E4; the rest stay
+`planned` (or `fixture`) until a slice cites them.
 
 ## Appendix: slice plan for stages 2 and 3
 
@@ -325,7 +331,7 @@ Engine (each one worker, TDD):
   methods and the M1 groundwater methods, chain prefixing, registry tests. Depends on nothing; E4 needs it.
 - **E3 Samplers.** SRS, LHS mapping, Iman-Conover with Cholesky, seed streams, percentiles (definition 7).
   Fixtures 1, 3, 4. Depends on E1.
-- **E4 Runner and the two registered methods.** `uncertainty.srs-exposure`, `uncertainty.lhs-ic`, row
+- **E4 Runner and the two registered methods (done).** `uncertainty.srs-exposure`, `uncertainty.lhs-ic`, row
   runner with failure accounting, chunk-invariance test, Table R-2 fixture. Depends on E2, E3.
 - **E5 Sensitivity.** Saltelli and Jansen estimators, bootstrap, tornado, Spearman. Fixture 5. Depends on E3
   (and E4 for the registered `uncertainty.sobol-saltelli`).

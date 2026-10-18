@@ -933,5 +933,34 @@ M10 slice E3 (samplers, 2026-10-18) implementation choices, none overturning a r
   n <= k is refused with `uncertainty.correlation-not-positive-definite`; n < 5k warns
   `uncertainty.small-sample-correlation`. Ties in the reordering are broken by row index (stable).
 - Spearman uses average ranks for ties. Sample standard deviation uses the n - 1 denominator.
-- `wichura1988`, `hyndmanfan1996`, `mckay1979` and `imanconover1982` stay `planned` until E4 registers the
-  methods that cite them; E3 registers nothing.
+- E3 registered nothing; `wichura1988`, `hyndmanfan1996`, `mckay1979` and `imanconover1982` became `used` when
+  E4 registered the methods that cite them.
+
+M10 slice E4 (runner and registered methods, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/runner.ts` holds a pure row runner. `buildSampleMatrix` makes the whole matrix on
+  one thread (streams `<seed>:srs`, `<seed>:lhs`, `<seed>:ic`); `evaluateRows` applies the sampled values
+  through the declared setters to a copy of the base input and runs the model over any slice of rows, so
+  the web worker pool (W1) can call it per chunk; `runUncertainty` chunks (default 50) and writes back by
+  row index. Chunking never changes the result (tested at one and four chunks).
+- The registered methods `uncertainty.srs-exposure` (legacy) and `uncertainty.lhs-ic` (modern) are process
+  `montecarlo`. Their input is a specification holding the model descriptor object, the base input, the
+  distributions in SI keyed by input id, a scalar output extractor and optional n, seed, chunk size and
+  correlation (modern only). Defaults: n 500 and 1000, seed `model-flow`. Callers build one with
+  `uncertaintySpec`. A worker that cannot receive functions resolves the model and extractor by id on its
+  side and calls `evaluateRows` with the rows it was sent.
+- Refusals throw `UncertaintyError` (a `RangeError` with a `code`), matching the engine's other thrown
+  refusals. A correlation on the legacy method, an unknown id, an empty specification and a bad n are
+  refused as `uncertainty.bad-specification` or `uncertainty.unknown-input`. Both are added to the note's
+  warning table, as is `uncertainty.non-finite-output` (a non-finite model output marks that iteration
+  failed, like a thrown refusal).
+- The legacy exposure method now declares water ingestion rate and exposure frequency per receptor next to
+  body weight and exposure duration (E2 declared only the latter two), because the Table R-2 case samples
+  the water intake. An absent optional factor reads as NaN, so the registry contract needs a base input
+  that carries every declared factor.
+- Table R-2 fixture values are the printed ones (RISC5 guide, section R.7.2). The input distributions the
+  test samples are fixture-only central-tendency assumptions with no source; their spreads were widened
+  until the shape check (ruling 12) held, which makes the test a regression guard on the runner and the
+  exposure method, not evidence about RISC. See `packages/engine/test/fixtures/uncertainty/README.md`.
+- `hyndmanfan1996` and `wichura1988` are cited by both methods because both use the percentile
+  definition and the AS 241 inverse; the note's citation lists were updated in place.

@@ -921,7 +921,7 @@
   {
     "key": "mckay1979",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "McKay, M.D., Beckman, R.J., Conover, W.J.",
     "year": 1979,
     "title": "A comparison of three methods for selecting values of input variables in the analysis of output from a computer code",
@@ -934,7 +934,7 @@
   {
     "key": "imanconover1982",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Iman, R.L., Conover, W.J.",
     "year": 1982,
     "title": "A distribution-free approach to inducing rank correlation among input variables",
@@ -996,7 +996,7 @@
   {
     "key": "epa1997mc",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 1997,
     "title": "Guiding Principles for Monte Carlo Analysis",
@@ -1007,7 +1007,7 @@
   {
     "key": "rags3a2001",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2001,
     "title": "Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment",
@@ -1275,7 +1275,7 @@
   {
     "key": "blackman2021",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Blackman, D., Vigna, S.",
     "year": 2021,
     "title": "Scrambled linear pseudorandom number generators",
@@ -1301,7 +1301,7 @@
   {
     "key": "hyndmanfan1996",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Hyndman, R.J., Fan, Y.",
     "year": 1996,
     "title": "Sample quantiles in statistical packages",
@@ -1314,7 +1314,7 @@
   {
     "key": "wichura1988",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Wichura, M.J.",
     "year": 1988,
     "title": "Algorithm AS 241: the percentage points of the normal distribution",

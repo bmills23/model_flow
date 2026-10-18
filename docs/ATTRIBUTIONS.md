@@ -497,6 +497,51 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
   - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
 
+### montecarlo
+
+#### Simple random sampling of exposure parameters
+
+- Kind: Legacy (RISC5 default)
+- Method id: `uncertainty.srs-exposure`
+- Summary: Independent simple random draws of exposure parameters only (fate and transport inputs stay at their point values), 500 iterations by default, reporting the sorted sample with its minimum, 5th, 25th, 50th, 75th, 90th and 95th percentiles, maximum, mean and standard deviation.
+- Assumptions:
+  - Every sampled value is x = F^-1(u) for a uniform u from the sampling design; truncation maps u into the truncated range and never rejects a draw.
+  - The sample matrix is built on one thread before any model run and rows are written back by index, so the result is bit-identical for the same seed, n, inputs and engine version whatever the chunking.
+  - An iteration refused by the deterministic checks is recorded as failed, not dropped; summaries use the successful iterations, and more than 1 percent failed raises a warning.
+  - Percentiles use linear interpolation between order statistics (Hyndman and Fan definition 7).
+  - Only inputs in the exposure category are sampled, and they are sampled independently (no correlation).
+  - Default 500 iterations, the count of the RISC v4.0 review comparison; the seed defaults to the literal model-flow and is shown and editable.
+- RISC5 choice: RISC5 offers Monte Carlo for human receptor exposure parameters only, with fate and transport held at point values; the manual does not state the input distributions, the sampling scheme beyond random draws, or a seeding rule, so this method reproduces the scope and not any undocumented internals.
+- Sources:
+  - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
+  - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
+  - Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
+  - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
+  - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
+
+#### Latin hypercube sampling with Iman-Conover rank correlation
+
+- Kind: Modern
+- Method id: `uncertainty.lhs-ic`
+- Summary: Latin hypercube draws of exposure, transport, site and chemical inputs through each inverse CDF, reordered with the Iman and Conover restricted pairing to a target rank correlation, 1000 iterations by default; reports the summary, the failed-iteration count and the target and achieved Spearman matrices.
+- Assumptions:
+  - Every sampled value is x = F^-1(u) for a uniform u from the sampling design; truncation maps u into the truncated range and never rejects a draw.
+  - The sample matrix is built on one thread before any model run and rows are written back by index, so the result is bit-identical for the same seed, n, inputs and engine version whatever the chunking.
+  - An iteration refused by the deterministic checks is recorded as failed, not dropped; summaries use the successful iterations, and more than 1 percent failed raises a warning.
+  - Percentiles use linear interpolation between order statistics (Hyndman and Fan definition 7).
+  - Each input range is split into n equal strata with one draw per stratum, permuted independently per input; rank correlation only permutes sampled values, so every marginal and the stratification are preserved exactly.
+  - The target correlation must be symmetric with a unit diagonal and positive definite; n must exceed the number of correlated inputs and n below 5 times that number is warned.
+  - Inputs not named in the correlation stay independent.
+  - Default 1000 iterations; the seed defaults to the literal model-flow and is shown and editable.
+- Sources:
+  - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755>
+  - Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265>
+  - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
+  - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
+  - Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
+  - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
+  - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -507,7 +552,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - American Petroleum Institute (2010). BioVapor.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
-- Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley].
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
@@ -516,15 +560,12 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
-- Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
-- Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265>
 - Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285>
 - Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
-- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755>
 - Morris, M.D. (1991). Factorial sampling plans for preliminary computational experiments. Technometrics. 33(2):161-174. <https://doi.org/10.1080/00401706.1991.10484804>
 - Roseberry, A.M., Burmaster, D.E. (1992). Lognormal distributions for water intake by children and adults. Risk Analysis. 12(1):99-104. <https://doi.org/10.1111/j.1539-6924.1992.tb01312.x>
 - Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018>
@@ -537,13 +578,10 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). [TPHCWG series, volumes published 1997 to 1999].
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - Trapp, S., Matthies, M. (1995). [Generic one-compartment model for uptake of organic chemicals by foliar vegetation].
-- U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
-- U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
-- Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g>
 
@@ -589,7 +627,7 @@ Every entry in the reference database, alphabetical by author.
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
-- Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772> [planned]
+- Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772> [used]
 - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [used]
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]. [planned]
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
@@ -610,8 +648,8 @@ Every entry in the reference database, alphabetical by author.
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
 - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
 - Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223. [used]
-- Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566> [planned]
-- Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265> [planned]
+- Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566> [used]
+- Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265> [used]
 - Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285> [planned]
 - Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4> [planned]
 - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
@@ -624,7 +662,7 @@ Every entry in the reference database, alphabetical by author.
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites]. [planned]
-- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755> [planned]
+- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755> [used]
 - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200> [used]
 - Morris, M.D. (1991). Factorial sampling plans for preliminary computational experiments. Technometrics. 33(2):161-174. <https://doi.org/10.1080/00401706.1991.10484804> [planned]
 - Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research. 12(3):513-522. <https://doi.org/10.1029/WR012i003p00513> [used]
@@ -649,8 +687,8 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (1992). Dermal Exposure Assessment: Principles and Applications, Interim Report. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-91/011B, January 1992. <https://rais.ornl.gov/documents/DERM_EXP.PDF> [used]
 - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf> [used]
 - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: User's Guide. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-96/018, Publication 9355.4-23, Second Edition, July 1996. <https://semspub.epa.gov/work/HQ/211.pdf> [used]
-- U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001. [planned]
-- U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [planned]
+- U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001. [used]
+- U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [used]
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). [planned]
@@ -684,7 +722,7 @@ Every entry in the reference database, alphabetical by author.
 - West, M.R., Kueper, B.H., Ungs, M.J. (2007). On the use and error of approximation in the Domenico (1987) solution. Ground Water. 45(2):126-135. <https://doi.org/10.1111/j.1745-6584.2006.00280.x> [used]
 - Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7> [used]
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/> [fixture]
-- Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330> [planned]
+- Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330> [used]
 - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908. [used]
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s> [planned]
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g> [planned]

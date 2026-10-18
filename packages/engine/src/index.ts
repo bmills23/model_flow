@@ -28,6 +28,7 @@ import {
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
+import { uncertaintyLhsIc, uncertaintySrsExposure } from './processes/uncertainty/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -54,6 +55,7 @@ export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
+export * from './processes/uncertainty/index.js';
 
 export const registry = new MethodRegistry();
 registry.register(gelhar1985Api1987);
@@ -83,3 +85,5 @@ registry.register(outdoorAirSsgVf1996);
 registry.register(vaporJuryBam);
 registry.register(surfaceWaterLegacy);
 registry.register(surfaceWaterModern);
+registry.register(uncertaintySrsExposure);
+registry.register(uncertaintyLhsIc);

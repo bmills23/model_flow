@@ -3,7 +3,15 @@ import { exposureLegacy, checkUncertainInputs, prefixUncertainInputs } from '../
 import type { LegacyScenarioInput, UncertainInput } from '../src/index.js';
 
 function base(): LegacyScenarioInput {
-  const receptor = { bw: 70, ed: 1e8, lifetime: 2.2e9, ef: 0.5, efByPathway: {}, etByPathway: {} };
+  const receptor = {
+    bw: 70,
+    ed: 1e8,
+    lifetime: 2.2e9,
+    ef: 0.5,
+    waterIngestionRate: 2e-8,
+    efByPathway: {},
+    etByPathway: {},
+  };
   return {
     receptors: [
       { label: 'a', receptor, pathways: [], chemicals: [] },

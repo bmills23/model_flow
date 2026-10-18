@@ -35,15 +35,16 @@ function legacyReceptorInputs(count: number): UncertainInput<LegacyScenarioInput
   const out: UncertainInput<LegacyScenarioInput>[] = [];
   const field = (
     idx: number,
-    key: 'bw' | 'ed',
+    key: 'bw' | 'ed' | 'waterIngestionRate' | 'ef',
     name: string,
     unit: string,
+    bounds: readonly [number, number] = [0, Number.POSITIVE_INFINITY],
   ): UncertainInput<LegacyScenarioInput> => ({
     id: `exposure.receptor${idx}.${key}`,
     label: `Receptor ${idx + 1} ${name}`,
     unit,
     category: 'exposure',
-    bounds: [0, Number.POSITIVE_INFINITY],
+    bounds,
     get: (i) => i.receptors[idx]?.receptor[key] ?? Number.NaN,
     set: (i, v) => ({
       ...i,
@@ -53,7 +54,12 @@ function legacyReceptorInputs(count: number): UncertainInput<LegacyScenarioInput
     }),
   });
   for (let idx = 0; idx < count; idx++) {
-    out.push(field(idx, 'bw', 'body weight', 'kg'), field(idx, 'ed', 'exposure duration', 's'));
+    out.push(
+      field(idx, 'bw', 'body weight', 'kg'),
+      field(idx, 'ed', 'exposure duration', 's'),
+      field(idx, 'waterIngestionRate', 'drinking-water ingestion rate', 'm^3/s'),
+      field(idx, 'ef', 'exposure frequency', '1', [0, 1]),
+    );
   }
   return out;
 }
