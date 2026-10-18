@@ -923,3 +923,15 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
     ROADMAP section 6 assigns; analytic lognormal, Ishigami and identity fixtures carry the real validation.
 13. **Deferred methods** (DEFAULT). Morris 1991 screening and low-discrepancy sequences are deferred: with
     the input counts of these models (about 5 to 15) the Sobol design is affordable in the browser.
+
+M10 slice E3 (samplers, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- Samplers live in `packages/engine/src/processes/uncertainty/samplers.ts` and are pure over a passed-in
+  seeded stream. `seedStream(seed, purpose)` is `new Xoshiro128ss("<seed>:<purpose>")`.
+- Iman-Conover takes the full k columns it is given (callers pass an identity block for uncorrelated
+  inputs). A target that is asymmetric, lacks a unit diagonal, is not positive definite, or a sample with
+  n <= k is refused with `uncertainty.correlation-not-positive-definite`; n < 5k warns
+  `uncertainty.small-sample-correlation`. Ties in the reordering are broken by row index (stable).
+- Spearman uses average ranks for ties. Sample standard deviation uses the n - 1 denominator.
+- `wichura1988`, `hyndmanfan1996`, `mckay1979` and `imanconover1982` stay `planned` until E4 registers the
+  methods that cite them; E3 registers nothing.
