@@ -7,9 +7,11 @@ only as a map of which pathways RISC5 offers; none of its text, figures or table
 stage 1 (scoping), 2026-10-18. The rulings are DEFAULT unless marked forced, recorded in
 `docs/DECISIONS.md` (2026-10-18, M9 block). No engine, data or web code is written in this stage.
 
-Stage 1 in progress: the exact published titles, volumes and pages of `trappmatthies1995`, `briggs1982`,
-`trapp2015`, `sample1996`, `tphcwg1997` and `madep2002` are still descriptors in references.json and must
-be verified against the primary sources before slice E1 or E3 starts; the per-chemical Eco-SSL document
+Stage 1 in progress: slice R1 verified `trappmatthies1995` (Environ. Sci. Technol. 29(9), 2333-2338),
+`briggs1982` (Pesticide Science 13(5), 495-504), `sample1996` (ORNL ES/ER/TM-86/R3), `tphcwg1997` (series
+level only; volume titles and ISBNs conflict between sources) and `madep2002` (Policy WSC-02-411, from the
+mass.gov listing; the PDF was not read). `trapp2015` is still unidentified (see below) and stays a
+descriptor. The per-chemical Eco-SSL document
 dates and the Eco-SSL values themselves have not been read yet (slice D1).
 
 ## What the processes are
@@ -73,8 +75,10 @@ interface is active the user may instead set the root-zone water to the irrigati
 
 ### Modern: Trapp 2015 (`plantUptake.trapp-2015`)
 
-- The ROADMAP names Trapp 2015 as the modern model; references.json holds it as a descriptor only. Slice E1
-  first identifies the exact publication (journal, volume, pages) and reads it. If it cannot be verified,
+- The ROADMAP names Trapp 2015 as the modern model; references.json holds it as a descriptor only. R1 found
+  that the descriptor title is Trapp 2004 (Environ. Sci. Pollut. Res. 11(1), 33-39, a different year) and that
+  the only 2015 candidate is Trapp, Environ. Sci. Technol. 49(1), 395-402 (radish calibration); the choice is
+  open. Slice E1 first identifies the exact publication (journal, volume, pages) and reads it. If it cannot be verified,
   the modern method falls back to the EPA 2005 HHRAP produce equations (`epa2005hhrap`), which are
   verified-public and cover above-ground (root uptake plus deposition-free vapor transfer) and below-ground
   produce; the switch is recorded as a DECISIONS ruling, never silently.

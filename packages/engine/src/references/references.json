@@ -701,19 +701,23 @@
     "status": "planned",
     "authors": "Trapp, S., Matthies, M.",
     "year": 1995,
-    "title": "[Generic one-compartment model for uptake of organic chemicals by foliar vegetation]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["plantUptake"]
+    "title": "Generic one-compartment model for uptake of organic chemicals by foliar vegetation",
+    "tags": ["plantUptake"],
+    "venue": "Environmental Science & Technology 29(9), 2333-2338",
+    "identifier": "doi:10.1021/es00009a027",
+    "notes": "Verified against the Crossref record, retrieved 2026-10-18. A 1996 erratum (doi:10.1021/es951008p) exists."
   },
   {
     "key": "briggs1982",
     "type": "method",
     "status": "planned",
-    "authors": "Briggs, G.G., et al.",
+    "authors": "Briggs, G.G., Bromilow, R.H., Evans, A.A.",
     "year": 1982,
-    "title": "[Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["plantUptake"]
+    "title": "Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley",
+    "tags": ["plantUptake"],
+    "venue": "Pesticide Science 13(5), 495-504",
+    "identifier": "doi:10.1002/ps.2780130506",
+    "notes": "Verified against the Crossref record, retrieved 2026-10-18."
   },
   {
     "key": "trapp2015",
@@ -722,8 +726,8 @@
     "authors": "Trapp, S.",
     "year": 2015,
     "title": "[Plant uptake and transport models for neutral and ionic chemicals]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["plantUptake"]
+    "tags": ["plantUptake"],
+    "notes": "Not identified. The descriptor title belongs to Trapp (2004), Environmental Science and Pollution Research 11(1), 33-39, doi:10.1065/espr2003.08.169 (Crossref, retrieved 2026-10-18), which is not a 2015 publication. The only 2015 Trapp plant uptake candidate found is Trapp (2015), Environmental Science & Technology 49(1), 395-402, doi:10.1021/es503437p (Crossref, retrieved 2026-10-18), a calibration of a plant uptake model for chlorinated organic compounds into radish. Which of these the plan means is undecided; the title field stays a descriptor until it is."
   },
   {
     "key": "epa2005hhrap",
@@ -762,12 +766,14 @@
     "key": "sample1996",
     "type": "method",
     "status": "planned",
-    "authors": "Sample, B.E., et al.",
+    "authors": "Sample, B.E., Opresko, D.M., Suter, G.W., II",
     "year": 1996,
-    "title": "[Toxicological benchmarks for wildlife]",
-    "venue": "Oak Ridge National Laboratory",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["plantUptake"]
+    "title": "Toxicological benchmarks for wildlife: 1996 revision",
+    "tags": ["plantUptake"],
+    "venue": "Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy",
+    "identifier": "ES/ER/TM-86/R3, June 1996; doi:10.2172/258027",
+    "url": "https://www.osti.gov/biblio/258027",
+    "notes": "Verified against the OSTI catalog record and the ORNL report listing (retrieved 2026-10-18)."
   },
   {
     "key": "tphcwg1997",
@@ -775,9 +781,10 @@
     "status": "planned",
     "authors": "Total Petroleum Hydrocarbon Criteria Working Group",
     "year": 1997,
-    "title": "[TPHCWG series, volumes published 1997 to 1999]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["cleanup"]
+    "title": "Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5",
+    "tags": ["cleanup"],
+    "venue": "Amherst Scientific Publishers, Amherst, Massachusetts",
+    "notes": "Series title and volume years verified from the AEHS Foundation series page and the EPA HERO records (retrieved 2026-10-18): volumes dated 1997 (3, 4), 1998 (1, 2) and 1999 (5). Volume titles differ slightly between those sources and ISBNs conflict, so no per-volume title or ISBN is recorded; cite the specific volume once its title page is read."
   },
   {
     "key": "madep2002",
@@ -785,9 +792,11 @@
     "status": "planned",
     "authors": "Massachusetts Department of Environmental Protection",
     "year": 2002,
-    "title": "[Characterizing risks posed by petroleum contaminated sites]",
-    "notes": "Title given as a descriptor, not the published title; verify against the source before citing in a report.",
-    "tags": ["cleanup"]
+    "title": "Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach",
+    "tags": ["cleanup"],
+    "venue": "Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup",
+    "identifier": "Policy #WSC-02-411, October 31, 2002",
+    "notes": "Title, policy number and date from the mass.gov listing of the policy (retrieved 2026-10-18); the PDF itself returned 403 and was not read."
   },
   {
     "key": "rags1989",
