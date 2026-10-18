@@ -979,3 +979,22 @@ M10 slice E5 (sensitivity, 2026-10-18) implementation choices, none overturning 
   (the base run included). `spearmanWithOutput` uses the E3 average-rank Spearman over rows with a finite output.
 - Fixture 5 passed at its stated tolerances (Ishigami N = 8192 within 0.03, linear additive within 0.02); no
   tolerance was widened. `saltelli2010`, `jansen1999` and `sobol2001` are `used`.
+
+M10 slice E6 (probabilistic cleanup, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/cleanup.ts` holds `runProbabilisticCleanup`, `solveCleanupRows` (the pure row solver a
+  worker can call) and `protectionQuantile`; the registered method `uncertainty.cleanup-probabilistic` (process
+  `montecarlo`, modern) wraps it. The sample is the E4 Latin hypercube matrix (optional Iman-Conover), built
+  on one thread; each row sets the sampled inputs through the declared setters and calls M5's
+  `solveSourceLevel` (a `problem` builder) or any caller solver returning level, reachability and forward runs
+  (`solve`, for example a chemical of `solveModeled` under cumulative or equal allocation). M5 numerics are unchanged.
+- Censoring: an unreachable iteration is counted and held at the cap (infinity when no cap is known) above every
+  solved level. The reported level at p is the Hyndman and Fan definition 7 (1 - p) quantile; when the
+  interpolation touches a censored iteration the level is null ("not reachable below the cap"). A refused or
+  non-positive solve is a failed iteration, counted like the other methods (above 1 percent
+  `uncertainty.failed-iterations`).
+- Protection fractions reported are the chosen one (default 0.95, must lie strictly in (0, 1)) plus 0.5 and 0.9.
+  `forwardRuns` sums the solver evaluations, the figure the run budget (ruling 11) counts.
+- Fixture 6 passed at its stated tolerances (quantiles within 2 percent of the analytic lognormal ones at
+  n = 4000; exceedance fraction inside the binomial 99 percent band); no tolerance was widened. No reference
+  changed status.

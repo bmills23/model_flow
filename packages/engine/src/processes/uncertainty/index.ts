@@ -6,12 +6,14 @@ import {
   type UncertaintyResult,
   type UncertaintySpec,
 } from './runner.js';
+import { runProbabilisticCleanup, type CleanupResult, type CleanupSpec } from './cleanup.js';
 import { runSobol, type SobolResult, type SobolSpec } from './sensitivity.js';
 
 export * from './distributions.js';
 export * from './samplers.js';
 export * from './runner.js';
 export * from './sensitivity.js';
+export * from './cleanup.js';
 
 /** Specifications reach the registered methods type-erased; build them with this helper. */
 export function uncertaintySpec<I, O>(
@@ -105,4 +107,46 @@ export const uncertaintySobolSaltelli: MethodDescriptor<SobolInput, SobolResult>
   ],
   validate: (): Warning[] => [],
   run: (spec) => runSobol(spec),
+};
+
+export const uncertaintyCleanupProbabilistic: MethodDescriptor<
+  CleanupSpec<unknown>,
+  CleanupResult
+> = {
+  id: 'uncertainty.cleanup-probabilistic',
+  process: 'montecarlo',
+  kind: 'modern',
+  name: 'Probabilistic cleanup levels by per-iteration root finding',
+  summary:
+    'Samples the uncertain inputs (Latin hypercube, optional Iman-Conover rank correlation), solves the source concentration meeting the target for each sampled parameter set with the cleanup root finder, and reports the level that protects 95 percent of the sampled population (the 5th percentile of the per-iteration levels), with 50 and 90 percent also shown and unreachable iterations censored at the search cap.',
+  citations: [
+    'brent1973',
+    'mckay1979',
+    'imanconover1982',
+    'epa1997mc',
+    'rags3a2001',
+    'blackman2021',
+    'wichura1988',
+    'hyndmanfan1996',
+  ],
+  assumptions: [
+    'The receptor metric is nondecreasing in the source concentration for every sampled parameter set, so a source concentration protects exactly the iterations whose own level is at or above it.',
+    'The level protecting a fraction p of the sampled population is the (1 - p) quantile of the per-iteration levels (Hyndman and Fan definition 7); p is 0.95 by default and 0.5 and 0.9 are also shown.',
+    'An iteration whose target is not reachable below the cap is kept as censored at the cap and counted; a quantile that lands on a censored iteration is reported as not reachable below the cap.',
+    'An iteration refused by the deterministic checks is recorded as failed, not dropped; quantiles use the iterations that ran, and more than 1 percent failed raises a warning.',
+    'The sample is built on one thread before any solve from purpose-labelled seeded streams, so the result is bit-identical for the same seed, n and inputs whatever the chunking; the cost is counted in forward runs.',
+  ],
+  validate: (spec): Warning[] => {
+    const n = spec.n ?? 1000;
+    const k = spec.correlation?.ids.length ?? 0;
+    return k > 0 && n < 5 * k
+      ? [
+          {
+            code: 'uncertainty.small-sample-correlation',
+            message: `Sample size ${n} is below 5 times the ${k} correlated inputs; the achieved correlation is noisy.`,
+          },
+        ]
+      : [];
+  },
+  run: (spec) => runProbabilisticCleanup(spec),
 };

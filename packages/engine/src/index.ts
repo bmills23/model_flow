@@ -29,6 +29,7 @@ import {
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
 import {
+  uncertaintyCleanupProbabilistic,
   uncertaintyLhsIc,
   uncertaintySobolSaltelli,
   uncertaintySrsExposure,
@@ -92,3 +93,4 @@ registry.register(surfaceWaterModern);
 registry.register(uncertaintySrsExposure);
 registry.register(uncertaintyLhsIc);
 registry.register(uncertaintySobolSaltelli);
+registry.register(uncertaintyCleanupProbabilistic);

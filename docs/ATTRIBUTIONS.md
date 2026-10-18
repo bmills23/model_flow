@@ -563,6 +563,27 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
   - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
 
+#### Probabilistic cleanup levels by per-iteration root finding
+
+- Kind: Modern
+- Method id: `uncertainty.cleanup-probabilistic`
+- Summary: Samples the uncertain inputs (Latin hypercube, optional Iman-Conover rank correlation), solves the source concentration meeting the target for each sampled parameter set with the cleanup root finder, and reports the level that protects 95 percent of the sampled population (the 5th percentile of the per-iteration levels), with 50 and 90 percent also shown and unreachable iterations censored at the search cap.
+- Assumptions:
+  - The receptor metric is nondecreasing in the source concentration for every sampled parameter set, so a source concentration protects exactly the iterations whose own level is at or above it.
+  - The level protecting a fraction p of the sampled population is the (1 - p) quantile of the per-iteration levels (Hyndman and Fan definition 7); p is 0.95 by default and 0.5 and 0.9 are also shown.
+  - An iteration whose target is not reachable below the cap is kept as censored at the cap and counted; a quantile that lands on a censored iteration is reported as not reachable below the cap.
+  - An iteration refused by the deterministic checks is recorded as failed, not dropped; quantiles use the iterations that ran, and more than 1 percent failed raises a warning.
+  - The sample is built on one thread before any solve from purpose-labelled seeded streams, so the result is bit-identical for the same seed, n and inputs whatever the chunking; the cost is counted in forward runs.
+- Sources:
+  - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html>
+  - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755>
+  - Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265>
+  - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
+  - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
+  - Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
+  - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
+  - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.

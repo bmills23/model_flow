@@ -219,7 +219,9 @@ p = 0.95 (DEFAULT, the RME-like protection percentile; 0.5 and 0.9 also shown). 
 not reachable below the cap has C*_i at or above the cap; it is kept as censored at the cap and counted
 (`uncertainty.cleanup-censored`), which leaves the low quantiles we report exact unless the quantile itself
 falls on the cap, in which case the level is reported as "not reachable below the cap" as in M5. Cumulative
-and equal allocation are solved per iteration exactly as M5 does for one parameter set. Cost: n solves; for
+and equal allocation are solved per iteration exactly as M5 does for one parameter set (the caller passes a
+`solve` function that wraps `solveModeled` for the chemical of interest; the runner itself takes a plain
+M5 `SolveInput` builder). Cost: n solves; for
 Brent chains about 10 to 20 forward runs each, so the run budget (ruling 11) counts forward runs, not
 iterations.
 
@@ -319,7 +321,7 @@ title corrections (`mckay1979`, `imanconover1982`, `saltelli2010`, `morris1991`)
 Crossref; full texts were not read in stage 1. `sobol1993` keeps its descriptor title (no DOI found in
 stage 1). A reference is flipped to `used` when a registered method cites it: `epa1997mc`, `rags3a2001`, `mckay1979`,
 `imanconover1982`, `wichura1988`, `hyndmanfan1996` and `blackman2021` are `used` since slice E4, and
-`saltelli2010`, `jansen1999` and `sobol2001` since slice E5; the rest stay `planned` (or `fixture`) until a
+`saltelli2010`, `jansen1999` and `sobol2001` since slice E5 (`brent1973` was already `used` by M5, and E6 cites it again); the rest stay `planned` (or `fixture`) until a
 slice cites them (`sobol1993` is not cited by code: its title is still a descriptor).
 
 ## Appendix: slice plan for stages 2 and 3
@@ -336,8 +338,8 @@ Engine (each one worker, TDD):
   runner with failure accounting, chunk-invariance test, Table R-2 fixture. Depends on E2, E3.
 - **E5 Sensitivity (done).** Saltelli and Jansen estimators, bootstrap, tornado, Spearman, the registered
   `uncertainty.sobol-saltelli`. Fixture 5. Depends on E3 and E4.
-- **E6 Probabilistic cleanup.** Wrap M5's solver per iteration, censoring, protection percentile. Fixture 6.
-  Depends on E4.
+- **E6 Probabilistic cleanup (done).** Wrap M5's solver per iteration, censoring, protection percentile, the
+  registered `uncertainty.cleanup-probabilistic`. Fixture 6. Depends on E4.
 - **E7 Registry coverage.** Declarations for M2, M3, M6 and M8 methods. Depends on E2; parallel with E4 to E6.
 
 Web (each one worker; verify at 390x844 through CDP, light and dark):
