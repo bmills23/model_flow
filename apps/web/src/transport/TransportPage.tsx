@@ -8,6 +8,8 @@ import type { ComputeRequest, MethodKey } from './compute';
 import { DEFAULT_FORM, toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { transportCsvTables } from './csv';
 import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
@@ -568,6 +570,10 @@ export function TransportPage() {
                     </div>
                   ))}
                 </dl>
+                <DownloadCsv
+                  disabled={computing || !parsed.ok}
+                  tables={transportCsvTables(result, Number(form.timeYr))}
+                />
               </section>
               <section className="panel" aria-label="Exposure and risk">
                 <h2>Use the well result for exposure and risk</h2>

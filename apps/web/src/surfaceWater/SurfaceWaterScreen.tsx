@@ -13,6 +13,8 @@ import {
 } from './feed';
 import type { SwResult } from './compute';
 import { DEFAULT_FORM, LAKE_FORM, R8_PUBLISHED, isR8Case, toRequest, type SwForm } from './inputs';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { surfaceWaterCsvTables } from './csv';
 import { useSurfaceWaterResult } from './useSurfaceWaterResult';
 
 type Setter = <K extends keyof SwForm>(key: K, value: SwForm[K]) => void;
@@ -502,6 +504,10 @@ export function SurfaceWaterScreen() {
                 {result.linked && (
                   <p className="muted">Groundwater from the transport run: {result.linkLabel}.</p>
                 )}
+                <DownloadCsv
+                  disabled={computing || !parsed.ok || engineError !== null}
+                  tables={surfaceWaterCsvTables(result)}
+                />
               </section>
 
               <R8Check form={form} result={result} />

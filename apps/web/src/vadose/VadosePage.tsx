@@ -22,6 +22,8 @@ import {
   type VadoseForm,
 } from './form';
 import { SourceDepletionChart } from './SourceDepletionChart';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { vadoseCsvTables } from './csv';
 import { useVadoseResult } from './useVadoseResult';
 import { METHOD_SERIES } from './series';
 import { WaterTableFluxChart } from './WaterTableFluxChart';
@@ -513,6 +515,7 @@ export function VadosePage() {
                     );
                   })}
                 </dl>
+                <DownloadCsv disabled={stale} tables={vadoseCsvTables(result)} />
               </section>
 
               {r7 && result.runs.legacy && <R7Check legacy={result.runs.legacy} />}

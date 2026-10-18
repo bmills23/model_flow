@@ -15,6 +15,8 @@ import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { cleanupCsvTables, modeledCsvTables } from './csv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<CleanupBuildResult, { ok: true }>;
@@ -432,6 +434,10 @@ export function CleanupPage() {
                     name={modeled.answered.chemical.name}
                     notes={modeledBuilt?.ok ? modeledBuilt.notes : []}
                   />
+                  <DownloadCsv
+                    disabled={modeled.computing || !modeledBuilt?.ok}
+                    tables={modeledCsvTables(modeledReply, modeled.answered.chemical.name)}
+                  />
                 </div>
               )}
             </>
@@ -464,6 +470,7 @@ export function CleanupPage() {
             <div className={stale ? 'stale' : undefined}>
               <LevelsSection method="modern" outcome={shown.outcome.modern} names={names} />
               <LevelsSection method="legacy" outcome={shown.outcome.legacy} names={names} />
+              <DownloadCsv disabled={stale} tables={cleanupCsvTables(shown.outcome, names)} />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
             </div>

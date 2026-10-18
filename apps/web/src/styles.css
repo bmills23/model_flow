@@ -235,3 +235,15 @@ footer {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+.csv-downloads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.csv-downloads .btn {
+  min-height: 44px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

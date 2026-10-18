@@ -114,6 +114,11 @@ autosave.
 - A shared `exportCsv(rows, columns)` helper with escaping tests (quotes, commas, newlines, a leading `=`,
   `+`, `-` or `@` prefixed with a quote to defuse spreadsheet formula injection from chemical names or
   user text).
+- Implemented for the transport, vadose, saturated, surface water, vapor, risk and cleanup screens
+  (`csv.ts` beside each screen, one `DownloadCsv` control per table). The `method` column carries the
+  registered method id; the cleanup screen's direct levels span media with different units, so that table
+  carries a `unit` column instead of a unit in the header. Per-chemical charts (risk contributions, the
+  modeled metric curve) have their table as a CSV too. The M7, M9 and M10 screens are added in S8.
 
 ## 6. Printable report and methods statement
 

@@ -20,6 +20,8 @@ import {
 import { saturatedVaporSource } from './vaporFeed';
 import { CASE_A, DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
 import { FED_MAX_STEPS, saturatedFedSteps } from './steps';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { saturatedCsvTables } from './csv';
 import { useSaturatedResult } from './useSaturatedResult';
 
 type Setter = <K extends keyof SaturatedForm>(key: K, value: SaturatedForm[K]) => void;
@@ -515,6 +517,11 @@ export function SaturatedPage() {
                   {first.levels.capped ? ' (capped at the source thickness)' : ''}. The mass budget
                   closes to the initial mass at the horizon of {fmt(horizonYr)} yr.
                 </p>
+              </section>
+
+              <section className="panel" aria-label="Download">
+                <h2>Download</h2>
+                <DownloadCsv disabled={stale} tables={saturatedCsvTables(result)} />
               </section>
 
               <section className="panel" aria-label="Groundwater coupling">

@@ -16,6 +16,8 @@ import {
   type RiskForm,
 } from './form';
 import { ReceptorPanel } from './ReceptorPanel';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { riskCsvTables } from './csv';
 import { Charts, Comparison, EpcTable, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<BuildResult, { ok: true }>;
@@ -263,6 +265,7 @@ export function RiskPage() {
           {shown && (
             <div className={stale ? 'stale' : undefined}>
               <Comparison outcome={shown.outcome} additive={shown.built.legacy.additive === true} />
+              <DownloadCsv disabled={stale} tables={riskCsvTables(shown.outcome, names)} />
               <Charts outcome={shown.outcome} names={names} />
               <NotQuantified outcome={shown.outcome} names={names} />
               <EpcTable outcome={shown.outcome} names={names} />

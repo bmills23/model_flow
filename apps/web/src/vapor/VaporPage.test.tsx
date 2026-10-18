@@ -41,4 +41,9 @@ describe('VaporPage', () => {
     fireEvent.click(screen.getByLabelText(/^groundwater$/i));
     expect(screen.getByLabelText(/^groundwater concentration/i)).toBeTruthy();
   });
+
+  it('offers the results as a CSV download', () => {
+    render(<VaporPage />);
+    expect(screen.getByRole('button', { name: /download csv/i })).toBeTruthy();
+  });
 });

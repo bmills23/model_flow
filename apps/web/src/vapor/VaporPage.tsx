@@ -4,6 +4,8 @@ import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
 import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './chemicals';
 import { layerBands, profileCurves } from './chartData';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { vaporCsvTables } from './csv';
 import { runVapor, type VaporOutcome } from './compute';
 import {
   getSaturatedVaporFeed,
@@ -692,6 +694,7 @@ export function VaporPage() {
                     </tbody>
                   </table>
                 </div>
+                <DownloadCsv disabled={stale} tables={vaporCsvTables(shown, feedEpcs)} />
                 {(['legacy', 'modern'] as const).map((m) => {
                   const o = shown[m];
                   return o.ok ? null : (
