@@ -943,3 +943,23 @@ registers and flips citations). Calls, open to overturn:
 4. **Fixtures.** Published Little results and RSL tap water levels for volatiles (note fixtures 3 and 5)
    are not asserted in E1 (no readable source for the first, no verified K for the second); identities and
    hand cases at 1e-9 to 1e-15 only. No tolerance was widened.
+
+## 2026-10-18: M7 slice E2, sprinkler and irrigation engine
+
+Implemented `processes/irrigation/{sprinkler,pathways}.ts` (not yet registered; E4 registers and flips
+citations). Calls, open to overturn:
+
+1. **Sprinkler emission** reuses the E1 droplet kernel unchanged: E = f_v Q_spr C_w as a `massRate`
+   `OutdoorEmission` (origin `irrigation.sprinkler-fc`), constant in time because the water concentration
+   is evaluated per sample. Droplet diameter, fall time and flow are required inputs with no defaults; the
+   film references carry the E1 default and warning.
+2. **Box width** is an optional input; when omitted `sprinklerAir` uses the RISC5 1 m and warns
+   `irrigation.box-width-default`. The mass rate itself does not depend on the width.
+3. **Irrigation EPCs.** Ingestion and dermal EPCs are the water concentration itself (the M4 kernels take
+   it unchanged); spray inhalation is the sprinkler box concentration. The irrigation exposure factors
+   (contact times, ingestion volumes, skin areas) are not computed here: the Walden and Spence factors were
+   never read in S0 and no invented defaults are supplied, so they remain M4 scenario inputs.
+4. **M9 interface.** `irrigationSource` returns the `IrrigationSource` of the note; the application rate is
+   a required input, the season is validated (nonnegative, end not before start), and the chemical is an
+   opaque string because the engine has no chemical id type.
+5. **Fixtures.** Identity and hand cases only (note fixtures 1 and 2); no tolerance widened.

@@ -357,7 +357,7 @@ Stage 2 (engine and data), each slice sized for one worker, failing tests first:
 |---|---|---|---|
 | S0 sources | `references.json` (verify `foster1986`, `cowherd1985`, add the viscosity source and any EQ 1994 memo only if verified), transcriptions with page numbers into the note | none (docs and data) | none |
 | E1 shower (built; fixtures 3 and 5 pending a source) | `processes/shower/{droplet,legacyStall,little,household,index}.ts`, `test/shower.test.ts` | identities 1, hand cases, Little fixtures (3), RSL fixtures (5) | S0 |
-| E2 sprinkler and irrigation | `processes/irrigation/{sprinkler,pathways,index}.ts`, `test/irrigation.test.ts` | sprinkler box identity; irrigation EPCs through M4 kernels; the M9 `IrrigationSource` shape | E1 (droplet kernel) |
+| E2 sprinkler and irrigation (built; no Walden and Spence factors, all irrigation exposure factors are inputs) | `processes/irrigation/{sprinkler,pathways,index}.ts`, `test/irrigation.test.ts` | sprinkler box identity; irrigation EPCs through M4 kernels; the M9 `IrrigationSource` shape | E1 (droplet kernel) |
 | E3 particulates | `processes/particulate/{windErosion,pef,qOverC2002,index}.ts`, `test/particulate.test.ts` | PEF and box identity; SSG default PEF (6); 2002 regression (7) | S0 |
 | E4 coupling, cleanup and registration | `exposure` EPC adapters (origin tags), `outdoorAirEpc` contributions, M5 coefficient wrappers, registry entries, reference status flips, `docs:generate` | Table R-9 rows (4); registry test with every cited key `used`; M5 levels equal target over coefficient | E1, E2, E3 |
 
