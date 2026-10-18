@@ -964,3 +964,18 @@ M10 slice E4 (runner and registered methods, 2026-10-18) implementation choices,
   exposure method, not evidence about RISC. See `packages/engine/test/fixtures/uncertainty/README.md`.
 - `hyndmanfan1996` and `wichura1988` are cited by both methods because both use the percentile
   definition and the AS 241 inverse; the note's citation lists were updated in place.
+
+M10 slice E5 (sensitivity, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/sensitivity.ts` holds `runSobol`, `runTornado` and `spearmanWithOutput`; the registered
+  method `uncertainty.sobol-saltelli` (process `montecarlo`, modern) wraps `runSobol`. Its input is the E4
+  specification plus optional `scale` and `bootstrap`; `n` is N (default 512). A and B use the streams
+  `<seed>:sobol-A` and `<seed>:sobol-B`, the bootstrap `<seed>:bootstrap`.
+- A row with a refused or non-finite run in any of the N (k + 2) evaluations is dropped from all designs together
+  and counted (`failedRows`); above 1 percent it raises `uncertainty.failed-iterations`. Intervals are the 2.5th and
+  97.5th bootstrap percentiles (definition 7); a first order estimate that is negative with an interval reaching
+  zero is shown as 0 and the raw value is kept in `firstRaw`.
+- The tornado uses `distributionQuantile` at 0.05 and 0.95, so truncation is respected; it costs 2k + 1 runs
+  (the base run included). `spearmanWithOutput` uses the E3 average-rank Spearman over rows with a finite output.
+- Fixture 5 passed at its stated tolerances (Ishigami N = 8192 within 0.03, linear additive within 0.02); no
+  tolerance was widened. `saltelli2010`, `jansen1999` and `sobol2001` are `used`.

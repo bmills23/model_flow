@@ -957,7 +957,7 @@
   {
     "key": "saltelli2010",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S.",
     "year": 2010,
     "title": "Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index",
@@ -1236,7 +1236,7 @@
   {
     "key": "sobol2001",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Sobol, I.M.",
     "year": 2001,
     "title": "Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates",
@@ -1249,7 +1249,7 @@
   {
     "key": "jansen1999",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Jansen, M.J.W.",
     "year": 1999,
     "title": "Analysis of variance designs for model output",

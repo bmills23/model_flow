@@ -318,8 +318,9 @@ The engine runner is a pure function over rows so the same code runs in Vitest w
 title corrections (`mckay1979`, `imanconover1982`, `saltelli2010`, `morris1991`) were verified through
 Crossref; full texts were not read in stage 1. `sobol1993` keeps its descriptor title (no DOI found in
 stage 1). A reference is flipped to `used` when a registered method cites it: `epa1997mc`, `rags3a2001`, `mckay1979`,
-`imanconover1982`, `wichura1988`, `hyndmanfan1996` and `blackman2021` are `used` since slice E4; the rest stay
-`planned` (or `fixture`) until a slice cites them.
+`imanconover1982`, `wichura1988`, `hyndmanfan1996` and `blackman2021` are `used` since slice E4, and
+`saltelli2010`, `jansen1999` and `sobol2001` since slice E5; the rest stay `planned` (or `fixture`) until a
+slice cites them (`sobol1993` is not cited by code: its title is still a descriptor).
 
 ## Appendix: slice plan for stages 2 and 3
 
@@ -333,8 +334,8 @@ Engine (each one worker, TDD):
   Fixtures 1, 3, 4. Depends on E1.
 - **E4 Runner and the two registered methods (done).** `uncertainty.srs-exposure`, `uncertainty.lhs-ic`, row
   runner with failure accounting, chunk-invariance test, Table R-2 fixture. Depends on E2, E3.
-- **E5 Sensitivity.** Saltelli and Jansen estimators, bootstrap, tornado, Spearman. Fixture 5. Depends on E3
-  (and E4 for the registered `uncertainty.sobol-saltelli`).
+- **E5 Sensitivity (done).** Saltelli and Jansen estimators, bootstrap, tornado, Spearman, the registered
+  `uncertainty.sobol-saltelli`. Fixture 5. Depends on E3 and E4.
 - **E6 Probabilistic cleanup.** Wrap M5's solver per iteration, censoring, protection percentile. Fixture 6.
   Depends on E4.
 - **E7 Registry coverage.** Declarations for M2, M3, M6 and M8 methods. Depends on E2; parallel with E4 to E6.

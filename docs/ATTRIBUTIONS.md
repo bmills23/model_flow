@@ -542,6 +542,27 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
   - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
 
+#### Sobol variance-based sensitivity (Saltelli design, Jansen total effect)
+
+- Kind: Modern
+- Method id: `uncertainty.sobol-saltelli`
+- Summary: First order and total Sobol indices from two independent Latin hypercube matrices A and B and the k hybrid matrices, N (k + 2) model runs (N = 512 by default), on log10 of the output by default, with 500-resample bootstrap 95 percent intervals and a convergence flag.
+- Assumptions:
+  - Inputs are independent; a correlation matrix is removed for this analysis with a warning.
+  - The first order index uses the Saltelli 2010 estimator mean(f(B)(f(A_B) - f(A))) / V and the total index the Jansen estimator mean((f(A) - f(A_B))^2) / (2V), with V the variance of the pooled 2N values of f(A) and f(B).
+  - A and B are independent Latin hypercube designs from the purpose-labelled seed streams sobol-A and sobol-B; the low-discrepancy Sobol sequence is not used.
+  - Indices describe log10 of the output unless the raw scale is requested; an output at or below zero falls back to the raw scale with a warning.
+  - Intervals are the 2.5th and 97.5th percentiles of 500 bootstrap resamples of the N rows (stream bootstrap); a half-width above 0.05 is flagged not converged. A negative first order estimate inside its interval of zero is shown as zero.
+  - A row with a refused or non-finite run in any design is dropped from all designs together and counted.
+- Sources:
+  - Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018>
+  - Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4>
+  - Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6>
+  - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755>
+  - Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
+  - Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
+  - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -561,17 +582,14 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
 - Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285>
-- Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
 - Morris, M.D. (1991). Factorial sampling plans for preliminary computational experiments. Technometrics. 33(2):161-174. <https://doi.org/10.1080/00401706.1991.10484804>
 - Roseberry, A.M., Burmaster, D.E. (1992). Lognormal distributions for water intake by children and adults. Risk Analysis. 12(1):99-104. <https://doi.org/10.1111/j.1539-6924.1992.tb01312.x>
-- Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018>
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory.
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
-- Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6>
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf>
@@ -651,7 +669,7 @@ Every entry in the reference database, alphabetical by author.
 - Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566> [used]
 - Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265> [used]
 - Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285> [planned]
-- Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4> [planned]
+- Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4> [used]
 - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013> [used]
@@ -668,11 +686,11 @@ Every entry in the reference database, alphabetical by author.
 - Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research. 12(3):513-522. <https://doi.org/10.1029/WR012i003p00513> [used]
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087, Version 1.3, August 1996. <https://nepis.epa.gov/Adobe/PDF/P1007K50.pdf> [used]
 - Roseberry, A.M., Burmaster, D.E. (1992). Lognormal distributions for water intake by children and adults. Risk Analysis. 12(1):99-104. <https://doi.org/10.1111/j.1539-6924.1992.tb01312.x> [planned]
-- Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018> [planned]
+- Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018> [used]
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
 - Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x> [used]
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
-- Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6> [planned]
+- Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6> [used]
 - Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf> [fixture]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]

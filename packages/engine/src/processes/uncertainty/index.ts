@@ -6,10 +6,12 @@ import {
   type UncertaintyResult,
   type UncertaintySpec,
 } from './runner.js';
+import { runSobol, type SobolResult, type SobolSpec } from './sensitivity.js';
 
 export * from './distributions.js';
 export * from './samplers.js';
 export * from './runner.js';
+export * from './sensitivity.js';
 
 /** Specifications reach the registered methods type-erased; build them with this helper. */
 export function uncertaintySpec<I, O>(
@@ -74,3 +76,33 @@ export const uncertaintyLhsIc: MethodDescriptor<Spec, UncertaintyResult> = {
 };
 
 export type { SamplingKind };
+
+type SobolInput = SobolSpec<unknown, unknown>;
+
+export const uncertaintySobolSaltelli: MethodDescriptor<SobolInput, SobolResult> = {
+  id: 'uncertainty.sobol-saltelli',
+  process: 'montecarlo',
+  kind: 'modern',
+  name: 'Sobol variance-based sensitivity (Saltelli design, Jansen total effect)',
+  summary:
+    'First order and total Sobol indices from two independent Latin hypercube matrices A and B and the k hybrid matrices, N (k + 2) model runs (N = 512 by default), on log10 of the output by default, with 500-resample bootstrap 95 percent intervals and a convergence flag.',
+  citations: [
+    'saltelli2010',
+    'jansen1999',
+    'sobol2001',
+    'mckay1979',
+    'blackman2021',
+    'wichura1988',
+    'hyndmanfan1996',
+  ],
+  assumptions: [
+    'Inputs are independent; a correlation matrix is removed for this analysis with a warning.',
+    'The first order index uses the Saltelli 2010 estimator mean(f(B)(f(A_B) - f(A))) / V and the total index the Jansen estimator mean((f(A) - f(A_B))^2) / (2V), with V the variance of the pooled 2N values of f(A) and f(B).',
+    'A and B are independent Latin hypercube designs from the purpose-labelled seed streams sobol-A and sobol-B; the low-discrepancy Sobol sequence is not used.',
+    'Indices describe log10 of the output unless the raw scale is requested; an output at or below zero falls back to the raw scale with a warning.',
+    'Intervals are the 2.5th and 97.5th percentiles of 500 bootstrap resamples of the N rows (stream bootstrap); a half-width above 0.05 is flagged not converged. A negative first order estimate inside its interval of zero is shown as zero.',
+    'A row with a refused or non-finite run in any design is dropped from all designs together and counted.',
+  ],
+  validate: (): Warning[] => [],
+  run: (spec) => runSobol(spec),
+};

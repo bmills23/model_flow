@@ -109,7 +109,7 @@ export interface UncertaintyResult {
   warnings: Warning[];
 }
 
-function resolveInputs<I, O>(
+export function resolveInputs<I, O>(
   kind: SamplingKind,
   spec: UncertaintySpec<I, O>,
 ): { ids: string[]; dists: Distribution[] } {

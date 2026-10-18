@@ -28,7 +28,11 @@ import {
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
-import { uncertaintyLhsIc, uncertaintySrsExposure } from './processes/uncertainty/index.js';
+import {
+  uncertaintyLhsIc,
+  uncertaintySobolSaltelli,
+  uncertaintySrsExposure,
+} from './processes/uncertainty/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -87,3 +91,4 @@ registry.register(surfaceWaterLegacy);
 registry.register(surfaceWaterModern);
 registry.register(uncertaintySrsExposure);
 registry.register(uncertaintyLhsIc);
+registry.register(uncertaintySobolSaltelli);
