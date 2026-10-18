@@ -98,7 +98,7 @@ This closes the open HANDOFF item. The feed modules keep their API (`get`, `set`
 a new `project/store.ts` subscribes to all of them and to the screens' form changes and writes the autosave
 from section 3. On start, before first render, the store reads the autosave, migrates it, and seeds the
 feeds and the screens' initial form state. `createFeed` gains an optional `initial` argument; the bespoke
-well, chain, bank and vapor feed modules are moved onto `createFeed` first (a refactor slice with no
+well, chain, bank, vadose, saturated and surface water feed modules (the vapor feeds already used it) are moved onto `createFeed` first (a refactor slice with no
 behaviour change, guarded by the existing feed tests). A "New project" control clears forms, feeds and the
 autosave.
 

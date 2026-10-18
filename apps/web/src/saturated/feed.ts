@@ -1,4 +1,5 @@
 import type { SaturatedSourceInput } from '@model-flow/engine';
+import { createFeed } from '../vapor/feedStore';
 
 export type SaturatedMethod = 'legacy' | 'modern';
 
@@ -13,29 +14,9 @@ export interface SaturatedFeed {
   label: string;
 }
 
-let current: SaturatedFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<SaturatedFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getSaturatedFeed(): SaturatedFeed | null {
-  return current;
-}
-
-export function setSaturatedFeed(feed: SaturatedFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearSaturatedFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeSaturatedFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getSaturatedFeed = store.get;
+export const setSaturatedFeed = store.set;
+export const clearSaturatedFeed = store.clear;
+export const subscribeSaturatedFeed = store.subscribe;

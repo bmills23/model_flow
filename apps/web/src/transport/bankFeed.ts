@@ -1,4 +1,5 @@
 import type { Scenario } from './form';
+import { createFeed } from '../vapor/feedStore';
 
 /**
  * The groundwater run of the transport screen, offered to the surface water screen as the plume that
@@ -11,29 +12,9 @@ export interface BankFeed {
   label: string;
 }
 
-let current: BankFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<BankFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getBankFeed(): BankFeed | null {
-  return current;
-}
-
-export function setBankFeed(feed: BankFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearBankFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeBankFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getBankFeed = store.get;
+export const setBankFeed = store.set;
+export const clearBankFeed = store.clear;
+export const subscribeBankFeed = store.subscribe;
