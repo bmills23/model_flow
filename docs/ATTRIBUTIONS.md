@@ -507,6 +507,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - American Petroleum Institute (2010). BioVapor.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
+- Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772>
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley].
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
@@ -515,16 +516,21 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
-- Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
+- Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566>
+- Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265>
+- Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285>
+- Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4>
 - Little, J.C. (1992). [Applying the two-resistance theory to contaminant volatilization in showers].
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
-- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
-- Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
-- Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
+- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755>
+- Morris, M.D. (1991). Factorial sampling plans for preliminary computational experiments. Technometrics. 33(2):161-174. <https://doi.org/10.1080/00401706.1991.10484804>
+- Roseberry, A.M., Burmaster, D.E. (1992). Lognormal distributions for water intake by children and adults. Risk Analysis. 12(1):99-104. <https://doi.org/10.1111/j.1539-6924.1992.tb01312.x>
+- Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018>
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory.
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
+- Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6>
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf>
@@ -537,6 +543,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
+- Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330>
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g>
 
@@ -582,6 +589,7 @@ Every entry in the reference database, alphabetical by author.
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0. [fixture]
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
+- Blackman, D., Vigna, S. (2021). Scrambled linear pseudorandom number generators. ACM Transactions on Mathematical Software. 47(4):1-32. <https://doi.org/10.1145/3460772> [planned]
 - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [used]
 - Briggs, G.G., et al. (1982). [Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley]. [planned]
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
@@ -602,7 +610,10 @@ Every entry in the reference database, alphabetical by author.
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974. [planned]
 - Guyonnet, D., Neville, C. (2004). Dimensionless analysis of two analytical solutions for 3-D solute transport in groundwater. Journal of Contaminant Hydrology. 75(1-2):141-153. <https://doi.org/10.1016/j.jconhyd.2004.06.004> [used]
 - Hanna, S.R., Briggs, G.A., Hosker, R.P., Jr. (1982). Handbook on atmospheric diffusion. U.S. Department of Energy, Office of Health and Environmental Research. DOE/TIC-11223. [used]
-- Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables]. [planned]
+- Hyndman, R.J., Fan, Y. (1996). Sample quantiles in statistical packages. The American Statistician. 50(4):361-365. <https://doi.org/10.1080/00031305.1996.10473566> [planned]
+- Iman, R.L., Conover, W.J. (1982). A distribution-free approach to inducing rank correlation among input variables. Communications in Statistics, Simulation and Computation. 11(3):311-334. <https://doi.org/10.1080/03610918208812265> [planned]
+- Ishigami, T., Homma, T. (1990). An importance quantification technique in uncertainty analysis for computer models. Proceedings, First International Symposium on Uncertainty Modeling and Analysis, IEEE. pp. 398-403. <https://doi.org/10.1109/ISUMA.1990.151285> [planned]
+- Jansen, M.J.W. (1999). Analysis of variance designs for model output. Computer Physics Communications. 117(1-2):35-43. <https://doi.org/10.1016/S0010-4655(98)00154-4> [planned]
 - Johnson, P.C., Ettinger, R.A. (1991). Heuristic model for predicting the intrusion rate of contaminant vapors into buildings. Environmental Science and Technology. 25(8):1445-1452. <https://doi.org/10.1021/es00020a013> [used]
 - Johnson, P.C., Kemblowski, M.W., Johnson, R.L. (1998). Assessing the Significance of Subsurface Contaminant Vapor Migration to Enclosed Spaces: Site-Specific Alternative to Generic Estimates. American Petroleum Institute. API Publication 4674, December 1998. [used]
 - Jury, W.A., Russo, D., Streile, G., El Abd, H. (1990). Evaluation of volatilization by organic chemicals residing below the soil surface. Water Resources Research. 26(1):13-20. <https://doi.org/10.1029/WR026i001p00013> [used]
@@ -613,15 +624,17 @@ Every entry in the reference database, alphabetical by author.
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites]. [planned]
-- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code]. [planned]
+- McKay, M.D., Beckman, R.J., Conover, W.J. (1979). A comparison of three methods for selecting values of input variables in the analysis of output from a computer code. Technometrics. 21(2):239-245. <https://doi.org/10.1080/00401706.1979.10489755> [planned]
 - Millington, R.J., Quirk, J.P. (1961). Permeability of porous solids. Transactions of the Faraday Society. 57:1200-1207. <https://doi.org/10.1039/TF9615701200> [used]
-- Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments]. [planned]
+- Morris, M.D. (1991). Factorial sampling plans for preliminary computational experiments. Technometrics. 33(2):161-174. <https://doi.org/10.1080/00401706.1991.10484804> [planned]
 - Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research. 12(3):513-522. <https://doi.org/10.1029/WR012i003p00513> [used]
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087, Version 1.3, August 1996. <https://nepis.epa.gov/Adobe/PDF/P1007K50.pdf> [used]
-- Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output]. [planned]
+- Roseberry, A.M., Burmaster, D.E. (1992). Lognormal distributions for water intake by children and adults. Risk Analysis. 12(1):99-104. <https://doi.org/10.1111/j.1539-6924.1992.tb01312.x> [planned]
+- Saltelli, A., Annoni, P., Azzini, I., Campolongo, F., Ratto, M., Tarantola, S. (2010). Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index. Computer Physics Communications. 181(2):259-270. <https://doi.org/10.1016/j.cpc.2009.09.018> [planned]
 - Sample, B.E., et al. (1996). [Toxicological benchmarks for wildlife]. Oak Ridge National Laboratory. [planned]
 - Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x> [used]
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
+- Sobol, I.M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and Computers in Simulation. 55(1-3):271-280. <https://doi.org/10.1016/S0378-4754(00)00270-6> [planned]
 - Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf> [fixture]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218. [planned]
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232. [planned]
@@ -671,6 +684,7 @@ Every entry in the reference database, alphabetical by author.
 - West, M.R., Kueper, B.H., Ungs, M.J. (2007). On the use and error of approximation in the Domenico (1987) solution. Ground Water. 45(2):126-135. <https://doi.org/10.1111/j.1745-6584.2006.00280.x> [used]
 - Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7> [used]
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/> [fixture]
+- Wichura, M.J. (1988). Algorithm AS 241: the percentage points of the normal distribution. Applied Statistics. 37(3):477. <https://doi.org/10.2307/2347330> [planned]
 - Xu, M., Eckstein, Y. (1995). Use of weighted least-squares method in evaluation of the relationship between dispersivity and field scale. Ground Water. 33(6):905-908. [used]
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s> [planned]
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g> [planned]

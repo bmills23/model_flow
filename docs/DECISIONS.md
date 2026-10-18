@@ -872,3 +872,54 @@ Web form rulings that keep the two methods on one site (DEFAULT, Bryan's to over
   Q_soil = 0.003 x 0.45 / ER x Q_B (ruling 9, default c) and the legacy run, which has no such default,
   keeps using the pressure-difference inputs. The modern run has its own air viscosity field (default
   1.75e-4 g/(cm s), the engine default); the legacy field keeps 1.8e-4 (ruling 6).
+
+## 2026-10-18: M10 uncertainty scope (stage 1)
+
+Bryan approved M10 ("Yes, M7 and M10"). Stage 1 writes the methods note `docs/methods/uncertainty.md`
+(scope, equations, algorithms, warnings, fixture plan, slice plan) and corrects or adds references. No
+engine, data or web code is written in this stage. Four descriptor titles were replaced by verified
+bibliographic data (`mckay1979`, `imanconover1982`, `saltelli2010`, `morris1991`) and seven references were
+added as `planned` (`sobol2001`, `jansen1999`, `ishigami1990`, `hyndmanfan1996`, `wichura1988`,
+`blackman2021`, `roseberry1992`), all checked through Crossref on 2026-10-18 with full texts not read.
+
+Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the source named):
+
+1. **Scope** (DEFAULT). In: distribution library, parameter registry, legacy simple random sampling over
+   exposure parameters, modern Latin hypercube with Iman-Conover rank correlation over exposure and
+   transport parameters, Sobol indices with bootstrap intervals, tornado and Spearman, percentile fans and
+   CDFs, probabilistic cleanup levels, worker pool with a run budget, Table R-2 loose fixture. Deferred:
+   Morris screening, quasi-random base sequences, two-dimensional Monte Carlo, distribution fitting and a
+   cited default distribution library, toxicity-value sampling, M7 and M9 inputs until those land.
+2. **Parameter registry** (DEFAULT). A method declares `uncertainInputs`, each with a stable dotted id,
+   label, SI unit, category (exposure, transport, site, chemical), physical bounds, and pure `get` and `set`
+   accessors; chains prefix ids by link so one sample drives the whole chain.
+3. **Distributions** (DEFAULT). Constant, uniform, log-uniform, triangular, normal, lognormal (geometric
+   or arithmetic parameters), empirical; inverse-CDF sampling only; truncation by mapping u into
+   [F(lo), F(hi)], never by rejection; a support outside the input's bounds must be truncated or is refused.
+   Phi^-1 by AS 241.
+4. **Legacy method.** Exposure parameters only with simple random sampling (forced by the RISC5 manual's
+   description of its Monte Carlo option); default n = 500, the count of the Table R-2 comparison (DEFAULT).
+5. **Modern method.** Latin hypercube with Iman-Conover rank correlation (the ROADMAP section 3 plan of
+   record); the sample correlation of the scores is corrected (T = Q Q'), not assumed to be the identity;
+   default n = 1000 (DEFAULT).
+6. **Transport sampling** (DEFAULT). Each iteration runs the whole deterministic chain; iterations refused
+   by deterministic checks are counted, not dropped silently, and above 1 percent the run is flagged.
+7. **Sobol estimator** (DEFAULT). Saltelli 2010 design, Saltelli first order and Jansen total effect
+   estimators, N = 512, two independent LHS base matrices, indices on log10 Y by default, 500-resample
+   bootstrap intervals with a 0.05 half-width convergence flag, correlations removed with a warning.
+8. **Tornado** (DEFAULT). One at a time between each input's 5th and 95th percentiles around the base run,
+   shown beside the Spearman rank correlations from the sample.
+9. **Percentiles** (DEFAULT). Hyndman and Fan definition 7; fans at 5, 25, 50, 75 and 95 percent with the
+   deterministic curve overlaid.
+10. **Probabilistic cleanup level.** The level protecting a fraction p is the (1 - p) quantile of the
+    per-iteration M5 cleanup levels (forced by M5's per-realization monotonicity); p = 0.95 by default, with
+    0.5 and 0.9 shown, and unreachable iterations censored at the cap (DEFAULT).
+11. **Seeding and budget** (DEFAULT). Explicit seed with the default `model-flow`; purpose-labelled streams;
+    the whole sample built on one thread before any run so results are independent of worker count; pool of
+    min(4, cores - 1) workers, 5-row pilot, confirm above 60 s, refuse above 10 minutes.
+12. **Table R-2 fixture** (DEFAULT). Shape check only: the manual gives no input distributions and its two
+    columns differ by 1.7 at the median, so percentiles must be monotone and the 5th, 50th and 95th fall
+    within a factor of 3 of the geometric mean of the printed columns. This is the "loose" tolerance
+    ROADMAP section 6 assigns; analytic lognormal, Ishigami and identity fixtures carry the real validation.
+13. **Deferred methods** (DEFAULT). Morris 1991 screening and low-discrepancy sequences are deferred: with
+    the input counts of these models (about 5 to 15) the Sobol design is affordable in the browser.
