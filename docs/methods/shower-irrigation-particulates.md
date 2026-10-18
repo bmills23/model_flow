@@ -91,8 +91,8 @@ and Chrostowski values (the paper could not be found or read); they stay a RISC5
 temperature T_2 by the ratio (T_2 mu_1 / (T_1 mu_2))^(1/2), mu the water viscosity (the Stokes-Einstein
 scaling of the liquid diffusivity). S0: could not verify a viscosity source (the CRC
 Handbook edition RISC5 cites was not identified and no table was read), so no viscosity correlation is
-chosen; E1 must choose and read one before the temperature correction is coded, or take viscosity as a
-required input.
+chosen; E1 took the second route: the correction is optional and its two viscosities (and the calibration
+temperature) are entered by the caller; without it no correction is applied. It scales the liquid film k_l only (our reading of "the coefficient"). No temperature range warning is issued because no correlation is chosen.
 
 A droplet of diameter d has surface over volume 6 / d. With a first-order loss at rate K_L 6 / d into air
 treated as clean (no back-pressure), the fraction leaving the droplet during its fall time t_d is
@@ -115,7 +115,9 @@ defect, and is warned (`shower.exceeds-equilibrium`), not clipped.
 
 S0: could not verify whether the Foster and Chrostowski paper includes a post-shower period and room
 exchange (paper not found; `foster1986` stays a descriptor). Until it is read, only the RISC5 stagnant form
-above is implemented, marked as the RISC5 choice.
+above is implemented (E1, `showerLegacyStall`), marked as the RISC5 choice. The film reference values
+(3000 and 20 cm/h) are `RISC5_FILM_REFERENCES`, used when the caller enters none and then warned
+(`shower.film-reference-unverified`).
 
 ## Modern method: two-resistance stall with back-pressure and ventilation (`shower.little-1992`)
 
@@ -152,7 +154,10 @@ S0: the volatility criterion is verified (RSL user's guide web page, section 4.9
 Henry's law constant greater than 1E-5 atm-m3/mol or a vapor pressure greater than 1 mm Hg, and a chemical
 must be volatile to be included in tapwater inhalation). The factor K itself could not be verified: the
 user's guide web page carries the tapwater equations as images, and only secondary sources state 0.5
-L/m3. K stays unstated until read from the equations page or the calculator documentation. This method lets M5 reproduce the RSL tap water
+L/m3. K stays unstated until read from the equations page or the calculator documentation: E1's
+`showerHouseholdAir` takes it as a required input (L/m^3) and always warns. Fixture 3 (Little published
+results) and fixture 5 (RSL tap water levels) are not in E1 for the same reason: no printed Little values and no
+verified K were available, so E1's tests are the identity and hand cases (fixtures 1 and 2) only. This method lets M5 reproduce the RSL tap water
 levels for volatiles, which the M5 fixtures currently exclude.
 
 ## Legacy method: sprinkler volatilization (`irrigation.sprinkler-fc`)
@@ -315,7 +320,8 @@ M7 does not compute soil accumulation from irrigation or interception on leaves;
 |---|---|
 | RangeError | nonpositive flow, time, volume, droplet diameter, wind speed or box size; V outside [0, 1]; U_t not positive |
 | `shower.exceeds-equilibrium` | legacy stall C_a above H C_w |
-| `shower.temperature-out-of-range` | water outside 20 to 45 deg C (the range of the viscosity correlation, unverified: no correlation chosen in S0) |
+| `shower.film-reference-unverified` | the film reference coefficients (3000 and 20 cm/h) are taken as the RISC5 defaults rather than entered (E1) |
+| `shower.household-factor-unverified` | always, on the household term: the factor K is entered, not defaulted (E1) |
 | `shower.not-volatile` | the chemical fails the RSL volatility criterion; the shower and household terms return zero with the warning |
 | `irrigation.potable-source` | the irrigation source is also the potable supply (the indoor pathways will dominate, per the scenario of `waldenspence1997`) |
 | `irrigation.box-width-default` | the sprinkler box width is left at the 1 m RISC5 default |
@@ -350,7 +356,7 @@ Stage 2 (engine and data), each slice sized for one worker, failing tests first:
 | Slice | Files | Failing tests first | Depends on |
 |---|---|---|---|
 | S0 sources | `references.json` (verify `foster1986`, `cowherd1985`, add the viscosity source and any EQ 1994 memo only if verified), transcriptions with page numbers into the note | none (docs and data) | none |
-| E1 shower | `processes/shower/{droplet,legacyStall,little,household,index}.ts`, `test/shower.test.ts` | identities 1, hand cases, Little fixtures (3), RSL fixtures (5) | S0 |
+| E1 shower (built; fixtures 3 and 5 pending a source) | `processes/shower/{droplet,legacyStall,little,household,index}.ts`, `test/shower.test.ts` | identities 1, hand cases, Little fixtures (3), RSL fixtures (5) | S0 |
 | E2 sprinkler and irrigation | `processes/irrigation/{sprinkler,pathways,index}.ts`, `test/irrigation.test.ts` | sprinkler box identity; irrigation EPCs through M4 kernels; the M9 `IrrigationSource` shape | E1 (droplet kernel) |
 | E3 particulates | `processes/particulate/{windErosion,pef,qOverC2002,index}.ts`, `test/particulate.test.ts` | PEF and box identity; SSG default PEF (6); 2002 regression (7) | S0 |
 | E4 coupling, cleanup and registration | `exposure` EPC adapters (origin tags), `outdoorAirEpc` contributions, M5 coefficient wrappers, registry entries, reference status flips, `docs:generate` | Table R-9 rows (4); registry test with every cited key `used`; M5 levels equal target over coefficient | E1, E2, E3 |

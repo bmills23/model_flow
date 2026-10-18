@@ -924,3 +924,22 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
 14. **Not cited until verified:** the CRC water viscosity source, the 1994 EQ memo and the Andelman paper
     are not added to `references.json`; `astme1739` is not cited for the entered PM10 flux default, as in
     M6 ruling 14.
+
+## 2026-10-18: M7 slice E1, shower engine
+
+Implemented `processes/shower/{droplet,common,legacyStall,little,household}.ts` (not yet registered; E4
+registers and flips citations). Calls, open to overturn:
+
+1. **Unverified constants are inputs.** The film reference coefficients (3000 cm/h gas, 20 cm/h liquid) are
+   RISC5 choices that S0 could not verify; they are the `filmReferences` input, defaulting to
+   `RISC5_FILM_REFERENCES` with the warning `shower.film-reference-unverified`. The household factor K
+   has no default (required input, always warned `shower.household-factor-unverified`). Water viscosity
+   has no default: the optional temperature correction takes both viscosities from the caller and scales
+   k_l only.
+2. **Droplet diameter and fall time are required inputs**, no defaults.
+3. **Little's model** is implemented from the note's own mass balance in closed form, with the exposure
+   average taken over shower plus an optional post-shower stay (decay at Q_g / V_s). Not checked against
+   the paper, which S0 could not read.
+4. **Fixtures.** Published Little results and RSL tap water levels for volatiles (note fixtures 3 and 5)
+   are not asserted in E1 (no readable source for the first, no verified K for the second); identities and
+   hand cases at 1e-9 to 1e-15 only. No tolerance was widened.
