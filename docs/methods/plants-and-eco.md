@@ -71,10 +71,19 @@ interface is active the user may instead set the root-zone water to the irrigati
   coefficient formed from the leaf water and lipid contents, K_ow and K_aw. The steady state is
   C_p = (TSCF Q C_pw + g A C_a) / (g A / K_la + lambda M). The time-dependent form is the exact exponential
   solution for constant inputs over a growing period, evaluated at harvest.
-- The numerical constants of both Briggs regressions and of K_la are taken from the primary publications in
-  slice E1, not from the manual; they are not written here until verified.
+- Constants (slice E1, 2026-10-18): the Briggs root concentration factor is implemented with the constants
+  the HHRAP appendix prints (log RCF = 0.77 log K_ow - 1.52 at log K_ow >= 2, log(RCF - 0.82) = 0.77 log
+  K_ow - 1.52 below 2, fitted on log K_ow -0.57 to 4.6). The Briggs TSCF regression and the K_la
+  correlation could not be read from a source, so TSCF and K_la are required user inputs (DECISIONS 12);
+  `PLANT_LOGKOW_OUT_OF_RANGE` uses the fitted range -0.57 to 4.6.
 
-### Modern: Trapp 2015 (`plantUptake.trapp-2015`)
+### Modern: HHRAP 2005 fallback (`plantUptake.hhrap-2005`; Trapp 2015 not verified)
+
+Slice E1 outcome (DECISIONS 11): neither Trapp candidate could be read, so the registered modern method is
+the HHRAP fallback below (root uptake with the Travis and Arms factor, Briggs RCF over K_d for roots,
+vapor transfer from the Bacci-type factor reduced by 100, dry weight, log K_ow caps 1.15 to 9.35 for Br
+and -0.57 to 8.2 for RCF). The multi-compartment description that follows is the unverified expectation
+and is not implemented.
 
 - The ROADMAP names Trapp 2015 as the modern model; references.json holds it as a descriptor only. R1 found
   that the descriptor title is Trapp 2004 (Environ. Sci. Pollut. Res. 11(1), 33-39, a different year) and that
@@ -259,7 +268,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 |---|---|---|
 | D1 | Eco-SSL data: manifest, hand-entered values with page citations, pdftotext cross-check reader, generated `ecossl.json`, ATTRIBUTIONS data provenance (done 2026-10-18, branch t-m9) | none |
 | R1 | Reference verification: exact titles, venues and pages for the descriptor entries (Trapp and Matthies, Briggs, Trapp 2015, Sample, TPHCWG, MADEP); identify Trapp 2015 or rule the HHRAP fallback | none |
-| E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.trapp-2015` | R1 |
+| E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.hhrap-2005` (done 2026-10-18, branch t-m9; the Trapp 2015 model was not verified, DECISIONS 11) | R1 |
 | E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type | E1 |
 | E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings | D1, R1 |
 | E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check | R1 |

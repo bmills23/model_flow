@@ -497,6 +497,39 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
   - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
 
+### plantUptake
+
+#### Briggs root factor with a one-compartment leaf model
+
+- Kind: Legacy (RISC5 default)
+- Method id: `plantUptake.trapp-matthies-1995`
+- Summary: Soil pore water from the shared partitioning step; root produce as the Briggs root concentration factor times pore water; above-ground produce from a one-compartment leaf mass balance with a transpiration stream term and a gas exchange term, at steady state or as the exact exponential at harvest.
+- Assumptions:
+  - Neutral organic chemicals only; ionizable chemicals and inorganics are warned, and an inorganic needs a user bioconcentration factor.
+  - The root factor constants are those the HHRAP appendix prints for the Briggs correlation; the transpiration stream concentration factor and the leaf-air partition coefficient are user inputs because their published regressions were not read.
+  - The leaf and stem form one well-mixed compartment with constant inputs over the growing period and zero initial concentration.
+  - Concentrations are fresh weight; the root factor is in L/kg of root fresh weight per water concentration.
+- RISC5 choice: RISC5 offers Briggs-type root and transpiration factors with a one-compartment leaf model for vegetable uptake of organics.
+- Sources:
+  - Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.
+  - Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027.
+  - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
+
+#### EPA HHRAP 2005 produce equations (fallback for the modern plant model)
+
+- Kind: Modern
+- Method id: `plantUptake.hhrap-2005`
+- Summary: Root uptake with the Travis and Arms plant-soil factor for above-ground produce, the Briggs root factor over Kd with the empirical skin correction for root produce, and Bacci-type air-to-plant vapor transfer for exposed produce, all on a dry weight basis with the published log Kow caps.
+- Assumptions:
+  - Fallback for the Trapp modern model, whose publication could not be verified (DECISIONS, 2026-10-18); the switch is recorded, not silent.
+  - Neutral organic chemicals only; an inorganic needs a user plant-soil factor.
+  - Particle deposition is not modelled; only root uptake and vapor-phase air-to-plant transfer.
+  - Concentrations are dry weight, as HHRAP states them; the root factor is converted from fresh weight with the 87 percent moisture content HHRAP uses.
+  - The empirical correction factor is 0.01 above log Kow 4 and 1.0 otherwise.
+- Sources:
+  - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
+  - Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -507,7 +540,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - American Petroleum Institute (2010). BioVapor.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95.
 - Aziz, C.E., et al. (2000). BIOCHLOR.
-- Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
@@ -530,10 +562,8 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf>
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts.
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
-- Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027.
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
-- U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
@@ -585,7 +615,7 @@ Every entry in the reference database, alphabetical by author.
 - ASTM International (1995). ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites. E1739-95. [planned]
 - Aziz, C.E., et al. (2000). BIOCHLOR. [planned]
 - Brent, R.P. (1973). Algorithms for Minimization without Derivatives. Prentice-Hall, Englewood Cliffs, New Jersey. ISBN 0-13-022335-2. <https://maths-people.anu.edu.au/~brent/pub/pub011.html> [used]
-- Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506. [planned]
+- Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506. [used]
 - Brooks, R.H., Corey, A.T. (1964). Hydraulic properties of porous media. Colorado State University, Fort Collins, Hydrology Papers. No. 3 (March 1964). <https://mountainscholar.org/bitstream/handle/10217/61288/HydrologyPapers_n3.pdf> [used]
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327> [planned]
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
@@ -631,7 +661,7 @@ Every entry in the reference database, alphabetical by author.
 - Stephan, C.E., Mount, D.I., Hansen, D.J., Gentile, J.H., Chapman, G.A., Brungs, W.A. (1985). Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses. U.S. Environmental Protection Agency, Office of Research and Development. PB85-227049. <https://www.epa.gov/sites/production/files/2016-02/documents/guidelines-water-quality-criteria.pdf> [planned]
 - Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts. [planned]
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals]. [planned]
-- Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027. [planned]
+- Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027. [used]
 - U.S. Environmental Protection Agency (1989). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part A), Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/1-89/002, December 1989. <https://www.epa.gov/system/files/documents/2024-10/rags_a_508.pdf> [used]
 - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual, Supplemental Guidance: "Standard Default Exposure Factors", Interim Final. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. OSWER Directive 9285.6-03, PB91-921314, March 25, 1991. <https://semspub.epa.gov/src/document/HQ/190591> [used]
 - U.S. Environmental Protection Agency (1991). Risk Assessment Guidance for Superfund: Volume I, Human Health Evaluation Manual (Part B, Development of Risk-based Preliminary Remediation Goals), Interim. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. EPA/540/R-92/003, Publication 9285.7-01B, December 1991. <https://semspub.epa.gov/src/document/HQ/156739> [used]
@@ -647,7 +677,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf> [used]
-- U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities. [planned]
+- U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities. [used]
 - U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf> [planned]
 - U.S. Environmental Protection Agency (2009). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA-540-R-070-002, OSWER 9285.7-82, January 2009. <https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf> [used]
 - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252> [used]

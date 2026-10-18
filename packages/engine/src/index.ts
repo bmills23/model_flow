@@ -28,6 +28,7 @@ import {
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
+import { plantUptakeLegacy, plantUptakeModern } from './processes/plantUptake/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -52,6 +53,7 @@ export * from './processes/outdoorAir/index.js';
 export type { SsgSoil as OutdoorAirSsgSoil } from './processes/outdoorAir/index.js';
 export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
+export * from './processes/plantUptake/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
 
@@ -83,3 +85,5 @@ registry.register(outdoorAirSsgVf1996);
 registry.register(vaporJuryBam);
 registry.register(surfaceWaterLegacy);
 registry.register(surfaceWaterModern);
+registry.register(plantUptakeLegacy);
+registry.register(plantUptakeModern);

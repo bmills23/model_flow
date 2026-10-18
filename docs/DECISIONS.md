@@ -922,3 +922,23 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
 10. **Fixture tolerances (DEFAULT).** Closed forms 1e-10 relative; ODE against linear solve 1e-8; published
     worked examples at printed precision (1 percent); Eco-SSL wildlife back-calculation 5 percent because
     the published values carry two significant figures. Wider tolerances need a new entry here.
+
+### M9 slice E1 rulings (2026-10-18)
+
+11. **Modern plant model is the HHRAP 2005 fallback (DEFAULT, ruling 2 applied).** Neither candidate for
+    Trapp 2015 (Environ. Sci. Pollut. Res. 11(1), 33-39, a 2004 review, or Environ. Sci. Technol. 49(1),
+    395-402) could be read: the first is behind a subscription wall and the second was not available. No
+    modern equation set was verified, so the modern method is the HHRAP produce equations
+    (`epa2005hhrap`, chapter 5 Equations 5-18, 5-20A, 5-20B and appendix A-2 Equations A-2-14 to A-2-20,
+    read from the EPA archive PDFs). It registers as `plantUptake.hhrap-2005`, not `plantUptake.trapp-2015`;
+    `trapp2015` stays a `planned` descriptor and is not cited.
+12. **Unreadable constants are user inputs, not typed from memory (DEFAULT).** The Briggs transpiration
+    stream concentration factor regression and the Trapp and Matthies leaf-air partition coefficient
+    could not be read from a primary source, so TSCF and K_la are required inputs of the legacy leaf model
+    (no default). The Briggs root concentration factor constants are entered as the HHRAP appendix
+    prints them for the Briggs correlation (a secondary account of `briggs1982`); `briggs1982` and
+    `trappmatthies1995` are marked `used` on that basis, with notes saying what was and was not read.
+13. **Dry weight HHRAP outputs (DEFAULT).** The modern method returns dry weight concentrations as HHRAP
+    states them; the fresh weight conversion for the produce pathway belongs to slice E2. The soil
+    gas-phase vapor term takes a user or M6 vapor air concentration directly (no Fv split) and ignores
+    particle deposition.

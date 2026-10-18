@@ -698,26 +698,26 @@
   {
     "key": "trappmatthies1995",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Trapp, S., Matthies, M.",
     "year": 1995,
     "title": "Generic one-compartment model for uptake of organic chemicals by foliar vegetation",
     "tags": ["plantUptake"],
     "venue": "Environmental Science & Technology 29(9), 2333-2338",
     "identifier": "doi:10.1021/es00009a027",
-    "notes": "Verified against the Crossref record, retrieved 2026-10-18. A 1996 erratum (doi:10.1021/es951008p) exists."
+    "notes": "Verified against the Crossref record, retrieved 2026-10-18. A 1996 erratum (doi:10.1021/es951008p) exists. Used for the structure of the one-compartment leaf balance only; the paper text was not available in slice E1, so its K_la correlation is not implemented and K_la is a user input."
   },
   {
     "key": "briggs1982",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Briggs, G.G., Bromilow, R.H., Evans, A.A.",
     "year": 1982,
     "title": "Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley",
     "tags": ["plantUptake"],
     "venue": "Pesticide Science 13(5), 495-504",
     "identifier": "doi:10.1002/ps.2780130506",
-    "notes": "Verified against the Crossref record, retrieved 2026-10-18."
+    "notes": "Verified against the Crossref record, retrieved 2026-10-18. Used for the root concentration factor; the constants were read as printed in the HHRAP 2005 appendix A-2 (Equations A-2-14 and A-2-15, retrieved 2026-10-18) because the paper text was not available. The transpiration stream concentration factor regression of this paper was not read and is a user input."
   },
   {
     "key": "trapp2015",
@@ -732,11 +732,12 @@
   {
     "key": "epa2005hhrap",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2005,
     "title": "Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities",
-    "tags": ["plantUptake"]
+    "tags": ["plantUptake"],
+    "notes": "Chapter 5 (Equations 5-18, 5-20A, 5-20B) and appendix A-2 (Equations A-2-14 to A-2-20) read from the EPA archive PDFs, retrieved 2026-10-18."
   },
   {
     "key": "epaecossl",
