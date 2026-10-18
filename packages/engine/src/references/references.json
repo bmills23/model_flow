@@ -358,7 +358,7 @@
   {
     "key": "eq1994pef",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "Environmental Quality Management, Inc.",
     "year": 1994,
     "title": "Revisions to VF and PEF Equations",
@@ -536,7 +536,7 @@
   {
     "key": "cowherd1985",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D.",
     "year": 1985,
     "title": "Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites",
@@ -680,7 +680,7 @@
   {
     "key": "little1992",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Little, J.C.",
     "year": 1992,
     "title": "Applying the two-resistance theory to contaminant volatilization in showers",
@@ -706,7 +706,7 @@
   {
     "key": "waldenspence1997",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Walden, T., Spence, L.R.",
     "year": 1997,
     "title": "Risk-based BTEX screening criteria for a groundwater irrigation scenario",
@@ -1151,7 +1151,7 @@
   {
     "key": "epa2024rslug",
     "type": "guidance",
-    "status": "fixture",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2024,
     "title": "Regional Screening Levels (RSLs), User's Guide",

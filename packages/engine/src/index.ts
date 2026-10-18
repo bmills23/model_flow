@@ -28,6 +28,13 @@ import {
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
+import { showerFc1986, showerLittle1992, showerRslHousehold } from './processes/shower/index.js';
+import { irrigationPathways, irrigationSprinklerFc } from './processes/irrigation/index.js';
+import {
+  particulateBoxEmissionMethod,
+  particulateSsgPef1996,
+  particulateSsgPef2002,
+} from './processes/particulate/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -54,6 +61,10 @@ export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
+export * from './processes/shower/index.js';
+export * from './processes/irrigation/index.js';
+export * from './processes/particulate/index.js';
+export * from './processes/household/index.js';
 
 export const registry = new MethodRegistry();
 registry.register(gelhar1985Api1987);
@@ -83,3 +94,11 @@ registry.register(outdoorAirSsgVf1996);
 registry.register(vaporJuryBam);
 registry.register(surfaceWaterLegacy);
 registry.register(surfaceWaterModern);
+registry.register(showerFc1986);
+registry.register(showerLittle1992);
+registry.register(showerRslHousehold);
+registry.register(irrigationSprinklerFc);
+registry.register(irrigationPathways);
+registry.register(particulateBoxEmissionMethod);
+registry.register(particulateSsgPef1996);
+registry.register(particulateSsgPef2002);

@@ -326,7 +326,7 @@ M7 does not compute soil accumulation from irrigation or interception on leaves;
 | `irrigation.potable-source` | the irrigation source is also the potable supply (the indoor pathways will dominate, per the scenario of `waldenspence1997`) |
 | `irrigation.box-width-default` | the sprinkler box width is left at the 1 m RISC5 default |
 | `particulate.volatile-chemical` | a particulate pathway for a chemical that the volatility criterion calls volatile (the SSG uses VF for those) |
-| `particulate.wind-below-threshold` | U_m / U_t small enough that F(x) is outside the entered range the user confirmed (stage 2 sets the bound from the source) |
+| `particulate.wind-below-threshold` | U_m / U_t small enough that F(x) is outside the entered range the user confirmed (not implemented: no bound was set from a source; DECISIONS.md, E4 item 6) |
 | `outdoorAir.mixed-dispersion` | existing M6 warning, reused |
 
 ## Fixture plan and tolerances
@@ -339,7 +339,8 @@ M7 does not compute soil accumulation from irrigation or interception on leaves;
 3. **Little 1992 published results** (S0 could not read the paper): its model comparisons for the chemicals it
    tabulates, at half a unit in the last printed figure.
 4. **Table R-9 shower inhalation rows** (`arcadis2001`, the M4 deferred rows), at the ROADMAP's 3
-   percent, if the review lists the shower inputs; otherwise a named exception like Table R-6 in M6.
+   percent, if the review lists the shower inputs; otherwise a named exception like Table R-6 in M6. E4 result:
+   a named exception (the review's shower inputs are not available; `namedExceptions` in the R-9 fixture, DECISIONS.md E4 item 4).
 5. **RSL tap water levels for volatiles** (benzene, trichloroethylene, chloroform; `epa2024rsl`) through
    `shower.rsl-household` and the M5 coefficient route, at half a unit in the third printed figure.
 6. **SSG 1996 default PEF** reproduced from the guidance's printed inputs, and the RSL resident soil
@@ -359,7 +360,7 @@ Stage 2 (engine and data), each slice sized for one worker, failing tests first:
 | E1 shower (built; fixtures 3 and 5 pending a source) | `processes/shower/{droplet,legacyStall,little,household,index}.ts`, `test/shower.test.ts` | identities 1, hand cases, Little fixtures (3), RSL fixtures (5) | S0 |
 | E2 sprinkler and irrigation (built; no Walden and Spence factors, all irrigation exposure factors are inputs) | `processes/irrigation/{sprinkler,pathways,index}.ts`, `test/irrigation.test.ts` | sprinkler box identity; irrigation EPCs through M4 kernels; the M9 `IrrigationSource` shape | E1 (droplet kernel) |
 | E3 particulates | `processes/particulate/{windErosion,pef,qOverC2002,index}.ts`, `test/particulate.test.ts` | PEF and box identity; SSG default PEF (6); 2002 regression (7) | S0 |
-| E4 coupling, cleanup and registration | `exposure` EPC adapters (origin tags), `outdoorAirEpc` contributions, M5 coefficient wrappers, registry entries, reference status flips, `docs:generate` | Table R-9 rows (4); registry test with every cited key `used`; M5 levels equal target over coefficient | E1, E2, E3 |
+| E4 coupling, cleanup and registration (built; Table R-9 shower rows are a named exception) | `processes/household/{coupling,cleanup}.ts` (EPC adapters with origin tags, sprinkler emission, M5 coefficient wrappers), `{shower,irrigation,particulate}/methods.ts` registry entries, reference status flips, `docs:generate`, `test/household-e4.test.ts` | Table R-9 rows (4); registry test with every cited key `used`; M5 levels equal target over coefficient | E1, E2, E3 |
 
 Stage 3 (web), new lazy route `#/household` (shower, irrigation, particulates):
 

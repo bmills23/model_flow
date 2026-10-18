@@ -963,3 +963,41 @@ citations). Calls, open to overturn:
    a required input, the season is validated (nonnegative, end not before start), and the chemical is an
    opaque string because the engine has no chemical id type.
 5. **Fixtures.** Identity and hand cases only (note fixtures 1 and 2); no tolerance widened.
+
+## 2026-10-18: M7 slice E4, coupling, cleanup wrappers and registration
+
+Registered the eight M7 methods (`shower.fc-1986`, `shower.little-1992`, `shower.rsl-household`,
+`irrigation.sprinkler-fc`, `irrigation.pathways`, `particulate.box-emission`, `particulate.ssg-pef-1996`,
+`particulate.ssg-pef-2002`), added `processes/household/{coupling,cleanup}.ts` and exported the three
+process folders from the package root. Calls, open to overturn:
+
+1. **Kinds.** The registry gate requires a legacy and a modern method per process. Shower has one legacy
+   and two modern, particulates one legacy and two modern. Irrigation has only the legacy-style sprinkler
+   (ruling 7: no modern sprinkler model), so `irrigation.pathways` is registered as the modern member
+   (the note already calls it "legacy and modern presets"); its factors are still caller inputs.
+2. **Citations and status flips.** Flipped to `used`: `little1992` (shower.little-1992), `waldenspence1997`
+   (irrigation.*), `cowherd1985` (particulate.box-emission), `eq1994pef` (particulate.ssg-pef-1996) and
+   `epa2024rslug` (shower.rsl-household, from `fixture`). `foster1986` stays `planned`: its title is still a
+   descriptor and the registry test forbids citing it. So `shower.fc-1986` and `irrigation.sprinkler-fc`
+   cite `little1992` for the shared two-resistance theory (and the sprinkler cites `waldenspence1997`),
+   and the unverified Foster and Chrostowski coefficients appear only in their `risc5Choice` text as
+   unverified RISC5 values. `little1992` is cited for the theory only; its mass balance is still our own
+   statement, unverified against the paper.
+3. **Coupling.** `waterDrivenEpc` evaluates any forward function per sample of a constant or series water
+   source (the M1 breakthrough adapter), tagging the EPC with the method id; `irrigationEpcSpecs` tags
+   ingestion and dermal `irrigation.pathways` and spray air `irrigation.sprinkler-fc`;
+   `sprinklerOutdoorEmission` is the `massRate` emission for `outdoorAirEpc`. Particulate contributions
+   use the E3 functions unchanged. Soil stays constant.
+4. **Table R-9 shower inhalation rows are a named exception.** The review's shower inputs are not in the
+   table or the RISC5 guide and the RISC4 manual that carries them was not available, so the four rows
+   (one per chemical) cannot be reproduced without inventing droplet size, fall time, flow, stall volume
+   and film coefficients. The fixture records them under `namedExceptions` (removed from `deferred`), as
+   Table R-6 was in M6. The shower model keeps its identity and hand cases (fixtures 1 and 2); fixtures 3
+   and 5 stay pending a readable source. No tolerance was widened.
+5. **M5 wrappers.** `sourceLevelsOverCoefficient` divides the direct back-calculation's bathroom-air or
+   outdoor-air level by the model coefficient (water or soil to air), with `cleanup.zero-coefficient`
+   when the model transfers nothing. The test checks level equals target over (pathway coefficient times
+   model coefficient) and that the forward run returns the air level. No root find.
+6. **Particulate method inputs.** The method wrappers add a `volatile` flag that raises
+   `particulate.volatile-chemical`; the `particulate.wind-below-threshold` warning of the note is not
+   implemented (no bound was set from a source), and the note says so.

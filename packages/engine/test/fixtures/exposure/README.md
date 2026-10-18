@@ -14,7 +14,7 @@ Targets are the table's "calculated" rows (not its "RISC" rows), entered as the 
 test derives its tolerance, half a unit in the last printed digit. A printed "NQ" asserts a `null` risk
 or hazard quotient (no toxicity value for that endpoint). Rows used: soil ingestion, dermal contact with
 soil, groundwater ingestion, dermal contact in the shower, each with dose, cancer risk and hazard
-index. Rows deferred: inhalation in the shower (needs the M7 shower model) and root vegetables (M9).
+index. Named exception: inhalation in the shower (its droplet, flow, stall and film inputs are not available, so the row cannot be reproduced without inventing them; DECISIONS.md, M7 slice E4). Row deferred: root vegetables (M9).
 
 The table lists no exposure inputs. Following the Table R-7 convention, the inputs come from the RISC4
 manual (`spence2001`) for this one case only, not as product defaults:

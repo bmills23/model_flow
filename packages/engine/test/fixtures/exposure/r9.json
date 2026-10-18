@@ -109,8 +109,12 @@
       }
     }
   },
-  "deferred": [
-    "Inhalation in Shower (needs the M7 shower model)",
-    "Ingestion of Root Vegetables (M9)"
+  "deferred": ["Ingestion of Root Vegetables (M9)"],
+  "namedExceptions": [
+    {
+      "row": "Inhalation in Shower",
+      "reason": "The shower model inputs of the review (droplet size, fall time, water flow, stall volume, film coefficients, water temperature) are not printed in the table or in the RISC5 guide, and the RISC4 manual that carries them was not available, so the row cannot be reproduced without inventing inputs. The shower model is checked by identities and hand cases instead.",
+      "decision": "docs/DECISIONS.md, 2026-10-18, M7 slice E4, item 4"
+    }
   ]
 }

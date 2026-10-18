@@ -27,7 +27,7 @@ const COMMON_ASSUMPTIONS = [
   'Risk is the linear low-dose form, slope times dose; it is warned above 0.01.',
   'The hazard index is a total over all target organs (no target-organ segregation).',
   'The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.',
-  'Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.',
+  'Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.',
   'A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.',
 ];
 

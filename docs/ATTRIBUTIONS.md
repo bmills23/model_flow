@@ -205,7 +205,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - Dermal water uses the steady-state permeability with no lag time.
   - Soil bioavailability is 1 unless entered; route-to-route extrapolation is off unless switched on.
@@ -228,7 +228,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.
   - The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.
@@ -497,6 +497,117 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5.
   - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203>
 
+### shower
+
+#### Stagnant stall shower volatilization with two-resistance droplet transfer
+
+- Kind: Legacy (RISC5 default)
+- Method id: `shower.fc-1986`
+- Summary: Fraction volatilized from a falling droplet by two films in series (gas film scaled from water vapour, liquid film from carbon dioxide, by the square root of the molecular weight ratio), with all the mass sitting in a fully mixed, unventilated stall: C_a = f_v Q_w t_s C_w / V_s.
+- Assumptions:
+  - Two-resistance transfer across the droplet surface into clean air (no gas-phase back-pressure), a single fall time for every droplet.
+  - The whole mass volatilized during the shower is in the stall from the start and stays there; the stall is fully mixed with no exchange with the bathroom.
+  - A stall value above the equilibrium concentration H C_w follows from the stagnant assumption and is warned, not clipped.
+  - Linear in the tap water concentration, so cleanup levels are the target over the coefficient.
+- RISC5 choice: RISC5 treats the shower as a stagnant stall fed by two-resistance droplet transfer with film reference coefficients of 3000 cm/h (gas, water vapour) and 20 cm/h (liquid, carbon dioxide) and the stagnant mass balance; the primary paper behind these values could not be verified, so they are inputs and the defaults are warned.
+- Sources:
+  - Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010>
+
+#### Two-resistance stall with gas-phase back-pressure and ventilation
+
+- Kind: Modern
+- Method id: `shower.little-1992`
+- Summary: Keeps the gas-phase driving force and the stall ventilation: dC/dt = alpha - beta C with alpha = Q_w f C_w / V_s and beta = (Q_w f / H + Q_g) / V_s, solved in closed form and averaged over the shower plus an optional stay after the water is off.
+- Assumptions:
+  - The mass balance is our statement of the two-resistance theory, checked by the limit identities (legacy stall at large H and no ventilation, equilibrium H C_w at long times); it is not a transcription of the paper.
+  - The stall is fully mixed and the supply air is clean; the receptor is in the stall for the shower time plus the stay.
+  - Linear in the tap water concentration.
+- Sources:
+  - Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010>
+
+#### RSL whole-house water-to-air volatilization term
+
+- Kind: Modern
+- Method id: `shower.rsl-household`
+- Summary: Whole-house air concentration as the tap water concentration times a fixed transfer factor K (L water per m^3 air), added to the tap water inhalation level for volatile chemicals only.
+- Assumptions:
+  - A chemical is volatile when its Henry constant exceeds 1E-5 atm m^3/mol or its vapor pressure exceeds 1 mm Hg; others return zero with a warning.
+  - The transfer factor K is an entered value: it could not be verified against a primary page and is always warned.
+  - Linear in the tap water concentration.
+- Sources:
+  - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide>
+
+### irrigation
+
+#### Sprinkler volatilization into the outdoor box
+
+- Kind: Legacy (RISC5 default)
+- Method id: `irrigation.sprinkler-fc`
+- Summary: The shared two-resistance droplet fraction with outdoor droplet parameters gives a mass rate E = f_v Q_spr C_w that enters the outdoor box as a mass-rate emission: C_a = E / (u delta W).
+- Assumptions:
+  - The droplet kernel is the one used for the shower, with outdoor droplet size, fall time (including ponding in the box) and flow supplied by the caller; none has a default.
+  - The box is fully mixed and ventilated by the wind; the width defaults to 1 m (the RISC5 choice) and is warned, because for a real sprinkler the plume width matters.
+  - Linear in the irrigation water concentration.
+- RISC5 choice: RISC5 feeds the outdoor box with the sprinkler droplet loss and fixes the box width at 1 m; the film reference coefficients are the unverified RISC5 values and are warned when defaulted.
+- Sources:
+  - Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722>
+  - Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010>
+
+#### Irrigation water exposure point concentrations
+
+- Kind: Modern
+- Method id: `irrigation.pathways`
+- Summary: Irrigation water feeds incidental ingestion and dermal contact through the existing exposure kernels (the EPC is the water concentration), spray inhalation through the sprinkler box, and garden vegetables through the irrigation source handed to plant uptake.
+- Assumptions:
+  - The irrigation exposure factors (contact times, ingestion volumes, skin areas) are caller inputs; none is defaulted because the source factors were not read.
+  - A source that is also the potable supply is warned, because the indoor pathways will dominate.
+  - Linear in the irrigation water concentration.
+- Sources:
+  - Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722>
+
+### particulate
+
+#### Particulate flux into the outdoor box
+
+- Kind: Legacy (RISC5 default)
+- Method id: `particulate.box-emission`
+- Summary: A PM10 mass flux, entered or from the wind-erosion expression J = 0.036 (1 - V) (U_m/U_t)^3 F(x), times the soil concentration is an area-flux emission of chemical into the outdoor box: C_a = J C_s L / (u delta).
+- Assumptions:
+  - The particles carry the bulk soil concentration of the chemical; soil is constant in time.
+  - F(x) is an entered value (the preset 0.194 is the printed guidance default); the function of x is not computed.
+  - The wind-erosion expression is verified as reproduced in the soil screening guidance; the original report was not read.
+  - Linear in the soil concentration.
+- RISC5 choice: RISC5 offers an entered PM10 emission flux (an ASTM RBCA default that could not be cited) or the wind-erosion flux, each feeding the outdoor box.
+- Sources:
+  - Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002.
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### Soil screening guidance particulate emission factor (1996)
+
+- Kind: Modern
+- Method id: `particulate.ssg-pef-1996`
+- Summary: PEF = (Q/C) / J with the guidance default Q/C of 90.80 g/(m^2 s) per kg/m^3 (Minneapolis, half acre) and the wind-erosion flux; air concentration = soil concentration / PEF.
+- Assumptions:
+  - Q/C for particulates is a separate PM10 value from the volatilization Q/C used by the outdoor air method.
+  - Defaults V 0.5, U_m 4.69 m/s, U_t 11.32 m/s and F(x) 0.194 are the printed guidance values; the generic PEF is 1.32E9 m^3/kg.
+  - Linear in the soil concentration.
+- Sources:
+  - U.S. Environmental Protection Agency (1996). Soil Screening Guidance: Technical Background Document. U.S. Environmental Protection Agency. EPA/540/R-95/128 (Publication 9355.4-17A), Second Edition, May 1996. <https://semspub.epa.gov/work/HQ/207.pdf>
+  - Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf>
+
+#### Supplemental soil screening guidance particulate emission factor (2002)
+
+- Kind: Modern
+- Method id: `particulate.ssg-pef-2002`
+- Summary: The same PEF with the 2002 default Q/C of 93.77 or the site-specific regression Q/C = A exp[(ln A_s - B)^2 / C] on source area (0.5 to 500 acres) with the constants of a climate zone station.
+- Assumptions:
+  - The regression constants are those of Exhibit D-2; the Minneapolis half-acre value reproduces the printed 93.77.
+  - V, U_m, U_t and F(x) are the same as the 1996 guidance; the generic PEF is 1.36E9 m^3/kg.
+  - Construction-phase emission factors are not included.
+  - Linear in the soil concentration.
+- Sources:
+  - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -511,13 +622,10 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Buchman, M.F. (2008). Screening Quick Reference Tables (SQuiRTs). National Oceanic and Atmospheric Administration, Office of Response and Restoration. NOAA OR&R Report 08-1. <https://repository.library.noaa.gov/view/noaa/9327>
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483>
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013>
-- Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002.
-- Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf>
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency.
 - Foster, S.A., Chrostowski, P.C. (1986). [Inhalation exposures to volatile organic contaminants in the shower].
 - Gelhar, L.W., Welty, C., Rehfeldt, K.R. (1992). [A critical review of data on field-scale dispersion in aquifers]. Water Resources Research. 28:1955-1974.
 - Iman, R.L., Conover, W.J. (1982). [A distribution-free approach to inducing rank correlation among input variables].
-- Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010>
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006>
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075>
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites].
@@ -536,7 +644,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
 - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs).
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
-- Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722>
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2013). A review of vapor intrusion models. Environmental Science and Technology. 47(6):2457-2470. <https://doi.org/10.1021/es302714g>
@@ -566,7 +673,6 @@ Reviews, codes and packages used to produce test fixtures. They are checks on th
 
 - Arcadis Geraghty & Miller (2001). Review of Risk Integrated Software for Cleanups (RISC) v4.0.
 - Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf>
-- U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide>
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/>
 - Wexler, E.J. (1996). ANALGWST (analytical groundwater solute transport code), version 1.1. U.S. Geological Survey. Version 1.1 (1996/04/03). <https://water.usgs.gov/software/ANALGWST/>
 
@@ -590,11 +696,11 @@ Every entry in the reference database, alphabetical by author.
 - Celia, M.A., Bouloutas, E.T., Zarba, R.L. (1990). A general mass-conservative numerical solution for the unsaturated flow equation. Water Resources Research. 26(7):1483-1496. <https://doi.org/10.1029/WR026i007p01483> [planned]
 - Chapra, S.C. (1997). Surface Water-Quality Modeling. McGraw-Hill, New York. ISBN 0-07-011364-5. [used]
 - Cline, P.V., Delfino, J.J., Rao, P.S.C. (1991). Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures. Environmental Science & Technology. 25(5):914-920. <https://doi.org/10.1021/es00017a013> [planned]
-- Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002. [planned]
+- Cowherd, C.G., Muleski, G., Engelhart, P., Gillette, D. (1985). Rapid Assessment of Exposure to Particulate Emissions from Surface Contamination Sites. U.S. Environmental Protection Agency, Office of Health and Environmental Assessment. EPA/600/8-85/002. [used]
 - DeVaull, G.E. (2007). Indoor Vapor Intrusion with Oxygen-Limited Biodegradation for a Subsurface Gasoline Source. Environmental Science and Technology. 41(9):3241-3248. <https://doi.org/10.1021/es060672a> [used]
 - Di Toro, D.M., Zarba, C.S., Hansen, D.J., Berry, W.J., Swartz, R.C., Cowan, C.E., Pavlou, S.P., Allen, H.E., Thomas, N.A., Paquin, P.R. (1991). Technical basis for establishing sediment quality criteria for nonionic organic chemicals using equilibrium partitioning. Environmental Toxicology and Chemistry. 10(12):1541-1583. <https://doi.org/10.1002/etc.5620101203> [used]
 - Domenico, P.A. (1987). An analytical model for multidimensional transport of a decaying contaminant species. Journal of Hydrology. 91(1-2):49-58. <https://doi.org/10.1016/0022-1694(87)90127-2> [used]
-- Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf> [planned]
+- Environmental Quality Management, Inc. (1994). Revisions to VF and PEF Equations. Memorandum to J. Dinan, U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Memorandum 5099-3, 11 July 1994. <https://semspub.epa.gov/work/HQ/207.pdf> [used]
 - Falta, R.W. (2026). REMChlor. U.S. Environmental Protection Agency. [planned]
 - Falta, R.W., Rao, P.S., Basu, N. (2005). Assessing the impacts of partial mass depletion in DNAPL source zones: I. Analytical modeling of source strength functions and plume response. Journal of Contaminant Hydrology. 78(4):259-280. <https://doi.org/10.1016/j.jconhyd.2005.05.010> [used]
 - Feenstra, S., Mackay, D.M., Cherry, J.A. (1991). A method for assessing residual NAPL based on organic chemical concentrations in soil samples. Ground Water Monitoring Review. 11(2):128-136. <https://doi.org/10.1111/j.1745-6592.1991.tb00374.x> [used]
@@ -611,7 +717,7 @@ Every entry in the reference database, alphabetical by author.
 - Jury, W.A., Spencer, W.F., Farmer, W.J. (1983). Behavior assessment model for trace organics in soil: I. Model description. Journal of Environmental Quality. 12(4):558-564. <https://doi.org/10.2134/jeq1983.00472425001200040026x> [used]
 - Lahvis, M.A., Hers, I., Davis, R.V., Wright, J., DeVaull, G.E. (2013). Vapor intrusion screening at petroleum UST sites. Ground Water Monitoring and Remediation. 33(2):53-67. <https://doi.org/10.1111/gwmr.12005> [used]
 - Lenhard, R.J., Parker, J.C., Mishra, S. (1989). On the correspondence between Brooks-Corey and van Genuchten models. Journal of Irrigation and Drainage Engineering. 115(4):744-751. <https://doi.org/10.1061/(ASCE)0733-9437(1989)115:4(744)> [used]
-- Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010> [planned]
+- Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010> [used]
 - Long, E.R., MacDonald, D.D., Smith, S.L., Calder, F.D. (1995). Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments. Environmental Management. 19(1):81-97. <https://doi.org/10.1007/BF02472006> [planned]
 - MacDonald, D.D., Ingersoll, C.G., Berger, T.A. (2000). Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems. Archives of Environmental Contamination and Toxicology. 39(1):20-31. <https://doi.org/10.1007/s002440010075> [planned]
 - Massachusetts Department of Environmental Protection (2002). [Characterizing risks posed by petroleum contaminated sites]. [planned]
@@ -656,7 +762,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2015). OSWER Technical Guide for Assessing and Mitigating the Vapor Intrusion Pathway from Subsurface Vapor Sources to Indoor Air. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Publication 9200.2-154, June 2015. <https://19january2017snapshot.epa.gov/sites/production/files/2015-09/documents/oswer-vapor-intrusion-technical-guide-final.pdf> [used]
 - U.S. Environmental Protection Agency (2017). Documentation for EPA's Implementation of the Johnson and Ettinger Model to Evaluate Site Specific Vapor Intrusion into Buildings, Version 6.0. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. Revised September 2017. <https://semspub.epa.gov/work/HQ/100000489.pdf> [used]
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables> [data]
-- U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [fixture]
+- U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide> [used]
 - U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table> [data]
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard. [data]
 - U.S. Environmental Protection Agency (2026). Integrated Risk Information System (IRIS). [data]
@@ -668,7 +774,7 @@ Every entry in the reference database, alphabetical by author.
 - Utrecht University (MiBiPreT) (2026). mibitrans. Version 1.0.1. <https://pypi.org/project/mibitrans/> [fixture]
 - van Genuchten, M.Th. (1980). A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. Soil Science Society of America Journal. 44(5):892-898. <https://doi.org/10.2136/sssaj1980.03615995004400050002x> [used]
 - van Genuchten, M.Th., Alves, W.J. (1982). Analytical solutions of the one-dimensional convective-dispersive solute transport equation. U.S. Department of Agriculture, Agricultural Research Service, Technical Bulletin. No. 1661, 151 p. <https://doi.org/10.22004/ag.econ.157268> [used]
-- Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722> [planned]
+- Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722> [used]
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency. [planned]
 - West, M.R., Kueper, B.H., Ungs, M.J. (2007). On the use and error of approximation in the Domenico (1987) solution. Ground Water. 45(2):126-135. <https://doi.org/10.1111/j.1745-6584.2006.00280.x> [used]
 - Wexler, E.J. (1992). Analytical solutions for one-, two-, and three-dimensional solute transport in ground-water systems with uniform flow. U.S. Geological Survey Techniques of Water-Resources Investigations. TWRI 3-B7 (Book 3, Chapter B7). <https://doi.org/10.3133/twri03b7> [used]
