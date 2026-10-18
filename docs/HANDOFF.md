@@ -16,8 +16,8 @@ a done one.
   before deleting it.
 - Test time: `apps/web/src/surfaceWater/compute.test.ts` takes about 200 s, the web suite about 206 s, and
   the full local gate about 4 min 45 s.
-- CI cost: about 3 billed minutes per push to main before this wave; re-measure after the next
-  push. Docs-only pushes trigger nothing.
+- CI cost: about 5 billed minutes per push to main (measured 2026-10-18: gate job 2 min 50 s, Pages
+  build 26 s, deploy 10 s); about 3 before M8. Docs-only pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 102 entries): 51 `used`, 38
   `planned`, 8 `data`, 5 `fixture`. The 18 `planned` entries with square-bracketed descriptor titles are
   the only bracketed titles.
@@ -205,8 +205,9 @@ a done one.
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted: the sec-butylbenzene enthalpy and
   the tert-butylbenzene row. No substitutes.
 - Test time: `apps/web/src/surfaceWater/compute.test.ts` takes about 200 s, the web suite about 206 s, and
-  the full local gate about 4 min 45 s. CI cost per push was about 3 billed minutes before this wave;
-  re-measure after the next push.
+  the full local gate about 4 min 45 s. CI cost per push rose from about 3 to about 5 billed minutes
+  (2026-10-18). A linked surface water run on the screen also takes about 81 s at a 2000 m reach (N_TIMES
+  bank-plane series in `apps/web/src/surfaceWater/compute.ts`); profile it before changing tests.
 - Timing checks under load: `vadose-legacy.test.ts` (speed, best of nine under 250 ms) and
   `groundwater-kernel.test.ts` (plan-view grid, best of three under 1 s) were made robust to parallel test
   load. The mass-conservation test in `groundwater-kernel.test.ts` has a 30 s timeout. If a timing check
