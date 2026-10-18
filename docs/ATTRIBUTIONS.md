@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-17 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-18 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -205,7 +205,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered until the vapor, shower and surface-water models arrive.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - Dermal water uses the steady-state permeability with no lag time.
   - Soil bioavailability is 1 unless entered; route-to-route extrapolation is off unless switched on.
@@ -228,7 +228,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Risk is the linear low-dose form, slope times dose; it is warned above 0.01.
   - The hazard index is a total over all target organs (no target-organ segregation).
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
-  - Air and surface-water concentrations are user entered until the vapor, shower and surface-water models arrive.
+  - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower air stays user entered until the shower model arrives.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.
   - The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.
