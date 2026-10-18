@@ -12,6 +12,7 @@ export type ProcessId =
   | 'irrigation'
   | 'surfaceWater'
   | 'plantUptake'
+  | 'eco'
   | 'exposure'
   | 'risk'
   | 'cleanup'

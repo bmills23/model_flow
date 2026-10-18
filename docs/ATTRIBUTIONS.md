@@ -530,6 +530,34 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
   - Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.
 
+### eco
+
+#### User-entered benchmark hazard quotients with a simple food web
+
+- Kind: Legacy (RISC5 default)
+- Method id: `eco.benchmark-hq`
+- Summary: Hazard quotient of the soil concentration over a benchmark the user enters with a citation, and a wildlife dose from a simple food web with user-entered bioaccumulation factors compared with a toxicity reference value. No benchmark table ships with the method.
+- Assumptions:
+  - Benchmarks and bioaccumulation factors are user entered; the expected citation for wildlife benchmarks is the ORNL toxicological benchmark report.
+  - Dose is the food ingestion rate times the area use factor times the diet-weighted food concentrations plus the incidental soil fraction.
+  - Hazard quotients only; no ecological cleanup level is offered.
+- RISC5 choice: RISC5 offers an ecological screen against user-supplied benchmarks with a simple food web.
+- Sources:
+  - Sample, B.E., Opresko, D.M., Suter, G.W., II (1996). Toxicological benchmarks for wildlife: 1996 revision. Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy. ES/ER/TM-86/R3, June 1996; doi:10.2172/258027. <https://www.osti.gov/biblio/258027>
+
+#### EPA Eco-SSL hazard quotients and wildlife food web
+
+- Kind: Modern
+- Method id: `eco.ecossl-2005`
+- Summary: Hazard quotients of the soil concentration over the EPA ecological soil screening levels for plants, soil invertebrates and the avian and mammalian wildlife guilds, with the guidance wildlife dose model (soil-to-biota uptake ratio, log-linear and linear models) available to back-calculate or check a wildlife level.
+- Assumptions:
+  - Eco-SSLs are screening values, not cleanup levels; the guidance states they are inappropriate as cleanup standards, so only hazard quotients are reported and ECO_SCREENING_ONLY is always shown.
+  - A group without a numeric Eco-SSL (not available, not enough data, or a procedure) gives no hazard quotient and an ECO_NO_SSL warning.
+  - The wildlife dose uses the per-chemical derivation inputs of the Eco-SSL documents; back-calculation reproduces the printed values to the two significant figures they carry (5 percent).
+- Sources:
+  - U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
+  - U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
+
 ## Planned methods
 
 Sources for methods on the roadmap that are not implemented yet. Nothing here affects a result today.
@@ -555,7 +583,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - McKay, M.D., Beckman, R.J., Conover, W.J. (1979). [A comparison of three methods for selecting values of input variables in the analysis of output from a computer code].
 - Morris, M.D. (1991). [Factorial sampling plans for preliminary computational experiments].
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output].
-- Sample, B.E., Opresko, D.M., Suter, G.W., II (1996). Toxicological benchmarks for wildlife: 1996 revision. Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy. ES/ER/TM-86/R3, June 1996; doi:10.2172/258027. <https://www.osti.gov/biblio/258027>
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models].
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]. Advances in Water Resources. 31:203-218.
 - Srinivasan, V., Clement, T.P. (2008). [Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]. Advances in Water Resources. 31:219-232.
@@ -564,7 +591,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Trapp, S. (2015). [Plant uptake and transport models for neutral and ionic chemicals].
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
-- U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
 - Weaver, J. (2017). PVIScreen. U.S. Environmental Protection Agency.
 - Yao, Y., Shen, R., Pennell, K.G., Suuberg, E.M. (2011). Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results. Environmental Science and Technology. 45(6):2227-2235. <https://doi.org/10.1021/es102602s>
@@ -575,7 +601,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 Public datasets that the chemical and toxicity database is built from.
 
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf>
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
 - U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
@@ -651,7 +676,7 @@ Every entry in the reference database, alphabetical by author.
 - Mualem, Y. (1976). A new model for predicting the hydraulic conductivity of unsaturated porous media. Water Resources Research. 12(3):513-522. <https://doi.org/10.1029/WR012i003p00513> [used]
 - Newell, C.J., McLeod, R.K., Gonzales, J.R. (1996). BIOSCREEN natural attenuation decision support system, user's manual. U.S. Environmental Protection Agency. EPA/600/R-96/087, Version 1.3, August 1996. <https://nepis.epa.gov/Adobe/PDF/P1007K50.pdf> [used]
 - Saltelli, A., et al. (2010). [Variance based sensitivity analysis of model output]. [planned]
-- Sample, B.E., Opresko, D.M., Suter, G.W., II (1996). Toxicological benchmarks for wildlife: 1996 revision. Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy. ES/ER/TM-86/R3, June 1996; doi:10.2172/258027. <https://www.osti.gov/biblio/258027> [planned]
+- Sample, B.E., Opresko, D.M., Suter, G.W., II (1996). Toxicological benchmarks for wildlife: 1996 revision. Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy. ES/ER/TM-86/R3, June 1996; doi:10.2172/258027. <https://www.osti.gov/biblio/258027> [used]
 - Schulze-Makuch, D. (2005). Longitudinal dispersivity data and implications for scaling behavior. Ground Water. 43(3):443-456. <https://doi.org/10.1111/j.1745-6584.2005.0051.x> [used]
 - Sobol, I.M. (1993). [Sensitivity estimates for nonlinear mathematical models]. [planned]
 - Spence, L.R., Walden, T. (2001). RISC4 User's Manual. BP Oil International. Version 4.0, October 2001. <https://www.isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf> [fixture]
@@ -672,13 +697,13 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [planned]
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents> [data]
+- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents> [used]
 - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [used]
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities. [used]
-- U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf> [planned]
+- U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf> [used]
 - U.S. Environmental Protection Agency (2009). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part F, Supplemental Guidance for Inhalation Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA-540-R-070-002, OSWER 9285.7-82, January 2009. <https://www.epa.gov/sites/default/files/2015-09/documents/partf_200901_final.pdf> [used]
 - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252> [used]
 - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf> [used]

@@ -198,7 +198,8 @@ What the data slice found, so the engine slices do not rediscover it:
   wildlife group value.
 - The receptor body weights, ingestion rates and diet fractions beyond the per-document table, and the
   soil-to-biota models for chemicals the documents do not tabulate, live in the guidance Attachment 4-1;
-  they are not entered here and are read by the ecological screening slice (E3).
+  they are not entered here. Slice E3 did not read them either: the engine takes the per-surrogate derivation inputs
+  of `wildlife.csv` (or user inputs) and does not carry a default receptor table.
 
 ## TPH fraction cleanup levels (`tph.fractions`)
 
@@ -226,7 +227,7 @@ What the data slice found, so the engine slices do not rediscover it:
 | `PLANT_INORGANIC_NEEDS_BCF` | a metal or inorganic without a user-entered bioconcentration factor |
 | `PLANT_NOT_STEADY` | the growing period is shorter than three times 1/(g A / (K_la M) + lambda), so the steady state overstates harvest concentration |
 | `IRRIGATION_USER_ENTERED` | the irrigation input is user entered rather than from M7 |
-| `ECO_NO_SSL` | no Eco-SSL exists for the chemical and receptor group |
+| `ECO_NO_SSL` | no numeric Eco-SSL exists for the chemical and receptor group |
 | `ECO_SCREENING_ONLY` | always shown with Eco-SSL results: screening values, not cleanup levels |
 | `ECO_BENCHMARK_USER_ENTERED` | a legacy benchmark was user entered |
 | `TPH_FRACTIONS_DO_NOT_SUM` | fraction mass fractions differ from one by more than 1e-6 |
@@ -270,7 +271,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 | R1 | Reference verification: exact titles, venues and pages for the descriptor entries (Trapp and Matthies, Briggs, Trapp 2015, Sample, TPHCWG, MADEP); identify Trapp 2015 or rule the HHRAP fallback | none |
 | E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.hhrap-2005` (done 2026-10-18, branch t-m9; the Trapp 2015 model was not verified, DECISIONS 11) | R1 |
 | E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type | E1 |
-| E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings | D1, R1 |
+| E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings (done 2026-10-18, branch t-m9) | D1, R1 |
 | E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check | R1 |
 | W1 | Web screen `#/plants-eco`: produce pathway inputs and results on the risk screen, eco HQ table, TPH composition editor; CDP check at 390x844 with zero overflow, light and dark | E2, E3, E4 |
 | G | Docs close: methods note status, ROADMAP M9 row, HANDOFF, references moved to `used` or `data` | W1 |
@@ -281,7 +282,7 @@ D1, R1 run in parallel; E1 and E4 then run in parallel; E2 and E3 follow; W1 las
 
 | Key | Status in this stage |
 |---|---|
-| `epaecosslguidance` | Added as `planned`; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
-| `epaecossl` | `data` since slice D1: documents page URL, its 21 documents, cover dates and directive numbers read 2026-10-18 |
-| `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1 |
+| `epaecosslguidance` | `used` since slice E3 (wildlife dose model and screening-only status; Attachment 4-1 not read). Added as `planned`; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
+| `epaecossl` | `used` since slice E3 (cited by `eco.ecossl-2005`), `data` since slice D1: documents page URL, its 21 documents, cover dates and directive numbers read 2026-10-18 |
+| `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1. `sample1996` is `used` since slice E3 (cited by `eco.benchmark-hq` as the expected user benchmark source; text not read) |
 | `epa2005hhrap`, `epa2011efh`, `epa2024rsl` | Existing; used as described above |

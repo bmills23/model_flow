@@ -28,6 +28,7 @@ import {
   vaporPviScreen2015,
 } from './processes/vapor/index.js';
 import { surfaceWaterLegacy, surfaceWaterModern } from './processes/surfaceWater/index.js';
+import { ecoBenchmarkHq, ecoEcossl2005 } from './processes/eco/index.js';
 import { plantUptakeLegacy, plantUptakeModern } from './processes/plantUptake/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
@@ -54,6 +55,7 @@ export type { SsgSoil as OutdoorAirSsgSoil } from './processes/outdoorAir/index.
 export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
 export * from './processes/plantUptake/index.js';
+export * from './processes/eco/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
 
@@ -87,3 +89,5 @@ registry.register(surfaceWaterLegacy);
 registry.register(surfaceWaterModern);
 registry.register(plantUptakeLegacy);
 registry.register(plantUptakeModern);
+registry.register(ecoBenchmarkHq);
+registry.register(ecoEcossl2005);

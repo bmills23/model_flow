@@ -742,7 +742,7 @@
   {
     "key": "epaecossl",
     "type": "guidance",
-    "status": "data",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2003,
     "title": "Ecological Soil Screening Levels (Eco-SSLs)",
@@ -753,20 +753,20 @@
   {
     "key": "epaecosslguidance",
     "type": "guidance",
-    "status": "planned",
+    "status": "used",
     "authors": "U.S. Environmental Protection Agency",
     "year": 2005,
     "title": "Guidance for Developing Ecological Soil Screening Levels",
     "venue": "U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response",
     "identifier": "OSWER Directive 9285.7-55, November 2003, revised February 2005",
     "url": "https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf",
-    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-18; the served file was 3,075,395 bytes, SHA-256 in the Eco-SSL manifest). Its receptor and food web parameters (Attachment 4-1) are read when the ecological screening engine is built.",
+    "notes": "Verified from the document cover (EPA copy, retrieved 2026-10-18; the served file was 3,075,395 bytes, SHA-256 in the Eco-SSL manifest). Used by eco.ecossl-2005 for the wildlife dose model (food intake times diet-weighted prey and soil, compared with a TRV) and the screening-only status of Eco-SSLs. The receptor parameters of Attachment 4-1 were not read; the engine takes the per-chemical derivation inputs of the Eco-SSL documents instead.",
     "tags": ["plantUptake"]
   },
   {
     "key": "sample1996",
     "type": "method",
-    "status": "planned",
+    "status": "used",
     "authors": "Sample, B.E., Opresko, D.M., Suter, G.W., II",
     "year": 1996,
     "title": "Toxicological benchmarks for wildlife: 1996 revision",
@@ -774,7 +774,7 @@
     "venue": "Oak Ridge National Laboratory, Risk Assessment Program, for the U.S. Department of Energy",
     "identifier": "ES/ER/TM-86/R3, June 1996; doi:10.2172/258027",
     "url": "https://www.osti.gov/biblio/258027",
-    "notes": "Verified against the OSTI catalog record and the ORNL report listing (retrieved 2026-10-18)."
+    "notes": "Verified against the OSTI catalog record and the ORNL report listing (retrieved 2026-10-18). Cited by eco.benchmark-hq as the expected source of user-entered wildlife benchmarks; the report text was not read and no benchmark value is shipped."
   },
   {
     "key": "tphcwg1997",

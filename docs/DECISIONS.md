@@ -942,3 +942,17 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
     states them; the fresh weight conversion for the produce pathway belongs to slice E2. The soil
     gas-phase vapor term takes a user or M6 vapor air concentration directly (no Fv split) and ignores
     particle deposition.
+
+### M9 slice E3 rulings (2026-10-18)
+
+14. **Ecological screening engine shape (DEFAULT).** `eco.benchmark-hq` (legacy, cites `sample1996`) and
+    `eco.ecossl-2005` (modern, cites `epaecossl` and `epaecosslguidance`) register under a new process id
+    `eco`. Both report hazard quotients only (ruling 7): the Eco-SSL screen returns `ECO_SCREENING_ONLY` on
+    every run and `ECO_NO_SSL` for a group with status NA, NC or procedure; the benchmark screen returns
+    `ECO_BENCHMARK_USER_ENTERED`. The wildlife dose is [sum(C_i P_i) + C_s P_s] IR AUF per kg body weight,
+    where the surrogate adapter uses a diet fraction of one for the prey term, as the data slice's
+    reproduction check does, so the printed derivation inputs reproduce.
+15. **No default receptor table (DEFAULT).** The guidance Attachment 4-1 receptor parameters were not read, so
+    the engine carries none; callers supply the food web (from `ecossl.json` derivation rows or by hand).
+    The three references above move to `used` because registered methods now cite them. `sample1996` is cited
+    for its role as the expected user benchmark source; its text was not read and no value from it ships.
