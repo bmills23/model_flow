@@ -34,6 +34,8 @@ export interface MethodDescriptor<I, O> {
   /** What RISC5 does for this process, recorded for legacy/modern comparison. */
   risc5Choice?: string;
   validate?(input: I): Warning[];
+  /** Inputs a Monte Carlo run may sample (uncertainty note, ruling 2). */
+  uncertainInputs?: readonly UncertainInput<I>[];
   run(input: I): O;
 }
 
@@ -63,4 +65,57 @@ export class MethodRegistry {
         (process === undefined || m.process === process) && (kind === undefined || m.kind === kind),
     );
   }
+}
+
+export interface UncertainInput<I> {
+  /** Stable dotted path, for example 'exposure.receptor0.bw'. */
+  id: string;
+  label: string;
+  /** SI unit of the value that get and set exchange. */
+  unit: string;
+  category: 'exposure' | 'transport' | 'site' | 'chemical';
+  /** Physical support, inclusive. */
+  bounds: readonly [number, number];
+  get(input: I): number;
+  /** Returns a new input; never mutates its argument. */
+  set(input: I, value: number): I;
+}
+
+/**
+ * Registry contract for a method's declarations: ids unique, set then get returns the value,
+ * and set leaves the original input unchanged. Throws on the first violation.
+ */
+export function checkUncertainInputs<I>(
+  inputs: readonly UncertainInput<I>[],
+  base: I,
+  probe: number,
+): void {
+  const seen = new Set<string>();
+  for (const u of inputs) {
+    if (seen.has(u.id)) throw new Error(`duplicate uncertain input id "${u.id}"`);
+    seen.add(u.id);
+    if (!(u.bounds[0] <= u.bounds[1])) throw new Error(`"${u.id}" has inverted bounds`);
+    const before = u.get(base);
+    const snapshot = JSON.stringify(base);
+    const next = u.set(base, probe);
+    if (JSON.stringify(base) !== snapshot || u.get(base) !== before) {
+      throw new Error(`"${u.id}" set must not mutate its input`);
+    }
+    if (u.get(next) !== probe) throw new Error(`"${u.id}" set then get did not return the value`);
+  }
+}
+
+/** Expose a link's inputs on a chain: ids gain the link prefix, accessors go through the link. */
+export function prefixUncertainInputs<L, C>(
+  prefix: string,
+  inputs: readonly UncertainInput<L>[],
+  getLink: (chain: C) => L,
+  setLink: (chain: C, link: L) => C,
+): UncertainInput<C>[] {
+  return inputs.map((u) => ({
+    ...u,
+    id: `${prefix}.${u.id}`,
+    get: (chain: C) => u.get(getLink(chain)),
+    set: (chain: C, value: number) => setLink(chain, u.set(getLink(chain), value)),
+  }));
 }
