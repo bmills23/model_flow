@@ -1,0 +1,96 @@
+# Eco-SSL values (mg/kg dry weight in soil), hand transcribed from Table 2.1 of each EPA Eco-SSL document (see manifest.json).
+# status: value (a number), NA (the document prints NA: data insufficient), NC (Chromium: the document prints 'Not enough data to derive Eco-SSL'),
+# procedure (no numeric Eco-SSL; the document gives an alternative screening procedure). page = PDF page (1-based). evidence = literal text that must appear on the page.
+substance,group,status,value,table,page,evidence
+antimony,plants,NA,,2.1,6,NA
+antimony,invertebrates,value,78,2.1,6,
+antimony,avian,NA,,2.1,6,NA
+antimony,mammalian,value,0.27,2.1,6,
+arsenic,plants,value,18,2.1,6,
+arsenic,invertebrates,NA,,2.1,6,NA
+arsenic,avian,value,43,2.1,6,
+arsenic,mammalian,value,46,2.1,6,
+barium,plants,NA,,2.1,6,NA
+barium,invertebrates,value,330,2.1,6,
+barium,avian,NA,,2.1,6,NA
+barium,mammalian,value,2000,2.1,6,
+beryllium,plants,NA,,2.1,6,NA
+beryllium,invertebrates,value,40,2.1,6,
+beryllium,avian,NA,,2.1,6,NA
+beryllium,mammalian,value,21,2.1,6,
+cadmium,plants,value,32,2.1,7,
+cadmium,invertebrates,value,140,2.1,7,
+cadmium,avian,value,0.77,2.1,7,
+cadmium,mammalian,value,0.36,2.1,7,
+chromium-iii,plants,NC,,2.1,7,Not enough data
+chromium-iii,invertebrates,NC,,2.1,7,Not enough data
+chromium-iii,avian,value,26,2.1,7,
+chromium-iii,mammalian,value,34,2.1,7,
+chromium-vi,plants,NC,,2.1,7,Not enough data
+chromium-vi,invertebrates,NC,,2.1,7,Not enough data
+chromium-vi,avian,NA,,2.1,7,NA
+chromium-vi,mammalian,value,130,2.1,7,
+cobalt,plants,value,13,2.1,7,
+cobalt,invertebrates,NA,,2.1,7,NA
+cobalt,avian,value,120,2.1,7,
+cobalt,mammalian,value,230,2.1,7,
+copper,plants,value,70,2.1,7,
+copper,invertebrates,value,80,2.1,7,
+copper,avian,value,28,2.1,7,
+copper,mammalian,value,49,2.1,7,
+ddt,plants,NA,,2.1,7,NA
+ddt,invertebrates,NA,,2.1,7,NA
+ddt,avian,value,0.093,2.1,7,
+ddt,mammalian,value,0.021,2.1,7,
+dieldrin,plants,NA,,2.1,7,NA
+dieldrin,invertebrates,NA,,2.1,7,NA
+dieldrin,avian,value,0.022,2.1,7,
+dieldrin,mammalian,value,0.0049,2.1,7,
+lead,plants,value,120,2.1,7,
+lead,invertebrates,value,1700,2.1,7,
+lead,avian,value,11,2.1,7,
+lead,mammalian,value,56,2.1,7,
+manganese,plants,value,220,2.1,7,
+manganese,invertebrates,value,450,2.1,7,
+manganese,avian,value,4300,2.1,7,
+manganese,mammalian,value,4000,2.1,7,
+nickel,plants,value,38,2.1,7,
+nickel,invertebrates,value,280,2.1,7,
+nickel,avian,value,210,2.1,7,
+nickel,mammalian,value,130,2.1,7,
+pah-lmw,plants,NA,,2.1,9,NA
+pah-lmw,invertebrates,value,29,2.1,9,
+pah-lmw,avian,NA,,2.1,9,NA
+pah-lmw,mammalian,value,100,2.1,9,
+pah-hmw,plants,NA,,2.1,9,NA
+pah-hmw,invertebrates,value,18,2.1,9,
+pah-hmw,avian,NA,,2.1,9,NA
+pah-hmw,mammalian,value,1.1,2.1,9,
+pcp,plants,value,5.0,2.1,6,
+pcp,invertebrates,value,31,2.1,6,
+pcp,avian,value,2.1,2.1,6,
+pcp,mammalian,value,2.8,2.1,6,
+selenium,plants,value,0.52,2.1,8,
+selenium,invertebrates,value,4.1,2.1,8,
+selenium,avian,value,1.2,2.1,8,
+selenium,mammalian,value,0.63,2.1,8,
+silver,plants,value,560,2.1,6,
+silver,invertebrates,NA,,2.1,6,NA
+silver,avian,value,4.2,2.1,6,
+silver,mammalian,value,14,2.1,6,
+vanadium,plants,NA,,2.1,7,NA
+vanadium,invertebrates,NA,,2.1,7,NA
+vanadium,avian,value,7.8,2.1,7,
+vanadium,mammalian,value,280,2.1,7,
+zinc,plants,value,160,2.1,7,
+zinc,invertebrates,value,120,2.1,7,
+zinc,avian,value,46,2.1,7,
+zinc,mammalian,value,79,2.1,7,
+aluminum,plants,procedure,,summary text,5,identified as a COPC only at sites where the soil pH is less than 5.5
+aluminum,invertebrates,procedure,,summary text,5,identified as a COPC only at sites where the soil pH is less than 5.5
+aluminum,avian,procedure,,summary text,5,identified as a COPC only at sites where the soil pH is less than 5.5
+aluminum,mammalian,procedure,,summary text,5,identified as a COPC only at sites where the soil pH is less than 5.5
+iron,plants,procedure,,summary text,5,site-specific measured pH and Eh
+iron,invertebrates,procedure,,summary text,5,site-specific measured pH and Eh
+iron,avian,procedure,,summary text,5,site-specific measured pH and Eh
+iron,mammalian,procedure,,summary text,5,site-specific measured pH and Eh

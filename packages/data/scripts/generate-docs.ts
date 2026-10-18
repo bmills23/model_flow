@@ -46,6 +46,9 @@ const sediment = JSON.parse(
     'utf8',
   ),
 ) as { sources: { epa2018r4era: { pageDate: string; retrieved: string; licence: string } } };
+const ecossl = JSON.parse(
+  readFileSync(resolve(root, 'packages/data/generated/ecossl-2026-10-18/ecossl.json'), 'utf8'),
+) as { source: { listingPageDate: string; retrieved: string; licence: string } };
 const dataEditions = [
   nrwqcEdition(
     'aquatic.json',
@@ -61,6 +64,13 @@ const dataEditions = [
     pageDate: sediment.sources.epa2018r4era.pageDate,
     retrieved: sediment.sources.epa2018r4era.retrieved,
     licence: sediment.sources.epa2018r4era.licence,
+  },
+  {
+    label:
+      'EPA Ecological Soil Screening Levels, 21 interim final per-chemical documents (Table 2.1 and wildlife derivation tables, transcribed)',
+    pageDate: ecossl.source.listingPageDate,
+    retrieved: ecossl.source.retrieved,
+    licence: ecossl.source.licence,
   },
 ];
 

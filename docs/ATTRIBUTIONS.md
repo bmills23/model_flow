@@ -533,7 +533,6 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 - Trapp, S., Matthies, M. (1995). Generic one-compartment model for uptake of organic chemicals by foliar vegetation. Environmental Science & Technology 29(9), 2333-2338. doi:10.1021/es00009a027.
 - U.S. Environmental Protection Agency (1997). Guiding Principles for Monte Carlo Analysis. U.S. Environmental Protection Agency. EPA/630/R-97/001.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment.
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
 - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
 - U.S. Environmental Protection Agency (2005). Guidance for Developing Ecological Soil Screening Levels. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER Directive 9285.7-55, November 2003, revised February 2005. <https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf>
 - Walden, T., Spence, L.R. (1997). [Irrigation water pathways].
@@ -546,6 +545,7 @@ Sources for methods on the roadmap that are not implemented yet. Nothing here af
 Public datasets that the chemical and toxicity database is built from.
 
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf>
+- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents>
 - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), Generic Tables, November 2024. U.S. Environmental Protection Agency. SEMS documents 405270 (summary table), 405302 (chemical-specific parameters) and 405290 (resident tap water), TR = 1E-06, THQ = 1. <https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables>
 - U.S. Environmental Protection Agency (2025). National Recommended Water Quality Criteria - Human Health Criteria Table. U.S. Environmental Protection Agency. <https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table>
 - U.S. Environmental Protection Agency (2026). CompTox Chemicals Dashboard.
@@ -559,6 +559,7 @@ Editions of committed web pages (the pages are not numbered editions, so each is
 - EPA National Recommended Water Quality Criteria, Aquatic Life Criteria Table (page dated 2026-06-09; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
 - EPA National Recommended Water Quality Criteria, Human Health Criteria Table (page dated 2025-12-18; retrieved 2026-10-17). U.S. government work, public domain in the United States; the page states no restriction.
 - EPA Region 4 Ecological Risk Assessment Supplemental Guidance, sediment Tables 2a, 2b and 2c (page dated 2018-03-19; retrieved 2026-10-17). U.S. government work, public domain in the United States.
+- EPA Ecological Soil Screening Levels, 21 interim final per-chemical documents (Table 2.1 and wildlife derivation tables, transcribed) (page dated 2026-04-21; retrieved 2026-10-18). U.S. government work, public domain in the United States; the documents state no restriction.
 
 ## Validation sources
 
@@ -641,7 +642,7 @@ Every entry in the reference database, alphabetical by author.
 - U.S. Environmental Protection Agency (2001). Risk Assessment Guidance for Superfund, Volume III, Part A, Process for Conducting Probabilistic Risk Assessment. [planned]
 - U.S. Environmental Protection Agency (2002). Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites. U.S. Environmental Protection Agency. OSWER 9355.4-24, December 2002. <https://semspub.epa.gov/work/HQ/175878.pdf> [used]
 - U.S. Environmental Protection Agency (2003). Human Health Toxicity Values in Superfund Risk Assessments. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. OSWER Directive 9285.7-53, December 5, 2003. <https://semspub.epa.gov/work/HQ/136.pdf> [data]
-- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents> [planned]
+- U.S. Environmental Protection Agency (2003). Ecological Soil Screening Levels (Eco-SSLs). <https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents> [data]
 - U.S. Environmental Protection Agency (2004). User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings. U.S. Environmental Protection Agency, Office of Emergency and Remedial Response. Revised February 22, 2004 (prepared by Environmental Quality Management, Inc., EPA Contract 68-W-02-33). <https://19january2021snapshot.epa.gov/sites/static/files/2015-11/2004_0222_3phase_users_guide.pdf> [used]
 - U.S. Environmental Protection Agency (2004). Risk Assessment Guidance for Superfund, Volume I: Human Health Evaluation Manual (Part E, Supplemental Guidance for Dermal Risk Assessment), Final. U.S. Environmental Protection Agency, Office of Superfund Remediation and Technology Innovation. EPA/540/R/99/005, OSWER 9285.7-02EP, PB99-963312, July 2004. <https://www.epa.gov/sites/default/files/2015-09/documents/part_e_final_revision_10-03-07.pdf> [used]
 - U.S. Environmental Protection Agency (2005). Supplemental Guidance for Assessing Susceptibility from Early-Life Exposure to Carcinogens. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/R-03/003F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/childrens_supplement_final.pdf> [used]

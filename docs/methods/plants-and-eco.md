@@ -11,8 +11,9 @@ Stage 1 in progress: slice R1 verified `trappmatthies1995` (Environ. Sci. Techno
 `briggs1982` (Pesticide Science 13(5), 495-504), `sample1996` (ORNL ES/ER/TM-86/R3), `tphcwg1997` (series
 level only; volume titles and ISBNs conflict between sources) and `madep2002` (Policy WSC-02-411, from the
 mass.gov listing; the PDF was not read). `trapp2015` is still unidentified (see below) and stays a
-descriptor. The per-chemical Eco-SSL document
-dates and the Eco-SSL values themselves have not been read yet (slice D1).
+descriptor. Slice D1 (Eco-SSL data, 2026-10-18) read the
+per-chemical document dates and directive numbers, the summary Eco-SSLs and the wildlife derivation inputs;
+see "Eco-SSL data slice" below for what was and was not entered.
 
 ## What the processes are
 
@@ -140,26 +141,55 @@ Checked 2026-10-18 on the EPA site.
 
 | Source (key) | Current edition and location | Format | Licence or status |
 |---|---|---|---|
-| Guidance (`epaecosslguidance`) | Guidance for Developing Ecological Soil Screening Levels, OSWER Directive 9285.7-55, November 2003, revised February 2005; https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf (1,500,872 bytes served 2026-10-18), linked from https://www.epa.gov/chemical-research/guidance-developing-ecological-soil-screening-levels (page last updated April 21, 2026) | PDF | US government work, public domain |
-| Per-chemical documents (`epaecossl`) | 21 documents, 17 metals (Al, Sb, As, Ba, Be, Cd, Cr, Co, Cu, Fe, Pb, Mn, Ni, Se, Ag, V, Zn) and 4 organics (DDT and metabolites, dieldrin, pentachlorophenol, PAHs), at https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_<name>.pdf, listed on https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents (page last updated April 21, 2026). All interim final; each document's own date is read in slice D1 | PDF, no machine-readable table | US government work, public domain |
+| Guidance (`epaecosslguidance`) | Guidance for Developing Ecological Soil Screening Levels, OSWER Directive 9285.7-55, November 2003, revised February 2005; https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf (3,075,395 bytes served 2026-10-18), linked from https://www.epa.gov/chemical-research/guidance-developing-ecological-soil-screening-levels (page last updated April 21, 2026) | PDF | US government work, public domain |
+| Per-chemical documents (`epaecossl`) | 21 documents, 17 metals (Al, Sb, As, Ba, Be, Cd, Cr, Co, Cu, Fe, Pb, Mn, Ni, Se, Ag, V, Zn) and 4 organics (DDT and metabolites, dieldrin, pentachlorophenol, PAHs), at https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_<name>.pdf, listed on https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents (page last updated April 21, 2026). All state Interim Final on the cover except the DDT document, whose cover text carries no status line; cover dates run from November 2003 to April 2008 (read in slice D1, in the manifest) | PDF, no machine-readable table | US government work, public domain |
 
 No consolidated table of values exists on the EPA site (checked 2026-10-18), so the build differs from the
 RSL build in its reader:
 
-- `packages/data/raw/ecossl/` holds the 21 per-chemical PDFs and the guidance PDF, with
-  `manifest.json` listing URL, retrieval date, byte size and SHA-256 for each (the RSL pattern).
-- The values (Eco-SSL per group: plants, soil invertebrates, avian, mammalian; the wildlife TRVs and the
-  uptake model coefficients used for the food web) are hand-entered into
-  `packages/data/src/ecossl/values.csv` with document, table and page for every row, because the PDFs
-  carry them only as typeset tables.
-- A reader test re-extracts each document's summary table text with `pdftotext` at build time when the tool
-  is present and checks every hand-entered value appears in it; when absent, the checksum check alone runs
-  and the test reports the skip.
-- Output: `packages/data/generated/ecossl-<retrieval date>/ecossl.json`, with a provenance block (edition,
-  URLs, checksums) and licence status, keyed by the same chemical ids as `chemicals.json` (CAS match;
-  metals and PAH groupings mapped explicitly, with unmapped rows reported, never dropped silently).
-- Raw PDFs total about 25 MB; if that is judged too large for the repository, the manifest stays and the
-  PDFs are fetched by a script that verifies the checksums (open question for slice D1, ruling 8).
+- `packages/data/raw/ecossl/2026-10-18/manifest.json` lists URL, directive number, cover date, byte size and
+  SHA-256 for the 21 per-chemical PDFs and the guidance PDF, with the retrieval date and the listing page's
+  own date. The PDFs total about 26 MB and are not committed (gitignored); `pnpm --filter
+  @model-flow/data fetch:ecossl` downloads any missing file and fails on a checksum or size mismatch
+  (ruling 8, decided in D1).
+- `packages/data/src/ecossl/values.csv` holds the summary Eco-SSL per substance and group (Table 2.1 of each
+  document, with PDF page); `wildlife.csv` holds the wildlife derivation inputs per surrogate (TRV, food
+  ingestion rate, soil proportion of the diet, the prey uptake model and the printed surrogate Eco-SSL, from
+  Tables 5.2, 6.2, 6.3 and 6.4, with PDF page). Every number is typed from the document, none from memory.
+- The reader test (`packages/data/test/ecossl.test.ts`) re-extracts each cited page (and the next, for a
+  table that breaks across pages) with `pdftotext -layout` and checks every hand-entered number appears
+  there; when `pdftotext` or the fetched PDFs are absent it runs the checksum and consistency checks only
+  and prints that the cross-check was skipped.
+- Output: `packages/data/generated/ecossl-2026-10-18/ecossl.json`, with a provenance block (listing page,
+  per-document directive, date, URL and checksum, licence status) and, per substance, the RSL
+  `chemicals.json` record ids it maps to (ids read from the file and checked by name). Unmapped
+  substances are listed in the file: the two PAH groups, because the document defines low and high
+  molecular weight PAHs by ring count and lists no members.
+
+What the data slice found, so the engine slices do not rediscover it:
+
+- Aluminum and iron have no numeric Eco-SSL; the documents give a screening procedure instead (aluminum is
+  a contaminant of potential concern only where soil pH is below 5.5; iron is judged from site pH and Eh).
+  They are stored with status `procedure`. Chromium is split into trivalent and hexavalent: plants and soil
+  invertebrates are "Not enough data" for both, avian has a trivalent value only. Not-available groups are
+  explicit statuses (`NA`, `NC`), never zeros or blanks.
+- The wildlife Eco-SSL of a group is the smallest of its three surrogate values (dove, woodcock, hawk;
+  vole, shrew, weasel); a test checks this for every substance. Nickel has no earthworm-based surrogate
+  value (printed NA), so its group value comes from the other two.
+- The prey uptake model is a ratio (Bi = a C), a log-linear regression (ln Bi = a ln Soil + b) or, for
+  pentachlorophenol carnivores, a linear form (Bi = a C + b); C is the soil concentration or, for predators
+  of small mammals, the prey diet concentration cdiet times soil. Solving dose = TRV for soil reproduces 99
+  of the 106 printed numeric surrogate values (two nickel rows print NA) within 5 percent (cadmium and lead fully). Seven printed rows
+  do not reproduce from their own printed inputs and are flagged in `wildlife.csv`: pentachlorophenol hawk
+  and weasel (printed hawk FIR and Ps, and weasel Ps, differ from the standard values in every other
+  document; the standard values reproduce the printed result), vanadium hawk and weasel (the printed
+  earthworm factor in the prey diet is not applied in the printed result), selenium woodcock (10 percent),
+  copper vole (5.5 percent) and low molecular weight PAH weasel (printed 1,200, inputs give about 11,700,
+  likely a misprint). None enters the cadmium and lead fixtures of fixture plan item 6 or changes a
+  wildlife group value.
+- The receptor body weights, ingestion rates and diet fractions beyond the per-document table, and the
+  soil-to-biota models for chemicals the documents do not tabulate, live in the guidance Attachment 4-1;
+  they are not entered here and are read by the ecological screening slice (E3).
 
 ## TPH fraction cleanup levels (`tph.fractions`)
 
@@ -227,7 +257,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 
 | Slice | Content | Depends on |
 |---|---|---|
-| D1 | Eco-SSL data: manifest, hand-entered values with page citations, pdftotext cross-check reader, generated `ecossl.json`, ATTRIBUTIONS data provenance | none |
+| D1 | Eco-SSL data: manifest, hand-entered values with page citations, pdftotext cross-check reader, generated `ecossl.json`, ATTRIBUTIONS data provenance (done 2026-10-18, branch t-m9) | none |
 | R1 | Reference verification: exact titles, venues and pages for the descriptor entries (Trapp and Matthies, Briggs, Trapp 2015, Sample, TPHCWG, MADEP); identify Trapp 2015 or rule the HHRAP fallback | none |
 | E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.trapp-2015` | R1 |
 | E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type | E1 |
@@ -243,6 +273,6 @@ D1, R1 run in parallel; E1 and E4 then run in parallel; E2 and E3 follow; W1 las
 | Key | Status in this stage |
 |---|---|
 | `epaecosslguidance` | Added as `planned`; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
-| `epaecossl` | Existing `planned` entry; documents page URL and its 21 documents confirmed 2026-10-18 |
+| `epaecossl` | `data` since slice D1: documents page URL, its 21 documents, cover dates and directive numbers read 2026-10-18 |
 | `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1 |
 | `epa2005hhrap`, `epa2011efh`, `epa2024rsl` | Existing; used as described above |

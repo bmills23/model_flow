@@ -909,8 +909,12 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
 8. **Eco-SSL data slice by hand entry with a checksummed manifest (DEFAULT).** No machine-readable table
    exists (checked 2026-10-18), so values are hand entered with document, table and page, cross-checked
    against `pdftotext` extracts of the checksummed PDFs, and generated into
-   `packages/data/generated/ecossl-<date>/ecossl.json` with provenance and public-domain status. Whether
-   the about 25 MB of PDFs is committed or fetched by a checksum-verifying script is decided in slice D1.
+   `packages/data/generated/ecossl-<date>/ecossl.json` with provenance and public-domain status. Decided in
+   slice D1 (2026-10-18): the PDFs (about 26 MB) are not committed; the manifest with SHA-256 and byte size is,
+   and a script fetches the PDFs and fails on a mismatch. Printed inconsistencies inside a document (seven
+   wildlife rows whose inputs do not reproduce their printed value, listed in the methods note) are
+   transcribed as printed and flagged, not corrected, and sit outside the 5 percent reproduction check of
+   ruling 10; no fixture of the wildlife back-calculation uses one.
 9. **TPH fractions map onto the RSL surrogates (DEFAULT).** TPHCWG and MADEP fraction sets map onto the
    five RSL November 2024 TPH records; no new toxicity values are entered; an unmapped fraction is
    reported. The total level is HI_t / sum_j( f_j / CL_j ), each fraction checked against its saturation

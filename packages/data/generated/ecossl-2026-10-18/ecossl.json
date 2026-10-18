@@ -1,0 +1,2562 @@
+{
+  "edition": "2026-10-18",
+  "source": {
+    "reference": "epaecossl",
+    "url": "https://www.epa.gov/chemical-research/interim-ecological-soil-screening-level-documents",
+    "listingPageDate": "2026-04-21",
+    "retrieved": "2026-10-18",
+    "licence": "U.S. government work, public domain in the United States; the documents state no restriction.",
+    "guidance": {
+      "reference": "epaecosslguidance",
+      "file": "ecossl_guidance_chapters.pdf",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf",
+      "directive": "9285.7-55",
+      "date": "2003-11",
+      "revised": "2005-02",
+      "bytes": 3075395,
+      "sha256": "4eaf36dc6a1c9107b458e846e7368da38a1137d3ba8744bc1e48d54df28cd6ff"
+    },
+    "documents": [
+      {
+        "key": "aluminum",
+        "file": "eco-ssl_aluminum.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_aluminum.pdf",
+        "directive": "9285.7-60",
+        "date": "2003-11",
+        "revised": null,
+        "bytes": 303165,
+        "sha256": "fc5176a83f7f58039afc8c1753ebbdf3a7c5023ffd2692c5b58baece94a1b8eb"
+      },
+      {
+        "key": "antimony",
+        "file": "eco-ssl_antimony.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_antimony.pdf",
+        "directive": "9285.7-61",
+        "date": "2005-02",
+        "revised": null,
+        "bytes": 456493,
+        "sha256": "659ab509f0ed32609fcf338132a8368a20930af084ab1c5a2438fceff85f1620"
+      },
+      {
+        "key": "arsenic",
+        "file": "eco-ssl_arsenic.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_arsenic.pdf",
+        "directive": "9285.7-62",
+        "date": "2005-03",
+        "revised": null,
+        "bytes": 938873,
+        "sha256": "0c01cef9655ec61c41bef235731a30832fe7ace1314b48e9297771e7c048c856"
+      },
+      {
+        "key": "barium",
+        "file": "eco-ssl_barium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_barium.pdf",
+        "directive": "9285.7-63",
+        "date": "2005-02",
+        "revised": null,
+        "bytes": 740124,
+        "sha256": "69020c6285ed6bcf3d98c4fbc52e959bbb997a8e70449c6baf1a05a2f8bbd05e"
+      },
+      {
+        "key": "beryllium",
+        "file": "eco-ssl_beryllium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_beryllium.pdf",
+        "directive": "9285.7-64",
+        "date": "2005-02",
+        "revised": null,
+        "bytes": 558330,
+        "sha256": "e82c11a743781876dae075376d05d05341528eb591c9c8f261d2e5c20b3e4b06"
+      },
+      {
+        "key": "cadmium",
+        "file": "eco-ssl_cadmium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_cadmium.pdf",
+        "directive": "9285.7-65",
+        "date": "2005-03",
+        "revised": null,
+        "bytes": 1495454,
+        "sha256": "623fe1eaf34ba37c2133b08a24eabce0a0035150f7f08da4bc33dcc15a1a2a49"
+      },
+      {
+        "key": "chromium",
+        "file": "eco-ssl_chromium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_chromium.pdf",
+        "directive": "9285.7-66",
+        "date": "2005-03",
+        "revised": "2008-04",
+        "bytes": 575639,
+        "sha256": "f2252faeafe8589718f5a54d290bddc384a1402b96bd0f645f0e3c5d0ea09dcf"
+      },
+      {
+        "key": "cobalt",
+        "file": "eco-ssl_cobalt_.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_cobalt_.pdf",
+        "directive": "9285.7-67",
+        "date": "2005-03",
+        "revised": null,
+        "bytes": 1043438,
+        "sha256": "201b77253a7e39b1f2f72496c8fcbb3f38f68cfa8849c53234abe7fa1d61dd5d"
+      },
+      {
+        "key": "copper",
+        "file": "eco-ssl_copper.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_copper.pdf",
+        "directive": "9285.7-68",
+        "date": "2006-07",
+        "revised": "2007-02",
+        "bytes": 1784495,
+        "sha256": "d87c918ce07c6a90025961cd12ebc2a345d79b54a672800b3173d31596cbe741"
+      },
+      {
+        "key": "ddt",
+        "file": "eco-ssl_ddt.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_ddt.pdf",
+        "directive": "9285.7-57",
+        "date": "2007-04",
+        "revised": null,
+        "bytes": 922450,
+        "sha256": "5b0e58b65acc243b8f18dd0affca8096ec991e649a78a95bab43b626b2a3ae67"
+      },
+      {
+        "key": "dieldrin",
+        "file": "eco-ssl_dieldrin.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_dieldrin.pdf",
+        "directive": "9285.7-56",
+        "date": "2005-03",
+        "revised": "2007-04",
+        "bytes": 805084,
+        "sha256": "6601faadf93e367a25010e5774565ca066dd7719b237690278148e7e7b790c83"
+      },
+      {
+        "key": "iron",
+        "file": "eco-ssl_iron.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_iron.pdf",
+        "directive": "9285.7-69",
+        "date": "2003-11",
+        "revised": null,
+        "bytes": 448911,
+        "sha256": "2dc30b2f61bd29542b5381e781268aeb365b797dec22f728907e87f374c3aac3"
+      },
+      {
+        "key": "lead",
+        "file": "eco-ssl_lead.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_lead.pdf",
+        "directive": "9285.7-70",
+        "date": "2005-03",
+        "revised": null,
+        "bytes": 1500872,
+        "sha256": "434bb5cc1b2b47c6090e050549e7bf48c52e7acf4801eeeb10396f386feeeb78"
+      },
+      {
+        "key": "manganese",
+        "file": "eco-ssl_manganese.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_manganese.pdf",
+        "directive": "9285.7-71",
+        "date": "2007-04",
+        "revised": null,
+        "bytes": 1500644,
+        "sha256": "3a8afc8ced595d43235f92733a0c12aea60fc7984eea100c0da32afc0d36f3a5"
+      },
+      {
+        "key": "nickel",
+        "file": "eco-ssl_nickel.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_nickel.pdf",
+        "directive": "9285.7-76",
+        "date": "2007-03",
+        "revised": null,
+        "bytes": 848927,
+        "sha256": "69772e091c9ed0226f8aee94e3ae99bdd1a59ea21bb41121083982cf62322ce1"
+      },
+      {
+        "key": "pah",
+        "file": "eco-ssl_pah.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_pah.pdf",
+        "directive": "9285.7-78",
+        "date": "2007-06",
+        "revised": null,
+        "bytes": 1799508,
+        "sha256": "f2f19135c3b24038b012949b64c1932849fc64ac4736768d578bd48ff4af89b3"
+      },
+      {
+        "key": "pcp",
+        "file": "eco-ssl_pcp.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_pcp.pdf",
+        "directive": "9285.7-58",
+        "date": "2005-03",
+        "revised": "2007-04",
+        "bytes": 715698,
+        "sha256": "6ccb60e2daca67772c614a346d0e78ad0ef80213bda4b6f43936203d5df23c4c"
+      },
+      {
+        "key": "selenium",
+        "file": "eco-ssl_selenium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_selenium.pdf",
+        "directive": "9285.7-72",
+        "date": "2007-07",
+        "revised": null,
+        "bytes": 1085670,
+        "sha256": "0f905de5bf63730db440c7166a7b92af0ffdf1aa66cb579b7830d7d36ea39e35"
+      },
+      {
+        "key": "silver",
+        "file": "eco-ssl_silver.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_silver.pdf",
+        "directive": "9285.7-77",
+        "date": "2006-09",
+        "revised": null,
+        "bytes": 635480,
+        "sha256": "14bfbb64c7c335fb7a28b24f282c11c0f82843cabe5205f0c3b50302fa755038"
+      },
+      {
+        "key": "vanadium",
+        "file": "eco-ssl_vanadium.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_vanadium.pdf",
+        "directive": "9285.7-75",
+        "date": "2005-04",
+        "revised": null,
+        "bytes": 957798,
+        "sha256": "5e68de96c476a26cfd9f3f8fa2e98aa8f1335af861e349bfa2dbcab51d06216a"
+      },
+      {
+        "key": "zinc",
+        "file": "eco-ssl_zinc.pdf",
+        "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_zinc.pdf",
+        "directive": "9285.7-73",
+        "date": "2007-06",
+        "revised": null,
+        "bytes": 4972794,
+        "sha256": "1f348a67b9e24de58367f0de9182eabf06248924b1df6831c18fd2a72e66b9d7"
+      }
+    ]
+  },
+  "units": {
+    "soil": "mg/kg dry weight",
+    "trv": "mg/kg bw/d",
+    "fir": "kg dw/kg bw/d"
+  },
+  "substances": [
+    {
+      "substance": "antimony",
+      "name": "Antimony",
+      "document": "antimony",
+      "chemicalIds": [
+        "7440-36-0"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 78,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 0.27,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.059,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.938,
+          "b": -3.233,
+          "cdiet": null,
+          "ecoSsl": 10,
+          "table": "6.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.059,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 1,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.27,
+          "table": "6.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.059,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.05,
+          "b": null,
+          "cdiet": 1,
+          "ecoSsl": 4.9,
+          "table": "6.2",
+          "page": 12,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "arsenic",
+      "name": "Arsenic",
+      "document": "arsenic",
+      "chemicalIds": [
+        "7440-38-2"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 18,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "value",
+          "value": 43,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 46,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 2.24,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.03752,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 67,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 2.24,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.706,
+          "b": -1.421,
+          "cdiet": null,
+          "ecoSsl": 43,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 2.24,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.8188,
+          "b": -4.8471,
+          "cdiet": null,
+          "ecoSsl": 1100,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 1.04,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.03752,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 170,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 1.04,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.706,
+          "b": -1.421,
+          "cdiet": null,
+          "ecoSsl": 46,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 1.04,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.8188,
+          "b": -4.8471,
+          "cdiet": null,
+          "ecoSsl": 170,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "barium",
+      "name": "Barium",
+      "document": "barium",
+      "chemicalIds": [
+        "7440-39-3"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 330,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 2000,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 51.8,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.156,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 3200,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 51.8,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.091,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 2000,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 51.8,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.0075,
+          "b": null,
+          "cdiet": 0.091,
+          "ecoSsl": 9100,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "beryllium",
+      "name": "Beryllium",
+      "document": "beryllium",
+      "chemicalIds": [
+        "7440-41-7"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 40,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 21,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.532,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.7345,
+          "b": -0.5361,
+          "cdiet": null,
+          "ecoSsl": 21,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.532,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.045,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 34,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.532,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.05,
+          "b": null,
+          "cdiet": 0.045,
+          "ecoSsl": 90,
+          "table": "6.2",
+          "page": 13,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "cadmium",
+      "name": "Cadmium",
+      "document": "cadmium",
+      "chemicalIds": [
+        "7440-43-9-cadmium-diet",
+        "7440-43-9-cadmium-water"
+      ],
+      "note": "The RSL set carries two cadmium records (diet and water exposure); the soil Eco-SSL is for the element.",
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 32,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 140,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 0.77,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 0.36,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 1.47,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.546,
+          "b": -0.475,
+          "cdiet": null,
+          "ecoSsl": 28,
+          "table": "5.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 1.47,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.795,
+          "b": 2.114,
+          "cdiet": null,
+          "ecoSsl": 0.77,
+          "table": "5.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 1.47,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.4723,
+          "b": -1.2571,
+          "cdiet": null,
+          "ecoSsl": 630,
+          "table": "5.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.77,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.546,
+          "b": -0.475,
+          "cdiet": null,
+          "ecoSsl": 73,
+          "table": "6.2",
+          "page": 22,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.77,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.795,
+          "b": 2.114,
+          "cdiet": null,
+          "ecoSsl": 0.36,
+          "table": "6.2",
+          "page": 22,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.77,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.4723,
+          "b": -1.2571,
+          "cdiet": null,
+          "ecoSsl": 84,
+          "table": "6.2",
+          "page": 22,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "chromium-iii",
+      "name": "Chromium (III)",
+      "document": "chromium",
+      "chemicalIds": [
+        "16065-83-1-chromium-iii-soluble-compounds",
+        "16065-83-1-chromium-iii-insoluble-salts"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NC",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NC",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 26,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 34,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 2.66,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.041,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 78,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 2.66,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 0.306,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 26,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 2.66,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.7338,
+          "b": -1.4599,
+          "cdiet": null,
+          "ecoSsl": 780,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 2.4,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.041,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 380,
+          "table": "6.3",
+          "page": 21,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 2.4,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.306,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 34,
+          "table": "6.3",
+          "page": 21,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 2.4,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.7338,
+          "b": -1.4599,
+          "cdiet": null,
+          "ecoSsl": 180,
+          "table": "6.3",
+          "page": 21,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "chromium-vi",
+      "name": "Chromium (VI)",
+      "document": "chromium",
+      "chemicalIds": [
+        "18540-29-9"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NC",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NC",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 130,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 9.24,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.041,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 1400,
+          "table": "6.4",
+          "page": 21,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 9.24,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.306,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 130,
+          "table": "6.4",
+          "page": 21,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 9.24,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.7338,
+          "b": -1.4599,
+          "cdiet": null,
+          "ecoSsl": 870,
+          "table": "6.4",
+          "page": 21,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "cobalt",
+      "name": "Cobalt",
+      "document": "cobalt",
+      "chemicalIds": [
+        "7440-48-4"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 13,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 120,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 230,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 7.61,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.0075,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 270,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 7.61,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 0.122,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 120,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 7.61,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 1.307,
+          "b": -4.4669,
+          "cdiet": null,
+          "ecoSsl": 1300,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 7.33,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.0075,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 2100,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 7.33,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.122,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 230,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 7.33,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 1.307,
+          "b": -4.4669,
+          "cdiet": null,
+          "ecoSsl": 470,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "copper",
+      "name": "Copper",
+      "document": "copper",
+      "chemicalIds": [
+        "7440-50-8"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 70,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 80,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 28,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 49,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 4.05,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.394,
+          "b": 0.688,
+          "cdiet": null,
+          "ecoSsl": 76,
+          "table": "5.2",
+          "page": 22,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 4.05,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 0.515,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 28,
+          "table": "5.2",
+          "page": 22,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 4.05,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.1444,
+          "b": 2.042,
+          "cdiet": null,
+          "ecoSsl": 1600,
+          "table": "5.2",
+          "page": 22,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 5.6,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.394,
+          "b": 0.688,
+          "cdiet": null,
+          "ecoSsl": 1100,
+          "table": "6.2",
+          "page": 28,
+          "flag": "printed Eco-SSL is 5.5 percent above the value the printed inputs give (1040); not reproduced within 5 percent"
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 5.6,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.515,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 49,
+          "table": "6.2",
+          "page": 28,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 5.6,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.1444,
+          "b": 2.042,
+          "cdiet": null,
+          "ecoSsl": 560,
+          "table": "6.2",
+          "page": 28,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "ddt",
+      "name": "DDT and metabolites",
+      "document": "ddt",
+      "chemicalIds": [
+        "50-29-3",
+        "72-55-9",
+        "72-54-8"
+      ],
+      "note": "The document names DDT with its breakdown products DDE and DDD.",
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 0.093,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 0.021,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 0.227,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.7524,
+          "b": -2.5119,
+          "cdiet": null,
+          "ecoSsl": 6.3,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 0.227,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 11.2,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.093,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 0.227,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ratio",
+          "a": 4.83,
+          "b": null,
+          "cdiet": 11.2,
+          "ecoSsl": 0.12,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.147,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.7524,
+          "b": -2.5119,
+          "cdiet": null,
+          "ecoSsl": 24,
+          "table": "6.2",
+          "page": 25,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.147,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 11.2,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.063,
+          "table": "6.2",
+          "page": 25,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.147,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 4.83,
+          "b": null,
+          "cdiet": 11.2,
+          "ecoSsl": 0.021,
+          "table": "6.2",
+          "page": 25,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "dieldrin",
+      "name": "Dieldrin",
+      "document": "dieldrin",
+      "chemicalIds": [
+        "60-57-1"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 0.022,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 0.0049,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 0.0709,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.41,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.68,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 0.0709,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 14.7,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.022,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 0.0709,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ratio",
+          "a": 1.2,
+          "b": null,
+          "cdiet": 14.7,
+          "ecoSsl": 0.11,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.015,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.41,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.39,
+          "table": "6.2",
+          "page": 19,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.015,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 14.7,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 0.0049,
+          "table": "6.2",
+          "page": 19,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.015,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 1.2,
+          "b": null,
+          "cdiet": 14.7,
+          "ecoSsl": 0.0065,
+          "table": "6.2",
+          "page": 19,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "lead",
+      "name": "Lead",
+      "document": "lead",
+      "chemicalIds": [
+        "7439-92-1-lead-and-compounds",
+        "7439-92-1-lead-and-compounds-with-other-sources-of-lead-present-see-guidance"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 120,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 1700,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 11,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 56,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 1.63,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.561,
+          "b": -1.328,
+          "cdiet": null,
+          "ecoSsl": 46,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 1.63,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.807,
+          "b": -0.218,
+          "cdiet": null,
+          "ecoSsl": 11,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 1.63,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.4422,
+          "b": 0.0761,
+          "cdiet": null,
+          "ecoSsl": 510,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 4.7,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.561,
+          "b": -1.328,
+          "cdiet": null,
+          "ecoSsl": 1200,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 4.7,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.807,
+          "b": -0.218,
+          "cdiet": null,
+          "ecoSsl": 56,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 4.7,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.4422,
+          "b": 0.0761,
+          "cdiet": null,
+          "ecoSsl": 460,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "manganese",
+      "name": "Manganese",
+      "document": "manganese",
+      "chemicalIds": [
+        "7439-96-5-manganese-diet",
+        "7439-96-5-manganese-non-diet"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 220,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 450,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 4300,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 4000,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 179,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.079,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 4300,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 179,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.682,
+          "b": -0.809,
+          "cdiet": null,
+          "ecoSsl": 4300,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 179,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ratio",
+          "a": 0.0205,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 65000,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 51.5,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.079,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 5300,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 51.5,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.682,
+          "b": -0.809,
+          "cdiet": null,
+          "ecoSsl": 4000,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 51.5,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.0205,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 6200,
+          "table": "6.2",
+          "page": 17,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "nickel",
+      "name": "Nickel",
+      "document": "nickel",
+      "chemicalIds": [
+        "7440-02-0"
+      ],
+      "note": "The RSL record for the element is titled Nickel Soluble Salts; the soil Eco-SSL is for nickel.",
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 38,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 280,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 210,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 130,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 6.71,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.748,
+          "b": -2.223,
+          "cdiet": null,
+          "ecoSsl": 210,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 6.71,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "NA",
+          "a": null,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": null,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 6.71,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.4658,
+          "b": -0.2462,
+          "cdiet": null,
+          "ecoSsl": 2800,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 1.7,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.748,
+          "b": -2.223,
+          "cdiet": null,
+          "ecoSsl": 340,
+          "table": "6.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 1.7,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "NA",
+          "a": null,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": null,
+          "table": "6.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 1.7,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.4658,
+          "b": -0.2462,
+          "cdiet": null,
+          "ecoSsl": 130,
+          "table": "6.2",
+          "page": 18,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "pcp",
+      "name": "Pentachlorophenol",
+      "document": "pcp",
+      "chemicalIds": [
+        "87-86-5"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 5,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 31,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "value",
+          "value": 2.1,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 2.8,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 6.73,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 5.93,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 5.9,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 6.73,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 14.63,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 2.1,
+          "table": "5.2",
+          "page": 13,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 6.73,
+          "fir": 0.12,
+          "ps": 0.05,
+          "form": "affine",
+          "a": 0.00452,
+          "b": 0.198,
+          "cdiet": 14.63,
+          "ecoSsl": 1500,
+          "table": "5.2",
+          "page": 13,
+          "flag": "printed FIR 0.12 and Ps 0.05 do not reproduce the printed 1500; the standard hawk values FIR 0.0353 and Ps 0.057 (the other documents) do"
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 8.42,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 5.93,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 16,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 8.42,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 14.63,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 2.8,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 8.42,
+          "fir": 0.13,
+          "ps": 0.057,
+          "form": "affine",
+          "a": 0.00452,
+          "b": 0.198,
+          "cdiet": 14.63,
+          "ecoSsl": 590,
+          "table": "6.2",
+          "page": 16,
+          "flag": "printed Ps 0.057 does not reproduce the printed 590; the standard weasel Ps 0.043 (the other documents) does"
+        }
+      ]
+    },
+    {
+      "substance": "selenium",
+      "name": "Selenium",
+      "document": "selenium",
+      "chemicalIds": [
+        "7782-49-2"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 0.52,
+          "table": "2.1",
+          "page": 8
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 4.1,
+          "table": "2.1",
+          "page": 8
+        },
+        "avian": {
+          "status": "value",
+          "value": 1.2,
+          "table": "2.1",
+          "page": 8
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 0.63,
+          "table": "2.1",
+          "page": 8
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 0.29,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 1.104,
+          "b": -0.677,
+          "cdiet": null,
+          "ecoSsl": 2.2,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 0.29,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.733,
+          "b": -0.075,
+          "cdiet": null,
+          "ecoSsl": 1.2,
+          "table": "5.2",
+          "page": 18,
+          "flag": "printed inputs give 1.32 against the printed 1.2 (10 percent); no alternative reading found"
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 0.29,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.3764,
+          "b": -0.4158,
+          "cdiet": null,
+          "ecoSsl": 83,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 0.143,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 1.104,
+          "b": -0.677,
+          "cdiet": null,
+          "ecoSsl": 2.7,
+          "table": "6.2",
+          "page": 27,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 0.143,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.733,
+          "b": -0.075,
+          "cdiet": null,
+          "ecoSsl": 0.63,
+          "table": "6.2",
+          "page": 27,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 0.143,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.3764,
+          "b": -0.4158,
+          "cdiet": null,
+          "ecoSsl": 2.8,
+          "table": "6.2",
+          "page": 27,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "silver",
+      "name": "Silver",
+      "document": "silver",
+      "chemicalIds": [
+        "7440-22-4"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 560,
+          "table": "2.1",
+          "page": 6
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 6
+        },
+        "avian": {
+          "status": "value",
+          "value": 4.2,
+          "table": "2.1",
+          "page": 6
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 14,
+          "table": "2.1",
+          "page": 6
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 2.02,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.014,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 69,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 2.02,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 2.045,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 4.2,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 2.02,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ratio",
+          "a": 0.004,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 930,
+          "table": "5.2",
+          "page": 12,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 6.02,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.014,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 1500,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 6.02,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 2.045,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 14,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 6.02,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.004,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 990,
+          "table": "6.2",
+          "page": 16,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "vanadium",
+      "name": "Vanadium",
+      "document": "vanadium",
+      "chemicalIds": [
+        "7440-62-2"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "NA",
+          "value": null,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 7.8,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 280,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 0.344,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ratio",
+          "a": 0.00485,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 13,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 0.344,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ratio",
+          "a": 0.042,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 7.8,
+          "table": "5.2",
+          "page": 14,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 0.344,
+          "fir": 0.035,
+          "ps": 0.057,
+          "form": "ratio",
+          "a": 0.0123,
+          "b": null,
+          "cdiet": 0.042,
+          "ecoSsl": 140,
+          "table": "5.2",
+          "page": 14,
+          "flag": "printed Cdiet = 0.042 * Soil does not reproduce the printed 140; Cdiet = Soil does"
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 4.16,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ratio",
+          "a": 0.00485,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 1300,
+          "table": "6.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 4.16,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ratio",
+          "a": 0.042,
+          "b": null,
+          "cdiet": null,
+          "ecoSsl": 280,
+          "table": "6.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 4.16,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ratio",
+          "a": 0.0123,
+          "b": null,
+          "cdiet": 0.042,
+          "ecoSsl": 580,
+          "table": "6.2",
+          "page": 18,
+          "flag": "printed Cdiet = 0.042 * Soil does not reproduce the printed 580; Cdiet = Soil does"
+        }
+      ]
+    },
+    {
+      "substance": "zinc",
+      "name": "Zinc",
+      "document": "zinc",
+      "chemicalIds": [
+        "7440-66-6"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "value",
+          "value": 160,
+          "table": "2.1",
+          "page": 7
+        },
+        "invertebrates": {
+          "status": "value",
+          "value": 120,
+          "table": "2.1",
+          "page": 7
+        },
+        "avian": {
+          "status": "value",
+          "value": 46,
+          "table": "2.1",
+          "page": 7
+        },
+        "mammalian": {
+          "status": "value",
+          "value": 79,
+          "table": "2.1",
+          "page": 7
+        }
+      },
+      "wildlife": [
+        {
+          "group": "avian",
+          "surrogate": "dove",
+          "trv": 66.1,
+          "fir": 0.19,
+          "ps": 0.139,
+          "form": "ln",
+          "a": 0.554,
+          "b": 1.575,
+          "cdiet": null,
+          "ecoSsl": 950,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "woodcock",
+          "trv": 66.1,
+          "fir": 0.214,
+          "ps": 0.164,
+          "form": "ln",
+          "a": 0.328,
+          "b": 4.449,
+          "cdiet": null,
+          "ecoSsl": 46,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "avian",
+          "surrogate": "hawk",
+          "trv": 66.1,
+          "fir": 0.0353,
+          "ps": 0.057,
+          "form": "ln",
+          "a": 0.0706,
+          "b": 4.3632,
+          "cdiet": null,
+          "ecoSsl": 30000,
+          "table": "5.2",
+          "page": 18,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "vole",
+          "trv": 75.4,
+          "fir": 0.0875,
+          "ps": 0.032,
+          "form": "ln",
+          "a": 0.554,
+          "b": 1.575,
+          "cdiet": null,
+          "ecoSsl": 6800,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "shrew",
+          "trv": 75.4,
+          "fir": 0.209,
+          "ps": 0.03,
+          "form": "ln",
+          "a": 0.328,
+          "b": 4.449,
+          "cdiet": null,
+          "ecoSsl": 79,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        },
+        {
+          "group": "mammalian",
+          "surrogate": "weasel",
+          "trv": 75.4,
+          "fir": 0.13,
+          "ps": 0.043,
+          "form": "ln",
+          "a": 0.0706,
+          "b": 4.3632,
+          "cdiet": null,
+          "ecoSsl": 10000,
+          "table": "6.2",
+          "page": 23,
+          "flag": null
+        }
+      ]
+    },
+    {
+      "substance": "aluminum",
+      "name": "Aluminum",
+      "document": "aluminum",
+      "chemicalIds": [
+        "7429-90-5"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "invertebrates": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "avian": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "mammalian": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        }
+      },
+      "wildlife": []
+    },
+    {
+      "substance": "iron",
+      "name": "Iron",
+      "document": "iron",
+      "chemicalIds": [
+        "7439-89-6"
+      ],
+      "note": null,
+      "values": {
+        "plants": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "invertebrates": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "avian": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        },
+        "mammalian": {
+          "status": "procedure",
+          "value": null,
+          "table": "summary text",
+          "page": 5
+        }
+      },
+      "wildlife": []
+    }
+  ],
+  "unmapped": [
+    {
+      "substance": "pah-lmw",
+      "name": "Low molecular weight PAHs",
+      "reason": "The document defines the group by ring count (fewer than four rings) and lists no member compounds; membership is a chemistry mapping left to the ecological screening slice."
+    },
+    {
+      "substance": "pah-hmw",
+      "name": "High molecular weight PAHs",
+      "reason": "The document defines the group by ring count (four or more rings) and lists no member compounds; membership is a chemistry mapping left to the ecological screening slice."
+    }
+  ]
+}
