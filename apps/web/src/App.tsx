@@ -1,8 +1,18 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
-import { MethodsPage } from './pages/MethodsPage';
-import { TransportPage } from './transport/TransportPage';
-import { SaturatedPage } from './saturated/SaturatedPage';
-import { VadosePage } from './vadose/VadosePage';
+
+// Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
+const MethodsPage = lazy(() =>
+  import('./pages/MethodsPage').then((m) => ({ default: m.MethodsPage })),
+);
+const TransportPage = lazy(() =>
+  import('./transport/TransportPage').then((m) => ({ default: m.TransportPage })),
+);
+const SaturatedPage = lazy(() =>
+  import('./saturated/SaturatedPage').then((m) => ({ default: m.SaturatedPage })),
+);
+const VadosePage = lazy(() =>
+  import('./vadose/VadosePage').then((m) => ({ default: m.VadosePage })),
+);
 
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
 const VaporPage = lazy(() => import('./vapor/VaporPage').then((m) => ({ default: m.VaporPage })));
@@ -112,13 +122,21 @@ export function App() {
       </nav>
       <main>
         {onMethods ? (
-          <MethodsPage />
+          <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
+            <MethodsPage />
+          </Suspense>
         ) : onTransport ? (
-          <TransportPage />
+          <Suspense fallback={<p className="muted">Loading the groundwater transport screen...</p>}>
+            <TransportPage />
+          </Suspense>
         ) : onVadose ? (
-          <VadosePage />
+          <Suspense fallback={<p className="muted">Loading the vadose leaching screen...</p>}>
+            <VadosePage />
+          </Suspense>
         ) : onSaturated ? (
-          <SaturatedPage />
+          <Suspense fallback={<p className="muted">Loading the saturated soil source screen...</p>}>
+            <SaturatedPage />
+          </Suspense>
         ) : onVapor ? (
           <Suspense fallback={<p className="muted">Loading the vapor intrusion screen...</p>}>
             <VaporPage />
