@@ -18,8 +18,7 @@ export const tphTphcwg: MethodDescriptor<TphTotalLevelInput, TphTotalLevelResult
     'Treats total petroleum hydrocarbon as a set of TPHCWG aliphatic and aromatic equivalent carbon number fractions, each mapped to an RSL surrogate record; the total level meeting a target hazard index is the target over the sum of fraction mass fraction over fraction level, with each fraction checked against its own soil saturation limit.',
   citations: ['tphcwg1997'],
   assumptions: COMMON_ASSUMPTIONS,
-  risc5Choice:
-    'RISC5 offers TPH fraction sets for forward risk and a total TPH level.',
+  risc5Choice: 'RISC5 offers TPH fraction sets for forward risk and a total TPH level.',
   validate: (input): Warning[] => tphTotalLevel(input).warnings,
   run: tphTotalLevel,
 };
