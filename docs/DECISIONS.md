@@ -872,3 +872,49 @@ Web form rulings that keep the two methods on one site (DEFAULT, Bryan's to over
   Q_soil = 0.003 x 0.45 / ER x Q_B (ruling 9, default c) and the legacy run, which has no such default,
   keeps using the pressure-difference inputs. The modern run has its own air viscosity field (default
   1.75e-4 g/(cm s), the engine default); the legacy field keeps 1.8e-4 (ruling 6).
+
+## 2026-10-18: M9 plant uptake and ecological screening scope (stage 1)
+
+M9 started with a methods note first, on the parallel track Bryan approved. The note is
+`docs/methods/plants-and-eco.md` (scope, equations, validity checks, coupling, Eco-SSL data plan, fixture
+plan and slice plan). No engine, data or web code is written in this stage. M9 does not depend on M7,
+which is scoped in parallel. Eco-SSL sources were checked on the EPA site on 2026-10-18. Rulings, each
+DEFAULT (open for Bryan to overturn) unless marked forced by a source:
+
+1. **Scope (DEFAULT).** In M9: neutral-organic plant uptake (legacy `plantUptake.trapp-matthies-1995` with
+   the `briggs1982` root and transpiration factors; modern `plantUptake.trapp-2015`), a `produce` pathway
+   into M4 and closed-form into M5, plant and invertebrate hazard quotients against Eco-SSLs, the Eco-SSL
+   wildlife food web, a legacy user-entered benchmark screen, and TPH fraction forward risk and total-TPH
+   cleanup levels through M5. Deferred: ionizable organics, metals uptake beyond a user BCF, meat and milk,
+   time-dependent plants inside the M5 Brent chain, aquatic food webs and fish, shipping the ORNL benchmark
+   tables, probabilistic parameters (M10), and soil build-up from irrigation (M7).
+2. **Trapp 2015 must be identified before E1 (DEFAULT).** The modern reference is a descriptor only. Slice
+   R1 verifies it; if it cannot be verified, the modern method becomes the EPA 2005 HHRAP produce
+   equations (`epa2005hhrap`) under a new ruling, never silently.
+3. **Pore water from the M2 and M3 partitioning (DEFAULT).** C_pw = C_s rho_b / (theta_w + rho_b K_d), with
+   the same chemical record, so a soil gives the same pore water in every milestone.
+4. **Irrigation as a plain interface (DEFAULT).** `IrrigationInput { concentration_mg_per_L,
+   applicationRate_L_per_m2_per_d, source }`, user entered until M7 lands; used only as an optional
+   root-zone water concentration and a foliar interception term. Every user-entered run raises
+   `IRRIGATION_USER_ENTERED`.
+5. **Produce pathway shape (DEFAULT).** Three produce classes (above-ground exposed, above-ground
+   protected, root) with preparation loss and fraction homegrown; legacy and modern presets follow the M4
+   split, modern intake rates from `epa2011efh`; risk adds into the M4 totals with the existing additivity
+   rules.
+6. **Legacy eco screen ships no benchmark table (DEFAULT).** Benchmarks are user entered with a citation;
+   `sample1996` is the expected citation until its fields are verified.
+7. **No ecological cleanup level (forced by `epaecosslguidance`).** The guidance states Eco-SSLs are
+   screening values and inappropriate as cleanup standards; M9 reports hazard quotients only, and
+   `ECO_SCREENING_ONLY` is always shown.
+8. **Eco-SSL data slice by hand entry with a checksummed manifest (DEFAULT).** No machine-readable table
+   exists (checked 2026-10-18), so values are hand entered with document, table and page, cross-checked
+   against `pdftotext` extracts of the checksummed PDFs, and generated into
+   `packages/data/generated/ecossl-<date>/ecossl.json` with provenance and public-domain status. Whether
+   the about 25 MB of PDFs is committed or fetched by a checksum-verifying script is decided in slice D1.
+9. **TPH fractions map onto the RSL surrogates (DEFAULT).** TPHCWG and MADEP fraction sets map onto the
+   five RSL November 2024 TPH records; no new toxicity values are entered; an unmapped fraction is
+   reported. The total level is HI_t / sum_j( f_j / CL_j ), each fraction checked against its saturation
+   limit.
+10. **Fixture tolerances (DEFAULT).** Closed forms 1e-10 relative; ODE against linear solve 1e-8; published
+    worked examples at printed precision (1 percent); Eco-SSL wildlife back-calculation 5 percent because
+    the published values carry two significant figures. Wider tolerances need a new entry here.
