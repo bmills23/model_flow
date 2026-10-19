@@ -2039,3 +2039,29 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
    name) use `TextField`, which never reads the setting, so "Vole, meadow" is stored as typed.
 5. **No project file change.** Format version 1 is untouched; there is no new route, so the mobile check and keyboard
    lists are unchanged.
+
+
+## 2026-10-19: Wave I scope and the wave H open questions (Bryan delegated)
+
+Asked to answer the wave H open questions and pick the next wave, Bryan replied "whatever you recommend". The
+calls below are the recommended ones, recorded as DEFAULT (delegated) so Bryan can still overturn any of them.
+
+1. **Transport Kd = Koc x foc stays** (DEFAULT, delegated), with foc entered by the user and the retardation
+   following from Kd.
+2. **Wildlife rows that do not reproduce get a visible flag** (DEFAULT, delegated): a row whose back-calculated
+   soil level differs from the printed Eco-SSL by more than 5 percent (the reproduction tolerance) is marked in
+   text, not by colour alone. Slice I2.
+3. **The ecological site checklist stays soil source only** (DEFAULT, delegated).
+4. **Database edits stay per project only** (DEFAULT, delegated; Bryan already chose this for wave H).
+5. **Homegrown produce stays off for modeled cleanup sources** (DEFAULT, delegated).
+6. **No total TPH cancer endpoint** (DEFAULT, delegated): the TPHCWG and MADEP fractions carry noncancer values
+   only, and carcinogenic constituents such as benzene and the carcinogenic PAHs are screened as individual
+   chemicals.
+7. **The plume map goes into the report** (DEFAULT, delegated), overturning the wave G slice G2 exclusion.
+   Slice I1.
+8. **The M7, M9, M10 and M11 DEFAULT rulings stay DEFAULT** and unreviewed.
+
+Wave I slices: I1 plume map in the report, I2 wildlife reproduction flag, I3 close-tab warning for unsaved
+project changes, I4 arrow-key navigation walk over every chart, I5 transport charts sized from the content box
+rather than the padded figure, I6 uncertainty sampling of modeled cleanup sources. Per-slice rulings follow in
+their own blocks.

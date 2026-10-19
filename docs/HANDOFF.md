@@ -20,8 +20,9 @@ skipping a done one.
   confirm its content is on main before deleting it.
 - Test time on this run: engine suite 34 s, web suite 53 s.
 - CI cost: about 5 billed minutes per push to main (measured 2026-10-18 and 2026-10-19 on main: gate job
-  2 min 38 s to 2 min 50 s, Pages build about 25 s, deploy 10 to 42 s). Not re-measured after waves G and H;
-  the gate job time is to be re-measured after the next push. Docs-only pushes trigger nothing.
+  2 min 38 s to 2 min 50 s, Pages build about 25 s, deploy 10 to 42 s). Re-measured 2026-10-19 after waves G
+  and H (runs 39298427676 and 39298427401): gate 2 min 26 s, Pages build 20 s plus deploy 11 s, still about 5
+  billed minutes (recorded in CLAUDE.md). Docs-only pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
@@ -294,7 +295,6 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Re-measure CI minutes per push now that the surface water tests are fast, and record them in CLAUDE.md.
 - Answer the wave H open questions above.
 - Then the open items above: read the unverified sources, and decide produce on modeled sources, the TPH
   cancer endpoint and the plume map in the report.
