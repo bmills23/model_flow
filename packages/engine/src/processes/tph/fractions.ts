@@ -99,12 +99,12 @@ export function tphTotalLevel(input: TphTotalLevelInput): TphTotalLevelResult {
   return { totalKgPerKg: sum > 0 ? hi / sum : null, warnings };
 }
 
-export interface TphForwardInput {
+export interface TphForwardInput<F extends TphFraction = TphFraction> {
   /** Total TPH soil concentration, kg/kg. */
   totalKgPerKg: number;
-  fractions: readonly TphFraction[];
+  fractions: readonly F[];
   /** Hazard quotient of one fraction run as its own chemical at C_s,j (the M4 receptor run). */
-  hazardQuotient: (fraction: TphFraction, soilKgPerKg: number) => number;
+  hazardQuotient: (fraction: F, soilKgPerKg: number) => number;
 }
 
 export interface TphForwardResult {
@@ -114,7 +114,9 @@ export interface TphForwardResult {
 }
 
 /** Each mapped fraction runs at C_s,j = f_j C_TPH; the noncancer hazard quotients add. */
-export function tphForwardHazard(input: TphForwardInput): TphForwardResult {
+export function tphForwardHazard<F extends TphFraction>(
+  input: TphForwardInput<F>,
+): TphForwardResult {
   checkNonNegative('total TPH concentration', input.totalKgPerKg);
   const { mapped, warnings } = resolveFractions(input.fractions);
   const byFraction = mapped.map((f) => {
