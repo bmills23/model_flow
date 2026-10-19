@@ -3,7 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProjectBar } from './ProjectBar';
 import { buildProject, defaultScreens } from './index';
 import { makeShareLink } from './share';
-import { getScreen, getTitle, markSaved, setScreen, setTitle } from './store';
+import {
+  AUTOSAVE_KEY,
+  flushAutosave,
+  forgetMemory,
+  getScreen,
+  getTitle,
+  markSaved,
+  setScreen,
+  setTitle,
+  startProjectStore,
+} from './store';
 import { serializeProject } from './file';
 
 function sharedProject(k: string) {
@@ -79,6 +89,53 @@ describe('project bar', () => {
     });
     await waitFor(() => expect(confirm).toHaveBeenCalledTimes(1));
     expect(getScreen('transport').form.K).toBe('11');
+  });
+
+  /** Work, autosave it, then simulate a reload that restores it (never saved to a file). */
+  function restoreUnfiledWork(): void {
+    const t = getScreen('transport');
+    setScreen('transport', { ...t, form: { ...t.form, K: '11' } });
+    flushAutosave();
+    const text = localStorage.getItem(AUTOSAVE_KEY);
+    forgetMemory();
+    if (text !== null) localStorage.setItem(AUTOSAVE_KEY, text);
+    startProjectStore();
+    expect(getScreen('transport').form.K).toBe('11');
+  }
+
+  it('Open project still asks first after a reload restored work that was never saved to a file', async () => {
+    restoreUnfiledWork();
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(<ProjectBar />);
+    const input = screen.getByLabelText(/open project file/i) as HTMLInputElement;
+    await act(async () => {
+      fireEvent.change(input, {
+        target: { files: [new File([serializeProject(sharedProject('42'))], 'p.json')] },
+      });
+    });
+    await waitFor(() => expect(confirm).toHaveBeenCalledTimes(1));
+    expect(getScreen('transport').form.K).toBe('11');
+  });
+
+  it('a shared link still asks first after a reload restored work that was never saved to a file', async () => {
+    restoreUnfiledWork();
+    const r = await makeShareLink(sharedProject('55'), 'https://x.test/');
+    if (!r.ok) throw new Error('link');
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    render(<ProjectBar />);
+    await act(async () => {
+      window.location.hash = new URL(r.link).hash;
+    });
+    await waitFor(() => expect(confirm).toHaveBeenCalledTimes(1));
+    expect(getScreen('transport').form.K).toBe('11');
+  });
+
+  it('a reload that only restores the autosave does not raise the close or reload warning', () => {
+    restoreUnfiledWork();
+    render(<ProjectBar />);
+    const event = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
   });
 
   it('Share link shows the link, or the reason when it is too long', async () => {

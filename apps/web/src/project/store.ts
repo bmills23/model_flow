@@ -83,6 +83,13 @@ let overrides: OverridesState = emptyOverrides();
 let site: SiteState = defaultSite();
 /** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
 let savedSnapshot: string | null = null;
+/**
+ * The last state the person has been warned about or has kept: it moves on a save, an open, a start AND
+ * a restore of the autosave. It drives only the close or reload warning. `savedSnapshot` moves on a
+ * save, an open or a start, never on a restore, so a restored project that was never saved to a file
+ * still reads as unfiled when something is about to replace it.
+ */
+let warnedSnapshot: string | null = null;
 let epoch = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
 /** Source form fingerprint recorded when each feed was last sent (or restored). */
@@ -185,20 +192,38 @@ function snapshot(): string {
   return stableStringify({ screens, title, feeds: currentFeeds(), overrides, site });
 }
 
-/** True when the project differs from the last save, open or start. */
+const startSnapshot = (): string =>
+  stableStringify({
+    screens: defaultScreens(),
+    title: '',
+    feeds: {},
+    overrides: emptyOverrides(),
+    site: defaultSite(),
+  });
+
+/**
+ * True when the project differs from the last save, open, start or restore: the close or reload
+ * warning. A reload that only brings the autosave back is not an unsaved change.
+ */
 export const hasUnsavedChanges = (): boolean =>
-  snapshot() !==
-  (savedSnapshot ??
-    stableStringify({
-      screens: defaultScreens(),
-      title: '',
-      feeds: {},
-      overrides: emptyOverrides(),
-      site: defaultSite(),
-    }));
+  snapshot() !== (warnedSnapshot ?? savedSnapshot ?? startSnapshot());
+
+/**
+ * True when the project differs from the last save to a file, open or start, whether or not it was
+ * restored from the autosave since. Replacing the project (an opened file or a share link) asks first
+ * on this, because the autosave is the only copy of unfiled work and the replace overwrites it.
+ */
+export const hasUnfiledChanges = (): boolean => snapshot() !== (savedSnapshot ?? startSnapshot());
+
 /** Record the project as saved (after a download, an open or a start). */
 export function markSaved(): void {
   savedSnapshot = snapshot();
+  warnedSnapshot = savedSnapshot;
+}
+
+/** Record the project as restored from the autosave: quiet for the unload warning, still unfiled. */
+function markRestored(): void {
+  warnedSnapshot = snapshot();
 }
 
 export const getOverrides = (): OverridesState => overrides;
@@ -315,6 +340,7 @@ export function forgetMemory(): void {
   stale = [];
   dropped = [];
   savedSnapshot = null;
+  warnedSnapshot = null;
 }
 
 /**
@@ -437,7 +463,8 @@ function watchPageHide(): void {
 export function startProjectStore(): void {
   hydrate();
   watchPageHide();
-  // seed the saved snapshot from the restored state, so a reload alone is not an unsaved change;
-  // the unload warning appears only once something is edited after the restore
-  markSaved();
+  // seed the unload baseline from the restored state, so a reload alone is not an unsaved change and
+  // the unload warning appears only once something is edited after the restore; the file baseline is
+  // left alone, so opening a file or a link still asks before replacing a restored, unfiled project
+  markRestored();
 }
