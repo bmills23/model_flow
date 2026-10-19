@@ -1793,10 +1793,16 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    Kd to the database Koc times a new optional organic carbon fraction field (`foc`, default 0.001) and
    switches retardation to "From Kd". Editing the fraction while a chemical is chosen recomputes Kd. The
    half-life stays a user input. New optional keys `chemicalId` and `foc`, inside format version 1.
+<<<<<<< HEAD
    Feed fingerprints leave these keys out (DEFAULT, wave H fix): `chemicalId` always (it only records where
    Kd or the properties were filled from, and the filled values are fingerprinted), `foc` while it equals
    0.001. See `FINGERPRINT_SKIP` in `project/hash.ts`; a project saved before this wave opens with no feed
    flagged stale. Every later form key must be added to that table.
+=======
+   A record without a Koc (74-90-8 hydrogen cyanide, 7439-97-6 mercury) leaves the retardation mode and
+   values unchanged and shows a note naming the chemical (DEFAULT, a fix to the first draft that switched to
+   "From Kd" with no database value behind it).
+>>>>>>> fix-h-transport
 4. **Not changed.** Surface water is excluded until G4; no feed changes meaning; choosing "Entered by hand"
    keeps the current values.
 

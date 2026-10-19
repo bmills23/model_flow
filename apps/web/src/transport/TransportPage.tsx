@@ -81,6 +81,7 @@ export function TransportPage() {
   const [form, setForm] = useState<TransportForm>(() => getScreen('transport').form);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const { rows: chemicals, failed: chemicalsFailed } = useChemicalRows();
+  const [noKocName, setNoKocName] = useState<string | null>(null);
   // Kd = Koc x foc (mL/g equals L/kg); a chemical without a Koc leaves Kd as typed
   const kdFor = (id: string, foc: string, keep: string): string => {
     const koc = chemicals.find((c) => c.id === id)?.rsl.koc?.value;
@@ -223,15 +224,26 @@ export function TransportPage() {
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) =>
+              onPick={(row) => {
+                // A record without a Koc cannot give Kd, so retardation stays as the user left it
+                const hasKoc = row !== null && row.rsl.koc?.value !== undefined;
+                setNoKocName(row !== null && !hasKoc ? row.name : null);
                 setForm((f) => ({
                   ...f,
                   chemicalId: row?.id ?? '',
-                  ...(row ? { retardMode: 'kd' as const, kd: kdFor(row.id, f.foc, f.kd) } : {}),
-                }))
-              }
+                  ...(row && hasKoc
+                    ? { retardMode: 'kd' as const, kd: kdFor(row.id, f.foc, f.kd) }
+                    : {}),
+                }));
+              }}
               note="Only Kd (Koc times the organic carbon fraction below) is used here; the half-life is not in the database and stays your input."
             />
+            {noKocName !== null && (
+              <p className="derived">
+                The database has no Koc for {noKocName}, so Kd cannot be filled. Retardation is
+                unchanged; enter R or Kd by hand.
+              </p>
+            )}
             <Seg
               legend="Retardation"
               name="retardMode"
