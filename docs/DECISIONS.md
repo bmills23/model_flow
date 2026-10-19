@@ -1467,9 +1467,11 @@ overturn):
    methods statement is generated from the registry for the methods actually run: name, kind, summary,
    assumptions, RISC5 choice, deduplicated citations from `references.json`, warnings and data editions.
    No author or contact line is printed; an optional user-filled "prepared by" field starts empty.
-   Built so far (S6): the generator, and a report of each edited screen's inputs plus the statement; the
-   methods are decided from the forms, not from computed results, and per-screen result tables, charts
-   and warnings are still open (see the methods note, section 6).
+   Built (S6, closed 2026-10-18): the generator, and a report of each used screen's inputs, result tables,
+   engine warnings and the statement. The methods are decided from the forms, not from computed results;
+   the result tables are each screen's own CSV tables, computed again from the saved forms and stored
+   feeds. Charts are not in the report (they stay on the screens), and the report says so; see the
+   methods note, section 6.
 9. **Mobile check in the repo (DEFAULT).** `scripts/mobile-check.mjs` drives Chrome through CDP at a true
    390x844 viewport, light and dark, every route, overflow count 0. Run locally before each milestone push;
    not in `gate` or CI (needs a real browser).
@@ -1547,7 +1549,7 @@ Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/met
    the plants screen runs both plant uptake methods and the Eco-SSL screen, plus the benchmark method when
    a benchmark row exists and the chosen TPH set when a total or a fraction is entered; the uncertainty
    section names the sampling method of each panel whose setup differs from the defaults and the Sobol
-   method when it is switched on. Result tables, charts and engine warnings per screen are still not in
-   the report for any screen (the open part of S6).
+   method when it is switched on. (The result tables and engine warnings per screen that were open here
+   landed with S6c; see ruling 8.)
 6. **Not verified here.** No data value or constant was typed. The units written in the new CSV headers
    are the units the screens display today, read from the screens, not from a source.

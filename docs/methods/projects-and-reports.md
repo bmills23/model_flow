@@ -203,7 +203,7 @@ so it is the one feed that still starts empty after a reload.
   prints to PDF from the browser. No PDF library (DEFAULT): smaller bundle, selectable text, and the
   browser handles page size.
 - Contents: title, saved date and app version; a non-affiliation statement (the existing `NON_AFFILIATION`
-  text); for each screen used, its inputs as a table and its results tables and charts; the warnings
+  text); for each screen used, its inputs as a table and its results tables (charts: see S6c below); the warnings
   returned by the engine, by code and message; the data editions used; then the methods statement.
 - **Methods statement, generated, never hand written.** For each method id actually run (collected from
   results, which carry their method id), it prints the descriptor's `name`, `kind`, `summary`,
@@ -227,9 +227,8 @@ so it is the one feed that still starts empty after a reload.
   for a non-direct cleanup source). The report page lists each used screen's inputs as typed (field
   names, not the screens' labels), the methods statement, and the data editions (the project's recorded
   edition when it has one, else the edition this build ships). A "Prepared by" field is held on the page
-  only, empty by default, and prints only when filled. Print CSS hides the app chrome. Not yet done:
-  result tables, charts and engine warnings per screen (they need each screen's computation run from the
-  project); until then the page says results are on each screen and in its CSV download. S8 added the
+  only, empty by default, and prints only when filled. Print CSS hides the app chrome. S6c added the
+  results (see the next bullet). S8 added the
   household, plants and uncertainty sections (inputs as typed, and the methods each runs): the household
   screen runs its three shower methods, the sprinkler method and its three particulate methods side by
   side; the plants screen runs both plant uptake methods and the Eco-SSL screen, adds the user benchmark
@@ -237,6 +236,29 @@ so it is the one feed that still starts empty after a reload.
   entered; the uncertainty section lists the sampling method of each configured panel (and the Sobol
   method when switched on). The plants and uncertainty sections count the RSL edition among the data
   sources; the household screen reads no dataset.
+- **Implemented (S6c, `apps/web/src/report/results.ts`).** Each used screen's section now carries a
+  Results block and a Warnings and notes block. `computeResults(project)` runs the screen's own form parser
+  and compute function on the saved form (no new calculation path) and passes the outcome to the screen's
+  own CSV table builders (`transportCsvTables`, `vadoseCsvTables`, `saturatedCsvTables`, `vaporCsvTables`,
+  `surfaceWaterCsvTables`, `riskCsvTables`, `cleanupCsvTables`, `ssgCsvTables`, `householdCsvTables`,
+  `plantsEcoCsvTables`), so the report tables and the CSV downloads cannot drift apart. Values passed
+  between screens come from the project's stored feeds, decoded as loading a project decodes them; a feed
+  the file lacks leaves that screen unfed, as it is after a reload. Tables print with the CSV headers
+  (units included), numbers shortened to six significant digits and at most 40 rows each, with a line
+  giving the full row count (the CSV download holds every row at full precision). Warnings are the engine
+  `{code, message}` pairs with the method or table that raised them, de-duplicated. A screen that cannot
+  be computed prints "Not computed" with the form's own error text instead of a table. Not in the report:
+  (1) charts, which stay on the screens, and the report says so; (2) the uncertainty panels' results,
+  because a project saves their setup and seed, not a run, so that section lists the setup and says the run
+  repeats from the seed; (3) a modeled cleanup source, which solves through the groundwater chain feed
+  (it holds a function and is not saved), so the section says it needs the chain sent again from the
+  groundwater screen; (4) the household source levels panel of the cleanup screen, which has no CSV table
+  (the section says it is on the screen only). On a phone each result row prints as a labeled card so no
+  table scrolls sideways; the printed page keeps the plain table.
+  Viewport check (2026-10-18): `#/report` for a project with the groundwater, vadose, saturated, vapor,
+  surface water and plants screens used, through CDP device emulation at 390x844 (mobile, scale 2) in
+  light and dark and at 1280x900 light: 8 result tables rendered, overflowing elements 0 in all three,
+  scroll width equal to client width.
 - No author name, address or contact line is printed (DEFAULT); a free-text "prepared by" field the user
   fills is allowed, empty by default. Nothing in the template carries a personal contact address.
 
@@ -314,9 +336,9 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S3 | Autosave and persisted feeds, "New project" | S2 | yes |
 | S4 | File save and open, share link with compression and size limit | S2 | yes |
 | S5 | `exportCsv` helper and CSV on the existing screens | none | yes |
-| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closes after S8 (generator, inputs and methods sections done; results, charts and warnings per screen open) |
+| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closed after S8 (done: generator, inputs, methods, result tables and engine warnings per screen; charts are deliberately left on the screens) |
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
-| S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; per-screen result tables in the report remain open with S6) | S2, S5, S6, and M7, M9, M10 landed | no |
+| S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; the per-screen result tables closed with S6c) | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen |
 | S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; the final pass waits for every screen |
 | S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last |

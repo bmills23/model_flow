@@ -25,6 +25,26 @@ describe('ReportPage', () => {
     expect(screen.getByText(/not affiliated with/i)).toBeTruthy();
   });
 
+  it('prints the result tables and engine warnings of a used screen, and says charts are left out', async () => {
+    const v = getScreen('vadose');
+    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    render(<ReportPage />);
+    expect(screen.getByText(/computing results/i)).toBeTruthy();
+    const heading = await screen.findByRole('heading', { name: 'Results' });
+    const section = heading.closest('section')!;
+    expect(section.querySelectorAll('table.result-table').length).toBeGreaterThan(0);
+    expect(section.querySelector('table.result-table td[data-label]')).not.toBeNull();
+    expect(screen.getByRole('heading', { name: 'Warnings and notes' })).toBeTruthy();
+    expect(screen.getByText(/charts are not included/i)).toBeTruthy();
+  });
+
+  it('prints why a screen was not computed', async () => {
+    const t = getScreen('transport');
+    setScreen('transport', { ...t, form: { ...t.form, K: 'abc' } });
+    render(<ReportPage />);
+    expect(await screen.findByText(/^Not computed/)).toBeTruthy();
+  });
+
   it('shows the prepared by line only once the user fills it', () => {
     render(<ReportPage />);
     expect(screen.queryByText('Prepared by')).toBeNull();

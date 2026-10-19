@@ -1,6 +1,7 @@
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { currentProject } from '../project/store';
 import { buildReport, type Report } from './buildReport';
+import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
 
 const KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
 
@@ -9,7 +10,85 @@ function dateText(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : d.toISOString().slice(0, 10);
 }
 
-export function ReportView({ report, preparedBy }: { report: Report; preparedBy: string }) {
+function ResultTables({ results }: { results: SectionResults }) {
+  return (
+    <>
+      {results.notes.length > 0 && (
+        <ul className="report-notes">
+          {results.notes.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
+      )}
+      {results.tables.map((t) => {
+        const text = tableText(t);
+        return (
+          <div key={text.name} className="result-block">
+            <h4>{text.label}</h4>
+            <table className="result-table" aria-label={text.label}>
+              <thead>
+                <tr>
+                  {text.headers.map((h, i) => (
+                    <th key={`${i}:${h}`} scope="col">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {text.rows.map((row, r) => (
+                  <tr key={r}>
+                    {row.map((cell, c) => (
+                      <td key={c} data-label={text.headers[c]}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {text.total > text.rows.length && (
+              <p className="muted">
+                Showing the first {text.rows.length} of {text.total} rows. The CSV download on the
+                screen holds all of them.
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function ResultWarnings({ results }: { results: SectionResults }) {
+  return (
+    <>
+      <h3>Warnings and notes</h3>
+      {results.warnings.length === 0 ? (
+        <p className="muted">No engine warnings.</p>
+      ) : (
+        <ul className="report-warnings">
+          {results.warnings.map((w) => (
+            <li key={`${w.origin}:${w.code}:${w.message}`}>
+              <code>{w.code}</code> <span className="muted">({w.origin})</span> {w.message}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export function ReportView({
+  report,
+  preparedBy,
+  results = null,
+}: {
+  report: Report;
+  preparedBy: string;
+  /** Results per screen; null while they compute. */
+  results?: ProjectResults | null;
+}) {
   const { statement } = report;
   return (
     <article className="report" aria-label="Project report">
@@ -62,6 +141,17 @@ export function ReportView({ report, preparedBy }: { report: Report; preparedBy:
                 ))}
               </tbody>
             </table>
+            <h3>Results</h3>
+            {results === null ? (
+              <p className="muted" role="status">
+                Computing results...
+              </p>
+            ) : results[sec.key] === undefined ? (
+              <p className="muted">No results for this screen.</p>
+            ) : (
+              <ResultTables results={results[sec.key]!} />
+            )}
+            {results?.[sec.key] !== undefined && <ResultWarnings results={results[sec.key]!} />}
             <p className="muted">
               Methods run:{' '}
               {statement.methods
@@ -80,8 +170,10 @@ export function ReportView({ report, preparedBy }: { report: Report; preparedBy:
         </p>
       )}
       <p className="muted report-scope">
-        Inputs are shown as typed, in the units each screen labels. Results, charts and any warnings
-        are on each screen and in its CSV download.
+        Inputs are shown as typed, in the units each screen labels. Results are the screen's own
+        tables, computed again from these inputs, with numbers shortened to six significant digits;
+        the CSV download on each screen holds every row at full precision. Charts are not included:
+        they are on each screen.
       </p>
 
       <section className="report-section" aria-labelledby="rep-methods">
@@ -150,7 +242,19 @@ export function ReportView({ report, preparedBy }: { report: Report; preparedBy:
 export function ReportPage() {
   const [preparedBy, setPreparedBy] = useState('');
   const id = useId();
-  const report = useMemo(() => buildReport(currentProject()), []);
+  const project = useMemo(() => currentProject(), []);
+  const report = useMemo(() => buildReport(project), [project]);
+  const [results, setResults] = useState<ProjectResults | null>(null);
+  useEffect(() => {
+    let live = true;
+    computeResults(project).then(
+      (r) => live && setResults(r),
+      () => live && setResults({}),
+    );
+    return () => {
+      live = false;
+    };
+  }, [project]);
   return (
     <section aria-labelledby="report-heading">
       <div className="report-tools">
@@ -171,7 +275,7 @@ export function ReportPage() {
           Print or save as PDF
         </button>
       </div>
-      <ReportView report={report} preparedBy={preparedBy} />
+      <ReportView report={report} preparedBy={preparedBy} results={results} />
     </section>
   );
 }
