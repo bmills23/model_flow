@@ -46,6 +46,7 @@ import {
   type TextureChoice,
   type VaporForm,
 } from './form';
+import { HelpLink } from '../docs/HelpLink';
 
 const byKey = new Map(references.map((r) => [r.key, r]));
 const sig = (v: number): string => formatConcentration(v);
@@ -314,6 +315,7 @@ export function VaporPage() {
   return (
     <section aria-labelledby="vapor-heading" className="vapor">
       <h1 id="vapor-heading">Vapor intrusion screen</h1>
+      <HelpLink target="vapor" />
       <p className="lede">
         Chemical vapors from soil, soil gas or groundwater diffuse up through the soil and enter a
         building through its foundation. Compare the legacy and the modern Johnson and Ettinger

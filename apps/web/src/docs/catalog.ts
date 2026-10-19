@@ -129,8 +129,14 @@ export function docHash(slug: string): string {
   return `${DOCS_HASH}/${slug}`;
 }
 
+// `#/docs/<slug>` names a document; `#/docs/<slug>/<section>` also names a heading in it.
 export function slugFromHash(hash: string): string | null {
-  const m = /^#\/docs\/([^/?#]+)$/.exec(hash);
+  const m = /^#\/docs\/([^/?#]+)(?:\/[^/?#]+)?$/.exec(hash);
+  return m ? decodeURIComponent(m[1]!) : null;
+}
+
+export function sectionFromHash(hash: string): string | null {
+  const m = /^#\/docs\/[^/?#]+\/([^/?#]+)$/.exec(hash);
   return m ? decodeURIComponent(m[1]!) : null;
 }
 

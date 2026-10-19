@@ -1921,3 +1921,20 @@ Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the ma
 9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
    disclosure inside an existing card.
 
+
+## 2026-10-19: Wave H slice U6, help link per screen
+
+1. **Target by heading text (DEFAULT).** Each screen names its user guide heading once, in `apps/web/src/docs/help.ts`
+   (`HELP_TARGETS`). A heading's id is `sectionId` of its text, so `#/docs/user-guide/<id>` is the link. The test
+   checks every target against `docs/USER_GUIDE.md`.
+2. **Screens covered (DEFAULT).** Eleven screens get the link: transport, vadose, saturated, vapor, surface water,
+   household, plants-eco, chemicals, risk, cleanup and report. Home, Methods and Documentation get none, since they
+   are not calculation screens. `#/site` does not exist on this branch yet, so the Site model screen has no link;
+   add one line to `HELP_TARGETS` and the page when U2 lands.
+3. **Reader scroll and focus (DEFAULT).** Every heading in the reader gets its id and `tabIndex=-1`. A section hash
+   scrolls to that heading and moves focus to it. The route parsing accepts one optional section segment, and
+   `#/docs/<slug>` is unchanged.
+4. **Shared component.** `HelpLink` (`apps/web/src/docs/HelpLink.tsx`) is the only Help link; the link is 44 px
+   high and sits in a paragraph under the screen title. No new route, so the mobile check and keyboard lists are
+   unchanged.
+5. **No project file change.** Help links carry no state, so the project file format and its version are untouched.

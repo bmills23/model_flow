@@ -407,6 +407,17 @@ footer {
   line-height: var(--tap);
 }
 
+.help-link-row {
+  margin: 0 0 0.5rem;
+}
+
+.help-link {
+  display: inline-block;
+  min-height: var(--tap);
+  line-height: var(--tap);
+  padding: 0 0.5rem;
+}
+
 .doc-body {
   max-width: 48rem;
 }

@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { DOCS_HASH, docHash, docs, findDoc, resolveLink, type DocEntry } from './catalog';
-import { parseInline, parseMarkdown, type Block, type ListItem } from './markdown';
+import { parseInline, parseMarkdown, sectionId, type Block, type ListItem } from './markdown';
 
 function renderInline(text: string): ReactNode[] {
   return parseInline(text).map((part, i) => {
@@ -47,7 +47,11 @@ function renderBlock(b: Block, key: number): ReactNode {
     case 'heading': {
       const level = Math.min(6, b.level);
       const Tag = `h${level}` as 'h1';
-      return <Tag key={key}>{renderInline(b.text)}</Tag>;
+      return (
+        <Tag key={key} id={sectionId(b.text)} tabIndex={-1}>
+          {renderInline(b.text)}
+        </Tag>
+      );
     }
     case 'paragraph':
       return <p key={key}>{renderInline(b.text)}</p>;
@@ -99,7 +103,7 @@ function renderBlocks(blocks: Block[]): ReactNode {
   return blocks.map(renderBlock);
 }
 
-function DocView({ entry }: { entry: DocEntry }) {
+function DocView({ entry, section }: { entry: DocEntry; section: string | null }) {
   const [source, setSource] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -112,6 +116,14 @@ function DocView({ entry }: { entry: DocEntry }) {
       live = false;
     };
   }, [entry]);
+  // A section link scrolls to its heading and moves focus there, so a screen reader starts at it.
+  useEffect(() => {
+    if (source === null || section === null) return;
+    const el = document.getElementById(section);
+    if (!el) return;
+    el.scrollIntoView?.({ block: 'start' });
+    el.focus({ preventScroll: true });
+  }, [source, section]);
   if (failed) return <p role="alert">This document could not be loaded.</p>;
   if (source === null) return <p className="muted">Loading the document...</p>;
   return <article className="doc-body">{renderBlocks(parseMarkdown(source))}</article>;
@@ -119,7 +131,7 @@ function DocView({ entry }: { entry: DocEntry }) {
 
 const GROUPS: DocEntry['group'][] = ['Guide', 'Methods notes', 'Sources'];
 
-export function DocsPage({ slug }: { slug: string | null }) {
+export function DocsPage({ slug, section = null }: { slug: string | null; section?: string | null }) {
   const entry = slug === null ? undefined : findDoc(slug);
   if (slug !== null && entry === undefined) {
     return (
@@ -138,7 +150,7 @@ export function DocsPage({ slug }: { slug: string | null }) {
         <p className="doc-back">
           <a href={DOCS_HASH}>All documentation</a>
         </p>
-        <DocView key={entry.slug} entry={entry} />
+        <DocView key={entry.slug} entry={entry} section={section} />
       </section>
     );
   }

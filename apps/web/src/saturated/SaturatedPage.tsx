@@ -35,6 +35,7 @@ import { DownloadCsv } from '../export/DownloadCsv';
 import { saturatedCsvTables } from './csv';
 import { useSaturatedResult } from './useSaturatedResult';
 import { SATURATED_METHODS as METHODS, saturatedSeries, saturatedVlines } from './timeSeries';
+import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof SaturatedForm>(key: K, value: SaturatedForm[K]) => void;
 
@@ -191,6 +192,7 @@ export function SaturatedPage() {
   return (
     <section aria-labelledby="saturated-heading" className="vadose saturated">
       <h1 id="saturated-heading">Saturated soil source</h1>
+      <HelpLink target="saturated" />
       <p className="lede">
         Chemical in soil that sits at or below the water table dissolves into the groundwater that
         flows through it, and into the infiltration that flushes the part above it. Release it

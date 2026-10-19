@@ -21,6 +21,7 @@ import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
 import { waterTableSource } from './vaporFeed';
+import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
 
@@ -136,6 +137,7 @@ export function TransportPage() {
   return (
     <section aria-labelledby="transport-heading" className="transport">
       <h1 id="transport-heading">Groundwater transport</h1>
+      <HelpLink target="transport" />
       <p className="lede">
         Dissolved plume from a finite source in uniform groundwater flow, with retardation and
         first-order decay. Compare the legacy AT123D-class method with the modern Wexler (1992)

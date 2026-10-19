@@ -17,6 +17,7 @@ import { DEFAULT_FORM, LAKE_FORM, R8_PUBLISHED, isR8Case, toRequest, type SwForm
 import { DownloadCsv } from '../export/DownloadCsv';
 import { surfaceWaterCsvTables } from './csv';
 import { useSurfaceWaterResult } from './useSurfaceWaterResult';
+import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof SwForm>(key: K, value: SwForm[K]) => void;
 
@@ -142,6 +143,7 @@ export function SurfaceWaterScreen() {
   return (
     <section aria-labelledby="sw-heading" className="surface-water">
       <h1 id="sw-heading">Surface water and sediment</h1>
+      <HelpLink target="surface-water" />
       <p className="lede">
         A groundwater plume that reaches a river or lake discharges through the bed. Mix it into the
         water body to get the surface water concentration, find the sediment concentration by

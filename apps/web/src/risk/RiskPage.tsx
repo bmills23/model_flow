@@ -19,6 +19,7 @@ import { RiskUncertainty } from './RiskUncertainty';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { riskCsvTables } from './csv';
 import { Charts, Comparison, EpcTable, NotQuantified, WarningsList } from './Results';
+import { HelpLink } from '../docs/HelpLink';
 
 type Built = Extract<BuildResult, { ok: true }>;
 interface Snapshot {
@@ -122,6 +123,7 @@ export function RiskPage() {
   return (
     <section aria-labelledby="risk-heading" className="vadose risk">
       <h1 id="risk-heading">Exposure and risk</h1>
+      <HelpLink target="risk" />
       <p className="lede">
         Pick chemicals from the EPA Regional Screening Level tables, enter their concentrations in
         soil, water and air (or take the groundwater concentration from the transport screen), and
