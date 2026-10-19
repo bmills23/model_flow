@@ -1,8 +1,8 @@
 import type { EpcSeries, EpcSpec } from '../exposure/index.js';
 import { seriesEpc } from '../exposure/index.js';
-import { at123dConcentration, type At123dInput } from '../groundwater/index.js';
+import { at123dConcentration, createAt123dMemo, type At123dInput } from '../groundwater/index.js';
 import type { PlaneConcentration } from './discharge.js';
-import { checkFinite, checkNonNegative } from './checks.js';
+import { checkFinite, checkNonNegative, checkPositive } from './checks.js';
 
 /**
  * Coupling of the surface water models to M1 (groundwater at the bank) and M4 (swimming EPCs); see
@@ -34,6 +34,17 @@ export function bankScreenAverage(
   return { times: [...times], values };
 }
 
+export interface BankPlaneOptions {
+  /**
+   * Absolute tolerance of each plane point as a fraction of the centreline surface concentration at the
+   * same time. Omit (the default) for the kernel's full relative tolerance at every point. The bank
+   * plane integral adds points over a reach that can be far wider than the plume, and chasing the
+   * relative tolerance of a tail value many orders of magnitude below the peak dominated the cost
+   * (`docs/DECISIONS.md`, Wave G slice G4).
+   */
+  tailTolerance?: number;
+}
+
 /**
  * The AT123D concentration on the bank plane for `bankPlaneDischarge`: lateral offset y from the
  * centreline, depth below the water table (z = waterTableZ - depth), at the plane x = bankX from the
@@ -43,11 +54,38 @@ export function at123dBankPlane(
   input: Omit<At123dInput, 'time'>,
   bankX: number,
   waterTableZ: number,
+  options: BankPlaneOptions = {},
 ): PlaneConcentration {
   checkFinite('bank x', bankX);
   checkFinite('water table z', waterTableZ);
-  return (y, depth, t) =>
-    at123dConcentration({ ...input, time: t }, { x: bankX, y, z: waterTableZ - depth });
+  const tail = options.tailTolerance;
+  if (tail !== undefined) checkPositive('tail tolerance', tail);
+  const memo = createAt123dMemo();
+  if (tail === undefined) {
+    return (y, depth, t) =>
+      at123dConcentration({ ...input, time: t }, { x: bankX, y, z: waterTableZ - depth }, { memo });
+  }
+  // The plane integral weighs a point by its size next to the plume, so a point far out in the tail needs
+  // its time integral only to a small share of the centreline surface value at that time. The reference
+  // is that value, converged to the kernel's own tolerance, and is kept for the time in hand (the plane
+  // integral visits one time at a time).
+  let refTime = Number.NaN;
+  let refValue = 0;
+  return (y, depth, t) => {
+    if (t !== refTime) {
+      refValue = at123dConcentration(
+        { ...input, time: t },
+        { x: bankX, y: 0, z: waterTableZ },
+        { memo },
+      );
+      refTime = t;
+    }
+    return at123dConcentration(
+      { ...input, time: t },
+      { x: bankX, y, z: waterTableZ - depth },
+      { absTol: tail * refValue, memo },
+    );
+  };
 }
 
 /**

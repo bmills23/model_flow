@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   at123dBankPlane,
+  bankPlaneDischarge,
   bankScreenAverage,
+  at123dConcentration,
+  createAt123dMemo,
   constantEpc,
   groundwaterAt123d,
   modernChemical,
@@ -90,6 +93,71 @@ describe('M1 bank screen average (legacy edge series)', () => {
       groundwaterAt123d.run({ ...input, time: t, points: [{ x: 60, y: 0, z: -2 }] })
         .concentrations[0],
     );
+  });
+});
+
+describe('bank plane tail tolerance', () => {
+  const input = {
+    aquifer: {
+      velocity: 1e-6,
+      porosity: 0.3,
+      retardation: 2,
+      decayRate: 0,
+      dx: 1e-5,
+      dy: 4e-6,
+      dz: 5e-8,
+    },
+    source: { x1: -15, x2: 0, y1: -10, y2: 10, z1: -3, z2: 0 },
+    loading: [{ start: 0, end: Infinity, rate: 1e-9 }],
+  };
+  const t = 5 * Y;
+
+  it('an absolute tolerance on the point concentration keeps a tail point within it', () => {
+    const p = { x: 50, y: 150, z: -1 };
+    const strict = at123dConcentration({ ...input, time: t }, p);
+    const centre = at123dConcentration({ ...input, time: t }, { x: 50, y: 0, z: -1 });
+    const absTol = 1e-9 * centre;
+    const loose = at123dConcentration({ ...input, time: t }, p, { absTol });
+    expect(Math.abs(loose - strict)).toBeLessThanOrEqual(absTol);
+    // the default is unchanged
+    expect(at123dConcentration({ ...input, time: t }, p, {})).toBe(strict);
+  });
+
+  it('a plane with a tail tolerance gives the strict discharge to far better than the plane tolerance', () => {
+    const strict = at123dBankPlane(input, 50, 0);
+    const tail = at123dBankPlane(input, 50, 0, { tailTolerance: 1e-9 });
+    const plane = { reachLength: 600, thickness: 3, darcyFlux: 3e-7 };
+    const times = [5 * Y];
+    const q = { relTol: 1e-3, panels: 1 };
+    const a = bankPlaneDischarge(strict, plane, times, q).discharge;
+    const b = bankPlaneDischarge(tail, plane, times, q).discharge;
+    a.forEach((w, i) => {
+      expect(w).toBeGreaterThan(0);
+      expect(Math.abs(b[i]! - w) / w).toBeLessThan(1e-6);
+    });
+  }, 60000);
+
+  it('remembered axis factors give exactly the numbers of the plain kernel, over a sweep of points', () => {
+    const memo = createAt123dMemo();
+    const pts = [
+      { x: 50, y: 0, z: -1 },
+      { x: 50, y: 0, z: -2.5 },
+      { x: 50, y: 12, z: -1 },
+      { x: 50, y: 12, z: -2.5 },
+      { x: 50, y: -30, z: -1 },
+      { x: 50, y: 0, z: -1 },
+    ];
+    for (const time of [2 * Y, 5 * Y]) {
+      for (const p of pts) {
+        const plain = at123dConcentration({ ...input, time }, p);
+        expect(at123dConcentration({ ...input, time }, p, { memo })).toBe(plain);
+      }
+    }
+  });
+
+  it('rejects a non-positive or non-finite tail tolerance', () => {
+    expect(() => at123dBankPlane(input, 50, 0, { tailTolerance: 0 })).toThrow(RangeError);
+    expect(() => at123dBankPlane(input, 50, 0, { tailTolerance: Infinity })).toThrow(RangeError);
   });
 });
 

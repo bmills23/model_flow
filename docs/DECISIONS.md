@@ -1591,3 +1591,45 @@ Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/met
    personal address). A test requires a heading for every screen route.
 6. **Not verified here.** No data value or constant was typed. The one-line summaries on the index are
    descriptions of each note's subject, written from the file names and headings.
+
+## 2026-10-19: Wave G slice G4, surface water performance
+
+Measured with a profile (`node --cpu-prof`), call counts and per-call timings of the bank plane integral,
+24 sample times, the AT123D bank plane of the default 5 year transport run, discharge thickness 3 m.
+
+1. **Root cause.** Not repeated solves per time step, not the screen average and not the quadrature
+   resolution. About 90 percent of a 2000 m linked run was the time integral of the AT123D kernel
+   (`at123dConcentration`, tanh-sinh at 1e-8 relative, absolute tolerance 0) evaluated at plane points far out
+   in the plume tail. The plane range is narrowed to where the field is above 1e-12 of its largest probe, so
+   on a 2000 m reach the lateral quadrature visits points 100 to 1000 m out where the value is many orders of
+   magnitude below the peak; with no absolute floor each of those 22,000 calls refined to the deepest level
+   (6.3 ms per call, against 0.16 ms for the central points). The rest of the cost was the three axis profiles
+   being recomputed for every point although, at one time and one bank x, they depend only on the release age.
+2. **Fix 1, tail tolerance (DEFAULT 1e-9).** `at123dConcentration` takes an optional absolute tolerance
+   (`absTol`, default 0, so every other caller is unchanged) and `at123dBankPlane` an optional
+   `tailTolerance`: the absolute tolerance of a plane point as a share of the centreline surface
+   concentration at the same time. The web calculation sets `BANK_TAIL_TOLERANCE = 1e-9`. A point is
+   therefore only converged to 1e-9 of the peak, which the plane quadrature (1e-3) cannot see. Measured
+   against the unchanged code on the 2000 m run, the largest relative difference over every result series
+   is 2.1e-11. The value 1e-9 was chosen as 1e-6 of the plane tolerance and is not tuned.
+3. **Fix 2, remembered axis factors (identical numbers).** `createAt123dMemo` and the `memo` option of
+   `at123dConcentration` keep the x, y and depth profiles by release age for one time and one aquifer and
+   source, so a plane's points reuse them. The operations and their order are those of the plain path, and a
+   test requires exact (`toBe`) agreement over a sweep of points and two times. Used by `at123dBankPlane`
+   only; it is valid for one aquifer and source.
+4. **Tolerances.** No fixture tolerance was widened, no test input was shrunk and no test was skipped. The
+   `timeout` values in `apps/web/src/surfaceWater/compute.test.ts` were lowered to 30 s (from 60 to 180 s) so
+   a return of the slowness fails the test. The existing 1 percent check of the fast plane quadrature against
+   the tight integral is unchanged and passes. The 40 m run is bit-identical to before (the tail tolerance
+   never engages there); the 2000 m run differs by at most 2.1e-11 relative.
+5. **Responsiveness.** The run already executes in a Web Worker (`compute.worker.ts`, a newer request
+   terminates the old one), so the interface was never blocked; only the wait shrank. No change there.
+6. **Measured, same harness before and after** (a script calling `compute()` with the default transport
+   scenario at 5 years, linked, bank 50 m, thickness 3 m, in Node; the 81 s in the handoff is a browser
+   figure, not comparable): 2000 m reach 178 s before, 2.0 s after; 40 m reach 22 s before, 1.9 s after.
+   Vitest wall time per file, before and after: `compute.test.ts` 205 s to 11.7 s,
+   `SurfaceWaterScreen.test.tsx` 22.8 s to 5.7 s; `criteriaDb`, `csv`, `feed` and `inputs` test files are
+   under 20 ms each and unchanged.
+7. **Not verified here.** The browser time of a linked run was not re-measured (no browser was launched);
+   the figures above are Node. Browser time should be re-measured before the handoff's "slow run" note is
+   dropped.
