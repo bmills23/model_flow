@@ -1,11 +1,12 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { BreakthroughChart } from './BreakthroughChart';
 import { Marker } from './Marker';
 import { SERIES } from './series';
 import { formatConcentration } from './chartData';
 import type { ComputeRequest, MethodKey } from './compute';
-import { DEFAULT_FORM, toScenario, type StepRow, type TransportForm } from './form';
+import { toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
 import { DownloadCsv } from '../export/DownloadCsv';
@@ -74,9 +75,10 @@ function StepsTable({ form, set }: { form: TransportForm; set: Setter }) {
 const fmtAlpha = (v: number): string => String(Number(v.toPrecision(3)));
 
 export function TransportPage() {
-  const [form, setForm] = useState<TransportForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<TransportForm>(() => getScreen('transport').form);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const [wellMethod, setWellMethod] = useState<MethodKey>('modern');
+  const [wellMethod, setWellMethod] = useState<MethodKey>(() => getScreen('transport').method);
+  useEffect(() => setScreen('transport', { form, method: wellMethod }), [form, wellMethod]);
   const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
   const chainHeld = useSyncExternalStore(
     subscribeTransportFeed,

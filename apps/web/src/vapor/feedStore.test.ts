@@ -32,4 +32,11 @@ describe('createFeed', () => {
     a.set(1);
     expect(b.get()).toBeNull();
   });
+
+  it('starts from an initial value and clears back to empty', () => {
+    const feed = createFeed<{ n: number }>({ n: 7 });
+    expect(feed.get()).toEqual({ n: 7 });
+    feed.clear();
+    expect(feed.get()).toBeNull();
+  });
 });

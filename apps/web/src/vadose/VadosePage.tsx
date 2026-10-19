@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { convert, formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Marker } from '../transport/Marker';
@@ -122,7 +123,8 @@ function relDiff(value: number, target: number): number {
 const pct = (x: number): string => `${x >= 0 ? '+' : ''}${(100 * x).toFixed(1)} percent`;
 
 export function VadosePage() {
-  const [form, setForm] = useState<VadoseForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<VadoseForm>(() => getScreen('vadose').form);
+  useEffect(() => setScreen('vadose', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const setLayer = (side: Side, index: number, patch: Partial<LayerForm>): void =>

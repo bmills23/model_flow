@@ -70,8 +70,12 @@ A project is one JSON document, the single source for save, load, share, persist
   M10 add keys; an absent key means that screen's defaults.
 - **Feeds are stored as values, not recomputed on load (DEFAULT).** The schema checks the well and
   surface water feeds in full (equal length finite series, SI) and the scenario carrying feeds (vadose,
-  saturated, bank, vapor) only as JSON objects; S3 pins their exact stored shape when it persists them
-  (the transport chain feed holds a closure and is not part of the file). `feedEntry` and `isFeedStale`
+  saturated, bank, vapor) by their top-level keys with the scenario itself a JSON object (S3 pinned the
+  shapes: vadose `{scenario, method, label}`, saturated `{input, method, label}`, bank `{scenario, label}`,
+  vapor `{vadose?, waterTable?, saturated?, risk?}` for the four vapor source feeds). Non-finite numbers,
+  which a scenario can hold (an open-ended loading term ends at infinity), are written as a tagged object
+  and read back exactly (`project/codec.ts`). The transport chain feed holds a closure and is not part of
+  the file. `feedEntry` and `isFeedStale`
   build and test the source form hash (FNV-1a over key-sorted JSON). A feed is the series the user chose to
   send, and recomputing it could silently change a downstream result. Each feed records the hash of the
   source form it was built from, so on load the receiving screen can say "this feed was built from inputs
@@ -120,6 +124,18 @@ feeds and the screens' initial form state. `createFeed` gains an optional `initi
 well, chain, bank, vadose, saturated and surface water feed modules (the vapor feeds already used it) are moved onto `createFeed` first (a refactor slice with no
 behaviour change, guarded by the existing feed tests). A "New project" control clears forms, feeds and the
 autosave.
+
+Implemented (S3, `apps/web/src/project/store.ts`). Each screen reads its initial state from the store and
+writes it back on every change (an unchanged state is ignored); the store autosaves the whole project
+(forms and every storable feed) 600 ms after the last change under the key
+`model_flow.project.autosave.v1`, and `main.tsx` restores it before the first render. A missing, corrupt,
+foreign or newer save, or blocked storage, starts a fresh project with no error. A feed records the hash
+of its source form when it is sent; the vapor entry hashes the vadose, saturated, groundwater and vapor
+forms together. A restored feed whose source form has changed since is listed in a notice under the
+masthead and is not refreshed. "New project" (masthead, asks first) clears the forms, the feeds and the
+autosave and remounts the screen. `createFeed` takes an optional `initial` value; restoring uses the feed
+setters, so no feed module imports the store. The transport chain feed (cleanup levels) holds a closure,
+so it is the one feed that still starts empty after a reload.
 
 ## 5. CSV export per screen
 

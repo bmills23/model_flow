@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { fedStepLength } from '../transport/compute';
 import { Field, Group, Seg } from '../ui/controls';
@@ -117,8 +118,11 @@ function CaseCheck(props: {
 }
 
 export function SaturatedPage() {
-  const [form, setForm] = useState<SaturatedForm>(DEFAULT_FORM);
-  const [feedMethod, setFeedMethod] = useState<SaturatedMethod>('legacy');
+  const [form, setForm] = useState<SaturatedForm>(() => getScreen('saturated').form);
+  const [feedMethod, setFeedMethod] = useState<SaturatedMethod>(
+    () => getScreen('saturated').method,
+  );
+  useEffect(() => setScreen('saturated', { form, method: feedMethod }), [form, feedMethod]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 

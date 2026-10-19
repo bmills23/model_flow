@@ -1,4 +1,5 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import { getEpoch, getStaleFeeds, newProject, subscribeProject } from './project/store';
 
 // Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
 const MethodsPage = lazy(() =>
@@ -46,6 +47,19 @@ export function App() {
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
+  const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
+  const [staleShown, setStaleShown] = useState(true);
+  const stale = staleShown ? getStaleFeeds() : [];
+  const onNewProject = (): void => {
+    if (
+      window.confirm(
+        'Start a new project? This clears every screen, the values passed between screens, and the automatic save in this browser.',
+      )
+    ) {
+      newProject();
+      setStaleShown(false);
+    }
+  };
   const onMethods = hash === METHODS_HASH;
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
@@ -67,7 +81,19 @@ export function App() {
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
           model_flow
         </a>
+        <button type="button" className="btn masthead-action" onClick={onNewProject}>
+          New project
+        </button>
       </header>
+      {stale.length > 0 ? (
+        <p className="stale-note" role="status">
+          Restored values passed between screens ({stale.join(', ')}) were built from inputs that
+          have since changed. Send them again from their source screen to refresh them.{' '}
+          <button type="button" className="btn" onClick={() => setStaleShown(false)}>
+            Dismiss
+          </button>
+        </p>
+      ) : null}
       <nav aria-label="Main">
         <ol className="steps">
           {STEPS.map((step, i) => (
@@ -120,7 +146,7 @@ export function App() {
           </a>
         </div>
       </nav>
-      <main>
+      <main key={epoch}>
         {onMethods ? (
           <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
             <MethodsPage />

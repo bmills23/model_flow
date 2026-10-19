@@ -73,6 +73,24 @@ footer {
 
 .masthead {
   padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.masthead-action {
+  min-height: var(--tap);
+}
+
+.stale-note {
+  max-width: 60rem;
+  margin: 8px auto 0;
+  padding: 8px var(--gutter);
+  width: 100%;
+  background: var(--legacy-bg);
+  color: var(--text);
+  border-left: 4px solid var(--legacy);
 }
 
 .brand {

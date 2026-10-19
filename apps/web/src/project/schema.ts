@@ -29,8 +29,10 @@ const numbers = z.array(z.number().finite());
 /**
  * A feed is stored as the values the user chose to send, with the screen it came from and a hash of
  * that screen's form at the time (see `feedEntry`). A series feed (well, surface water) is checked
- * in full; feeds that carry a whole scenario (vadose, saturated, bank, vapor) are checked as JSON
- * objects here, and S3 pins their exact shape when it persists them.
+ * in full; feeds that carry a whole scenario (vadose, saturated, bank, vapor) are checked for their
+ * top-level keys, with the scenario itself a JSON object (non-finite numbers are tagged, see
+ * `codec.ts`). The vapor entry holds up to four sub-feeds by origin: vadose, waterTable, saturated
+ * and risk. The transport chain feed holds a closure and is not stored.
  */
 const feedEnvelope = <V extends z.ZodType>(value: V) =>
   z.object({ source: text, inputsHash: text, value });
@@ -59,10 +61,21 @@ export const feedsSchema = z.object({
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),
-  vadose: feedEnvelope(jsonObject).optional(),
-  saturated: feedEnvelope(jsonObject).optional(),
-  bank: feedEnvelope(jsonObject).optional(),
-  vapor: feedEnvelope(jsonObject).optional(),
+  vadose: feedEnvelope(
+    z.object({ scenario: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+  ).optional(),
+  saturated: feedEnvelope(
+    z.object({ input: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+  ).optional(),
+  bank: feedEnvelope(z.object({ scenario: jsonObject, label: text })).optional(),
+  vapor: feedEnvelope(
+    z.object({
+      vadose: jsonObject.optional(),
+      waterTable: jsonObject.optional(),
+      saturated: jsonObject.optional(),
+      risk: jsonObject.optional(),
+    }),
+  ).optional(),
 });
 
 /** The data editions the project was made against (directory names under packages/data/generated). */

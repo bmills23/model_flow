@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { Field, Seg } from '../ui/controls';
 import { ChemicalCard } from '../risk/ChemicalCard';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
@@ -10,7 +11,7 @@ import { runCleanup, type CleanupOutcome } from './compute';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getTransportFeed, subscribeTransportFeed } from '../transport/chainFeed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
-import { ALLOCATIONS, SOURCES, TARGET_KINDS, defaultCleanupForm, type CleanupForm } from './form';
+import { ALLOCATIONS, SOURCES, TARGET_KINDS, type CleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
@@ -28,7 +29,8 @@ interface Snapshot {
 const EXAMPLE_ID = '71-43-2';
 
 export function CleanupPage() {
-  const [form, setForm] = useState<CleanupForm>(defaultCleanupForm);
+  const [form, setForm] = useState<CleanupForm>(() => getScreen('cleanup').form);
+  useEffect(() => setScreen('cleanup', { form }), [form]);
   const [lastGood, setLastGood] = useState<Snapshot | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const { db, error: dbError } = useChemicalDb();

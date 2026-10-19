@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
@@ -94,7 +95,8 @@ function R8Check({ form, result }: { form: SwForm; result: SwResult }) {
 }
 
 export function SurfaceWaterScreen() {
-  const [form, setForm] = useState<SwForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<SwForm>(() => getScreen('surfaceWater').form);
+  useEffect(() => setScreen('surfaceWater', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
   const held = useSyncExternalStore(

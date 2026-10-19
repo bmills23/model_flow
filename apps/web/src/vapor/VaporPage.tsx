@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
@@ -18,16 +19,9 @@ import {
   subscribeVaporRiskFeed,
   subscribeWaterTableFeed,
 } from './feeds';
-import { DEFAULT_OUTDOOR, runOutdoor, type OutdoorForm } from './outdoor';
+import { runOutdoor, type OutdoorForm } from './outdoor';
 import { ProfileChart } from './ProfileChart';
-import {
-  DEFAULT_PVI,
-  afMediaFor,
-  runAttenuation,
-  runPvi,
-  type AfOptions,
-  type PviForm,
-} from './screening';
+import { afMediaFor, runAttenuation, runPvi, type AfOptions, type PviForm } from './screening';
 import { constantEpcs, vaporEpcs, type SourceSeries, type VaporEpcs } from './series';
 import {
   AttenuationPanel,
@@ -175,7 +169,7 @@ function comparisonRows(out: VaporOutcome): Row[] {
 }
 
 export function VaporPage() {
-  const [form, setForm] = useState<VaporForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<VaporForm>(() => getScreen('vapor').form);
   const [chemicals, setChemicals] = useState<VaporChemicalRow[]>([]);
   const [loadError, setLoadError] = useState(false);
   useEffect(() => {
@@ -210,14 +204,14 @@ export function VaporPage() {
   const shown = outcome ?? lastGood;
   const shownParsed = parsed.ok ? parsed : lastParsed;
 
-  const [outdoorForm, setOutdoorForm] = useState<OutdoorForm>(DEFAULT_OUTDOOR);
-  const [af, setAf] = useState<AfOptions>({
-    medium: 'groundwater',
-    depthBelowFoundation: 0,
-    preferential: false,
-  });
-  const [pvi, setPvi] = useState<PviForm>(DEFAULT_PVI);
-  const [choice, setChoice] = useState<SourceChoice>('entered');
+  const [outdoorForm, setOutdoorForm] = useState<OutdoorForm>(() => getScreen('vapor').outdoor);
+  const [af, setAf] = useState<AfOptions>(() => getScreen('vapor').af);
+  const [pvi, setPvi] = useState<PviForm>(() => getScreen('vapor').pvi);
+  const [choice, setChoice] = useState<SourceChoice>(() => getScreen('vapor').choice);
+  useEffect(
+    () => setScreen('vapor', { form, outdoor: outdoorForm, af, pvi, choice }),
+    [form, outdoorForm, af, pvi, choice],
+  );
   const vadoseFeed = useSyncExternalStore(
     subscribeVadoseVaporFeed,
     getVadoseVaporFeed,
