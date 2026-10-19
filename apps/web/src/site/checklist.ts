@@ -30,7 +30,8 @@ export type ProblemId =
   | 'two-media'
   | 'produce-both'
   | 'produce-soil-needs-soil'
-  | 'produce-irrigation-needs-groundwater';
+  | 'produce-irrigation-needs-groundwater'
+  | 'eco-medium-unsupported';
 
 export interface Problem {
   id: ProblemId;
@@ -96,6 +97,12 @@ function problemsOf(s: SiteState): Problem[] {
         message: `Produce from irrigation water needs groundwater as the source medium, but the source is ${MEDIUM_LABELS[m].toLowerCase()}. Choose groundwater, or switch the produce source.`,
       });
     }
+  }
+  if (s.receptors === 'ecological' && s.media.length === 1 && s.media[0] !== 'soil') {
+    out.push({
+      id: 'eco-medium-unsupported',
+      message: `Ecological screening is not supported for ${MEDIUM_LABELS[s.media[0]!].toLowerCase()} as the source. The ecological screen on Plants, ecology and TPH takes a soil concentration only, and no screen compares a measured or modeled ${MEDIUM_LABELS[s.media[0]!].toLowerCase()} concentration with ecological benchmarks. Choose soil, or switch the receptors to human.`,
+    });
   }
   return out;
 }
@@ -200,7 +207,7 @@ export function checklist(s: SiteState): Checklist {
       'Look up the chemicals and their values, then add them on the screens below.',
     ),
   ];
-  if (modeled) items.push(...fateItems(s, m));
+  if (modeled && human) items.push(...fateItems(s, m));
 
   if (human) {
     if (s.produceSoil) {
@@ -252,23 +259,9 @@ export function checklist(s: SiteState): Checklist {
         'Transport',
         'Plants, ecology and TPH',
         '#/plants-eco',
-        modeled
-          ? 'Set the ecological receptors and take the modeled concentration.'
-          : `Enter the ${MEDIUM_LABELS[m].toLowerCase()} concentration and set the ecological receptors.`,
-        'Send to exposure and risk',
+        'Enter the Soil concentration (mg/kg dry weight), then read the ecological screening panel and set the ecological benchmarks.',
       ),
     );
-    if (m === 'surfaceWater' && !modeled) {
-      items.push(
-        item(
-          'surface-water',
-          'Transport',
-          'Surface water and sediment',
-          '#/surface-water',
-          'Compare the surface water concentration with the criteria.',
-        ),
-      );
-    }
   }
   items.push(
     item(
@@ -297,9 +290,9 @@ export function checklist(s: SiteState): Checklist {
       'Homegrown produce is a human pathway, so the produce choice is not used for ecological receptors.',
     );
   }
-  if (!human && (m === 'indoorAir' || m === 'soilToIndoorAir' || m === 'soilGasToIndoorAir')) {
+  if (!human && modeled) {
     notes.push(
-      'Indoor air is a human exposure route; ecological receptors do not use it, so check that this is the source you mean.',
+      'The ecological screen does not read the vadose or transport results: enter the soil concentration on Plants, ecology and TPH yourself.',
     );
   }
   return { problems, notes, items };

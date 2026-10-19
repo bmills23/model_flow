@@ -142,7 +142,9 @@ groundwater source** on vadose leaching, then **Use as exposure well concentrati
 Some combinations are not allowed, and the page says why instead of listing screens: no source medium, more than
 one source medium (run the others as separate projects; when you have both soil and soil gas for indoor air,
 soil gas is the better basis), produce from soil and from irrigation water together, and produce from a medium
-that is not its source (soil for soil produce, groundwater for irrigation). Nothing on any other screen is
+that is not its source (soil for soil produce, groundwater for irrigation), and ecological receptors with any source
+other than soil (the ecological screen takes a soil concentration only, so only soil is supported; for soil the
+steps are the chemical database, the plants and ecology screen, then the report). Nothing on any other screen is
 locked or changed by these answers. They are saved with the project, and the report shows them as one line
 above the screen sections when they differ from the defaults.
 

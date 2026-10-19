@@ -1987,9 +1987,18 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
    models; the choice only words the vapor step.
 5. **Produce must match its medium for humans (DEFAULT).** Produce from soil needs soil as the source, from irrigation
    water needs groundwater. Both together is refused (E7). Produce is a note, not a problem, for ecological receptors.
-6. **Ecological path is shorter (DEFAULT).** After the fate screens it goes to plants, ecology and TPH (and surface
-   water for a direct surface water source), then the report; no risk or cleanup step. Indoor air and a downgradient
-   vapor source get notes, not problems.
+6. **Ecological path is soil only (DEFAULT, revised after review).** The ecological screen on Plants, ecology and
+   TPH takes one input, "Soil concentration (mg/kg dry weight)", and reads no feed, and no screen compares a
+   groundwater, surface water or air concentration with ecological benchmarks. So ecological receptors are served
+   for a soil source only (direct or modeled): the checklist is Chemical database, Plants, ecology and TPH
+   (enter the soil concentration), then the report, with no fate, risk or cleanup step. A modeled soil source adds a
+   note that the screen does not read the vadose or transport results. Any other medium is a problem
+   (`eco-medium-unsupported`) that says plainly it is not supported, instead of a step that names a missing control.
+   Answer to the author's question (DEFAULT, chosen without Bryan): the flow of fate screens, then plants and
+   ecology, then report, with no risk or cleanup step, is right in its ending, because ecological hazard quotients
+   have no cleanup-level screen here. What was wrong is the fate-to-ecology link, which does not exist, so the fate
+   screens are not listed for ecological receptors. Produce is a note, not a problem, for ecological receptors. A
+   test reads each named screen's source to guard every feed label and the soil field name.
 7. **Report.** `buildReport` gains `site`, one line shown above the screen sections, null at the defaults.
 8. **Route.** `#/site` is owned by the Site model step in `steps.ts`, listed in the nav links, the mobile check route
    list and the keyboard-order tests.
