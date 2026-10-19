@@ -1883,3 +1883,41 @@ engine's `SOIL_TEXTURES` as the vapor screen does. No engine or data change.
 5. **Schema.** An optional `texture` key on each vadose layer and on the saturated form, format version 1, with
    round-trip cases in `project/screens.test.ts`. A file without the key loads as Custom values. The Table R-7 case
    and hand case A stay Custom, so both validation cases still load unchanged. No new route.
+
+## 2026-10-19: Wave H slice U4, project toxicity overrides
+
+Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the master database).
+
+1. **One project-level key (DEFAULT shape).** `overrides` is a new optional top-level key inside format
+   version 1, beside `screens`, `feeds` and `data`. It is absent when empty, so a project with no edits is
+   byte-for-byte as before. Its `toxicity` set maps a chemical id to a field (`sfo`, `iur`, `rfdo`,
+   `rfci`) to `{ value, note }`, with the value kept as typed text. A round trip test sits in
+   `project/store.test.ts` and `overrides/overrides.test.ts`; no version bump.
+2. **Applied to the database, not to each builder (DEFAULT).** `applyToxOverrides(db, state)` lays the
+   usable edits over the loaded chemical database and returns a database whose records carry the user
+   value (source key `user`) and the unedited entry in `dbTox`. The risk and cleanup pages, the cleanup
+   groundwater and modeled builders, the report results and the uncertainty report all build from that
+   database, so `buildInputs` and `buildCleanup` needed no change and every screen shows one value. The
+   master data and the engine are untouched.
+3. **Usable means number above zero and a non-blank note (DEFAULT).** An incomplete edit stays in the project and in
+   the report (marked "not used") but does not change a result. A zero value is refused because a zero
+   slope factor or reference dose is not a toxicity value the engine accepts.
+4. **Fields offered (DEFAULT).** The four toxicity values the pathways read. Absorption fractions, the
+   MCL and soil saturation are not offered; the inventory asks for the toxicity values the chosen
+   pathways use. A value the database lacks can be supplied.
+5. **Marking.** An edited field shows the word "Edited" and a tint (never colour alone) in the panel and in
+   the card table, whose source column reads "User value (this project)". J8 is a note in the panel: the
+   database is chronic, enter the short-term reference dose and say so.
+6. **Report.** A "Values supplied by the user" section lists chemical, value, database value, value used
+   and note. Results in the report and the uncertainty runs use the overridden point values.
+7. **Feed staleness.** No feed is built from a toxicity value (feeds fingerprint their source screen
+   form), so an override cannot make a feed stale; a test confirms a changed source form still flags its
+   feed in a project that holds overrides.
+8. **Reuse by U5.** The mechanism is general: `overrides/model.ts` holds `FieldOverrides` (subject to field
+   to `{ value, note }`) with `setField` and `resetField`; U5 adds a sibling set (for example `receptors`,
+   keyed by receptor tag) to `OverridesState`, `overrides/project.ts` and a function that lays it over the
+   presets, and reuses `usableValue`, `entryProblem`, `useOverrides` and the panel's Edited and reset
+   pattern. The store, autosave, file and report plumbing already carry the whole `overrides` object.
+9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
+   disclosure inside an existing card.
+

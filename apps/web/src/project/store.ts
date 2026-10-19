@@ -48,6 +48,7 @@ import {
   subscribeVaporRiskFeed,
   subscribeWaterTableFeed,
 } from '../vapor/feeds';
+import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { decodeJson, encodeJson } from './codec';
 import { stableStringify } from './hash';
 import {
@@ -56,6 +57,7 @@ import {
   feedEntry,
   parseProject,
   screensOf,
+  overridesOf,
   type Feeds,
   type Project,
   type Screens,
@@ -71,6 +73,8 @@ type Entry = { source: string; inputsHash: string; value: unknown };
 
 let screens: Screens = defaultScreens();
 let title = '';
+/** Project-level overrides (see overrides/); the same value shows on every screen that reads it. */
+let overrides: OverridesState = emptyOverrides();
 /** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
 let savedSnapshot: string | null = null;
 let epoch = 0;
@@ -161,6 +165,7 @@ function build(): ReturnType<typeof buildProject> {
   return buildProject({
     screens,
     feeds: currentFeeds(),
+    overrides,
     createdWith: APP_VERSION,
     ...(title !== '' ? { title } : {}),
   });
@@ -170,16 +175,31 @@ function build(): ReturnType<typeof buildProject> {
 export const currentProject = build;
 
 function snapshot(): string {
-  return stableStringify({ screens, title, feeds: currentFeeds() });
+  return stableStringify({ screens, title, feeds: currentFeeds(), overrides });
 }
 
 /** True when the project differs from the last save, open or start. */
 export const hasUnsavedChanges = (): boolean =>
   snapshot() !==
-  (savedSnapshot ?? stableStringify({ screens: defaultScreens(), title: '', feeds: {} }));
+  (savedSnapshot ??
+    stableStringify({
+      screens: defaultScreens(),
+      title: '',
+      feeds: {},
+      overrides: emptyOverrides(),
+    }));
 /** Record the project as saved (after a download, an open or a start). */
 export function markSaved(): void {
   savedSnapshot = snapshot();
+}
+
+export const getOverrides = (): OverridesState => overrides;
+/** Replace the project's overrides; subscribers (the screens that show or use them) are told. */
+export function setOverrides(next: OverridesState): void {
+  if (stableStringify(next) === stableStringify(overrides)) return;
+  overrides = next;
+  schedule();
+  notify();
 }
 
 export const getTitle = (): string => title;
@@ -270,6 +290,7 @@ export function forgetMemory(): void {
   timer = null;
   screens = defaultScreens();
   title = '';
+  overrides = emptyOverrides();
   hashes = {};
   stale = [];
   dropped = [];
@@ -300,6 +321,7 @@ export function hydrate(): void {
  */
 function seed(project: Project, droppedKeys: readonly string[] = []): void {
   screens = screensOf(project);
+  overrides = overridesOf(project);
   title = project.title ?? '';
   dropped = [...droppedKeys];
   const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
@@ -358,6 +380,7 @@ export function loadProject(project: Project, droppedKeys: readonly string[] = [
 export function newProject(): void {
   screens = defaultScreens();
   title = '';
+  overrides = emptyOverrides();
   clearAllFeeds();
   hashes = {};
   stale = [];

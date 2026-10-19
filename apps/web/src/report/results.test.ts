@@ -3,6 +3,7 @@ import { buildProject, defaultScreens, feedEntry, type Screens } from '../projec
 import { PATHWAY_IDS } from '@model-flow/engine';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
+import { emptyOverrides, setField, type OverridesState } from '../overrides/model';
 import { computeResults, tableText, MAX_ROWS } from './results';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
@@ -17,6 +18,37 @@ function project(edit: (s: Screens) => void, feeds?: (s: Screens) => Record<stri
     now: NOW,
   });
 }
+
+describe('computeResults with project overrides', () => {
+  it('computes the exposure and cleanup sections with the overridden toxicity value', async () => {
+    const db = await loadChemicalDb();
+    const rec = db.byId.get('71-43-2')!;
+    const row = { ...newChemicalRow(rec), conc: { groundwater: '0.005' } };
+    const make = (overrides?: OverridesState) => {
+      const screens = defaultScreens();
+      screens.risk = { form: { ...screens.risk.form, chemicals: [row] } };
+      screens.cleanup = { form: { ...screens.cleanup.form, chemicals: [newChemicalRow(rec)] } };
+      return buildProject({
+        screens,
+        ...(overrides ? { overrides } : {}),
+        createdWith: '0.0.1',
+        now: NOW,
+      });
+    };
+    const base = await computeResults(make());
+    const edited = await computeResults(
+      make({
+        ...emptyOverrides(),
+        toxicity: setField({}, '71-43-2', 'sfo', {
+          value: String(rec.tox.sfo!.value * 10),
+          note: 'n',
+        }),
+      }),
+    );
+    const text = (r: typeof base) => JSON.stringify([r['risk']!.tables, r['cleanup']!.tables]);
+    expect(text(edited)).not.toBe(text(base));
+  }, 60000);
+});
 
 describe('computeResults', () => {
   it('has no results for a new project', async () => {

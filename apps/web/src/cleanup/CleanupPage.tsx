@@ -5,6 +5,8 @@ import { ChemicalCard } from '../risk/ChemicalCard';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
 import { ReceptorPanel } from '../risk/ReceptorPanel';
 import { defaultReceptor, newChemicalRow, type ChemicalRow } from '../risk/form';
+import { setField, resetField } from '../overrides/model';
+import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { ADD_CHEMICAL, buildCleanup, ENTER_CONCENTRATION, type CleanupBuildResult } from './build';
 import { runCleanup, type CleanupOutcome } from './compute';
@@ -43,7 +45,9 @@ export function CleanupPage() {
   useEffect(() => setScreen('cleanup', { form }), [form]);
   const [lastGood, setLastGood] = useState<Snapshot | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
-  const { db, error: dbError } = useChemicalDb();
+  const { db: baseDb, error: dbError } = useChemicalDb();
+  const [overrides, setOverridesState] = useOverrides();
+  const db = useEffectiveDb(baseDb, overrides);
 
   const patch = (next: Partial<CleanupForm>): void => setForm((f) => ({ ...f, ...next }));
   const setRow = (id: string, next: ChemicalRow): void =>
@@ -206,6 +210,16 @@ export function CleanupPage() {
                     showProduce
                     produceNote="Use the plants and ecology plant factors for homegrown produce (adds the produce pathway to this chemical's soil level; receptors switch the pathway on)"
                     concentrationNote="These concentrations set only the ratios between chemicals. The levels keep those ratios and are scaled together."
+                    edits={overrides.toxicity[row.id]}
+                    onEdit={(field, entry) =>
+                      setOverridesState({
+                        ...overrides,
+                        toxicity:
+                          entry === null
+                            ? resetField(overrides.toxicity, row.id, field)
+                            : setField(overrides.toxicity, row.id, field, entry),
+                      })
+                    }
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>
                       patch({ chemicals: form.chemicals.filter((c) => c.id !== row.id) })

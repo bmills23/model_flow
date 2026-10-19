@@ -34,6 +34,7 @@ describe('colour tokens meet WCAG 2.2 AA', () => {
     ['--muted', '--surface'],
     ['--accent-text', '--accent'],
     ['--legacy', '--legacy-bg'],
+    ['--text', '--legacy-bg'],
     ['--modern', '--modern-bg'],
     ['--accent', '--bg'],
     ['--accent', '--surface'],

@@ -12,6 +12,8 @@ export interface ChemicalRecord {
   cas?: string;
   name: string;
   tox: ToxEntry;
+  /** Set when the project overrides toxicity values: the unedited database entry (see `overrides/toxicity.ts`). */
+  dbTox?: ToxEntry;
   phys: RiskChemicalEntry | undefined;
 }
 
@@ -87,6 +89,8 @@ export interface ToxRow {
   unit: string;
   /** Name of the source, from the RSL key; the key itself when the RSL does not define it. */
   source: string;
+  /** The source key as stored (the project's own value carries the key `user`). */
+  sourceKey: string;
 }
 
 const TOX_ROWS: { key: ToxRow['key']; label: string; unit: string }[] = [
@@ -102,7 +106,14 @@ export function toxRows(rec: ChemicalRecord, sourceKeys: Record<string, string>)
   for (const { key, label, unit } of TOX_ROWS) {
     const v: ToxValue | undefined = rec.tox[key];
     if (v === undefined) continue;
-    out.push({ key, label, unit, value: v.value, source: sourceKeys[v.source] ?? v.source });
+    out.push({
+      key,
+      label,
+      unit,
+      value: v.value,
+      source: sourceKeys[v.source] ?? v.source,
+      sourceKey: v.source,
+    });
   }
   return out;
 }

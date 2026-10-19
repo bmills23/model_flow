@@ -1,0 +1,81 @@
+/* Project-level toxicity overrides: the "Edit values" disclosure on a chemical card. */
+.override-panel {
+  margin: 8px 0;
+  min-width: 0;
+}
+
+.override-panel summary {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.override-row {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+/* an edited field: a tint and the word "Edited", never colour alone */
+.override-row.edited {
+  background: var(--legacy-bg);
+  border-color: var(--legacy);
+}
+
+.override-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  overflow-wrap: anywhere;
+}
+
+.override-title small {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.edited-mark {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  border: 1px solid var(--legacy);
+  border-radius: 999px;
+  color: var(--legacy);
+}
+
+.override-row.edited .muted {
+  color: var(--text);
+}
+
+.override-problem {
+  margin: 4px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--legacy);
+}
+
+.override-row .btn {
+  min-height: var(--tap);
+  margin-top: 6px;
+}
+
+.override-row input[type='text'] {
+  min-width: 0;
+  width: 100%;
+}
+
+table.tox tr.edited-value th,
+table.tox tr.edited-value td {
+  background: var(--legacy-bg);
+}
+
+table.tox .edited-mark {
+  margin-left: 6px;
+}
