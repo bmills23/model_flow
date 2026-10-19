@@ -1,0 +1,78 @@
+/* Charts and uncertainty results in the report (Wave G slice G2). */
+.report-charts,
+.report-uncertainty-block {
+  min-width: 0;
+}
+
+.report-chart {
+  margin: 12px 0;
+  min-width: 0;
+  break-inside: avoid;
+}
+
+.report-chart figure,
+.report-uncertainty figure {
+  margin: 0 0 12px;
+  min-width: 0;
+}
+
+.report-uncertainty {
+  margin: 12px 0;
+  min-width: 0;
+}
+
+.report-uncertainty h4,
+.report-uncertainty h5 {
+  break-after: avoid;
+}
+
+.report-uncertainty figure,
+.report-uncertainty .table-wrap,
+.report-uncertainty .sat-wrap {
+  break-inside: avoid;
+}
+
+@media print {
+  /* Pin the chart palette to light values and draw in greys: the screens' markers and dashes stay,
+     so the series still differ in a black and white print. */
+  html:root {
+    --r-0: #111111;
+    --r-1: #777777;
+    --r-2: #444444;
+    --r-3: #999999;
+    --r-4: #222222;
+    --r-5: #666666;
+    --r-6: #333333;
+    --r-7: #888888;
+    --s-legacy: #000000;
+    --s-modern: #666666;
+    --s-domenico: #999999;
+  }
+
+  .report svg {
+    filter: grayscale(1);
+  }
+
+  .report-noprint,
+  .report .probe,
+  .report .table-view > .btn {
+    display: none;
+  }
+
+  .report-chart,
+  .report-uncertainty figure {
+    break-inside: avoid;
+  }
+
+  .report .table-scroll,
+  .report .table-wrap,
+  .report .sat-wrap {
+    overflow: visible;
+    max-height: none;
+  }
+
+  .report .table-view table,
+  .report .sat {
+    font-size: 9pt;
+  }
+}

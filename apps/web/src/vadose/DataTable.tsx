@@ -1,17 +1,26 @@
-import { useState } from 'react';
-
+import { useContext, useState } from 'react';
+import { TablesAlwaysOpen } from './tablesOpen';
 /** The chart's values as a table, collapsed by default, so nothing depends on hover or colour. */
 export function DataTable(props: {
   caption: string;
   columns: readonly string[];
   rows: readonly (readonly string[])[];
 }) {
-  const [open, setOpen] = useState(false);
+  const always = useContext(TablesAlwaysOpen);
+  const [open0, setOpen] = useState(false);
+  const open = always || open0;
   return (
     <div className="table-view">
-      <button type="button" className="btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        {open ? 'Hide data table' : 'Show data table'}
-      </button>
+      {!always && (
+        <button
+          type="button"
+          className="btn"
+          aria-expanded={open}
+          onClick={() => setOpen((o) => !o)}
+        >
+          {open ? 'Hide data table' : 'Show data table'}
+        </button>
+      )}
       {open && (
         <div className="table-scroll">
           <table>

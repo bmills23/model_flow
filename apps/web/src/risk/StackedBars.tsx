@@ -1,3 +1,5 @@
+import { useContext } from 'react';
+import { TablesAlwaysOpen } from '../vadose/tablesOpen';
 import type { BarRow } from './chartData';
 
 /**
@@ -14,6 +16,7 @@ export function StackedBars(props: {
   /** What the segments are, the first column header of the table. */
   by: string;
 }) {
+  const always = useContext(TablesAlwaysOpen);
   const by = props.by;
   const { rows, fmt } = props;
   const max = Math.max(0, ...rows.map((r) => r.total));
@@ -66,7 +69,7 @@ export function StackedBars(props: {
           ))}
         </ul>
       )}
-      <details className="data-table">
+      <details className="data-table" open={always || undefined}>
         <summary>Table of values</summary>
         <div className="sat-wrap">
           <table className="sat">

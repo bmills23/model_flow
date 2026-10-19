@@ -1,16 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import {
-  DEFAULT_N,
-  DEFAULT_SEED,
-  buildSampleMatrix,
-  solveCleanupRows,
-  sourceLevelSolve,
-  spearmanWithOutput,
-  type CleanupResult,
-  type UncertainInput,
-  type UncertainModel,
-  type UncertaintySpec,
-} from '@model-flow/engine';
+import { DEFAULT_N, type UncertainInput } from '@model-flow/engine';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupUncertaintyTables } from '../uncertainty/csv';
 import { Field } from '../ui/controls';
@@ -18,7 +7,8 @@ import { DistributionEditor } from '../uncertainty/DistributionEditor';
 import type { UncertaintySetup } from '../uncertainty/project';
 import { useSetup } from '../uncertainty/useSetup';
 import type { EditorSpec } from '../uncertainty/editor';
-import { PILOT_ROWS, assertWithinBudget, formatDuration, projectRun } from '../uncertainty/budget';
+import { formatDuration } from '../uncertainty/budget';
+import { cleanupSettings, runCleanupAnalysis, type CleanupRun } from '../uncertainty/headless';
 import type { Projection } from '../uncertainty/budget';
 import { RunCancelledError } from '../uncertainty/pool';
 import { CdfChart, HistogramChart, SpearmanChart } from '../uncertainty/ResultsCharts';
@@ -26,23 +16,9 @@ import { empiricalCdf, fmtNum, histogram } from '../uncertainty/resultsData';
 import '../uncertainty/uncertainty.css';
 import { MEDIA } from '../risk/form';
 import type { CleanupLegacyInput } from './build';
-import {
-  buildProbabilisticSetup,
-  probabilisticChoices,
-  runCleanupProbabilistic,
-} from './probabilistic';
+import { buildProbabilisticSetup, probabilisticChoices } from './probabilistic';
 
-interface Shown {
-  result: CleanupResult;
-  label: string;
-  unit: string;
-  fromSi: number;
-  deterministic: number | null;
-  spearman: { label: string; rho: number }[];
-  input: CleanupLegacyInput;
-}
-
-const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+type Shown = CleanupRun & { label: string; input: CleanupLegacyInput };
 
 /**
  * The probabilistic cleanup level of one chemical in one medium on the cleanup screen: the receptor
@@ -103,79 +79,31 @@ export function CleanupUncertainty(props: {
     if (!setup?.ok || !spec || !spec.ok || !choice) return;
     setError(null);
     setShown(null);
-    const n = nText.trim() === '' ? DEFAULT_N.lhs : Number(nText);
-    if (!Number.isInteger(n) || n < 1) {
-      setError('The number of iterations must be a positive whole number.');
+    const settings = cleanupSettings(setup0);
+    if (!settings.ok) {
+      setError(settings.error);
       return;
     }
-    const percent = Number(protText);
-    if (!(Number.isFinite(percent) && percent > 0 && percent < 100)) {
-      setError(
-        'The protected fraction must be a percentage between 0 and 100, not including either.',
-      );
-      return;
-    }
-    const useSeed = seed.trim() === '' ? DEFAULT_SEED : seed;
     setRunning(true);
     try {
-      await tick();
-      const full: UncertaintySpec<unknown, unknown> = {
-        model: setup.model as UncertainModel<unknown, unknown>,
-        base: setup.base,
-        distributions: spec.distributions,
-        output: () => 0,
-        ...(spec.correlation ? { correlation: spec.correlation } : {}),
-        n,
-        seed: useSeed,
-      };
-      // The pilot times the first rows alone; the run budget (ruling 11) is projected from it.
-      const matrix = buildSampleMatrix('lhs', full);
-      const pilotRows = matrix.samples.slice(0, Math.min(PILOT_ROWS, n));
-      const t0 = now();
-      solveCleanupRows(setup.model, setup.base, matrix.ids, pilotRows, (i) =>
-        sourceLevelSolve(setup.problem(i)),
-      );
-      const projection = projectRun({
-        pilotMs: now() - t0,
-        pilotRows: pilotRows.length,
-        totalRows: n,
-        workers: 1,
+      const ran = await runCleanupAnalysis(setup, spec, settings.value, labels, {
+        now,
+        confirm: (p) =>
+          new Promise<boolean>((resolve) =>
+            setConfirm({
+              p,
+              answer: (a) => {
+                setConfirm(null);
+                resolve(a);
+              },
+            }),
+          ),
       });
-      assertWithinBudget(projection);
-      if (projection.decision === 'confirm') {
-        const ok = await new Promise<boolean>((resolve) =>
-          setConfirm({
-            p: projection,
-            answer: (a) => {
-              setConfirm(null);
-              resolve(a);
-            },
-          }),
-        );
-        if (!ok) throw new RunCancelledError();
-        await tick();
-      }
-      const result = runCleanupProbabilistic(setup, {
-        distributions: spec.distributions,
-        ...(spec.correlation ? { correlation: spec.correlation } : {}),
-        n,
-        seed: useSeed,
-        protection: percent / 100,
-      });
-      const censored = new Set(result.censoredRows);
-      const rho = spearmanWithOutput(
-        result.samples,
-        result.iterationLevels.map((v, i) => (censored.has(i) ? Number.NaN : v)),
-      );
       const medium =
         MEDIA.find((m) => m.key === choice.medium)?.label.toLowerCase() ?? choice.medium;
       setShown({
-        result,
+        ...ran,
         label: `${names[choice.chemicalId] ?? choice.chemicalId} in ${medium}`,
-        unit: setup.unit,
-        fromSi: setup.fromSi,
-        deterministic: setup.deterministic,
-        spearman: result.ids.map((id, j) => ({ label: labels[id] ?? id, rho: rho[j] as number })),
         input,
       });
     } catch (e) {

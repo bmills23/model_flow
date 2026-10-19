@@ -1,6 +1,8 @@
-import { useEffect, useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { currentProject } from '../project/store';
 import { buildReport, type Report } from './buildReport';
+import { ReportCharts } from './ReportCharts';
+import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
 
 const KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
@@ -83,11 +85,14 @@ export function ReportView({
   report,
   preparedBy,
   results = null,
+  uncertainty = null,
 }: {
   report: Report;
   preparedBy: string;
   /** Results per screen; null while they compute. */
   results?: ProjectResults | null;
+  /** The uncertainty control and results, shown in the uncertainty setup section. */
+  uncertainty?: ReactNode;
 }) {
   const { statement } = report;
   return (
@@ -151,7 +156,9 @@ export function ReportView({
             ) : (
               <ResultTables results={results[sec.key]!} />
             )}
+            {results?.[sec.key] !== undefined && <ReportCharts charts={results[sec.key]!.charts} />}
             {results?.[sec.key] !== undefined && <ResultWarnings results={results[sec.key]!} />}
+            {sec.key === 'uncertainty' && uncertainty}
             <p className="muted">
               Methods run:{' '}
               {statement.methods
@@ -172,8 +179,9 @@ export function ReportView({
       <p className="muted report-scope">
         Inputs are shown as typed, in the units each screen labels. Results are the screen's own
         tables, computed again from these inputs, with numbers shortened to six significant digits;
-        the CSV download on each screen holds every row at full precision. Charts are not included:
-        they are on each screen.
+        the CSV download on each screen holds every row at full precision. Each chart is followed by
+        its data table. Uncertainty results are included only when asked for, and are repeated from
+        the saved setup and seed.
       </p>
 
       <section className="report-section" aria-labelledby="rep-methods">
@@ -275,7 +283,12 @@ export function ReportPage() {
           Print or save as PDF
         </button>
       </div>
-      <ReportView report={report} preparedBy={preparedBy} results={results} />
+      <ReportView
+        report={report}
+        preparedBy={preparedBy}
+        results={results}
+        uncertainty={<ReportUncertainty project={project} />}
+      />
     </section>
   );
 }

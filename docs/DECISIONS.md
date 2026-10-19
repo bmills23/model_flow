@@ -1670,3 +1670,48 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
    with the note that the chemical levels were not computed.
 7. **Not done.** No cancer endpoint for TPH fractions (the fraction levels are hazard quotient levels
    entered by the user); no TPH level inside a modeled source's soil chain beyond the existing implied TPH.
+
+## 2026-10-19: Wave G slice G2, report charts and uncertainty results
+
+1. **Uncertainty results reach the report through an explicit "Include uncertainty results" control
+   that repeats the run from the saved setup and seed (DEFAULT).** Off until ticked; once on, it shows
+   progress, can be cancelled and asks before a run projected over 60 s, as the screens do. Evidence for
+   the choice: (a) a project saves a setup and seed, never a run (M11 ruling), and the runs are seeded and
+   independent of pool size and chunk order (`pool.test.ts`, and `uncertaintyReport.test.ts` runs the same
+   plan on 1 and 2 workers and compares every value), so a re-run is the same numbers the screen showed,
+   and an in-session result adds nothing a re-run does not; (b) an in-session result lives in the panel
+   component's state and is gone once the reader navigates to the report, so using it would need a new
+   module store and would show a stale run after an input changed; (c) running on every report build
+   would cost up to the run budget each time the page opens, against "keep report generation responsive";
+   (d) the control keeps the cost with the reader. Rejected: always re-running on open, and including the
+   in-session result.
+2. **Never on the main thread for the exposure panel.** The sample goes through the existing worker pool
+   (pilot timing, run budget, progress, cancel). The one-at-a-time and Sobol runs and the probabilistic
+   cleanup solve are synchronous, exactly as on their screens, and are bounded by the same budget check;
+   the cleanup solve is not cancellable once started (DEFAULT, a worker protocol for the cleanup solver is
+   a separate change).
+3. **One run implementation for the screens and the report.** `uncertainty/headless.ts` holds the run of
+   the exposure panel and of the cleanup panel with no component state; `UncertaintyPanel` and
+   `CleanupUncertainty` now call it, so the report cannot drift from the screens. Behaviour of both panels
+   is unchanged (their tests pass untouched).
+4. **Charts reuse the screens' components, each with its data table open (DEFAULT).** `ChartItem`
+   (`report/chartItems.ts`) holds the data a screen's chart takes; `results.ts` fills it from the compute
+   result the tables come from. In the report every chart's table is open with no toggle, through the
+   `TablesAlwaysOpen` context read by the shared data table, the breakthrough chart's own table and the
+   exposure bars' details. Included: groundwater breakthrough, vadose depth profile, water table and
+   depletion, saturated release rate and remaining mass, surface water and sediment, vapor profile and the
+   exposure bars. Left out (DEFAULT): the plume map (a map with a long table of its own) and the modeled
+   cleanup chart (a modeled cleanup source is not computed in the report, see S6c).
+5. **Print styling (DEFAULT).** In print the chart palette tokens are pinned to grey shades, svg is drawn
+   with a grayscale filter, pointer readouts and table buttons are hidden, and charts, tables and
+   uncertainty figures avoid page breaks. Series stay apart by shade plus the screens' markers and dashes;
+   the data table is the fallback. Dark theme prints as light (the print block already pins the surface
+   tokens).
+6. **Shown for uncertainty:** percentile summary, CDF, histogram, tornado, Spearman and (when switched on)
+   Sobol indices with their N, the seed, the iteration count and sampling kind, warnings, and for the
+   cleanup panel the protective level table, CDF, histogram and Spearman. A panel with no sampled input, an
+   invalid setup or an uncomputable screen is skipped with a sentence. Results are not saved in the project.
+7. **Not verified here.** No data value or constant was typed. Viewport check run through CDP at 390x844
+   (light, dark) and 1280x900 with both panels run on the real worker pool: overflowing elements 0. The
+   print check was a screenshot under print media emulation of the breakthrough chart and table (grey, legible),
+   not a printed page.
