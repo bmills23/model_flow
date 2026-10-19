@@ -62,6 +62,16 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
     });
     setProbeIdx(best);
   };
+  const onKey = (e: React.KeyboardEvent<SVGSVGElement>): void => {
+    const last = tYr.length - 1;
+    if (e.key === 'Home') setProbeIdx(0);
+    else if (e.key === 'End') setProbeIdx(last);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const step = e.key === 'ArrowRight' ? 1 : -1;
+      setProbeIdx((i) => Math.min(last, Math.max(0, (i ?? 0) + step)));
+    } else return;
+    e.preventDefault();
+  };
 
   return (
     <figure className="chart" ref={ref}>
@@ -89,6 +99,8 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
         height={H}
         role="img"
         aria-label="Breakthrough curves at the receptor. A data table follows."
+        tabIndex={0}
+        onKeyDown={onKey}
         onPointerMove={onMove}
         onPointerDown={onMove}
         onPointerLeave={() => setProbeIdx(null)}
@@ -146,9 +158,9 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
           />
         )}
       </svg>
-      <p className="probe">
+      <p className="probe" aria-live="polite">
         {probeIdx === null
-          ? 'Move over or tap the chart to read values.'
+          ? 'Move over or tap the chart, or focus it and use the arrow keys, to read values.'
           : `t = ${tYr[probeIdx]!.toFixed(1)} yr: ${keys
               .map(
                 (k) =>

@@ -27,6 +27,7 @@ const M = { l: 46, r: 10, t: 10, b: 36 };
 export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, depthLabel }: Props) {
   const [ref, width] = useWidth();
   const [probe, setProbe] = useState<string>('');
+  const [cell, setCell] = useState<[number, number] | null>(null);
   const { xs, ys, grid } = result;
   const nx = xs.length;
   const ny = ys.length;
@@ -62,19 +63,43 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values, nx, ny, levels, scale, plotW, plotH, xMin, xMax, yHalf]);
 
+  const readCell = (i: number, j: number): string => {
+    const x = xMin + (i / (nx - 1)) * (xMax - xMin);
+    const y = -yHalf + (j / (ny - 1)) * 2 * yHalf;
+    return `x ${x.toFixed(0)} m, y ${y.toFixed(0)} m: ${formatConcentration(values[j * nx + i]!)} mg/L`;
+  };
   const onMove = (e: React.PointerEvent<SVGSVGElement>): void => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = sx.invert(e.clientX - rect.left);
     const y = sy.invert(e.clientY - rect.top);
     if (x < xMin || x > xMax || y < -yHalf || y > yHalf) {
       setProbe('');
+      setCell(null);
       return;
     }
     const i = Math.round(((x - xMin) / (xMax - xMin)) * (nx - 1));
     const j = Math.round(((y + yHalf) / (2 * yHalf)) * (ny - 1));
+    setCell([i, j]);
     setProbe(
       `x ${x.toFixed(0)} m, y ${y.toFixed(0)} m: ${formatConcentration(values[j * nx + i]!)} mg/L`,
     );
+  };
+  // Arrow keys step the readout one grid cell, starting from the centre of the grid.
+  const onKey = (e: React.KeyboardEvent<SVGSVGElement>): void => {
+    const d: Record<string, [number, number]> = {
+      ArrowRight: [1, 0],
+      ArrowLeft: [-1, 0],
+      ArrowUp: [0, 1],
+      ArrowDown: [0, -1],
+    };
+    const step = d[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const [ci, cj] = cell ?? [(nx - 1) >> 1, (ny - 1) >> 1];
+    const i = Math.min(nx - 1, Math.max(0, ci + step[0]));
+    const j = Math.min(ny - 1, Math.max(0, cj + step[1]));
+    setCell([i, j]);
+    setProbe(readCell(i, j));
   };
 
   const src = scenario.source;
@@ -95,6 +120,8 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
         onPointerMove={onMove}
         onPointerDown={onMove}
         onPointerLeave={() => setProbe('')}
+        tabIndex={0}
+        onKeyDown={onKey}
       >
         <rect x={M.l} y={M.t} width={plotW} height={plotH} className="plot-bg" />
         {bands.map((b) => (
@@ -169,8 +196,9 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
           ];
         })}
       />
-      <p className="probe" aria-live="off">
-        {probe || 'Move over or tap the map to read the concentration.'}
+      <p className="probe" aria-live="polite">
+        {probe ||
+          'Move over or tap the map, or focus it and use the arrow keys, to read the concentration.'}
       </p>
       {levels.length > 0 ? (
         <ul className="legend" aria-label="Concentration levels in milligrams per litre">
