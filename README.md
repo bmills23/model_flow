@@ -4,12 +4,20 @@ Open, web-based fate-and-transport and human health risk modeling for contaminat
 reach functional parity with RISC5-class tools while letting the user switch each process between the
 legacy published method and a modern alternative, with modern visualizations.
 
-Status: milestones M1 (dissolved-phase groundwater transport, 2026-10-15), M2 (vadose zone
-leaching, 2026-10-16), M3 (saturated soil source, 2026-10-16), M4 (chemical and
-toxicity database, direct exposure and forward risk, 2026-10-16), M5 (cleanup levels), M6 (vapor
-models) and M8 (surface water and sediment; M5, M6 and M8 on 2026-10-17) complete, at https://bmills23.github.io/model_flow/ .
-Milestones M7 and M9 to M11 are open. See `docs/ROADMAP.md`
-for scope, milestones and the research brief, and `docs/DECISIONS.md` for the decisions behind them.
+Status: milestones M0 to M11 are complete as of the dates in `docs/ROADMAP.md` (M0 to M4 on 2026-10-15
+and 2026-10-16, M5, M6 and M8 on 2026-10-17, M7, M9, M10 and M11 on 2026-10-18). M0 to M6 and M8 are live at
+https://bmills23.github.io/model_flow/ ; M7, M9, M10 and M11 are on the `wave-parity` branch until merged.
+This is not full RISC5 parity: see line 1 of `docs/ROADMAP.md` for what still separates the two, and the
+deferred lists in its section 7 rows and in `docs/HANDOFF.md` (open items). See `docs/ROADMAP.md` for
+scope, milestones and the research brief, and `docs/DECISIONS.md` for the decisions behind them.
+
+Screens (hash routes): `#/transport` groundwater transport, `#/vadose` vadose zone leaching,
+`#/saturated` saturated soil source, `#/risk` exposure and risk (with the uncertainty panel), `#/cleanup`
+cleanup levels (with the probabilistic panel), `#/vapor` vapor intrusion and outdoor air, `#/surface-water`
+surface water and sediment, `#/household` shower, irrigation and particulates, `#/plants-eco` plant uptake,
+ecological screening and TPH fractions, `#/report` the printable report with the methods statement, and
+`#/docs` the in-app user guide, methods notes and attributions. Projects save to a file, a share link or
+browser autosave.
 
 ## What it will do
 
