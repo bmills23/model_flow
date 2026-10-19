@@ -36,4 +36,7 @@ progress) and `pages.yml` (deploy to GitHub Pages on main). CI confirms, it does
 after a green local gate. Measured cost per push to main (2026-10-18, runs 39154922836 and 39154922957): CI gate job 2 min 50 s, Pages
 build 26 s plus deploy 10 s, so about 5 billed minutes per push (each job rounds up to a minute). It was about 3
 before M8: the surface water web tests (`apps/web/src/surfaceWater/compute.test.ts`) dominate the gate job.
+Re-measured 2026-10-19 after M7, M9, M10 and M11 (runs 39260793655 and 39260793635): gate 2 min 38 s, Pages
+build 24 s plus deploy 42 s, still about 5 billed minutes. The repo is public, so standard-runner minutes do not count
+against the account's included minutes; keep the local-gate-first rule anyway.
 Pushes that touch only docs or markdown trigger nothing.
