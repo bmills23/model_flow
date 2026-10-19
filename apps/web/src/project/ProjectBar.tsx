@@ -7,6 +7,7 @@ import { warnBeforeUnload } from './unloadGuard';
 import {
   currentProject,
   getTitle,
+  hasUnfiledChanges,
   hasUnsavedChanges,
   loadProject,
   markSaved,
@@ -39,7 +40,7 @@ export function ProjectBar() {
       setMessage({ kind: 'error', text: r.error });
       return false;
     }
-    if (hasUnsavedChanges() && !window.confirm(REPLACE_PROMPT)) return false;
+    if (hasUnfiledChanges() && !window.confirm(REPLACE_PROMPT)) return false;
     loadProject(r.project, r.droppedFeeds ?? []);
     setLink(null);
     const warn = r.warnings.length > 0 ? ` ${r.warnings.map((w) => w.message).join(' ')}` : '';

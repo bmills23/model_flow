@@ -42,6 +42,7 @@ import {
   getStaleFeeds,
   getOverrides,
   getSite,
+  hasUnfiledChanges,
   hasUnsavedChanges,
   hydrate,
   currentProject,
@@ -539,9 +540,21 @@ describe('project store', () => {
       expect(hasUnsavedChanges()).toBe(true);
     });
 
+    it('is still not saved to a file, so replacing it must ask', () => {
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, K: '5' } });
+      flushAutosave();
+      restart();
+      expect(hasUnsavedChanges()).toBe(false);
+      expect(hasUnfiledChanges()).toBe(true);
+      markSaved();
+      expect(hasUnfiledChanges()).toBe(false);
+    });
+
     it('with no autosave starts clean and flags a first edit', () => {
       restart();
       expect(hasUnsavedChanges()).toBe(false);
+      expect(hasUnfiledChanges()).toBe(false);
       setSite({ ...defaultSite(), basis: 'modeled' });
       expect(hasUnsavedChanges()).toBe(true);
     });
