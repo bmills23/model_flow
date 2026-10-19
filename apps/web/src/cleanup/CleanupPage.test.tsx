@@ -121,11 +121,12 @@ describe('CleanupPage', () => {
     expect(within(panel).getByRole('button', { name: /run probabilistic cleanup/i })).toBeTruthy();
   }, 30000);
 
-  it('says a modeled source is not sampled', async () => {
+  it('offers no probabilistic panel for a modeled source until its level is solved', async () => {
     await withBenzene();
     fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
-    expect((await screen.findAllByText(/not sampled yet/i)).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/press "use for cleanup levels"/i)).toBeTruthy();
     expect(screen.queryByRole('region', { name: /probabilistic cleanup level/i })).toBeNull();
+    expect(screen.queryByText(/not sampled yet/i)).toBeNull();
   }, 30000);
 
   it('shows the held total TPH level with its method, fractions and warnings', async () => {

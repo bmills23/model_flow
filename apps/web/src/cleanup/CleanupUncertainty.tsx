@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import { DEFAULT_N, type UncertainInput } from '@model-flow/engine';
-import { DownloadCsv } from '../export/DownloadCsv';
-import { cleanupUncertaintyTables } from '../uncertainty/csv';
 import { Field } from '../ui/controls';
 import { DistributionEditor } from '../uncertainty/DistributionEditor';
 import type { UncertaintySetup } from '../uncertainty/project';
@@ -11,13 +9,12 @@ import { formatDuration } from '../uncertainty/budget';
 import { cleanupSettings, runCleanupAnalysis, type CleanupRun } from '../uncertainty/headless';
 import type { Projection } from '../uncertainty/budget';
 import { RunCancelledError } from '../uncertainty/pool';
-import { CdfChart, HistogramChart, SpearmanChart } from '../uncertainty/ResultsCharts';
-import { empiricalCdf, fmtNum, histogram } from '../uncertainty/resultsData';
 import '../uncertainty/uncertainty.css';
 import { MEDIA } from '../risk/form';
 import type { CleanupLegacyInput } from './build';
 import { buildProbabilisticSetup, probabilisticChoices } from './probabilistic';
 import { AlertDialog } from '../ui/AlertDialog';
+import { ProbabilisticResults } from './ProbabilisticResults';
 
 type Shown = CleanupRun & { label: string; input: CleanupLegacyInput };
 
@@ -120,15 +117,6 @@ export function CleanupUncertainty(props: {
     confirm?.answer(false);
   };
 
-  const conv = (x: number): number => x * (shown?.fromSi ?? 1);
-  const solvedLevels = shown
-    ? shown.result.iterationLevels.filter(
-        (v, i) => Number.isFinite(v) && !shown.result.censoredRows.includes(i),
-      )
-    : [];
-  const levelsScreen = solvedLevels.map(conv);
-  const detScreen = shown?.deterministic != null ? conv(shown.deterministic) : undefined;
-
   return (
     <section className="panel uncertainty" aria-label="Probabilistic cleanup level">
       <h2>Probabilistic cleanup level</h2>
@@ -137,7 +125,7 @@ export function CleanupUncertainty(props: {
         protects a chosen fraction of the sampled population is the matching low percentile of the
         solved levels. This solves one chemical in one medium at a time, each against its full
         targets (individual allocation, risk and hazard targets), even when the screen above splits
-        the targets among chemicals. Modeled sources are not sampled yet.
+        the targets among chemicals. A modeled source has its own panel.
       </p>
       {choices.length === 0 && <p className="muted">Switch on a pathway to sample its level.</p>}
       {choices.length > 1 && (
@@ -257,86 +245,7 @@ export function CleanupUncertainty(props: {
       )}
 
       {shown && (
-        <div className="u-results" aria-label="Probabilistic cleanup results">
-          <h3>Results: {shown.label}</h3>
-          {shown.input !== input && (
-            <p className="alert" role="status">
-              The scenario inputs changed after this run. Run again to update the results.
-            </p>
-          )}
-          <p>
-            {shown.result.succeeded} of {shown.result.n} iterations ran (Latin hypercube sampling,
-            seed <code>{shown.result.seed}</code>, {shown.result.forwardRuns} forward runs).{' '}
-            {shown.deterministic !== null ? (
-              <>
-                The deterministic cleanup level is{' '}
-                <strong>
-                  {fmtNum(conv(shown.deterministic))} {shown.unit}
-                </strong>
-                .
-              </>
-            ) : (
-              'The deterministic target is not reachable.'
-            )}
-          </p>
-          {shown.result.warnings.length > 0 && (
-            <ul className="warnings">
-              {shown.result.warnings.map((w) => (
-                <li key={`${w.code}-${w.message}`}>
-                  <code>{w.code}</code>: {w.message}
-                </li>
-              ))}
-            </ul>
-          )}
-          <div className="table-wrap">
-            <table aria-label="Protective cleanup levels">
-              <caption>
-                Level that protects a fraction of the sampled population ({shown.unit})
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Protected</th>
-                  <th scope="col">Cleanup level ({shown.unit})</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.result.levels.map((l) => (
-                  <tr key={l.p}>
-                    <th scope="row">
-                      {Number((l.p * 100).toFixed(4))} percent
-                      {l.p === shown.result.protection.p ? ' (chosen)' : ''}
-                    </th>
-                    <td>
-                      {l.level === null ? 'not reachable below the cap' : fmtNum(conv(l.level))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {levelsScreen.length > 0 ? (
-            <>
-              <CdfChart points={empiricalCdf(levelsScreen)} base={detScreen} unit={shown.unit} />
-              <HistogramChart hist={histogram(levelsScreen)} base={detScreen} unit={shown.unit} />
-            </>
-          ) : (
-            <p className="muted">No iteration reached the target, so there is nothing to chart.</p>
-          )}
-          <h3>Which inputs matter</h3>
-          <SpearmanChart rows={shown.spearman} />
-          <DownloadCsv
-            tables={cleanupUncertaintyTables({
-              label: shown.label,
-              unit: shown.unit,
-              fromSi: shown.fromSi,
-              levels: shown.result.levels,
-              chosen: shown.result.protection.p,
-              iterationLevels: shown.result.iterationLevels,
-              censored: shown.result.censoredRows,
-              spearman: shown.spearman,
-            })}
-          />
-        </div>
+        <ProbabilisticResults run={shown} label={shown.label} stale={shown.input !== input} />
       )}
     </section>
   );

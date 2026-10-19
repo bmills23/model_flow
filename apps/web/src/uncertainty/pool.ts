@@ -7,7 +7,7 @@ import {
   projectRun,
   type Projection,
 } from './budget';
-import type { PoolRequest, PoolResponse } from './protocol';
+import type { ModeledRowsRequest, PoolRequest, PoolResponse } from './protocol';
 
 /** The part of a Web Worker the pool uses, so tests can stand in for real workers. */
 export interface WorkerLike {
@@ -25,13 +25,51 @@ export class RunCancelledError extends Error {
   }
 }
 
-export interface PooledJob {
+export interface RowsJob {
+  type?: 'rows';
   modelId: string;
   base: unknown;
   ids: readonly string[];
   /** The whole sample matrix, built on one thread before the pool starts (n by k). */
   rows: Matrix;
   outputPath: readonly string[];
+}
+
+/** Probabilistic cleanup rows of a modeled source; the output of a row is its level (see protocol). */
+export interface ModeledCleanupJob {
+  type: 'modeled-cleanup';
+  request: ModeledRowsRequest['request'];
+  method: ModeledRowsRequest['method'];
+  ids: readonly string[];
+  rows: Matrix;
+}
+
+export type PooledJob = RowsJob | ModeledCleanupJob;
+
+/** The message for one chunk of a job. */
+function chunkMessage(job: PooledJob, index: number, start: number, end: number): PoolRequest {
+  const rows = job.rows.slice(start, end) as number[][];
+  if (job.type === 'modeled-cleanup') {
+    return {
+      type: 'modeled-cleanup',
+      job: index,
+      start,
+      request: job.request,
+      method: job.method,
+      ids: job.ids,
+      rows,
+    };
+  }
+  return {
+    type: 'rows',
+    job: index,
+    start,
+    modelId: job.modelId,
+    base: job.base,
+    ids: job.ids,
+    rows,
+    outputPath: job.outputPath,
+  };
 }
 
 export interface Progress {
@@ -58,8 +96,12 @@ export interface PooledResult {
     count: number;
     fraction: number;
     first: IterationFailure[];
+    /** Every failure, by absolute row. */
+    all: IterationFailure[];
     codes: Record<string, number>;
   };
+  /** Forward runs per row, in row order (0 when the worker does not count them). */
+  evaluations: number[];
   projection: Projection;
   workers: number;
 }
@@ -91,6 +133,7 @@ export async function runPooled(
   if (signal?.aborted) throw new RunCancelledError();
 
   const outputs = new Array<number>(total).fill(Number.NaN);
+  const evaluations = new Array<number>(total).fill(0);
   const failed: IterationFailure[] = [];
   const workers: WorkerLike[] = [];
   let done = 0;
@@ -134,22 +177,16 @@ export async function runPooled(
         r.outputs.forEach((y, i) => {
           outputs[start + i] = y;
         });
+        r.evaluations?.forEach((k, i) => {
+          evaluations[start + i] = k;
+        });
         for (const f of r.failures) failed.push({ ...f, row: f.row + start });
         done += end - start;
         options.onProgress?.({ done, total });
         resolve({ elapsedMs: r.elapsedMs });
       };
       w.onerror = (e) => reject(new Error(e.message || 'An uncertainty worker failed.'));
-      w.postMessage({
-        type: 'rows',
-        job: index,
-        start,
-        modelId: job.modelId,
-        base: job.base,
-        ids: job.ids,
-        rows: job.rows.slice(start, end) as number[][],
-        outputPath: job.outputPath,
-      });
+      w.postMessage(chunkMessage(job, index, start, end));
     });
 
   const body = async (): Promise<PooledResult> => {
@@ -191,10 +228,12 @@ export async function runPooled(
     for (const f of failed) codes[f.code] = (codes[f.code] ?? 0) + 1;
     return {
       outputs,
+      evaluations,
       failures: {
         count: failed.length,
         fraction: failed.length / total,
         first: failed.slice(0, 5),
+        all: failed,
         codes,
       },
       projection: effective,

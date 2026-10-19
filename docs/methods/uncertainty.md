@@ -1,9 +1,11 @@
 # Uncertainty: Monte Carlo, Latin hypercube, sensitivity and probabilistic cleanup levels (M10)
 
 Status: implemented 2026-10-18 (scope written in stage 1; engine slices E1 to E7 and web slices W1 to W4
-done, see the appendix, plus slice E8 for the remaining registry coverage; open items: the unmounted
-percentile fan, modeled cleanup sources not sampled because no screen wires a transport chain into the
-sampler). Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
+done, see the appendix, plus slice E8 for the remaining registry coverage; open item: the unmounted
+percentile fan). Since wave I (2026-10-19) the cleanup screen also samples a modeled source: the declared
+inputs of the groundwater, vadose or saturated source methods of its chain (never the solved source
+concentration) and, for the legacy method, the receptor factors, with every iteration a full modeled solve
+on the worker pool and the levels summarised by the same `summarizeCleanup` as the in-line run. Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
 uncertainty scope (stage 1)"; the ruling numbers below refer to that block. Every ruling marked DEFAULT is
 a screening choice open to Bryan's overturn. Equations are written in our own words from the primary
 publications; the RISC5 manual is used only as a map of what RISC5 offers.

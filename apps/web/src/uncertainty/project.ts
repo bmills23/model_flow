@@ -22,14 +22,18 @@ export interface UncertaintySetup {
   sobolN: string;
   /** Protected percentage on the cleanup panel. */
   protection: string;
-  /** Chemical and medium choice on the cleanup panel, `chemicalId|medium`; blank takes the first. */
+  /**
+   * Chemical and medium choice on the cleanup panel, `chemicalId|medium`; the method (`legacy` or
+   * `modern`) on the modeled-source panel. Blank takes the first.
+   */
   choice: string;
 }
 
-/** The two panels: the exposure screen's and the cleanup screen's. */
+/** The panels: the exposure screen's, the cleanup screen's direct-source and modeled-source ones. */
 export interface UncertaintyState {
   risk: UncertaintySetup;
   cleanup: UncertaintySetup;
+  modeled: UncertaintySetup;
 }
 
 export const defaultSetup = (): UncertaintySetup => ({
@@ -48,6 +52,7 @@ export const defaultSetup = (): UncertaintySetup => ({
 export const defaultUncertainty = (): UncertaintyState => ({
   risk: defaultSetup(),
   cleanup: defaultSetup(),
+  modeled: defaultSetup(),
 });
 
 const row = z.object({
@@ -74,7 +79,7 @@ const setupSchema = partialObject({
   sobol: flag,
 });
 
-const formSchema = partialObject({ risk: setupSchema, cleanup: setupSchema });
+const formSchema = partialObject({ risk: setupSchema, cleanup: setupSchema, modeled: setupSchema });
 
 export const uncertaintyProjectSchema = z.object({ form: formSchema.optional() });
 export type UncertaintyProject = z.infer<typeof uncertaintyProjectSchema>;
