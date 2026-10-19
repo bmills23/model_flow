@@ -13,6 +13,7 @@ export const HELP_TARGETS = {
   household: 'Shower, irrigation and particulates (`#/household`)',
   'plants-eco': 'Plants, ecology and TPH (`#/plants-eco`)',
   chemicals: 'Chemical database (`#/chemicals`)',
+  site: 'Site model (`#/site`)',
   risk: 'Exposure and risk (`#/risk`)',
   cleanup: 'Cleanup levels (`#/cleanup`)',
   report: 'Report (`#/report`)',

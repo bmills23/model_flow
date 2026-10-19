@@ -1988,10 +1988,9 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
 1. **Target by heading text (DEFAULT).** Each screen names its user guide heading once, in `apps/web/src/docs/help.ts`
    (`HELP_TARGETS`). A heading's id is `sectionId` of its text, so `#/docs/user-guide/<id>` is the link. The test
    checks every target against `docs/USER_GUIDE.md`.
-2. **Screens covered (DEFAULT).** Eleven screens get the link: transport, vadose, saturated, vapor, surface water,
-   household, plants-eco, chemicals, risk, cleanup and report. Home, Methods and Documentation get none, since they
-   are not calculation screens. `#/site` does not exist on this branch yet, so the Site model screen has no link;
-   add one line to `HELP_TARGETS` and the page when U2 lands.
+2. **Screens covered (DEFAULT).** Twelve screens get the link: transport, vadose, saturated, vapor, surface water,
+   household, plants-eco, chemicals, risk, cleanup and report, plus the Site model screen (`#/site`) once U2 merged,
+   twelve in all. Home, Methods and Documentation get none, since they are not calculation screens.
 3. **Reader scroll and focus (DEFAULT).** Every heading in the reader gets its id and `tabIndex=-1`. A section hash
    scrolls to that heading and moves focus to it. The route parsing accepts one optional section segment, and
    `#/docs/<slug>` is unchanged.

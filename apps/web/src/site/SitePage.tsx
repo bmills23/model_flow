@@ -1,4 +1,5 @@
 import { useMemo, useSyncExternalStore } from 'react';
+import { HelpLink } from '../docs/HelpLink';
 import { getSite, setSite, subscribeProject } from '../project/store';
 import { Seg } from '../ui/controls';
 import { checklist } from './checklist';
@@ -22,6 +23,7 @@ export function SitePage() {
   return (
     <section aria-labelledby="site-heading" className="vadose site-model">
       <h1 id="site-heading">Site model</h1>
+      <HelpLink target="site" />
       <p className="muted">
         Answer a few questions about the site and this page lists the screens to visit, in order,
         and the button to press on each to pass a value on. It is advice only: nothing is locked,
