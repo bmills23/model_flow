@@ -257,7 +257,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{
@@ -334,10 +334,15 @@ for (const view of VIEWS) {
       for (const x of v)
         axeNote += `\n    [${x.impact}] ${x.id} (${x.count}): ${x.nodes.slice(0, 3).join(' | ')}`;
     }
-    const bad = m.n > 0 || m.sw > m.cw || axeBad || (via && !(m.fedPanel && m.fedProduce));
+    const bad =
+      m.n > 0 ||
+      m.sw > m.cw ||
+      axeBad ||
+      (via && !(m.fedPanel && m.fedProduce)) ||
+      (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : tag ? ` (${tag})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : tag ? ` (${tag})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
