@@ -1,5 +1,9 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { currentProject } from '../project/store';
+import { overridesOf } from '../project';
+import { loadOverrideRows } from './userValues';
+import type { OverrideRow } from '../overrides/toxicity';
+import { fmtTox } from '../risk/format';
 import { buildReport, type Report } from './buildReport';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
@@ -86,6 +90,7 @@ export function ReportView({
   preparedBy,
   results = null,
   uncertainty = null,
+  userValues = [],
 }: {
   report: Report;
   preparedBy: string;
@@ -93,6 +98,8 @@ export function ReportView({
   results?: ProjectResults | null;
   /** The uncertainty control and results, shown in the uncertainty setup section. */
   uncertainty?: ReactNode;
+  /** Values the user supplied in place of database values. */
+  userValues?: readonly OverrideRow[];
 }) {
   const { statement } = report;
   return (
@@ -176,6 +183,47 @@ export function ReportView({
           Screens left at their defaults and not reported: {report.unused.join(', ')}.
         </p>
       )}
+      {userValues.length > 0 && (
+        <section className="report-section" aria-labelledby="rep-user-values">
+          <h2 id="rep-user-values">Values supplied by the user</h2>
+          <p className="muted">
+            These toxicity values replace the database value for this project only. Each is the
+            user's own entry with the source note given for it; the database was not changed.
+          </p>
+          <table className="report-table report-user-values">
+            <caption className="sr-only">Toxicity values supplied by the user</caption>
+            <thead>
+              <tr>
+                <th scope="col">Chemical</th>
+                <th scope="col">Value</th>
+                <th scope="col">Database value</th>
+                <th scope="col">Value used</th>
+                <th scope="col">Source note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {userValues.map((r) => (
+                <tr key={`${r.cas}:${r.label}`}>
+                  <th scope="row">
+                    {r.chemical}
+                    {r.cas !== '' ? ` (${r.cas})` : ''}
+                  </th>
+                  <td>
+                    {r.label} ({r.unit})
+                  </td>
+                  <td>{r.dbValue === null ? 'none' : fmtTox(r.dbValue)}</td>
+                  <td>
+                    {r.userValue === null
+                      ? 'not used (incomplete entry)'
+                      : `${fmtTox(r.userValue)} (user-supplied)`}
+                  </td>
+                  <td>{r.note === '' ? '(none)' : r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
       <p className="muted report-scope">
         Inputs are shown as typed, in the units each screen labels. Results are the screen's own
         tables, computed again from these inputs, with numbers shortened to six significant digits;
@@ -253,6 +301,18 @@ export function ReportPage() {
   const project = useMemo(() => currentProject(), []);
   const report = useMemo(() => buildReport(project), [project]);
   const [results, setResults] = useState<ProjectResults | null>(null);
+  const [userValues, setUserValues] = useState<OverrideRow[]>([]);
+  useEffect(() => {
+    let live = true;
+    if (Object.keys(overridesOf(project).toxicity).length === 0) return;
+    loadOverrideRows(project).then(
+      (r) => live && setUserValues(r),
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [project]);
   useEffect(() => {
     let live = true;
     computeResults(project).then(
@@ -287,6 +347,7 @@ export function ReportPage() {
         report={report}
         preparedBy={preparedBy}
         results={results}
+        userValues={userValues}
         uncertainty={<ReportUncertainty project={project} />}
       />
     </section>

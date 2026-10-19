@@ -1,4 +1,6 @@
 import type { z } from 'zod';
+import * as overrides from '../overrides/project';
+import type { OverridesState } from '../overrides/model';
 import * as cleanup from '../cleanup/project';
 import * as household from '../household/project';
 import * as plantsEco from '../plantsEco/project';
@@ -68,6 +70,7 @@ export function screensOf(project: Project): Screens {
 export interface BuildOptions {
   screens: Screens;
   feeds?: Feeds;
+  overrides?: OverridesState;
   data?: NonNullable<Project['data']>;
   title?: string;
   /** The app version string (from package.json) the file is written with. */
@@ -98,9 +101,15 @@ export function buildProject(o: BuildOptions): Project {
   };
   if (o.title !== undefined) project.title = o.title;
   if (o.feeds !== undefined) project.feeds = o.feeds;
+  const ov = o.overrides === undefined ? undefined : overrides.toProject(o.overrides);
+  if (ov !== undefined) project.overrides = ov;
   if (o.data !== undefined) project.data = o.data;
   return project;
 }
+
+/** The project-level overrides of a loaded project; none when the file has no `overrides` key. */
+export const overridesOf = (project: Project): OverridesState =>
+  overrides.fromProject(project.overrides);
 
 /** A feed as stored: the value, the screen it came from and a fingerprint of that screen's form. */
 export function feedEntry<V>(

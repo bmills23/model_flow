@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { newProject, setScreen, getScreen } from '../project/store';
+import { newProject, setOverrides, setScreen, getScreen } from '../project/store';
+import { emptyOverrides, setField } from '../overrides/model';
 import { ReportPage } from './ReportPage';
 
 afterEach(() => newProject());
@@ -75,5 +76,26 @@ describe('ReportPage', () => {
     expect(screen.queryByLabelText('Exposure uncertainty results')).toBeNull();
     fireEvent.click(box);
     expect(await screen.findByText(/nothing to run|not run/i)).toBeTruthy();
+  });
+
+  it('lists the values the user supplied, with the database value and the source note', async () => {
+    setOverrides({
+      ...emptyOverrides(),
+      toxicity: setField({}, '71-43-2', 'sfo', { value: '0.9', note: 'state agency memo 2026' }),
+    });
+    render(<ReportPage />);
+    const heading = await screen.findByRole('heading', { name: 'Values supplied by the user' });
+    const section = heading.closest('section')!;
+    expect(section.textContent).toContain('Benzene');
+    expect(section.textContent).toContain('Oral slope factor');
+    expect(section.textContent).toContain('0.9');
+    expect(section.textContent).toContain('state agency memo 2026');
+    expect(section.querySelector('caption')).not.toBeNull();
+    expect(section.querySelectorAll('th[scope="col"]').length).toBeGreaterThanOrEqual(5);
+  });
+
+  it('has no user values section without overrides', () => {
+    render(<ReportPage />);
+    expect(screen.queryByRole('heading', { name: 'Values supplied by the user' })).toBeNull();
   });
 });

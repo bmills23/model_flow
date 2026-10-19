@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { emptyOverrides, setField } from '../overrides/model';
+import { parseProject } from './index';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
@@ -30,8 +32,14 @@ import {
   getScreen,
   getDroppedFeeds,
   getStaleFeeds,
+  getOverrides,
+  hasUnsavedChanges,
   hydrate,
+  currentProject,
+  loadProject,
+  markSaved,
   newProject,
+  setOverrides,
   setScreen,
   startProjectStore,
 } from './store';
@@ -209,6 +217,55 @@ describe('project store', () => {
     flushAutosave();
     reload();
     expect(getStaleFeeds()).toEqual([]);
+  });
+
+  describe('project overrides', () => {
+    const ov = () => ({
+      ...emptyOverrides(),
+      toxicity: setField({}, '71-43-2', 'sfo', { value: '0.9', note: 'agency memo' }),
+    });
+
+    it('survive a reload through the autosave', () => {
+      setOverrides(ov());
+      flushAutosave();
+      expect(saved()).toMatchObject({
+        overrides: { toxicity: { '71-43-2': { sfo: { value: '0.9' } } } },
+      });
+      reload();
+      expect(getOverrides()).toEqual(ov());
+    });
+
+    it('stay out of the file when empty, round trip through the file, and clear on a new project', () => {
+      expect(currentProject()).not.toHaveProperty('overrides');
+      setOverrides(ov());
+      const r = parseProject(JSON.stringify(currentProject()));
+      expect(r.ok).toBe(true);
+      expect(r.ok && r.warnings).toEqual([]);
+      newProject();
+      expect(getOverrides()).toEqual(emptyOverrides());
+      if (r.ok) loadProject(r.project);
+      expect(getOverrides()).toEqual(ov());
+      newProject();
+      expect(getOverrides()).toEqual(emptyOverrides());
+    });
+
+    it('count as an unsaved change', () => {
+      markSaved();
+      expect(hasUnsavedChanges()).toBe(false);
+      setOverrides(ov());
+      expect(hasUnsavedChanges()).toBe(true);
+    });
+
+    it('do not hide a stale feed: a changed source form still flags it', () => {
+      setOverrides(ov());
+      setWellFeed(wellFeed);
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, K: '99' } });
+      flushAutosave();
+      reload();
+      expect(getOverrides()).toEqual(ov());
+      expect(getStaleFeeds()).toEqual(['well']);
+    });
   });
 
   it('ignores corrupt, foreign and newer saves quietly', () => {

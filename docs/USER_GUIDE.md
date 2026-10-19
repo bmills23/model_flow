@@ -139,7 +139,20 @@ take the groundwater concentration from the transport screen), and see the cance
 each method gives, the pathways and chemicals that drive them, and what could not be quantified. A second
 receptor can be evaluated alongside the first.
 
+**Edit values** on a chemical card lists the four toxicity values (oral slope factor, inhalation unit risk,
+oral reference dose, inhalation reference concentration) with the database value and its source. Type a
+value to use for this project and a short source note; both are required, and a value without a note, or
+not above zero, is flagged and not used. An edited field is marked with the word "Edited" and a tint, and
+the table above shows the value with the source "User value (this project)". **Reset to database value**
+undoes one field. A value the database lacks can be supplied the same way. The database holds chronic
+values, so for a short-term case enter the reference dose that applies and say so in the note. The edits
+belong to the project, not to the screen: the cleanup screen shows the same values, the uncertainty runs
+use them as point values, the project file keeps them, and the report lists them under "Values supplied by
+the user" with the database value beside each. The master database is never changed.
+
 ### Cleanup levels (`#/cleanup`)
+
+Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits.
 
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and

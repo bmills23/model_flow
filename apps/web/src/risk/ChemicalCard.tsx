@@ -9,6 +9,8 @@ import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow, type HouseholdOutdoor } from './form';
 import { fmtTox } from './format';
+import { OverridesPanel } from '../overrides/OverridesPanel';
+import type { OverrideEntry } from '../overrides/model';
 
 /** One chemical: its RSL toxicity values with sources, then the concentration entered for each medium. */
 export function ChemicalCard(props: {
@@ -28,6 +30,9 @@ export function ChemicalCard(props: {
   showProduce?: boolean;
   /** Replaces the explanation beside the plant-factor switch. */
   produceNote?: string;
+  /** This chemical's project-level toxicity edits by field; with `onEdit` shows the "Edit values" panel. */
+  edits?: Record<string, OverrideEntry> | undefined;
+  onEdit?: (field: string, entry: OverrideEntry | null) => void;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
@@ -67,12 +72,15 @@ export function ChemicalCard(props: {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.key}>
+              <tr key={r.key} className={r.sourceKey === 'user' ? 'edited-value' : undefined}>
                 <th scope="row">
                   {r.label}
                   <small className="tox-unit">{r.unit}</small>
                 </th>
-                <td className="tox-value">{fmtTox(r.value)}</td>
+                <td className="tox-value">
+                  {fmtTox(r.value)}
+                  {r.sourceKey === 'user' && <span className="edited-mark">Edited</span>}
+                </td>
                 <td>
                   <span className="source-tag">{r.source}</span>
                 </td>
@@ -86,6 +94,14 @@ export function ChemicalCard(props: {
           The RSL gives this chemical no cancer or noncancer toxicity value, so no risk can be
           quantified for it.
         </p>
+      )}
+      {props.onEdit !== undefined && (
+        <OverridesPanel
+          rec={rec}
+          sourceKeys={db.sourceKeys}
+          edits={props.edits}
+          onEdit={props.onEdit}
+        />
       )}
       {facts.length > 0 && <p className="muted">{facts.join(' ')}</p>}
 

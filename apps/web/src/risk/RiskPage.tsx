@@ -9,6 +9,8 @@ import { getProduceFeed, subscribeProduceFeed } from '../plantsEco/feeds';
 import { buildInputs, ENTER_CONCENTRATION, type BuildResult } from './build';
 import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
+import { setField, resetField } from '../overrides/model';
+import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
 import { useChemicalDb } from './useChemicalDb';
 import { runRisk, type RiskOutcome } from './compute';
 import { defaultReceptor, newChemicalRow, type ChemicalRow, type RiskForm } from './form';
@@ -31,7 +33,9 @@ export function RiskPage() {
   useEffect(() => setScreen('risk', { form }), [form]);
   const [lastGood, setLastGood] = useState<Snapshot | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
-  const { db, error: dbError } = useChemicalDb();
+  const { db: baseDb, error: dbError } = useChemicalDb();
+  const [overrides, setOverridesState] = useOverrides();
+  const db = useEffectiveDb(baseDb, overrides);
   const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
   const vapor = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
   const surface = useSyncExternalStore(
@@ -169,6 +173,16 @@ export function RiskPage() {
                     household={household}
                     produce={produce}
                     surface={surface}
+                    edits={overrides.toxicity[row.id]}
+                    onEdit={(field, entry) =>
+                      setOverridesState({
+                        ...overrides,
+                        toxicity:
+                          entry === null
+                            ? resetField(overrides.toxicity, row.id, field)
+                            : setField(overrides.toxicity, row.id, field, entry),
+                      })
+                    }
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>
                       patch({ chemicals: form.chemicals.filter((c) => c.id !== row.id) })
