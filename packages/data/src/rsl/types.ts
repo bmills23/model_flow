@@ -120,7 +120,7 @@ export interface RiskChemicalsFile {
 }
 
 /** The values the cleanup screen reads: partition and solubility inputs. */
-export type CleanupValueKey = 'koc' | 'kd' | 'hPrime' | 's' | 'mw';
+export type CleanupValueKey = 'koc' | 'kd' | 'hPrime' | 's' | 'mw' | 'logKow';
 
 export interface CleanupChemicalEntry {
   id: string;

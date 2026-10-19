@@ -388,7 +388,7 @@ describe('MCL and published soil-to-groundwater SSL columns (slice D2)', () => {
     const file = readFileSync(join(generatedDir, 'cleanup-chemicals.json'), 'utf8');
     expect(file).toBe(JSON.stringify(built.cleanup, null, 2) + '\n');
     const byId = new Map(built.chemicals.chemicals.map((c) => [c.id, c]));
-    const keys = ['koc', 'kd', 'hPrime', 's', 'mw'] as const;
+    const keys = ['koc', 'kd', 'hPrime', 's', 'mw', 'logKow'] as const;
     const expected = built.chemicals.chemicals
       .filter((c) => keys.some((k) => c.values[k]))
       .map((c) => c.id);

@@ -11,6 +11,7 @@ import './cleanup/cleanup.css';
 import './vapor/vapor.css';
 import './surfaceWater/surfaceWater.css';
 import './household/household.css';
+import './plantsEco/plantsEco.css';
 import './report/report.css';
 
 startProjectStore();

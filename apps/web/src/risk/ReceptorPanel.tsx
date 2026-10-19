@@ -44,8 +44,19 @@ export function ReceptorPanel(props: {
             <span>{PATHWAY_LABELS[p]}</span>
           </label>
         ))}
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={form.produce}
+            onChange={(e) => set('produce', e.target.checked)}
+          />
+          <span>
+            {PATHWAY_LABELS.produce} (intake and plant factors from the plants and ecology screen)
+          </span>
+        </label>
         <p className="muted">
-          A pathway runs only when a chemical has a concentration for its medium.
+          A pathway runs only when a chemical has a concentration for its medium. Homegrown produce
+          runs only for a chemical that uses the plants and ecology plant factors.
         </p>
       </Group>
       <Group title="Site-specific factors" open={false}>

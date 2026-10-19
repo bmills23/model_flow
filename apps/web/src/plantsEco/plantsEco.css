@@ -1,0 +1,53 @@
+/* Plants, ecology and TPH screen. Reuses the transport screen's layout classes. */
+.plants-eco .panel h2 {
+  text-transform: none;
+}
+
+.plants-eco .panel h3 {
+  margin: 16px 0 6px;
+  font-size: 1rem;
+}
+
+.plants-eco .needs {
+  margin: 8px 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.plants-eco table.compare {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.plants-eco table.compare th,
+.plants-eco table.compare td {
+  text-align: left;
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.plants-eco .readouts dd {
+  overflow-wrap: anywhere;
+}
+
+.plants-eco select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.plants-eco .button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.plants-eco .warnings code {
+  overflow-wrap: anywhere;
+}

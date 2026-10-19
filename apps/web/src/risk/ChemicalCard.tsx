@@ -5,6 +5,7 @@ import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
+import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow, type HouseholdOutdoor } from './form';
 import { fmtTox } from './format';
@@ -21,6 +22,8 @@ export function ChemicalCard(props: {
   vapor: VaporRiskFeed | null;
   surface: SurfaceWaterFeed | null;
   household: HouseholdRiskFeed | null;
+  /** The plants and ecology screen's produce result; absent where the screen has no produce pathway. */
+  produce?: ProduceRiskFeed | null;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
@@ -28,6 +31,7 @@ export function ChemicalCard(props: {
   const showConc = props.showConcentrations ?? true;
   const vaporHere = vapor !== null && vapor.chemicalId === row.id;
   const householdHere = household !== null && household.chemicalId === row.id;
+  const produceHere = props.produce != null && props.produce.chemicalId === row.id;
   const rows = toxRows(rec, db.sourceKeys);
   const t = rec.tox;
   const setConc = (m: Medium, v: string): void =>
@@ -206,6 +210,19 @@ export function ChemicalCard(props: {
             }
           />
           <span>Use the vapor screen outdoor air for the outdoor air concentration</span>
+        </label>
+      )}
+      {showConc && (produceHere || row.produceFromPlantsEco) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.produceFromPlantsEco}
+            onChange={(e) => props.onChange({ ...row, produceFromPlantsEco: e.target.checked })}
+          />
+          <span>
+            Use the plants and ecology plant factors for homegrown produce (driven by the soil
+            concentration; receptors switch the pathway on)
+          </span>
         </label>
       )}
       {(surface !== null || row.surfaceWaterFromModel) && (

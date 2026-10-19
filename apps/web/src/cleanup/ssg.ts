@@ -15,7 +15,10 @@ import { buildCleanup } from './build';
 import type { CleanupForm } from './form';
 
 /** Partition and solubility inputs of the cleanup screen, by database id (RSL units: L/kg, mg/L). */
-export type CleanupProps = Map<string, { koc?: number; kd?: number; hPrime?: number; s?: number }>;
+export type CleanupProps = Map<
+  string,
+  { koc?: number; kd?: number; hPrime?: number; s?: number; logKow?: number }
+>;
 
 let loading: Promise<CleanupProps> | null = null;
 
@@ -26,11 +29,12 @@ export function loadCleanupProps(): Promise<CleanupProps> {
     const out: CleanupProps = new Map();
     for (const c of file.chemicals) {
       const v = c.values;
-      const e: { koc?: number; kd?: number; hPrime?: number; s?: number } = {};
+      const e: { koc?: number; kd?: number; hPrime?: number; s?: number; logKow?: number } = {};
       if (v.koc) e.koc = v.koc.value;
       if (v.kd) e.kd = v.kd.value;
       if (v.hPrime) e.hPrime = v.hPrime.value;
       if (v.s) e.s = v.s.value;
+      if (v.logKow) e.logKow = v.logKow.value;
       out.set(c.id, e);
     }
     return out;

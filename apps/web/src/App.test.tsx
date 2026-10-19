@@ -66,6 +66,21 @@ describe('App shell', () => {
     window.location.hash = '';
   });
 
+  it('links to the plants, ecology and TPH screen and opens it at #/plants-eco', async () => {
+    window.location.hash = '#/plants-eco';
+    render(<App />);
+    const link = screen.getAllByRole('link', { name: /plants, ecology and tph/i })[0]!;
+    expect(link.getAttribute('href')).toBe('#/plants-eco');
+    expect(
+      await screen.findByRole(
+        'heading',
+        { level: 1, name: /plants, ecology and tph/i },
+        { timeout: 20000 },
+      ),
+    ).toBeTruthy();
+    window.location.hash = '';
+  }, 30000);
+
   it('links to the cleanup levels screen from the navigation', () => {
     render(<App />);
     const link = screen.getAllByRole('link', { name: /cleanup levels/i })[0]!;

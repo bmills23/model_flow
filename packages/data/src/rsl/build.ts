@@ -314,9 +314,9 @@ export const deriveRiskChemicals = (file: ChemicalsFile): RiskChemicalsFile => {
   };
 };
 
-const CLEANUP_KEYS: readonly CleanupValueKey[] = ['koc', 'kd', 'hPrime', 's', 'mw'];
+const CLEANUP_KEYS: readonly CleanupValueKey[] = ['koc', 'kd', 'hPrime', 's', 'mw', 'logKow'];
 
-/** The cleanup screen's subset of the chemical file: chemicals with none of the five values are left out. */
+/** The cleanup screen's subset of the chemical file: chemicals with none of the six values are left out. */
 export const deriveCleanupChemicals = (file: ChemicalsFile): CleanupChemicalsFile => {
   const chemicals: CleanupChemicalEntry[] = [];
   for (const c of file.chemicals) {

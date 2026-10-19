@@ -7,6 +7,7 @@ import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
+import type { ProduceRiskFeed } from '../plantsEco/feeds';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -40,8 +41,9 @@ function built(
   vapor: VaporRiskFeed | null = null,
   surface: SurfaceWaterFeed | null = null,
   household: HouseholdRiskFeed | null = null,
+  produce: ProduceRiskFeed | null = null,
 ) {
-  const r = buildInputs(form, db, well, vapor, surface, household);
+  const r = buildInputs(form, db, well, vapor, surface, household, produce);
   if (!r.ok) throw new Error(r.errors.join('; '));
   return r;
 }
@@ -517,5 +519,92 @@ describe('buildInputs', () => {
     form.a = defaultReceptor('child');
     const out = runRisk(built(form));
     expect(out.legacy.ok && out.modern.ok).toBe(true);
+  });
+});
+
+describe('homegrown produce from the plants and ecology screen', () => {
+  const feed = (over: Partial<ProduceRiskFeed> = {}): ProduceRiskFeed => ({
+    chemicalId: '71-43-2',
+    label: 'Benzene, produce run',
+    method: 'plantUptake.hhrap-2005',
+    factors: { root: 0.05 },
+    intakes: { root: { kgPerDay: 0.1, lossFraction: 0.2, fractionHomegrown: 0.4 } },
+    intakeLabel: 'user entered',
+    ...over,
+  });
+  const soilForm = (flag: boolean, receptorProduce: boolean): RiskForm => {
+    const form = formWith([{ id: '71-43-2', conc: { soil: '10' } }]);
+    form.chemicals[0]!.produceFromPlantsEco = flag;
+    form.a.produce = receptorProduce;
+    return form;
+  };
+
+  it('adds the produce pathway when the receptor and the chemical both opt in', () => {
+    const r = built(soilForm(true, true), null, null, null, null, feed());
+    expect(r.legacy.receptors[0]!.pathways).toContain('produce');
+    expect(r.modern.receptors[0]!.pathways).toContain('produce');
+  });
+
+  it('leaves the pathway off unless both opt in', () => {
+    expect(
+      built(soilForm(true, false), null, null, null, null, feed()).legacy.receptors[0]!.pathways,
+    ).not.toContain('produce');
+    expect(
+      built(soilForm(false, true), null, null, null, null, feed()).legacy.receptors[0]!.pathways,
+    ).not.toContain('produce');
+  });
+
+  it('reproduces the hand calculation of the legacy produce dose in the legacy method', () => {
+    const r = built(soilForm(true, true), null, null, null, null, feed());
+    const out = runRisk(r);
+    expect(out.legacy.ok).toBe(true);
+    if (!out.legacy.ok) return;
+    const produce = out.legacy.result.summary.receptors[0]!.byPathway.find(
+      (p) => p.id === 'produce',
+    )!;
+    // 0.055 (mg/kg-d)^-1, 10 mg/kg soil, Bp 0.05, 0.1 kg/d, loss 0.2, homegrown 0.4, 70 kg, 350 d/yr, 24 of 70 yr
+    const hand =
+      ((0.055 * 10 * 1e-6 * 0.05 * 0.8 * 0.1 * 0.4 * 1e6) / 70) * (350 / 365) * (24 / 70);
+    expect(produce.risk / hand).toBeCloseTo(1, 6);
+  });
+
+  it('runs the produce pathway under the modern method as well', () => {
+    const out = runRisk(built(soilForm(true, true), null, null, null, null, feed()));
+    expect(out.modern.ok).toBe(true);
+    if (!out.modern.ok) return;
+    const produce = out.modern.result.summary.receptors[0]!.byPathway.find(
+      (p) => p.id === 'produce',
+    );
+    expect(produce?.risk).toBeGreaterThan(0);
+  });
+
+  it('refuses a chemical that opts in with no produce result for it', () => {
+    const none = buildInputs(soilForm(true, true), db, null, null, null, null, null);
+    expect(none.ok).toBe(false);
+    const other = buildInputs(
+      soilForm(true, true),
+      db,
+      null,
+      null,
+      null,
+      null,
+      feed({ chemicalId: '108-88-3' }),
+    );
+    expect(other.ok).toBe(false);
+    if (!other.ok) expect(other.errors.join(' ')).toMatch(/plants and ecology/i);
+  });
+
+  it('asks for a soil concentration when the chemical opts in without one', () => {
+    const form = formWith([{ id: '71-43-2', conc: { groundwater: '0.005' } }]);
+    form.chemicals[0]!.produceFromPlantsEco = true;
+    form.a.produce = true;
+    const r = buildInputs(form, db, null, null, null, null, feed());
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.join(' ')).toMatch(/soil concentration/i);
+  });
+
+  it('notes that the intake applies to every life stage', () => {
+    const r = built(soilForm(true, true), null, null, null, null, feed());
+    expect(r.notes.join(' ')).toMatch(/every life stage/i);
   });
 });

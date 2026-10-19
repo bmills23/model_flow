@@ -31,6 +31,7 @@ const chemical: ChemicalRow = {
   bathroomFromHousehold: true,
   indoorFromHousehold: true,
   outdoorFromHousehold: 'sprinkler',
+  produceFromPlantsEco: true,
 };
 
 interface Case<S> {
@@ -43,7 +44,13 @@ interface Case<S> {
 
 function riskState() {
   const f = riskDefault();
-  return { ...f, chemicals: [chemical], b: defaultReceptor('child'), additive: true, startYr: '5' };
+  return {
+    ...f,
+    chemicals: [chemical],
+    b: { ...defaultReceptor('child'), produce: true },
+    additive: true,
+    startYr: '5',
+  };
 }
 
 const cases: Case<unknown>[] = [

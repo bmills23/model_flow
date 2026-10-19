@@ -33,6 +33,11 @@ export interface ReceptorForm {
   swimTime: string;
   swimDays: string;
   outdoorTime: string;
+  /**
+   * Eat homegrown produce, from the plants and ecology screen's intake. Not one of the nine direct pathways:
+   * it runs only for a chemical that also opts in (`ChemicalRow.produceFromPlantsEco`).
+   */
+  produce: boolean;
 }
 
 export interface ChemicalRow {
@@ -59,6 +64,8 @@ export interface ChemicalRow {
   indoorFromHousehold: boolean;
   /** Use the household screen's sprinkler spray air or windblown particulate air as outdoor air. */
   outdoorFromHousehold: HouseholdOutdoor;
+  /** Use the plants and ecology screen's plant factors for the homegrown produce pathway (soil concentration). */
+  produceFromPlantsEco: boolean;
 }
 
 export type HouseholdOutdoor = '' | 'sprinkler' | 'particulate';
@@ -90,6 +97,7 @@ export function defaultReceptor(preset: PresetId = 'resident'): ReceptorForm {
     swimTime: '',
     swimDays: '',
     outdoorTime: '',
+    produce: false,
   };
 }
 
@@ -118,5 +126,6 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     bathroomFromHousehold: false,
     indoorFromHousehold: false,
     outdoorFromHousehold: '',
+    produceFromPlantsEco: false,
   };
 }

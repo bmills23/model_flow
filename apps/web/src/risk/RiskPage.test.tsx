@@ -4,6 +4,7 @@ import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
+import { clearProduceFeed, setProduceFeed } from '../plantsEco/feeds';
 import { RiskPage } from './RiskPage';
 
 afterEach(() => {
@@ -11,6 +12,7 @@ afterEach(() => {
   clearVaporRiskFeed();
   clearHouseholdFeed();
   clearSurfaceWaterFeed();
+  clearProduceFeed();
 });
 
 async function loaded() {
@@ -250,5 +252,45 @@ describe('RiskPage', () => {
     const alerts = await screen.findAllByRole('alert');
     expect(alerts.map((a) => a.textContent).join(' ')).toMatch(/benzene.*groundwater/i);
     expect(screen.getByRole('img', { name: /cancer risk by pathway/i })).toBeTruthy();
+  }, 30000);
+
+  it('adds the homegrown produce pathway when the receptor and the chemical use the plant factors', async () => {
+    setProduceFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, produce run',
+      method: 'plantUptake.hhrap-2005',
+      factors: { root: 0.05 },
+      intakes: { root: { kgPerDay: 0.1, fractionHomegrown: 0.4 } },
+      intakeLabel: 'user entered',
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    fireEvent.change(within(card).getByLabelText(/^soil \(mg\/kg\)/i), { target: { value: '10' } });
+    fireEvent.click(
+      within(card).getByRole('checkbox', { name: /plants and ecology plant factors/i }),
+    );
+    const receptor = screen.getByRole('group', { name: /receptor a/i });
+    fireEvent.click(within(receptor).getByRole('checkbox', { name: /homegrown produce/i }));
+    const table = await screen.findByRole('table', { name: /exposure point concentrations/i });
+    expect(within(table).getAllByText(/homegrown produce/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/every life stage/i)).toBeTruthy();
+  }, 30000);
+
+  it('does not offer the produce factors for a chemical the plants screen was not run for', async () => {
+    setProduceFeed({
+      chemicalId: '108-88-3',
+      label: 'Toluene, produce run',
+      method: 'plantUptake.hhrap-2005',
+      factors: { root: 0.05 },
+      intakes: { root: { kgPerDay: 0.1, fractionHomegrown: 0.4 } },
+      intakeLabel: 'user entered',
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    expect(
+      within(card).queryByRole('checkbox', { name: /plants and ecology plant factors/i }),
+    ).toBeNull();
   }, 30000);
 });

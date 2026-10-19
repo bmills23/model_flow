@@ -39,6 +39,7 @@ export const receptorSchema = partialObject({
     'swimDays',
     'outdoorTime',
   ),
+  produce: flag,
 });
 
 /** One chemical row. A flag an older file lacks reads as false. */
@@ -54,6 +55,7 @@ export const chemicalRowSchema = z.object({
   bathroomFromHousehold: flag.default(false),
   indoorFromHousehold: flag.default(false),
   outdoorFromHousehold: z.enum(['', 'sprinkler', 'particulate']).default(''),
+  produceFromPlantsEco: flag.default(false),
 });
 
 const formSchema = partialObject({

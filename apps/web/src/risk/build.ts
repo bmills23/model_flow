@@ -27,6 +27,8 @@ import {
   type ModernScenarioInput,
   type ModernScenarioReceptor,
   type PathwayId,
+  type ProduceBoundary,
+  type ProduceFactors,
   type ScenarioChemical,
 } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
@@ -34,6 +36,7 @@ import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
+import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
@@ -94,9 +97,13 @@ export function parse(text: string | undefined, label: string, errors: Errors): 
   return v;
 }
 
-export function legacyChemical(rec: ChemicalRecord): LegacyChemical {
+export function legacyChemical(
+  rec: ChemicalRecord,
+  produceFactors?: ProduceFactors,
+): LegacyChemical {
   const t = rec.tox;
   const out: LegacyChemical = {};
+  if (produceFactors !== undefined) out.produceFactors = produceFactors;
   if (t.sfo) out.sfo = sfFromPerMgKgDay(t.sfo.value);
   if (t.iur) out.iur = iurFromPerUgM3(t.iur.value);
   if (t.rfdo) out.rfdo = rfdFromMgPerKgDay(t.rfdo.value);
@@ -108,7 +115,11 @@ export function legacyChemical(rec: ChemicalRecord): LegacyChemical {
   return out;
 }
 
-export function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefined) {
+export function modernChem(
+  rec: ChemicalRecord,
+  dermalForm: DermalForm | undefined,
+  produceFactors?: ProduceFactors,
+) {
   const t = rec.tox;
   const v = rec.phys?.values;
   return modernChemical({
@@ -130,6 +141,7 @@ export function modernChem(rec: ChemicalRecord, dermalForm: DermalForm | undefin
     inEpd: rec.phys?.inEpd,
     special: t.special,
     organic: dermalForm === undefined ? undefined : dermalForm === 'organic',
+    produceFactors,
   });
 }
 
@@ -160,7 +172,11 @@ export function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
   };
 }
 
-export function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundary {
+export function legacyBoundary(
+  preset: PresetId,
+  s: Site,
+  produce?: ProduceBoundary,
+): LegacyReceptorBoundary {
   const base = LEGACY_PRESETS[LEGACY_PRESET[preset]];
   const et: Partial<Record<PathwayId, number>> = { ...base.etHoursPerDay };
   const ef: Partial<Record<PathwayId, number>> = { ...base.efDaysPerYrByPathway };
@@ -186,10 +202,15 @@ export function legacyBoundary(preset: PresetId, s: Site): LegacyReceptorBoundar
     ef.swimDermal = s.swimDays;
   }
   if (s.outdoorTime !== undefined) et.outdoorInhalation = s.outdoorTime;
+  if (produce !== undefined) b.produce = produce;
   return b;
 }
 
-export function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundary {
+export function modernBoundary(
+  preset: PresetId,
+  s: Site,
+  produce?: ProduceBoundary,
+): ModernReceptorBoundary {
   const base = MODERN_PRESET[preset];
   const stage = (st: LifeStageBoundary): LifeStageBoundary => {
     const et: Partial<Record<PathwayId, number>> = { ...st.etHoursPerDay };
@@ -215,6 +236,7 @@ export function modernBoundary(preset: PresetId, s: Site): ModernReceptorBoundar
       ef.swimDermal = s.swimDays;
     }
     if (s.outdoorTime !== undefined) et.outdoorInhalation = s.outdoorTime;
+    if (produce !== undefined) out.produce = produce;
     return out;
   };
   const out: ModernReceptorBoundary = { ...base, stages: base.stages.map(stage) };
@@ -235,6 +257,7 @@ export function buildInputs(
   vapor: VaporRiskFeed | null = null,
   surface: SurfaceWaterFeed | null = null,
   household: HouseholdRiskFeed | null = null,
+  produce: ProduceRiskFeed | null = null,
 ): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
@@ -319,10 +342,29 @@ export function buildInputs(
       );
       if (v !== undefined) byPathway[pathway] = constantEpc(pathway, v);
     }
+    if (row.produceFromPlantsEco) {
+      if (produce === null || produce.chemicalId !== row.id) {
+        errors.add(
+          `${row.name}: no plants and ecology result for this chemical to use; run the plants and ecology screen with it and send its produce result here`,
+        );
+      } else {
+        const soil = parse(row.conc.soil, `${row.name}, soil`, errors);
+        if (soil === undefined) {
+          if ((row.conc.soil ?? '').trim() === '')
+            errors.add(
+              `${row.name}: enter a soil concentration; the homegrown produce pathway is driven by it`,
+            );
+        } else {
+          byPathway.produce = constantEpc('produce', soil);
+        }
+      }
+    }
     epcs.set(row.id, byPathway);
   }
 
   const notes: string[] = [];
+  const factorsFor = (row: { id: string; produceFromPlantsEco: boolean }) =>
+    row.produceFromPlantsEco && produce?.chemicalId === row.id ? produce.factors : undefined;
   const hasAnyEpc = [...epcs.values()].some((e) => Object.keys(e).length > 0);
   if (form.chemicals.length > 0 && errors.list.length === 0 && !hasAnyEpc) {
     errors.add(ENTER_CONCENTRATION);
@@ -345,9 +387,21 @@ export function buildInputs(
     const site = parseSite(rf, tag, errors);
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
-    const pathways = DIRECT_PATHWAY_IDS.filter(
+    const pathways: PathwayId[] = DIRECT_PATHWAY_IDS.filter(
       (p) => rf.pathways[p] && [...epcs.values()].some((e) => e[p] !== undefined),
     );
+    const produceOn =
+      rf.produce && produce !== null && [...epcs.values()].some((e) => e.produce !== undefined);
+    if (produceOn) {
+      pathways.push('produce');
+      notes.push(
+        `${label}: homegrown produce uses the ${produce.intakeLabel} intake for every life stage of the receptor.`,
+      );
+    } else if (rf.produce) {
+      notes.push(
+        `${label}: homegrown produce skipped, no chemical uses the plants and ecology screen's plant factors.`,
+      );
+    }
     for (const p of DIRECT_PATHWAY_IDS) {
       if (rf.pathways[p] && !pathways.includes(p)) {
         notes.push(
@@ -360,15 +414,16 @@ export function buildInputs(
       continue;
     }
     try {
-      const legacyR = legacyReceptor(legacyBoundary(rf.preset, site));
-      const modernR = modernReceptor(modernBoundary(rf.preset, site));
+      const intake = produceOn ? produce.intakes : undefined;
+      const legacyR = legacyReceptor(legacyBoundary(rf.preset, site, intake));
+      const modernR = modernReceptor(modernBoundary(rf.preset, site, intake));
       legacyReceptors.push({
         label,
         receptor: legacyR,
         pathways,
         chemicals: records.map(({ row, rec }): ScenarioChemical<LegacyChemical> => ({
           id: row.id,
-          chemical: legacyChemical(rec!),
+          chemical: legacyChemical(rec!, factorsFor(row)),
           epcs: epcs.get(row.id) ?? {},
         })),
         routeExtrapolation: form.routeExtrapolation,
@@ -379,7 +434,7 @@ export function buildInputs(
         pathways,
         chemicals: records.map(({ row, rec }) => ({
           id: row.id,
-          chemical: modernChem(rec!, row.dermalForm),
+          chemical: modernChem(rec!, row.dermalForm, factorsFor(row)),
           epcs: epcs.get(row.id) ?? {},
         })),
       });

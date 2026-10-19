@@ -31,6 +31,9 @@ const SurfaceWaterScreen = lazy(() =>
 const HouseholdPage = lazy(() =>
   import('./household/HouseholdPage').then((m) => ({ default: m.HouseholdPage })),
 );
+const PlantsEcoPage = lazy(() =>
+  import('./plantsEco/PlantsEcoPage').then((m) => ({ default: m.PlantsEcoPage })),
+);
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
 const ReportPage = lazy(() =>
@@ -53,6 +56,7 @@ const REPORT_HASH = '#/report';
 const VAPOR_HASH = '#/vapor';
 const SURFACE_WATER_HASH = '#/surface-water';
 const HOUSEHOLD_HASH = '#/household';
+const PLANTS_ECO_HASH = '#/plants-eco';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -84,6 +88,7 @@ export function App() {
   const onVapor = hash === VAPOR_HASH;
   const onSurfaceWater = hash === SURFACE_WATER_HASH;
   const onHousehold = hash === HOUSEHOLD_HASH;
+  const onPlantsEco = hash === PLANTS_ECO_HASH;
   const onReport = hash === REPORT_HASH;
 
   return (
@@ -98,7 +103,8 @@ export function App() {
               onVapor ||
               onCleanup ||
               onSurfaceWater ||
-              onHousehold
+              onHousehold ||
+              onPlantsEco
             ? 'shell shell-wide'
             : 'shell'
       }
@@ -178,6 +184,13 @@ export function App() {
           >
             Shower, irrigation and particulates
           </a>
+          <a
+            className="nav-link"
+            href={PLANTS_ECO_HASH}
+            aria-current={onPlantsEco ? 'page' : undefined}
+          >
+            Plants, ecology and TPH
+          </a>
           <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
             Exposure and risk
           </a>
@@ -221,6 +234,10 @@ export function App() {
           <Suspense fallback={<p className="muted">Loading the household screen...</p>}>
             <HouseholdPage />
           </Suspense>
+        ) : onPlantsEco ? (
+          <Suspense fallback={<p className="muted">Loading the plants and ecology screen...</p>}>
+            <PlantsEcoPage />
+          </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
@@ -260,6 +277,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={HOUSEHOLD_HASH}>
                 Open shower, irrigation and particulates
+              </a>{' '}
+              <a className="button" href={PLANTS_ECO_HASH}>
+                Open plants, ecology and TPH
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk

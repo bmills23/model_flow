@@ -4,7 +4,7 @@ Scope, equations, validity checks, coupling, data plan, fixture plan and slice p
 section 3 rows O, P and Q). Equations are written in our own words from the primary publications cited by
 reference key (full entries in `docs/ATTRIBUTIONS.md` once they move to `used`). The RISC5 manual was used
 only as a map of which pathways RISC5 offers; none of its text, figures or tables is reproduced. Status:
-scoping done 2026-10-18; slices D1, R1, E1, E2, E3 and E4 are implemented (the slice plan table below carries
+scoping done 2026-10-18; slices D1, R1, E1, E2, E3, E4 and W1 are implemented (the slice plan table below carries
 the status of every slice). The rulings are DEFAULT unless marked forced, recorded in
 `docs/DECISIONS.md` (2026-10-18, M9 block).
 
@@ -314,7 +314,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 | E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type (done 2026-10-18, branch wave-parity; DECISIONS 17 to 20) | E1 |
 | E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings (done 2026-10-18, branch t-m9) | D1, R1 |
 | E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check (done 2026-10-18, branch t-m9; DECISIONS 16) | R1 |
-| W1 | Web screen `#/plants-eco`: produce pathway inputs and results on the risk screen, eco HQ table, TPH composition editor; CDP check at 390x844 with zero overflow, light and dark | E2, E3, E4 |
+| W1 | Web screen `#/plants-eco` (done 2026-10-18, branch wave-parity): plant factors and the intake (handbook preset or entered) sent to the risk screen, where a receptor switch and a per-chemical switch turn the `produce` pathway on (intake applies to every life stage); Eco-SSL and user-benchmark hazard quotient tables; TPH composition editor with total level, forward hazard index and the mixture saturation check. The screen state is not saved in the project file and the held feed is not stored (like the household screen). Not wired: the cleanup screen (produce in M5 and the TPH total level through M5), irrigation and vapor plant terms, the wildlife surrogate food web table. 390x844 light and dark and 1280 checked, zero overflowing elements. `log Kow` was added to `cleanup-chemicals.json` for it | E2, E3, E4 |
 | G | Docs close: methods note status, ROADMAP M9 row, HANDOFF, references moved to `used` or `data` | W1 |
 
 D1, R1 run in parallel; E1 and E4 then run in parallel; E2 and E3 follow; W1 last.
