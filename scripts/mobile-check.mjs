@@ -63,6 +63,23 @@ const SEED = {
         waterFilledPorosity: '0.2',
         moistureFraction: '0.9',
         tphTotal: '1000',
+        tphThetaA: '0.3',
+        tphFractions: [
+          {
+            label: 'Aliphatic C5-C8',
+            family: 'aliphatic',
+            massFraction: '0.5',
+            surrogate: 'E1790666',
+            level: '500',
+          },
+          {
+            label: 'Aromatic C9-C16',
+            family: 'aromatic',
+            massFraction: '0.5',
+            surrogate: 'E1790674',
+            level: '300',
+          },
+        ],
       },
     },
   },
@@ -85,6 +102,22 @@ const ROUTES = [
   '#/docs/uncertainty',
   '#/docs/vapor-models',
   '#/docs/attributions',
+];
+// Screens that read an in-memory feed (never saved with the project) are visited a second time as
+// "fed" routes: the sending screen is opened and its send buttons pressed, then the hash changes to the
+// receiving screen without a reload, so the held feed is on screen (the cleanup produce switch and the
+// total TPH level panel).
+const FED_ROUTES = [
+  {
+    route: '#/cleanup',
+    via: '#/plants-eco',
+    // lead (an inorganic, so no organic partitioning inputs), its produce factors sent to the cleanup screen
+    viaSetup: `(async()=>{const u=window.__ui;await u.pick('lead',/^add lead and compounds/i);await u.sleep(800);
+      u.fill(/^log kow/i,'3');u.fill(/^kd \\(l\\/kg\\)/i,'5');u.fill(/^moisture fraction/i,'0.8');u.fill(/^dry bulk density/i,'1.5');
+      await u.sleep(500)})()`,
+    routeSetup: `(async()=>{const u=window.__ui;await u.pick('lead',/^add lead and compounds/i);await u.sleep(800);
+      u.tick(/homegrown produce/i);await u.sleep(500)})()`,
+  },
 ];
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
 const ONLY = opt('routes');
@@ -162,9 +195,13 @@ const send = (method, params = {}) =>
   });
 const evaluate = async (expression) =>
   (await send('Runtime.evaluate', { expression, returnByValue: true })).result?.value;
+const evaluateAsync = async (expression) =>
+  (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result
+    ?.value;
 
 const PRESS = `(async()=>{
-  const re=/^(calculate|compute|run|solve|evaluate|send to|load an example|start from|add a|apply)/i;
+  // the seed names the TPH fractions; the buttons that would reset them or append a blank row are left alone
+  const re=/^(?!start from the five|add a fraction)(calculate|compute|run|solve|evaluate|send to|load an example|start from|add a|apply)/i;
   for(let pass=0;pass<5;pass++){
     for(const b of document.querySelectorAll('main button')){
       if(!b.disabled&&re.test(b.textContent.trim())) b.click();
@@ -172,11 +209,39 @@ const PRESS = `(async()=>{
     await new Promise(r=>setTimeout(r,700));
   }
 })()`;
+
+// Drivers for the fed routes: type into a labelled input the way a user would (React sees the input event),
+// pick a chemical from the search results, and tick a checkbox by its label.
+const UI = `(()=>{
+  const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+  const setValue=(el,v)=>{
+    const proto=el instanceof HTMLTextAreaElement?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto,'value').set.call(el,v);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+  const labelled=(re)=>[...document.querySelectorAll('main label')].find(l=>re.test(l.textContent.trim()));
+  window.__ui={
+    sleep,
+    async pick(query,name){
+      const search=document.querySelector('main input[type=search],main input[aria-label*="chemical" i],main input');
+      const input=[...document.querySelectorAll('main input')].find(i=>/find a chemical/i.test(i.labels?.[0]?.textContent||i.getAttribute('aria-label')||''))||search;
+      setValue(input,query);
+      for(let i=0;i<40;i++){
+        const b=[...document.querySelectorAll('main button')].find(x=>name.test(x.textContent.trim()||x.getAttribute('aria-label')||''));
+        if(b){b.click();return true}
+        await sleep(250);
+      }
+      return false;
+    },
+    fill(re,v){const l=labelled(re);const i=l&&(l.control||l.querySelector('input'));if(i)setValue(i,v);return !!i},
+    tick(re){const l=labelled(re);const i=l&&(l.control||l.querySelector('input'));if(i&&!i.checked)i.click();return !!i},
+  };
+})()`;
 const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{
@@ -204,19 +269,33 @@ for (const view of VIEWS) {
   await send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-color-scheme', value: view.dark ? 'dark' : 'light' }],
   });
-  for (const route of ROUTES.filter(
-    (r) => !ONLY || ONLY.split(',').some((o) => r === o || r.startsWith(`${o}/`)),
-  )) {
+  const visits = [...ROUTES.map((route) => ({ route, via: null })), ...FED_ROUTES].filter(
+    (v) => !ONLY || ONLY.split(',').some((o) => v.route === o || v.route.startsWith(`${o}/`)),
+  );
+  for (const { route, via, viaSetup, routeSetup } of visits) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
-      `try{localStorage.setItem('model_flow.project.autosave.v1',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(route)};location.reload()`,
+      `try{localStorage.setItem('model_flow.project.autosave.v1',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
     );
     await sleep(1800);
+    if (viaSetup) {
+      await evaluate(UI);
+      await evaluateAsync(viaSetup);
+    }
     await evaluate(PRESS);
+    if (via) {
+      await evaluate(`location.hash=${JSON.stringify(route)}`);
+      await sleep(1500);
+      if (routeSetup) {
+        await evaluate(UI);
+        await evaluateAsync(routeSetup);
+      }
+      await evaluate(PRESS);
+    }
     await sleep(800);
     const m = JSON.parse(await evaluate(MEASURE));
-    const slug = route.replace(/[#/]/g, '') || 'home';
+    const slug = (route.replace(/[#/]/g, '') || 'home') + (via ? '-fed' : '');
     const shot = await send('Page.captureScreenshot', {
       format: 'png',
       // the long committed documents are measured in full but only their first screen is captured
@@ -229,15 +308,15 @@ for (const view of VIEWS) {
       const v = await runAxe();
       const hard = v.filter((x) => x.impact === 'serious' || x.impact === 'critical');
       axeBad = hard.length > 0;
-      axeReport.push({ view: view.name, route, violations: v });
+      axeReport.push({ view: view.name, route: via ? `${route} (fed)` : route, violations: v });
       axeNote = ` axe=${hard.length}+${v.length - hard.length}`;
       for (const x of v)
         axeNote += `\n    [${x.impact}] ${x.id} (${x.count}): ${x.nodes.slice(0, 3).join(' | ')}`;
     }
-    const bad = m.n > 0 || m.sw > m.cw || axeBad;
+    const bad = m.n > 0 || m.sw > m.cw || axeBad || (via && !(m.fedPanel && m.fedProduce));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route} cw=${m.cw} sw=${m.sw} overflow=${m.n} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }

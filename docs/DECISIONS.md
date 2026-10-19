@@ -1668,7 +1668,14 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
    carries produce. The `#/report` cleanup section adds the TPH table and both warning sets from the saved
    feeds. When the cleanup form has no chemical but a TPH feed is held, the section shows the TPH table
    with the note that the chemical levels were not computed.
-7. **Not done.** No cancer endpoint for TPH fractions (the fraction levels are hazard quotient levels
+7. **Phone check of the fed screen (DEFAULT).** The held feeds are in memory only, so `scripts/mobile-check.mjs`
+   visits `#/cleanup` a second time as a fed route: it opens `#/plants-eco`, picks lead, sends the produce
+   factors and the TPH total, changes the hash without a reload, adds lead on the cleanup screen and ticks
+   the produce switch. At 390x844 light and dark and at 1280x900 the "Total TPH level" panel and the produce
+   switch are on screen with 0 overflowing elements and 0 axe violations; the run fails if either is
+   missing. The seeded press step no longer clicks "Start from the five RSL surrogates" or "Add a fraction",
+   which would overwrite the seeded fractions.
+8. **Not done.** No cancer endpoint for TPH fractions (the fraction levels are hazard quotient levels
    entered by the user); no TPH level inside a modeled source's soil chain beyond the existing implied TPH.
 
 ## 2026-10-19: Wave G slice G2, report charts and uncertainty results
