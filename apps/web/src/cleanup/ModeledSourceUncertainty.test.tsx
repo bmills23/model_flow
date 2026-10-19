@@ -5,6 +5,7 @@ import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { toScenario, DEFAULT_FORM } from '../transport/form';
 import { inlineWorkerFactory } from '../uncertainty/dispatch';
+import type { WorkerLike } from '../uncertainty/pool';
 import { computeModeled } from './compute';
 import { defaultCleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
@@ -125,6 +126,49 @@ describe('ModeledSourceUncertainty', () => {
     fireEvent.click(runButton());
     fireEvent.click(screen.getByRole('button', { name: /cancel run/i }));
     await screen.findByText(/the run was cancelled/i);
+    expect(getModeledSummary()).toBeNull();
+  }, 120000);
+
+  it('drops the earlier summary when a cancelled re-run clears the screen result', async () => {
+    clearModeledSummary();
+    const { rerender } = render(panel());
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '6' } });
+    fireEvent.click(runButton());
+    await screen.findByRole('table', { name: /protective cleanup levels/i }, { timeout: 60000 });
+    expect(getModeledSummary()).not.toBeNull();
+    rerender(panel({ request: { ...req } }));
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '40' } });
+    fireEvent.click(runButton());
+    fireEvent.click(screen.getByRole('button', { name: /cancel run/i }));
+    await screen.findByText(/the run was cancelled/i);
+    expect(screen.queryByRole('table', { name: /protective cleanup levels/i })).toBeNull();
+    expect(getModeledSummary()).toBeNull();
+  }, 120000);
+
+  it('drops the earlier summary when a failed re-run clears the screen result', async () => {
+    clearModeledSummary();
+    const { rerender } = render(panel());
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '6' } });
+    fireEvent.click(runButton());
+    await screen.findByRole('table', { name: /protective cleanup levels/i }, { timeout: 60000 });
+    expect(getModeledSummary()).not.toBeNull();
+    const failing = (): WorkerLike => {
+      const w: WorkerLike = {
+        onmessage: null,
+        onerror: null,
+        postMessage() {
+          setTimeout(() => w.onerror?.({ message: 'worker exploded' }), 0);
+        },
+        terminate() {},
+      };
+      return w;
+    };
+    rerender(panel({ makeWorker: failing }));
+    fireEvent.click(runButton());
+    await screen.findByText(/worker exploded/i, undefined, { timeout: 60000 });
+    expect(screen.queryByRole('table', { name: /protective cleanup levels/i })).toBeNull();
     expect(getModeledSummary()).toBeNull();
   }, 120000);
 

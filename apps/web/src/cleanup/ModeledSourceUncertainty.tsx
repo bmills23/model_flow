@@ -21,7 +21,12 @@ import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
 import { buildModeledSetup } from './modeledSetup';
 import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS } from './modeledUncertainty';
 import { ProbabilisticResults } from './ProbabilisticResults';
-import { modeledFingerprint, setModeledSummary, summarizeModeledRun } from './modeledSummary';
+import {
+  clearModeledSummary,
+  modeledFingerprint,
+  setModeledSummary,
+  summarizeModeledRun,
+} from './modeledSummary';
 
 type Shown = ModeledCleanupRun & { label: string; request: ModeledRequest };
 
@@ -83,6 +88,9 @@ export function ModeledSourceUncertainty(props: {
     if (!setup?.ok || !spec || !spec.ok) return;
     setError(null);
     setShown(null);
+    // The report reads the session summary, so it must lose the earlier run with the screen's result:
+    // a re-run that is cancelled or fails leaves neither on screen nor in the report.
+    clearModeledSummary();
     const settings = cleanupSettings(setup0, MODELED_DEFAULT_N);
     if (!settings.ok) {
       setError(settings.error);
