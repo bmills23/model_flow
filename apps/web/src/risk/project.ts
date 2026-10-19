@@ -51,6 +51,8 @@ export const chemicalRowSchema = z.object({
   indoorFromVapor: flag.default(false),
   outdoorFromVapor: flag.default(false),
   surfaceWaterFromModel: flag.default(false),
+  bathroomFromHousehold: flag.default(false),
+  outdoorFromHousehold: z.enum(['', 'sprinkler', 'particulate']).default(''),
 });
 
 const formSchema = partialObject({

@@ -28,6 +28,8 @@ const chemical: ChemicalRow = {
   indoorFromVapor: false,
   outdoorFromVapor: true,
   surfaceWaterFromModel: false,
+  bathroomFromHousehold: true,
+  outdoorFromHousehold: 'sprinkler',
 };
 
 interface Case<S> {
@@ -177,6 +179,40 @@ describe.each(cases)('screen project: $name', (c) => {
   it('refuses a value of the wrong type', () => {
     expect(c.schema.safeParse({ form: 'not an object' }).success).toBe(false);
     expect(c.schema.safeParse('x').success).toBe(false);
+  });
+});
+
+describe('screen project: household feed flags', () => {
+  const oldRow = {
+    id: '71-43-2',
+    name: 'Benzene',
+    conc: {},
+    groundwaterFromWell: true,
+  };
+  it('loads a row saved before the household feeds with both feeds off', () => {
+    const p = risk.riskProjectSchema.safeParse({ form: { chemicals: [oldRow] } });
+    expect(p.success).toBe(true);
+    const row = risk.fromProject(p.data).form.chemicals[0];
+    expect(row?.bathroomFromHousehold).toBe(false);
+    expect(row?.outdoorFromHousehold).toBe('');
+    const c = cleanup.cleanupProjectSchema.safeParse({ form: { chemicals: [oldRow] } });
+    expect(c.success).toBe(true);
+    expect(cleanup.fromProject(c.data).form.chemicals[0]?.outdoorFromHousehold).toBe('');
+  });
+  it('round-trips each outdoor feed choice', () => {
+    for (const v of ['', 'sprinkler', 'particulate'] as const) {
+      const state = riskState();
+      state.chemicals = [{ ...chemical, outdoorFromHousehold: v }];
+      const p = risk.riskProjectSchema.safeParse(json(risk.toProject({ form: state })));
+      expect(risk.fromProject(p.data).form.chemicals[0]?.outdoorFromHousehold).toBe(v);
+    }
+  });
+  it('refuses an unknown outdoor feed', () => {
+    expect(
+      risk.riskProjectSchema.safeParse({
+        form: { chemicals: [{ ...oldRow, outdoorFromHousehold: 'rain' }] },
+      }).success,
+    ).toBe(false);
   });
 });
 
