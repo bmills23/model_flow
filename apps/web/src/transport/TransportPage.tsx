@@ -124,6 +124,13 @@ export function TransportPage() {
       : parsed.scenario
     : null;
   const result = outcome?.ok ? outcome.result : engineError ? (lastGood?.result ?? null) : null;
+  // The grid and readouts on screen are the last good ones, so a download labelled with the
+  // current form's method and time would misdescribe them; downloads are off while stale.
+  const csvStale = computing || !parsed.ok || engineError !== null;
+  const plumeTable = useMemo(
+    () => (result ? plumeCsvTable(result, form.mapMethod, Number(form.timeYr)) : null),
+    [result, form.mapMethod, form.timeYr],
+  );
   const keys = (['legacy', 'modern', 'domenico'] as const).filter(
     (k) => result?.readouts[k] !== undefined,
   );
@@ -604,11 +611,7 @@ export function TransportPage() {
                 timeLabel={`at ${form.timeYr} years`}
                 depthLabel={depthLabel}
               />
-              <DownloadCsv
-                showLabel
-                disabled={computing || !parsed.ok}
-                tables={[plumeCsvTable(result, form.mapMethod, Number(form.timeYr))]}
-              />
+              <DownloadCsv showLabel disabled={csvStale} tables={[plumeTable!]} />
               <BreakthroughChart result={result} scale={form.scale} />
               <section className="panel" aria-label="Receptor concentration at the evaluation time">
                 <h2>Receptor concentration at {form.timeYr} years</h2>
@@ -628,7 +631,7 @@ export function TransportPage() {
                   ))}
                 </dl>
                 <DownloadCsv
-                  disabled={computing || !parsed.ok}
+                  disabled={csvStale}
                   tables={transportCsvTables(result, Number(form.timeYr))}
                 />
               </section>
