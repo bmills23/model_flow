@@ -37,10 +37,10 @@ export function OverridesPanel(props: {
         const id = `ov-${rec.id}-${key}`;
         return (
           <div key={key} className={entry === undefined ? 'override-row' : 'override-row edited'}>
-            <h4 className="override-title">
+            <p className="override-title">
               {label} <small>{unit}</small>
               {entry !== undefined && <span className="edited-mark">Edited</span>}
-            </h4>
+            </p>
             <p className="muted">
               Database value:{' '}
               {dbv === undefined
@@ -82,7 +82,7 @@ export function OverridesPanel(props: {
               <button
                 type="button"
                 className="btn"
-                aria-label={`Reset ${label.toLowerCase()} of ${rec.name} to the database value`}
+                aria-label={`Reset to database value: ${label.toLowerCase()} of ${rec.name}`}
                 onClick={() => props.onEdit(key, null)}
               >
                 Reset to database value

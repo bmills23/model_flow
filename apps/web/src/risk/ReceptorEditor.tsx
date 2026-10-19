@@ -60,7 +60,7 @@ export function ReceptorEditor(props: {
           <button
             type="button"
             className="btn"
-            aria-label={`Reset ${r.label.toLowerCase()} of ${props.tag} to the preset`}
+            aria-label={`Reset to preset: ${r.label.toLowerCase()} of ${props.tag}`}
             onClick={() => set(r.key, '')}
           >
             Reset to preset
@@ -82,17 +82,17 @@ export function ReceptorEditor(props: {
         factors; the modern ones apply to the named life stage (a mutagen's age segments use the
         same stage values).
       </p>
-      <h4 className="override-title">Legacy method</h4>
+      <p className="override-title">Legacy method</p>
       {rows.legacy.map(renderRow)}
-      <h4 className="override-title">Modern method</h4>
+      <p className="override-title">Modern method</p>
       {rows.modern.map(renderRow)}
-      <h4 className="override-title">Both methods</h4>
+      <p className="override-title">Both methods</p>
       {renderRow(rows.lifetime)}
       {Object.keys(edits).length > 0 && (
         <button
           type="button"
           className="btn"
-          aria-label={`Reset all exposure factors of ${props.tag} to the preset`}
+          aria-label={`Reset to preset: all exposure factors of ${props.tag}`}
           onClick={() =>
             props.onChange({
               ...state,

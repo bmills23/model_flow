@@ -29,6 +29,7 @@
 .override-title {
   margin: 0 0 4px;
   font-size: 0.95rem;
+  font-weight: 600;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;

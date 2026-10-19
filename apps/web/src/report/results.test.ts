@@ -322,3 +322,22 @@ describe('computeResults charts', () => {
     expect(k).toEqual([]);
   });
 });
+
+describe('computeResults with receptor edits only', () => {
+  it('does not count an otherwise untouched risk or cleanup screen as used', async () => {
+    const overrides: OverridesState = {
+      ...emptyOverrides(),
+      receptorNames: { 'risk.a': 'North lot worker', 'cleanup.a': 'Yard worker' },
+      receptors: setField({}, 'risk.a', 'legacy.bwKg', { value: '60', note: '' }),
+    };
+    const p = buildProject({
+      screens: defaultScreens(),
+      overrides,
+      createdWith: '0.0.1',
+      now: NOW,
+    });
+    const r = await computeResults(p);
+    expect(r['risk']).toBeUndefined();
+    expect(r['cleanup']).toBeUndefined();
+  });
+});

@@ -55,7 +55,9 @@ describe('Edit values panel', () => {
     });
 
     fireEvent.click(
-      within(panel).getByRole('button', { name: /reset oral slope factor of benzene/i }),
+      within(panel).getByRole('button', {
+        name: /reset to database value: oral slope factor of benzene/i,
+      }),
     );
     expect(getOverrides().toxicity).toEqual({});
     expect(within(table).getByText('0.055')).toBeTruthy();
@@ -91,4 +93,21 @@ describe('Edit values panel', () => {
       (within(p2).getAllByLabelText(/source note \(required\)/i)[0] as HTMLInputElement).value,
     ).toBe('agency memo');
   }, 40000);
+});
+
+describe('Edit values panel accessibility', () => {
+  it('names each reset button starting with its visible text and adds no skipped heading level', async () => {
+    const card = await loadedRisk();
+    const panel = openPanel(card);
+    fireEvent.change(within(panel).getByLabelText(/your value for oral slope factor/i), {
+      target: { value: '0.5' },
+    });
+    const buttons = [...panel.querySelectorAll('button')];
+    expect(buttons.length).toBeGreaterThan(0);
+    for (const b of buttons) {
+      const label = (b.getAttribute('aria-label') ?? '').toLowerCase();
+      expect(label.startsWith((b.textContent ?? '').trim().toLowerCase())).toBe(true);
+    }
+    expect(panel.querySelector('h4')).toBeNull();
+  }, 60000);
 });
