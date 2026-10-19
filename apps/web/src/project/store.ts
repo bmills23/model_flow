@@ -1,5 +1,17 @@
 import pkg from '../../package.json';
 import {
+  clearHouseholdFeed,
+  getHouseholdFeed,
+  setHouseholdFeed,
+  subscribeHouseholdFeed,
+} from '../household/feeds';
+import {
+  clearProduceFeed,
+  getProduceFeed,
+  setProduceFeed,
+  subscribeProduceFeed,
+} from '../plantsEco/feeds';
+import {
   clearSaturatedFeed,
   getSaturatedFeed,
   setSaturatedFeed,
@@ -90,6 +102,8 @@ function sourceForms(s: Screens): Record<FeedKey, unknown> {
     vaporWaterTable: s.transport.form,
     vaporSaturated: s.saturated.form,
     vaporRisk: s.vapor.form,
+    household: s.household.form,
+    produce: s.plantsEco.form,
   };
 }
 const SOURCE: Record<FeedKey, string> = {
@@ -102,6 +116,8 @@ const SOURCE: Record<FeedKey, string> = {
   vaporWaterTable: 'transport',
   vaporSaturated: 'saturated',
   vaporRisk: 'vapor',
+  household: 'household',
+  produce: 'plantsEco',
 };
 
 const readers: Record<FeedKey, () => unknown> = {
@@ -114,6 +130,8 @@ const readers: Record<FeedKey, () => unknown> = {
   vaporWaterTable: getWaterTableFeed,
   vaporSaturated: getSaturatedVaporFeed,
   vaporRisk: getVaporRiskFeed,
+  household: getHouseholdFeed,
+  produce: getProduceFeed,
 };
 
 function currentFeeds(): Feeds {
@@ -218,6 +236,8 @@ function watchFeeds(): void {
   subscribeWaterTableFeed(() => recordHash('vaporWaterTable'));
   subscribeSaturatedVaporFeed(() => recordHash('vaporSaturated'));
   subscribeVaporRiskFeed(() => recordHash('vaporRisk'));
+  subscribeHouseholdFeed(() => recordHash('household'));
+  subscribeProduceFeed(() => recordHash('produce'));
 }
 watchFeeds();
 
@@ -231,6 +251,8 @@ function clearAllFeeds(): void {
   clearWaterTableFeed();
   clearSaturatedVaporFeed();
   clearVaporRiskFeed();
+  clearHouseholdFeed();
+  clearProduceFeed();
 }
 
 /** Drop in-memory state back to defaults without touching storage (a simulated reload in tests). */
@@ -284,6 +306,8 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
     vaporWaterTable: setWaterTableFeed,
     vaporSaturated: setSaturatedVaporFeed,
     vaporRisk: setVaporRiskFeed,
+    household: setHouseholdFeed,
+    produce: setProduceFeed,
   };
   for (const k of Object.keys(setters) as FeedKey[]) {
     const e = feeds[k];

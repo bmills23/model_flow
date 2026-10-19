@@ -1,10 +1,16 @@
 import { stableStringify } from '../project/hash';
 import { defaultScreens, type Screens } from '../project';
 import * as cleanup from '../cleanup/project';
+import * as household from '../household/project';
+import * as plantsEco from '../plantsEco/project';
+import { ECO_LEGACY_ID, ECO_MODERN_ID } from '../plantsEco/eco';
+import { LEGACY_PLANT_ID, MODERN_PLANT_ID } from '../plantsEco/produce';
+import { TPH_LEGACY_ID, TPH_MODERN_ID } from '../plantsEco/tph';
 import * as risk from '../risk/project';
 import * as saturated from '../saturated/project';
 import * as surfaceWater from '../surfaceWater/project';
 import * as transport from '../transport/project';
+import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
 import type { DataEditions } from './methodsStatement';
@@ -20,6 +26,9 @@ export const USED_SCREENS_ORDER: readonly ScreenKey[] = [
   'surfaceWater',
   'risk',
   'cleanup',
+  'household',
+  'plantsEco',
+  'uncertainty',
 ];
 
 /** The data editions this build ships (directory names under packages/data/generated). */
@@ -37,6 +46,9 @@ const PROJECTORS: { [K in ScreenKey]: (s: Screens[K]) => unknown } = {
   surfaceWater: surfaceWater.toProject,
   risk: risk.toProject,
   cleanup: cleanup.toProject,
+  household: household.toProject,
+  plantsEco: plantsEco.toProject,
+  uncertainty: uncertainty.toProject,
 };
 
 /** The stored feeds of a project, as far as the report needs them: which screen each came from. */
@@ -44,7 +56,7 @@ export type FeedsLike = Record<string, { source: string } | undefined>;
 
 /**
  * A screen counts as used when its state differs from the defaults a new project starts with. A
- * project holds all seven screen keys, so presence says nothing; an edit does.
+ * project holds every screen key, so presence says nothing; an edit does.
  */
 export function screenUsed(key: ScreenKey, screens: Screens, feeds?: FeedsLike): boolean {
   if (feeds !== undefined && Object.values(feeds).some((e) => e?.source === key)) return true;
@@ -108,6 +120,38 @@ function idsFor(key: ScreenKey, s: Screens): string[] {
       }
       return ids;
     }
+    case 'household':
+      return [
+        'shower.fc-1986',
+        'shower.little-1992',
+        'shower.rsl-household',
+        'irrigation.sprinkler-fc',
+        'particulate.box-emission',
+        'particulate.ssg-pef-1996',
+        'particulate.ssg-pef-2002',
+      ];
+    case 'plantsEco': {
+      const f = s.plantsEco.form;
+      const ids = [LEGACY_PLANT_ID, MODERN_PLANT_ID, ECO_MODERN_ID];
+      if (f.benchmarks.length > 0) ids.push(ECO_LEGACY_ID);
+      if (f.tphTotal.trim() !== '' || f.tphFractions.length > 0) {
+        ids.push(f.tphSet === 'tphcwg' ? TPH_LEGACY_ID : TPH_MODERN_ID);
+      }
+      return ids;
+    }
+    case 'uncertainty': {
+      const u = s.uncertainty;
+      const d = uncertainty.defaultUncertainty();
+      const changed = (k: 'risk' | 'cleanup'): boolean =>
+        stableStringify(u[k]) !== stableStringify(d[k]);
+      const ids: string[] = [];
+      if (changed('risk')) {
+        ids.push(u.risk.sampling === 'lhs' ? 'uncertainty.lhs-ic' : 'uncertainty.srs-exposure');
+        if (u.risk.sobol) ids.push('uncertainty.sobol-saltelli');
+      }
+      if (changed('cleanup')) ids.push('uncertainty.cleanup-probabilistic');
+      return ids;
+    }
   }
 }
 
@@ -131,7 +175,7 @@ export function methodsRun(screens: Screens, feeds?: FeedsLike): MethodsRun {
 }
 
 const READS: Record<keyof DataEditions, readonly ScreenKey[]> = {
-  rsl: ['risk', 'cleanup'],
+  rsl: ['risk', 'cleanup', 'plantsEco', 'uncertainty'],
   nrwqc: ['surfaceWater'],
   sediment: ['surfaceWater'],
 };

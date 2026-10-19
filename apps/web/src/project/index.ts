@@ -1,9 +1,12 @@
 import type { z } from 'zod';
 import * as cleanup from '../cleanup/project';
+import * as household from '../household/project';
+import * as plantsEco from '../plantsEco/project';
 import * as risk from '../risk/project';
 import * as saturated from '../saturated/project';
 import * as surfaceWater from '../surfaceWater/project';
 import * as transport from '../transport/project';
+import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
 import { hashInputs } from './hash';
@@ -15,7 +18,7 @@ export { CURRENT_VERSION } from './migrate';
 export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
 export { hashInputs } from './hash';
 
-/** The live state of the seven screens, in the form each screen's `fromProject` hands back. */
+/** The live state of the screens (and the two uncertainty panels), in the form each screen's `fromProject` hands back. */
 export interface Screens {
   transport: transport.TransportState;
   vadose: vadose.VadoseState;
@@ -24,6 +27,9 @@ export interface Screens {
   surfaceWater: surfaceWater.SurfaceWaterState;
   risk: risk.RiskState;
   cleanup: cleanup.CleanupState;
+  household: household.HouseholdState;
+  plantsEco: plantsEco.PlantsEcoState;
+  uncertainty: uncertainty.UncertaintyState;
 }
 
 /** Every screen at its defaults (a new project). */
@@ -36,6 +42,9 @@ export function defaultScreens(): Screens {
     surfaceWater: surfaceWater.fromProject(undefined),
     risk: risk.fromProject(undefined),
     cleanup: cleanup.fromProject(undefined),
+    household: household.fromProject(undefined),
+    plantsEco: plantsEco.fromProject(undefined),
+    uncertainty: uncertainty.fromProject(undefined),
   };
 }
 
@@ -50,6 +59,9 @@ export function screensOf(project: Project): Screens {
     surfaceWater: surfaceWater.fromProject(s.surfaceWater),
     risk: risk.fromProject(s.risk),
     cleanup: cleanup.fromProject(s.cleanup),
+    household: household.fromProject(s.household),
+    plantsEco: plantsEco.fromProject(s.plantsEco),
+    uncertainty: uncertainty.fromProject(s.uncertainty),
   };
 }
 
@@ -79,6 +91,9 @@ export function buildProject(o: BuildOptions): Project {
       surfaceWater: surfaceWater.toProject(screens.surfaceWater),
       risk: risk.toProject(screens.risk),
       cleanup: cleanup.toProject(screens.cleanup),
+      household: household.toProject(screens.household),
+      plantsEco: plantsEco.toProject(screens.plantsEco),
+      uncertainty: uncertainty.toProject(screens.uncertainty),
     },
   };
   if (o.title !== undefined) project.title = o.title;

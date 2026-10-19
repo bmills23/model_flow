@@ -5,6 +5,7 @@ import { HouseholdPage } from './HouseholdPage';
 import { clearHouseholdFeed, getHouseholdFeed } from './feeds';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
+import { forgetMemory, getScreen } from '../project/store';
 
 afterEach(() => {
   clearHouseholdFeed();
@@ -27,6 +28,21 @@ function fillShower() {
   fill(/^stall volume/i, '2');
   fill(/^stall ventilation/i, '0.5');
 }
+
+describe('HouseholdPage in the project', () => {
+  it('starts from the project, writes edits back, and offers the results as CSV', () => {
+    forgetMemory();
+    const { unmount } = render(<HouseholdPage />);
+    fillShower();
+    expect(getScreen('household').form.waterConcentration).toBe('0.5');
+    expect(getScreen('household').form.henry).toBe('0.2');
+    expect(screen.getByRole('button', { name: 'Download CSV' })).toBeTruthy();
+    unmount();
+    render(<HouseholdPage />);
+    expect((screen.getByLabelText(/^henry constant/i) as HTMLInputElement).value).toBe('0.2');
+    forgetMemory();
+  });
+});
 
 describe('HouseholdPage', () => {
   it('opens on a heading and asks for the inputs it cannot default', () => {

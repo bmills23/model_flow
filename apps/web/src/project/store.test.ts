@@ -13,6 +13,8 @@ import {
   setVaporRiskFeed,
 } from '../vapor/feeds';
 import { clearSurfaceWaterFeed } from '../surfaceWater/feed';
+import { clearHouseholdFeed, getHouseholdFeed, setHouseholdFeed } from '../household/feeds';
+import { clearProduceFeed, getProduceFeed, setProduceFeed } from '../plantsEco/feeds';
 import {
   AUTOSAVE_KEY,
   flushAutosave,
@@ -53,6 +55,8 @@ function wipeFeeds(): void {
   clearVaporRiskFeed();
   clearVadoseVaporFeed();
   clearSurfaceWaterFeed();
+  clearHouseholdFeed();
+  clearProduceFeed();
 }
 
 /** Simulate a reload: keep only what is in storage. */
@@ -129,6 +133,47 @@ describe('project store', () => {
     expect(getVadoseFeed()?.scenario.duration).toBe(vad.scenario.duration);
     expect(getVaporRiskFeed()?.chemicalId).toBe('71-43-2');
     expect(getSaturatedFeed()).toBeNull();
+  });
+
+  it('restores the household and plants screens, their feeds and the uncertainty setup', () => {
+    const h = getScreen('household');
+    setScreen('household', { form: { ...h.form, waterConcentration: '0.01' } });
+    const pl = getScreen('plantsEco');
+    setScreen('plantsEco', { form: { ...pl.form, soilConcentration: '12' } });
+    const u = getScreen('uncertainty');
+    setScreen('uncertainty', { ...u, risk: { ...u.risk, seed: 'abc', iterations: '300' } });
+    setHouseholdFeed({
+      chemicalId: '71-43-2',
+      label: 'benzene',
+      coefficients: { bathroomAir: 0.5 },
+      methods: { bathroomAir: 'shower.little-1992' },
+    });
+    setProduceFeed({
+      chemicalId: '71-43-2',
+      label: 'benzene',
+      method: 'plantUptake.hhrap-2005',
+      factors: {} as never,
+      intakes: {} as never,
+      intakeLabel: 'user entered',
+    });
+    flushAutosave();
+    reload();
+    expect(getScreen('household').form.waterConcentration).toBe('0.01');
+    expect(getScreen('plantsEco').form.soilConcentration).toBe('12');
+    expect(getScreen('uncertainty').risk.seed).toBe('abc');
+    expect(getScreen('uncertainty').risk.iterations).toBe('300');
+    expect(getHouseholdFeed()?.coefficients.bathroomAir).toBe(0.5);
+    expect(getProduceFeed()?.method).toBe('plantUptake.hhrap-2005');
+    expect(getStaleFeeds()).toEqual([]);
+  });
+
+  it('flags a household feed whose source form changed after it was built', () => {
+    setHouseholdFeed({ chemicalId: 'x', label: 'x', coefficients: {}, methods: {} });
+    const h = getScreen('household');
+    setScreen('household', { form: { ...h.form, waterConcentration: '9' } });
+    flushAutosave();
+    reload();
+    expect(getStaleFeeds()).toEqual(['household']);
   });
 
   it('flags a restored feed whose source form changed after it was built', () => {

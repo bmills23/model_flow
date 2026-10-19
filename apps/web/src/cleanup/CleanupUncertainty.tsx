@@ -11,8 +11,12 @@ import {
   type UncertainModel,
   type UncertaintySpec,
 } from '@model-flow/engine';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { cleanupUncertaintyTables } from '../uncertainty/csv';
 import { Field } from '../ui/controls';
 import { DistributionEditor } from '../uncertainty/DistributionEditor';
+import type { UncertaintySetup } from '../uncertainty/project';
+import { useSetup } from '../uncertainty/useSetup';
 import type { EditorSpec } from '../uncertainty/editor';
 import { PILOT_ROWS, assertWithinBudget, formatDuration, projectRun } from '../uncertainty/budget';
 import type { Projection } from '../uncertainty/budget';
@@ -27,8 +31,6 @@ import {
   probabilisticChoices,
   runCleanupProbabilistic,
 } from './probabilistic';
-
-const DEFAULT_PROTECTION_PERCENT = '95';
 
 interface Shown {
   result: CleanupResult;
@@ -56,7 +58,15 @@ export function CleanupUncertainty(props: {
   const { input, names } = props;
   const now = props.now ?? ((): number => performance.now());
   const choices = useMemo(() => probabilisticChoices(input), [input]);
-  const [choiceKey, setChoiceKey] = useState('');
+  const [setup0, patchSetup] = useSetup('cleanup');
+  const [initialEditor] = useState(() => ({ rows: setup0.rows, entries: setup0.correlation }));
+  const choiceKey = setup0.choice;
+  const setChoiceKey = (v: string): void => patchSetup({ choice: v });
+  const onEditorState = useCallback(
+    (s: { rows: UncertaintySetup['rows']; entries: UncertaintySetup['correlation'] }) =>
+      patchSetup({ rows: s.rows, correlation: s.entries }),
+    [patchSetup],
+  );
   const keyOf = (c: { chemicalId: string; medium: string }): string =>
     `${c.chemicalId}|${c.medium}`;
   const choice = choices.find((c) => keyOf(c) === choiceKey) ?? choices[0];
@@ -71,9 +81,12 @@ export function CleanupUncertainty(props: {
   );
   const labels = useMemo(() => Object.fromEntries(inputs.map((u) => [u.id, u.label])), [inputs]);
   const [spec, setSpec] = useState<EditorSpec | null>(null);
-  const [nText, setNText] = useState('');
-  const [seed, setSeed] = useState(DEFAULT_SEED);
-  const [protText, setProtText] = useState(DEFAULT_PROTECTION_PERCENT);
+  const nText = setup0.iterations;
+  const setNText = (v: string): void => patchSetup({ iterations: v });
+  const seed = setup0.seed;
+  const setSeed = (v: string): void => patchSetup({ seed: v });
+  const protText = setup0.protection;
+  const setProtText = (v: string): void => patchSetup({ protection: v });
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ p: Projection; answer: (ok: boolean) => void } | null>(
@@ -230,7 +243,13 @@ export function CleanupUncertainty(props: {
         </p>
       )}
       {setup?.ok && (
-        <DistributionEditor inputs={inputs} displays={setup.displays} onChange={onSpec} />
+        <DistributionEditor
+          inputs={inputs}
+          displays={setup.displays}
+          initial={initialEditor}
+          onState={onEditorState}
+          onChange={onSpec}
+        />
       )}
       {spec && !spec.ok && (
         <div className="alert" role="alert">
@@ -376,6 +395,18 @@ export function CleanupUncertainty(props: {
           )}
           <h3>Which inputs matter</h3>
           <SpearmanChart rows={shown.spearman} />
+          <DownloadCsv
+            tables={cleanupUncertaintyTables({
+              label: shown.label,
+              unit: shown.unit,
+              fromSi: shown.fromSi,
+              levels: shown.result.levels,
+              chosen: shown.result.protection.p,
+              iterationLevels: shown.result.iterationLevels,
+              censored: shown.result.censoredRows,
+              spearman: shown.spearman,
+            })}
+          />
         </div>
       )}
     </section>

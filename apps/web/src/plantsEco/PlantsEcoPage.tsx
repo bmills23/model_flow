@@ -8,17 +8,19 @@ import {
   type Warning,
 } from '@model-flow/engine';
 import { loadCleanupProps, type CleanupProps } from '../cleanup/ssg';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { getScreen, setScreen } from '../project/store';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
 import { fmtHi } from '../risk/chartData';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
+import { plantsEcoCsvTables } from './csv';
 import { computeBenchmarks, computeEcossl, ECO_LEGACY_ID, ECO_MODERN_ID } from './eco';
 import { loadEcossl, substanceFor, type EcosslSubstance } from './ecossl';
 import { getProduceFeed, setProduceFeed, subscribeProduceFeed } from './feeds';
 import {
   CLASS_LABELS,
-  DEFAULT_FORM,
   type IntakeMode,
   type PlantsEcoForm,
   type TphFractionRow,
@@ -101,7 +103,8 @@ function Select(props: {
 }
 
 export function PlantsEcoPage() {
-  const [form, setForm] = useState<PlantsEcoForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<PlantsEcoForm>(() => getScreen('plantsEco').form);
+  useEffect(() => setScreen('plantsEco', { form }), [form]);
   const set = <K extends keyof PlantsEcoForm>(k: K, v: PlantsEcoForm[K]): void =>
     setForm((f) => ({ ...f, [k]: v }));
   const text = (k: keyof PlantsEcoForm & string, label: string, hint?: string) => (
@@ -142,6 +145,10 @@ export function PlantsEcoPage() {
   const ecossl = useMemo(() => computeEcossl(form, substance), [form, substance]);
   const benchmarks = useMemo(() => computeBenchmarks(form), [form]);
   const tph = useMemo(() => computeTph(form, props ?? new Map()), [form, props]);
+  const csvTables = useMemo(
+    () => plantsEcoCsvTables({ produce, ecossl, benchmarks, tph }),
+    [produce, ecossl, benchmarks, tph],
+  );
 
   const send = (): void => {
     if (!feedResult.ok) return;
@@ -694,6 +701,7 @@ export function PlantsEcoPage() {
               <Needs errors={tph.errors} />
             )}
           </section>
+          <DownloadCsv tables={csvTables} />
         </div>
       </div>
     </section>

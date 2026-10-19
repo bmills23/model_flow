@@ -45,7 +45,7 @@ describe('buildReport', () => {
     const r = buildReport(project());
     expect(r.sections).toEqual([]);
     expect(r.statement.methods).toEqual([]);
-    expect(r.unused.length).toBe(7);
+    expect(r.unused.length).toBe(10);
   });
 
   it('carries the title, saved date, app version and the non-affiliation statement', () => {
@@ -84,6 +84,67 @@ describe('buildReport', () => {
       }),
     );
     expect(r.statement.data.map((d) => d.kind)).toEqual(['nrwqc', 'sediment']);
+  });
+
+  it('adds sections for the household, plants and uncertainty screens with their methods', () => {
+    const r = buildReport(
+      project((s) => {
+        s.household = { form: { ...s.household.form, waterConcentration: '0.5' } };
+        s.plantsEco = { form: { ...s.plantsEco.form, soilConcentration: '12', tphTotal: '800' } };
+        s.uncertainty = {
+          ...s.uncertainty,
+          risk: { ...s.uncertainty.risk, sampling: 'lhs', sobol: true, seed: 'k' },
+          cleanup: { ...s.uncertainty.cleanup, protection: '90' },
+        };
+      }),
+    );
+    expect(r.sections.map((x) => x.key)).toEqual(['household', 'plantsEco', 'uncertainty']);
+    const byKey = Object.fromEntries(r.sections.map((x) => [x.key, x]));
+    expect(byKey['household']?.name).toBe('Household water and soil air');
+    expect(byKey['household']?.inputs.find((i) => i.path === 'waterConcentration')?.value).toBe(
+      '0.5',
+    );
+    expect(byKey['household']?.methodIds).toContain('shower.little-1992');
+    expect(byKey['plantsEco']?.methodIds).toEqual([
+      'plantUptake.trapp-matthies-1995',
+      'plantUptake.hhrap-2005',
+      'eco.ecossl-2005',
+      'tph.tphcwg',
+    ]);
+    expect(byKey['uncertainty']?.methodIds).toEqual([
+      'uncertainty.lhs-ic',
+      'uncertainty.sobol-saltelli',
+      'uncertainty.cleanup-probabilistic',
+    ]);
+    const ids = r.statement.methods.map((m) => m.id);
+    expect(ids).toContain('particulate.ssg-pef-2002');
+    expect(ids).toContain('uncertainty.sobol-saltelli');
+    expect(r.statement.data.map((d) => d.kind)).toEqual(['rsl']);
+  });
+
+  it('shows a distribution row of the uncertainty setup as typed', () => {
+    const r = buildReport(
+      project((s) => {
+        s.uncertainty = {
+          ...s.uncertainty,
+          risk: {
+            ...s.uncertainty.risk,
+            rows: {
+              bodyWeight: {
+                kind: 'uniform',
+                params: { a: '50', b: '100' },
+                lnForm: 'geometric',
+                lo: '',
+                hi: '',
+                table: '',
+              },
+            },
+          },
+        };
+      }),
+    );
+    const inputs = r.sections.find((x) => x.key === 'uncertainty')!.inputs;
+    expect(inputs.find((i) => i.path === 'risk.rows.bodyWeight.params.a')?.value).toBe('50');
   });
 
   it('prints no personal contact line', () => {

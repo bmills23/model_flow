@@ -40,11 +40,14 @@ A project is one JSON document, the single source for save, load, share, persist
     "vadose":    { "form": { ... } },
     "saturated": { "form": { ... }, "method": "legacy" },
     "vapor": { "form": { ... }, "outdoor": { ... }, "af": { ... }, "pvi": { ... }, "choice": "entered" },
-    "surfaceWater": { "form": { ... } }, "risk": { "form": { ... } }, "cleanup": { "form": { ... } }
+    "surfaceWater": { "form": { ... } }, "risk": { "form": { ... } }, "cleanup": { "form": { ... } },
+    "household": { "form": { ... } }, "plantsEco": { "form": { ... } },
+    "uncertainty": { "form": { "risk": { ... }, "cleanup": { ... } } }
   },
   "feeds": {
     "well":   { "source": "transport", "inputsHash": "<hash of the source form>", "value": { ... } },
-    "vadose": { ... }, "saturated": { ... }, "bank": { ... }, "vapor": { ... }, "surfaceWater": { ... }
+    "vadose": { ... }, "saturated": { ... }, "bank": { ... }, "vaporRisk": { ... }, "surfaceWater": { ... },
+    "household": { ... }, "produce": { ... }
   },
   "data": { "rsl": "rsl-2024-11", "nrwqc": "nrwqc-2026-10-16", "sediment": "sediment-2026-10-16" }
 }
@@ -64,6 +67,16 @@ A project is one JSON document, the single source for save, load, share, persist
   `buildProject`; the caller passes the app version. No version has needed a migration yet, so the
   `migrations` table is empty and the runner is tested with injected steps; the first real bump adds its
   fixture test.
+- **Implemented (S8, screens added after S2).** Three more keys: `household` (the `#/household` form),
+  `plantsEco` (the `#/plants-eco` form: chemical, plant, intake, benchmark and TPH fraction rows) and
+  `uncertainty`, which holds the setup of the two uncertainty panels (`risk` on the exposure screen,
+  `cleanup` on the cleanup screen): the distribution editor row of each input as typed (kind, parameters,
+  lognormal form, truncation limits, empirical table), the rank correlation pairs, the sampling kind,
+  iteration count, seed, output, Sobol switch and sample size, the protected percentage and the chosen
+  chemical and medium. Results are never saved: a run is repeated from the setup and its seed, which
+  gives the same numbers. Two more feed entries, `household` (fingerprinted against the household form)
+  and `produce` (against the plants form). An absent key, and a field an older file lacks, take the
+  defaults, so no version bump was needed.
 - **Screen keys hold the screen's own form type unchanged** (strings as typed, so a reload shows exactly
   what the user entered, including invalid text). Each screen exports `toProject()` and `fromProject()`
   beside its `form.ts`; the project module never reaches into a form's fields. Screens added by M7, M9 and
@@ -170,7 +183,19 @@ so it is the one feed that still starts empty after a reload.
   (`csv.ts` beside each screen, one `DownloadCsv` control per table). The `method` column carries the
   registered method id; the cleanup screen's direct levels span media with different units, so that table
   carries a `unit` column instead of a unit in the header. Per-chemical charts (risk contributions, the
-  modeled metric curve) have their table as a CSV too. The M7, M9 and M10 screens are added in S8.
+  modeled metric curve) have their table as a CSV too.
+- **Implemented for the M7, M9 and M10 screens (S8).** `household/csv.ts` writes one long table
+  (`household-results`: method id, quantity, value, unit; values converted to the units the screen
+  shows). `plantsEco/csv.ts` writes `plants-produce` (plant factor and fresh weight plant concentration
+  per produce class), `eco-screening` (Eco-SSL rows with their NA and NC statuses kept as a status with
+  a blank value, then the user benchmark rows with their citations) and `tph-results` (total level,
+  fraction levels, forward hazard index and quotients, saturation index). `uncertainty/csv.ts` writes the
+  exposure panel's `uncertainty-summary`, `uncertainty-sample` (every iteration) and
+  `uncertainty-sensitivity` (one at a time swings, Spearman correlations and Sobol indices with their
+  intervals in one long table), and the cleanup panel's `cleanup-uncertainty-levels`, `-sample` (a failed
+  iteration has a blank level and the status `failed`) and `-sensitivity`. A table with no rows is not
+  offered. The household tables read no dataset and carry no edition in the file name; the rest carry the
+  RSL edition.
 
 ## 6. Printable report and methods statement
 
@@ -204,8 +229,14 @@ so it is the one feed that still starts empty after a reload.
   edition when it has one, else the edition this build ships). A "Prepared by" field is held on the page
   only, empty by default, and prints only when filled. Print CSS hides the app chrome. Not yet done:
   result tables, charts and engine warnings per screen (they need each screen's computation run from the
-  project, and the report closes with S8 for the M7, M9 and M10 screens); until then the page says
-  results are on each screen and in its CSV download.
+  project); until then the page says results are on each screen and in its CSV download. S8 added the
+  household, plants and uncertainty sections (inputs as typed, and the methods each runs): the household
+  screen runs its three shower methods, the sprinkler method and its three particulate methods side by
+  side; the plants screen runs both plant uptake methods and the Eco-SSL screen, adds the user benchmark
+  method when a benchmark row exists and the chosen TPH fraction set when a total or a fraction is
+  entered; the uncertainty section lists the sampling method of each configured panel (and the Sobol
+  method when switched on). The plants and uncertainty sections count the RSL edition among the data
+  sources; the household screen reads no dataset.
 - No author name, address or contact line is printed (DEFAULT); a free-text "prepared by" field the user
   fills is allowed, empty by default. Nothing in the template carries a personal contact address.
 
@@ -279,13 +310,13 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | Slice | Content | Depends on | Can start before M7, M9, M10 land |
 | --- | --- | --- | --- |
 | S1 | Move the bespoke feed modules onto `createFeed`, no behaviour change | none | yes |
-| S2 | `apps/web/src/project/`: format v1, zod schema, migration runner, `toProject`/`fromProject` for the existing seven screens | S1 | yes; M7, M9, M10 screens add their keys in S8 |
+| S2 | `apps/web/src/project/`: format v1, zod schema, migration runner, `toProject`/`fromProject` for the existing seven screens | S1 | yes; the M7, M9 and M10 keys were added in S8 |
 | S3 | Autosave and persisted feeds, "New project" | S2 | yes |
 | S4 | File save and open, share link with compression and size limit | S2 | yes |
 | S5 | `exportCsv` helper and CSV on the existing screens | none | yes |
 | S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closes after S8 (generator, inputs and methods sections done; results, charts and warnings per screen open) |
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
-| S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens | S2, S5, S6, and M7, M9, M10 landed | no |
+| S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; per-screen result tables in the report remain open with S6) | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen |
 | S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; the final pass waits for every screen |
 | S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last |

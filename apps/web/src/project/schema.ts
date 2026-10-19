@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { cleanupProjectSchema } from '../cleanup/project';
+import { householdProjectSchema } from '../household/project';
+import { plantsEcoProjectSchema } from '../plantsEco/project';
 import { riskProjectSchema } from '../risk/project';
 import { saturatedProjectSchema } from '../saturated/project';
 import { surfaceWaterProjectSchema } from '../surfaceWater/project';
 import { transportProjectSchema } from '../transport/project';
+import { uncertaintyProjectSchema } from '../uncertainty/project';
 import { vadoseProjectSchema } from '../vadose/project';
 import { vaporProjectSchema } from '../vapor/project';
 import { text } from './fields';
@@ -19,6 +22,9 @@ export const screensSchema = z.object({
   surfaceWater: surfaceWaterProjectSchema.optional(),
   risk: riskProjectSchema.optional(),
   cleanup: cleanupProjectSchema.optional(),
+  household: householdProjectSchema.optional(),
+  plantsEco: plantsEcoProjectSchema.optional(),
+  uncertainty: uncertaintyProjectSchema.optional(),
 });
 
 const sameLength = (v: { times: unknown[]; values: unknown[] }): boolean =>
@@ -73,6 +79,8 @@ export const feedShapes = {
   vaporWaterTable: feedEnvelope(jsonObject).optional(),
   vaporSaturated: feedEnvelope(jsonObject).optional(),
   vaporRisk: feedEnvelope(jsonObject).optional(),
+  household: feedEnvelope(jsonObject).optional(),
+  produce: feedEnvelope(jsonObject).optional(),
 };
 
 /** Every feed key of format version 1. Each entry is validated on its own (see `parseProject`). */

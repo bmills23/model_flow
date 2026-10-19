@@ -28,6 +28,10 @@ export interface DistributionEditorProps {
   displays?: Readonly<Record<string, UnitDisplay>>;
   /** Called with the built specification whenever any field changes (and once on mount). */
   onChange?: (spec: EditorSpec) => void;
+  /** The rows and correlation entries to start from (a loaded project). */
+  initial?: { rows: Record<string, DistRow>; entries: Record<string, string> };
+  /** Called with the rows and correlation entries as typed whenever either changes. */
+  onState?: (state: { rows: Record<string, DistRow>; entries: Record<string, string> }) => void;
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -305,8 +309,14 @@ function CorrelationPanel(props: {
 }
 
 export function DistributionEditor(props: DistributionEditorProps) {
-  const [rows, setRows] = useState<Record<string, DistRow>>({});
-  const [entries, setEntries] = useState<Record<string, string>>({});
+  const [rows, setRows] = useState<Record<string, DistRow>>(() => props.initial?.rows ?? {});
+  const [entries, setEntries] = useState<Record<string, string>>(
+    () => props.initial?.entries ?? {},
+  );
+  const { onState } = props;
+  useEffect(() => {
+    onState?.({ rows, entries });
+  }, [rows, entries, onState]);
   const factors = useMemo(() => {
     const out: Record<string, number> = {};
     for (const [id, d] of Object.entries(props.displays ?? {})) out[id] = d.factor;

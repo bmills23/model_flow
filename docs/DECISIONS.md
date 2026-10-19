@@ -1483,8 +1483,8 @@ overturn):
 13. **Deferred (DEFAULT).** Named projects in storage, cloud or gist sharing, a PDF library, RISC5 project
     import, comparing two saved projects, offline install, translation, and the mobile check in CI.
 14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
-    S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens), the full S9 and S10
-    passes and the S11 user guide wait for M7, M9 and M10.
+    S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens) is done (see the S8
+    block below), while the full S9 and S10 passes and the S11 user guide wait for the other screens.
 
 ### M9 review fixes (2026-10-18)
 
@@ -1518,3 +1518,36 @@ overturn):
   plain property, never a prototype.
 - No fixture was widened, removed or rewritten for tolerance. Two project tests that expected a bad feed
   to refuse the whole file were rewritten to expect the feed dropped and the forms kept.
+
+## 2026-10-18: M11 slice S8, project keys, CSV and report sections for the household, plants and uncertainty screens
+
+Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/methods/projects-and-reports.md`
+(sections 2, 5, 6 and 12).
+
+1. **Three new screen keys, no version bump.** `household`, `plantsEco` and `uncertainty` join the
+   version 1 `screens` object. Every field is optional on load and takes the screen default, so a file
+   written before S8 loads unchanged; the migration table stays empty.
+2. **The uncertainty setup is project state, results are not.** The `uncertainty` key holds, per panel
+   (`risk`, `cleanup`), the distribution editor rows as typed, the correlation pairs and the run settings.
+   A run is reproducible from the setup and the seed, so no sample or result is stored (the file would
+   grow by the iteration count for nothing). The panel writes its setup to the project store on every
+   change and reads it back on mount.
+3. **Two new feed entries.** `household` (the received air concentrations and coefficients, fingerprinted
+   against the household form) and `produce` (plant factors and intake, against the plants form). They
+   follow the existing rule: a feed that cannot be used is dropped with a warning, never refusing the
+   file, and a feed whose source form changed is flagged stale, never recomputed.
+4. **CSV tables per screen.** Household: one long table. Plants and ecology: plant factors, ecological
+   screening (Eco-SSL rows and user benchmark rows together, with a status column so an Eco-SSL NA or NC is
+   kept and not dropped) and TPH. Uncertainty: summary, sample and sensitivity tables for the exposure
+   panel, levels, sample and sensitivity for the cleanup panel. The sample tables hold every iteration at
+   full precision. A table with no rows is not offered. The household file name carries no data edition
+   (no dataset is read); the plants, TPH and uncertainty files carry the RSL edition.
+5. **Report sections.** The report lists the three screens like the others (inputs as typed, methods
+   run) and decides the methods from the forms: the household screen runs its seven methods side by side;
+   the plants screen runs both plant uptake methods and the Eco-SSL screen, plus the benchmark method when
+   a benchmark row exists and the chosen TPH set when a total or a fraction is entered; the uncertainty
+   section names the sampling method of each panel whose setup differs from the defaults and the Sobol
+   method when it is switched on. Result tables, charts and engine warnings per screen are still not in
+   the report for any screen (the open part of S6).
+6. **Not verified here.** No data value or constant was typed. The units written in the new CSV headers
+   are the units the screens display today, read from the screens, not from a source.

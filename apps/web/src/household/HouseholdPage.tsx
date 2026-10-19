@@ -1,14 +1,16 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { registry, type Warning } from '@model-flow/engine';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { getScreen, setScreen } from '../project/store';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { computeHousehold, volatileVerdict, type Section } from './compute';
+import { householdCsvTables } from './csv';
 import { buildHouseholdFeed } from './feed';
 import { setHouseholdFeed } from './feeds';
 import {
-  DEFAULT_FORM,
   type HouseholdForm,
   type IrrigationWaterSource,
   type ParticulateChoice,
@@ -65,7 +67,8 @@ function Kind({ id }: { id: string }) {
 const isInvalid = (e: string): boolean => !e.endsWith('is required');
 
 export function HouseholdPage() {
-  const [form, setForm] = useState<HouseholdForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<HouseholdForm>(() => getScreen('household').form);
+  useEffect(() => setScreen('household', { form }), [form]);
   const set = <K extends keyof HouseholdForm>(k: K, v: HouseholdForm[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
   const text = (k: keyof HouseholdForm, label: string, hint?: string) => (
@@ -482,6 +485,8 @@ export function HouseholdPage() {
               </p>
             )}
           </section>
+
+          <DownloadCsv tables={householdCsvTables(out)} />
 
           <section className="panel" aria-label="Warnings and notes">
             <h2>Warnings</h2>

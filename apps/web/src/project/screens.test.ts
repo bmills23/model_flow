@@ -15,6 +15,12 @@ import { defaultForm as riskDefault, defaultReceptor, type ChemicalRow } from '.
 import * as risk from '../risk/project';
 import { defaultCleanupForm } from '../cleanup/form';
 import * as cleanup from '../cleanup/project';
+import { DEFAULT_FORM as HOUSEHOLD_DEFAULT } from '../household/form';
+import * as household from '../household/project';
+import { DEFAULT_FORM as PLANTS_DEFAULT } from '../plantsEco/form';
+import * as plantsEco from '../plantsEco/project';
+import { defaultUncertainty } from '../uncertainty/project';
+import * as uncertainty from '../uncertainty/project';
 import { unknownKeyPaths } from './merge';
 
 const json = <T>(v: T): unknown => JSON.parse(JSON.stringify(v));
@@ -145,6 +151,90 @@ const cases: Case<unknown>[] = [
           b: defaultReceptor('worker'),
           allocation: 'cumulative',
         },
+      },
+    ],
+  },
+  {
+    name: 'household',
+    schema: household.householdProjectSchema,
+    toProject: household.toProject as never,
+    fromProject: household.fromProject as never,
+    states: [
+      { form: HOUSEHOLD_DEFAULT },
+      {
+        form: {
+          ...HOUSEHOLD_DEFAULT,
+          chemicalId: '71-43-2',
+          chemicalName: 'Benzene',
+          waterConcentration: '0.005',
+          alsoPotable: true,
+          showerMethod: 'rsl',
+          particulateMethod: 'box',
+          showerWaterSource: 'well',
+          irrigationWaterSource: 'surface',
+          volatileOverride: 'nonvolatile',
+        },
+      },
+    ],
+  },
+  {
+    name: 'plantsEco',
+    schema: plantsEco.plantsEcoProjectSchema,
+    toProject: plantsEco.toProject as never,
+    fromProject: plantsEco.fromProject as never,
+    states: [
+      { form: PLANTS_DEFAULT },
+      {
+        form: {
+          ...PLANTS_DEFAULT,
+          chemicalId: '71-43-2',
+          uptake: 'legacy',
+          intakeMode: 'custom',
+          ageGroup: '6 to 11',
+          ionizable: true,
+          tphSet: 'madep',
+          custom: {
+            ...PLANTS_DEFAULT.custom,
+            root: { gPerKgDay: '1.5', loss: '0.1', homegrown: '0.5' },
+          },
+          benchmarks: [{ receptor: 'plants', value: '10', citation: 'user' }],
+          tphFractions: [
+            { label: 'C9-C12', family: 'aliphatic', massFraction: '0.4', surrogate: '', level: '' },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    name: 'uncertainty',
+    schema: uncertainty.uncertaintyProjectSchema,
+    toProject: uncertainty.toProject as never,
+    fromProject: uncertainty.fromProject as never,
+    states: [
+      defaultUncertainty(),
+      {
+        ...defaultUncertainty(),
+        risk: {
+          ...defaultUncertainty().risk,
+          rows: {
+            bodyWeight: {
+              kind: 'lognormal',
+              params: { gm: '70', gsd: '1.2' },
+              lnForm: 'geometric',
+              lo: '40',
+              hi: '',
+              table: '',
+            },
+          },
+          correlation: { 'a|b': '0.3' },
+          sampling: 'lhs',
+          iterations: '500',
+          seed: '7',
+          output: 'hi',
+          sobol: true,
+          sobolN: '256',
+        },
+        cleanup: { ...defaultUncertainty().cleanup, protection: '90', choice: '71-43-2|soil' },
       },
     ],
   },

@@ -115,6 +115,49 @@ describe('methodsRun', () => {
   });
 });
 
+describe('household, plants and uncertainty screens', () => {
+  it('count as used only when edited, and every id they return is registered', () => {
+    const s = base();
+    expect(screenUsed('household', s)).toBe(false);
+    s.household = { form: { ...s.household.form, soilConcentration: '3' } };
+    s.plantsEco = {
+      form: {
+        ...s.plantsEco.form,
+        soilConcentration: '3',
+        benchmarks: [{ receptor: 'r', value: '1', citation: 'c' }],
+        tphSet: 'madep',
+        tphFractions: [
+          { label: 'f', family: 'aliphatic', massFraction: '1', surrogate: '', level: '' },
+        ],
+      },
+    };
+    s.uncertainty = { ...s.uncertainty, risk: { ...s.uncertainty.risk, seed: 'x' } };
+    const r = methodsRun(s);
+    expect(Object.keys(r.byScreen)).toEqual(['household', 'plantsEco', 'uncertainty']);
+    for (const id of r.ids) expect(registry.has(id)).toBe(true);
+    expect(r.byScreen.plantsEco).toEqual([
+      'plantUptake.trapp-matthies-1995',
+      'plantUptake.hhrap-2005',
+      'eco.ecossl-2005',
+      'eco.benchmark-hq',
+      'tph.madep',
+    ]);
+    expect(r.byScreen.uncertainty).toEqual(['uncertainty.srs-exposure']);
+  });
+
+  it('a household feed marks the household screen used', () => {
+    expect(
+      methodsRun(base(), { household: { source: 'household' } }).byScreen.household,
+    ).toHaveLength(7);
+  });
+
+  it('the RSL edition is named when the plants screen is used', () => {
+    const s = base();
+    s.plantsEco = { form: { ...s.plantsEco.form, soilConcentration: '3' } };
+    expect(dataEditionsFor(methodsRun(s).byScreen).rsl).toBe('rsl-2024-11');
+  });
+});
+
 describe('dataEditionsFor', () => {
   it('names the editions of the datasets the used screens read', () => {
     const s = base();

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { TPH_SURROGATE_IDS } from '@model-flow/engine';
 import { PlantsEcoPage } from './PlantsEcoPage';
 import { clearProduceFeed, getProduceFeed } from './feeds';
+import { forgetMemory, getScreen } from '../project/store';
 
 afterEach(clearProduceFeed);
 
@@ -15,6 +16,19 @@ async function pickLead() {
   const buttons = await screen.findAllByRole('button', { name: /^add lead and compounds/i });
   fireEvent.click(buttons[0]!);
 }
+
+describe('PlantsEcoPage in the project', () => {
+  it('starts from the project and writes edits back', () => {
+    forgetMemory();
+    const { unmount } = render(<PlantsEcoPage />);
+    fill(/^soil concentration/i, '10');
+    expect(getScreen('plantsEco').form.soilConcentration).toBe('10');
+    unmount();
+    render(<PlantsEcoPage />);
+    expect((screen.getByLabelText(/^soil concentration/i) as HTMLInputElement).value).toBe('10');
+    forgetMemory();
+  });
+});
 
 describe('PlantsEcoPage', () => {
   it('opens on a heading and asks for the inputs it cannot default', () => {

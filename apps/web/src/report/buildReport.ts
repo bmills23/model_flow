@@ -9,10 +9,13 @@ import {
 } from './methodsRun';
 import { buildMethodsStatement, type MethodsStatement } from './methodsStatement';
 import * as cleanup from '../cleanup/project';
+import * as household from '../household/project';
+import * as plantsEco from '../plantsEco/project';
 import * as risk from '../risk/project';
 import * as saturated from '../saturated/project';
 import * as surfaceWater from '../surfaceWater/project';
 import * as transport from '../transport/project';
+import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
 
@@ -27,6 +30,9 @@ export const SCREEN_NAMES: Record<ScreenKey, string> = {
   surfaceWater: 'Surface water and sediment',
   risk: 'Exposure and risk',
   cleanup: 'Cleanup levels',
+  household: 'Household water and soil air',
+  plantsEco: 'Plants, ecology and TPH',
+  uncertainty: 'Uncertainty analysis setup',
 };
 
 export interface InputRow {
@@ -71,6 +77,9 @@ const PROJECTORS: { [K in ScreenKey]: (s: Screens[K]) => unknown } = {
   surfaceWater: surfaceWater.toProject,
   risk: risk.toProject,
   cleanup: cleanup.toProject,
+  household: household.toProject,
+  plantsEco: plantsEco.toProject,
+  uncertainty: uncertainty.toProject,
 };
 
 /** A screen's saved state wraps its fields in `form`; the report shows the field names alone. */

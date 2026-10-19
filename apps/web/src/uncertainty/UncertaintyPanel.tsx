@@ -18,7 +18,11 @@ import {
   type UncertaintySpec,
   type Warning,
 } from '@model-flow/engine';
+import { DownloadCsv, type CsvTable } from '../export/DownloadCsv';
 import { Field, Seg } from '../ui/controls';
+import { exposureUncertaintyTables } from './csv';
+import type { UncertaintySetup } from './project';
+import { useSetup } from './useSetup';
 import { DistributionEditor, type UnitDisplay } from './DistributionEditor';
 import type { EditorSpec } from './editor';
 import {
@@ -70,6 +74,10 @@ export interface UncertaintyPanelProps<I> {
   makeWorker?: WorkerFactory;
   /** Pool size override (tests); default min(4, cores - 1). */
   workers?: number;
+  /** When set, the setup (distributions, sampling, seed) is read from and saved to the project. */
+  persistKey?: 'risk' | 'cleanup';
+  /** Datasets the output reads, whose editions go in the CSV file names. */
+  csvEditions?: CsvTable['editions'];
 }
 
 interface RunResult {
@@ -100,12 +108,25 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
     [model],
   );
   const [spec, setSpec] = useState<EditorSpec | null>(null);
-  const [kind, setKind] = useState<SamplingKind>('srs');
-  const [nText, setNText] = useState('');
-  const [seed, setSeed] = useState(DEFAULT_SEED);
-  const [outId, setOutId] = useState(props.outputs[0]?.id ?? '');
-  const [sobol, setSobol] = useState(false);
-  const [sobolN, setSobolN] = useState(String(DEFAULT_SOBOL_N));
+  const [setup, patchSetup] = useSetup(props.persistKey);
+  const [initialEditor] = useState(() => ({ rows: setup.rows, entries: setup.correlation }));
+  const kind: SamplingKind = setup.sampling;
+  const nText = setup.iterations;
+  const seed = setup.seed;
+  const outId = setup.output !== '' ? setup.output : (props.outputs[0]?.id ?? '');
+  const sobol = setup.sobol;
+  const sobolN = setup.sobolN;
+  const setKind = (v: SamplingKind): void => patchSetup({ sampling: v });
+  const setNText = (v: string): void => patchSetup({ iterations: v });
+  const setSeed = (v: string): void => patchSetup({ seed: v });
+  const setOutId = (v: string): void => patchSetup({ output: v });
+  const setSobol = (v: boolean): void => patchSetup({ sobol: v });
+  const setSobolN = (v: string): void => patchSetup({ sobolN: v });
+  const onEditorState = useCallback(
+    (s: { rows: UncertaintySetup['rows']; entries: UncertaintySetup['correlation'] }) =>
+      patchSetup({ rows: s.rows, correlation: s.entries }),
+    [patchSetup],
+  );
   const [progress, setProgress] = useState<Progress | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -240,6 +261,8 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
       <DistributionEditor
         inputs={inputs}
         {...(props.displays ? { displays: props.displays } : {})}
+        initial={initialEditor}
+        onState={onEditorState}
         onChange={onSpec}
       />
       {spec && !spec.ok && (
@@ -403,6 +426,21 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
           />
           <SpearmanChart rows={view.spearman} />
           {view.sobol && <SobolChart rows={sobolRows(view.sobol, labels)} />}
+          <DownloadCsv
+            tables={exposureUncertaintyTables(
+              {
+                method: view.kind === 'lhs' ? 'uncertainty.lhs-ic' : 'uncertainty.srs-exposure',
+                outputLabel: view.output.label,
+                unit: view.output.unit,
+                summary: view.summary,
+                values: view.values,
+                tornado: tornadoRows(view.tornado, labels),
+                spearman: view.spearman,
+                sobol: view.sobol ? sobolRows(view.sobol, labels) : null,
+              },
+              props.csvEditions,
+            )}
+          />
           {view.sobol && (
             <p className="muted">
               Sobol: N = {view.sobol.n}, {view.sobol.runs} runs, indices on the{' '}

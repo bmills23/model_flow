@@ -21,6 +21,8 @@ export function RiskUncertainty(props: { base: LegacyScenarioInput }) {
         base={base}
         outputs={outputs}
         displays={EXPOSURE_DISPLAYS}
+        persistKey="risk"
+        csvEditions={['rsl']}
       />
       <p className="muted">
         The analysis samples the legacy method&apos;s receptor factors (body weight, exposure

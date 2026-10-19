@@ -13,7 +13,7 @@ import {
 } from './store';
 
 const SHARED_NOTE =
-  'The shared link does not include the values passed between screens. Send them again from their source screens (groundwater transport, vadose leaching, saturated soil source, vapor intrusion, surface water and sediment).';
+  'The shared link does not include the values passed between screens. Send them again from their source screens (groundwater transport, vadose leaching, saturated soil source, vapor intrusion, surface water and sediment, household water and soil air, plants, ecology and TPH).';
 const SHARE_CAVEAT =
   'The link holds every screen as entered but does not include the values passed between screens; the person who opens it sends those again from their source screens.';
 const REPLACE_PROMPT =
