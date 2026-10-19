@@ -4,6 +4,8 @@ import { convert, formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Marker } from '../transport/Marker';
 import { Field, Group, Seg } from '../ui/controls';
+import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { budgetRows, massRateKgPerDay } from './chartData';
 import { lastYearMean, type RunSummary, type VadoseMethod } from './compute';
 import { DepthProfileChart } from './DepthProfileChart';
@@ -127,6 +129,7 @@ export function VadosePage() {
   useEffect(() => setScreen('vadose', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const { rows: chemicals, failed: chemicalsFailed } = useChemicalRows();
   const setLayer = (side: Side, index: number, patch: Partial<LayerForm>): void =>
     setForm((f) => ({
       ...f,
@@ -267,6 +270,16 @@ export function VadosePage() {
           </Group>
 
           <Group title="Chemical">
+            <ChemicalPicker
+              id="vadose-chemical"
+              rows={chemicals}
+              failed={chemicalsFailed}
+              value={form.chemicalId}
+              onPick={(row) =>
+                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              }
+              note="Decay in the leachate is not in the database and stays your input."
+            />
             <div className="fields">
               <Field label="Molar mass (g/mol)" value={form.M} onChange={(v) => set('M', v)} />
               <Field label="Solubility (mg/L)" value={form.S} onChange={(v) => set('S', v)} />

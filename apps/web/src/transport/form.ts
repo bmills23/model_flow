@@ -37,6 +37,8 @@ export interface TransportForm {
   retardMode: 'factor' | 'kd';
   retardation: string;
   kd: string; // L/kg
+  chemicalId: string; // database row Kd was filled from; blank = entered by hand
+  foc: string; // organic carbon fraction used with the database Koc
   bulkDensity: string; // kg/L
   halfLifeYr: string; // years; blank or 0 = no decay
   // source
@@ -89,6 +91,8 @@ export const DEFAULT_FORM: TransportForm = {
   retardMode: 'factor',
   retardation: '2',
   kd: '0.1',
+  chemicalId: '',
+  foc: '0.001',
   bulkDensity: '1.7',
   halfLifeYr: '10',
   srcLength: '15',

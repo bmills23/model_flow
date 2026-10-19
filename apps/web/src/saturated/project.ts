@@ -17,7 +17,7 @@ const formSchema = partialObject({
   schedule: z.enum(['annual-mean', 'seasonal']),
   ...texts('porosity', 'rhoB', 'foc', 'thetaR', 'n'),
   hydraulicModel: z.enum(['default', 'brooksCorey1964', 'vanGenuchten1980']),
-  ...texts('K', 'gradient', 'infiltration', 'F', 'M', 'S', 'H', 'Koc'),
+  ...texts('K', 'gradient', 'infiltration', 'chemicalId', 'F', 'M', 'S', 'H', 'Koc'),
   tphOn: flag,
   ...texts('FT', 'MT', 'srcDecay', 'horizonYr'),
   method: z.enum(['legacy', 'modern', 'both']),

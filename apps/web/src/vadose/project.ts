@@ -11,7 +11,7 @@ export interface VadoseState {
 const layer = z.object({ ...texts('thickness', 'thetaS', 'thetaR', 'n', 'Ks', 'rhoB', 'foc') });
 
 const formSchema = partialObject({
-  ...texts('infiltration', 'M', 'S', 'H', 'Koc', 'Da', 'Dw', 'mu'),
+  ...texts('infiltration', 'chemicalId', 'M', 'S', 'H', 'Koc', 'Da', 'Dw', 'mu'),
   source: layer.partial(),
   ...texts('srcLength', 'srcWidth', 'srcF'),
   tphOn: flag,
