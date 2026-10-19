@@ -29,6 +29,7 @@ export interface SaturatedForm {
   infiltration: string; // cm/yr
   // chemical
   F: string; // mg/kg
+  chemicalId: string; // database row the properties were filled from; blank = entered by hand
   M: string; // g/mol
   S: string; // mg/L
   H: string;
@@ -69,6 +70,7 @@ export const DEFAULT_FORM: SaturatedForm = {
   M: '78',
   S: '1750',
   H: '0.228',
+  chemicalId: '',
   Koc: '59',
   tphOn: true,
   FT: '5000',

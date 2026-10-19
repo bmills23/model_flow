@@ -3,6 +3,8 @@ import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { fedStepLength } from '../transport/compute';
 import { Field, Group, Seg } from '../ui/controls';
+import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { TimeLineChart, type TimeSeries } from '../vadose/TimeLineChart';
 import { fmt, regionRows, releaseRows, type Row } from './chartData';
 import type { RunSummary, TaggedWarning } from './compute';
@@ -108,6 +110,7 @@ export function SaturatedPage() {
   useEffect(() => setScreen('saturated', { form, method: feedMethod }), [form, feedMethod]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const { rows: chemicals, failed: chemicalsFailed } = useChemicalRows();
 
   const parsed = useMemo(() => toScenario(form), [form]);
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
@@ -324,6 +327,16 @@ export function SaturatedPage() {
           </Group>
 
           <Group title="Chemical">
+            <ChemicalPicker
+              id="saturated-chemical"
+              rows={chemicals}
+              failed={chemicalsFailed}
+              value={form.chemicalId}
+              onPick={(row) =>
+                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              }
+              note="The source decay rate is not in the database and stays your input."
+            />
             <div className="fields">
               <Field
                 label="Chemical in the soil (mg/kg)"

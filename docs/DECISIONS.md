@@ -1780,3 +1780,18 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    screens to visit; no step is locked.
 4. **Scope: all ten slices**, U1 to U10, including the optional decimal comma entry (U10).
 
+
+## 2026-10-19: Wave H slice U8, fill chemical properties from the database
+
+1. **Shared helper (DEFAULT).** `ui/chemicalFill.ts` (`fateFill`, `useChemicalRows`) and
+   `ui/ChemicalPicker.tsx` reuse the vapor chemical file and its loader. A property the record lacks is
+   left as typed rather than blanked, so a fill never removes a value.
+2. **Vadose and saturated (DEFAULT).** The select fills molar mass, solubility, Henry constant, Koc and
+   (vadose only) both diffusivities. Decay stays a user input and the note says so. Each form gains an
+   optional `chemicalId` key, inside project format version 1.
+3. **Groundwater transport (DEFAULT).** The screen has no chemical properties, only Kd, so the select sets
+   Kd to the database Koc times a new optional organic carbon fraction field (`foc`, default 0.001) and
+   switches retardation to "From Kd". Editing the fraction while a chemical is chosen recomputes Kd. The
+   half-life stays a user input. New optional keys `chemicalId` and `foc`, inside format version 1.
+4. **Not changed.** Surface water is excluded until G4; no feed changes meaning; choosing "Entered by hand"
+   keeps the current values.

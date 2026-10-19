@@ -22,6 +22,7 @@ export interface LayerForm {
 export interface VadoseForm {
   infiltration: string; // cm/yr
   // chemical
+  chemicalId: string; // database row the properties were filled from; blank = entered by hand
   M: string; // g/mol
   S: string; // mg/L
   H: string; // dimensionless
@@ -71,6 +72,7 @@ export const DEFAULT_FORM: VadoseForm = {
   M: '78',
   S: '1750',
   H: '0.228',
+  chemicalId: '',
   Koc: '59',
   Da: '0.088',
   Dw: '9.8e-6',

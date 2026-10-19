@@ -58,6 +58,8 @@ Compare the legacy AT123D-class method with the modern exact solution at a recep
 Buttons below the result send the well concentration to the risk screen, the aquifer to cleanup levels, the
 water table concentration to vapor intrusion and the plume to surface water.
 
+The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input.
+
 ### Vadose leaching (`#/vadose`)
 
 A source in unsaturated soil loses chemical to the air and to infiltrating water. Follow the leachate to the
@@ -65,11 +67,15 @@ water table with the legacy or the modern layered model. The screen shows the so
 arrival at the water table, a mass budget, and a validation case you can load. It can feed the groundwater
 and vapor screens.
 
+The chemical select fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input.
+
 ### Saturated soil source (`#/saturated`)
 
 Chemical in soil at or below the water table dissolves into the groundwater flowing through it. Release it
 at a constant rate until it is gone (legacy) or in proportion to the mass left (modern). The release can
 feed the groundwater and vapor screens. A worked example is built in.
+
+The chemical select fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input.
 
 ### Vapor intrusion (`#/vapor`)
 

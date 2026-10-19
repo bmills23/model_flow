@@ -9,6 +9,8 @@ import type { ComputeRequest, MethodKey } from './compute';
 import { toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
+import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { useChemicalRows } from '../ui/chemicalFill';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { transportCsvTables } from './csv';
 import { useTransportResult } from './useTransportResult';
@@ -77,6 +79,13 @@ const fmtAlpha = (v: number): string => String(Number(v.toPrecision(3)));
 export function TransportPage() {
   const [form, setForm] = useState<TransportForm>(() => getScreen('transport').form);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const { rows: chemicals, failed: chemicalsFailed } = useChemicalRows();
+  // Kd = Koc x foc (mL/g equals L/kg); a chemical without a Koc leaves Kd as typed
+  const kdFor = (id: string, foc: string, keep: string): string => {
+    const koc = chemicals.find((c) => c.id === id)?.rsl.koc?.value;
+    const f = Number(foc);
+    return koc !== undefined && foc.trim() !== '' && Number.isFinite(f) ? String(koc * f) : keep;
+  };
   const [wellMethod, setWellMethod] = useState<MethodKey>(() => getScreen('transport').method);
   useEffect(() => setScreen('transport', { form, method: wellMethod }), [form, wellMethod]);
   const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
@@ -207,6 +216,20 @@ export function TransportPage() {
                 />
               </div>
             )}
+            <ChemicalPicker
+              id="transport-chemical"
+              rows={chemicals}
+              failed={chemicalsFailed}
+              value={form.chemicalId}
+              onPick={(row) =>
+                setForm((f) => ({
+                  ...f,
+                  chemicalId: row?.id ?? '',
+                  ...(row ? { retardMode: 'kd' as const, kd: kdFor(row.id, f.foc, f.kd) } : {}),
+                }))
+              }
+              note="Only Kd (Koc times the organic carbon fraction below) is used here; the half-life is not in the database and stays your input."
+            />
             <Seg
               legend="Retardation"
               name="retardMode"
@@ -227,6 +250,19 @@ export function TransportPage() {
                 />
               ) : (
                 <>
+                  <Field
+                    label="Organic carbon fraction (-)"
+                    value={form.foc}
+                    disabled={satOn}
+                    onChange={(v) =>
+                      setForm((f) => ({
+                        ...f,
+                        foc: v,
+                        kd: f.chemicalId ? kdFor(f.chemicalId, v, f.kd) : f.kd,
+                      }))
+                    }
+                    hint="With a database chemical, Kd follows Koc times this."
+                  />
                   <Field
                     label="Kd (L/kg)"
                     value={form.kd}
