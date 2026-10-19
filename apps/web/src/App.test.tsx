@@ -140,4 +140,42 @@ describe('App shell', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'User guide' })).toBeTruthy();
     window.location.hash = '';
   });
+
+  it('has no disabled step and links every step to a route', () => {
+    window.location.hash = '';
+    render(<App />);
+    const nav = screen.getByRole('navigation');
+    const steps = nav.querySelectorAll('ol.steps li');
+    expect(steps).toHaveLength(6);
+    expect(nav.querySelectorAll('.steps button')).toHaveLength(0);
+    const hrefs = [...steps].map((li) => li.querySelector('a')?.getAttribute('href'));
+    expect(hrefs).toEqual([
+      '#/risk',
+      '#/transport',
+      '#/transport',
+      '#/risk',
+      '#/cleanup',
+      '#/report',
+    ]);
+  });
+
+  it('marks only the step that owns the current route', () => {
+    window.location.hash = '#/vadose';
+    render(<App />);
+    const current = screen
+      .getByRole('navigation')
+      .querySelectorAll('ol.steps a[aria-current="page"]');
+    expect(current).toHaveLength(1);
+    expect(current[0]!.textContent).toContain('Transport');
+    window.location.hash = '';
+  });
+
+  it('marks no step on the home page, which names no placeholder and links the report', () => {
+    window.location.hash = '';
+    render(<App />);
+    expect(document.querySelectorAll('ol.steps a[aria-current]')).toHaveLength(0);
+    expect(document.body.textContent).not.toMatch(/placeholder/i);
+    const main = document.getElementById('main')!;
+    expect(main.querySelector('a[href="#/report"]')).toBeTruthy();
+  });
 });

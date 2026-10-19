@@ -9,6 +9,11 @@ and sources behind each calculation are in the methods notes listed on the docum
 
 - The links under the title open each screen. The flow runs from the chemicals and site, through transport
   and receptors, to risk, cleanup levels and the report.
+- The six numbered steps (Chemicals, Site model, Transport, Receptors, Risk & cleanup, Results) are all
+  links, and none is locked: open them in any order. The step that owns the screen you are on is
+  highlighted; the groundwater, vadose, saturated soil, vapor, surface water, household and plants screens
+  count as Transport. Until the dedicated chemicals and site model screens arrive, Chemicals opens the
+  exposure and risk screen (where the chemical database loads) and Site model opens transport.
 - Screens pass results to each other (for example the groundwater concentration at a well goes to the risk
   screen). A result is only passed when you press the button that sends it, and the receiving screen says
   where its value came from.
