@@ -36,7 +36,9 @@ describe('receptor exposure factors panel', () => {
     expect(getOverrides().receptors[receptorKey('risk', 'a')]?.['legacy.bwKg']?.value).toBe('60');
     expect(ed.querySelector('summary')?.textContent).toMatch(/1 edited/);
 
-    fireEvent.click(within(ed).getByRole('button', { name: /reset body weight of receptor a/i }));
+    fireEvent.click(
+      within(ed).getByRole('button', { name: /reset to preset: body weight of receptor a/i }),
+    );
     expect(within(ed).queryByText('Edited')).toBeNull();
     expect(getOverrides().receptors).toEqual({});
   }, 30000);
@@ -48,7 +50,9 @@ describe('receptor exposure factors panel', () => {
       target: { value: '-3' },
     });
     expect(within(ed).getByRole('status').textContent).toMatch(/not negative/i);
-    fireEvent.click(within(ed).getByRole('button', { name: /reset all exposure factors/i }));
+    fireEvent.click(
+      within(ed).getByRole('button', { name: /reset to preset: all exposure factors/i }),
+    );
     expect(getOverrides().receptors).toEqual({});
   }, 30000);
 
