@@ -1,15 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { buildProject, defaultScreens, type Screens } from '../project';
+import { buildProject, defaultScreens, feedEntry, type Screens } from '../project';
+import { PATHWAY_IDS } from '@model-flow/engine';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { computeResults, tableText, MAX_ROWS } from './results';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
 
-function project(edit: (s: Screens) => void) {
+function project(edit: (s: Screens) => void, feeds?: (s: Screens) => Record<string, unknown>) {
   const screens = defaultScreens();
   edit(screens);
-  return buildProject({ screens, createdWith: '0.0.1', now: NOW });
+  return buildProject({
+    screens,
+    ...(feeds ? { feeds: feeds(screens) as never } : {}),
+    createdWith: '0.0.1',
+    now: NOW,
+  });
 }
 
 describe('computeResults', () => {
@@ -138,6 +144,55 @@ describe('computeResults', () => {
     expect(r['risk']!.tables.map((t) => t.name)).toEqual(['risk-results', 'risk-contributions']);
     expect(r['risk']!.tables[0]!.rows.length).toBeGreaterThan(0);
     expect(r['cleanup']!.tables.map((t) => t.name)).toContain('cleanup-levels');
+  }, 60000);
+
+  it('adds the held produce and total TPH levels to the cleanup section, with their warnings', async () => {
+    const db = await loadChemicalDb();
+    const rec = db.byId.get('71-43-2')!;
+    const on = ['soilIngestion'];
+    const pathways = Object.fromEntries(PATHWAY_IDS.map((p) => [p, on.includes(p)]));
+    const r = await computeResults(
+      project(
+        (s) => {
+          s.cleanup = {
+            form: {
+              ...s.cleanup.form,
+              chemicals: [{ ...newChemicalRow(rec), produceFromPlantsEco: true }],
+              a: { ...s.cleanup.form.a, pathways: pathways as never, produce: true },
+            },
+          };
+        },
+        (s) => ({
+          produce: feedEntry('plantsEco', s.plantsEco.form, {
+            chemicalId: '71-43-2',
+            label: 'Benzene',
+            method: 'plantUptake.hhrap-2005',
+            factors: { root: 0.02 },
+            intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
+            intakeLabel: 'user entered',
+            warnings: [{ code: 'PLANT_TEST_WARNING', message: 'outside the fitted range' }],
+          }),
+          tph: feedEntry('plantsEco', s.plantsEco.form, {
+            methodId: 'tph.tphcwg',
+            label: 'Total TPH, tph.tphcwg',
+            targetHazardIndex: 1,
+            totalMgPerKg: 640,
+            fractions: [],
+            unmapped: [],
+            warnings: [{ code: 'TPH_TEST_WARNING', message: 'a fraction warning' }],
+          }),
+        }),
+      ),
+    );
+    const sec = r['cleanup']!;
+    expect(sec.tables.map((t) => t.name)).toEqual(
+      expect.arrayContaining(['cleanup-levels', 'cleanup-pathways', 'cleanup-tph']),
+    );
+    const paths = sec.tables.find((t) => t.name === 'cleanup-pathways')!;
+    expect(paths.rows.some((x) => String(x.pathway).toLowerCase().includes('produce'))).toBe(true);
+    expect(sec.warnings.map((w) => w.code)).toEqual(
+      expect.arrayContaining(['PLANT_TEST_WARNING', 'TPH_TEST_WARNING']),
+    );
   }, 60000);
 
   it('notes that a modeled cleanup source needs the transport chain a saved project lacks', async () => {

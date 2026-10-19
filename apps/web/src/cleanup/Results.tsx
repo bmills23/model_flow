@@ -272,7 +272,12 @@ export function NotQuantified(props: {
   );
 }
 
-export function WarningsList(props: { outcome: CleanupOutcome; notes: string[] }) {
+export function WarningsList(props: {
+  outcome: CleanupOutcome;
+  notes: string[];
+  /** Engine warnings of the produce plant factors, with the plants and ecology screen's codes. */
+  feedWarnings?: readonly { code: string; message: string }[];
+}) {
   const items: { key: string; code: string; method: string; message: string }[] = [];
   const add = (method: Method, ws: readonly Warning[]) =>
     ws.forEach((w, i) =>
@@ -285,6 +290,14 @@ export function WarningsList(props: { outcome: CleanupOutcome; notes: string[] }
     );
   if (props.outcome.legacy.ok) add('legacy', props.outcome.legacy.result.warnings);
   if (props.outcome.modern.ok) add('modern', props.outcome.modern.result.warnings);
+  (props.feedWarnings ?? []).forEach((w, i) =>
+    items.push({
+      key: `plants:${w.code}:${i}`,
+      code: w.code,
+      method: 'Plant uptake',
+      message: w.message,
+    }),
+  );
   const total = items.length + props.notes.length;
   return (
     <section className="panel" aria-label="Warnings and notes">

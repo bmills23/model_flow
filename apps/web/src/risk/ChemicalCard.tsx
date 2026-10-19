@@ -24,6 +24,10 @@ export function ChemicalCard(props: {
   household: HouseholdRiskFeed | null;
   /** The plants and ecology screen's produce result; absent where the screen has no produce pathway. */
   produce?: ProduceRiskFeed | null;
+  /** Offer the plant-factor switch even where concentrations are hidden (the cleanup screen). */
+  showProduce?: boolean;
+  /** Replaces the explanation beside the plant-factor switch. */
+  produceNote?: string;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
@@ -212,7 +216,7 @@ export function ChemicalCard(props: {
           <span>Use the vapor screen outdoor air for the outdoor air concentration</span>
         </label>
       )}
-      {showConc && (produceHere || row.produceFromPlantsEco) && (
+      {(showConc || props.showProduce === true) && (produceHere || row.produceFromPlantsEco) && (
         <label className="check">
           <input
             type="checkbox"
@@ -220,8 +224,8 @@ export function ChemicalCard(props: {
             onChange={(e) => props.onChange({ ...row, produceFromPlantsEco: e.target.checked })}
           />
           <span>
-            Use the plants and ecology plant factors for homegrown produce (driven by the soil
-            concentration; receptors switch the pathway on)
+            {props.produceNote ??
+              'Use the plants and ecology plant factors for homegrown produce (driven by the soil concentration; receptors switch the pathway on)'}
           </span>
         </label>
       )}

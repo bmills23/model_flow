@@ -2,10 +2,13 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, describe, expect, it } from 'vitest';
 import { TPH_SURROGATE_IDS } from '@model-flow/engine';
 import { PlantsEcoPage } from './PlantsEcoPage';
-import { clearProduceFeed, getProduceFeed } from './feeds';
+import { clearProduceFeed, clearTphFeed, getProduceFeed, getTphFeed } from './feeds';
 import { forgetMemory, getScreen } from '../project/store';
 
-afterEach(clearProduceFeed);
+afterEach(() => {
+  clearProduceFeed();
+  clearTphFeed();
+});
 
 function fill(label: RegExp, value: string) {
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
@@ -101,5 +104,10 @@ describe('PlantsEcoPage', () => {
     const tph = screen.getByRole('region', { name: /tph fractions/i });
     // 1 / (0.5/200 + 0.5/1000) = 333.33 mg/kg
     expect(within(tph).getByText(/333/)).toBeTruthy();
+    // the total level goes to the cleanup screen on request
+    expect(getTphFeed()).toBeNull();
+    fireEvent.click(within(tph).getByRole('button', { name: /send total level to cleanup/i }));
+    expect(getTphFeed()?.methodId).toBe('tph.tphcwg');
+    expect(getTphFeed()?.totalMgPerKg).toBeCloseTo(1000 / 3, 6);
   });
 });

@@ -7,9 +7,13 @@ import {
 } from '../household/feeds';
 import {
   clearProduceFeed,
+  clearTphFeed,
   getProduceFeed,
+  getTphFeed,
   setProduceFeed,
+  setTphFeed,
   subscribeProduceFeed,
+  subscribeTphFeed,
 } from '../plantsEco/feeds';
 import {
   clearSaturatedFeed,
@@ -104,6 +108,7 @@ function sourceForms(s: Screens): Record<FeedKey, unknown> {
     vaporRisk: s.vapor.form,
     household: s.household.form,
     produce: s.plantsEco.form,
+    tph: s.plantsEco.form,
   };
 }
 const SOURCE: Record<FeedKey, string> = {
@@ -118,6 +123,7 @@ const SOURCE: Record<FeedKey, string> = {
   vaporRisk: 'vapor',
   household: 'household',
   produce: 'plantsEco',
+  tph: 'plantsEco',
 };
 
 const readers: Record<FeedKey, () => unknown> = {
@@ -132,6 +138,7 @@ const readers: Record<FeedKey, () => unknown> = {
   vaporRisk: getVaporRiskFeed,
   household: getHouseholdFeed,
   produce: getProduceFeed,
+  tph: getTphFeed,
 };
 
 function currentFeeds(): Feeds {
@@ -238,6 +245,7 @@ function watchFeeds(): void {
   subscribeVaporRiskFeed(() => recordHash('vaporRisk'));
   subscribeHouseholdFeed(() => recordHash('household'));
   subscribeProduceFeed(() => recordHash('produce'));
+  subscribeTphFeed(() => recordHash('tph'));
 }
 watchFeeds();
 
@@ -253,6 +261,7 @@ function clearAllFeeds(): void {
   clearVaporRiskFeed();
   clearHouseholdFeed();
   clearProduceFeed();
+  clearTphFeed();
 }
 
 /** Drop in-memory state back to defaults without touching storage (a simulated reload in tests). */
@@ -308,6 +317,7 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
     vaporRisk: setVaporRiskFeed,
     household: setHouseholdFeed,
     produce: setProduceFeed,
+    tph: setTphFeed,
   };
   for (const k of Object.keys(setters) as FeedKey[]) {
     const e = feeds[k];

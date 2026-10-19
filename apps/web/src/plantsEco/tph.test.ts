@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TPH_SURROGATE_IDS } from '@model-flow/engine';
 import type { CleanupProps } from '../cleanup/ssg';
 import { DEFAULT_FORM, type PlantsEcoForm } from './form';
-import { computeTph } from './tph';
+import { buildTphFeed, computeTph } from './tph';
 
 const [ALI_LOW, ALI_MED] = TPH_SURROGATE_IDS as [string, string];
 
@@ -129,5 +129,30 @@ describe('computeTph', () => {
         missing: expect.arrayContaining([expect.stringMatching(/bulk density/i)]),
       });
     });
+  });
+});
+
+describe('buildTphFeed', () => {
+  it('carries the total level, target, fractions and engine warnings to the cleanup screen', () => {
+    const form = base({ tphTargetHi: '0.5' });
+    const r = computeTph(form, props);
+    const feed = buildTphFeed(form, r);
+    expect(feed.ok).toBe(true);
+    if (!feed.ok || !r.ok) return;
+    expect(feed.feed.methodId).toBe('tph.tphcwg');
+    expect(feed.feed.targetHazardIndex).toBe(0.5);
+    expect(feed.feed.totalMgPerKg).toBe(r.result.totalMgPerKg);
+    expect(feed.feed.fractions.map((f) => f.label)).toEqual(['Low', 'Medium']);
+    expect(feed.feed.warnings).toEqual(
+      r.result.warnings.map((w) => ({ code: w.code, message: w.message })),
+    );
+  });
+
+  it('selects the MADEP id with the MADEP set and is refused when nothing computed', () => {
+    const form = base({ tphSet: 'madep' });
+    const feed = buildTphFeed(form, computeTph(form, props));
+    expect(feed.ok && feed.feed.methodId).toBe('tph.madep');
+    const none = base({ tphFractions: [] });
+    expect(buildTphFeed(none, computeTph(none, props)).ok).toBe(false);
   });
 });

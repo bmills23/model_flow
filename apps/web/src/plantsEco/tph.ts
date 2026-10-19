@@ -11,6 +11,7 @@ import {
 } from '@model-flow/engine';
 import type { CleanupProps } from '../cleanup/ssg';
 import { readNumber, readOptional, type PlantsEcoForm, type Section } from './form';
+import type { TphRiskFeed } from './feeds';
 
 export const TPH_LEGACY_ID = 'tph.tphcwg';
 export const TPH_MODERN_ID = 'tph.madep';
@@ -176,6 +177,37 @@ export function computeTph(
   } catch (e) {
     return { ok: false, errors: [e instanceof Error ? e.message : String(e)] };
   }
+}
+
+/** The feed the cleanup screen reads, or the reasons it cannot be built. */
+export function buildTphFeed(
+  form: PlantsEcoForm,
+  result: Section<{ result: TphResult }>,
+): { ok: true; feed: TphRiskFeed } | { ok: false; reasons: string[] } {
+  if (!result.ok) return { ok: false, reasons: result.errors };
+  const r = result.result;
+  if (r.totalMgPerKg === null) {
+    return { ok: false, reasons: ['No mapped fraction carries mass, so there is no total level'] };
+  }
+  const target = Number(form.tphTargetHi);
+  return {
+    ok: true,
+    feed: {
+      methodId: r.methodId,
+      label: `Total TPH, ${r.methodId}`,
+      targetHazardIndex: target,
+      totalMgPerKg: r.totalMgPerKg,
+      fractions: r.fractions.map((f) => ({
+        label: f.label,
+        family: f.family,
+        massFraction: f.massFraction,
+        mapped: f.mapped,
+        levelMgPerKg: f.levelMgPerKg ?? null,
+      })),
+      unmapped: r.unmapped,
+      warnings: r.warnings.map((w) => ({ code: w.code, message: w.message })),
+    },
+  };
 }
 
 function dedupe(ws: Warning[]): Warning[] {

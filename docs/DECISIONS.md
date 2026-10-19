@@ -1591,3 +1591,40 @@ Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/met
    personal address). A test requires a heading for every screen route.
 6. **Not verified here.** No data value or constant was typed. The one-line summaries on the index are
    descriptions of each note's subject, written from the file names and headings.
+
+## 2026-10-19: Wave G slice G1, produce and total TPH levels on the cleanup screen
+
+1. **Produce inputs come through the existing feed from `#/plants-eco` (DEFAULT).** The cleanup screen reads
+   the same `ProduceRiskFeed` the risk screen reads, and reuses the existing per-chemical switch
+   (`produceFromPlantsEco`) and per-receptor switch (`produce`). Evidence: the risk screen already follows
+   this pattern, the plant factors need the soil and plant inputs (TSCF, leaf-air partition coefficient,
+   Kd, moisture) that live on `#/plants-eco`, and entering them a second time on the cleanup screen would
+   let two screens hold two answers for one chemical. Cleanup-screen entry of plant inputs is not added.
+2. **Produce is part of the soil level, not a separate column (DEFAULT).** The produce pathway is a soil
+   pathway in the engine (closed form, coefficients add), so with both switches on the soil cleanup level
+   includes it and the existing "each pathway alone" table and CSV show the produce-only level. Test:
+   1/L(with produce) = 1/L(without) + 1/L(produce alone) at 1e-9. A chemical that opts in with no held feed
+   for it is an input error; a receptor that switches it on with no opting chemical gets a skip note. Old
+   projects load unchanged (both switches already exist in the saved risk and receptor schemas, default off).
+3. **Produce applies to direct sources only (DEFAULT).** Modeled sources (groundwater, vadose, saturated)
+   ignore the switches; the modeled chains were not extended. The probabilistic panel holds the produce
+   pathway at its point values (test: its deterministic level equals the closed form).
+4. **Unverified inputs keep their warnings.** The produce feed now carries the plant engine's warnings
+   (`warnings`, optional so earlier saved feeds still load); the cleanup warnings list shows them under the
+   origin "Plant uptake" and the report carries them with the same codes. The feed's method id
+   (`plantUptake.hhrap-2005` for the HHRAP fallback of Trapp 2015, `plantUptake.trapp-matthies-1995` for
+   legacy) names which engine produced the factors, and TSCF and the leaf-air partition coefficient remain
+   required user inputs on `#/plants-eco` (M9 ruling 12); nothing was defaulted here.
+5. **Total TPH level through a new `tph` feed (DEFAULT).** The composition editor, fraction levels and
+   saturation check live on `#/plants-eco`, so that screen gains "Send total level to cleanup" and the
+   cleanup screen shows a "Total TPH level" panel (method id `tph.tphcwg` or `tph.madep`, the target
+   hazard index, the total in mg/kg, the fraction table, the engine warnings). The cleanup screen does not
+   recompute it. The feed key `tph` was added to the project file's optional feeds (still format version 1:
+   a project without it loads as before, and it goes stale with the plants screen form like the produce
+   feed). The modeled-chain `impliedTph` and `tphHeld` are a different feature and are unchanged.
+6. **Exports.** `cleanup-tph` CSV table (total first, then one row per fraction); the pathway CSV already
+   carries produce. The `#/report` cleanup section adds the TPH table and both warning sets from the saved
+   feeds. When the cleanup form has no chemical but a TPH feed is held, the section shows the TPH table
+   with the note that the chemical levels were not computed.
+7. **Not done.** No cancer endpoint for TPH fractions (the fraction levels are hazard quotient levels
+   entered by the user); no TPH level inside a modeled source's soil chain beyond the existing implied TPH.
