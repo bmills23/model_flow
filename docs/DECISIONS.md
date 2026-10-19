@@ -1024,3 +1024,21 @@ M10 slice E7 (registry coverage, 2026-10-18) implementation choices, none overtu
 - The coverage tests use runnable base inputs written for the test (`test/uncertainBases.ts`); their numbers
   are scaffolding, not data and not a validation. No reference changed status and no assumption text changed.
 
+M10 slice W1 (worker pool and budget, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `apps/web/src/uncertainty/` holds `budget.ts` (pool size, the 5-row pilot, the 60 s and 10 minute limits,
+  the projection and the `uncertainty.run-budget` refusal), `protocol.ts` (the chunk message and `handleRows`, the
+  pure handler the worker and the tests share), `pool.ts` (`runPooled`) and `uncertainty.worker.ts`.
+- The worker resolves the model from the engine registry by method id and takes the scalar output as a property
+  path into the result, because functions do not cross the worker boundary. The sample matrix is still built on
+  one thread by the caller (`buildSampleMatrix`) and passed in as rows.
+- The pilot is the first 5 rows, run alone on one worker; its results are kept, not discarded. Time is measured
+  inside the worker around the model rows, so engine load is excluded. Projected wall time is the mean per-row
+  time times all rows divided by the pool size (an estimate: it assumes the pool scales linearly). Above 60 s the
+  caller's `confirm` decides (no callback means decline); above 10 minutes the run is refused with
+  `UncertaintyError` code `uncertainty.run-budget` (added to the engine's code union) before any further chunk is sent.
+- Cancel is an `AbortSignal`: every worker is terminated at once and the run rejects with `RunCancelledError`; a
+  declined confirmation rejects the same way. A worker error or an error response also terminates the pool.
+- Chunking, pool size and completion order never change the result: tested bit-identical to `runUncertainty`
+  for 1 and 4 workers and with completion order reversed. The budget counts timed rows, so a probabilistic
+  cleanup row that costs many forward runs is covered by its measured time rather than by a forward-run count.

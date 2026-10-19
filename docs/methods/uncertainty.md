@@ -240,7 +240,8 @@ chunks and compares exactly.
 
 Runs execute in a pool of web workers (size min(4, hardwareConcurrency - 1), at least 1), each holding the
 engine bundle, receiving row chunks of 50 and posting progress; the run can be cancelled. Before a run the
-coordinator times 5 pilot rows and projects the total; projected time above 60 s asks the user to confirm
+coordinator times 5 pilot rows (run alone on one worker, kept as the first rows of the result) and projects the
+total as the mean per-row model time times the rows, divided by the pool size; projected time above 60 s asks the user to confirm
 or reduce n, and above 10 minutes the run is refused with the projection shown. Chains flagged numerical
 by M5 (`cleanup.numerical-chain`, the layered finite-volume column) are labelled as expensive in the form.
 The engine runner is a pure function over rows so the same code runs in Vitest without workers.
@@ -349,7 +350,8 @@ Engine (each one worker, TDD):
 
 Web (each one worker; verify at 390x844 through CDP, light and dark):
 
-- **W1 Worker pool and budget.** Pool, chunking, progress, cancel, pilot timing. Depends on E4.
+- **W1 Worker pool and budget (done).** Pool, chunking, progress, cancel, pilot timing, in `apps/web/src/uncertainty/`
+  (no screen; W3 puts the confirm dialog and progress bar on the exposure screen). Depends on E4.
 - **W2 Distribution editor and correlation matrix input.** Per-input distribution rows from the registry,
   CDF preview, positive definite check. Depends on E1, E2.
 - **W3 Results.** Percentile fan, CDF and histogram, tornado, Sobol bars with intervals, summary table, on

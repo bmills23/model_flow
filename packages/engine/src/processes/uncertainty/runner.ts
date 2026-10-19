@@ -59,7 +59,8 @@ export type UncertaintyCode =
   | 'uncertainty.category-not-allowed'
   | 'uncertainty.correlation-not-positive-definite'
   | 'uncertainty.unknown-input'
-  | 'uncertainty.bad-specification';
+  | 'uncertainty.bad-specification'
+  | 'uncertainty.run-budget';
 
 /** A refusal: the run is not attempted. */
 export class UncertaintyError extends RangeError {
