@@ -36,10 +36,11 @@ A project is one JSON document, the single source for save, load, share, persist
   "savedAt": "<ISO 8601 date-time>",
   "title": "<free text, optional>",
   "screens": {
-    "transport": { "form": { ... }, "method": "groundwater.<id>" },
-    "vadose":    { "form": { ... }, "method": "vadose.<id>" },
-    "saturated": { ... }, "vapor": { ... }, "surfaceWater": { ... },
-    "risk": { ... }, "cleanup": { ... }
+    "transport": { "form": { ... }, "method": "modern" },
+    "vadose":    { "form": { ... } },
+    "saturated": { "form": { ... }, "method": "legacy" },
+    "vapor": { "form": { ... }, "outdoor": { ... }, "af": { ... }, "pvi": { ... }, "choice": "entered" },
+    "surfaceWater": { "form": { ... } }, "risk": { "form": { ... } }, "cleanup": { "form": { ... } }
   },
   "feeds": {
     "well":   { "source": "transport", "inputsHash": "<hash of the source form>", "value": { ... } },
@@ -49,11 +50,29 @@ A project is one JSON document, the single source for save, load, share, persist
 }
 ```
 
+- **Implemented (S2, `apps/web/src/project/` and a `project.ts` beside each screen's `form.ts`).** The
+  `method` entries are the screen's own method choice as the page holds it (the transport well method, the
+  saturated feed method), not a registry id, because the page keys are what the page reads back; the vapor
+  key also holds the outdoor, attenuation factor and vertical separation sub-forms and the source choice.
+  `buildProject`, `parseProject` (text or parsed value; refuses a non-project, a bad or newer version, and
+  any schema failure, with the path of the problem), `screensOf` and `defaultScreens` are the entry points.
+  Inside a screen, every form field is optional on load and takes the screen default when absent (so
+  adding a field never needs a version bump), and nested objects merge key by key; array rows (steps,
+  layers, chemicals) are taken whole and must be complete, except that a chemical row flag an older file
+  lacks reads as false. Enum fields are checked against the form's own allowed values; text fields accept
+  any string. Unknown keys are dropped and listed as warnings by path. `createdWith` is a parameter of
+  `buildProject`; the caller passes the app version. No version has needed a migration yet, so the
+  `migrations` table is empty and the runner is tested with injected steps; the first real bump adds its
+  fixture test.
 - **Screen keys hold the screen's own form type unchanged** (strings as typed, so a reload shows exactly
   what the user entered, including invalid text). Each screen exports `toProject()` and `fromProject()`
   beside its `form.ts`; the project module never reaches into a form's fields. Screens added by M7, M9 and
   M10 add keys; an absent key means that screen's defaults.
-- **Feeds are stored as values, not recomputed on load (DEFAULT).** A feed is the series the user chose to
+- **Feeds are stored as values, not recomputed on load (DEFAULT).** The schema checks the well and
+  surface water feeds in full (equal length finite series, SI) and the scenario carrying feeds (vadose,
+  saturated, bank, vapor) only as JSON objects; S3 pins their exact stored shape when it persists them
+  (the transport chain feed holds a closure and is not part of the file). `feedEntry` and `isFeedStale`
+  build and test the source form hash (FNV-1a over key-sorted JSON). A feed is the series the user chose to
   send, and recomputing it could silently change a downstream result. Each feed records the hash of the
   source form it was built from, so on load the receiving screen can say "this feed was built from inputs
   that have since changed" (a warning, never a silent refresh).
