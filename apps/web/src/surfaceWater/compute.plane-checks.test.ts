@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { linkedRun } from './computeLinked';
+import { linkedRun } from './linkedRun.testkit';
 
 describe('surface water compute, plane checks', () => {
   it('warns on both methods when the discharge thickness is far shallower than the plume', () => {
