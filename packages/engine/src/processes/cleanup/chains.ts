@@ -101,7 +101,29 @@ export type Transport =
       points: readonly Point3[];
     };
 
+/**
+ * What a level search can reuse between its runs of one transport: the per-point time integrals (AT123D)
+ * or unit step responses (PATCHI). They do not depend on the source concentration, only on the point,
+ * the time and the step windows, and are the very numbers a cold evaluation computes.
+ */
+interface PointCaches {
+  at123d: Map<number, Map<string, number>>[];
+  patchi: Map<number, number>[];
+}
+
+const POINT_CACHES = new WeakMap<Transport, PointCaches>();
+
+function pointCaches(t: Transport): PointCaches {
+  let c = POINT_CACHES.get(t);
+  if (c === undefined) {
+    c = { at123d: t.points.map(() => new Map()), patchi: t.points.map(() => new Map()) };
+    POINT_CACHES.set(t, c);
+  }
+  return c;
+}
+
 export function wellConcentrations(t: Transport, load: WellLoad, time: number): number[] {
+  const caches = pointCaches(t);
   if (t.kind === 'at123d') {
     const rates =
       load.kind === 'rates'
@@ -111,20 +133,30 @@ export function wellConcentrations(t: Transport, load: WellLoad, time: number): 
             end: s.end,
             rate: massRateFromConcentration(s.concentration, t.darcyFlux, t.crossSection),
           }));
-    return t.points.map((p) =>
-      at123dConcentration({ aquifer: t.aquifer, source: t.source, loading: rates, time }, p),
-    );
+    return t.points.map((p, i) => {
+      const byTime = caches.at123d[i]!;
+      let integrals = byTime.get(time);
+      if (integrals === undefined) {
+        integrals = new Map();
+        byTime.set(time, integrals);
+      }
+      return at123dConcentration(
+        { aquifer: t.aquifer, source: t.source, loading: rates, time },
+        p,
+        { integrals },
+      );
+    });
   }
   const conc =
     load.kind === 'conc'
       ? load.steps
       : toConcentrationSteps(load.steps, t.darcyFlux, t.crossSection);
   if (t.kind === 'wexler') {
-    return t.points.map((p) =>
+    return t.points.map((p, i) =>
       t.width !== undefined && t.thickness !== undefined
         ? patchfConcentration(t.params, p, time, { width: t.width, thickness: t.thickness }, conc)
             .value
-        : patchiConcentration(t.params, p, time, conc, t.bounds),
+        : patchiConcentration(t.params, p, time, conc, t.bounds, caches.patchi[i]),
     );
   }
   return t.points.map((p) => domenicoConcentration(t.params, p, time, conc));

@@ -210,6 +210,9 @@ function inflowPlane(input: WexlerInput, p: Point3, bounds: Bounds = {}): number
  * Wexler (1992) PATCHI: patch source on the inflow plane, infinite width and depth. With `vertical`
  * the z axis is bounded instead (see VerticalBounds): the patch spreading is reflected at the no-flux
  * layer ends or water table by the method of images, and receptors outside the domain report zero.
+ * With a loading, `unitResponse` keeps the unit step response by age between calls: it does not depend
+ * on the concentrations, so a caller re-running one point with new concentrations (a level search)
+ * passes one map per point and skips the quadrature. Valid for one input (c0 aside), point and vertical.
  */
 export function patchiConcentration(
   input: WexlerInput,
@@ -217,12 +220,17 @@ export function patchiConcentration(
   time: number,
   loading?: readonly ConcentrationStep[],
   vertical?: VerticalBounds,
+  unitResponse?: Map<number, number>,
 ): number {
   if (loading) {
     const unit = { ...input, c0: 1 };
-    return superposeLoading(loading, time, (tau) =>
-      patchiConcentration(unit, p, tau, undefined, vertical),
-    );
+    return superposeLoading(loading, time, (tau) => {
+      const known = unitResponse?.get(tau);
+      if (known !== undefined) return known;
+      const value = patchiConcentration(unit, p, tau, undefined, vertical);
+      unitResponse?.set(tau, value);
+      return value;
+    });
   }
   const r = retarded(input);
   checkVertical(input, vertical);

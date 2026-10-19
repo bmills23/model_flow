@@ -271,6 +271,15 @@ export interface At123dPointOptions {
    * it so the refinement stops chasing digits that cannot matter.
    */
   absTol?: number;
+  /**
+   * Time integrals of the unit response kept between calls, keyed by the release-age window of a loading
+   * step. The integral depends on the aquifer, the source, the point, the time and the window, never on
+   * the step's rate, so a caller that re-runs one point at one time with new rates (a level search)
+   * passes one map per point and time and skips the quadrature on every later call. The numbers are the
+   * very ones the uncached path computes. Used only with `absTol` 0 (a tolerance that scales with the
+   * rate would change the integral). Valid for one aquifer, source, point and time.
+   */
+  integrals?: Map<string, number>;
 }
 
 /**
@@ -350,6 +359,12 @@ export function at123dConcentration(
     const lo = time - end;
     const hi = time - step.start;
     const stepAbsTol = absTol > 0 ? absTol / step.rate : 0;
+    const key = opts.integrals !== undefined && absTol === 0 ? `${lo}|${hi}` : undefined;
+    const known = key === undefined ? undefined : opts.integrals!.get(key);
+    if (known !== undefined) {
+      total += step.rate * known;
+      continue;
+    }
     const f = memo
       ? memoisedResponse(memo, aquifer, source, p)
       : (tau: number): number => instantaneousBoxConcentration(aquifer, source, p, tau, 1);
@@ -362,6 +377,7 @@ export function at123dConcentration(
         maxDepth: 10,
       }).value;
     }
+    if (key !== undefined) opts.integrals!.set(key, sum);
     total += step.rate * sum;
   }
   return total;
