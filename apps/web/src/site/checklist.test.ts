@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { checklist } from './checklist';
 import {
@@ -24,14 +25,7 @@ const FATE: Record<string, string[]> = {
   'human/modeled/soilToIndoorAir': ['chemicals', 'vadose', 'vapor', 'risk', 'cleanup', 'report'],
   'human/modeled/soilGasToIndoorAir': ['chemicals', 'vapor', 'risk', 'cleanup', 'report'],
   'ecological/direct/soil': ['chemicals', 'plants-eco', 'report'],
-  'ecological/direct/groundwater': ['chemicals', 'plants-eco', 'report'],
-  'ecological/direct/surfaceWater': ['chemicals', 'plants-eco', 'surface-water', 'report'],
-  'ecological/direct/indoorAir': ['chemicals', 'plants-eco', 'report'],
-  'ecological/direct/outdoorAir': ['chemicals', 'plants-eco', 'report'],
-  'ecological/modeled/soil': ['chemicals', 'vadose', 'transport', 'plants-eco', 'report'],
-  'ecological/modeled/groundwater': ['chemicals', 'transport', 'plants-eco', 'report'],
-  'ecological/modeled/soilToIndoorAir': ['chemicals', 'vadose', 'vapor', 'plants-eco', 'report'],
-  'ecological/modeled/soilGasToIndoorAir': ['chemicals', 'vapor', 'plants-eco', 'report'],
+  'ecological/modeled/soil': ['chemicals', 'plants-eco', 'report'],
 };
 
 const mediaOf = (b: Basis): readonly SourceMedium[] =>
@@ -58,8 +52,13 @@ describe('checklist: every valid combination', () => {
               });
               const name = `${receptors}/${basis}/${m} ${location} ${vaporMethod} produce:${produce}`;
               it(name, () => {
-                const base = FATE[`${receptors}/${basis}/${m}`]!;
                 const c = checklist(s);
+                if (receptors === 'ecological' && m !== 'soil') {
+                  expect(c.problems.map((p) => p.id)).toEqual(['eco-medium-unsupported']);
+                  expect(c.items).toEqual([]);
+                  return;
+                }
+                const base = FATE[`${receptors}/${basis}/${m}`]!;
                 // produce needs its own medium for a human; a mismatch is a problem, not a checklist
                 const mismatch =
                   receptors === 'human' &&
@@ -180,6 +179,66 @@ describe('checklist: items and notes', () => {
       const [r, b, m] = key.split('/') as [ReceptorKind, Basis, SourceMedium];
       for (const i of checklist(site({ receptors: r, basis: b, media: [m] })).items)
         expect(labels.has(i.step), i.id).toBe(true);
+    }
+  });
+});
+
+const read = (p: string): string => readFileSync(new URL(p, import.meta.url), 'utf8');
+const SCREEN_SOURCES: Record<string, string> = {
+  vadose: read('../vadose/VadosePage.tsx'),
+  transport: read('../transport/TransportPage.tsx'),
+  vapor: read('../vapor/VaporPanels.tsx'),
+  'plants-eco': read('../plantsEco/PlantsEcoPage.tsx'),
+  household: read('../household/HouseholdPage.tsx'),
+};
+
+describe('checklist: every step names a control that exists on its screen', () => {
+  const states: SiteState[] = [];
+  for (const receptors of ['human', 'ecological'] as const)
+    for (const basis of ['direct', 'modeled'] as const)
+      for (const m of mediaOf(basis))
+        for (const produce of ['none', 'soil', 'irrigation'] as const)
+          states.push(
+            site({
+              receptors,
+              basis,
+              media: [m],
+              produceSoil: produce === 'soil',
+              produceIrrigation: produce === 'irrigation',
+            }),
+          );
+
+  it('every feed button label appears in the named screen source', () => {
+    for (const s of states)
+      for (const i of checklist(s).items) {
+        if (!i.feed) continue;
+        const src = SCREEN_SOURCES[i.id];
+        expect(src, `${i.id} has a screen source`).toBeDefined();
+        expect(src!.includes(i.feed), `${i.id}: ${i.feed}`).toBe(true);
+      }
+  });
+
+  it('the ecological step names the soil concentration field the screen has', () => {
+    const c = checklist(site({ receptors: 'ecological', basis: 'direct', media: ['soil'] }));
+    const eco = c.items.find((i) => i.id === 'plants-eco')!;
+    expect(eco.action).toContain('Soil concentration (mg/kg dry weight)');
+    expect(SCREEN_SOURCES['plants-eco']!.includes('Soil concentration (mg/kg dry weight)')).toBe(
+      true,
+    );
+    expect(eco.feed).toBeUndefined();
+  });
+
+  it('modeled soil for ecological receptors says the fate screens are not read', () => {
+    const c = checklist(site({ receptors: 'ecological', basis: 'modeled', media: ['soil'] }));
+    expect(c.notes.join(' ')).toMatch(/does not read/i);
+  });
+
+  it('ecological receptors with any other medium get a plain explanation and no steps', () => {
+    for (const m of ['groundwater', 'surfaceWater', 'indoorAir', 'outdoorAir'] as const) {
+      const c = checklist(site({ receptors: 'ecological', basis: 'direct', media: [m] }));
+      expect(c.items).toEqual([]);
+      expect(c.problems[0]!.message).toMatch(/soil/i);
+      expect(c.problems[0]!.message).toMatch(/not supported/i);
     }
   });
 });
