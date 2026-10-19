@@ -71,7 +71,13 @@ const ROUTES = [
   '#/report',
   '#/methods',
   '#/docs',
+  '#/docs/user-guide',
+  '#/docs/uncertainty',
+  '#/docs/vapor-models',
+  '#/docs/attributions',
 ];
+// --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
+const ONLY = opt('routes');
 const VIEWS = [
   { name: 'm390-light', w: 390, h: 844, mobile: true, dark: false },
   { name: 'm390-dark', w: 390, h: 844, mobile: true, dark: true },
@@ -174,7 +180,9 @@ for (const view of VIEWS) {
   await send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-color-scheme', value: view.dark ? 'dark' : 'light' }],
   });
-  for (const route of ROUTES) {
+  for (const route of ROUTES.filter(
+    (r) => !ONLY || ONLY.split(',').some((o) => r === o || r.startsWith(`${o}/`)),
+  )) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
@@ -187,7 +195,8 @@ for (const view of VIEWS) {
     const slug = route.replace(/[#/]/g, '') || 'home';
     const shot = await send('Page.captureScreenshot', {
       format: 'png',
-      captureBeyondViewport: true,
+      // the long committed documents are measured in full but only their first screen is captured
+      captureBeyondViewport: !/^#\/docs\/(?!user-guide)/.test(route),
     });
     writeFileSync(join(outDir, `${view.name}-${slug}.png`), Buffer.from(shot.data, 'base64'));
     const bad = m.n > 0 || m.sw > m.cw;

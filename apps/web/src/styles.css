@@ -373,3 +373,128 @@ footer {
   background: var(--legacy-bg);
   border-left: 4px solid var(--legacy);
 }
+
+/* In-app documentation reader */
+.docs {
+  overflow-wrap: anywhere;
+}
+
+.doc-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.doc-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.doc-list a {
+  display: inline-block;
+  min-height: var(--tap);
+  line-height: var(--tap);
+  font-weight: 600;
+}
+
+.doc-back a {
+  display: inline-block;
+  min-height: var(--tap);
+  line-height: var(--tap);
+}
+
+.doc-body {
+  max-width: 48rem;
+}
+
+.doc-body h1 {
+  margin-top: 0;
+}
+
+.doc-body h2 {
+  margin-top: 1.75rem;
+}
+
+.doc-body pre,
+.doc-code {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 12px var(--gutter);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.doc-body code {
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+
+.doc-body pre code {
+  white-space: pre-wrap;
+}
+
+.doc-body blockquote {
+  margin: 0 0 1rem;
+  padding: 4px var(--gutter);
+  border-left: 4px solid var(--border);
+  color: var(--muted);
+}
+
+.doc-body li > ul,
+.doc-body li > ol {
+  margin-top: 0.3rem;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.doc-table th,
+.doc-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+}
+
+.doc-table th {
+  background: var(--surface);
+}
+
+@media (max-width: 640px) {
+  .doc-table,
+  .doc-table tbody,
+  .doc-table tr,
+  .doc-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .doc-table thead {
+    position: absolute;
+    left: -9999px;
+  }
+
+  .doc-table tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .doc-table td {
+    border: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .doc-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+}

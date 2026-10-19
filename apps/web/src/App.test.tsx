@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { App } from './App';
 
@@ -129,6 +129,15 @@ describe('App shell', () => {
     window.location.hash = '#/report';
     render(<App />);
     expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
+    window.location.hash = '';
+  });
+  it('links to the documentation and opens the reader at #/docs and #/docs/user-guide', async () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: 'Documentation' }).getAttribute('href')).toBe('#/docs');
+    cleanup();
+    window.location.hash = '#/docs/user-guide';
+    render(<App />);
+    expect(await screen.findByRole('heading', { level: 1, name: 'User guide' })).toBeTruthy();
     window.location.hash = '';
   });
 });

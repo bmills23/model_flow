@@ -1,0 +1,145 @@
+# User guide
+
+model_flow is an open reimplementation of RISC5-class fate-and-transport and risk methods. Everything runs
+in your browser: nothing is uploaded, there are no accounts and no analytics. This guide covers each screen,
+saving and sharing a project, the report, and the switch between legacy and modern methods. The reasoning
+and sources behind each calculation are in the methods notes listed on the documentation index.
+
+## Getting around
+
+- The links under the title open each screen. The flow runs from the chemicals and site, through transport
+  and receptors, to risk, cleanup levels and the report.
+- Screens pass results to each other (for example the groundwater concentration at a well goes to the risk
+  screen). A result is only passed when you press the button that sends it, and the receiving screen says
+  where its value came from.
+- Everything you type is kept in this browser as you work, so a reload brings it back. That copy is a
+  convenience only. Save the project to a file to keep it.
+- **New project** in the header clears every screen, the values passed between screens and the copy kept in
+  this browser.
+- The page works on a phone and on a desktop, in light and dark themes (it follows your device setting).
+
+## Legacy and modern methods
+
+Each process offers a legacy method, which is the choice RISC5 makes, and a modern alternative. Where a
+screen shows both, they run on the same inputs so you can see the difference. A badge on each method in
+Methods and References says which kind it is, and lists its assumptions and sources. Neither is a
+recommendation by itself: the methods notes say where a legacy method is kept only for comparison and what
+its validity limits are. Warnings on a screen list the checks a method failed for your inputs.
+
+## Projects: save, open and share
+
+- **Project title** names the file and appears on the report.
+- **Save project** downloads one JSON file holding every screen as you typed it, including text that does
+  not yet parse, and the values you sent between screens. Results are not stored: they are computed again
+  from the inputs, and every random analysis repeats from its seed.
+- **Open project** loads such a file (choose it, or drop it on the page). A file that is not a project, or
+  that was made by a newer version of the app, is refused with a message and nothing is changed. If a file
+  has an unknown key it is ignored and listed. If a value passed between screens in the file is unusable
+  it is dropped and named, and your inputs still load.
+- A value passed between screens records which inputs it was built from. If those inputs have since
+  changed, the app tells you the value is out of date and asks you to send it again. It is never refreshed
+  silently.
+- **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
+  server, so the link carries the project without anyone hosting it. The link does not include the values
+  passed between screens; whoever opens it sends those again from their source screens.
+- A link longer than 8000 characters is not offered, because chat and mail programs often cut longer ones.
+  Save a file instead. The app shows the limit rather than a shortened link.
+- Opening a project, from a file or a link, asks first when the current project has changes not saved to a
+  file.
+- Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
+  the reload recovery is lost.
+
+## Screens
+
+### Groundwater transport (`#/transport`)
+
+A dissolved plume from a finite source in uniform groundwater flow, with retardation and first-order decay.
+Compare the legacy AT123D-class method with the modern exact solution at a receptor and across the site.
+Buttons below the result send the well concentration to the risk screen, the aquifer to cleanup levels, the
+water table concentration to vapor intrusion and the plume to surface water.
+
+### Vadose leaching (`#/vadose`)
+
+A source in unsaturated soil loses chemical to the air and to infiltrating water. Follow the leachate to the
+water table with the legacy or the modern layered model. The screen shows the source and leaching, the
+arrival at the water table, a mass budget, and a validation case you can load. It can feed the groundwater
+and vapor screens.
+
+### Saturated soil source (`#/saturated`)
+
+Chemical in soil at or below the water table dissolves into the groundwater flowing through it. Release it
+at a constant rate until it is gone (legacy) or in proportion to the mass left (modern). The release can
+feed the groundwater and vapor screens. A worked example is built in.
+
+### Vapor intrusion (`#/vapor`)
+
+Vapors from soil, soil gas or groundwater diffuse through the soil and enter a building. The legacy and
+modern Johnson and Ettinger methods run on one set of inputs, with indoor air results, the vapor profile
+through the soil and a check against a published case.
+
+### Surface water and sediment (`#/surface-water`)
+
+A groundwater plume that reaches a river or lake discharges through the bed. Mix it into the water body to
+get the surface water concentration, find the sediment concentration by equilibrium partitioning, and
+compare the well-mixed box (legacy) with the mass-discharge method (modern). The criteria and exposure
+section compares the result with water quality and sediment criteria.
+
+### Shower, irrigation and particulates (`#/household`)
+
+Household exposure from tap and irrigation water and from surface soil: shower air, sprinkler spray and
+irrigation contact, and windblown particulates, each with a legacy and a modern method. Values that no
+primary source supplied are left blank for you to enter; values taken as RISC5 choices carry a warning. The
+result can be sent to the risk and cleanup screens.
+
+### Plants, ecology and TPH (`#/plants-eco`)
+
+Homegrown produce plant factors for the risk screen, screening ecological hazard quotients, and total
+petroleum hydrocarbon levels from a fraction composition. Nothing is defaulted from memory: a value without
+a primary source is yours to enter, and the button that sends a result on stays disabled until the inputs are
+usable.
+
+### Exposure and risk (`#/risk`)
+
+Pick chemicals from the EPA Regional Screening Level tables, enter concentrations in soil, water and air (or
+take the groundwater concentration from the transport screen), and see the cancer risk and hazard index
+each method gives, the pathways and chemicals that drive them, and what could not be quantified. A second
+receptor can be evaluated alongside the first.
+
+### Cleanup levels (`#/cleanup`)
+
+The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
+quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and
+noncancer levels governs, and the screen says which one did.
+
+### Uncertainty analysis
+
+The risk and cleanup screens each have an uncertainty section. Give an input a distribution to sample it;
+inputs left as point values stay at the value above. Run the analysis to see how much the answer could vary
+and which inputs drive it. The distributions, sampling kind, number of iterations and seed are saved in the
+project, so a run repeats exactly.
+
+### Report (`#/report`)
+
+The report is built from the project: the inputs of each screen you used, each screen's result tables, the
+engine warnings, a methods statement that names the methods you chose with numbered references, and the
+non-affiliation notice. Charts stay on their screens and the report says so. **Print or save as PDF** uses
+your browser's print dialog, which has a PDF option. The optional "Prepared by" field is not saved to the
+project.
+
+### Downloading tables
+
+Result tables have a Download CSV button. The file name carries the table name, the app version, the data
+editions it used and the date, so a file can be traced to what produced it.
+
+## Documentation and sources
+
+- This reader (`#/docs`) shows this guide, every methods note and the attributions.
+- Methods and References (`#/methods`) lists every registered method with its kind, assumptions and sources.
+- The attributions document records the science and the data provenance. Third-party software licences are
+  kept in a separate document in the repository.
+
+## Reporting a problem
+
+Open an issue on the project's repository:
+[github.com/bmills23/model_flow/issues](https://github.com/bmills23/model_flow/issues). Please describe what
+you entered and attach the saved project file if you can; it holds your inputs and nothing else.

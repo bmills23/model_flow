@@ -1486,7 +1486,7 @@ overturn):
     import, comparing two saved projects, offline install, translation, and the mobile check in CI.
 14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
     S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens) is done (see the S8
-    block below), S9 and S10 are done (2026-10-18) and the S11 user guide waits for the other screens.
+    block below), S9, S10 and S11 are done (2026-10-18; see the S11 block below).
 
 ### M11 accessibility pass, S10 (2026-10-18)
 
@@ -1565,3 +1565,29 @@ Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/met
    landed with S6c; see ruling 8.)
 6. **Not verified here.** No data value or constant was typed. The units written in the new CSV headers
    are the units the screens display today, read from the screens, not from a source.
+
+### M11 docs reader and user guide, S11 (2026-10-18)
+
+1. **`#/docs` reader (as ruled in 11).** `apps/web/src/docs/`: `markdown.ts` reads the Markdown subset the
+   committed notes use (headings, paragraphs, nested lists, fenced code, tables, block quotes, rules,
+   inline code, bold, italic, links) into a plain tree, and `DocsPage.tsx` renders it as React elements, so
+   no HTML string is injected. `catalog.ts` imports `docs/USER_GUIDE.md`, `docs/ATTRIBUTIONS.md` and every
+   `docs/methods/*.md` as raw text, one lazy chunk each. A test parses every committed document and fails
+   if a table, fence, heading or list mark is left in a paragraph. Routes: `#/docs` is the index,
+   `#/docs/<slug>` a document; the slug is the file name, with `user-guide` and `attributions` for the two
+   top-level files.
+2. **Only the guide, the attributions and the methods notes are offered (DEFAULT).** DECISIONS, ROADMAP,
+   HANDOFF and the third-party licences stay repository documents; offering them would add large chunks
+   for text that is about the project's working state, not its use.
+3. **Links in a document.** A web address opens in a new tab with `noopener`; a link to another offered
+   Markdown file becomes a reader link; any other target (including a `javascript:` address) renders as
+   plain text.
+4. **Narrow screens.** Document tables stack to one block per row below 640 px, each cell labelled by its
+   column header, so no table scrolls sideways. The mobile check script now also visits four document
+   pages (the guide, a table-heavy note, a long note and the attributions).
+5. **User guide.** `docs/USER_GUIDE.md` covers navigation, legacy versus modern, saving, opening and
+   sharing (including the 8000 character limit and what a link leaves out), every screen, the uncertainty
+   panels, the report, CSV download and where to report a problem (the repository issue tracker, no
+   personal address). A test requires a heading for every screen route.
+6. **Not verified here.** No data value or constant was typed. The one-line summaries on the index are
+   descriptions of each note's subject, written from the file names and headings.

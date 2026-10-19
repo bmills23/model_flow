@@ -314,6 +314,8 @@ so it is the one feed that still starts empty after a reload.
   raw text at build time and rendered by a small Markdown subset renderer (headings, lists, code, tables,
   links) with tests, lazy loaded. One site, one deploy, no new hosting.
 - The rejected alternative is a second static generator on Pages (another toolchain and build minutes).
+- **Implemented (S11, `apps/web/src/docs/`, `docs/USER_GUIDE.md`).** The reader is built as described,
+  over the user guide, the attributions and the methods notes only (not DECISIONS, ROADMAP or HANDOFF).
 - The user guide covers projects, sharing limits, the report and the legacy versus modern switch. It
   carries no personal contact address; issues go to the repository's issue tracker link.
 
@@ -358,7 +360,7 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; the per-screen result tables closed with S6c) | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen (done 2026-10-18, zero overflow) |
 | S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; done 2026-10-18 on the wave branch with the gaps listed in section 8 |
-| S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last |
+| S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last (done 2026-10-18) |
 
 Order: S1, S5, S7 and the S9 script in parallel; then S2; then S3, S4 and S6 in parallel; S8, the S9 pass,
 S10 and S11 close after M7, M9 and M10 land. Each slice is TDD and touches disjoint files except S8 and

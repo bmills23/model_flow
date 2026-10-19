@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import { slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
 import { ProjectBar } from './project/ProjectBar';
 import {
@@ -44,6 +45,8 @@ const CleanupPage = lazy(() =>
   import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
 );
 
+const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
+
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
 
 const METHODS_HASH = '#/methods';
@@ -57,6 +60,7 @@ const VAPOR_HASH = '#/vapor';
 const SURFACE_WATER_HASH = '#/surface-water';
 const HOUSEHOLD_HASH = '#/household';
 const PLANTS_ECO_HASH = '#/plants-eco';
+const DOCS_HASH = '#/docs';
 
 export function App() {
   const [hash, setHash] = useState(() => window.location.hash);
@@ -90,6 +94,7 @@ export function App() {
   const onHousehold = hash === HOUSEHOLD_HASH;
   const onPlantsEco = hash === PLANTS_ECO_HASH;
   const onReport = hash === REPORT_HASH;
+  const onDocs = hash === DOCS_HASH || hash.startsWith(`${DOCS_HASH}/`);
 
   return (
     <div
@@ -214,10 +219,17 @@ export function App() {
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
+          <a className="nav-link" href={DOCS_HASH} aria-current={onDocs ? 'page' : undefined}>
+            Documentation
+          </a>
         </div>
       </nav>
       <main id="main" tabIndex={-1} key={epoch}>
-        {onMethods ? (
+        {onDocs ? (
+          <Suspense fallback={<p className="muted">Loading the documentation...</p>}>
+            <DocsPage slug={slugFromHash(hash)} />
+          </Suspense>
+        ) : onMethods ? (
           <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
             <MethodsPage />
           </Suspense>
@@ -300,6 +312,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={METHODS_HASH}>
                 Read how each calculation is sourced
+              </a>{' '}
+              <a className="button" href={DOCS_HASH}>
+                Read the user guide
               </a>
             </p>
           </section>
