@@ -110,6 +110,16 @@ a primary source is yours to enter, and the button that sends a result on stays 
 usable. The produce button sends the plant factors, the intake and the plant engine's warnings; the total
 TPH button sends the total level, the fraction table and the warnings, and the cleanup screen shows them.
 
+The "Wildlife dose (site-specific)" group turns the Eco-SSL wildlife screen into rows you can change. Pick a
+chemical that has an Eco-SSL document and press "Load the surrogates from the Eco-SSL document": each bird
+and mammal surrogate appears with its printed toxicity reference value, food ingestion rate, soil share of
+the diet, uptake form and coefficients, and the table and page of the document they came from. Every factor
+can be edited, an area use factor (1 reproduces the Eco-SSL) is added, and you can add a surrogate of your
+own. The ecological screening panel then shows, per surrogate, the daily dose, the hazard quotient at the
+soil concentration, the soil level at which that quotient is one, and the Eco-SSL the document printed, so a
+change can be read against its source. These are screening comparisons, never cleanup levels, and the
+screening-only warning stays. The rows are saved in the project file, and a CSV table of them is offered.
+
 ### Chemical database (`#/chemicals`)
 
 A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition

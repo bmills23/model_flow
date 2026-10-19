@@ -2,6 +2,7 @@ import type { CsvColumn, CsvRow } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import { ECO_LEGACY_ID, ECO_MODERN_ID, type BenchmarkHqRow, type EcosslResult } from './eco';
 import type { Section } from './form';
+import { WILDLIFE_GROUP_LABELS, type WildlifeResult } from './wildlife';
 import type { ProduceRow } from './produce';
 import type { TphResult } from './tph';
 
@@ -10,6 +11,7 @@ export interface PlantsEcoOutcome {
   ecossl: Section<{ result: EcosslResult }>;
   benchmarks: Section<{ rows: BenchmarkHqRow[] }>;
   tph: Section<{ result: TphResult }>;
+  wildlife?: Section<WildlifeResult>;
 }
 
 const PRODUCE_COLUMNS: CsvColumn[] = [
@@ -26,6 +28,17 @@ const ECO_COLUMNS: CsvColumn[] = [
   { key: 'benchmark', header: 'benchmark', unit: 'mg/kg dry weight' },
   { key: 'hq', header: 'hazard quotient', unit: '-' },
   { key: 'citation', header: 'citation' },
+];
+
+const WILDLIFE_COLUMNS: CsvColumn[] = [
+  { key: 'group', header: 'receptor group' },
+  { key: 'surrogate', header: 'surrogate' },
+  { key: 'source', header: 'source' },
+  { key: 'dose', header: 'dose', unit: 'mg/kg body weight/day' },
+  { key: 'trv', header: 'toxicity reference value', unit: 'mg/kg body weight/day' },
+  { key: 'hq', header: 'hazard quotient', unit: '-' },
+  { key: 'backCalc', header: 'soil level for a hazard quotient of one', unit: 'mg/kg dry weight' },
+  { key: 'printed', header: 'printed Eco-SSL', unit: 'mg/kg dry weight' },
 ];
 
 const TPH_COLUMNS: CsvColumn[] = [
@@ -78,6 +91,21 @@ export function ecoCsvRows(
   return rows;
 }
 
+/** Site-specific wildlife dose rows: screening values, not cleanup levels. */
+export function wildlifeCsvRows(s: PlantsEcoOutcome['wildlife']): CsvRow[] {
+  if (!s || !s.ok) return [];
+  return s.rows.map((r) => ({
+    group: WILDLIFE_GROUP_LABELS[r.group],
+    surrogate: r.label,
+    source: r.source,
+    dose: r.doseMgPerKgD,
+    trv: r.trvMgPerKgD,
+    hq: r.hq,
+    backCalc: r.backCalcMgPerKg,
+    printed: r.printedMgPerKg,
+  }));
+}
+
 export function tphCsvRows(s: PlantsEcoOutcome['tph']): CsvRow[] {
   if (!s.ok) return [];
   const r = s.result;
@@ -123,6 +151,12 @@ export function plantsEcoCsvTables(o: PlantsEcoOutcome): CsvTable[] {
       label: 'ecological screening',
       rows: ecoCsvRows(o.ecossl, o.benchmarks),
       columns: ECO_COLUMNS,
+    },
+    {
+      name: 'wildlife-dose',
+      label: 'wildlife dose',
+      rows: wildlifeCsvRows(o.wildlife),
+      columns: WILDLIFE_COLUMNS,
     },
     {
       name: 'tph-results',

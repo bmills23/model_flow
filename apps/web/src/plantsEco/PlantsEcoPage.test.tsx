@@ -110,4 +110,26 @@ describe('PlantsEcoPage', () => {
     expect(getTphFeed()?.methodId).toBe('tph.tphcwg');
     expect(getTphFeed()?.totalMgPerKg).toBeCloseTo(1000 / 3, 6);
   });
+
+  it('loads the lead surrogates, shows a dose panel with sources and keeps edits in the project', async () => {
+    render(<PlantsEcoPage />);
+    await pickLead();
+    fill(/^soil concentration/i, '100');
+    fireEvent.click(screen.getByText('Wildlife dose (site-specific)'));
+    const load = screen.getByRole('button', {
+      name: /load the surrogates from the eco-ssl document/i,
+    });
+    await waitFor(() => expect((load as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(load);
+    expect(screen.getAllByLabelText(/^area use factor/i)).toHaveLength(6);
+    expect(screen.getAllByText(/prefilled from eco-ssl table/i).length).toBe(6);
+    const eco = screen.getByRole('region', { name: /ecological screening/i });
+    const table = within(eco).getByRole('table', { name: /wildlife dose hazard quotients/i });
+    expect(within(table).getAllByRole('row')).toHaveLength(7);
+    expect(within(eco).getAllByText('ECO_SCREENING_ONLY').length).toBeGreaterThan(0);
+    fireEvent.change(screen.getAllByLabelText(/^area use factor/i)[0]!, {
+      target: { value: '0.5' },
+    });
+    expect(getScreen('plantsEco').form.wildlifeRows[0]!.auf).toBe('0.5');
+  }, 30000);
 });

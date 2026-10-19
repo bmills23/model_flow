@@ -13,6 +13,12 @@ const intake = partialObject(texts('gPerKgDay', 'loss', 'homegrown'));
 
 const benchmark = z.object({ ...texts('receptor', 'value', 'citation') });
 
+const wildlifeRow = z.object({
+  group: z.enum(['avian', 'mammalian']),
+  form: z.enum(['ratio', 'ln', 'affine']),
+  ...texts('surrogate', 'table', 'page', 'trv', 'fir', 'ps', 'auf', 'a', 'b', 'cdiet', 'printed'),
+});
+
 const fraction = z.object({
   label: text,
   family: z.enum(['aliphatic', 'aromatic']),
@@ -56,6 +62,7 @@ const formSchema = partialObject({
     >,
   ),
   benchmarks: z.array(benchmark),
+  wildlifeRows: z.array(wildlifeRow),
   tphSet: z.enum(['tphcwg', 'madep']),
   tphFractions: z.array(fraction),
 });

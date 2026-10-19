@@ -1841,3 +1841,26 @@ Read-only `#/chemicals` (features C1, C4, C5, D5, J1, J2, J4, J7); edits per pro
    and date are in the file name like the other CSVs. When a search is active a second button saves only
    the matching chemicals.
 7. **Schema.** No new saved state; the project file is unchanged.
+
+## 2026-10-19: Wave H slice U9, wildlife dose panel
+
+Scope: the site-specific wildlife hazard quotient panel on `#/plants-eco` (inventory C9), built on the engine's
+`wildlifeDose`, `wildlifeHazardQuotient` and `backCalculateEcoSsl`. No engine or data change.
+
+1. **Rows come from the generated Eco-SSL derivation rows (DEFAULT).** "Load the surrogates from the Eco-SSL
+   document" copies each surrogate's printed inputs, with its table and page, into editable form rows. The two
+   rows the documents print NA (nickel, no uptake model) are left out. The load replaces the saved rows; there
+   is no automatic reload on a chemical change, so edits are never overwritten silently.
+2. **One food item per row, area use factor added (DEFAULT).** A row is the single-item diet the Eco-SSL
+   derivation uses (diet fraction 1). The area use factor defaults to 1, which reproduces the Eco-SSL; the
+   panel states that. Users can add rows of their own with no source.
+3. **Reproduction uses the existing tolerance (DEFAULT).** A test back-calculates every prefilled lead and
+   cadmium row and requires 5 percent of the printed value, the same tolerance as the engine reproduction
+   test. No tolerance was widened. Rows the data flags as not reproduced are shown with their printed value
+   beside the back-calculated one rather than hidden.
+4. **Screening only (DEFAULT).** The panel carries the `ECO_SCREENING_ONLY` warning and offers no cleanup
+   level; the soil level at a hazard quotient of one is labelled a screening back-calculation.
+5. **Saved state.** An optional `wildlifeRows` key inside the existing `plantsEco` form, format version 1,
+   with a round-trip case in `project/screens.test.ts`. CSV table `wildlife-dose` is added to the screen's
+   downloads. No new route, so the mobile check route list and keyboard-order tests are unchanged.
+

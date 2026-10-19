@@ -21,6 +21,31 @@ export interface BenchmarkRow {
   citation: string;
 }
 
+/** One surrogate receptor of the site-specific wildlife dose panel. Every number is text, as typed. */
+export interface WildlifeRowForm {
+  group: 'avian' | 'mammalian';
+  surrogate: string;
+  /** Eco-SSL document table and page the row was prefilled from; blank for a user row. */
+  table: string;
+  page: string;
+  /** Toxicity reference value, mg per kg body weight per day. */
+  trv: string;
+  /** Food ingestion rate, kg dry weight per kg body weight per day. */
+  fir: string;
+  /** Soil as a proportion of the diet, 0 to 1. */
+  ps: string;
+  /** Area use factor, 0 to 1. */
+  auf: string;
+  /** Soil-to-food uptake form: ratio Bi = a C, ln ln Bi = a ln S + b, affine Bi = a C + b. */
+  form: 'ratio' | 'ln' | 'affine';
+  a: string;
+  b: string;
+  /** Diet concentration factor, blank is 1. */
+  cdiet: string;
+  /** Eco-SSL printed in the document for this surrogate, mg/kg dry weight (blank for a user row). */
+  printed: string;
+}
+
 export interface TphFractionRow {
   label: string;
   family: 'aliphatic' | 'aromatic';
@@ -73,6 +98,9 @@ export interface PlantsEcoForm {
   // ecology
   benchmarks: BenchmarkRow[];
 
+  // wildlife dose panel
+  wildlifeRows: WildlifeRowForm[];
+
   // TPH
   tphSet: TphSet;
   tphTotal: string;
@@ -114,6 +142,7 @@ export const DEFAULT_FORM: PlantsEcoForm = {
     root: emptyIntake(),
   },
   benchmarks: [],
+  wildlifeRows: [],
   tphSet: 'tphcwg',
   tphTotal: '',
   tphTargetHi: '1',

@@ -3,6 +3,7 @@ import { exportCsv } from '../export/csv';
 import {
   ecoCsvRows,
   plantsEcoCsvTables,
+  wildlifeCsvRows,
   produceCsvRows,
   tphCsvRows,
   type PlantsEcoOutcome,
@@ -161,5 +162,39 @@ describe('plants and ecology CSV', () => {
     expect(header(1)).toBe(
       'method,receptor,status,benchmark (mg/kg dry weight),hazard quotient (-),citation',
     );
+  });
+
+  it('writes one wildlife dose row per surrogate, with its source and the printed Eco-SSL', () => {
+    const wildlife = {
+      ok: true as const,
+      warnings: [],
+      rows: [
+        {
+          label: 'dove',
+          group: 'avian' as const,
+          source: 'table 5.2, page 16',
+          doseMgPerKgD: 0.3,
+          trvMgPerKgD: 1.47,
+          hq: 0.2,
+          backCalcMgPerKg: 28.1,
+          printedMgPerKg: 28,
+        },
+      ],
+    };
+    expect(wildlifeCsvRows(wildlife)).toEqual([
+      {
+        group: 'Bird',
+        surrogate: 'dove',
+        source: 'table 5.2, page 16',
+        dose: 0.3,
+        trv: 1.47,
+        hq: 0.2,
+        backCalc: 28.1,
+        printed: 28,
+      },
+    ]);
+    expect(wildlifeCsvRows({ ok: false, errors: ['x'] })).toEqual([]);
+    const t = plantsEcoCsvTables({ ...none, wildlife });
+    expect(t.map((x) => x.name)).toEqual(['wildlife-dose']);
   });
 });

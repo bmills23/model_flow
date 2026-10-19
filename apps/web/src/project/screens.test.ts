@@ -201,6 +201,23 @@ const cases: Case<unknown>[] = [
           tphFractions: [
             { label: 'C9-C12', family: 'aliphatic', massFraction: '0.4', surrogate: '', level: '' },
           ],
+          wildlifeRows: [
+            {
+              group: 'avian',
+              surrogate: 'dove',
+              table: '5.2',
+              page: '16',
+              trv: '1.47',
+              fir: '0.19',
+              ps: '0.139',
+              auf: '1',
+              form: 'ln',
+              a: '0.546',
+              b: '-0.475',
+              cdiet: '',
+              printed: '28',
+            },
+          ],
         },
       },
     ],

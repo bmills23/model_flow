@@ -33,7 +33,9 @@ import {
   type TphFractionRow,
   type TphSet,
   type UptakeChoice,
+  type WildlifeRowForm,
 } from './form';
+import { computeWildlife, wildlifeRowsFor, WILDLIFE_GROUP_LABELS } from './wildlife';
 import { buildProduceFeed, computeProduce, LEGACY_PLANT_ID, MODERN_PLANT_ID } from './produce';
 import { buildTphFeed, computeTph, TPH_LEGACY_ID, TPH_MODERN_ID } from './tph';
 
@@ -154,10 +156,16 @@ export function PlantsEcoPage() {
   const ecossl = useMemo(() => computeEcossl(form, substance), [form, substance]);
   const benchmarks = useMemo(() => computeBenchmarks(form), [form]);
   const tph = useMemo(() => computeTph(form, props ?? new Map()), [form, props]);
+  const wildlife = useMemo(() => computeWildlife(form), [form]);
   const csvTables = useMemo(
-    () => plantsEcoCsvTables({ produce, ecossl, benchmarks, tph }),
-    [produce, ecossl, benchmarks, tph],
+    () => plantsEcoCsvTables({ produce, ecossl, benchmarks, tph, wildlife }),
+    [produce, ecossl, benchmarks, tph, wildlife],
   );
+  const setWildlife = (i: number, next: WildlifeRowForm): void =>
+    set(
+      'wildlifeRows',
+      form.wildlifeRows.map((w, j) => (j === i ? next : w)),
+    );
 
   const tphFeedResult = useMemo(() => buildTphFeed(form, tph), [form, tph]);
   const sendTph = (): void => {
@@ -413,6 +421,135 @@ export function PlantsEcoPage() {
             </button>
           </Group>
 
+          <Group title="Wildlife dose (site-specific)" open={false}>
+            <p className="muted">
+              Surrogate birds and mammals as the Eco-SSL document derives them. Load them for the
+              chemical above, then change any factor to your site. Each row gives a dose and hazard
+              quotient at the soil concentration; this is a screening comparison, not a cleanup
+              level.
+            </p>
+            {form.wildlifeRows.map((w, i) => (
+              <fieldset className="receptor" key={i}>
+                <legend>
+                  {w.surrogate.trim() === '' ? `Row ${i + 1}` : w.surrogate} (
+                  {WILDLIFE_GROUP_LABELS[w.group].toLowerCase()})
+                </legend>
+                {w.table !== '' && (
+                  <p className="muted">
+                    Prefilled from Eco-SSL table {w.table}, page {w.page}.
+                  </p>
+                )}
+                <div className="fields">
+                  <Field
+                    label="Surrogate name"
+                    value={w.surrogate}
+                    onChange={(v) => setWildlife(i, { ...w, surrogate: v })}
+                  />
+                  <Field
+                    label="Toxicity reference value (mg/kg body weight/day)"
+                    value={w.trv}
+                    onChange={(v) => setWildlife(i, { ...w, trv: v })}
+                  />
+                  <Field
+                    label="Food ingestion rate (kg dry weight/kg body weight/day)"
+                    value={w.fir}
+                    onChange={(v) => setWildlife(i, { ...w, fir: v })}
+                  />
+                  <Field
+                    label="Soil in the diet (fraction)"
+                    value={w.ps}
+                    onChange={(v) => setWildlife(i, { ...w, ps: v })}
+                  />
+                  <Field
+                    label="Area use factor"
+                    value={w.auf}
+                    onChange={(v) => setWildlife(i, { ...w, auf: v })}
+                    hint="1 reproduces the Eco-SSL"
+                  />
+                  <Select
+                    label="Soil-to-food uptake form"
+                    value={w.form}
+                    onChange={(v) => setWildlife(i, { ...w, form: v as WildlifeRowForm['form'] })}
+                    options={[
+                      { value: 'ratio', label: 'Ratio: food = a x soil' },
+                      { value: 'ln', label: 'Log-linear: ln food = a ln soil + b' },
+                      { value: 'affine', label: 'Linear: food = a x soil + b' },
+                    ]}
+                  />
+                  <Field
+                    label="Uptake coefficient a"
+                    value={w.a}
+                    onChange={(v) => setWildlife(i, { ...w, a: v })}
+                  />
+                  <Field
+                    label="Uptake intercept b"
+                    value={w.b}
+                    onChange={(v) => setWildlife(i, { ...w, b: v })}
+                    hint="Not used by the ratio form"
+                  />
+                  <Field
+                    label="Diet concentration factor"
+                    value={w.cdiet}
+                    onChange={(v) => setWildlife(i, { ...w, cdiet: v })}
+                    hint="Blank is 1; not used by the log-linear form"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn remove"
+                  aria-label={`Remove wildlife row ${i + 1}`}
+                  onClick={() =>
+                    set(
+                      'wildlifeRows',
+                      form.wildlifeRows.filter((_, j) => j !== i),
+                    )
+                  }
+                >
+                  Remove
+                </button>
+              </fieldset>
+            ))}
+            <div className="button-row">
+              <button
+                type="button"
+                className="btn"
+                disabled={!substance || wildlifeRowsFor(substance).length === 0}
+                onClick={() => substance && set('wildlifeRows', wildlifeRowsFor(substance))}
+              >
+                Load the surrogates from the Eco-SSL document
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  set('wildlifeRows', [
+                    ...form.wildlifeRows,
+                    {
+                      group: 'mammalian',
+                      surrogate: '',
+                      table: '',
+                      page: '',
+                      trv: '',
+                      fir: '',
+                      ps: '',
+                      auf: '1',
+                      form: 'ratio',
+                      a: '',
+                      b: '',
+                      cdiet: '',
+                      printed: '',
+                    },
+                  ])
+                }
+              >
+                Add a surrogate
+              </button>
+            </div>
+            {form.chemicalId !== '' && substances && !substance && (
+              <p className="muted">This chemical has no Eco-SSL document to load from.</p>
+            )}
+          </Group>
+
           <Group title="TPH composition" open={false}>
             <Seg<TphSet>
               legend="Fraction set"
@@ -618,6 +755,52 @@ export function PlantsEcoPage() {
               </>
             ) : (
               <Needs errors={ecossl.errors} />
+            )}
+            <h3>Wildlife dose, site-specific</h3>
+            {wildlife.ok ? (
+              <>
+                <table className="compare" aria-label="Wildlife dose hazard quotients">
+                  <thead>
+                    <tr>
+                      <th scope="col">Surrogate</th>
+                      <th scope="col">Dose (mg/kg/day)</th>
+                      <th scope="col">Hazard quotient</th>
+                      <th scope="col">Soil level at HQ 1 (mg/kg)</th>
+                      <th scope="col">Printed Eco-SSL (mg/kg)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {wildlife.rows.map((r, i) => (
+                      <tr key={i}>
+                        <th scope="row">
+                          {r.label} ({WILDLIFE_GROUP_LABELS[r.group].toLowerCase()})
+                          {r.source !== '' && <small> {r.source}</small>}
+                        </th>
+                        <td>{formatConcentration(r.doseMgPerKgD)}</td>
+                        <td>{fmtHi(r.hq)}</td>
+                        <td>
+                          {r.backCalcMgPerKg === null
+                            ? 'out of range'
+                            : formatConcentration(r.backCalcMgPerKg)}
+                        </td>
+                        <td>
+                          {r.printedMgPerKg === null
+                            ? 'none'
+                            : formatConcentration(r.printedMgPerKg)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <p className="muted">
+                  The soil level at a hazard quotient of one is a screening back-calculation for the
+                  factors entered, not a cleanup level. With an area use factor of 1 and the
+                  prefilled factors it reproduces the printed Eco-SSL.
+                </p>
+                <WarningList warnings={wildlife.warnings} />
+              </>
+            ) : (
+              <Needs errors={wildlife.errors} />
             )}
             <h3>
               User-entered benchmarks <Kind id={ECO_LEGACY_ID} />

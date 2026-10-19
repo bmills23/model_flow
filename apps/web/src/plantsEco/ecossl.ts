@@ -1,11 +1,29 @@
 import { ECO_GROUPS, type EcoGroup, type SslEntry } from '@model-flow/engine';
 
+export interface EcosslWildlifeRow {
+  group: 'avian' | 'mammalian';
+  surrogate: string;
+  trv: number;
+  fir: number;
+  ps: number;
+  form: 'ratio' | 'ln' | 'affine' | 'NA';
+  a: number | null;
+  b: number | null;
+  cdiet: number | null;
+  ecoSsl: number | null;
+  table: string;
+  page: number;
+  flag: string | null;
+}
+
 /** The slice of the generated Eco-SSL file the screen reads (mg/kg dry weight in soil). */
 export interface EcosslSubstance {
   substance: string;
   name: string;
   chemicalIds: string[];
   note: string | null;
+  /** Wildlife derivation rows (mg/kg body weight per day for trv, kg/kg per day for fir) with their page. */
+  wildlife: EcosslWildlifeRow[];
   values: Record<EcoGroup, { status: 'value' | 'NA' | 'NC' | 'procedure'; value: number | null }>;
 }
 
