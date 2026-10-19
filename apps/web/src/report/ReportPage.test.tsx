@@ -52,6 +52,22 @@ describe('ReportPage', () => {
     expect(screen.queryByRole('button', { name: /hide data table/i })).toBeNull();
   });
 
+  it('draws the plume map with a thinned table in the groundwater section, none when not computed', async () => {
+    const t = getScreen('transport');
+    setScreen('transport', { ...t, form: { ...t.form, K: '12.5' } });
+    const { unmount } = render(<ReportPage />);
+    const map = await screen.findByRole('img', { name: /plume map/i });
+    const fig = map.closest('figure')!;
+    expect(fig.querySelectorAll('.table-view table').length).toBe(1);
+    expect(fig.querySelectorAll('tbody tr').length).toBeLessThanOrEqual(25);
+    expect(fig.querySelector('caption')!.textContent).toMatch(/of 100/);
+    unmount();
+    setScreen('transport', { ...t, form: { ...t.form, K: 'abc' } });
+    render(<ReportPage />);
+    await screen.findByText(/^Not computed/);
+    expect(screen.queryByRole('img', { name: /plume map/i })).toBeNull();
+  });
+
   it('prints why a screen was not computed', async () => {
     const t = getScreen('transport');
     setScreen('transport', { ...t, form: { ...t.form, K: 'abc' } });
