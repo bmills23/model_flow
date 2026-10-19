@@ -118,3 +118,10 @@ export function formatConcentration(v: number): string {
   if (a >= 0.01) return String(Number(v.toPrecision(3)));
   return v.toExponential(2);
 }
+
+/** Indices 0..n-1 thinned evenly to at most `cap`, always keeping the first and the last. */
+export function thinIndices(n: number, cap: number | undefined): number[] {
+  const all = Array.from({ length: n }, (_, i) => i);
+  if (cap === undefined || cap < 2 || n <= cap) return all;
+  return Array.from({ length: cap }, (_, k) => Math.round((k * (n - 1)) / (cap - 1)));
+}

@@ -5,6 +5,7 @@ import {
   contourBands,
   contourLevels,
   flattenGrid,
+  thinIndices,
   formatConcentration,
   type ConcScale,
 } from './chartData';
@@ -20,11 +21,21 @@ interface Props {
   methodLabel: string;
   timeLabel: string;
   depthLabel: string;
+  /** Thin the centreline table to at most this many rows (the report); omit for every row. */
+  tableMaxRows?: number;
 }
 
 const M = { l: 46, r: 10, t: 10, b: 36 };
 
-export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, depthLabel }: Props) {
+export function PlumeMap({
+  result,
+  scenario,
+  scale,
+  methodLabel,
+  timeLabel,
+  depthLabel,
+  tableMaxRows,
+}: Props) {
   const [ref, width] = useWidth();
   const [probe, setProbe] = useState<string>('');
   const { xs, ys, grid } = result;
@@ -76,6 +87,9 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
       `x ${x.toFixed(0)} m, y ${y.toFixed(0)} m: ${formatConcentration(values[j * nx + i]!)} mg/L`,
     );
   };
+
+  const jc = ys.reduce((best, y, j) => (Math.abs(y) < Math.abs(ys[best]!) ? j : best), 0);
+  const picked = thinIndices(nx, tableMaxRows);
 
   const src = scenario.source;
   const rx = scenario.receptor.x;
@@ -158,16 +172,17 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
         )}
       </svg>
       <DataTable
-        caption={`Concentration along the plume centreline (y nearest 0), ${methodLabel}, ${timeLabel}, ${depthLabel}`}
+        caption={`Concentration along the plume centreline (y nearest 0), ${methodLabel}, ${timeLabel}, ${depthLabel}${
+          picked.length < nx
+            ? `. Every row shown is an evenly spaced sample: ${picked.length} of ${nx} x positions`
+            : ''
+        }`}
         columns={['x downgradient (m)', 'y (m)', 'Concentration (mg/L)']}
-        rows={xs.map((x, i) => {
-          const jc = ys.reduce((best, y, j) => (Math.abs(y) < Math.abs(ys[best]!) ? j : best), 0);
-          return [
-            String(Number(x.toFixed(2))),
-            String(Number(ys[jc]!.toFixed(2))),
-            formatConcentration(values[jc * nx + i]!),
-          ];
-        })}
+        rows={picked.map((i) => [
+          String(Number(xs[i]!.toFixed(2))),
+          String(Number(ys[jc]!.toFixed(2))),
+          formatConcentration(values[jc * nx + i]!),
+        ])}
       />
       <p className="probe" aria-live="off">
         {probe || 'Move over or tap the map to read the concentration.'}

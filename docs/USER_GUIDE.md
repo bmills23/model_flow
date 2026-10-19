@@ -223,7 +223,7 @@ project, so a run repeats exactly.
 The report is built from the project: the inputs of each screen you used, each screen's result tables, the
 engine warnings, a methods statement that names the methods you chose with numbered references, and the
 non-affiliation notice. Each screen's main charts are included too, every one followed by its data table
-(the plume map stays on its screen). Charts print in shades of grey, so a black and white print stays
+(including the groundwater plume map; its printed table is an evenly spaced sample of 20 centreline rows, and the groundwater screen's table holds every row). Charts print in shades of grey, so a black and white print stays
 readable. **Print or save as PDF** uses your browser's print dialog, which has a PDF option. The optional
 "Prepared by" field is not saved to the project.
 

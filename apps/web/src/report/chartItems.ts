@@ -1,5 +1,6 @@
 import type { ConcScale } from '../transport/chartData';
 import type { ComputeResult } from '../transport/compute';
+import type { Scenario } from '../transport/form';
 import type { Measure } from '../vadose/chartData';
 import type { RunSummary as VadoseRun, VadoseMethod } from '../vadose/compute';
 import type { TimeSeries } from '../vadose/TimeLineChart';
@@ -12,6 +13,15 @@ import type { RiskOutcome } from '../risk/compute';
  * it with that same component. Charts are not saved in a project; they are rebuilt with the results.
  */
 export type ChartItem =
+  | {
+      kind: 'plume';
+      result: ComputeResult;
+      scenario: Scenario;
+      scale: ConcScale;
+      methodLabel: string;
+      timeLabel: string;
+      depthLabel: string;
+    }
   | { kind: 'breakthrough'; result: ComputeResult; scale: ConcScale }
   | { kind: 'vadoseDepth'; run: VadoseRun; scale: ConcScale }
   | {

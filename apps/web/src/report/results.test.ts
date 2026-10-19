@@ -297,11 +297,11 @@ describe('computeResults charts', () => {
     return (r[key as keyof typeof r]?.charts ?? []).map((c) => c.kind);
   };
 
-  it('carries the breakthrough chart of the groundwater screen', async () => {
+  it('carries the plume map and the breakthrough chart of the groundwater screen', async () => {
     const k = await kinds((s) => {
       s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5' } };
     }, 'transport');
-    expect(k).toEqual(['breakthrough']);
+    expect(k).toEqual(['plume', 'breakthrough']);
   });
 
   it('carries the three vadose charts and the two saturated charts', async () => {

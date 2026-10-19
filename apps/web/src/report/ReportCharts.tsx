@@ -1,4 +1,5 @@
 import { BreakthroughChart } from '../transport/BreakthroughChart';
+import { PlumeMap } from '../transport/PlumeMap';
 import { DepthProfileChart } from '../vadose/DepthProfileChart';
 import { TablesAlwaysOpen } from '../vadose/tablesOpen';
 import { SourceDepletionChart } from '../vadose/SourceDepletionChart';
@@ -10,8 +11,23 @@ import { Charts as RiskCharts } from '../risk/Results';
 import type { ChartItem } from './chartItems';
 import './reportCharts.css';
 
+/** Rows kept in the printed plume table (about half a page); the screen table holds every row. */
+const PLUME_TABLE_ROWS = 20;
+
 function Chart({ item }: { item: ChartItem }) {
   switch (item.kind) {
+    case 'plume':
+      return (
+        <PlumeMap
+          result={item.result}
+          scenario={item.scenario}
+          scale={item.scale}
+          methodLabel={item.methodLabel}
+          timeLabel={item.timeLabel}
+          depthLabel={item.depthLabel}
+          tableMaxRows={PLUME_TABLE_ROWS}
+        />
+      );
     case 'breakthrough':
       return <BreakthroughChart result={item.result} scale={item.scale} />;
     case 'vadoseDepth':

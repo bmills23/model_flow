@@ -156,7 +156,23 @@ function transport(s: Screens, feed: Feed): SectionResults {
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
   sec.tables = transportCsvTables(out.result, Number(form.timeYr));
-  sec.charts = [{ kind: 'breakthrough', result: out.result, scale: form.scale }];
+  const rd = parsed.scenario.receptorDepths;
+  sec.charts = [
+    {
+      kind: 'plume',
+      result: out.result,
+      scenario: parsed.scenario,
+      scale: form.scale,
+      methodLabel:
+        form.mapMethod === 'legacy' ? 'legacy AT123D-class method' : 'modern Wexler (1992) method',
+      timeLabel: `at ${form.timeYr} years`,
+      depthLabel:
+        rd.bottom > rd.top
+          ? `screen average ${rd.top} to ${rd.bottom} m depth`
+          : `at ${rd.top} m depth`,
+    },
+    { kind: 'breakthrough', result: out.result, scale: form.scale },
+  ];
   addWarnings(sec, 'groundwater transport', out.result.warnings);
   return sec;
 }
