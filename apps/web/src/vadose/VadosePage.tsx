@@ -32,6 +32,7 @@ import { vadoseCsvTables } from './csv';
 import { useVadoseResult } from './useVadoseResult';
 import { METHOD_SERIES } from './series';
 import { WaterTableFluxChart } from './WaterTableFluxChart';
+import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof VadoseForm>(key: K, value: VadoseForm[K]) => void;
 
@@ -214,6 +215,7 @@ export function VadosePage() {
   return (
     <section aria-labelledby="vadose-heading" className="vadose">
       <h1 id="vadose-heading">Vadose zone leaching</h1>
+      <HelpLink target="vadose" />
       <p className="lede">
         A source in unsaturated soil loses chemical to the air and to infiltrating water. Follow the
         leachate down to the water table with the legacy VADSAT-type model or the modern layered

@@ -8,6 +8,7 @@ import {
   type BrowseRecord,
 } from './browse';
 import { loadBrowse } from './load';
+import { HelpLink } from '../docs/HelpLink';
 
 const PAGE = 25;
 
@@ -59,6 +60,7 @@ export function ChemicalsPage() {
   return (
     <section aria-labelledby="chemicals-heading" className="vadose chemicals">
       <h1 id="chemicals-heading">Chemical database</h1>
+      <HelpLink target="chemicals" />
       <p className="muted">
         EPA Regional Screening Level chemical data, edition {db?.edition ?? '2024-11'}
         {db ? `, retrieved ${db.retrieved}` : ''}. This list is read only: it shows the values the

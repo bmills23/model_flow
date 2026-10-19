@@ -180,6 +180,17 @@ export function parseMarkdown(source: string): Block[] {
   return parseBlocks(source.replace(/\r\n?/g, '\n').split('\n'));
 }
 
+// The id a heading carries, so `#/docs/<slug>/<section>` can scroll to it. Backticks, punctuation
+// and the route text in parentheses are dropped, so "Vadose leaching (`#/vadose`)" becomes
+// "vadose-leaching-vadose".
+export function sectionId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 const INLINE =
   /`([^`]+)`|\*\*([^*]+?)\*\*|(?<![\w*])\*([^*\s][^*]*?)\*(?![\w*])|\[([^\]]+)\]\(([^)\s]+)\)/g;
 

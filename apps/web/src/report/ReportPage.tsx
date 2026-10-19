@@ -8,6 +8,7 @@ import { buildReport, type Report } from './buildReport';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
+import { HelpLink } from '../docs/HelpLink';
 
 const KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
 
@@ -371,6 +372,7 @@ export function ReportPage() {
         <h1 id="report-heading" className="report-page-title">
           Report
         </h1>
+        <HelpLink target="report" />
         <label htmlFor={id} className="report-prepared">
           Prepared by (optional)
           <input

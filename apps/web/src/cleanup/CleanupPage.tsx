@@ -32,6 +32,7 @@ import { CleanupUncertainty } from './CleanupUncertainty';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupCsvTables, modeledCsvTables } from './csv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
+import { HelpLink } from '../docs/HelpLink';
 
 type Built = Extract<CleanupBuildResult, { ok: true }>;
 interface Snapshot {
@@ -158,6 +159,7 @@ export function CleanupPage() {
   return (
     <section aria-labelledby="cleanup-heading" className="vadose risk cleanup">
       <h1 id="cleanup-heading">Cleanup levels</h1>
+      <HelpLink target="cleanup" />
       <p className="lede">
         Pick chemicals from the EPA Regional Screening Level tables and the receptors and pathways
         that matter, set a target cancer risk and hazard quotient, and see the concentration in

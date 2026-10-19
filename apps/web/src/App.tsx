@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
-import { slugFromHash } from './docs/catalog';
+import { sectionFromHash, slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
 import { STEPS, stepForHash } from './steps';
 import { ProjectBar } from './project/ProjectBar';
@@ -243,7 +243,7 @@ export function App() {
       <main id="main" tabIndex={-1} key={epoch}>
         {onDocs ? (
           <Suspense fallback={<p className="muted">Loading the documentation...</p>}>
-            <DocsPage slug={slugFromHash(hash)} />
+            <DocsPage slug={slugFromHash(hash)} section={sectionFromHash(hash)} />
           </Suspense>
         ) : onMethods ? (
           <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>

@@ -18,6 +18,7 @@ import {
   type ShowerWaterSource,
   type VolatileOverride,
 } from './form';
+import { HelpLink } from '../docs/HelpLink';
 
 const SHOWER_METHODS = [
   { value: 'legacy', id: 'shower.fc-1986', label: 'Stagnant stall' },
@@ -147,6 +148,7 @@ export function HouseholdPage() {
   return (
     <section aria-labelledby="hh-heading" className="household">
       <h1 id="hh-heading">Shower, irrigation and particulates</h1>
+      <HelpLink target="household" />
       <p className="lede">
         Household exposure from tap and irrigation water and from surface soil: shower air,
         sprinkler spray and irrigation contact, and windblown particulates. Each process has a

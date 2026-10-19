@@ -38,6 +38,7 @@ import {
 import { computeWildlife, wildlifeRowsFor, WILDLIFE_GROUP_LABELS } from './wildlife';
 import { buildProduceFeed, computeProduce, LEGACY_PLANT_ID, MODERN_PLANT_ID } from './produce';
 import { buildTphFeed, computeTph, TPH_LEGACY_ID, TPH_MODERN_ID } from './tph';
+import { HelpLink } from '../docs/HelpLink';
 
 function kindOf(id: string): 'legacy' | 'modern' {
   return registry.get(id).kind === 'legacy' ? 'legacy' : 'modern';
@@ -211,6 +212,7 @@ export function PlantsEcoPage() {
   return (
     <section aria-labelledby="pe-heading" className="plants-eco">
       <h1 id="pe-heading">Plants, ecology and TPH</h1>
+      <HelpLink target="plants-eco" />
       <p className="lede">
         Homegrown produce plant factors for the exposure and risk screen, screening ecological
         hazard quotients, and total petroleum hydrocarbon cleanup levels from a fraction
