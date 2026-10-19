@@ -1689,7 +1689,11 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
    (pilot timing, run budget, progress, cancel). The one-at-a-time and Sobol runs and the probabilistic
    cleanup solve are synchronous, exactly as on their screens, and are bounded by the same budget check;
    the cleanup solve is not cancellable once started (DEFAULT, a worker protocol for the cleanup solver is
-   a separate change).
+   a separate change). Because those runs block the page, the control's copy and the user guide say so
+   (the page may stop responding, only the exposure sample can be cancelled) rather than claiming the
+   report stays usable; the review finding on this was resolved by correcting the claim, not by moving the
+   solve to a worker (DEFAULT, Bryan's to overturn). The report builds the cleanup inputs with the held
+   produce feed, exactly as the screen does.
 3. **One run implementation for the screens and the report.** `uncertainty/headless.ts` holds the run of
    the exposure panel and of the cleanup panel with no component state; `UncertaintyPanel` and
    `CleanupUncertainty` now call it, so the report cannot drift from the screens. Behaviour of both panels

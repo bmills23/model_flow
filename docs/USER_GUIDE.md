@@ -139,8 +139,10 @@ readable. **Print or save as PDF** uses your browser's print dialog, which has a
 
 Uncertainty results are left out until you ask. In the uncertainty section, tick **Include uncertainty
 results** to repeat each analysis you set up on the exposure and cleanup screens, from its saved
-distributions and seed, so the numbers match the screens. A progress bar shows the run and **Cancel run**
-stops it; a very long run asks you to confirm first. The report then shows the percentile summary, the
+distributions and seed, so the numbers match the screens. A progress bar shows the run. The exposure
+sample runs in the background and **Cancel run** stops it. The one-at-a-time and Sobol runs and the
+probabilistic cleanup solve run in the page itself, so the page may stop responding until they finish and
+they cannot be cancelled once started; a very long run asks you to confirm first. The report then shows the percentile summary, the
 chart of the spread, which inputs matter (tornado, Spearman and, if switched on, Sobol), the seed and the
 iteration count, and the probabilistic cleanup levels. A panel with no distribution set is skipped with a
 note saying why. Results are not saved with the project.

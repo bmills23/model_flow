@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { registry } from '@model-flow/engine';
-import { buildProject, defaultScreens, type Screens } from '../project';
+import { buildProject, defaultScreens, feedEntry, type Screens } from '../project';
+import { PATHWAY_IDS } from '@model-flow/engine';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { emptyRow } from '../uncertainty/editor';
@@ -117,5 +118,47 @@ describe('planUncertainty', () => {
     expect(run.cleanup!.result.seed).toBe('g2c');
     expect(run.cleanup!.result.levels.length).toBeGreaterThan(0);
     expect(run.cleanup!.label).toMatch(/in /);
+  }, 60000);
+  it('plans the cleanup panel with the held produce feed, as the screen does', async () => {
+    const db = await loadChemicalDb();
+    const rec = newChemicalRow(db.byId.get(BENZENE)!);
+    const screens = defaultScreens();
+    const on = ['soilIngestion'];
+    const pathways = Object.fromEntries(PATHWAY_IDS.map((p) => [p, on.includes(p)]));
+    screens.cleanup = {
+      form: {
+        ...screens.cleanup.form,
+        chemicals: [{ ...rec, produceFromPlantsEco: true }],
+        a: { ...screens.cleanup.form.a, pathways: pathways as never, produce: true },
+      },
+    };
+    screens.uncertainty = {
+      ...screens.uncertainty,
+      cleanup: {
+        ...screens.uncertainty.cleanup,
+        rows: { 'exposure.receptor0.bw': uniform('50', '100') },
+        iterations: '30',
+        seed: 'g2p',
+      },
+    };
+    const proj = buildProject({
+      screens,
+      feeds: {
+        produce: feedEntry('plantsEco', screens.plantsEco.form, {
+          chemicalId: BENZENE,
+          label: 'Benzene',
+          method: 'plantUptake.hhrap-2005',
+          factors: { root: 0.02 },
+          intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
+          intakeLabel: 'user entered',
+          warnings: [],
+        }),
+      } as never,
+      createdWith: '0.0.1',
+      now: NOW,
+    });
+    const plan = await planUncertainty(proj);
+    expect(plan.notes).toEqual([]);
+    expect(plan.cleanup).not.toBeNull();
   }, 60000);
 });

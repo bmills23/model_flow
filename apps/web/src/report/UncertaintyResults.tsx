@@ -267,8 +267,10 @@ export function ReportUncertainty(props: {
         </label>
         <p className="muted">
           Repeats each analysis from the setup above and its seed, which gives the same numbers as
-          the screens. It can take a while for a large iteration count; the report stays usable
-          while it runs.
+          the screens. It can take a while for a large iteration count. The exposure sample runs in
+          the background and can be cancelled; the one-at-a-time, Sobol and cleanup solves run in
+          the page itself, so it may stop responding until they finish and they cannot be cancelled
+          once started.
         </p>
         {busy && (
           <div className="u-progress" role="status">

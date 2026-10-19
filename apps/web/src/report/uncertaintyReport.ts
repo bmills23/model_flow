@@ -153,7 +153,7 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
     } else if (form.source !== 'direct') {
       plan.notes.push(`${name}: not run, the probabilistic level samples a direct source only.`);
     } else {
-      const built = buildCleanup(form, db);
+      const built = buildCleanup(form, db, { produce: feed<ProduceRiskFeed>('produce') });
       if (!built.ok) {
         plan.notes.push(
           `${name}: not run, the screen's inputs do not compute (${built.errors.join('; ')}).`,
