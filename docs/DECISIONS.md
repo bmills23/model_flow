@@ -1171,6 +1171,12 @@ M10 slice E5 (sensitivity, 2026-10-18) implementation choices, none overturning 
   zero is shown as 0 and the raw value is kept in `firstRaw`.
 - The tornado uses `distributionQuantile` at 0.05 and 0.95, so truncation is respected; it costs 2k + 1 runs
   (the base run included). `spearmanWithOutput` uses the E3 average-rank Spearman over rows with a finite output.
+- The first order sum centres f(B) on the pooled mean of f(A) and f(B) over the rows in use (recomputed per
+  bootstrap resample). Review fix: the first implementation used f(B) uncentred, which is unbiased but whose noise
+  grows with the output mean, so on log10 risk (mean near -6) the intervals spanned several units and every run was
+  flagged not converged whatever N. Ishigami and the linear fixture have means near zero, so they could not see it;
+  tests now assert indices and intervals are unchanged (to 1e-9) by adding 100 to the output and by a 1e-6 factor
+  on the log10 scale, and that doubling N clears the flag. The Jansen total is shift invariant already.
 - Fixture 5 passed at its stated tolerances (Ishigami N = 8192 within 0.03, linear additive within 0.02); no
   tolerance was widened. `saltelli2010`, `jansen1999` and `sobol2001` are `used`.
 
@@ -1260,7 +1266,7 @@ M10 slice W3 (results charts and panel on the exposure screen, 2026-10-18) imple
 - The pooled run produces the sample outputs; the tornado (2k + 1 runs) and the optional Sobol analysis run on the main thread, which is acceptable for the exposure methods because a run costs microseconds. Sobol N is its own field (default 512).
 - Entered units: exposure duration in years (365 days, the exposure convention) and water ingestion in L/day (factor 1e-3 / 86400), converted at the boundary.
 - The percentile fan (`FanChart`, `fanBands`) is built and unit tested but not mounted: no exposure output is a time series yet. Open for a screen that has one.
-- Results are marked stale with a notice when the scenario inputs change after a run. Charts are inline SVG with the shared theme tokens; the Sobol first-order intervals at the default N are often flagged not converged, which the panel reports with the advice to double N.
+- Results are marked stale with a notice when the scenario inputs change after a run. Charts are inline SVG with the shared theme tokens; when a Sobol interval is flagged not converged the panel reports it with the advice to double N. (Before the E5 centring fix the first order intervals on log10 risk were flagged at every N; that was the estimator, not the sample size.)
 - No registry entry, assumption or reference changed, so no docs regeneration was needed.
 
 M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) implementation choices, none overturning a ruling above:

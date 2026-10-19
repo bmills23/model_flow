@@ -67,7 +67,12 @@ function variance(values: readonly number[]): number {
   return values.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1);
 }
 
-/** Saltelli first order and Jansen total estimators over row subsets (indices into the arrays). */
+/**
+ * Saltelli first order and Jansen total estimators over row subsets (indices into the arrays). The first
+ * order sum uses f(B) centred on the pooled mean of f(A) and f(B) over the same rows: the expectation is
+ * unchanged (E(f(A_B) - f(A)) = 0), but without centring the estimate's noise grows with the output mean,
+ * so a log10 risk near -6 would swamp the indices. The Jansen total is already shift invariant.
+ */
 function estimate(
   fA: readonly number[],
   fB: readonly number[],
@@ -78,6 +83,7 @@ function estimate(
   const pooled: number[] = [];
   for (const i of rows) pooled.push(fA[i] as number, fB[i] as number);
   const v = variance(pooled);
+  const mean = pooled.reduce((t, y) => t + y, 0) / pooled.length;
   const first: number[] = [];
   const total: number[] = [];
   for (const col of fAB) {
@@ -85,7 +91,7 @@ function estimate(
     let s2 = 0;
     for (const i of rows) {
       const ab = col[i] as number;
-      s1 += (fB[i] as number) * (ab - (fA[i] as number));
+      s1 += ((fB[i] as number) - mean) * (ab - (fA[i] as number));
       s2 += ((fA[i] as number) - ab) ** 2;
     }
     first.push(s1 / n / v);

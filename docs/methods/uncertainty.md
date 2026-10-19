@@ -180,8 +180,11 @@ Estimator (Saltelli et al. 2010 design, `saltelli2010`; total effect after Janse
 1. Draw two independent N by k matrices A and B of u values, mapped through F^-1.
 2. For each j form A_B^(j): A with column j taken from B.
 3. Evaluate f(A), f(B) and f(A_B^(j)) for every j: N (k + 2) model runs.
-4. V = the sample variance of the 2N values f(A) and f(B) together.
-5. S_j = (1/N) sum_i f(B)_i (f(A_B^(j))_i - f(A)_i) / V.
+4. V = the sample variance of the 2N values f(A) and f(B) together, and m their mean.
+5. S_j = (1/N) sum_i (f(B)_i - m) (f(A_B^(j))_i - f(A)_i) / V. Centring f(B) on m leaves the expectation
+   unchanged, because f(A_B^(j)) - f(A) has mean zero, but it removes noise that otherwise grows with the
+   size of the output mean: uncentred, a log10 risk near -6 swamps the indices and no N clears the
+   convergence flag. Every bootstrap resample recomputes V and m over its own rows.
 6. ST_j = (1/(2N)) sum_i (f(A)_i - f(A_B^(j))_i)^2 / V.
 
 Choices (all DEFAULT): A and B are two independent Latin hypercube designs from separate seeded streams

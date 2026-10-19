@@ -212,3 +212,43 @@ describe('spearman against the output', () => {
     expect(rho[0]).toBeCloseTo(1, 12);
   });
 });
+
+describe('sobol: invariance to an additive offset of the output', () => {
+  const lin = (x: number[]) => (x[0] as number) + 2 * (x[1] as number) + 0.5 * (x[2] as number);
+  const dists: Distribution[] = [U, U, U];
+  const close = (a: readonly number[], b: readonly number[]) =>
+    a.forEach((v, j) => expect(Math.abs(v - (b[j] as number))).toBeLessThan(1e-9));
+  const closeIv = (a: readonly [number, number][], b: readonly [number, number][]) =>
+    a.forEach((iv, j) => close(iv, b[j] as [number, number]));
+  it('adding 100 to a mean-zero model leaves the indices and intervals unchanged', () => {
+    const r0 = runSobol(spec(3, lin, dists, { n: 512, seed: 'shift' }));
+    const r1 = runSobol(spec(3, (x) => lin(x) + 100, dists, { n: 512, seed: 'shift' }));
+    close(r1.firstRaw, r0.firstRaw);
+    close(r1.total, r0.total);
+    closeIv(r1.firstInterval, r0.firstInterval);
+    closeIv(r1.totalInterval, r0.totalInterval);
+  });
+  it('with an offset of 100, doubling N twice clears the not converged flag', () => {
+    const r = runSobol(spec(3, (x) => lin(x) + 100, dists, { n: 2048, seed: 'shift' }));
+    expect(r.warnings.map((w) => w.code)).not.toContain('uncertainty.sobol-not-converged');
+  });
+  it('on the log10 scale a 1e-6 scale output gives the same indices as the unscaled one', () => {
+    const LN: Distribution = { kind: 'lognormal', gm: 1, gsd: 2 };
+    const prod = (x: number[]) => (x[0] as number) * (x[1] as number) ** 0.5 * (x[2] as number) ** 2;
+    const log = { n: 512, seed: 'log', scale: 'log10' as const };
+    const r0 = runSobol(spec(3, prod, [LN, LN, LN], log));
+    const r1 = runSobol(spec(3, (x) => 1e-6 * prod(x), [LN, LN, LN], log));
+    close(r1.firstRaw, r0.firstRaw);
+    close(r1.total, r0.total);
+    closeIv(r1.firstInterval, r0.firstInterval);
+    closeIv(r1.totalInterval, r0.totalInterval);
+    // log10 Y is additive in log10 X_j with weights 1, 0.5 and 2 on equal variances.
+    const w = [1, 0.25, 4];
+    const tot = w.reduce((p, q) => p + q, 0);
+    r1.firstInterval.forEach(([lo, hi], j) => {
+      expect(lo).toBeLessThanOrEqual((w[j] as number) / tot);
+      expect(hi).toBeGreaterThanOrEqual((w[j] as number) / tot);
+      expect(hi - lo).toBeLessThan(0.25);
+    });
+  });
+});
