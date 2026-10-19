@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { loadEcossl, substanceFor } from './ecossl';
 import { DEFAULT_FORM, type PlantsEcoForm, type WildlifeRowForm } from './form';
-import { computeWildlife, REPRODUCTION_TOLERANCE, wildlifeRowsFor } from './wildlife';
+import {
+  computeWildlife,
+  REPRODUCTION_TOLERANCE,
+  reproducesPrinted,
+  wildlifeRowsFor,
+} from './wildlife';
 
 const form = (over: Partial<PlantsEcoForm> = {}): PlantsEcoForm => ({
   ...DEFAULT_FORM,
@@ -96,5 +101,9 @@ describe('wildlife dose panel', () => {
     if (!r.ok) throw new Error(r.errors.join('; '));
     expect(r.rows[0]!.printedMgPerKg).toBeNull();
     expect(r.rows[0]!.reproduces).toBeNull();
+  });
+
+  it('makes no reproduction claim when a value is printed but no level was back-calculated', () => {
+    expect(reproducesPrinted(null, 5)).toBeNull();
   });
 });

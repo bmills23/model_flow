@@ -23,12 +23,13 @@ const MG = 1e-6; // kg/kg per mg/kg
 export const REPRODUCTION_TOLERANCE = 0.05;
 
 /**
- * Whether the back-calculated soil level reproduces the printed Eco-SSL within the tolerance. Null when the document
- * prints no value for the row (a user row), since there is nothing to reproduce.
+ * Whether the back-calculated soil level reproduces the printed Eco-SSL within the tolerance. Null when there is no
+ * claim to make: the document prints no value for the row (a user row), or no level was back-calculated (the
+ * bisection bracket was not met), so there is nothing to compare and the row shows no reproduction flag.
  */
 export function reproducesPrinted(backCalc: number | null, printed: number | null): boolean | null {
   if (printed === null || printed <= 0) return null;
-  if (backCalc === null) return false;
+  if (backCalc === null) return null;
   return Math.abs(backCalc - printed) / printed <= REPRODUCTION_TOLERANCE;
 }
 
@@ -79,7 +80,7 @@ export interface WildlifeResultRow {
   backCalcMgPerKg: number | null;
   /** Eco-SSL printed in the document for this surrogate, mg/kg, or null. */
   printedMgPerKg: number | null;
-  /** Whether backCalcMgPerKg is within REPRODUCTION_TOLERANCE of the printed value; null when none is printed. */
+  /** Whether backCalcMgPerKg is within REPRODUCTION_TOLERANCE of the printed value; null when none is printed or none was back-calculated. */
   reproduces: boolean | null;
 }
 
