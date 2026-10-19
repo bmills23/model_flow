@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
 import { DEFAULT_FORM, toScenario } from './form';

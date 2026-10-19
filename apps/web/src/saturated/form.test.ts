@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { SOIL_TEXTURES, convert, runTwoRegion } from '@model-flow/engine';
 import { DEFAULT_FORM, applyTexture, isCaseA, toScenario, type SaturatedForm } from './form';

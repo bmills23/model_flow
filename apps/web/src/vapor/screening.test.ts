@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { attenuationFactorRun, pviScreenRun } from '@model-flow/engine';
 import { DEFAULT_FORM, toInputs, type VaporForm } from './form';

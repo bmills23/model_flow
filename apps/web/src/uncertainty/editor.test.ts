@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { distributionQuantile, type UncertainInput } from '@model-flow/engine';
 import {

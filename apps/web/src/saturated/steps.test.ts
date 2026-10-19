@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { convert, loadedMass, runExponential, runTwoRegion } from '@model-flow/engine';
 import { DEFAULT_FORM, toScenario, type SaturatedForm } from './form';

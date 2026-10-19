@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { SOIL_TEXTURES, convert } from '@model-flow/engine';
 import {

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { references, registry } from '@model-flow/engine';
 import { describe, expect, it } from 'vitest';
 import { buildMethodsStatement, DATA_SOURCES } from './methodsStatement';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import type { MethodDescriptor } from '@model-flow/engine';
 import { describe, expect, it } from 'vitest';
 import { groupByProcess } from './group';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { beforeAll, describe, expect, it } from 'vitest';
 import { loadChemicalDb, searchChemicals, toxRows, type ChemicalDb } from './chemicalDb';
 

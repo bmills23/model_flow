@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { convert } from '@model-flow/engine';
 import { compute, type SaturatedComputeResult } from './compute';

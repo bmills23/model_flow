@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { SOIL_TEXTURES, henryAtTemperature, jeEpaIndoor, jeLegacyIndoor } from '@model-flow/engine';
 import { DEFAULT_FORM, applyTexture, toInputs, type VaporForm } from './form';

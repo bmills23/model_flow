@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { clearWellFeed, getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { compute, lastYearMean, vadoseFluxSeries, type VadoseComputeResult } from './compute';
 import { DEFAULT_FORM, R7_PUBLISHED, addLayer, toScenario, type VadoseForm } from './form';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import type { ReceptorRiskSummary } from '@model-flow/engine';
 import { barRows, fmtHi, fmtRisk, PATHWAY_LABELS } from './chartData';

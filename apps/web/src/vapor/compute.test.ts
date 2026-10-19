@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { jeLegacyIndoor, jeEpaIndoor } from '@model-flow/engine';
 import { DEFAULT_FORM, RISC4_BENZENE, toInputs, type VaporForm } from './form';
