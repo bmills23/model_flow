@@ -11,3 +11,4 @@ coverage/
 # Eco-SSL source PDFs are fetched by `pnpm --filter @model-flow/data fetch:ecossl` (checksummed), not committed.
 packages/data/raw/ecossl/**/*.pdf
 apps/web/.mobile-check/
+.vitest/
