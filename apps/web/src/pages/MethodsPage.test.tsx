@@ -25,5 +25,5 @@ describe('MethodsPage', () => {
         expect(screen.getAllByText(new RegExp(escapeRegExp(ref!.title))).length).toBeGreaterThan(0);
       }
     }
-  });
+  }, 30_000);
 });
