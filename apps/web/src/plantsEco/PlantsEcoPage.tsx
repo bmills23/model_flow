@@ -18,7 +18,14 @@ import { Field, Group, Seg } from '../ui/controls';
 import { plantsEcoCsvTables } from './csv';
 import { computeBenchmarks, computeEcossl, ECO_LEGACY_ID, ECO_MODERN_ID } from './eco';
 import { loadEcossl, substanceFor, type EcosslSubstance } from './ecossl';
-import { getProduceFeed, setProduceFeed, subscribeProduceFeed } from './feeds';
+import {
+  getProduceFeed,
+  getTphFeed,
+  setProduceFeed,
+  setTphFeed,
+  subscribeProduceFeed,
+  subscribeTphFeed,
+} from './feeds';
 import {
   CLASS_LABELS,
   type IntakeMode,
@@ -28,7 +35,7 @@ import {
   type UptakeChoice,
 } from './form';
 import { buildProduceFeed, computeProduce, LEGACY_PLANT_ID, MODERN_PLANT_ID } from './produce';
-import { computeTph, TPH_LEGACY_ID, TPH_MODERN_ID } from './tph';
+import { buildTphFeed, computeTph, TPH_LEGACY_ID, TPH_MODERN_ID } from './tph';
 
 function kindOf(id: string): 'legacy' | 'modern' {
   return registry.get(id).kind === 'legacy' ? 'legacy' : 'modern';
@@ -120,7 +127,9 @@ export function PlantsEcoPage() {
   const props = useLoaded<CleanupProps>(loadCleanupProps);
   const substances = useLoaded<EcosslSubstance[]>(loadEcossl);
   const held = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  const heldTph = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const [sent, setSent] = useState<string | null>(null);
+  const [sentTph, setSentTph] = useState<string | null>(null);
 
   const choose = (id: string): void => {
     const rec = db?.byId.get(id);
@@ -149,6 +158,13 @@ export function PlantsEcoPage() {
     () => plantsEcoCsvTables({ produce, ecossl, benchmarks, tph }),
     [produce, ecossl, benchmarks, tph],
   );
+
+  const tphFeedResult = useMemo(() => buildTphFeed(form, tph), [form, tph]);
+  const sendTph = (): void => {
+    if (!tphFeedResult.ok) return;
+    setTphFeed(tphFeedResult.feed);
+    setSentTph(tphFeedResult.feed.label);
+  };
 
   const send = (): void => {
     if (!feedResult.ok) return;
@@ -699,6 +715,17 @@ export function PlantsEcoPage() {
               </>
             ) : (
               <Needs errors={tph.errors} />
+            )}
+            <button type="button" className="btn" disabled={!tphFeedResult.ok} onClick={sendTph}>
+              Send total level to cleanup
+            </button>
+            {sentTph !== null && (
+              <p role="status">
+                Sent {sentTph}. The cleanup levels screen shows it beside the chemical levels.
+              </p>
+            )}
+            {heldTph !== null && sentTph === null && (
+              <p className="muted">A total TPH level ({heldTph.methodId}) is already held.</p>
             )}
           </section>
           <DownloadCsv tables={csvTables} />

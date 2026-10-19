@@ -11,7 +11,13 @@ import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
 import { buildModeled } from '../cleanup/modeledBuild';
 import { runCleanup } from '../cleanup/compute';
-import { cleanupCsvTables, CLEANUP_METHOD_IDS, ssgCsvTables, SSG_METHOD_ID } from '../cleanup/csv';
+import {
+  cleanupCsvTables,
+  CLEANUP_METHOD_IDS,
+  ssgCsvTables,
+  SSG_METHOD_ID,
+  tphCsvTables,
+} from '../cleanup/csv';
 import { computeSsg, loadCleanupProps, type CleanupProps } from '../cleanup/ssg';
 import { compute as computeTransport } from '../transport/compute';
 import { toScenario as transportScenario } from '../transport/form';
@@ -43,7 +49,7 @@ import type { WellFeed } from '../transport/wellFeed';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { HouseholdRiskFeed } from '../household/feeds';
-import type { ProduceRiskFeed } from '../plantsEco/feeds';
+import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
 
 /** An engine warning with the method (or table) it came from. */
 export interface ResultWarning {
@@ -251,7 +257,12 @@ async function cleanup(
     ]);
   }
   const sec = empty();
-  const built = buildCleanup(form, db);
+  const built = buildCleanup(form, db, { produce: feed<ProduceRiskFeed>('produce') });
+  const tphHeld = feed<TphRiskFeed>('tph');
+  if (tphHeld !== null) {
+    sec.tables.push(...tphCsvTables(tphHeld));
+    addWarnings(sec, tphHeld.methodId, tphHeld.warnings);
+  }
   if (built.ok) {
     const outcome = runCleanup(built);
     const names: Record<string, string> = {};
@@ -259,6 +270,7 @@ async function cleanup(
     sec.tables.push(...cleanupCsvTables(outcome, names));
     for (const n of built.notes)
       addWarnings(sec, 'cleanup screen', [{ code: 'ui.pathway-skipped', message: n }]);
+    addWarnings(sec, 'plant uptake', built.feedWarnings);
     for (const m of ['legacy', 'modern'] as const) {
       const o = outcome[m];
       if (o.ok) addWarnings(sec, CLEANUP_METHOD_IDS[m], o.result.warnings);
@@ -269,7 +281,7 @@ async function cleanup(
         'The household source levels panel of the cleanup screen is on the screen only.',
       );
     }
-  } else if (!form.ssg.on) {
+  } else if (!form.ssg.on && tphHeld === null) {
     return notComputed(built.errors);
   } else {
     sec.notes.push(`Not computed: ${built.errors.join('; ')}`);

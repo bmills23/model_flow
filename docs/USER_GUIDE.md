@@ -96,7 +96,8 @@ result can be sent to the risk and cleanup screens.
 Homegrown produce plant factors for the risk screen, screening ecological hazard quotients, and total
 petroleum hydrocarbon levels from a fraction composition. Nothing is defaulted from memory: a value without
 a primary source is yours to enter, and the button that sends a result on stays disabled until the inputs are
-usable.
+usable. The produce button sends the plant factors, the intake and the plant engine's warnings; the total
+TPH button sends the total level, the fraction table and the warnings, and the cleanup screen shows them.
 
 ### Exposure and risk (`#/risk`)
 
@@ -110,6 +111,15 @@ receptor can be evaluated alongside the first.
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and
 noncancer levels governs, and the screen says which one did.
+
+Homegrown produce and total petroleum hydrocarbons come from the plants, ecology and TPH screen. For
+produce, send the plant factors from that screen, switch on "plant factors for homegrown produce" on the
+chemical and "Homegrown produce" on the receptor: the soil level then includes the produce pathway
+(it is also listed on its own under each pathway alone), and the plant engine's warnings appear with the
+cleanup warnings. The produce pathway is added to a direct soil source only, not to a modeled one. For
+total TPH, send the total level from that screen: a "Total TPH level" panel shows it beside the chemical
+levels with its fraction table, method id and warnings, and it has its own CSV download. The total is a
+hazard index level held from that screen, so change the composition there and send it again.
 
 ### Uncertainty analysis
 

@@ -6,6 +6,7 @@ import { FROM_SI, MEDIUM_UNIT } from './build';
 import type { CleanupOutcome } from './compute';
 import type { ModeledMethodOutcome, ModeledOutcome } from './modeledTypes';
 import type { SsgRow } from './ssg';
+import type { TphRiskFeed } from '../plantsEco/feeds';
 
 export const CLEANUP_METHOD_IDS = {
   legacy: 'cleanup.rags-b-1991',
@@ -260,6 +261,57 @@ export function ssgRows(rows: readonly SsgRow[]): CsvRow[] {
           note: r.reason,
         },
   );
+}
+
+/* ---------------------------------------------------------------- total TPH level */
+
+/** The two registered fraction sets the total TPH level can come from. */
+export const TPH_METHOD_IDS = ['tph.tphcwg', 'tph.madep'] as const;
+
+const TPH_COLUMNS: CsvColumn[] = [
+  { key: 'method', header: 'method' },
+  { key: 'item', header: 'item' },
+  { key: 'family', header: 'family' },
+  { key: 'massFraction', header: 'mass fraction', unit: '-' },
+  { key: 'mapped', header: 'mapped to an RSL surrogate' },
+  { key: 'levelMgPerKg', header: 'level', unit: 'mg/kg' },
+  { key: 'targetHazardIndex', header: 'target hazard index', unit: '-' },
+];
+
+/** The total level first, then one row per fraction with the level the user entered for it. */
+export function tphRows(feed: TphRiskFeed): CsvRow[] {
+  return [
+    {
+      method: feed.methodId,
+      item: 'Total TPH',
+      family: null,
+      massFraction: null,
+      mapped: null,
+      levelMgPerKg: feed.totalMgPerKg,
+      targetHazardIndex: feed.targetHazardIndex,
+    },
+    ...feed.fractions.map((f) => ({
+      method: feed.methodId,
+      item: f.label,
+      family: f.family,
+      massFraction: f.massFraction,
+      mapped: f.mapped ? 'yes' : 'no',
+      levelMgPerKg: f.levelMgPerKg,
+      targetHazardIndex: null,
+    })),
+  ];
+}
+
+export function tphCsvTables(feed: TphRiskFeed): CsvTable[] {
+  return [
+    {
+      name: 'cleanup-tph',
+      editions: ['rsl'],
+      label: 'total TPH level',
+      rows: tphRows(feed),
+      columns: TPH_COLUMNS,
+    },
+  ];
 }
 
 export function ssgCsvTables(rows: readonly SsgRow[]): CsvTable[] {

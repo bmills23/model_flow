@@ -81,6 +81,7 @@ export const feedShapes = {
   vaporRisk: feedEnvelope(jsonObject).optional(),
   household: feedEnvelope(jsonObject).optional(),
   produce: feedEnvelope(jsonObject).optional(),
+  tph: feedEnvelope(jsonObject).optional(),
 };
 
 /** Every feed key of format version 1. Each entry is validated on its own (see `parseProject`). */

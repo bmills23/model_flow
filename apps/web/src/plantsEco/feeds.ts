@@ -17,6 +17,12 @@ export interface ProduceRiskFeed {
   intakes: ProduceBoundary;
   /** What the intake is, for the risk screen's note ("EFH chapter 13, ages 20 to 39", "user entered"). */
   intakeLabel: string;
+  /**
+   * The plant uptake engine's warnings for these factors (for example log Kow outside the fitted
+   * range), carried so the cleanup screen and report show what the plants screen showed. Absent in
+   * a feed saved before the cleanup screen read it.
+   */
+  warnings?: { code: string; message: string }[];
 }
 
 const produce = createFeed<ProduceRiskFeed>();
@@ -24,3 +30,33 @@ export const getProduceFeed = produce.get;
 export const setProduceFeed = produce.set;
 export const clearProduceFeed = produce.clear;
 export const subscribeProduceFeed = produce.subscribe;
+
+/**
+ * The total TPH cleanup level of the composition on the plants and ecology screen, offered to the
+ * cleanup screen. Levels are mg/kg dry soil at the target hazard index; the fraction levels are the
+ * ones the user entered, so the cleanup screen can show what the total rests on.
+ */
+export interface TphRiskFeed {
+  /** Registry id of the fraction set (`tph.tphcwg` or `tph.madep`). */
+  methodId: string;
+  label: string;
+  targetHazardIndex: number;
+  /** Total TPH level in soil, mg/kg. */
+  totalMgPerKg: number;
+  fractions: {
+    label: string;
+    family: 'aliphatic' | 'aromatic';
+    massFraction: number;
+    mapped: boolean;
+    levelMgPerKg: number | null;
+  }[];
+  /** Fractions left out of the total because no RSL surrogate is mapped. */
+  unmapped: string[];
+  warnings: { code: string; message: string }[];
+}
+
+const tph = createFeed<TphRiskFeed>();
+export const getTphFeed = tph.get;
+export const setTphFeed = tph.set;
+export const clearTphFeed = tph.clear;
+export const subscribeTphFeed = tph.subscribe;

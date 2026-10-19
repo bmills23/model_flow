@@ -2,6 +2,8 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
+import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
+import { forgetMemory } from '../project/store';
 
 async function loaded() {
   render(<CleanupPage />);
@@ -18,7 +20,12 @@ async function withBenzene() {
   await addChemical('71-43-2', /add benzene/i);
 }
 
-afterEach(() => clearHouseholdFeed());
+afterEach(() => {
+  clearHouseholdFeed();
+  clearProduceFeed();
+  clearTphFeed();
+  forgetMemory();
+});
 
 describe('CleanupPage', () => {
   it('has its heading and asks for a chemical first', async () => {
@@ -119,5 +126,66 @@ describe('CleanupPage', () => {
     fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
     expect((await screen.findAllByText(/not sampled yet/i)).length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: /probabilistic cleanup level/i })).toBeNull();
+  }, 30000);
+
+  it('shows the held total TPH level with its method, fractions and warnings', async () => {
+    setTphFeed({
+      methodId: 'tph.madep',
+      label: 'Total TPH, tph.madep',
+      targetHazardIndex: 1,
+      totalMgPerKg: 333.333,
+      fractions: [
+        { label: 'Low', family: 'aliphatic', massFraction: 0.5, mapped: true, levelMgPerKg: 200 },
+        {
+          label: 'Oddball',
+          family: 'aromatic',
+          massFraction: 0.5,
+          mapped: false,
+          levelMgPerKg: null,
+        },
+      ],
+      unmapped: ['Oddball'],
+      warnings: [{ code: 'TPH_TEST_WARNING', message: 'a fraction warning' }],
+    });
+    await loaded();
+    const region = screen.getByRole('region', { name: /total tph level/i });
+    expect(within(region).getByText('tph.madep')).toBeTruthy();
+    expect(within(region).getByText('333')).toBeTruthy();
+    expect(within(region).getByText(/no surrogate, left out/i)).toBeTruthy();
+    expect(within(region).getByText('TPH_TEST_WARNING')).toBeTruthy();
+  }, 30000);
+
+  it('shows no TPH panel when none is held', async () => {
+    await loaded();
+    expect(screen.queryByRole('region', { name: /total tph level/i })).toBeNull();
+  }, 30000);
+
+  it('adds the homegrown produce level to the soil table with the plant engine warnings', async () => {
+    setProduceFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, plantUptake.hhrap-2005',
+      method: 'plantUptake.hhrap-2005',
+      factors: { root: 0.02, abovegroundExposed: 0.05 },
+      intakes: {
+        root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 },
+        abovegroundExposed: { gPerKgDay: 1, fractionHomegrown: 0.4 },
+      },
+      intakeLabel: 'user entered',
+      warnings: [{ code: 'PLANT_TEST_WARNING', message: 'log Kow is outside the fitted range' }],
+    });
+    await withBenzene();
+    const card = screen.getByRole('group', { name: /benzene/i });
+    fireEvent.click(
+      within(card).getByRole('checkbox', { name: /plant factors for homegrown produce/i }),
+    );
+    fireEvent.click(
+      screen
+        .getAllByRole('checkbox', { name: /homegrown produce/i })
+        .find((c) => !card.contains(c))!,
+    );
+    const warnings = await screen.findByRole('region', { name: /warnings and notes/i });
+    expect(within(warnings).getAllByText('PLANT_TEST_WARNING').length).toBeGreaterThan(0);
+    expect(within(warnings).getAllByText(/user entered intake/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/each pathway alone/i).length).toBeGreaterThan(0);
   }, 30000);
 });

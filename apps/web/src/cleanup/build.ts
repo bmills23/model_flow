@@ -12,10 +12,12 @@ import {
   type ModernChemical,
   type ModernReceptor,
   type PathwayId,
+  type ProduceFactors,
 } from '@model-flow/engine';
 import type { ChemicalDb } from '../risk/chemicalDb';
 import { PATHWAY_LABELS } from '../risk/chartData';
 import { MEDIA, PRESET_LABELS, type ReceptorForm } from '../risk/form';
+import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import {
   Errors,
   legacyBoundary,
@@ -35,8 +37,21 @@ export const ENTER_CONCENTRATION =
   'Cumulative allocation keeps your ratios: enter a concentration for at least one chemical in at least one medium.';
 export const ADD_CHEMICAL = 'Add at least one chemical.';
 
+/** The held results of other screens this screen reads. */
+export interface CleanupFeeds {
+  /** The plants and ecology screen's produce result, for the homegrown produce pathway. */
+  produce?: ProduceRiskFeed | null;
+}
+
 export type CleanupBuildResult =
-  | { ok: true; legacy: CleanupLegacyInput; modern: CleanupModernInput; notes: string[] }
+  | {
+      ok: true;
+      legacy: CleanupLegacyInput;
+      modern: CleanupModernInput;
+      notes: string[];
+      /** Engine warnings of the produce plant factors, shown with the cleanup warnings. */
+      feedWarnings: { code: string; message: string }[];
+    }
   | { ok: false; errors: string[] };
 
 /** Screen unit to SI: mg/kg to kg/kg, mg/L to kg/m3, mg/m3 to kg/m3. */
@@ -80,14 +95,29 @@ function parseEntered(text: string | undefined, label: string, errors: Errors): 
  * pathway gets a level. Cumulative allocation keeps the entered ratios, so only the media with an
  * entered concentration are solved, and a chemical blank in such a medium counts as zero there.
  */
-export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildResult {
+export function buildCleanup(
+  form: CleanupForm,
+  db: ChemicalDb,
+  feeds: CleanupFeeds = {},
+): CleanupBuildResult {
+  const produce = feeds.produce ?? null;
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add(ADD_CHEMICAL);
 
   const records = form.chemicals.map((row) => ({ row, rec: db.byId.get(row.id) }));
   for (const { row, rec } of records) {
     if (rec === undefined) errors.add(`${row.name}: not in the chemical database`);
+    if (row.produceFromPlantsEco && (produce === null || produce.chemicalId !== row.id)) {
+      errors.add(
+        `${row.name}: no plants and ecology result for this chemical to use; run the plants and ecology screen with it and send its produce result here`,
+      );
+    }
   }
+  // the chemicals whose soil level includes the produce pathway (they opted in and the feed is theirs)
+  const usesProduce = (id: string, flagged: boolean): boolean =>
+    flagged && produce !== null && produce.chemicalId === id;
+  const anyProduce = form.chemicals.some((c) => usesProduce(c.id, c.produceFromPlantsEco));
+  const feedWarnings: { code: string; message: string }[] = [];
 
   const risk = parseTarget(form.targetRisk, 'Target cancer risk', errors);
   const hq = parseTarget(form.targetHq, 'Target hazard quotient', errors);
@@ -128,7 +158,25 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
     const usable = (p: PathwayId): boolean => !cumulative || mediaWithValue.has(PATHWAYS[p].medium);
-    const pathways = DIRECT_PATHWAY_IDS.filter((p) => rf.pathways[p] && usable(p));
+    const pathways: PathwayId[] = DIRECT_PATHWAY_IDS.filter((p) => rf.pathways[p] && usable(p));
+    const produceOn = rf.produce && anyProduce && usable('produce');
+    if (produceOn && produce !== null) {
+      pathways.push('produce');
+      notes.push(
+        `${label}: homegrown produce uses the ${produce.intakeLabel} intake for every life stage of the receptor.`,
+      );
+      for (const w of produce.warnings ?? []) {
+        if (!feedWarnings.some((x) => x.code === w.code && x.message === w.message)) {
+          feedWarnings.push(w);
+        }
+      }
+    } else if (rf.produce) {
+      notes.push(
+        anyProduce
+          ? `${label}: homegrown produce skipped, no concentration entered for soil.`
+          : `${label}: homegrown produce skipped, no chemical uses the plants and ecology screen's plant factors.`,
+      );
+    }
     for (const p of DIRECT_PATHWAY_IDS) {
       if (rf.pathways[p] && !usable(p)) {
         notes.push(
@@ -141,15 +189,16 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
       continue;
     }
     try {
+      const intake = produceOn && produce !== null ? produce.intakes : undefined;
       legacyReceptors.push({
         label,
-        receptor: legacyReceptor(legacyBoundary(rf.preset, site)),
+        receptor: legacyReceptor(legacyBoundary(rf.preset, site, intake)),
         pathways,
         routeExtrapolation: form.routeExtrapolation,
       });
       modernReceptors.push({
         label,
-        receptor: modernReceptor(modernBoundary(rf.preset, site)),
+        receptor: modernReceptor(modernBoundary(rf.preset, site, intake)),
         pathways,
       });
     } catch (e) {
@@ -171,10 +220,15 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
     make: (
       rec: NonNullable<(typeof records)[number]['rec']>,
       dermal: (typeof form.chemicals)[number]['dermalForm'],
+      factors: ProduceFactors | undefined,
     ) => C,
   ): DirectChemical<C>[] =>
     records.map(({ row, rec }) => {
-      const out: DirectChemical<C> = { id: row.id, chemical: make(rec!, row.dermalForm) };
+      const factors =
+        usesProduce(row.id, row.produceFromPlantsEco) && produce !== null
+          ? produce.factors
+          : undefined;
+      const out: DirectChemical<C> = { id: row.id, chemical: make(rec!, row.dermalForm, factors) };
       if (rec!.tox.volatile) out.volatile = true;
       const e = enteredFor(row.id);
       if (e !== undefined) out.entered = e;
@@ -190,14 +244,15 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
     ok: true,
     legacy: {
       receptors: legacyReceptors,
-      chemicals: chem((rec) => legacyChemical(rec)),
+      chemicals: chem((rec, _dermal, factors) => legacyChemical(rec, factors)),
       ...common,
     },
     modern: {
       receptors: modernReceptors,
-      chemicals: chem((rec, dermal) => modernChem(rec, dermal)),
+      chemicals: chem((rec, dermal, factors) => modernChem(rec, dermal, factors)),
       ...common,
     },
     notes,
+    feedWarnings,
   };
 }

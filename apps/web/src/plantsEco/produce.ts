@@ -275,6 +275,7 @@ export function buildProduceFeed(
       factors: row.factors,
       intakes: row.intakes,
       intakeLabel: row.intakeLabel,
+      warnings: row.warnings.map((w) => ({ code: w.code, message: w.message })),
     },
     notes:
       gaps.length > 0 ? [`Not quantified, so left out of the pathway: ${gaps.join(', ')}`] : [],

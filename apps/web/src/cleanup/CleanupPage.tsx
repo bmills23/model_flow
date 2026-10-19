@@ -11,6 +11,13 @@ import { runCleanup, type CleanupOutcome } from './compute';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
 import { HouseholdPanel } from './HouseholdPanel';
+import { TphPanel } from './TphPanel';
+import {
+  getProduceFeed,
+  getTphFeed,
+  subscribeProduceFeed,
+  subscribeTphFeed,
+} from '../plantsEco/feeds';
 import { getTransportFeed, subscribeTransportFeed } from '../transport/chainFeed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 import { ALLOCATIONS, SOURCES, TARGET_KINDS, type CleanupForm } from './form';
@@ -58,11 +65,13 @@ export function CleanupPage() {
     getHouseholdFeed,
     getHouseholdFeed,
   );
+  const produceFeed = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const modeledOn = form.source !== 'direct';
 
   const built = useMemo(
-    () => (db && !modeledOn ? buildCleanup(form, db) : null),
-    [form, db, modeledOn],
+    () => (db && !modeledOn ? buildCleanup(form, db, { produce: produceFeed }) : null),
+    [form, db, modeledOn, produceFeed],
   );
   const outcome = useMemo(() => (built?.ok ? runCleanup(built) : null), [built]);
   const modeledBuilt = useMemo(
@@ -193,6 +202,9 @@ export function CleanupPage() {
                     vapor={null}
                     household={null}
                     surface={null}
+                    produce={produceFeed}
+                    showProduce
+                    produceNote="Use the plants and ecology plant factors for homegrown produce (adds the produce pathway to this chemical's soil level; receptors switch the pathway on)"
                     concentrationNote="These concentrations set only the ratios between chemicals. The levels keep those ratios and are scaled together."
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>
@@ -413,6 +425,7 @@ export function CleanupPage() {
         </form>
 
         <div className="results" ref={resultsRef}>
+          {tphFeed && <TphPanel feed={tphFeed} />}
           {modeledOn && (
             <>
               {form.chemicals.length === 0 && (
@@ -486,7 +499,11 @@ export function CleanupPage() {
               )}
               <DownloadCsv disabled={stale} tables={cleanupCsvTables(shown.outcome, names)} />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
-              <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
+              <WarningsList
+                outcome={shown.outcome}
+                notes={shown.built.notes}
+                feedWarnings={shown.built.feedWarnings}
+              />
             </div>
           )}
           {!modeledOn && shown && shown.outcome.legacy.ok && (

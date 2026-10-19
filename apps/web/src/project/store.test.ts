@@ -14,7 +14,14 @@ import {
 } from '../vapor/feeds';
 import { clearSurfaceWaterFeed } from '../surfaceWater/feed';
 import { clearHouseholdFeed, getHouseholdFeed, setHouseholdFeed } from '../household/feeds';
-import { clearProduceFeed, getProduceFeed, setProduceFeed } from '../plantsEco/feeds';
+import {
+  clearProduceFeed,
+  clearTphFeed,
+  getProduceFeed,
+  getTphFeed,
+  setProduceFeed,
+  setTphFeed,
+} from '../plantsEco/feeds';
 import {
   AUTOSAVE_KEY,
   flushAutosave,
@@ -57,6 +64,7 @@ function wipeFeeds(): void {
   clearSurfaceWaterFeed();
   clearHouseholdFeed();
   clearProduceFeed();
+  clearTphFeed();
 }
 
 /** Simulate a reload: keep only what is in storage. */
@@ -156,8 +164,18 @@ describe('project store', () => {
       intakes: {} as never,
       intakeLabel: 'user entered',
     });
+    setTphFeed({
+      methodId: 'tph.tphcwg',
+      label: 'Total TPH, tph.tphcwg',
+      targetHazardIndex: 1,
+      totalMgPerKg: 640,
+      fractions: [],
+      unmapped: [],
+      warnings: [],
+    });
     flushAutosave();
     reload();
+    expect(getTphFeed()?.totalMgPerKg).toBe(640);
     expect(getScreen('household').form.waterConcentration).toBe('0.01');
     expect(getScreen('plantsEco').form.soilConcentration).toBe('12');
     expect(getScreen('uncertainty').risk.seed).toBe('abc');
