@@ -188,6 +188,7 @@
     --border: #999999;
   }
 
+  .shell-report > .skip-link,
   .shell-report > .masthead,
   .shell-report > nav,
   .shell-report > .project-bar,

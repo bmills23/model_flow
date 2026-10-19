@@ -6,9 +6,9 @@
   --t-2: #1c5cab;
   --t-3: #0d366b;
   /* mass budget: categorical slots 3 to 7, a run of the validated palette */
-  --b-source: #1baf7a;
-  --b-volatilized: #eda100;
-  --b-transit: #e87ba4;
+  --b-source: #19a673;
+  --b-volatilized: #c48500;
+  --b-transit: #d77298;
   --b-delivered: #008300;
   --b-sourceDecayed: #6250d6;
   --band-a: rgba(31, 111, 107, 0.05);

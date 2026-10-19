@@ -293,6 +293,19 @@ so it is the one feed that still starts empty after a reload.
   (the same rows as the CSV), so no result is chart-only.
 - Target: WCAG 2.2 AA (DEFAULT). An axe-core run is optional tooling in the mobile script, not a gate
   dependency.
+- Status (S10, 2026-10-18): built. `apps/web/src/a11y/labels.test.tsx` renders every screen (risk and
+  cleanup also with a chemical added) and fails on any input, select or textarea with no accessible
+  name. `a11y/contrast.test.ts` computes WCAG ratios from the CSS tokens in both themes: text pairs at
+  4.5:1, the accent focus colour and every chart mark token at 3:1 against the surface. That test found
+  three light-theme categorical colours (vadose mass budget and risk slots 2 to 4) under 3:1; they were
+  darkened (DECISIONS, M11 accessibility block). Every chart now has a "Show data table" toggle: the
+  uncertainty charts (CDF, histogram, fan, tornado, Sobol, Spearman) and the plume map were the last
+  without one; the plume table lists the centreline concentration at each x, not the whole grid. A skip
+  link is first in the tab order and moves focus to `main` without touching the route hash, and one
+  global `:focus-visible` rule draws a 3px accent outline. Not done: the axe-core run, the cross-section
+  figure (its numbers are in its label and caption) and the distribution editor's cumulative preview
+  (its input table is the data) have no separate data table, and keyboard order was checked by tests of
+  the shell only, not by tabbing every screen by hand.
 
 ## 9. Docs site
 
@@ -344,7 +357,7 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
 | S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; the per-screen result tables closed with S6c) | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen (done 2026-10-18, zero overflow) |
-| S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; the final pass waits for every screen |
+| S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; done 2026-10-18 on the wave branch with the gaps listed in section 8 |
 | S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last |
 
 Order: S1, S5, S7 and the S9 script in parallel; then S2; then S3, S4 and S6 in parallel; S8, the S9 pass,

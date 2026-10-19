@@ -1486,7 +1486,19 @@ overturn):
     import, comparing two saved projects, offline install, translation, and the mobile check in CI.
 14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
     S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens) is done (see the S8
-    block below), while the full S9 and S10 passes and the S11 user guide wait for the other screens.
+    block below), S9 and S10 are done (2026-10-18) and the S11 user guide waits for the other screens.
+
+### M11 accessibility pass, S10 (2026-10-18)
+
+- **Three light-theme chart colours darkened (DEFAULT).** The token-pair test found the categorical
+  slots `--b-source`, `--b-volatilized`, `--b-transit` (vadose mass budget) and `--r-2`, `--r-3`, `--r-4`
+  (risk bars) under 3:1 against the white surface. They are now `#19a673`, `#c48500` and `#d77298`
+  (3.1:1 or better). Dark-theme values already passed and are unchanged. The mass budget and the risk
+  bars also have data tables, so colour is never the only channel.
+- **Skip link does not navigate (DEFAULT).** The hash is the router, so the link's click handler moves
+  focus to `main` (`id="main"`, `tabindex="-1"`) instead of changing the hash.
+- **Charts without a separate table (DEFAULT).** The saturated cross-section and the distribution
+  editor's cumulative preview keep their numbers in the label, caption or input table instead of a toggle.
 
 ### M9 review fixes (2026-10-18)
 

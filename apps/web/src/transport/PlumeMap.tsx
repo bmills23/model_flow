@@ -11,6 +11,7 @@ import {
 import type { ComputeResult } from './compute';
 import type { Scenario } from './form';
 import { useWidth } from './useWidth';
+import { DataTable } from '../vadose/DataTable';
 
 interface Props {
   result: ComputeResult;
@@ -90,7 +91,7 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
         width={width}
         height={height}
         role="img"
-        aria-label={`Plume map, ${methodLabel}, ${timeLabel}. Peak concentration ${formatConcentration(max)} milligrams per litre.`}
+        aria-label={`Plume map, ${methodLabel}, ${timeLabel}. Peak concentration ${formatConcentration(max)} milligrams per litre. A data table follows.`}
         onPointerMove={onMove}
         onPointerDown={onMove}
         onPointerLeave={() => setProbe('')}
@@ -156,6 +157,18 @@ export function PlumeMap({ result, scenario, scale, methodLabel, timeLabel, dept
           </g>
         )}
       </svg>
+      <DataTable
+        caption={`Concentration along the plume centreline (y nearest 0), ${methodLabel}, ${timeLabel}, ${depthLabel}`}
+        columns={['x downgradient (m)', 'y (m)', 'Concentration (mg/L)']}
+        rows={xs.map((x, i) => {
+          const jc = ys.reduce((best, y, j) => (Math.abs(y) < Math.abs(ys[best]!) ? j : best), 0);
+          return [
+            String(Number(x.toFixed(2))),
+            String(Number(ys[jc]!.toFixed(2))),
+            formatConcentration(values[jc * nx + i]!),
+          ];
+        })}
+      />
       <p className="probe" aria-live="off">
         {probe || 'Move over or tap the map to read the concentration.'}
       </p>

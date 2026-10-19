@@ -109,6 +109,17 @@ export function App() {
             : 'shell'
       }
     >
+      <a
+        className="skip-link"
+        href="#main"
+        onClick={(e) => {
+          // the hash is the router, so move focus instead of navigating
+          e.preventDefault();
+          document.getElementById('main')?.focus();
+        }}
+      >
+        Skip to main content
+      </a>
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
           model_flow
@@ -205,7 +216,7 @@ export function App() {
           </a>
         </div>
       </nav>
-      <main key={epoch}>
+      <main id="main" tabIndex={-1} key={epoch}>
         {onMethods ? (
           <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
             <MethodsPage />

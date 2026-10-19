@@ -1,5 +1,6 @@
 import type { CdfPoint, Fan, Histogram, SobolRow, TornadoRow } from './resultsData';
 import { FAN_PROBABILITIES, fmtNum } from './resultsData';
+import { DataTable } from '../vadose/DataTable';
 
 /** Result charts for an uncertainty run: inline SVG, theme colours from CSS, no chart library. */
 
@@ -54,18 +55,38 @@ function Axis(props: { s: Scale; y: number }) {
   );
 }
 
+const CDF_TABLE_PROBABILITIES = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95] as const;
+
+/** Smallest sample value whose cumulative probability reaches q. */
+function quantileAt(pts: readonly CdfPoint[], q: number): number {
+  return (pts.find((p) => p.p >= q) ?? pts[pts.length - 1]!).x;
+}
+
+/** The values behind a chart, so no result is chart-only. */
+interface ChartTable {
+  caption: string;
+  columns: readonly string[];
+  rows: readonly (readonly string[])[];
+}
+
 function Figure(props: {
   label: string;
   caption: React.ReactNode;
   height: number;
+  table: ChartTable;
   children: React.ReactNode;
 }) {
   return (
     <figure className="uchart">
-      <svg viewBox={`0 0 ${W} ${props.height}`} role="img" aria-label={props.label}>
+      <svg
+        viewBox={`0 0 ${W} ${props.height}`}
+        role="img"
+        aria-label={`${props.label}. A data table follows.`}
+      >
         {props.children}
       </svg>
       <figcaption>{props.caption}</figcaption>
+      <DataTable {...props.table} />
     </figure>
   );
 }
@@ -88,6 +109,11 @@ export function CdfChart(props: { points: CdfPoint[]; base: number | undefined; 
     <Figure
       label="Cumulative distribution of the output"
       height={H}
+      table={{
+        caption: `Output (${props.unit}) at selected cumulative probabilities`,
+        columns: ['Cumulative probability', `Output (${props.unit})`],
+        rows: CDF_TABLE_PROBABILITIES.map((q) => [String(q), fmtNum(quantileAt(pts, q))]),
+      }}
       caption={
         <>
           Cumulative probability against the output ({props.unit}
@@ -136,6 +162,11 @@ export function HistogramChart(props: { hist: Histogram; base: number | undefine
     <Figure
       label="Histogram of the output"
       height={H}
+      table={{
+        caption: `Iterations per bin (${props.unit})`,
+        columns: [`Bin from (${props.unit})`, `Bin to (${props.unit})`, 'Iterations'],
+        rows: counts.map((c, i) => [fmtNum(edges[i]!), fmtNum(edges[i + 1]!), String(c)]),
+      }}
       caption={
         <>
           Iterations per bin ({props.unit}
@@ -196,6 +227,19 @@ export function FanChart(props: {
     <Figure
       label="Percentile fan of the output over time"
       height={H}
+      table={{
+        caption: `Percentiles of the output (${props.unit}) at each time`,
+        columns: [
+          props.timeLabel,
+          ...FAN_PROBABILITIES.map((q) => `${Math.round(q * 100)}th percentile`),
+          ...(props.base ? ['Base value'] : []),
+        ],
+        rows: times.map((t, i) => [
+          fmtNum(t),
+          ...bands.map((b) => fmtNum(b[i]!)),
+          ...(props.base ? [fmtNum(props.base[i]!)] : []),
+        ]),
+      }}
       caption={
         <>
           Bands: 5th to 95th and 25th to 75th percentiles; solid line the median
@@ -235,6 +279,17 @@ export function TornadoChart(props: { rows: TornadoRow[]; base: number; unit: st
       <Figure
         label="Tornado chart of one-at-a-time output swings"
         height={H}
+        table={{
+          caption: `Output (${props.unit}) with one input at a time at its 5th and 95th percentile`,
+          columns: ['Input', 'Input at 5th', 'Input at 95th', 'Output at 5th', 'Output at 95th'],
+          rows: ran.map((r) => [
+            r.label,
+            fmtNum(r.lowInput),
+            fmtNum(r.highInput),
+            fmtNum(r.low),
+            fmtNum(r.high),
+          ]),
+        }}
         caption={
           <>
             One input at a time at its 5th and 95th percentile, the others at their base values; the
@@ -294,6 +349,17 @@ export function SobolChart(props: { rows: SobolRow[] }) {
       <Figure
         label="Sobol sensitivity indices with 95 percent intervals"
         height={H}
+        table={{
+          caption: 'Sobol first order and total indices with bootstrap 95 percent intervals',
+          columns: ['Input', 'First order', 'First order interval', 'Total', 'Total interval'],
+          rows: props.rows.map((r) => [
+            r.label,
+            fmtNum(r.first),
+            `${fmtNum(r.firstInterval[0])} to ${fmtNum(r.firstInterval[1])}`,
+            fmtNum(r.total),
+            `${fmtNum(r.totalInterval[0])} to ${fmtNum(r.totalInterval[1])}`,
+          ]),
+        }}
         caption="First order index (share of output variance an input explains alone) and total index (including interactions), with bootstrap 95 percent intervals."
       >
         {props.rows.map((r, i) => {
@@ -359,6 +425,11 @@ export function SpearmanChart(props: { rows: { label: string; rho: number }[] })
     <Figure
       label="Spearman rank correlation of each input with the output"
       height={H}
+      table={{
+        caption: 'Spearman rank correlation of each input with the output',
+        columns: ['Input', 'Rank correlation'],
+        rows: props.rows.map((r) => [r.label, fmtNum(r.rho)]),
+      }}
       caption="Spearman rank correlation of each input with the output, from the sample: a global view that sees monotone effects only."
     >
       {props.rows.map((r, i) => {
