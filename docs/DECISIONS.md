@@ -1765,3 +1765,18 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
 6. **Not verified here.** axe-core does not judge screen reader output or cognitive load, and jsdom does
    not apply CSS, so tab order is tested from the DOM; the real-browser pass covers rendering only.
    The chart SVGs that take `tabindex="0"` were not walked with arrow keys in this slice.
+
+## 2026-10-19: Wave H UI near-parity scope (Bryan)
+
+Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on the paraphrased feature map
+`docs/RISC5_UI_INVENTORY.md`. Bryan's answers to the three open calls and the scope question:
+
+1. **Database edits are per project only** (Bryan: "Per-project only"). Toxicity values, exposure factors and
+   receptor names can be overridden inside one project; no reusable library carries across projects.
+2. **Multi-chemical fate runs are deferred** (Bryan: "Defer (Recommended)"). The fate screens stay one chemical
+   at a time with a fill-from-database control; running many chemicals through transport at once waits for a
+   design session.
+3. **The site model screen is advisory** (Bryan: "Advisory (as planned)"). `#/site` builds a checklist of the
+   screens to visit; no step is locked.
+4. **Scope: all ten slices**, U1 to U10, including the optional decimal comma entry (U10).
+
