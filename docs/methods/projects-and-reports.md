@@ -270,8 +270,12 @@ so it is the one feed that still starts empty after a reload.
   `document.documentElement.clientWidth`; the count must be 0. Tap targets at least 44 px.
 - **It lives in the repo (DEFAULT)** as `scripts/mobile-check.mjs`: Node 22 global `fetch` and
   `WebSocket`, no new dependency, launches the installed Chrome headless against `vite preview`, visits
-  every route in light and dark (`Emulation.setEmulatedMedia` with `prefers-color-scheme`), prints the
-  overflowing selectors and writes screenshots to an ignored folder. Run as `corepack pnpm mobile:check`.
+  every route in light and dark (`Emulation.setEmulatedMedia` with `prefers-color-scheme`) at 390x844 and
+  once at 1280x900, seeds a small layout-test project and presses each screen's compute, example and add
+  buttons so result tables and charts are on screen, prints the overflowing selectors and writes full-page
+  screenshots to the ignored `apps/web/.mobile-check` folder. `#/docs` is in the route list and is checked
+  as the fallback page until the reader exists. Status (2026-10-18): built and run over every route, zero
+  overflowing elements in all three views. Run as `corepack pnpm mobile:check`.
 - **Not in `gate` and not in CI (DEFAULT).** It needs a Chrome binary and a GUI-free but real browser
   session; it runs locally before each milestone push, per ROADMAP section 9 step 3. A jsdom unit test
   cannot measure layout, so no vitest stand-in is pretended.
@@ -339,7 +343,7 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closed after S8 (done: generator, inputs, methods, result tables and engine warnings per screen; charts are deliberately left on the screens) |
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
 | S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; the per-screen result tables closed with S6c) | S2, S5, S6, and M7, M9, M10 landed | no |
-| S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen |
+| S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen (done 2026-10-18, zero overflow) |
 | S10 | Accessibility pass (labels test, contrast token test, chart data toggles, keyboard) | none | partly; the final pass waits for every screen |
 | S11 | `#/docs` reader and the user guide | none | yes; the guide is finished last |
 
