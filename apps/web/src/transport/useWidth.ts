@@ -19,7 +19,10 @@ export function useWidth(fallback = 640): [React.RefObject<HTMLDivElement | null
     const measure = (): void => {
       const style = getComputedStyle(el);
       const inset =
-        px(style.paddingLeft) + px(style.paddingRight) + px(style.borderLeftWidth) + px(style.borderRightWidth);
+        px(style.paddingLeft) +
+        px(style.paddingRight) +
+        px(style.borderLeftWidth) +
+        px(style.borderRightWidth);
       const w = Math.floor(el.getBoundingClientRect().width - inset);
       if (w > 0) setWidth(w);
     };

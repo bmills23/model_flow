@@ -6,7 +6,11 @@ import { hasUnsavedChanges, markSaved, setTitle } from './store';
 function unload(target: EventTarget): { prevented: boolean; returnValue: unknown } {
   const event = new Event('beforeunload', { cancelable: true });
   // jsdom's Event.returnValue is a boolean accessor; a browser BeforeUnloadEvent takes a string
-  Object.defineProperty(event, 'returnValue', { value: undefined, writable: true, configurable: true });
+  Object.defineProperty(event, 'returnValue', {
+    value: undefined,
+    writable: true,
+    configurable: true,
+  });
   target.dispatchEvent(event);
   return {
     prevented: event.defaultPrevented,

@@ -42,7 +42,10 @@ describe('useWidth', () => {
 
   it('measures the content box of a padded and bordered figure', () => {
     render(
-      <Probe tag="figure" style={{ padding: '10px 12px', borderWidth: '1px', borderStyle: 'solid' }} />,
+      <Probe
+        tag="figure"
+        style={{ padding: '10px 12px', borderWidth: '1px', borderStyle: 'solid' }}
+      />,
     );
     expect(screen.getByTestId('box').textContent).toBe('374');
   });
