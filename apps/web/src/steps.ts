@@ -10,7 +10,7 @@ export interface Step {
 }
 
 export const STEPS: readonly Step[] = [
-  { label: 'Chemicals', href: '#/risk', owns: [] },
+  { label: 'Chemicals', href: '#/chemicals', owns: ['#/chemicals'] },
   { label: 'Site model', href: '#/transport', owns: [] },
   {
     label: 'Transport',
