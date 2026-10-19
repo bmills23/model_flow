@@ -8,6 +8,8 @@ import { useChemicalDb } from '../risk/useChemicalDb';
 import { ADD_CHEMICAL, buildCleanup, ENTER_CONCENTRATION, type CleanupBuildResult } from './build';
 import { runCleanup, type CleanupOutcome } from './compute';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
+import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
+import { HouseholdPanel } from './HouseholdPanel';
 import { getTransportFeed, subscribeTransportFeed } from '../transport/chainFeed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 import { ALLOCATIONS, SOURCES, TARGET_KINDS, defaultCleanupForm, type CleanupForm } from './form';
@@ -45,6 +47,11 @@ export function CleanupPage() {
     subscribeSaturatedFeed,
     getSaturatedFeed,
     getSaturatedFeed,
+  );
+  const householdFeed = useSyncExternalStore(
+    subscribeHouseholdFeed,
+    getHouseholdFeed,
+    getHouseholdFeed,
   );
   const modeledOn = form.source !== 'direct';
 
@@ -179,6 +186,7 @@ export function CleanupPage() {
                     well={null}
                     showConcentrations={cumulative}
                     vapor={null}
+                    household={null}
                     surface={null}
                     concentrationNote="These concentrations set only the ratios between chemicals. The levels keep those ratios and are scaled together."
                     onChange={(next) => setRow(row.id, next)}
@@ -464,6 +472,9 @@ export function CleanupPage() {
             <div className={stale ? 'stale' : undefined}>
               <LevelsSection method="modern" outcome={shown.outcome.modern} names={names} />
               <LevelsSection method="legacy" outcome={shown.outcome.legacy} names={names} />
+              {householdFeed && (
+                <HouseholdPanel outcome={shown.outcome} feed={householdFeed} names={names} />
+              )}
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
             </div>

@@ -53,7 +53,13 @@ export interface ChemicalRow {
   outdoorFromVapor: boolean;
   /** Use the surface water screen's result as the swimming (surface water) concentration series. */
   surfaceWaterFromModel: boolean;
+  /** Use the household screen's shower air for the bathroom air concentration. */
+  bathroomFromHousehold: boolean;
+  /** Use the household screen's sprinkler spray air or windblown particulate air as outdoor air. */
+  outdoorFromHousehold: HouseholdOutdoor;
 }
+
+export type HouseholdOutdoor = '' | 'sprinkler' | 'particulate';
 
 export interface RiskForm {
   chemicals: ChemicalRow[];
@@ -104,5 +110,7 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     indoorFromVapor: false,
     outdoorFromVapor: false,
     surfaceWaterFromModel: false,
+    bathroomFromHousehold: false,
+    outdoorFromHousehold: '',
   };
 }

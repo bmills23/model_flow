@@ -3,6 +3,7 @@ import { Seg, Field } from '../ui/controls';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
 import { buildInputs, ENTER_CONCENTRATION, type BuildResult } from './build';
 import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
@@ -39,13 +40,19 @@ export function RiskPage() {
     getSurfaceWaterFeed,
   );
 
+  const household = useSyncExternalStore(
+    subscribeHouseholdFeed,
+    getHouseholdFeed,
+    getHouseholdFeed,
+  );
+
   const patch = (next: Partial<RiskForm>): void => setForm((f) => ({ ...f, ...next }));
   const setRow = (id: string, next: ChemicalRow): void =>
     setForm((f) => ({ ...f, chemicals: f.chemicals.map((c) => (c.id === id ? next : c)) }));
 
   const built = useMemo(
-    () => (db ? buildInputs(form, db, well, vapor, surface) : null),
-    [form, db, well, vapor, surface],
+    () => (db ? buildInputs(form, db, well, vapor, surface, household) : null),
+    [form, db, well, vapor, surface, household],
   );
   const outcome = useMemo(() => (built?.ok ? runRisk(built) : null), [built]);
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
@@ -157,6 +164,7 @@ export function RiskPage() {
                     db={db}
                     well={well}
                     vapor={vapor}
+                    household={household}
                     surface={surface}
                     onChange={(next) => setRow(row.id, next)}
                     onRemove={() =>

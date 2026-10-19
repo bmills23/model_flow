@@ -1,7 +1,16 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { showerLegacyStall, showerLittle } from '@model-flow/engine';
 import { HouseholdPage } from './HouseholdPage';
+import { clearHouseholdFeed, getHouseholdFeed } from './feeds';
+import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
+import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
+
+afterEach(() => {
+  clearHouseholdFeed();
+  clearWellFeed();
+  clearSurfaceWaterFeed();
+});
 
 function fill(label: RegExp, value: string) {
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
@@ -79,5 +88,69 @@ describe('HouseholdPage', () => {
     render(<HouseholdPage />);
     fill(/^henry constant/i, 'abc');
     expect(screen.getByRole('alert').textContent).toMatch(/henry constant must be a number/i);
+  });
+
+  describe('feeds', () => {
+    const YR = 365.25 * 86400;
+    const well = {
+      method: 'modern' as const,
+      label: 'Receptor well, modern method',
+      times: [0, 10 * YR, 20 * YR],
+      values: [0, 1e-6, 4e-6],
+    };
+
+    it('offers the held well series as the tap water source and shows its label', () => {
+      setWellFeed(well);
+      render(<HouseholdPage />);
+      fillShower();
+      const group = screen.getByRole('group', { name: /tap water source/i });
+      fireEvent.click(within(group).getByRole('radio', { name: /well series/i }));
+      expect(screen.getAllByText(/receptor well, modern method/i).length).toBeGreaterThan(0);
+    });
+
+    it('says a chosen source is not held rather than computing', () => {
+      render(<HouseholdPage />);
+      fillShower();
+      const group = screen.getByRole('group', { name: /irrigation water source/i });
+      fireEvent.click(within(group).getByRole('radio', { name: /surface water series/i }));
+      expect(screen.getByRole('alert').textContent).toMatch(/no surface water result is held/i);
+    });
+
+    it('sends the shower EPC series with its origin to the risk screen feed', () => {
+      setWellFeed(well);
+      render(<HouseholdPage />);
+      fillShower();
+      fill(/^chemical id/i, '71-43-2');
+      const group = screen.getByRole('group', { name: /tap water source/i });
+      fireEvent.click(within(group).getByRole('radio', { name: /well series/i }));
+      fireEvent.click(screen.getByRole('button', { name: /send to risk and cleanup/i }));
+      const feed = getHouseholdFeed();
+      expect(feed?.chemicalId).toBe('71-43-2');
+      expect(feed?.bathroomAir?.kind).toBe('series');
+      expect(feed?.bathroomAir?.origin).toBe('shower.little-1992');
+      expect(screen.getByRole('status').textContent).toMatch(/sent/i);
+    });
+
+    it('explains why it cannot send without a chemical id', () => {
+      render(<HouseholdPage />);
+      fillShower();
+      const btn = screen.getByRole('button', { name: /send to risk and cleanup/i });
+      expect((btn as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.getByText(/enter the chemical id/i)).toBeTruthy();
+    });
+
+    it('lists a surface water series when one is held', () => {
+      setSurfaceWaterFeed({
+        method: 'well-mixed',
+        origin: 'surfaceWater.well-mixed',
+        label: 'Well-mixed surface water',
+        times: [10 * YR, 20 * YR],
+        values: [3e-6, 1e-6],
+      });
+      render(<HouseholdPage />);
+      const group = screen.getByRole('group', { name: /irrigation water source/i });
+      fireEvent.click(within(group).getByRole('radio', { name: /surface water series/i }));
+      expect(screen.getAllByText(/well-mixed surface water/i).length).toBeGreaterThan(0);
+    });
   });
 });

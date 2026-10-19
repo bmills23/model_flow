@@ -33,6 +33,7 @@ import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import type { HouseholdRiskFeed } from '../household/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
@@ -233,6 +234,7 @@ export function buildInputs(
   well: WellFeed | null,
   vapor: VaporRiskFeed | null = null,
   surface: SurfaceWaterFeed | null = null,
+  household: HouseholdRiskFeed | null = null,
 ): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
@@ -258,6 +260,26 @@ export function buildInputs(
           { times: well.times, values: well.values },
           `transport.${well.method}`,
         );
+        continue;
+      }
+      const householdSpec =
+        medium === 'bathroomAir' && row.bathroomFromHousehold
+          ? { spec: household?.bathroomAir, what: 'shower air' }
+          : medium === 'outdoorAir' && row.outdoorFromHousehold === 'sprinkler'
+            ? { spec: household?.outdoorSprinkler, what: 'sprinkler spray air' }
+            : medium === 'outdoorAir' && row.outdoorFromHousehold === 'particulate'
+              ? { spec: household?.outdoorParticulate, what: 'windblown particulate air' }
+              : null;
+      if (householdSpec) {
+        if (household === null || household.chemicalId !== row.id) {
+          errors.add(
+            `${row.name}: no household screen result for this chemical to use; run the shower, irrigation and particulates screen with it and send its result here`,
+          );
+        } else if (householdSpec.spec === undefined) {
+          errors.add(`${row.name}: the household screen result has no ${householdSpec.what}`);
+        } else {
+          byPathway[pathway] = householdSpec.spec;
+        }
         continue;
       }
       const vaporSpec =

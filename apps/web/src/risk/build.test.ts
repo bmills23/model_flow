@@ -6,6 +6,7 @@ import { defaultForm, defaultReceptor, newChemicalRow, type RiskForm } from './f
 import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import type { HouseholdRiskFeed } from '../household/feeds';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -38,8 +39,9 @@ function built(
   well: WellFeed | null = null,
   vapor: VaporRiskFeed | null = null,
   surface: SurfaceWaterFeed | null = null,
+  household: HouseholdRiskFeed | null = null,
 ) {
-  const r = buildInputs(form, db, well, vapor, surface);
+  const r = buildInputs(form, db, well, vapor, surface, household);
   if (!r.ok) throw new Error(r.errors.join('; '));
   return r;
 }
@@ -172,6 +174,72 @@ describe('buildInputs', () => {
       const r = buildInputs(withVapor(false, true), db, null, noOutdoor);
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.errors.join(' ')).toMatch(/outdoor/i);
+    });
+  });
+
+  describe('household feed', () => {
+    const householdFeed = (over: Partial<HouseholdRiskFeed> = {}): HouseholdRiskFeed => ({
+      chemicalId: '71-43-2',
+      label: 'Benzene, household run',
+      bathroomAir: {
+        kind: 'series',
+        series: { times: [0, 10 * YR, 20 * YR], values: [0, 3e-8, 1e-8] },
+        origin: 'shower.little-1992',
+      },
+      outdoorSprinkler: { kind: 'constant', value: 2e-9, origin: 'irrigation.sprinkler-fc' },
+      outdoorParticulate: { kind: 'constant', value: 4e-10, origin: 'particulate.ssg-pef-1996' },
+      coefficients: { bathroomAir: 0.01, sprayAir: 1e-4, particulateAir: 1e-9 },
+      ...over,
+    });
+    const withHousehold = (
+      bathroom: boolean,
+      outdoor: '' | 'sprinkler' | 'particulate',
+    ): RiskForm => ({
+      ...formWith([{ id: '71-43-2', conc: {} }]),
+      chemicals: [
+        {
+          ...newChemicalRow(db.byId.get('71-43-2')!),
+          bathroomFromHousehold: bathroom,
+          outdoorFromHousehold: outdoor,
+        },
+      ],
+    });
+
+    it('takes shower air as a series and keeps the producing method as its origin', () => {
+      const r = built(withHousehold(true, ''), null, null, null, householdFeed());
+      const epcs = r.legacy.receptors[0]!.chemicals[0]!.epcs;
+      expect(epcs.showerInhalation).toMatchObject({ kind: 'series', origin: 'shower.little-1992' });
+      expect(r.modern.receptors[0]!.pathways).toContain('showerInhalation');
+      const out = runRisk(r);
+      expect(out.legacy.ok).toBe(true);
+    });
+
+    it('takes outdoor air from the sprinkler or from the particulates, with the right origin', () => {
+      const a = built(withHousehold(false, 'sprinkler'), null, null, null, householdFeed());
+      expect(a.legacy.receptors[0]!.chemicals[0]!.epcs.outdoorInhalation).toMatchObject({
+        kind: 'constant',
+        origin: 'irrigation.sprinkler-fc',
+      });
+      const b = built(withHousehold(false, 'particulate'), null, null, null, householdFeed());
+      expect(b.modern.receptors[0]!.chemicals[0]!.epcs.outdoorInhalation).toMatchObject({
+        origin: 'particulate.ssg-pef-1996',
+      });
+    });
+
+    it('asks for a household result when none matches the chemical', () => {
+      for (const feed of [null, householdFeed({ chemicalId: '108-88-3' })]) {
+        const r = buildInputs(withHousehold(true, ''), db, null, null, null, feed);
+        expect(r.ok).toBe(false);
+        if (!r.ok) expect(r.errors.join(' ')).toMatch(/household/i);
+      }
+    });
+
+    it('says when the feed lacks the chosen term', () => {
+      const { outdoorSprinkler: _omitted, ...rest } = householdFeed();
+      void _omitted;
+      const r = buildInputs(withHousehold(false, 'sprinkler'), db, null, null, null, rest);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.errors.join(' ')).toMatch(/sprinkler/i);
     });
   });
 

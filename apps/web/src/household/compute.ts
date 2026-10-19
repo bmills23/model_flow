@@ -11,7 +11,15 @@ import {
   type Warning,
   type WindErosionInput,
 } from '@model-flow/engine';
+import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import type { WellFeed } from '../transport/wellFeed';
 import { isBlank, makeReader, type HouseholdForm } from './form';
+
+/** Series other screens hold, in SI (s, kg/m3). */
+export interface HeldSources {
+  well: WellFeed | null;
+  surface: SurfaceWaterFeed | null;
+}
 
 type Fail = { ok: false; errors: string[] };
 export type Section<T> = ({ ok: true } & T) | Fail;
@@ -276,10 +284,49 @@ function particulateSections(form: HouseholdForm): HouseholdOutcome['particulate
   return { box: box(), pef1996: pefRow(particulatePef1996), pef2002: pefRow(particulatePef2002) };
 }
 
-export function computeHousehold(form: HouseholdForm): HouseholdOutcome {
+const peak = (values: readonly number[]): number => values.reduce((a, b) => Math.max(a, b), 0);
+
+/**
+ * The form a water-driven section computes on. A held series stands in for the entered water
+ * concentration at its peak (the table rows are a constant-source view; the feed carries the series);
+ * a chosen source that is not held is a refusal naming it.
+ */
+function withWater(
+  form: HouseholdForm,
+  source: 'entered' | 'well' | 'surface',
+  held: HeldSources,
+): { form: HouseholdForm } | { error: string } {
+  if (source === 'entered') return { form };
+  const feed = source === 'well' ? held.well : held.surface;
+  if (feed === null) {
+    return {
+      error:
+        source === 'well'
+          ? 'No transport well result is held; run the groundwater transport screen and send its well result here'
+          : 'No surface water result is held; run the surface water screen and send its result here',
+    };
+  }
+  return { form: { ...form, waterConcentration: String(peak(feed.values) * 1000) } };
+}
+
+const refused = <T>(error: string): Section<T> => ({ ok: false, errors: [error] });
+
+export function computeHousehold(
+  form: HouseholdForm,
+  held: HeldSources = { well: null, surface: null },
+): HouseholdOutcome {
+  const sw = withWater(form, form.showerWaterSource, held);
+  const ir = withWater(form, form.irrigationWaterSource, held);
   return {
-    shower: showerSections(form),
-    irrigation: irrigationSection(form),
+    shower:
+      'error' in sw
+        ? {
+            legacy: refused(sw.error),
+            little: refused(sw.error),
+            rsl: refused(sw.error),
+          }
+        : showerSections(sw.form),
+    irrigation: 'error' in ir ? refused(ir.error) : irrigationSection(ir.form),
     particulate: particulateSections(form),
   };
 }

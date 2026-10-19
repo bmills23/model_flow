@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { CleanupPage } from './CleanupPage';
+import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 
 async function loaded() {
   render(<CleanupPage />);
@@ -16,6 +17,8 @@ async function withBenzene() {
   await loaded();
   await addChemical('71-43-2', /add benzene/i);
 }
+
+afterEach(() => clearHouseholdFeed());
 
 describe('CleanupPage', () => {
   it('has its heading and asks for a chemical first', async () => {
@@ -58,6 +61,26 @@ describe('CleanupPage', () => {
     await withBenzene();
     const card = screen.getByRole('group', { name: /benzene/i });
     expect(within(card).queryByLabelText(/groundwater \(mg\/L\)/i)).toBeNull();
+  }, 30000);
+
+  it('shows the water and soil levels behind the air levels for the household run', async () => {
+    setHouseholdFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, household run',
+      coefficients: { bathroomAir: 0.002, sprayAir: 5e-5, particulateAir: 2e-9 },
+    });
+    await withBenzene();
+    const region = await screen.findByRole('region', { name: /household source levels/i });
+    expect(within(region).getAllByText(/tap water \(shower air\)/i).length).toBeGreaterThan(0);
+    expect(
+      within(region).getAllByText(/surface soil \(windblown particulates\)/i).length,
+    ).toBeGreaterThan(0);
+  }, 30000);
+
+  it('shows no household panel without a household run for the chemical', async () => {
+    await withBenzene();
+    await screen.findByRole('region', { name: /cleanup levels, modern/i });
+    expect(screen.queryByRole('region', { name: /household source levels/i })).toBeNull();
   }, 30000);
 
   it('recomputes when the target risk changes', async () => {

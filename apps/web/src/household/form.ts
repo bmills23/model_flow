@@ -6,6 +6,8 @@ import { PARTICULATE_DEFAULTS } from '@model-flow/engine';
  * chemical, the shower and sprinkler geometry and the household factor are entered.
  */
 export interface HouseholdForm {
+  /** CAS-style id the risk and cleanup screens key chemicals by; needed only to send results on. */
+  chemicalId: string;
   chemicalName: string;
   waterConcentration: string; // mg/L
   soilConcentration: string; // mg/kg
@@ -39,12 +41,33 @@ export interface HouseholdForm {
   pm10Flux: string; // g/(m2 s), blank = wind erosion flux
   showerMethod: ShowerChoice;
   particulateMethod: ParticulateChoice;
+  /** Where the tap water concentration comes from: the entered value or the held transport well series. */
+  showerWaterSource: ShowerWaterSource;
+  /** Where the irrigation water concentration comes from. */
+  irrigationWaterSource: IrrigationWaterSource;
 }
+
+export type ShowerWaterSource = 'entered' | 'well';
+export type IrrigationWaterSource = 'entered' | 'well' | 'surface';
+
+/** Registered method id of each choice, the origin carried onto the exposure point concentration. */
+export const SHOWER_ORIGIN: Record<ShowerChoice, string> = {
+  legacy: 'shower.fc-1986',
+  little: 'shower.little-1992',
+  rsl: 'shower.rsl-household',
+};
+export const PARTICULATE_ORIGIN: Record<ParticulateChoice, string> = {
+  box: 'particulate.box-emission',
+  pef1996: 'particulate.ssg-pef-1996',
+  pef2002: 'particulate.ssg-pef-2002',
+};
+export const SPRINKLER_ORIGIN = 'irrigation.sprinkler-fc';
 
 export type ShowerChoice = 'legacy' | 'little' | 'rsl';
 export type ParticulateChoice = 'box' | 'pef1996' | 'pef2002';
 
 export const DEFAULT_FORM: HouseholdForm = {
+  chemicalId: '',
   chemicalName: '',
   waterConcentration: '',
   soilConcentration: '',
@@ -78,6 +101,8 @@ export const DEFAULT_FORM: HouseholdForm = {
   pm10Flux: '',
   showerMethod: 'little',
   particulateMethod: 'pef1996',
+  showerWaterSource: 'entered',
+  irrigationWaterSource: 'entered',
 };
 
 export type Reader = (key: keyof HouseholdForm, label: string, opts?: ReadOpts) => number;

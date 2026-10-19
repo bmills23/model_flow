@@ -2,12 +2,14 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
+import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { RiskPage } from './RiskPage';
 
 afterEach(() => {
   clearWellFeed();
   clearVaporRiskFeed();
+  clearHouseholdFeed();
   clearSurfaceWaterFeed();
 });
 
@@ -145,6 +147,43 @@ describe('RiskPage', () => {
     expect(within(table).getAllByText('vapor.je-1991').length).toBeGreaterThan(0);
     expect(within(table).getAllByText('outdoorAir.box').length).toBeGreaterThan(0);
     expect(within(card).queryByLabelText(/^indoor air \(mg\/m3\)/i)).toBeNull();
+  }, 30000);
+
+  it('shows the M7 origin when shower and outdoor air come from the household screen', async () => {
+    const YR = 365 * 86400;
+    setHouseholdFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, household run',
+      bathroomAir: {
+        kind: 'series',
+        series: { times: [0, 10 * YR, 20 * YR], values: [0, 3e-8, 1e-8] },
+        origin: 'shower.little-1992',
+      },
+      outdoorParticulate: { kind: 'constant', value: 4e-10, origin: 'particulate.ssg-pef-1996' },
+      coefficients: {},
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    fireEvent.click(within(card).getByRole('checkbox', { name: /household shower air/i }));
+    fireEvent.click(within(card).getByRole('radio', { name: /windblown particulates/i }));
+    const table = await screen.findByRole('table', { name: /exposure point concentrations/i });
+    expect(within(table).getAllByText('shower.little-1992').length).toBeGreaterThan(0);
+    expect(within(table).getAllByText('particulate.ssg-pef-1996').length).toBeGreaterThan(0);
+    expect(within(card).queryByLabelText(/^bathroom air \(mg\/m3\)/i)).toBeNull();
+  }, 30000);
+
+  it('does not offer the household feed for a chemical it was not run for', async () => {
+    setHouseholdFeed({
+      chemicalId: '108-88-3',
+      label: 'Toluene, household run',
+      bathroomAir: { kind: 'constant', value: 1e-8, origin: 'shower.little-1992' },
+      coefficients: {},
+    });
+    await loaded();
+    await addChemical('71-43-2', /add benzene/i);
+    const card = screen.getByRole('group', { name: /benzene/i });
+    expect(within(card).queryByRole('checkbox', { name: /household shower air/i })).toBeNull();
   }, 30000);
 
   it('does not offer the vapor feed for a chemical it was not run for', async () => {

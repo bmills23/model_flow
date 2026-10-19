@@ -4,8 +4,9 @@ import { Field, Seg } from '../ui/controls';
 import type { WellFeed } from '../transport/wellFeed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import type { HouseholdRiskFeed } from '../household/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
-import { MEDIA, type ChemicalRow } from './form';
+import { MEDIA, type ChemicalRow, type HouseholdOutdoor } from './form';
 import { fmtTox } from './format';
 
 /** One chemical: its RSL toxicity values with sources, then the concentration entered for each medium. */
@@ -19,12 +20,14 @@ export function ChemicalCard(props: {
   concentrationNote?: string;
   vapor: VaporRiskFeed | null;
   surface: SurfaceWaterFeed | null;
+  household: HouseholdRiskFeed | null;
   onChange: (next: ChemicalRow) => void;
   onRemove: () => void;
 }) {
-  const { row, rec, db, well, vapor, surface } = props;
+  const { row, rec, db, well, vapor, surface, household } = props;
   const showConc = props.showConcentrations ?? true;
   const vaporHere = vapor !== null && vapor.chemicalId === row.id;
+  const householdHere = household !== null && household.chemicalId === row.id;
   const rows = toxRows(rec, db.sourceKeys);
   const t = rec.tox;
   const setConc = (m: Medium, v: string): void =>
@@ -86,6 +89,12 @@ export function ChemicalCard(props: {
               <p className="muted well-note" key={m.key}>
                 Groundwater concentration: {well ? well.label : 'no well result held'}.
               </p>
+            ) : (m.key === 'bathroomAir' && row.bathroomFromHousehold) ||
+              (m.key === 'outdoorAir' && row.outdoorFromHousehold !== '') ? (
+              <p className="muted well-note" key={m.key}>
+                {m.label} concentration:{' '}
+                {householdHere ? household.label : 'no household result held for this chemical'}.
+              </p>
             ) : (m.key === 'indoorAir' && row.indoorFromVapor) ||
               (m.key === 'outdoorAir' && row.outdoorFromVapor) ? (
               <p className="muted well-note" key={m.key}>
@@ -118,6 +127,35 @@ export function ChemicalCard(props: {
           <span>Use the transport well result for the groundwater concentration</span>
         </label>
       )}
+      {showConc && (householdHere || row.bathroomFromHousehold) && (
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={row.bathroomFromHousehold}
+            onChange={(e) => props.onChange({ ...row, bathroomFromHousehold: e.target.checked })}
+          />
+          <span>Use the household shower air for the bathroom air concentration</span>
+        </label>
+      )}
+      {showConc && (householdHere || row.outdoorFromHousehold !== '') && (
+        <Seg<HouseholdOutdoor>
+          legend="Outdoor air from the household screen"
+          name={`household-outdoor-${row.id}`}
+          value={row.outdoorFromHousehold}
+          options={[
+            { value: '', label: 'None' },
+            { value: 'sprinkler', label: 'Sprinkler spray' },
+            { value: 'particulate', label: 'Windblown particulates' },
+          ]}
+          onChange={(v) =>
+            props.onChange({
+              ...row,
+              outdoorFromHousehold: v,
+              outdoorFromVapor: v === '' ? row.outdoorFromVapor : false,
+            })
+          }
+        />
+      )}
       {(vaporHere || row.indoorFromVapor) && (
         <label className="check">
           <input
@@ -133,7 +171,13 @@ export function ChemicalCard(props: {
           <input
             type="checkbox"
             checked={row.outdoorFromVapor}
-            onChange={(e) => props.onChange({ ...row, outdoorFromVapor: e.target.checked })}
+            onChange={(e) =>
+              props.onChange({
+                ...row,
+                outdoorFromVapor: e.target.checked,
+                outdoorFromHousehold: e.target.checked ? '' : row.outdoorFromHousehold,
+              })
+            }
           />
           <span>Use the vapor screen outdoor air for the outdoor air concentration</span>
         </label>

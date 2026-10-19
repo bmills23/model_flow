@@ -1018,5 +1018,31 @@ Added the lazy route `#/household` (`apps/web/src/household/`, nav link and home
    water concentration (E2 ruling 3). The application rate is optional and only feeds the M9 handoff object.
 5. **Comparison.** Each process shows every method in a table with the chosen one marked; the warnings panel
    merges one warning code across the methods that raise it.
-6. **Not in W1.** No chemical database, no feeds from other screens or into risk and cleanup (slice W2), and
-   no series input (constant water and soil only).
+6. **Not in W1.** No chemical database, no feeds from other screens or into risk and cleanup, and no series
+   input (constant water and soil only). Feeds and series were added in slice W2 (below); there is still no
+   chemical database.
+
+## 2026-10-18: M7 slice W2, feeds into and out of the household screen
+
+Calls, open to overturn:
+
+1. **Sources in.** The shower tap water can come from the held transport well series and the irrigation water
+   from the well series or the held surface water series, chosen per process (`showerWaterSource`,
+   `irrigationWaterSource`); the entered concentration stays the default. The result tables show a held
+   series at its peak (a constant-source view); the full series goes out through the feed. A chosen source that
+   is not held is an error naming it, never a silent fall back to the entered value. Soil stays constant.
+2. **Series out.** Every M7 forward function is linear (ruling 11), so a series source gives the EPC series
+   `coefficient * c(t)` through the engine's `waterDrivenEpc`, tagged with the method id (for example
+   `shower.little-1992`); a constant source sends the screen's own value unchanged.
+3. **Into risk.** The household feed (`household/feeds.ts`) carries bathroom air, sprinkler spray air and
+   windblown particulate air for one chemical id (a CAS number entered on the screen, since the screen has no
+   chemical database). The risk card offers shower air for the bathroom air medium and a choice of none,
+   sprinkler or particulates for outdoor air; choosing one outdoor source clears the vapor outdoor option and
+   the reverse, because the pathway takes one EPC. Irrigation ingestion and dermal EPCs are not sent: M4 has
+   nine pathways and none is irrigation contact, so adding one is M4 work, not W2.
+4. **Into cleanup.** The cleanup screen's direct mode shows, for the chemical of the household run, the tap
+   water, irrigation water and soil level as the M5 air level over the model coefficient
+   (`sourceLevelsOverCoefficient`, no root find), per method. Air levels still need the receptor's bathing and
+   outdoor times; without them the level reads not quantified.
+5. **Nothing held across a reload**, as for the other feeds. No tolerance was widened and no value was added
+   from memory.

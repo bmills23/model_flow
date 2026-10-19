@@ -1,13 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { registry, type Warning } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
+import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { computeHousehold, type Section } from './compute';
+import { buildHouseholdFeed } from './feed';
+import { setHouseholdFeed } from './feeds';
 import {
   DEFAULT_FORM,
   type HouseholdForm,
+  type IrrigationWaterSource,
   type ParticulateChoice,
   type ShowerChoice,
+  type ShowerWaterSource,
 } from './form';
 
 const SHOWER_METHODS = [
@@ -70,7 +76,24 @@ export function HouseholdPage() {
     />
   );
 
-  const out = useMemo(() => computeHousehold(form), [form]);
+  const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
+  const surface = useSyncExternalStore(
+    subscribeSurfaceWaterFeed,
+    getSurfaceWaterFeed,
+    getSurfaceWaterFeed,
+  );
+  const [sent, setSent] = useState<string | null>(null);
+
+  const out = useMemo(() => computeHousehold(form, { well, surface }), [form, well, surface]);
+  const feedResult = useMemo(
+    () => buildHouseholdFeed(form, { well, surface }),
+    [form, well, surface],
+  );
+  const send = (): void => {
+    if (!feedResult.ok) return;
+    setHouseholdFeed(feedResult.feed);
+    setSent(feedResult.feed.label);
+  };
   const { shower, irrigation, particulate } = out;
 
   const invalid = useMemo(() => {
@@ -132,11 +155,52 @@ export function HouseholdPage() {
           <Group title="Water, soil and chemical">
             <div className="fields">
               {text('chemicalName', 'Chemical name')}
+              {text(
+                'chemicalId',
+                'Chemical id (CAS number)',
+                'Only to send results to the risk and cleanup screens, for example 71-43-2',
+              )}
               {text('waterConcentration', 'Tap and irrigation water concentration (mg/L)')}
               {text('soilConcentration', 'Surface soil concentration (mg/kg)')}
               {text('henry', 'Henry constant (dimensionless, air over water)')}
               {text('molecularWeight', 'Molecular weight (g/mol)')}
             </div>
+            <Seg<ShowerWaterSource>
+              legend="Tap water source"
+              name="hhShowerWater"
+              value={form.showerWaterSource}
+              onChange={(v) => set('showerWaterSource', v)}
+              options={[
+                { value: 'entered', label: 'Entered concentration' },
+                { value: 'well', label: 'Well series' },
+              ]}
+            />
+            <Seg<IrrigationWaterSource>
+              legend="Irrigation water source"
+              name="hhIrrigationWater"
+              value={form.irrigationWaterSource}
+              onChange={(v) => set('irrigationWaterSource', v)}
+              options={[
+                { value: 'entered', label: 'Entered concentration' },
+                { value: 'well', label: 'Well series' },
+                { value: 'surface', label: 'Surface water series' },
+              ]}
+            />
+            <p className="muted">
+              {form.showerWaterSource === 'well' || form.irrigationWaterSource === 'well'
+                ? well
+                  ? `Well series: ${well.label}.`
+                  : 'No transport well result is held.'
+                : ''}{' '}
+              {form.irrigationWaterSource === 'surface'
+                ? surface
+                  ? `Surface water series: ${surface.label}.`
+                  : 'No surface water result is held.'
+                : ''}
+              {form.showerWaterSource === 'well' || form.irrigationWaterSource !== 'entered'
+                ? ' A held series is shown here at its peak; the full series goes to the risk screen.'
+                : ''}
+            </p>
             <label className="check">
               <input
                 type="checkbox"
@@ -379,6 +443,38 @@ export function HouseholdPage() {
                 </tbody>
               </table>
             </section>
+          </section>
+
+          <section className="panel" aria-label="Send results">
+            <h2>Send to risk and cleanup</h2>
+            <p className="muted">
+              Sends the shown shower method, the sprinkler spray air and the shown particulate
+              method as exposure point concentrations, each tagged with its method, to the exposure
+              and risk screen, and their model coefficients to the cleanup screen. Irrigation
+              ingestion and dermal contact have no exposure pathway there and are not sent.
+            </p>
+            {!feedResult.ok && (
+              <ul className="warnings">
+                {feedResult.reasons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            )}
+            {feedResult.ok && feedResult.notes.length > 0 && (
+              <ul className="warnings">
+                {feedResult.notes.map((n) => (
+                  <li key={n}>{n}</li>
+                ))}
+              </ul>
+            )}
+            <button type="button" className="btn" disabled={!feedResult.ok} onClick={send}>
+              Send to risk and cleanup
+            </button>
+            {sent !== null && (
+              <p role="status">
+                Sent {sent}. Open the exposure and risk or cleanup screen to use it.
+              </p>
+            )}
           </section>
 
           <section className="panel" aria-label="Warnings and notes">
