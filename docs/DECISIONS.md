@@ -1793,6 +1793,9 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    Kd to the database Koc times a new optional organic carbon fraction field (`foc`, default 0.001) and
    switches retardation to "From Kd". Editing the fraction while a chemical is chosen recomputes Kd. The
    half-life stays a user input. New optional keys `chemicalId` and `foc`, inside format version 1.
+   A record without a Koc (74-90-8 hydrogen cyanide, 7439-97-6 mercury) leaves the retardation mode and
+   values unchanged and shows a note naming the chemical (DEFAULT, a fix to the first draft that switched to
+   "From Kd" with no database value behind it).
 4. **Not changed.** Surface water is excluded until G4; no feed changes meaning; choosing "Entered by hand"
    keeps the current values.
 

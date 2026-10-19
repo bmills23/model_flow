@@ -69,7 +69,7 @@ Compare the legacy AT123D-class method with the modern exact solution at a recep
 Buttons below the result send the well concentration to the risk screen, the aquifer to cleanup levels, the
 water table concentration to vapor intrusion and the plume to surface water.
 
-The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input.
+The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so.
 
 ### Vadose leaching (`#/vadose`)
 
