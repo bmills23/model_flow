@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { Field } from './controls';
-import { setDecimalComma } from './decimalComma';
+import { Field, TextField } from './controls';
+import { REJECTED_ENTRY, scrubRejected, setDecimalComma } from './decimalComma';
 
 afterEach(() => setDecimalComma(false));
 
@@ -51,10 +51,56 @@ describe('Field decimal comma', () => {
     expect(input.value).toBe('1.234,5');
     expect(screen.getByRole('alert').textContent).toMatch(/ambiguous/i);
     expect(input.getAttribute('aria-invalid')).toBe('true');
-    // the invalid text never reaches the form as a number: it is NaN downstream
-    expect(Number.isNaN(Number(seen[seen.length - 1]))).toBe(true);
+    // the form gets a fixed non-number marker, never the typed text, so nothing is computed
+    expect(seen[seen.length - 1]).toBe(REJECTED_ENTRY);
+    expect(Number.isNaN(Number(REJECTED_ENTRY))).toBe(true);
     fireEvent.change(input, { target: { value: '1,5' } });
     expect(screen.queryByRole('alert')).toBeNull();
     expect(seen[seen.length - 1]).toBe('1.5');
+  });
+
+  it('still shows the alert after a remount while the form holds the marker', () => {
+    setDecimalComma(true);
+    render(<Field label="Depth" value={REJECTED_ENTRY} onChange={() => undefined} />);
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(screen.getByRole('alert').textContent).toMatch(/ambiguous/i);
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('scrubs the marker from anything that is saved', () => {
+    const saved = scrubRejected({
+      a: REJECTED_ENTRY,
+      b: ['1.5', REJECTED_ENTRY],
+      c: { d: 'x, y' },
+    });
+    expect(saved).toEqual({ a: '', b: ['1.5', ''], c: { d: 'x, y' } });
+    expect(JSON.stringify(saved)).not.toMatch(/ambiguous/i);
+  });
+});
+
+describe('TextField', () => {
+  it('passes text through untouched with decimal comma on', () => {
+    setDecimalComma(true);
+    const seen: string[] = [];
+    function H() {
+      const [v, setV] = useState('Vole');
+      return (
+        <TextField
+          label="Name"
+          value={v}
+          onChange={(x) => {
+            setV(x);
+            seen.push(x);
+          }}
+        />
+      );
+    }
+    render(<H />);
+    const input = screen.getByLabelText('Name') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'Vole, meadow. a.b,c' } });
+    expect(seen).toEqual(['Vole, meadow. a.b,c']);
+    expect(input.value).toBe('Vole, meadow. a.b,c');
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });

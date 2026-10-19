@@ -14,7 +14,7 @@ import { ChemicalPicker } from '../risk/ChemicalPicker';
 import { fmtHi } from '../risk/chartData';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { formatConcentration } from '../transport/chartData';
-import { Field, Group, Seg } from '../ui/controls';
+import { Field, Group, Seg, TextField } from '../ui/controls';
 import { plantsEcoCsvTables } from './csv';
 import { computeBenchmarks, computeEcossl, ECO_LEGACY_ID, ECO_MODERN_ID } from './eco';
 import { loadEcossl, substanceFor, type EcosslSubstance } from './ecossl';
@@ -366,7 +366,7 @@ export function PlantsEcoPage() {
               <fieldset className="receptor" key={i}>
                 <legend>Benchmark {i + 1}</legend>
                 <div className="fields">
-                  <Field
+                  <TextField
                     label="Receptor"
                     value={b.receptor}
                     onChange={(v) =>
@@ -386,7 +386,7 @@ export function PlantsEcoPage() {
                       )
                     }
                   />
-                  <Field
+                  <TextField
                     label="Citation"
                     value={b.citation}
                     onChange={(v) =>
@@ -442,7 +442,7 @@ export function PlantsEcoPage() {
                   </p>
                 )}
                 <div className="fields">
-                  <Field
+                  <TextField
                     label="Surrogate name"
                     value={w.surrogate}
                     onChange={(v) => setWildlife(i, { ...w, surrogate: v })}
@@ -580,7 +580,7 @@ export function PlantsEcoPage() {
               <fieldset className="receptor" key={i}>
                 <legend>{f.label.trim() === '' ? `Fraction ${i + 1}` : f.label}</legend>
                 <div className="fields">
-                  <Field
+                  <TextField
                     label="Name"
                     value={f.label}
                     onChange={(v) => setFraction(i, { ...f, label: v })}

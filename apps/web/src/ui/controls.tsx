@@ -1,6 +1,39 @@
 import { useId, useState, useSyncExternalStore } from 'react';
-import { getDecimalComma, readEntry, showNumber, subscribeDecimalComma } from './decimalComma';
+import {
+  AMBIGUOUS,
+  REJECTED_ENTRY,
+  getDecimalComma,
+  readEntry,
+  showNumber,
+  subscribeDecimalComma,
+} from './decimalComma';
 
+/** A free-text box (a name, a citation). It never reads the decimal comma setting. */
+export function TextField(props: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  hint?: string;
+  placeholder?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <label className="field">
+      <span className="field-label">{props.label}</span>
+      <input
+        type="text"
+        autoComplete="off"
+        value={props.value}
+        placeholder={props.placeholder}
+        disabled={props.disabled}
+        onChange={(e) => props.onChange(e.target.value)}
+      />
+      {props.hint && <small>{props.hint}</small>}
+    </label>
+  );
+}
+
+/** A number box. Use `TextField` for text. */
 export function Field(props: {
   label: string;
   value: string;
@@ -12,10 +45,10 @@ export function Field(props: {
   const comma = useSyncExternalStore(subscribeDecimalComma, getDecimalComma, getDecimalComma);
   const id = useId();
   // the text the viewer typed when it could not be read, kept so it is not rewritten under them
-  const [rejected, setRejected] = useState<{ text: string; sent: string; message: string } | null>(
-    null,
-  );
-  const live = rejected !== null && rejected.sent === props.value ? rejected : null;
+  const [rejected, setRejected] = useState<{ text: string; message: string } | null>(null);
+  // after a remount the typed text is gone but the form still holds the marker: say so, empty
+  const live =
+    props.value === REJECTED_ENTRY ? (rejected ?? { text: '', message: AMBIGUOUS }) : null;
   const shown = live !== null ? live.text : showNumber(props.value, comma);
   return (
     <label className="field">
@@ -36,10 +69,9 @@ export function Field(props: {
             setRejected(null);
             props.onChange(r.canonical);
           } else {
-            // the form gets text that is not a number, so nothing stale or guessed is computed
-            const sent = `${text} (ambiguous)`;
-            setRejected({ text, sent, message: r.message });
-            props.onChange(sent);
+            // the form gets a marker that is not a number (never the typed text, and never saved)
+            setRejected({ text, message: r.message });
+            props.onChange(REJECTED_ENTRY);
           }
         }}
       />

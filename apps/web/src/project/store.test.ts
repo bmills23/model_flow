@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { emptyOverrides, setField } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { hashInputs, parseProject } from './index';
+import { REJECTED_ENTRY } from '../ui/decimalComma';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
@@ -489,5 +490,13 @@ describe('project store', () => {
     document.dispatchEvent(new Event('visibilitychange'));
     Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
     expect(saved()?.screens?.transport?.form?.K).toBe('8');
+  });
+
+  it('never lets a rejected decimal entry reach the saved project', () => {
+    const s = getScreen('transport');
+    setScreen('transport', { ...s, form: { ...s.form, K: REJECTED_ENTRY } });
+    const text = JSON.stringify(currentProject());
+    expect(text).not.toContain(REJECTED_ENTRY);
+    expect(text).not.toMatch(/ambiguous/i);
   });
 });

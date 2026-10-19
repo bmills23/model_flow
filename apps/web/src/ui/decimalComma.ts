@@ -38,8 +38,27 @@ export function subscribeDecimalComma(l: () => void): () => void {
 
 export type Entry = { ok: true; canonical: string } | { ok: false; message: string };
 
-const AMBIGUOUS =
+export const AMBIGUOUS =
   'Ambiguous number: use one comma as the decimal separator and no thousands separators.';
+
+/**
+ * What a number box hands the form while its text cannot be read. It is not a number, so the form's
+ * own validation blocks computation, and it holds none of the typed text. It lives in memory only:
+ * `scrubRejected` removes it from everything saved, so files, links and the autosave never hold it.
+ */
+export const REJECTED_ENTRY = 'ambiguous entry, not a number';
+
+/** A copy of saved state with every rejected-entry marker replaced by an empty value. */
+export function scrubRejected<T>(value: T): T {
+  if (value === REJECTED_ENTRY) return '' as T;
+  if (Array.isArray(value)) return value.map((v) => scrubRejected(v)) as T;
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) out[k] = scrubRejected(v);
+    return out as T;
+  }
+  return value;
+}
 
 /** The point-form text for what a viewer typed. With the setting off, text passes through. */
 export function readEntry(raw: string, comma: boolean): Entry {

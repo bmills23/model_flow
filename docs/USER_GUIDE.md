@@ -56,7 +56,9 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   "1,5" for 1.5 in every number box. It is a setting of this browser only. Saved files, share links and CSV
   always use the point. With it on, a box shows a message and keeps your text when it cannot tell what you
   meant: both a comma and a point, more than one comma, or a thousands-style group such as "1.234". Retype
-  the number with a single comma.
+  the number with a single comma. A box that cannot be read blocks the calculation until you fix it, and
+  that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
+  plain text and are not affected by this setting.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
   the reload recovery is lost.
 
