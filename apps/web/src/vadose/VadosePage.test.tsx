@@ -27,6 +27,15 @@ describe('VadosePage', () => {
     expect(within(example).getByText(/spence/i)).toBeTruthy();
   }, 20000);
 
+  it('tells screen reader users how to operate every focusable chart', async () => {
+    await loaded();
+    const charts = document.querySelectorAll('svg[tabindex="0"]');
+    expect(charts.length).toBeGreaterThanOrEqual(3);
+    for (const svg of charts) {
+      expect(svg.getAttribute('aria-label')).toMatch(/arrow keys/i);
+    }
+  }, 20000);
+
   it('shows the profile, water-table and source charts, the budget and the readouts', async () => {
     await loaded();
     expect(screen.getByRole('img', { name: /concentration at the water table/i })).toBeTruthy();

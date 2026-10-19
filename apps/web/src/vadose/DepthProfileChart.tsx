@@ -97,7 +97,7 @@ export function DepthProfileChart(props: { run: RunSummary; scale: ConcScale }) 
           width={width}
           height={H}
           role="img"
-          aria-label="Leachate concentration against depth below the base of the source at several times, with the layers below the source shaded and the water table at the bottom. A data table follows."
+          aria-label="Leachate concentration against depth below the base of the source at several times, with the layers below the source shaded and the water table at the bottom. Focus and use the up and down arrow keys to read values. A data table follows."
           tabIndex={0}
           onPointerMove={(e) =>
             setProbeIdx(nearest(e.clientY, e.currentTarget.getBoundingClientRect().top))

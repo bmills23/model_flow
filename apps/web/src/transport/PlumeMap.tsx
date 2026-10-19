@@ -130,10 +130,13 @@ export function PlumeMap({
         width={width}
         height={height}
         role="img"
-        aria-label={`Plume map, ${methodLabel}, ${timeLabel}. Peak concentration ${formatConcentration(max)} milligrams per litre. A data table follows.`}
+        aria-label={`Plume map, ${methodLabel}, ${timeLabel}. Peak concentration ${formatConcentration(max)} milligrams per litre. Focus and use the arrow keys to read values. A data table follows.`}
         onPointerMove={onMove}
         onPointerDown={onMove}
-        onPointerLeave={() => setProbe('')}
+        onPointerLeave={() => {
+          setProbe('');
+          setCell(null);
+        }}
         tabIndex={0}
         onKeyDown={onKey}
       >

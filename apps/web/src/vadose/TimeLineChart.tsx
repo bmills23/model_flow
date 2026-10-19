@@ -114,7 +114,7 @@ export function TimeLineChart(props: {
           width={width}
           height={H}
           role="img"
-          aria-label={`${props.ariaLabel} A data table follows.`}
+          aria-label={`${props.ariaLabel} Focus and use the left and right arrow keys to read values. A data table follows.`}
           tabIndex={0}
           onPointerMove={onMove}
           onPointerDown={onMove}

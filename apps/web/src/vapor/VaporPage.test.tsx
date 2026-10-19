@@ -14,6 +14,15 @@ describe('VaporPage', () => {
     expect(within(check).getByText(/within/i)).toBeTruthy();
   });
 
+  it('tells screen reader users how to operate every focusable chart', () => {
+    render(<VaporPage />);
+    const charts = document.querySelectorAll('svg[tabindex="0"]');
+    expect(charts.length).toBeGreaterThanOrEqual(1);
+    for (const svg of charts) {
+      expect(svg.getAttribute('aria-label')).toMatch(/up and down arrow keys/i);
+    }
+  });
+
   it('lists the warnings of both methods', () => {
     render(<VaporPage />);
     const w = screen.getByRole('region', { name: /warnings/i });

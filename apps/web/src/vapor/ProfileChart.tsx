@@ -87,7 +87,7 @@ export function ProfileChart(props: { curves: ProfileCurve[]; bands: Band[] }) {
           width={width}
           height={H}
           role="img"
-          aria-label="Vapor concentration against height above the source on a log axis, one curve per method, with the soil strata shaded. A data table follows."
+          aria-label="Vapor concentration against height above the source on a log axis, one curve per method, with the soil strata shaded. Focus and use the up and down arrow keys to read values. A data table follows."
           tabIndex={0}
           onPointerMove={(e) =>
             setProbe(nearest(e.clientY, e.currentTarget.getBoundingClientRect().top))

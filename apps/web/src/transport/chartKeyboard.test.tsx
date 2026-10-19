@@ -15,6 +15,7 @@ describe('BreakthroughChart arrow keys', () => {
     render(<BreakthroughChart result={result} scale="linear" />);
     const svg = screen.getByRole('img', { name: /breakthrough curves/i });
     expect(svg.getAttribute('tabindex')).toBe('0');
+    expect(svg.getAttribute('aria-label')).toMatch(/arrow keys/i);
     const probe = (): string => document.querySelector('.probe')!.textContent ?? '';
     expect(probe()).toMatch(/arrow keys/i);
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
@@ -62,6 +63,7 @@ describe('PlumeMap arrow keys', () => {
     );
     const svg = screen.getByRole('img', { name: /plume map/i });
     expect(svg.getAttribute('tabindex')).toBe('0');
+    expect(svg.getAttribute('aria-label')).toMatch(/arrow keys/i);
     const probe = (): string => document.querySelector('.probe')!.textContent ?? '';
     fireEvent.keyDown(svg, { key: 'ArrowRight' });
     expect(probe()).toMatch(/x 20 m, y 0 m/);
@@ -75,5 +77,26 @@ describe('PlumeMap arrow keys', () => {
     fireEvent.keyDown(svg, { key: 'ArrowDown' });
     expect(probe()).toMatch(/x 10 m, y -5 m/);
     expect(document.querySelector('.probe')!.getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('starts the arrow keys from the centre after the pointer leaves a previously hovered cell', () => {
+    render(
+      <PlumeMap
+        result={result}
+        scenario={scenario}
+        scale="linear"
+        methodLabel="Modern"
+        timeLabel="10 yr"
+        depthLabel="top"
+      />,
+    );
+    const svg = screen.getByRole('img', { name: /plume map/i });
+    const probe = (): string => document.querySelector('.probe')!.textContent ?? '';
+    fireEvent.pointerMove(svg, { clientX: 600, clientY: 156 });
+    expect(probe()).toMatch(/x 19 m, y 0 m/);
+    fireEvent.pointerLeave(svg);
+    expect(probe()).toMatch(/arrow keys/i);
+    fireEvent.keyDown(svg, { key: 'ArrowLeft' });
+    expect(probe()).toMatch(/x 0 m, y 0 m/);
   });
 });

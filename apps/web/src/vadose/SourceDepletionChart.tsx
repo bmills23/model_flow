@@ -84,7 +84,7 @@ function StackedBudget({ run }: { run: RunSummary }) {
           width={width}
           height={H}
           role="img"
-          aria-label="Stacked cumulative mass in the source, volatilized, in transit and delivered to the water table over time. A data table follows."
+          aria-label="Stacked cumulative mass in the source, volatilized, in transit and delivered to the water table over time. Focus and use the left and right arrow keys to read values. A data table follows."
           tabIndex={0}
           onPointerMove={(e) =>
             setProbeIdx(nearest(e.clientX, e.currentTarget.getBoundingClientRect().left))

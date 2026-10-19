@@ -98,7 +98,7 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
         width={width}
         height={H}
         role="img"
-        aria-label="Breakthrough curves at the receptor. A data table follows."
+        aria-label="Breakthrough curves at the receptor. Focus and use the left and right arrow keys, Home and End, to read values. A data table follows."
         tabIndex={0}
         onKeyDown={onKey}
         onPointerMove={onMove}
