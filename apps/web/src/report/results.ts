@@ -5,6 +5,7 @@ import { overridesOf, screensOf, type Project, type Screens } from '../project';
 import { decodeJson } from '../project/codec';
 import { screenUsed, USED_SCREENS_ORDER, type FeedsLike, type ScreenKey } from './methodsRun';
 import { applyToxOverrides } from '../overrides/toxicity';
+import { withProjectReceptorEdits } from './userValues';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { buildInputs } from '../risk/build';
 import { runRisk } from '../risk/compute';
@@ -426,7 +427,7 @@ function uncertainty(): SectionResults {
  * computed (a form that does not parse, an engine refusal) says why in its notes.
  */
 export async function computeResults(project: Project): Promise<ProjectResults> {
-  const screens = screensOf(project);
+  const screens = withProjectReceptorEdits(screensOf(project), overridesOf(project));
   const feeds = project.feeds as FeedsLike | undefined;
   const feed: Feed = (key) => feedOf(project, key);
   const used = USED_SCREENS_ORDER.filter((k) => screenUsed(k, screens, feeds));

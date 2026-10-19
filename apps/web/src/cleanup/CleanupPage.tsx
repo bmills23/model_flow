@@ -7,6 +7,7 @@ import { ReceptorPanel } from '../risk/ReceptorPanel';
 import { defaultReceptor, newChemicalRow, type ChemicalRow } from '../risk/form';
 import { setField, resetField } from '../overrides/model';
 import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
+import { withReceptorEdits } from '../overrides/receptors';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { ADD_CHEMICAL, buildCleanup, ENTER_CONCENTRATION, type CleanupBuildResult } from './build';
 import { runCleanup, type CleanupOutcome } from './compute';
@@ -72,22 +73,24 @@ export function CleanupPage() {
   const produceFeed = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
   const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const modeledOn = form.source !== 'direct';
+  // the form with the project's receptor names and factor edits laid on, for every build below
+  const buildForm = useMemo(() => withReceptorEdits(form, overrides, 'cleanup'), [form, overrides]);
 
   const built = useMemo(
-    () => (db && !modeledOn ? buildCleanup(form, db, { produce: produceFeed }) : null),
-    [form, db, modeledOn, produceFeed],
+    () => (db && !modeledOn ? buildCleanup(buildForm, db, { produce: produceFeed }) : null),
+    [buildForm, db, modeledOn, produceFeed],
   );
   const outcome = useMemo(() => (built?.ok ? runCleanup(built) : null), [built]);
   const modeledBuilt = useMemo(
     () =>
       db && modeledOn && form.chemicals.length > 0
-        ? buildModeled(form, db, {
+        ? buildModeled(buildForm, db, {
             transport: transportFeed,
             vadose: vadoseFeed,
             saturated: saturatedFeed,
           })
         : null,
-    [form, db, modeledOn, transportFeed, vadoseFeed, saturatedFeed],
+    [form, buildForm, db, modeledOn, transportFeed, vadoseFeed, saturatedFeed],
   );
   const modeled = useModeled(modeledBuilt?.ok ? modeledBuilt.request : null);
   const modeledReply = modeled.reply?.ok ? modeled.reply.outcome : null;
@@ -395,7 +398,13 @@ export function CleanupPage() {
 
           <section className="panel" aria-label="Receptors">
             <h2>Receptors</h2>
-            <ReceptorPanel tag="Receptor A" id="a" form={form.a} onChange={(a) => patch({ a })} />
+            <ReceptorPanel
+              tag="Receptor A"
+              id="a"
+              screen="cleanup"
+              form={form.a}
+              onChange={(a) => patch({ a })}
+            />
             <label className="check">
               <input
                 type="checkbox"
@@ -410,7 +419,13 @@ export function CleanupPage() {
               <span>Evaluate a second receptor</span>
             </label>
             {form.b && (
-              <ReceptorPanel tag="Receptor B" id="b" form={form.b} onChange={(b) => patch({ b })} />
+              <ReceptorPanel
+                tag="Receptor B"
+                id="b"
+                screen="cleanup"
+                form={form.b}
+                onChange={(b) => patch({ b })}
+              />
             )}
             {form.b && (
               <label className="check">
@@ -529,7 +544,7 @@ export function CleanupPage() {
               modeled source is not sampled yet: no transport chain is wired into the sampler.
             </p>
           )}
-          <SsgResults form={form} db={db} />
+          <SsgResults form={buildForm} db={db} />
         </div>
       </div>
     </section>

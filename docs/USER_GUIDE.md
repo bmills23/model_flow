@@ -152,9 +152,25 @@ belong to the project, not to the screen: the cleanup screen shows the same valu
 use them as point values, the project file keeps them, and the report lists them under "Values supplied by
 the user" with the database value beside each. The master database is never changed.
 
+Each receptor panel has two more project-level edits. **Receptor name (optional)** replaces "Receptor A" or
+"Receptor B" in the panel, the result tables, the downloads and the report. **Edit exposure factors** lists
+the preset's body weight, exposure duration and frequency, soil ingestion rate, swimming water ingestion
+and the cancer averaging time (lifetime) for the legacy method, the same scalars for each life stage of the
+modern method (child and adult, or worker), and the averaging time for both. The preset's value is shown
+under each box; a blank box keeps it. An edited factor is marked "Edited" and has its own **Reset to
+preset**, and a **Reset to preset** under the list clears the receptor's edits. A factor needs no source
+note. A mutagen's age segments use the stage value, and the modern exposure duration (which sets the stage
+split) is not editable. The soil skin area, adherence, water, breathing and time entries stay under
+"Site-specific factors". Changing the scenario preset of a receptor that has edited factors asks first: the
+edits belong to the old preset, and switching resets them. The exposure and cleanup screens keep their own
+receptor edits. The uncertainty runs centre on the edited values, the project file keeps the edits, and
+the report lists them under "Receptor factors supplied by the user" with the preset value beside each.
+
 ### Cleanup levels (`#/cleanup`)
 
-Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits.
+Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits. The
+receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed
+on the cleanup screen does not change the exposure screen.
 
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and

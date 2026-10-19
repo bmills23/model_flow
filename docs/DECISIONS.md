@@ -1921,3 +1921,39 @@ Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the ma
 9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
    disclosure inside an existing card.
 
+
+## 2026-10-19: Wave H slice U5, editable exposure factors and receptor names
+
+Features G5, G7 and G8 (per project only, as Bryan ruled: the presets are not edited, a project overrides them).
+
+1. **Where the edits live (DEFAULT shape).** `OverridesState` gains `receptors` (the U4 `FieldOverrides` shape: subject
+   to field to `{ value, note }`) and `receptorNames` (subject to name), saved as optional keys inside the
+   existing `overrides` key of format version 1, absent when empty. No version bump. Round trip cases sit in
+   `overrides/receptors.test.ts`. The subject is `<screen>.<a|b>` (`risk.a`, `cleanup.b`), so the exposure and
+   cleanup screens keep separate receptors, matching how each screen already has its own receptor forms.
+2. **No source note for a factor (DEFAULT).** Unlike a toxicity value, which replaces a published number, a
+   receptor factor describes the site's own receptor. The `note` field is kept empty; the edit is marked
+   "Edited", reset per field, and listed in the report. A non-numeric or negative entry is an error naming the
+   receptor and factor; a value the engine refuses (a zero body weight) is reported as that receptor's error.
+3. **Which factors are editable (DEFAULT).** Legacy: body weight, exposure duration, exposure frequency, soil
+   ingestion rate, swimming water ingestion (the preset boundary fields not already on the form). Modern: body
+   weight, exposure frequency and soil ingestion rate, per life-stage group (child, adult, worker). Both: the
+   cancer averaging time (lifetime). The existing "Site-specific factors" entries (skin areas, adherence, water,
+   breathing rate, times) were already editable and stay where they are. Modern exposure duration is not editable
+   because the stages and a mutagen's age segments must keep adding up to the same period. An edit to a stage
+   group applies to the mutagen segments of that group too.
+4. **Applied by laying edits on the form, not by threading a parameter (DEFAULT).** `withReceptorEdits` returns
+   the form with a runtime-only `edits` on each receptor (never saved in the screen form); the existing builders
+   read it in `parseEdits`, `legacyBoundary` and `modernBoundary`. The pages, the report results and the
+   uncertainty report each call it once, so the cleanup SSG, modeled and tap-water builds see the edits without
+   signature changes. Uncertainty sampling reads the built legacy receptor, so it centres on the edited value.
+5. **Names.** A name replaces the default tag ("Receptor A") in the result labels, errors, notes, CSV and report;
+   the preset in brackets stays after it. Limited to 60 characters; blank returns to the default.
+6. **Preset switch (DEFAULT).** Switching the preset of a receptor with edited factors opens an `AlertDialog`:
+   "Switch and reset edits" clears that receptor's factor edits (the name is kept), "Keep <preset>" cancels. With no
+   edits the switch is immediate. The factor keys are per preset family, so keeping stale edits across presets was
+   judged more confusing than asking.
+7. **Report.** A "Receptor factors supplied by the user" section lists receptor, factor, preset value and value used.
+8. **Mobile check.** One seeded route (`#/risk` with benzene, the Edit values disclosure and the receptor
+   exposure factor panel open and edited) is added to `scripts/mobile-check.mjs`. No new route, so the
+   keyboard-order tests are unchanged.

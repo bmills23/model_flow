@@ -39,6 +39,13 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
+import {
+  LEGACY_FIELDS,
+  LIFETIME_KEY,
+  MODERN_FIELDS,
+  modernKey,
+  type ReceptorEdits,
+} from '../overrides/receptors';
 import { MEDIA, PRESET_LABELS, type PresetId, type ReceptorForm, type RiskForm } from './form';
 
 /**
@@ -71,7 +78,7 @@ const MODERN_CHILD_BOUNDARY: ModernReceptorBoundary = {
     : {}),
 };
 
-const MODERN_PRESET: Record<PresetId, ModernReceptorBoundary> = {
+export const MODERN_PRESET: Record<PresetId, ModernReceptorBoundary> = {
   resident: MODERN_RESIDENT_BOUNDARY,
   worker: MODERN_WORKER_BOUNDARY,
   child: MODERN_CHILD_BOUNDARY,
@@ -172,10 +179,35 @@ export function parseSite(rf: ReceptorForm, tag: string, errors: Errors): Site {
   };
 }
 
+/** The receptor's display name: the project's name for it, else the default tag. */
+export const receptorTag = (rf: ReceptorForm, tag: string): string =>
+  rf.edits !== undefined && rf.edits.name.trim() !== '' ? rf.edits.name.trim() : tag;
+
+/** The typed factor edits as numbers by field key; a bad entry is an error and is left out. */
+export type FactorEdits = Record<string, number>;
+
+export function parseEdits(rf: ReceptorForm, tag: string, errors: Errors): FactorEdits {
+  const out: FactorEdits = {};
+  const values: ReceptorEdits['values'] = rf.edits?.values ?? {};
+  const labels = new Map<string, string>([
+    ...LEGACY_FIELDS.map((f) => [f.key, `legacy ${f.label.toLowerCase()}`] as const),
+    ...MODERN_FIELDS.map((f) => [`*.${f.prop}`, `modern ${f.label.toLowerCase()}`] as const),
+    [LIFETIME_KEY, 'averaging time for cancer'],
+  ]);
+  for (const [key, text] of Object.entries(values)) {
+    const wild = key.startsWith('modern.') ? `*.${key.split('.')[2] ?? ''}` : key;
+    const what = labels.get(wild) ?? key;
+    const v = parse(text, `${tag}, ${what}`, errors);
+    if (v !== undefined) out[key] = v;
+  }
+  return out;
+}
+
 export function legacyBoundary(
   preset: PresetId,
   s: Site,
   produce?: ProduceBoundary,
+  edits: FactorEdits = {},
 ): LegacyReceptorBoundary {
   const base = LEGACY_PRESETS[LEGACY_PRESET[preset]];
   const et: Partial<Record<PathwayId, number>> = { ...base.etHoursPerDay };
@@ -203,6 +235,11 @@ export function legacyBoundary(
   }
   if (s.outdoorTime !== undefined) et.outdoorInhalation = s.outdoorTime;
   if (produce !== undefined) b.produce = produce;
+  for (const f of LEGACY_FIELDS) {
+    const v = edits[f.key];
+    if (v !== undefined) b[f.prop] = v;
+  }
+  if (edits[LIFETIME_KEY] !== undefined) b.lifetimeYr = edits[LIFETIME_KEY];
   return b;
 }
 
@@ -210,6 +247,7 @@ export function modernBoundary(
   preset: PresetId,
   s: Site,
   produce?: ProduceBoundary,
+  edits: FactorEdits = {},
 ): ModernReceptorBoundary {
   const base = MODERN_PRESET[preset];
   const stage = (st: LifeStageBoundary): LifeStageBoundary => {
@@ -237,11 +275,16 @@ export function modernBoundary(
     }
     if (s.outdoorTime !== undefined) et.outdoorInhalation = s.outdoorTime;
     if (produce !== undefined) out.produce = produce;
+    for (const f of MODERN_FIELDS) {
+      const v = edits[modernKey(st.group, f.prop)];
+      if (v !== undefined) out[f.prop] = v;
+    }
     return out;
   };
   const out: ModernReceptorBoundary = { ...base, stages: base.stages.map(stage) };
   if (base.mutagenStages) out.mutagenStages = base.mutagenStages.map(stage);
   if (s.bathTime !== undefined) out.cancerBathingTimeHr = s.bathTime;
+  if (edits[LIFETIME_KEY] !== undefined) out.lifetimeYr = edits[LIFETIME_KEY];
   return out;
 }
 
@@ -383,8 +426,10 @@ export function buildInputs(
   const legacyReceptors: LegacyScenarioReceptor[] = [];
   const modernReceptors: ModernScenarioReceptor[] = [];
   const ready = errors.list.length === 0;
-  for (const { tag, rf } of receptors) {
+  for (const { tag: defaultTag, rf } of receptors) {
+    const tag = receptorTag(rf, defaultTag);
     const site = parseSite(rf, tag, errors);
+    const edits = parseEdits(rf, tag, errors);
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
     const pathways: PathwayId[] = DIRECT_PATHWAY_IDS.filter(
@@ -415,8 +460,8 @@ export function buildInputs(
     }
     try {
       const intake = produceOn ? produce.intakes : undefined;
-      const legacyR = legacyReceptor(legacyBoundary(rf.preset, site, intake));
-      const modernR = modernReceptor(modernBoundary(rf.preset, site, intake));
+      const legacyR = legacyReceptor(legacyBoundary(rf.preset, site, intake, edits));
+      const modernR = modernReceptor(modernBoundary(rf.preset, site, intake, edits));
       legacyReceptors.push({
         label,
         receptor: legacyR,
