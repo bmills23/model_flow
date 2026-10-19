@@ -7,7 +7,7 @@ import { defaultSetup, type UncertaintySetup } from './project';
  * back on every change; without one (tests, other uses) it is plain local state.
  */
 export function useSetup(
-  key: 'risk' | 'cleanup' | undefined,
+  key: 'risk' | 'cleanup' | 'modeled' | undefined,
 ): [UncertaintySetup, (patch: Partial<UncertaintySetup>) => void] {
   const [setup, setSetup] = useState<UncertaintySetup>(() =>
     key === undefined ? defaultSetup() : getScreen('uncertainty')[key],

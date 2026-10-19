@@ -49,6 +49,20 @@ describe('CleanupPage modeled sources', () => {
     expect(screen.getByRole('region', { name: /modeled cleanup level, legacy/i })).toBeTruthy();
   }, 120000);
 
+  it('offers the modeled-source probabilistic panel once the level is solved', async () => {
+    hold();
+    await withBenzene();
+    fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
+    const panel = await screen.findByRole(
+      'region',
+      { name: /probabilistic cleanup level, modeled source/i },
+      { timeout: 60000 },
+    );
+    expect(within(panel).getByRole('group', { name: /seepage velocity/i })).toBeTruthy();
+    expect(within(panel).getByRole('button', { name: /run probabilistic cleanup/i })).toBeTruthy();
+    expect(screen.queryByRole('region', { name: /^probabilistic cleanup level$/i })).toBeNull();
+  }, 120000);
+
   it('reports a target the source cannot reach under the solubility ceiling', async () => {
     hold();
     await withBenzene();

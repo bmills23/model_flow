@@ -29,6 +29,7 @@ import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
 import { CleanupUncertainty } from './CleanupUncertainty';
+import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupCsvTables, modeledCsvTables } from './csv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
@@ -540,11 +541,13 @@ export function CleanupPage() {
           {!modeledOn && shown && shown.outcome.legacy.ok && (
             <CleanupUncertainty input={shown.built.legacy} names={names} />
           )}
-          {modeledOn && (
-            <p className="muted">
-              The probabilistic cleanup level samples the receptor factors of a direct source. A
-              modeled source is not sampled yet: no transport chain is wired into the sampler.
-            </p>
+          {modeledOn && modeledReply && modeled.answered && modeledBuilt?.ok && (
+            <ModeledSourceUncertainty
+              request={modeled.answered}
+              outcome={modeledReply}
+              name={modeled.answered.chemical.name}
+              pending={modeled.computing}
+            />
           )}
           <SsgResults form={buildForm} db={db} />
         </div>

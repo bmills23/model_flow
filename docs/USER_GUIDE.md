@@ -211,6 +211,22 @@ total TPH, send the total level from that screen: a "Total TPH level" panel show
 levels with its fraction table, method id and warnings, and it has its own CSV download. The total is a
 hazard index level held from that screen, so change the composition there and send it again.
 
+A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
+**Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or
+modern transport method, give some inputs a distribution and run: every draw is a full solve through the
+transport chain, so the draws run in the background, a progress bar shows them, the page stays usable and
+**Cancel run** stops the run. The inputs offered are the aquifer values of the groundwater screen (seepage
+velocity, porosity for the legacy method, retardation, decay rate and the three dispersion coefficients,
+each sampled on its own, so a sampled velocity does not rescale the dispersion), the inputs of the vadose
+or saturated source method, and with the legacy method the receptor factors. The source concentration is
+never offered, because it is the level being solved. A solve takes tens of milliseconds for a dissolved
+source and from under a second to several seconds for a soil source, so the iteration count defaults to
+200 rather than 1000; a run projected over a minute asks first and one over 10 minutes is refused. When
+fewer than 10 draws lie below the chosen protection level, the results carry the warning
+`uncertainty.small-sample-tail`. The method, distributions, iteration count, protected fraction and seed
+are saved in the project. The report does not repeat this run, because the report does not compute a
+modeled source.
+
 ### Uncertainty analysis
 
 The risk and cleanup screens each have an uncertainty section. Give an input a distribution to sample it;

@@ -110,9 +110,7 @@ describe('modeledUncertainInputs', () => {
     const ids = modeledUncertainInputs(vadose, 'modern').map((u) => u.id);
     expect(ids).toContain('vadose.infiltration');
     expect(ids).not.toContain('vadose.source.F');
-    const u = modeledUncertainInputs(vadose, 'modern').find(
-      (x) => x.id === 'vadose.infiltration',
-    )!;
+    const u = modeledUncertainInputs(vadose, 'modern').find((x) => x.id === 'vadose.infiltration')!;
     const moved = u.set(vadose, 2e-9);
     expect(moved.source.kind === 'vadose' && moved.source.vadose.modern.q).toBe(2e-9);
   });
@@ -203,10 +201,16 @@ describe('runModeledCleanupAnalysis', () => {
   it('warns when the chosen protection rests on fewer than the stated number of draws', async () => {
     const setup = buildModeledSetup(dissolved, dissolvedOutcome, 'legacy');
     if (!setup.ok) throw new Error(setup.error);
-    const r = await runModeledCleanupAnalysis(setup, specFor(), settings, {}, {
-      makeWorker: inlineFactory(),
-      workers: 1,
-    });
+    const r = await runModeledCleanupAnalysis(
+      setup,
+      specFor(),
+      settings,
+      {},
+      {
+        makeWorker: inlineFactory(),
+        workers: 1,
+      },
+    );
     const w = r.result.warnings.find((x) => x.code === 'uncertainty.small-sample-tail');
     expect(w).toBeDefined();
     expect(w?.message).toMatch(new RegExp(`${SMALL_TAIL_DRAWS}`));
@@ -218,14 +222,20 @@ describe('runModeledCleanupAnalysis', () => {
     if (!setup.ok) throw new Error(setup.error);
     const ctl = new AbortController();
     const created: WorkerLike[] = [];
-    const p = runModeledCleanupAnalysis(setup, specFor(), { ...settings, n: 40 }, {}, {
-      makeWorker: inlineFactory(created),
-      workers: 2,
-      onProgress: (pr) => {
-        if (pr.done > 0) ctl.abort();
+    const p = runModeledCleanupAnalysis(
+      setup,
+      specFor(),
+      { ...settings, n: 40 },
+      {},
+      {
+        makeWorker: inlineFactory(created),
+        workers: 2,
+        onProgress: (pr) => {
+          if (pr.done > 0) ctl.abort();
+        },
+        signal: ctl.signal,
       },
-      signal: ctl.signal,
-    });
+    );
     await expect(p).rejects.toBeInstanceOf(RunCancelledError);
     expect(created.every((w) => (w as unknown as { stopped: boolean }).stopped)).toBe(true);
   }, 120000);

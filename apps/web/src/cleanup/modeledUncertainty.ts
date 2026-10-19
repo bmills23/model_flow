@@ -1,10 +1,4 @@
-import {
-  DAY_S,
-  YEAR_S,
-  registry,
-  solveCleanupRows,
-  type UncertainInput,
-} from '@model-flow/engine';
+import { DAY_S, YEAR_S, registry, solveCleanupRows, type UncertainInput } from '@model-flow/engine';
 import type { UnitDisplay } from '../uncertainty/DistributionEditor';
 import type { ModeledRowsRequest, PoolResponse } from '../uncertainty/protocol';
 import { FROM_SI, MEDIUM_UNIT } from './build';
@@ -34,7 +28,15 @@ export const SMALL_TAIL_DRAWS = 10;
 const SOLVED_IDS = new Set(['vadose.source.F', 'saturatedSource.chemical.F']);
 
 /** Groundwater screen scalars the chain reads, by the suffix of the transport method's declaration id. */
-const TRANSPORT_KEYS = ['velocity', 'porosity', 'retardation', 'decayRate', 'dx', 'dy', 'dz'] as const;
+const TRANSPORT_KEYS = [
+  'velocity',
+  'porosity',
+  'retardation',
+  'decayRate',
+  'dx',
+  'dy',
+  'dz',
+] as const;
 type TransportKey = (typeof TRANSPORT_KEYS)[number];
 
 const TRANSPORT_METHOD: Record<Method, string> = {
