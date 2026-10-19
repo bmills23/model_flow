@@ -256,12 +256,11 @@ fieldset.seg {
   margin: 0;
   font-size: 0.85rem;
   color: var(--muted);
-  opacity: 0.6;
-  transition: opacity 0.2s;
 }
 
 .status.on {
-  opacity: 1;
+  color: var(--text);
+  font-weight: 600;
 }
 
 .stale .chart svg {

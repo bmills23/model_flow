@@ -1591,3 +1591,33 @@ Rulings (DEFAULT unless noted), built on the wave branch. Method note: `docs/met
    personal address). A test requires a heading for every screen route.
 6. **Not verified here.** No data value or constant was typed. The one-line summaries on the index are
    descriptions of each note's subject, written from the file names and headings.
+
+## 2026-10-19: Wave G slice G3, accessibility pass
+
+1. **axe-core runs in the mobile check (DEFAULT).** `scripts/mobile-check.mjs` injects axe-core into every
+   route at 390x844 light, 390x844 dark and 1280x900, after the compute buttons are pressed so result
+   tables and charts are on screen. Any serious or critical violation fails the run; moderate and minor
+   ones are printed but do not fail it. `--no-axe` skips the pass and `--axe-json <file>` writes every
+   violation. axe-core 4.14.0 (MPL-2.0) is a root dev dependency only; it is not imported by any app
+   code and not bundled. The generated third-party licence document lists production dependencies only,
+   so it is unchanged.
+2. **Before and after.** Before: 4 routes failed in all three views (12 route-view failures, 12 nodes),
+   all one rule: `color-contrast` (serious) on the `.status` compute line of `#/transport`, `#/vadose`,
+   `#/saturated` and `#/surface-water`. The other 13 routes had 0. After: 0 violations of any impact on
+   all 17 routes in all three views.
+3. **Fix (DEFAULT).** The idle status line faded its text with `opacity: 0.6`, which pushed the muted
+   token below 4.5:1. The fade is removed; the active state is shown with the full text token and a
+   heavier weight instead. A test reads the rule so opacity cannot return.
+4. **Moderate and minor violations.** None were reported, so there is nothing to defer.
+5. **Keyboard-order tests (DEFAULT).** `apps/web/src/a11y/screenKeyboard.test.tsx` renders all 17
+   routes and checks: no positive tabindex, no native control with `tabindex="-1"`, the skip link is the
+   first tab stop and navigation precedes main, nothing outside main sits between main's first and last
+   stop, the skip link moves focus to main without changing the hash, and main's tab order equals its
+   document order. Visual order is guarded by a stylesheet scan for CSS `order` and `*-reverse`
+   (none exist). Disclosure buttons keep focus and flip `aria-expanded`; every `details` summary is a tab
+   stop. The app has no modal dialog (confirmation uses the browser's native confirm, which traps and
+   returns focus itself), and a test fails if a `dialog` or `aria-modal` is added without a focus-trap
+   test.
+6. **Not verified here.** axe-core does not judge screen reader output or cognitive load, and jsdom does
+   not apply CSS, so tab order is tested from the DOM; the real-browser pass covers rendering only.
+   The chart SVGs that take `tabindex="0"` were not walked with arrow keys in this slice.

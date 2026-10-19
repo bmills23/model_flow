@@ -4,16 +4,26 @@
 // Visits every route at a true 390x844 viewport in light and dark, plus once at 1280x900, after
 // pressing the compute buttons so result tables and charts are on screen, and counts elements whose
 // right edge exceeds the document client width. Exits 1 if any count is above 0.
+// It also injects axe-core (a dev dependency, never bundled) into each page and fails on any serious or
+// critical violation; moderate and minor ones are counted and listed but do not fail the run.
+// Pass --no-axe to skip the axe pass, and --axe-json <file> to write every violation to a JSON file.
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 ? args[i + 1] : fallback;
 };
+const AXE = !args.includes('--no-axe');
+const axeSource = AXE
+  ? readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8')
+  : '';
+const axeReport = [];
 const PORT = 5178;
 const DEBUG_PORT = 9335;
 const CHROME_CANDIDATES = [
@@ -169,6 +179,20 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
     tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
+const AXE_RUN = `(async()=>{
+  const r=await axe.run(document,{resultTypes:['violations']});
+  return JSON.stringify(r.violations.map(v=>({id:v.id,impact:v.impact,help:v.help,
+    nodes:v.nodes.slice(0,5).map(n=>n.target.join(' ')),count:v.nodes.length})))})()`;
+const runAxe = async () => {
+  await evaluate(axeSource);
+  const res = await send('Runtime.evaluate', {
+    expression: AXE_RUN,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  return JSON.parse(res.result?.value ?? '[]');
+};
+
 let failures = 0;
 for (const view of VIEWS) {
   await send('Emulation.setDeviceMetricsOverride', {
@@ -199,12 +223,24 @@ for (const view of VIEWS) {
       captureBeyondViewport: !/^#\/docs\/(?!user-guide)/.test(route),
     });
     writeFileSync(join(outDir, `${view.name}-${slug}.png`), Buffer.from(shot.data, 'base64'));
-    const bad = m.n > 0 || m.sw > m.cw;
+    let axeBad = false;
+    let axeNote = '';
+    if (AXE) {
+      const v = await runAxe();
+      const hard = v.filter((x) => x.impact === 'serious' || x.impact === 'critical');
+      axeBad = hard.length > 0;
+      axeReport.push({ view: view.name, route, violations: v });
+      axeNote = ` axe=${hard.length}+${v.length - hard.length}`;
+      for (const x of v)
+        axeNote += `\n    [${x.impact}] ${x.id} (${x.count}): ${x.nodes.slice(0, 3).join(' | ')}`;
+    }
+    const bad = m.n > 0 || m.sw > m.cw || axeBad;
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route} cw=${m.cw} sw=${m.sw} overflow=${m.n} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route} cw=${m.cw} sw=${m.sw} overflow=${m.n} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
+if (opt('axe-json')) writeFileSync(opt('axe-json'), JSON.stringify(axeReport, null, 1));
 cleanup();
 process.exit(failures ? 1 : 0);
