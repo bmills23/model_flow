@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { getDecimalComma, setDecimalComma, subscribeDecimalComma } from '../ui/decimalComma';
 import { downloadProject, readProjectFile } from './file';
 import type { LoadResult } from './index';
 import { SHARE_PREFIX, decodeShare, makeShareLink } from './share';
@@ -24,6 +25,7 @@ type Message = { kind: 'status' | 'error'; text: string } | null;
 /** Save, open and share the project: the file is the durable store, the link is a convenience. */
 export function ProjectBar() {
   const title = useSyncExternalStore(subscribeProject, getTitle, getTitle);
+  const comma = useSyncExternalStore(subscribeDecimalComma, getDecimalComma, getDecimalComma);
   const [message, setMessage] = useState<Message>(null);
   const [link, setLink] = useState<string | null>(null);
   const lastPayload = useRef<string | null>(null);
@@ -159,6 +161,16 @@ export function ProjectBar() {
           Share link
         </button>
       </div>
+      <label className="project-comma">
+        <input
+          type="checkbox"
+          checked={comma}
+          onChange={(e) => setDecimalComma(e.target.checked)}
+        />
+        <span>
+          Type numbers with a decimal comma (this browser only; saved files keep the point)
+        </span>
+      </label>
       {link !== null ? (
         <div className="project-share">
           <label>

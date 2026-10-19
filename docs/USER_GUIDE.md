@@ -52,6 +52,11 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   Save a file instead. The app shows the limit rather than a shortened link.
 - Opening a project, from a file or a link, asks first when the current project has changes not saved to a
   file.
+- **Type numbers with a decimal comma** (a checkbox under the project buttons) lets you type and read
+  "1,5" for 1.5 in every number box. It is a setting of this browser only. Saved files, share links and CSV
+  always use the point. With it on, a box shows a message and keeps your text when it cannot tell what you
+  meant: both a comma and a point, more than one comma, or a thousands-style group such as "1.234". Retype
+  the number with a single comma.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
   the reload recovery is lost.
 

@@ -513,3 +513,22 @@ footer {
     color: var(--muted);
   }
 }
+
+.field-error {
+  color: var(--legacy);
+  font-weight: 600;
+}
+
+.project-comma {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  font-size: 0.9rem;
+}
+
+.project-comma input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}

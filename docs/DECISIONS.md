@@ -1998,3 +1998,22 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
    high and sits in a paragraph under the screen title. No new route, so the mobile check and keyboard lists are
    unchanged.
 5. **No project file change.** Help links carry no state, so the project file format and its version are untouched.
+
+## 2026-10-19: Wave H slice U10, decimal comma entry
+
+1. **One change point (DEFAULT).** Every numeric field already goes through `Field` in `apps/web/src/ui/controls.tsx`
+   (206 uses), so the setting and the parser live in `apps/web/src/ui/decimalComma.ts` and `Field` is the only
+   caller. The per-form `Number(s)` helpers are untouched: form state, saved files, share links and CSV always hold
+   the point form, so nothing about them changes.
+2. **Per-viewer setting (DEFAULT).** A checkbox in the project bar, stored in localStorage under
+   `model_flow.decimalComma.v1` inside try and catch. It is off by default and is never written to a project file.
+   With it off, `Field` behaves exactly as before.
+3. **Parsing rules when on (DEFAULT).** One comma reads as the decimal point ("1,5" is 1.5, "1,5e-3" is 1.5e-3). A
+   lone point is kept as a decimal ("1.5", "0.125"). Rejected as ambiguous: both separators, more than one comma,
+   more than one point, and a lone point shaped like a thousands group (one to three digits starting 1 to 9, a
+   point, exactly three digits, for example "1.234").
+4. **Rejection never guesses (DEFAULT).** A rejected string stays as typed in the box, with an alert message and
+   `aria-invalid`. The form receives the text with " (ambiguous)" appended, which is not a number, so the form's own
+   validation flags it and no stale or guessed value is computed.
+5. **No project file change.** Format version 1 is untouched; there is no new route, so the mobile check and keyboard
+   lists are unchanged.
