@@ -5,9 +5,8 @@ sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree be
 skipping a done one.
 
 ## State of the tree
-- Main holds M0 to M11. Wave G (parity gaps) is on branch `wave-gaps` and wave H (UI near-parity) is on branch
-  `wave-ui`, which builds on it; both are ahead of main and not yet merged or pushed when this was written.
-  Confirm with `git log --oneline main..wave-ui`. Pages deploys from main: https://bmills23.github.io/model_flow/
+- Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`) and wave H (UI near-parity, built on
+  branch `wave-ui`), all pushed 2026-10-19. Pages deploys from main: https://bmills23.github.io/model_flow/
 - Gate (full `corepack pnpm gate`, green on `wave-ui` 2026-10-19, build included): engine 1377 tests (79 files,
   34.34 s), web 1475 tests (135 files, 53.19 s), data and other packages 149 passed and 3 skipped (7 files,
   1.69 s; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs).
@@ -48,7 +47,6 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Corrections made while closing the wave: feed fingerprints skip keys added in this wave (`FINGERPRINT_SKIP`
   in `project/hash.ts`) so older project files are not flagged stale; `screenUsed` judges the saved screens;
   the ecological checklist serves a soil source only.
-- Routes now also include `#/site` and `#/chemicals`.
 
 ## Wave G landed (parity gaps, 2026-10-19)
 - Cleanup (`#/cleanup`): homegrown produce level (does not apply to modeled sources, DEFAULT) and TPHCWG and
@@ -296,7 +294,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Merge `wave-gaps` and `wave-ui` to main in one push after a final local gate, then re-measure CI minutes.
+- Re-measure CI minutes per push now that the surface water tests are fast, and record them in CLAUDE.md.
 - Answer the wave H open questions above.
 - Then the open items above: read the unverified sources, and decide produce on modeled sources, the TPH
   cancer endpoint and the plume map in the report.

@@ -5,7 +5,7 @@ reach functional parity with RISC5-class tools while letting the user switch eac
 legacy published method and a modern alternative, with modern visualizations.
 
 Status: milestones M0 to M11 are complete as of the dates in `docs/ROADMAP.md` (M0 to M4 on 2026-10-15
-and 2026-10-16, M5, M6 and M8 on 2026-10-17, M7, M9, M10 and M11 on 2026-10-18). Waves G and H (parity gaps and UI near-parity, 2026-10-19) are on branches `wave-gaps` and `wave-ui`, not yet merged; the site
+and 2026-10-16, M5, M6 and M8 on 2026-10-17, M7, M9, M10 and M11 on 2026-10-18). Waves G and H (parity gaps and UI near-parity, 2026-10-19) are on main as well; the site
 at https://bmills23.github.io/model_flow/ deploys from main.
 This is not full RISC5 parity: see line 1 of `docs/ROADMAP.md` for what still separates the two, and the
 deferred lists in its section 7 rows and in `docs/HANDOFF.md` (open items). See `docs/ROADMAP.md` for
