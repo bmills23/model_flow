@@ -1793,6 +1793,10 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    Kd to the database Koc times a new optional organic carbon fraction field (`foc`, default 0.001) and
    switches retardation to "From Kd". Editing the fraction while a chemical is chosen recomputes Kd. The
    half-life stays a user input. New optional keys `chemicalId` and `foc`, inside format version 1.
+   Feed fingerprints leave these keys out (DEFAULT, wave H fix): `chemicalId` always (it only records where
+   Kd or the properties were filled from, and the filled values are fingerprinted), `foc` while it equals
+   0.001. See `FINGERPRINT_SKIP` in `project/hash.ts`; a project saved before this wave opens with no feed
+   flagged stale. Every later form key must be added to that table.
 4. **Not changed.** Surface water is excluded until G4; no feed changes meaning; choosing "Entered by hand"
    keeps the current values.
 
@@ -1861,6 +1865,7 @@ Scope: the site-specific wildlife hazard quotient panel on `#/plants-eco` (inven
 4. **Screening only (DEFAULT).** The panel carries the `ECO_SCREENING_ONLY` warning and offers no cleanup
    level; the soil level at a hazard quotient of one is labelled a screening back-calculation.
 5. **Saved state.** An optional `wildlifeRows` key inside the existing `plantsEco` form, format version 1,
+   left out of the feed fingerprints (DEFAULT, wave H fix: the produce and TPH feeds do not read it),
    with a round-trip case in `project/screens.test.ts`. CSV table `wildlife-dose` is added to the screen's
    downloads. No new route, so the mobile check route list and keyboard-order tests are unchanged.
 
@@ -1882,7 +1887,7 @@ engine's `SOIL_TEXTURES` as the vapor screen does. No engine or data change.
    chosen; Custom values only stops filling. There is no automatic refill.
 5. **Schema.** An optional `texture` key on each vadose layer and on the saturated form, format version 1, with
    round-trip cases in `project/screens.test.ts`. A file without the key loads as Custom values. The Table R-7 case
-   and hand case A stay Custom, so both validation cases still load unchanged. No new route.
+   and hand case A stay Custom, so both validation cases still load unchanged. No new route. The `texture` key is left out of the feed fingerprints (DEFAULT, wave H fix) because the values it filled are fingerprinted themselves, so an older file's feeds are not flagged stale.
 
 ## 2026-10-19: Wave H slice U4, project toxicity overrides
 

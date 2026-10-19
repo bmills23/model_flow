@@ -13,7 +13,7 @@ import * as transport from '../transport/project';
 import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
-import { hashInputs } from './hash';
+import { fingerprintForm, hashInputs } from './hash';
 import { unknownKeyPaths } from './merge';
 import { CURRENT_VERSION, migrate } from './migrate';
 import { PROJECT_FORMAT, feedShapes, projectV1Schema, type Feeds, type Project } from './schema';
@@ -125,12 +125,16 @@ export function feedEntry<V>(
   sourceForm: unknown,
   value: V,
 ): { source: string; inputsHash: string; value: V } {
-  return { source, inputsHash: hashInputs(sourceForm), value };
+  return { source, inputsHash: hashInputs(fingerprintForm(source, sourceForm)), value };
 }
 
 /** True when the source form no longer matches the one the feed was built from. */
-export function isFeedStale(entry: { inputsHash: string }, currentSourceForm: unknown): boolean {
-  return entry.inputsHash !== hashInputs(currentSourceForm);
+export function isFeedStale(
+  entry: { inputsHash: string; source: string },
+  currentSourceForm: unknown,
+): boolean {
+  const source = entry.source;
+  return entry.inputsHash !== hashInputs(fingerprintForm(source, currentSourceForm));
 }
 
 export interface LoadWarning {
