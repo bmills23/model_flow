@@ -71,8 +71,12 @@ A project is one JSON document, the single source for save, load, share, persist
 - **Feeds are stored as values, not recomputed on load (DEFAULT).** The schema checks the well and
   surface water feeds in full (equal length finite series, SI) and the scenario carrying feeds (vadose,
   saturated, bank, vapor) by their top-level keys with the scenario itself a JSON object (S3 pinned the
-  shapes: vadose `{scenario, method, label}`, saturated `{input, method, label}`, bank `{scenario, label}`,
-  vapor `{vadose?, waterTable?, saturated?, risk?}` for the four vapor source feeds). Non-finite numbers,
+  shapes: vadose `{scenario, method, label}`, saturated `{input, method, label}`, bank `{scenario, label}`;
+  the four vapor source feeds are four entries, `vaporVadose`, `vaporWaterTable`, `vaporSaturated` and
+  `vaporRisk`, each fingerprinted against its own source form: the vadose, transport, saturated and vapor
+  forms in that order, so editing the receiving vapor form never flags a received feed). Each feed entry
+  is validated on its own: an unusable one is dropped with a warning (and named in a note on the page)
+  while the screens still load, so a feed never costs the user the forms. Non-finite numbers,
   which a scenario can hold (an open-ended loading term ends at infinity), are written as a tagged object
   and read back exactly (`project/codec.ts`). The transport chain feed holds a closure and is not part of
   the file. `feedEntry` and `isFeedStale`
@@ -84,7 +88,8 @@ A project is one JSON document, the single source for save, load, share, persist
   (`apps/web/src/project/`), not in the engine: the forms are web types. The engine keeps its own SI
   inputs. zod is MIT and small, but it is a new runtime dependency and lands in
   `THIRD_PARTY_LICENSES.md`. Unknown keys are dropped with a warning; a file with a newer `version` than
-  the app knows is refused with a clear message, never half loaded.
+  the app knows is refused with a clear message, never half loaded. A bad feed entry is not a bad file:
+  the forms, which are the user's work, load and the feed is dropped and reported.
 - **Migration.** `migrations[n]` is a pure function from version n to n + 1, applied in order on load, each
   with a fixture test (a saved file of version n loads and matches the expected version n + 1 document).
   A form field rename or a unit change bumps `version`; adding an optional field does not.
@@ -118,7 +123,8 @@ A project is one JSON document, the single source for save, load, share, persist
   screens were not shared and from which screens to send them again; the payload does not record which
   feeds the sender had, so the list names every screen that sends one.
 - **Browser storage is a convenience only.** The current project (forms and feeds) autosaves to
-  `localStorage` under one versioned key, debounced, wrapped in try and catch; a private window or a full
+  `localStorage` under one versioned key, debounced (and written at once when the page is hidden or
+  unloaded, so a reload or a killed background tab loses nothing), wrapped in try and catch; a private window or a full
   quota degrades to today's behaviour without an error. No list of named projects in storage (DEFAULT):
   files are the durable store, which keeps one source of truth and nothing to migrate silently.
 - **No accounts, no upload, no analytics.** Nothing leaves the browser except what the user downloads or
@@ -154,7 +160,9 @@ so it is the one feed that still starts empty after a reload.
 - Format: RFC 4180, UTF-8 with no BOM (DEFAULT), comma separated, a header row with units in the column
   name (`concentration (mg/L)`), numbers at full double precision (not the rounded display), and no
   metadata rows above the header, so spreadsheets parse it cleanly. A `method` column carries the method
-  id on each row; the data edition and app version go in the file name and the report.
+  id on each row; the app version, the data edition of each dataset the table reads (risk and cleanup: the RSL
+  edition; surface water: the criteria and sediment editions) and the date go in the file name
+  (`risk-results-v0.0.0-rsl-2024-11-2026-10-18.csv`), and the editions and version also go in the report.
 - A shared `exportCsv(rows, columns)` helper with escaping tests (quotes, commas, newlines, a leading `=`,
   `+`, `-` or `@` prefixed with a quote to defuse spreadsheet formula injection from chemical names or
   user text).

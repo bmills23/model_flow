@@ -82,12 +82,14 @@ export function riskCsvTables(
   return [
     {
       name: 'risk-results',
+      editions: ['rsl'],
       label: 'results',
       rows: riskResultRows(outcome),
       columns: RESULT_COLUMNS,
     },
     {
       name: 'risk-contributions',
+      editions: ['rsl'],
       label: 'by pathway and chemical',
       rows: riskContributionRows(outcome, names),
       columns: CONTRIBUTION_COLUMNS,

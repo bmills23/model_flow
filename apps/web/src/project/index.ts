@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import * as cleanup from '../cleanup/project';
 import * as risk from '../risk/project';
 import * as saturated from '../saturated/project';
@@ -8,7 +9,7 @@ import * as vapor from '../vapor/project';
 import { hashInputs } from './hash';
 import { unknownKeyPaths } from './merge';
 import { CURRENT_VERSION, migrate } from './migrate';
-import { PROJECT_FORMAT, projectV1Schema, type Feeds, type Project } from './schema';
+import { PROJECT_FORMAT, feedShapes, projectV1Schema, type Feeds, type Project } from './schema';
 
 export { CURRENT_VERSION } from './migrate';
 export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
@@ -106,7 +107,8 @@ export interface LoadWarning {
 }
 
 export type LoadResult =
-  { ok: true; project: Project; warnings: LoadWarning[] } | { ok: false; error: string };
+  | { ok: true; project: Project; warnings: LoadWarning[]; droppedFeeds?: string[] }
+  | { ok: false; error: string };
 
 const NOT_A_PROJECT = 'This file is not a model_flow project.';
 
@@ -168,5 +170,37 @@ export function parseProject(input: unknown): LoadResult {
     const path = p.replace(/^\./, '');
     return { path, message: `Ignored the unknown field "${path}".` };
   });
-  return { ok: true, project: parsed.data, warnings };
+  const droppedFeeds: string[] = [];
+  const { feeds: rawFeeds, ...rest } = parsed.data;
+  const project: Project = rest;
+  if (rawFeeds !== undefined) {
+    // each feed is a convenience copy of a value passed between screens: an unusable one is dropped
+    // and reported, and never costs the user the forms
+    const kept: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(rawFeeds)) {
+      const shape = (feedShapes as Record<string, z.ZodType | undefined>)[key];
+      if (shape === undefined) {
+        warnings.push({
+          path: `feeds.${key}`,
+          message: `Ignored the unknown field "feeds.${key}".`,
+        });
+        continue;
+      }
+      const r = shape.safeParse(entry);
+      if (!r.success) {
+        droppedFeeds.push(key);
+        warnings.push({
+          path: `feeds.${key}`,
+          message: `Dropped the value passed between screens "${key}" because it was not usable; send it again from its source screen.`,
+        });
+        continue;
+      }
+      for (const p of unknownKeyPaths(entry, r.data, `feeds.${key}`)) {
+        warnings.push({ path: p, message: `Ignored the unknown field "${p}".` });
+      }
+      kept[key] = r.data;
+    }
+    project.feeds = kept as Feeds;
+  }
+  return { ok: true, project, warnings, droppedFeeds };
 }

@@ -113,6 +113,32 @@ describe('project bar', () => {
     expect(screen.getByRole('status').textContent).toMatch(/values passed between screens/i);
   });
 
+  it('handling a shared link replaces the history entry so Back does not open it again', async () => {
+    const r = await makeShareLink(sharedProject('56'), 'https://x.test/');
+    if (!r.ok) throw new Error('link');
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const replace = vi.spyOn(window.history, 'replaceState');
+    render(<ProjectBar />);
+    await act(async () => {
+      window.location.hash = new URL(r.link).hash;
+    });
+    await waitFor(() => expect(getScreen('transport').form.K).toBe('56'));
+    expect(replace).toHaveBeenCalled();
+    expect(window.location.hash).toBe('#/');
+    // the same payload arriving again (a Back step) must not decode a second time
+    setScreen('transport', {
+      ...getScreen('transport'),
+      form: { ...getScreen('transport').form, K: '9' },
+    });
+    await act(async () => {
+      window.location.hash = new URL(r.link).hash;
+    });
+    await act(async () => {
+      await new Promise((res) => setTimeout(res, 50));
+    });
+    expect(getScreen('transport').form.K).toBe('9');
+  });
+
   it('a shared link asks before replacing unsaved work and leaves it alone on cancel', async () => {
     const t = getScreen('transport');
     setScreen('transport', { ...t, form: { ...t.form, K: '11' } });

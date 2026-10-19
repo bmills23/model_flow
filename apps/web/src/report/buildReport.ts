@@ -5,6 +5,7 @@ import {
   screenUsed,
   USED_SCREENS_ORDER,
   type ScreenKey,
+  type FeedsLike,
 } from './methodsRun';
 import { buildMethodsStatement, type MethodsStatement } from './methodsStatement';
 import * as cleanup from '../cleanup/project';
@@ -100,11 +101,12 @@ export interface Report {
 /** The report model of a project: used screens with their inputs, then the generated methods statement. */
 export function buildReport(project: Project): Report {
   const screens = screensOf(project);
-  const run = methodsRun(screens);
+  const feeds = project.feeds as FeedsLike | undefined;
+  const run = methodsRun(screens, feeds);
   const sections: ReportSection[] = [];
   const unused: string[] = [];
   for (const key of USED_SCREENS_ORDER) {
-    if (!screenUsed(key, screens)) {
+    if (!screenUsed(key, screens, feeds)) {
       unused.push(SCREEN_NAMES[key]);
       continue;
     }

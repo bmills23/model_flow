@@ -1,3 +1,5 @@
+import { csvFileName } from './csvFileName';
+import type { CURRENT_EDITIONS } from '../report/methodsRun';
 import { downloadCsv, exportCsv, type CsvColumn, type CsvRow } from './csv';
 
 /** One downloadable table: the rows and columns of an exportCsv call plus the file stem. */
@@ -6,6 +8,8 @@ export interface CsvTable {
   name: string;
   /** Short label for the control, e.g. `results`. */
   label: string;
+  /** Datasets the table's numbers read; their editions go in the file name. */
+  editions?: readonly (keyof typeof CURRENT_EDITIONS)[];
   rows: readonly CsvRow[];
   columns: readonly CsvColumn[];
 }
@@ -21,7 +25,7 @@ export function DownloadCsv(props: { tables: readonly CsvTable[]; disabled?: boo
           type="button"
           className="btn"
           disabled={props.disabled}
-          onClick={() => downloadCsv(`${t.name}.csv`, exportCsv(t.rows, t.columns))}
+          onClick={() => downloadCsv(csvFileName(t), exportCsv(t.rows, t.columns))}
         >
           Download CSV{props.tables.length > 1 ? `: ${t.label}` : ''}
         </button>

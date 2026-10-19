@@ -1438,3 +1438,25 @@ overturn):
 - **The Eco-SSL screen requires all four receptor groups.** A missing group throws instead of being
   reported as an EPA NA; the earlier test that omitted groups was rewritten to supply all four.
 - **PAH group membership** is deferred to a named future slice, not to the E3 slice that is already done.
+
+### M11 review fixes (2026-10-18)
+
+- **A feed never refuses a project (DEFAULT).** `parseProject` validates the screens with the strict
+  schema and each feed entry on its own; an unusable or unknown feed is dropped with a warning and listed
+  in `droppedFeeds`, and the autosave and opened files still seed every form. The page names the dropped
+  feeds in a dismissible note.
+- **The four vapor feeds are four entries (DEFAULT).** `vaporVadose`, `vaporWaterTable`, `vaporSaturated`
+  and `vaporRisk`, each hashed against its own source form (vadose, transport, saturated, vapor). The old
+  single `vapor` key is an unknown feed key: dropped with a warning, no version bump (feeds are
+  convenience copies and the format is unreleased).
+- **Autosave flushes on pagehide and when the page becomes hidden**, not only after the debounce.
+- **The methods statement counts a screen as used when it sent a feed**, and a cleanup chain adds the
+  groundwater methods (and the vadose or saturated methods for a soil source) it runs.
+- **CSV files are named with app version, data edition and date**, so a saved file ties to a build and
+  an RSL, criteria or sediment edition without a metadata row inside the file.
+- **Opening a share link replaces the history entry** (`history.replaceState`) and keeps the handled
+  payload, so Back does not open it again.
+- **`cloneData` and `mergeDefaults` define own properties**, so a `__proto__` key in an untrusted file is a
+  plain property, never a prototype.
+- No fixture was widened, removed or rewritten for tolerance. Two project tests that expected a bad feed
+  to refuse the whole file were rewritten to expect the feed dropped and the forms kept.

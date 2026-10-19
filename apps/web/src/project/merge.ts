@@ -3,12 +3,22 @@ type Plain = Record<string, unknown>;
 const isPlain = (v: unknown): v is Plain =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
+/** Set an own data property, even for a key named __proto__ (plain assignment would set the prototype). */
+function setOwn(target: Plain, key: string, value: unknown): void {
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
+}
+
 /** A deep copy of plain JSON-like data (objects, arrays, primitives), so no live state is shared. */
 export function cloneData<T>(v: T): T {
   if (Array.isArray(v)) return v.map((x) => cloneData(x)) as T;
   if (isPlain(v)) {
     const out: Plain = {};
-    for (const [k, x] of Object.entries(v)) out[k] = cloneData(x);
+    for (const [k, x] of Object.entries(v)) setOwn(out, k, cloneData(x));
     return out as T;
   }
   return v;
@@ -25,7 +35,13 @@ export function mergeDefaults<T>(defaults: T, partial: unknown): T {
     const out: Plain = cloneData(defaults);
     for (const [k, v] of Object.entries(partial)) {
       if (v === undefined) continue;
-      out[k] = k in defaults ? mergeDefaults(defaults[k], v) : cloneData(v);
+      setOwn(
+        out,
+        k,
+        Object.prototype.hasOwnProperty.call(defaults, k)
+          ? mergeDefaults(defaults[k], v)
+          : cloneData(v),
+      );
     }
     return out as T;
   }

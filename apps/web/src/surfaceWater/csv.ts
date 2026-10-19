@@ -102,12 +102,14 @@ export function surfaceWaterCsvTables(r: SwResult): CsvTable[] {
   return [
     {
       name: 'surface-water-results',
+      editions: ['nrwqc', 'sediment'],
       label: 'results',
       rows: surfaceWaterResultRows(r),
       columns: RESULT_COLUMNS,
     },
     {
       name: 'surface-water-time-series',
+      editions: ['nrwqc', 'sediment'],
       label: 'time series',
       rows: surfaceWaterSeriesRows(r),
       columns: SERIES_COLUMNS,

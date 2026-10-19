@@ -62,6 +62,8 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 /** Source form fingerprint recorded when each feed was last sent (or restored). */
 let hashes: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
 let stale: FeedKey[] = [];
+/** Feeds a restored or opened project carried that could not be used and were dropped. */
+let dropped: string[] = [];
 const listeners = new Set<() => void>();
 const notify = (): void => listeners.forEach((fn) => fn());
 
@@ -75,6 +77,7 @@ export const getEpoch = (): number => epoch;
 export const getScreen = <K extends keyof Screens>(key: K): Screens[K] => screens[key];
 /** Feeds restored from storage whose source form has changed since they were built. */
 export const getStaleFeeds = (): readonly FeedKey[] => stale;
+export const getDroppedFeeds = (): readonly string[] => dropped;
 
 function sourceForms(s: Screens): Record<FeedKey, unknown> {
   return {
@@ -83,8 +86,10 @@ function sourceForms(s: Screens): Record<FeedKey, unknown> {
     surfaceWater: s.surfaceWater.form,
     vadose: s.vadose.form,
     saturated: s.saturated.form,
-    // the vapor feeds come from four screens; any of them changing makes the entry stale
-    vapor: [s.vadose.form, s.saturated.form, s.transport.form, s.vapor.form],
+    vaporVadose: s.vadose.form,
+    vaporWaterTable: s.transport.form,
+    vaporSaturated: s.saturated.form,
+    vaporRisk: s.vapor.form,
   };
 }
 const SOURCE: Record<FeedKey, string> = {
@@ -93,20 +98,11 @@ const SOURCE: Record<FeedKey, string> = {
   surfaceWater: 'surfaceWater',
   vadose: 'vadose',
   saturated: 'saturated',
-  vapor: 'vapor',
+  vaporVadose: 'vadose',
+  vaporWaterTable: 'transport',
+  vaporSaturated: 'saturated',
+  vaporRisk: 'vapor',
 };
-
-function vaporValue(): Record<string, unknown> | null {
-  const v = {
-    vadose: getVadoseVaporFeed(),
-    waterTable: getWaterTableFeed(),
-    saturated: getSaturatedVaporFeed(),
-    risk: getVaporRiskFeed(),
-  };
-  const out: Record<string, unknown> = {};
-  for (const [k, val] of Object.entries(v)) if (val !== null) out[k] = val;
-  return Object.keys(out).length === 0 ? null : out;
-}
 
 const readers: Record<FeedKey, () => unknown> = {
   well: getWellFeed,
@@ -114,7 +110,10 @@ const readers: Record<FeedKey, () => unknown> = {
   vadose: getVadoseFeed,
   saturated: getSaturatedFeed,
   bank: getBankFeed,
-  vapor: vaporValue,
+  vaporVadose: getVadoseVaporFeed,
+  vaporWaterTable: getWaterTableFeed,
+  vaporSaturated: getSaturatedVaporFeed,
+  vaporRisk: getVaporRiskFeed,
 };
 
 function currentFeeds(): Feeds {
@@ -215,14 +214,10 @@ function watchFeeds(): void {
   subscribeSurfaceWaterFeed(() => recordHash('surfaceWater'));
   subscribeVadoseFeed(() => recordHash('vadose'));
   subscribeSaturatedFeed(() => recordHash('saturated'));
-  for (const sub of [
-    subscribeVadoseVaporFeed,
-    subscribeWaterTableFeed,
-    subscribeSaturatedVaporFeed,
-    subscribeVaporRiskFeed,
-  ]) {
-    sub(() => recordHash('vapor'));
-  }
+  subscribeVadoseVaporFeed(() => recordHash('vaporVadose'));
+  subscribeWaterTableFeed(() => recordHash('vaporWaterTable'));
+  subscribeSaturatedVaporFeed(() => recordHash('vaporSaturated'));
+  subscribeVaporRiskFeed(() => recordHash('vaporRisk'));
 }
 watchFeeds();
 
@@ -246,6 +241,7 @@ export function forgetMemory(): void {
   title = '';
   hashes = {};
   stale = [];
+  dropped = [];
   savedSnapshot = null;
 }
 
@@ -263,49 +259,49 @@ export function hydrate(): void {
   if (text === null) return;
   const r = parseProject(text);
   if (!r.ok) return;
-  seed(r.project);
+  seed(r.project, r.droppedFeeds ?? []);
   notify();
 }
 
-/** Put a parsed project into the screens and feeds. Falls back to a fresh project if a feed is unusable. */
-function seed(project: Project): void {
-  try {
-    screens = screensOf(project);
-    title = project.title ?? '';
-    const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
-    const restored: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
-    const val = (k: FeedKey): never => decodeJson(feeds[k]?.value) as never;
-    const note = (k: FeedKey): void => {
-      const e = feeds[k];
-      if (e) restored[k] = { source: e.source, inputsHash: e.inputsHash };
-    };
-    if (feeds['well']) setWellFeed(val('well'));
-    if (feeds['bank']) setBankFeed(val('bank'));
-    if (feeds['surfaceWater']) setSurfaceWaterFeed(val('surfaceWater'));
-    if (feeds['vadose']) setVadoseFeed(val('vadose'));
-    if (feeds['saturated']) setSaturatedFeed(val('saturated'));
-    if (feeds['vapor']) {
-      const v = val('vapor') as Record<string, never | undefined>;
-      if (v.vadose) setVadoseVaporFeed(v.vadose);
-      if (v.waterTable) setWaterTableFeed(v.waterTable);
-      if (v.saturated) setSaturatedVaporFeed(v.saturated);
-      if (v.risk) setVaporRiskFeed(v.risk);
+/**
+ * Put a parsed project into the screens and feeds. The screens always seed; a feed that cannot be
+ * put back is dropped on its own (and listed) without touching the others.
+ */
+function seed(project: Project, droppedKeys: readonly string[] = []): void {
+  screens = screensOf(project);
+  title = project.title ?? '';
+  dropped = [...droppedKeys];
+  const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
+  const restored: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
+  const val = (k: FeedKey): never => decodeJson(feeds[k]?.value) as never;
+  const setters: Record<FeedKey, (v: never) => void> = {
+    well: setWellFeed,
+    bank: setBankFeed,
+    surfaceWater: setSurfaceWaterFeed,
+    vadose: setVadoseFeed,
+    saturated: setSaturatedFeed,
+    vaporVadose: setVadoseVaporFeed,
+    vaporWaterTable: setWaterTableFeed,
+    vaporSaturated: setSaturatedVaporFeed,
+    vaporRisk: setVaporRiskFeed,
+  };
+  for (const k of Object.keys(setters) as FeedKey[]) {
+    const e = feeds[k];
+    if (!e) continue;
+    try {
+      setters[k](val(k));
+      restored[k] = { source: e.source, inputsHash: e.inputsHash };
+    } catch {
+      dropped.push(k);
     }
-    for (const k of Object.keys(feeds) as FeedKey[]) note(k);
-    // the setters above recorded fresh hashes; put back the ones the file carried
-    hashes = restored;
-    const forms = sourceForms(screens);
-    stale = (Object.keys(restored) as FeedKey[]).filter(
-      (k) =>
-        restored[k]?.inputsHash !== feedEntry(SOURCE[k] as keyof Screens, forms[k], 0).inputsHash,
-    );
-  } catch {
-    screens = defaultScreens();
-    title = '';
-    hashes = {};
-    stale = [];
-    clearAllFeeds();
   }
+  // the setters above recorded fresh hashes; put back the ones the file carried
+  hashes = restored;
+  const forms = sourceForms(screens);
+  stale = (Object.keys(restored) as FeedKey[]).filter(
+    (k) =>
+      restored[k]?.inputsHash !== feedEntry(SOURCE[k] as keyof Screens, forms[k], 0).inputsHash,
+  );
   if (timer !== null) clearTimeout(timer);
   timer = null;
 }
@@ -315,9 +311,9 @@ function seed(project: Project): void {
  * without feeds clears the old ones). Mounted screens remount through the epoch. The result counts as
  * saved, and the autosave follows.
  */
-export function loadProject(project: Project): void {
+export function loadProject(project: Project, droppedKeys: readonly string[] = []): void {
   clearAllFeeds();
-  seed(project);
+  seed(project, droppedKeys);
   markSaved();
   epoch += 1;
   schedule();
@@ -331,6 +327,7 @@ export function newProject(): void {
   clearAllFeeds();
   hashes = {};
   stale = [];
+  dropped = [];
   if (timer !== null) clearTimeout(timer);
   timer = null;
   try {
@@ -343,9 +340,24 @@ export function newProject(): void {
   notify();
 }
 
+let hideWatched = false;
+/** A debounce timer dies with the page: write the pending edit when the page is hidden or leaves. */
+function watchPageHide(): void {
+  if (hideWatched || typeof window === 'undefined') return;
+  hideWatched = true;
+  const flushPending = (): void => {
+    if (timer !== null) flushAutosave();
+  };
+  window.addEventListener('pagehide', flushPending);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushPending();
+  });
+}
+
 /** Seed from storage; call once before the first render. */
 export function startProjectStore(): void {
   hydrate();
+  watchPageHide();
   // the autosave is not a saved file: compare against a blank project, so a restored one is unsaved
   savedSnapshot = null;
 }

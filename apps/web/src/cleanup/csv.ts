@@ -100,12 +100,14 @@ export function cleanupCsvTables(
   return [
     {
       name: 'cleanup-levels',
+      editions: ['rsl'],
       label: 'cleanup levels',
       rows: cleanupLevelRows(outcome, names),
       columns: LEVEL_COLUMNS,
     },
     {
       name: 'cleanup-pathways',
+      editions: ['rsl'],
       label: 'each pathway alone',
       rows: cleanupPathwayRows(outcome, names),
       columns: PATHWAY_COLUMNS,
@@ -197,12 +199,14 @@ export function modeledCsvTables(outcome: ModeledOutcome, chemicalName: string):
   return [
     {
       name: 'cleanup-modeled-levels',
+      editions: ['rsl'],
       label: 'modeled level',
       rows: modeledResultRows(outcome, chemicalName),
       columns: modeledResultColumns(outcome.medium),
     },
     {
       name: 'cleanup-modeled-curve',
+      editions: ['rsl'],
       label: 'metric curve',
       rows: modeledCurveRows(outcome),
       columns: modeledCurveColumns(outcome.medium),
@@ -260,6 +264,12 @@ export function ssgRows(rows: readonly SsgRow[]): CsvRow[] {
 
 export function ssgCsvTables(rows: readonly SsgRow[]): CsvTable[] {
   return [
-    { name: 'cleanup-ssg', label: 'leaching levels', rows: ssgRows(rows), columns: SSG_COLUMNS },
+    {
+      name: 'cleanup-ssg',
+      editions: ['rsl'],
+      label: 'leaching levels',
+      rows: ssgRows(rows),
+      columns: SSG_COLUMNS,
+    },
   ];
 }

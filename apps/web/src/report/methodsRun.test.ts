@@ -19,6 +19,32 @@ describe('screenUsed', () => {
   });
 });
 
+describe('methodsRun with feeds and chains', () => {
+  it('counts a screen at its defaults as used when a feed sourced from it exists', () => {
+    const r = methodsRun(base(), { well: { source: 'transport' } });
+    expect(r.byScreen.transport).toContain('groundwater.at123d');
+    expect(r.ids).toContain('groundwater.wexler1992');
+  });
+
+  it('a cleanup chain adds the methods the chain runs', () => {
+    const s = base();
+    s.cleanup = { form: { ...s.cleanup.form, source: 'dissolved' } };
+    expect(methodsRun(s).ids).toEqual(
+      expect.arrayContaining(['groundwater.at123d', 'groundwater.wexler1992']),
+    );
+    s.cleanup = { form: { ...s.cleanup.form, source: 'vadose' } };
+    expect(methodsRun(s).ids).toEqual(
+      expect.arrayContaining(['groundwater.at123d', 'vadose.vadsat', 'vadose.layered']),
+    );
+    s.cleanup = { form: { ...s.cleanup.form, source: 'saturated' } };
+    const ids = methodsRun(s).ids;
+    expect(ids).toEqual(
+      expect.arrayContaining(['saturatedSource.two-region', 'saturatedSource.exponential']),
+    );
+    expect(ids).not.toContain('vadose.vadsat');
+  });
+});
+
 describe('methodsRun', () => {
   it('is empty for a new project', () => {
     expect(methodsRun(base()).ids).toEqual([]);

@@ -145,16 +145,41 @@ describe('parseProject', () => {
     expect(screensOf(r.project).risk.form.additive).toBe(true);
   });
 
-  it('refuses a feed whose series arrays differ in length', () => {
+  it('drops a feed whose series arrays differ in length, keeps the screens and warns', () => {
     const doc = JSON.parse(JSON.stringify(sample()));
     doc.feeds.well.value.values = [1];
-    expect(parseProject(doc).ok).toBe(false);
+    const r = parseProject(doc);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.project.feeds?.['well']).toBeUndefined();
+    expect(r.droppedFeeds).toEqual(['well']);
+    expect(r.warnings.some((w) => w.path === 'feeds.well')).toBe(true);
+    expect(screensOf(r.project).transport.form.K).toBe(screensOf(sample()).transport.form.K);
   });
 
-  it('refuses a non-finite series value', () => {
+  it('drops a non-finite series value the same way and keeps the other feeds', () => {
     const doc = JSON.parse(JSON.stringify(sample()));
     doc.feeds.well.value.values = [0, null, 1];
-    expect(parseProject(doc).ok).toBe(false);
+    doc.feeds.vaporRisk = {
+      source: 'vapor',
+      inputsHash: 'h',
+      value: { chemicalId: '71-43-2', label: 'benzene' },
+    };
+    const r = parseProject(doc);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.droppedFeeds).toEqual(['well']);
+    expect(r.project.feeds?.['vaporRisk']).toBeDefined();
+  });
+
+  it('drops a feed key this build does not know with a warning', () => {
+    const doc = JSON.parse(JSON.stringify(sample()));
+    doc.feeds.vapor = { source: 'vapor', inputsHash: 'h', value: {} };
+    const r = parseProject(doc);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect((r.project.feeds as Record<string, unknown> | undefined)?.['vapor']).toBeUndefined();
+    expect(r.warnings.some((w) => w.path === 'feeds.vapor')).toBe(true);
   });
 });
 

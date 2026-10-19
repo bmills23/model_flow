@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mergeDefaults, unknownKeyPaths } from './merge';
+import { cloneData, mergeDefaults, unknownKeyPaths } from './merge';
 
 describe('mergeDefaults', () => {
   it('fills absent keys from the defaults and keeps present ones', () => {
@@ -39,5 +39,25 @@ describe('unknownKeyPaths', () => {
   });
   it('is empty when nothing was dropped', () => {
     expect(unknownKeyPaths({ a: { b: 1 } }, { a: { b: 1 } }, 'r')).toEqual([]);
+  });
+});
+
+describe('untrusted __proto__ keys', () => {
+  const hostile = () => JSON.parse('{"__proto__":{"polluted":1},"a":1}') as Record<string, unknown>;
+
+  it('cloneData copies a __proto__ key as a property and leaves the prototype alone', () => {
+    const out = cloneData(hostile());
+    expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+    expect((out as { polluted?: number }).polluted).toBeUndefined();
+    expect(Object.prototype.hasOwnProperty.call(out, '__proto__')).toBe(true);
+    expect(out['a']).toBe(1);
+  });
+
+  it('mergeDefaults does the same and pollutes nothing global', () => {
+    const out = mergeDefaults({ a: 0 } as Record<string, unknown>, hostile());
+    expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+    expect((out as { polluted?: number }).polluted).toBeUndefined();
+    expect(({} as { polluted?: number }).polluted).toBeUndefined();
+    expect(out['a']).toBe(1);
   });
 });

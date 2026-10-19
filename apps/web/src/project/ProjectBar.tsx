@@ -34,7 +34,7 @@ export function ProjectBar() {
       return false;
     }
     if (hasUnsavedChanges() && !window.confirm(REPLACE_PROMPT)) return false;
-    loadProject(r.project);
+    loadProject(r.project, r.droppedFeeds ?? []);
     setLink(null);
     const warn = r.warnings.length > 0 ? ` ${r.warnings.map((w) => w.message).join(' ')}` : '';
     setMessage({ kind: 'status', text: `${done}${warn}` });
@@ -60,9 +60,14 @@ export function ProjectBar() {
         } else {
           replaceWith(r, `Opened the shared project. ${SHARED_NOTE}`);
         }
-        // leave the hash so a reload or a back step does not open the link again
-        window.location.hash = '#/';
-        lastPayload.current = null;
+        // swap the link for the home hash in place (no new history entry) and remember the payload, so
+        // a back step to the same link is not opened again
+        window.history.replaceState(
+          null,
+          '',
+          `${window.location.pathname}${window.location.search}#/`,
+        );
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
       });
     };
     check();

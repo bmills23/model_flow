@@ -31,15 +31,16 @@ const numbers = z.array(z.number().finite());
  * that screen's form at the time (see `feedEntry`). A series feed (well, surface water) is checked
  * in full; feeds that carry a whole scenario (vadose, saturated, bank, vapor) are checked for their
  * top-level keys, with the scenario itself a JSON object (non-finite numbers are tagged, see
- * `codec.ts`). The vapor entry holds up to four sub-feeds by origin: vadose, waterTable, saturated
- * and risk. The transport chain feed holds a closure and is not stored.
+ * `codec.ts`). The vapor screen's four received feeds are four entries (vaporVadose, vaporWaterTable,
+ * vaporSaturated, vaporRisk), each fingerprinted against its own source form. The transport chain
+ * feed holds a closure and is not stored.
  */
 const feedEnvelope = <V extends z.ZodType>(value: V) =>
   z.object({ source: text, inputsHash: text, value });
 
 const jsonObject = z.record(z.string(), z.json());
 
-export const feedsSchema = z.object({
+export const feedShapes = {
   well: feedEnvelope(
     z
       .object({
@@ -68,15 +69,14 @@ export const feedsSchema = z.object({
     z.object({ input: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
   ).optional(),
   bank: feedEnvelope(z.object({ scenario: jsonObject, label: text })).optional(),
-  vapor: feedEnvelope(
-    z.object({
-      vadose: jsonObject.optional(),
-      waterTable: jsonObject.optional(),
-      saturated: jsonObject.optional(),
-      risk: jsonObject.optional(),
-    }),
-  ).optional(),
-});
+  vaporVadose: feedEnvelope(jsonObject).optional(),
+  vaporWaterTable: feedEnvelope(jsonObject).optional(),
+  vaporSaturated: feedEnvelope(jsonObject).optional(),
+  vaporRisk: feedEnvelope(jsonObject).optional(),
+};
+
+/** Every feed key of format version 1. Each entry is validated on its own (see `parseProject`). */
+export const feedsSchema = z.object(feedShapes);
 
 /** The data editions the project was made against (directory names under packages/data/generated). */
 export const dataSchema = z.object({
@@ -92,8 +92,9 @@ export const projectV1Schema = z.object({
   savedAt: z.iso.datetime({ offset: true }),
   title: text.optional(),
   screens: screensSchema,
-  feeds: feedsSchema.optional(),
+  // each entry is checked on its own by parseProject, so one unusable feed never refuses the file
+  feeds: z.record(z.string(), z.unknown()).optional(),
   data: dataSchema.optional(),
 });
-export type Project = z.infer<typeof projectV1Schema>;
 export type Feeds = z.infer<typeof feedsSchema>;
+export type Project = Omit<z.infer<typeof projectV1Schema>, 'feeds'> & { feeds?: Feeds };

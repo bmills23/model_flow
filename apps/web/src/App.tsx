@@ -1,7 +1,13 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
 import { NON_AFFILIATION } from './nonAffiliation';
 import { ProjectBar } from './project/ProjectBar';
-import { getEpoch, getStaleFeeds, newProject, subscribeProject } from './project/store';
+import {
+  getDroppedFeeds,
+  getEpoch,
+  getStaleFeeds,
+  newProject,
+  subscribeProject,
+} from './project/store';
 
 // Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
 const MethodsPage = lazy(() =>
@@ -58,6 +64,7 @@ export function App() {
   const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
   const [staleShown, setStaleShown] = useState(true);
   const stale = staleShown ? getStaleFeeds() : [];
+  const dropped = staleShown ? getDroppedFeeds() : [];
   const onNewProject = (): void => {
     if (
       window.confirm(
@@ -105,6 +112,15 @@ export function App() {
         </button>
       </header>
       <ProjectBar />
+      {dropped.length > 0 ? (
+        <p className="stale-note" role="status">
+          Some values passed between screens ({dropped.join(', ')}) could not be restored. Your
+          inputs on every screen were kept; send those values again from their source screen.{' '}
+          <button type="button" className="btn" onClick={() => setStaleShown(false)}>
+            Dismiss
+          </button>
+        </p>
+      ) : null}
       {stale.length > 0 ? (
         <p className="stale-note" role="status">
           Restored values passed between screens ({stale.join(', ')}) were built from inputs that

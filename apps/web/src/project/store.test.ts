@@ -5,7 +5,13 @@ import { DEFAULT_FORM, toScenario } from '../transport/form';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed } from '../vadose/feed';
 import { DEFAULT_FORM as VADOSE_FORM, toScenario as vadoseScenario } from '../vadose/form';
 import { clearSaturatedFeed, getSaturatedFeed } from '../saturated/feed';
-import { clearVaporRiskFeed, getVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
+import {
+  clearVadoseVaporFeed,
+  clearVaporRiskFeed,
+  getVaporRiskFeed,
+  setVadoseVaporFeed,
+  setVaporRiskFeed,
+} from '../vapor/feeds';
 import { clearSurfaceWaterFeed } from '../surfaceWater/feed';
 import {
   AUTOSAVE_KEY,
@@ -13,10 +19,12 @@ import {
   forgetMemory,
   getEpoch,
   getScreen,
+  getDroppedFeeds,
   getStaleFeeds,
   hydrate,
   newProject,
   setScreen,
+  startProjectStore,
 } from './store';
 
 const wellFeed = {
@@ -43,6 +51,7 @@ function wipeFeeds(): void {
   clearVadoseFeed();
   clearSaturatedFeed();
   clearVaporRiskFeed();
+  clearVadoseVaporFeed();
   clearSurfaceWaterFeed();
 }
 
@@ -183,5 +192,51 @@ describe('project store', () => {
     setWellFeed(wellFeed);
     flushAutosave();
     expect(Object.keys(saved()?.feeds ?? {})).toEqual(['well']);
+  });
+
+  it('one unusable feed is dropped but the forms still come back', () => {
+    const s = getScreen('vadose');
+    setScreen('vadose', { form: { ...s.form, infiltration: '0.3' } });
+    setWellFeed(wellFeed);
+    setVaporRiskFeed({ chemicalId: '71-43-2', label: 'benzene' });
+    flushAutosave();
+    const doc = JSON.parse(localStorage.getItem(AUTOSAVE_KEY)!);
+    doc.feeds.well.value.values = [0, null, 2e-6];
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(doc));
+    reload();
+    expect(getScreen('vadose').form.infiltration).toBe('0.3');
+    expect(getWellFeed()).toBeNull();
+    expect(getVaporRiskFeed()?.chemicalId).toBe('71-43-2');
+    expect(getDroppedFeeds()).toEqual(['well']);
+  });
+
+  it('editing the vapor form does not flag a received vadose feed, editing the vadose form does', () => {
+    setVadoseVaporFeed({ kind: 'poreWater', label: 'pore water', constant: 1e-3 });
+    flushAutosave();
+    expect(Object.keys(saved()?.feeds ?? {})).toEqual(['vaporVadose']);
+    const v = getScreen('vapor');
+    setScreen('vapor', { ...v, form: { ...v.form, H: '9.9' } });
+    flushAutosave();
+    reload();
+    expect(getStaleFeeds()).toEqual([]);
+    const d = getScreen('vadose');
+    setScreen('vadose', { form: { ...d.form, infiltration: '0.4' } });
+    flushAutosave();
+    reload();
+    expect(getStaleFeeds()).toEqual(['vaporVadose']);
+  });
+
+  it('flushes the autosave when the page is hidden or unloaded', () => {
+    startProjectStore();
+    const s = getScreen('transport');
+    setScreen('transport', { ...s, form: { ...s.form, K: '7' } });
+    expect(localStorage.getItem(AUTOSAVE_KEY)).toBeNull();
+    window.dispatchEvent(new Event('pagehide'));
+    expect(saved()?.screens?.transport?.form?.K).toBe('7');
+    setScreen('transport', { ...s, form: { ...s.form, K: '8' } });
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+    expect(saved()?.screens?.transport?.form?.K).toBe('8');
   });
 });

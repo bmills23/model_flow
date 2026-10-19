@@ -39,11 +39,15 @@ const PROJECTORS: { [K in ScreenKey]: (s: Screens[K]) => unknown } = {
   cleanup: cleanup.toProject,
 };
 
+/** The stored feeds of a project, as far as the report needs them: which screen each came from. */
+export type FeedsLike = Record<string, { source: string } | undefined>;
+
 /**
  * A screen counts as used when its state differs from the defaults a new project starts with. A
  * project holds all seven screen keys, so presence says nothing; an edit does.
  */
-export function screenUsed(key: ScreenKey, screens: Screens): boolean {
+export function screenUsed(key: ScreenKey, screens: Screens, feeds?: FeedsLike): boolean {
+  if (feeds !== undefined && Object.values(feeds).some((e) => e?.source === key)) return true;
   const project = PROJECTORS[key] as (s: Screens[ScreenKey]) => unknown;
   return stableStringify(project(screens[key])) !== stableStringify(project(defaultScreens()[key]));
 }
@@ -95,7 +99,13 @@ function idsFor(key: ScreenKey, s: Screens): string[] {
       const f = s.cleanup.form;
       const ids = ['cleanup.rags-b-1991', 'cleanup.rags-e-f-2014'];
       if (f.ssg.on) ids.push('cleanup.ssg-leaching');
-      if (f.source !== 'direct') ids.push('cleanup.modeled-chains');
+      if (f.source !== 'direct') {
+        // the chain runs both groundwater methods, and the soil source's own two methods
+        ids.push('cleanup.modeled-chains', 'groundwater.at123d', 'groundwater.wexler1992');
+        if (f.source === 'vadose') ids.push('vadose.vadsat', 'vadose.layered');
+        if (f.source === 'saturated')
+          ids.push('saturatedSource.two-region', 'saturatedSource.exponential');
+      }
       return ids;
     }
   }
@@ -108,11 +118,11 @@ export interface MethodsRun {
   ids: string[];
 }
 
-export function methodsRun(screens: Screens): MethodsRun {
+export function methodsRun(screens: Screens, feeds?: FeedsLike): MethodsRun {
   const byScreen: MethodsRun['byScreen'] = {};
   const ids: string[] = [];
   for (const key of USED_SCREENS_ORDER) {
-    if (!screenUsed(key, screens)) continue;
+    if (!screenUsed(key, screens, feeds)) continue;
     const list = idsFor(key, screens);
     byScreen[key] = list;
     for (const id of list) if (!ids.includes(id)) ids.push(id);
