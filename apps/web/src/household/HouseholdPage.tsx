@@ -3,7 +3,7 @@ import { registry, type Warning } from '@model-flow/engine';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { getScreen, setScreen } from '../project/store';
 import { formatConcentration } from '../transport/chartData';
-import { Field, Group, Seg } from '../ui/controls';
+import { Field, Group, Seg, TextField } from '../ui/controls';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { computeHousehold, volatileVerdict, type Section } from './compute';
@@ -160,7 +160,11 @@ export function HouseholdPage() {
         <form className="inputs" onSubmit={(e) => e.preventDefault()} aria-label="Scenario inputs">
           <Group title="Water, soil and chemical">
             <div className="fields">
-              {text('chemicalName', 'Chemical name')}
+              <TextField
+                label="Chemical name"
+                value={form.chemicalName}
+                onChange={(v) => set('chemicalName', v)}
+              />
               {text(
                 'chemicalId',
                 'Chemical id (CAS number)',

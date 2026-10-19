@@ -2013,7 +2013,12 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
    more than one point, and a lone point shaped like a thousands group (one to three digits starting 1 to 9, a
    point, exactly three digits, for example "1.234").
 4. **Rejection never guesses (DEFAULT).** A rejected string stays as typed in the box, with an alert message and
-   `aria-invalid`. The form receives the text with " (ambiguous)" appended, which is not a number, so the form's own
-   validation flags it and no stale or guessed value is computed.
+   `aria-invalid`. The form receives a fixed marker (`REJECTED_ENTRY`, "ambiguous entry, not a number") that holds none
+   of the typed text and is not a number, so the form's own validation flags it and no stale or guessed value is
+   computed. The marker is in memory only: the project build replaces it with an empty value, so files, share links
+   and the autosave never hold it. After a remount the box is empty and still shows the alert. (DEFAULT, revised
+   2026-10-19 after review: the first version appended " (ambiguous)" to the typed text and let it be saved.)
+   Free-text boxes (benchmark receptor and citation, wildlife surrogate name, TPH fraction name, household chemical
+   name) use `TextField`, which never reads the setting, so "Vole, meadow" is stored as typed.
 5. **No project file change.** Format version 1 is untouched; there is no new route, so the mobile check and keyboard
    lists are unchanged.

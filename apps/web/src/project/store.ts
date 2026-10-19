@@ -52,6 +52,7 @@ import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { decodeJson, encodeJson } from './codec';
 import { stableStringify } from './hash';
+import { scrubRejected } from '../ui/decimalComma';
 import {
   buildProject,
   defaultScreens,
@@ -167,7 +168,7 @@ function currentFeeds(): Feeds {
 
 function build(): ReturnType<typeof buildProject> {
   return buildProject({
-    screens,
+    screens: scrubRejected(screens),
     feeds: currentFeeds(),
     overrides,
     site,
