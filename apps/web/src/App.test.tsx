@@ -85,4 +85,16 @@ describe('App shell', () => {
     ).toBeTruthy();
     window.location.hash = '';
   });
+
+  it('links to the report and opens it at #/report', async () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: 'Report' }).getAttribute('href')).toBe('#/report');
+  });
+
+  it('opens the report screen at #/report', async () => {
+    window.location.hash = '#/report';
+    render(<App />);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
+    window.location.hash = '';
+  });
 });

@@ -180,6 +180,24 @@ so it is the one feed that still starts empty after a reload.
   statement for a fixture project contains every cited key and no method that was not run.
 - Charts print as inline SVG (they already are SVG), with the data table beside each, so a printout is
   readable in greyscale.
+- **Implemented (S6, `apps/web/src/report/`, route `#/report`).** `buildMethodsStatement` (pure, tested
+  against the real registry) takes the ids of the methods run and the data editions and returns the
+  methods in registry order with name, kind, summary, assumptions and RISC5 choice, a reference list
+  numbered by first appearance and deduplicated, and the data sources with their edition strings
+  (RSL 2024-11 from `epa2024rsl`, NRWQC from `epanrwqc` and `epanrwqchh`, sediment benchmarks from
+  `epa2018r4era`; the vapor data has no edition string and is not cited yet). An unknown method id or
+  reference key throws. Which methods were run is decided from the project forms, not from computed
+  results (`methodsRun.ts`): a screen counts as used only when its state differs from a new project's, a
+  used screen runs both of its methods side by side, and a form choice adds or drops the optional ones
+  (the Domenico method, the dispersivity law unless all three dispersivities are entered, the
+  attenuation factor for a non-soil vapor source, the soil screening leaching level, the modeled chains
+  for a non-direct cleanup source). The report page lists each used screen's inputs as typed (field
+  names, not the screens' labels), the methods statement, and the data editions (the project's recorded
+  edition when it has one, else the edition this build ships). A "Prepared by" field is held on the page
+  only, empty by default, and prints only when filled. Print CSS hides the app chrome. Not yet done:
+  result tables, charts and engine warnings per screen (they need each screen's computation run from the
+  project, and the report closes with S8 for the M7, M9 and M10 screens); until then the page says
+  results are on each screen and in its CSV download.
 - No author name, address or contact line is printed (DEFAULT); a free-text "prepared by" field the user
   fills is allowed, empty by default. Nothing in the template carries a personal contact address.
 
@@ -257,7 +275,7 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S3 | Autosave and persisted feeds, "New project" | S2 | yes |
 | S4 | File save and open, share link with compression and size limit | S2 | yes |
 | S5 | `exportCsv` helper and CSV on the existing screens | none | yes |
-| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closes after S8 |
+| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closes after S8 (generator, inputs and methods sections done; results, charts and warnings per screen open) |
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
 | S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen |

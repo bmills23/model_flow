@@ -10,6 +10,7 @@ import './risk/risk.css';
 import './cleanup/cleanup.css';
 import './vapor/vapor.css';
 import './surfaceWater/surfaceWater.css';
+import './report/report.css';
 
 startProjectStore();
 

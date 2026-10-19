@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import { NON_AFFILIATION } from './nonAffiliation';
 import { ProjectBar } from './project/ProjectBar';
 import { getEpoch, getStaleFeeds, newProject, subscribeProject } from './project/store';
 
@@ -23,14 +24,15 @@ const SurfaceWaterScreen = lazy(() =>
 );
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
+const ReportPage = lazy(() =>
+  import('./report/ReportPage').then((m) => ({ default: m.ReportPage })),
+);
+
 const CleanupPage = lazy(() =>
   import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
 );
 
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
-
-const NON_AFFILIATION =
-  'This project is independent. It is not affiliated with, endorsed by, or derived from the software of Spence Environmental Engineering, BP, or GroundwaterSoftware.com. "RISC" and "BP RISC" are their marks.';
 
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
@@ -38,6 +40,7 @@ const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
+const REPORT_HASH = '#/report';
 const VAPOR_HASH = '#/vapor';
 const SURFACE_WATER_HASH = '#/surface-water';
 
@@ -69,13 +72,22 @@ export function App() {
   const onCleanup = hash === CLEANUP_HASH;
   const onVapor = hash === VAPOR_HASH;
   const onSurfaceWater = hash === SURFACE_WATER_HASH;
+  const onReport = hash === REPORT_HASH;
 
   return (
     <div
       className={
-        onTransport || onVadose || onSaturated || onRisk || onVapor || onCleanup || onSurfaceWater
-          ? 'shell shell-wide'
-          : 'shell'
+        onReport
+          ? 'shell shell-report'
+          : onTransport ||
+              onVadose ||
+              onSaturated ||
+              onRisk ||
+              onVapor ||
+              onCleanup ||
+              onSurfaceWater
+            ? 'shell shell-wide'
+            : 'shell'
       }
     >
       <header className="masthead">
@@ -143,6 +155,9 @@ export function App() {
           <a className="nav-link" href={CLEANUP_HASH} aria-current={onCleanup ? 'page' : undefined}>
             Cleanup levels
           </a>
+          <a className="nav-link" href={REPORT_HASH} aria-current={onReport ? 'page' : undefined}>
+            Report
+          </a>
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
@@ -176,6 +191,10 @@ export function App() {
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
+          </Suspense>
+        ) : onReport ? (
+          <Suspense fallback={<p className="muted">Loading the report...</p>}>
+            <ReportPage />
           </Suspense>
         ) : onCleanup ? (
           <Suspense fallback={<p className="muted">Loading the cleanup levels screen...</p>}>

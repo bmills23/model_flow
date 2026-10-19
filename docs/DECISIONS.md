@@ -904,6 +904,9 @@ overturn):
    methods statement is generated from the registry for the methods actually run: name, kind, summary,
    assumptions, RISC5 choice, deduplicated citations from `references.json`, warnings and data editions.
    No author or contact line is printed; an optional user-filled "prepared by" field starts empty.
+   Built so far (S6): the generator, and a report of each edited screen's inputs plus the statement; the
+   methods are decided from the forms, not from computed results, and per-screen result tables, charts
+   and warnings are still open (see the methods note, section 6).
 9. **Mobile check in the repo (DEFAULT).** `scripts/mobile-check.mjs` drives Chrome through CDP at a true
    390x844 viewport, light and dark, every route, overflow count 0. Run locally before each milestone push;
    not in `gate` or CI (needs a real browser).
