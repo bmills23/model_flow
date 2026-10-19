@@ -54,6 +54,8 @@ export interface RunHooks {
   /** Defaults to the real module worker pool. */
   makeWorker?: WorkerFactory;
   workers?: number;
+  /** Rows per queued chunk after the pilot; defaults to the pool's DEFAULT_CHUNK_ROWS. */
+  chunkSize?: number;
   onProgress?: (p: Progress) => void;
   /** Asked when the run is projected over 60 s; return false to stop. */
   confirm?: (p: Projection) => boolean | Promise<boolean>;
@@ -172,6 +174,7 @@ export async function runExposureAnalysis<I>(
       ...(hooks.onProgress ? { onProgress: hooks.onProgress } : {}),
       ...(hooks.signal ? { signal: hooks.signal } : {}),
       ...(hooks.workers !== undefined ? { workers: hooks.workers } : {}),
+      ...(hooks.chunkSize !== undefined ? { chunkSize: hooks.chunkSize } : {}),
       ...(hooks.confirm ? { confirm: hooks.confirm } : {}),
     },
   );
@@ -381,6 +384,7 @@ export async function runModeledCleanupAnalysis(
       ...(hooks.onProgress ? { onProgress: hooks.onProgress } : {}),
       ...(hooks.signal ? { signal: hooks.signal } : {}),
       ...(hooks.workers !== undefined ? { workers: hooks.workers } : {}),
+      ...(hooks.chunkSize !== undefined ? { chunkSize: hooks.chunkSize } : {}),
       ...(hooks.confirm ? { confirm: hooks.confirm } : {}),
     },
   );

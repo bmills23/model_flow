@@ -145,6 +145,28 @@ describe('household, plants and uncertainty screens', () => {
     expect(r.byScreen.uncertainty).toEqual(['uncertainty.srs-exposure']);
   });
 
+  it('lists the probabilistic cleanup method for a run on the modeled-source panel', () => {
+    const s = base();
+    s.uncertainty = {
+      ...s.uncertainty,
+      modeled: {
+        ...s.uncertainty.modeled,
+        rows: {
+          'groundwater.velocity': {
+            kind: 'uniform',
+            params: {},
+            lnForm: 'geometric',
+            lo: '1e-6',
+            hi: '2e-6',
+            table: '',
+          },
+        },
+      },
+    };
+    const r = methodsRun(s);
+    expect(r.byScreen.uncertainty).toEqual(['uncertainty.cleanup-probabilistic']);
+  });
+
   it('a household feed marks the household screen used', () => {
     expect(
       methodsRun(base(), { household: { source: 'household' } }).byScreen.household,

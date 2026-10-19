@@ -160,20 +160,29 @@ describe('runModeledCleanupAnalysis', () => {
       correlationIssues: [],
     };
   }
-  const settings = { n: 6, seed: 'modeled', protection: 0.95 };
+  // 12 rows: a 5-row pilot, then 7 rows in chunks of 2, so four chunks are queued after the pilot.
+  const settings = { n: 12, seed: 'modeled', protection: 0.95 };
+  const CHUNK = 2;
 
   it('matches the in-line engine run and is bit-identical on one and two workers', async () => {
     const setup = buildModeledSetup(dissolved, dissolvedOutcome, 'legacy');
     if (!setup.ok) throw new Error(setup.error);
     const labels = { [VELOCITY]: 'Velocity' };
+    const oneWorkers: WorkerLike[] = [];
     const one = await runModeledCleanupAnalysis(setup, specFor(), settings, labels, {
-      makeWorker: inlineFactory(),
+      makeWorker: inlineFactory(oneWorkers),
       workers: 1,
+      chunkSize: CHUNK,
     });
+    const twoWorkers: WorkerLike[] = [];
     const two = await runModeledCleanupAnalysis(setup, specFor(), settings, labels, {
-      makeWorker: inlineFactory(),
+      makeWorker: inlineFactory(twoWorkers),
       workers: 2,
+      chunkSize: CHUNK,
     });
+    expect(oneWorkers).toHaveLength(1);
+    expect(twoWorkers).toHaveLength(2);
+    expect(two.workers).toBe(2);
     expect(two.result).toEqual(one.result);
     const inline = runProbabilisticCleanup({
       model: setup.model,
@@ -226,6 +235,7 @@ describe('runModeledCleanupAnalysis', () => {
       {
         makeWorker: inlineFactory(created),
         workers: 2,
+        chunkSize: 4,
         onProgress: (pr) => {
           if (pr.done > 0) ctl.abort();
         },
@@ -233,6 +243,7 @@ describe('runModeledCleanupAnalysis', () => {
       },
     );
     await expect(p).rejects.toBeInstanceOf(RunCancelledError);
+    expect(created).toHaveLength(2);
     expect(created.every((w) => (w as unknown as { stopped: boolean }).stopped)).toBe(true);
   }, 120000);
 

@@ -142,14 +142,15 @@ function idsFor(key: ScreenKey, s: Screens): string[] {
     case 'uncertainty': {
       const u = s.uncertainty;
       const d = uncertainty.defaultUncertainty();
-      const changed = (k: 'risk' | 'cleanup'): boolean =>
+      const changed = (k: 'risk' | 'cleanup' | 'modeled'): boolean =>
         stableStringify(u[k]) !== stableStringify(d[k]);
       const ids: string[] = [];
       if (changed('risk')) {
         ids.push(u.risk.sampling === 'lhs' ? 'uncertainty.lhs-ic' : 'uncertainty.srs-exposure');
         if (u.risk.sobol) ids.push('uncertainty.sobol-saltelli');
       }
-      if (changed('cleanup')) ids.push('uncertainty.cleanup-probabilistic');
+      // the direct-source and modeled-source panels both run the probabilistic cleanup method
+      if (changed('cleanup') || changed('modeled')) ids.push('uncertainty.cleanup-probabilistic');
       return ids;
     }
   }
