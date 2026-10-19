@@ -150,7 +150,7 @@ describe('App shell', () => {
     expect(nav.querySelectorAll('.steps button')).toHaveLength(0);
     const hrefs = [...steps].map((li) => li.querySelector('a')?.getAttribute('href'));
     expect(hrefs).toEqual([
-      '#/risk',
+      '#/chemicals',
       '#/transport',
       '#/transport',
       '#/risk',
