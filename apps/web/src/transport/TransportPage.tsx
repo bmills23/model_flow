@@ -12,7 +12,7 @@ import { Field, Group, Seg } from '../ui/controls';
 import { ChemicalPicker } from '../ui/ChemicalPicker';
 import { useChemicalRows } from '../ui/chemicalFill';
 import { DownloadCsv } from '../export/DownloadCsv';
-import { transportCsvTables } from './csv';
+import { plumeCsvTable, transportCsvTables } from './csv';
 import { useTransportResult } from './useTransportResult';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
@@ -603,6 +603,11 @@ export function TransportPage() {
                 methodLabel={mapMethodLabel}
                 timeLabel={`at ${form.timeYr} years`}
                 depthLabel={depthLabel}
+              />
+              <DownloadCsv
+                showLabel
+                disabled={computing || !parsed.ok}
+                tables={[plumeCsvTable(result, form.mapMethod, Number(form.timeYr))]}
               />
               <BreakthroughChart result={result} scale={form.scale} />
               <section className="panel" aria-label="Receptor concentration at the evaluation time">
