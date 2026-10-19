@@ -8,6 +8,7 @@ import {
   solveCleanupRows,
   sourceLevelSolve,
   spearmanWithOutput,
+  summarizeCleanup,
   summarizeSample,
   type CleanupResult,
   type SampleSummary,
@@ -20,6 +21,7 @@ import {
   type Warning,
 } from '@model-flow/engine';
 import { runCleanupProbabilistic, type ProbabilisticSetup } from '../cleanup/probabilistic';
+import { SMALL_TAIL_DRAWS, type ModeledSetup } from '../cleanup/modeledUncertainty';
 import { PILOT_ROWS, assertWithinBudget, projectRun, type Projection } from './budget';
 import { buildEditorSpec, type EditorSpec } from './editor';
 import {
@@ -218,8 +220,9 @@ export interface CleanupSettings {
 /** Reads the cleanup panel's iteration count, seed and protected percentage as typed. */
 export function cleanupSettings(
   setup: Pick<UncertaintySetup, 'iterations' | 'seed' | 'protection'>,
+  defaultN: number = DEFAULT_N.lhs,
 ): Settings<CleanupSettings> {
-  const n = setup.iterations.trim() === '' ? DEFAULT_N.lhs : Number(setup.iterations);
+  const n = setup.iterations.trim() === '' ? defaultN : Number(setup.iterations);
   if (!Number.isInteger(n) || n < 1) {
     return { ok: false, error: 'The number of iterations must be a positive whole number.' };
   }
@@ -309,16 +312,105 @@ export async function runCleanupAnalysis(
     seed,
     protection: settings.protection,
   });
-  const censored = new Set(result.censoredRows);
-  const rho = spearmanWithOutput(
-    result.samples,
-    result.iterationLevels.map((v, i) => (censored.has(i) ? Number.NaN : v)),
-  );
   return {
     result,
     unit: setup.unit,
     fromSi: setup.fromSi,
     deterministic: setup.deterministic,
-    spearman: result.ids.map((id, j) => ({ label: labels[id] ?? id, rho: rho[j] as number })),
+    spearman: levelSpearman(result, labels),
+  };
+}
+
+/** Spearman of each sampled input with the solved levels (censored and failed rows left out). */
+function levelSpearman(
+  result: CleanupResult,
+  labels: Record<string, string>,
+): { label: string; rho: number }[] {
+  const censored = new Set(result.censoredRows);
+  const rho = spearmanWithOutput(
+    result.samples,
+    result.iterationLevels.map((v, i) => (censored.has(i) ? Number.NaN : v)),
+  );
+  return result.ids.map((id, j) => ({ label: labels[id] ?? id, rho: rho[j] as number }));
+}
+
+export interface ModeledCleanupRun extends CleanupRun {
+  workers: number;
+}
+
+/** Draws at or below the definition 7 quantile that gives the level protecting a fraction p. */
+export function drawsBelow(n: number, protection: number): number {
+  return Math.floor((n - 1) * (1 - protection)) + 1;
+}
+
+/**
+ * The probabilistic cleanup level of a modeled source. The Latin hypercube sample is built here on one
+ * thread; every row is a full modeled solve, so the rows go to the worker pool (5-row pilot, run
+ * budget, progress, cancel) and the levels are summarised exactly as the engine's in-line run does.
+ * Same setup and seed, same numbers, whatever the pool size.
+ */
+export async function runModeledCleanupAnalysis(
+  setup: ModeledSetup,
+  spec: EditorSpec,
+  settings: CleanupSettings,
+  labels: Record<string, string>,
+  hooks: RunHooks = {},
+): Promise<ModeledCleanupRun> {
+  const { n, seed, protection } = settings;
+  const built = buildSampleMatrix('lhs', {
+    model: { uncertainInputs: setup.model.uncertainInputs, run: () => undefined },
+    base: setup.request,
+    distributions: spec.distributions,
+    output: () => 0,
+    ...(spec.correlation ? { correlation: spec.correlation } : {}),
+    n,
+    seed,
+  } as UncertaintySpec<unknown, unknown>);
+  hooks.onProgress?.({ done: 0, total: n });
+  const pooled = await runPooled(
+    {
+      type: 'modeled-cleanup',
+      request: setup.request,
+      method: setup.method,
+      ids: built.ids,
+      rows: built.samples,
+    },
+    hooks.makeWorker ?? createWorkerFactory(),
+    {
+      ...(hooks.onProgress ? { onProgress: hooks.onProgress } : {}),
+      ...(hooks.signal ? { signal: hooks.signal } : {}),
+      ...(hooks.workers !== undefined ? { workers: hooks.workers } : {}),
+      ...(hooks.confirm ? { confirm: hooks.confirm } : {}),
+    },
+  );
+  // A row's output is its level, +Infinity when censored at the cap, NaN when refused.
+  const outcomes = pooled.outputs.map((y, i) => {
+    const censored = y === Number.POSITIVE_INFINITY;
+    return {
+      level: censored ? Number.NaN : y,
+      censored,
+      evaluations: pooled.evaluations[i] ?? 0,
+      cap: undefined,
+    };
+  });
+  const result = summarizeCleanup(built, outcomes, pooled.failures.all, {
+    protection,
+    ...(setup.cap !== undefined ? { cap: setup.cap } : {}),
+  });
+  const below = drawsBelow(n, protection);
+  if (below < SMALL_TAIL_DRAWS) {
+    const percent = Number((protection * 100).toFixed(4));
+    result.warnings.push({
+      code: 'uncertainty.small-sample-tail',
+      message: `The level protecting ${percent} percent rests on ${below} of ${n} draws, fewer than ${SMALL_TAIL_DRAWS}: treat it as a rough estimate or raise the iteration count.`,
+    });
+  }
+  return {
+    result,
+    unit: setup.unit,
+    fromSi: setup.fromSi,
+    deterministic: setup.deterministic,
+    spearman: levelSpearman(result, labels),
+    workers: pooled.workers,
   };
 }

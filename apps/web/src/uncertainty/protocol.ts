@@ -1,4 +1,5 @@
 import { evaluateRows, type IterationFailure, type UncertainModel } from '@model-flow/engine';
+import type { ModeledRequest } from '../cleanup/modeledTypes';
 
 /** Messages between the pool and an uncertainty worker. Everything here is plain structured-clone data. */
 export interface RowsRequest {
@@ -15,7 +16,20 @@ export interface RowsRequest {
   /** Property path from the model result to the scalar output, for example ['summary', 'total']. */
   outputPath: readonly string[];
 }
-export type PoolRequest = RowsRequest;
+/**
+ * A chunk of probabilistic cleanup rows of a modeled source: each row sets the sampled values on the
+ * request and solves the cleanup level through the transport chain of one method.
+ */
+export interface ModeledRowsRequest {
+  type: 'modeled-cleanup';
+  job: number;
+  start: number;
+  request: ModeledRequest;
+  method: 'legacy' | 'modern';
+  ids: readonly string[];
+  rows: number[][];
+}
+export type PoolRequest = RowsRequest | ModeledRowsRequest;
 
 export interface RowsResponse {
   type: 'rows';
@@ -24,6 +38,8 @@ export interface RowsResponse {
   failures: IterationFailure[];
   /** Model time for the chunk in milliseconds, measured inside the worker (engine load excluded). */
   elapsedMs: number;
+  /** Forward runs per row (cleanup rows only). */
+  evaluations?: number[];
 }
 export interface ErrorResponse {
   type: 'error';
@@ -51,10 +67,14 @@ export function pathExtractor(path: readonly string[]): (result: unknown) => num
  * because functions do not cross the worker boundary.
  */
 export function handleRows(
-  req: RowsRequest,
+  req: PoolRequest,
   resolve: (id: string) => UncertainModel<unknown, unknown>,
   now: () => number = () => performance.now(),
 ): PoolResponse {
+  if (req.type !== 'rows') {
+    // Modeled cleanup rows need the cleanup solver; `handlePoolRequest` routes them.
+    return { type: 'error', job: req.job, message: `handleRows cannot answer "${req.type}" rows` };
+  }
   try {
     const model = resolve(req.modelId);
     const t0 = now();

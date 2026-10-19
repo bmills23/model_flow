@@ -11,6 +11,7 @@ import {
   solveModeled,
   type ChainChemical,
   type DirectResult,
+  type IterationSolve,
   type ModeledEndpoint,
   type ModeledInput,
   type PathwayId,
@@ -85,7 +86,11 @@ export function chainChemicalFor(
   return { cc, start, chain };
 }
 
-function runMethod(req: ModeledRequest, method: Method): ModeledRun {
+/** The engine input the modeled solve inverts for one method, with the chain and search start. */
+export function modeledInputFor(
+  req: ModeledRequest,
+  method: Method,
+): { input: ModeledInput<never>; start: number; chain: ReturnType<typeof buildChain>['chain'] } {
   const { cc, start, chain } = chainChemicalFor(req, method);
   const side = method === 'legacy' ? req.legacy : req.modern;
   const pathways = [...new Set(side.receptors.flatMap((r) => r.pathways))] as PathwayId[];
@@ -102,6 +107,32 @@ function runMethod(req: ModeledRequest, method: Method): ModeledRun {
     averagingWindow: req.windowSeconds,
     secantParity: req.secantParity,
   } as unknown as ModeledInput<never>;
+  return { input, start, chain };
+}
+
+/**
+ * One probabilistic iteration of a modeled source: the level the screen's solve gives for this
+ * request (no chart curve). A null level (target not reachable below the cap, or nothing quantified)
+ * is unreachable, so the sampler censors it at the cap.
+ */
+export function solveModeledIteration(
+  req: ModeledRequest,
+  method: Method,
+): IterationSolve & { cap?: number } {
+  const { input, chain } = modeledInputFor(req, method);
+  const lv = solveModeled(input).levels[0]!;
+  let evaluations = 0;
+  for (const s of Object.values(lv.solves)) evaluations += s?.evaluations ?? 0;
+  return {
+    level: lv.level,
+    reachable: lv.level !== null,
+    evaluations,
+    ...(chain.cap !== undefined ? { cap: chain.cap } : {}),
+  };
+}
+
+function runMethod(req: ModeledRequest, method: Method): ModeledRun {
+  const { input, start, chain } = modeledInputFor(req, method);
   const result = solveModeled(input);
   const lv = result.levels[0]!;
 

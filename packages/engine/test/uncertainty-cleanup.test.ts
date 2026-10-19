@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   normalQuantile,
   registry,
+  buildSampleMatrix,
   runProbabilisticCleanup,
+  solveCleanupRows,
   solveSourceLevel,
+  sourceLevelSolve,
+  summarizeCleanup,
   uncertaintyCleanupProbabilistic,
   uncertaintySpec,
   type CleanupSpec,
@@ -178,6 +182,52 @@ describe('failures, protection percentile and reproducibility', () => {
       spec({ n: 1, distributions: { 'm.x': { kind: 'constant', value: 3 } } }),
     );
     expect(r.forwardRuns).toBe(s.evaluations);
+  });
+});
+
+describe('summarizeCleanup (rows solved elsewhere, for example on a worker pool)', () => {
+  const cap = analytic(0.7);
+  const s = spec({
+    problem: (p) => ({ metric: metricOf(p), target: TARGET, reference: 1, cap }),
+    n: 300,
+    seed: 'split',
+    protection: 0.8,
+  });
+  it('gives the same result as the in-line run from the same matrix and row outcomes', () => {
+    const whole = runProbabilisticCleanup(s);
+    const built = buildSampleMatrix('lhs', {
+      ...s,
+      model: { uncertainInputs: model.uncertainInputs, run: () => undefined },
+      output: () => 0,
+    });
+    const halves = [built.samples.slice(0, 120), built.samples.slice(120)].map((rows) =>
+      solveCleanupRows(model, s.base, built.ids, rows, (i) => sourceLevelSolve(s.problem!(i))),
+    );
+    const outcomes = halves.flatMap((h) => h.outcomes);
+    const failures = halves.flatMap((h, k) =>
+      h.failures.map((f) => ({ ...f, row: f.row + (k === 0 ? 0 : 120) })),
+    );
+    const got = summarizeCleanup(built, outcomes, failures, { protection: 0.8 });
+    expect(got).toEqual(whole);
+  });
+  it('takes a cap given by the caller when no row reports one', () => {
+    const built = buildSampleMatrix('lhs', {
+      ...s,
+      n: 3,
+      model: { uncertainInputs: model.uncertainInputs, run: () => undefined },
+      output: () => 0,
+    });
+    const outcomes = [
+      { level: 1e-3, censored: false, evaluations: 2, cap: undefined },
+      { level: Number.NaN, censored: true, evaluations: 4, cap: undefined },
+      { level: 2e-3, censored: false, evaluations: 2, cap: undefined },
+    ];
+    const r = summarizeCleanup(built, outcomes, [], { cap: 5e-3 });
+    expect(r.cap).toBe(5e-3);
+    expect(r.iterationLevels).toEqual([1e-3, 5e-3, 2e-3]);
+    expect(r.censoredRows).toEqual([1]);
+    expect(r.forwardRuns).toBe(8);
+    expect(r.succeeded).toBe(3);
   });
 });
 

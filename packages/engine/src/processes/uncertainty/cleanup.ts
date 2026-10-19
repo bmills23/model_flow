@@ -101,7 +101,8 @@ function errorCode(e: unknown): string {
   return e instanceof Error ? e.name : 'Error';
 }
 
-interface RowOutcome {
+/** One row's solve as `solveCleanupRows` gives it. */
+export interface RowOutcome {
   /** NaN when failed. */
   level: number;
   censored: boolean;
@@ -220,11 +221,8 @@ export function runProbabilisticCleanup<I>(spec: CleanupSpec<I>): CleanupResult 
     output: () => 0,
   } as UncertaintySpec<I, unknown>);
   const chunk = Math.max(1, Math.floor(spec.chunkSize ?? DEFAULT_CHUNK));
-  const iterationLevels = new Array<number>(built.n).fill(Number.NaN);
-  const censoredRows: number[] = [];
+  const outcomes: RowOutcome[] = [];
   const failed: IterationFailure[] = [];
-  let forwardRuns = 0;
-  let cap: number | undefined = spec.cap;
   for (let start = 0; start < built.n; start += chunk) {
     const part = solveCleanupRows(
       spec.model,
@@ -233,14 +231,56 @@ export function runProbabilisticCleanup<I>(spec: CleanupSpec<I>): CleanupResult 
       built.samples.slice(start, start + chunk),
       solver,
     );
-    part.outcomes.forEach((o, i) => {
-      forwardRuns += o.evaluations;
-      if (o.cap !== undefined && cap === undefined) cap = o.cap;
-      if (o.censored) censoredRows.push(start + i);
-      else iterationLevels[start + i] = o.level;
-    });
+    outcomes.push(...part.outcomes);
     for (const f of part.failures) failed.push({ ...f, row: f.row + start });
   }
+  return summarizeCleanup(built, outcomes, failed, {
+    protection,
+    ...(spec.cap !== undefined ? { cap: spec.cap } : {}),
+  });
+}
+
+/** The sample a cleanup summary describes, as `buildSampleMatrix` gives it. */
+export interface CleanupSample {
+  n: number;
+  seed: string;
+  ids: string[];
+  samples: Matrix;
+  correlation?: CorrelationReport;
+  warnings: readonly Warning[];
+}
+
+/**
+ * Summarise per-row solves into the protective levels: censoring at the cap, failure counts and
+ * warnings. `outcomes` and `failures` are in row order of the whole sample (failure rows absolute), so
+ * rows solved anywhere (one thread, a worker pool) give the same result as `runProbabilisticCleanup`.
+ * The cap is the caller's, else the first one a row reports.
+ */
+export function summarizeCleanup(
+  built: CleanupSample,
+  outcomes: readonly RowOutcome[],
+  failures: readonly IterationFailure[],
+  opts: { protection?: number; cap?: number } = {},
+): CleanupResult {
+  const protection = opts.protection ?? DEFAULT_PROTECTION;
+  checkProtection(protection);
+  if (outcomes.length !== built.n) {
+    throw new UncertaintyError(
+      'uncertainty.bad-specification',
+      `${outcomes.length} row outcomes for a sample of ${built.n}`,
+    );
+  }
+  const iterationLevels = new Array<number>(built.n).fill(Number.NaN);
+  const censoredRows: number[] = [];
+  const failed = [...failures].sort((a, b) => a.row - b.row);
+  let forwardRuns = 0;
+  let cap: number | undefined = opts.cap;
+  outcomes.forEach((o, i) => {
+    forwardRuns += o.evaluations;
+    if (o.cap !== undefined && cap === undefined) cap = o.cap;
+    if (o.censored) censoredRows.push(i);
+    else iterationLevels[i] = o.level;
+  });
   const censoredLevel = cap ?? Number.POSITIVE_INFINITY;
   for (const r of censoredRows) iterationLevels[r] = censoredLevel;
 
