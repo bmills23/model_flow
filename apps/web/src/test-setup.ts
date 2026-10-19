@@ -37,6 +37,8 @@ afterEach(async () => {
   if (loaded('/@testing-library/react/')) (await import('@testing-library/react')).cleanup();
   if (loaded('/src/project/store.ts')) (await import('./project/store')).forgetMemory();
   try {
+    // the route hash outlives a test (a failed assertion skips its own reset) and picks the next screen
+    window.location.hash = '';
     localStorage.clear();
   } catch {
     // a test that stubs storage, or a file that runs without a DOM

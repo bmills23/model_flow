@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { linkedRun } from './computeLinked';
+import { linkedRun } from './linkedRun.testkit';
 
 describe('surface water compute, long reaches', () => {
   it('keeps the modern loading for a long entered reach (it must not collapse to zero)', () => {

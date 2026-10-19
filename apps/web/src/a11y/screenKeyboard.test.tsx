@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { DataTable } from '../vadose/DataTable';
 import { tabbables, positiveTabindex, unreachableControls } from './tabOrder';
-import { defineKeyboardOrder, openRoute, ROUTES } from './screenKeyboardOrder';
+import { defineKeyboardOrder, openRoute, ROUTES } from './screenKeyboard.testkit';
 
 defineKeyboardOrder(ROUTES.slice(0, 5));
 

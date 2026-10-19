@@ -1,3 +1,3 @@
-import { defineKeyboardOrder, ROUTES } from './screenKeyboardOrder';
+import { defineKeyboardOrder, ROUTES } from './screenKeyboard.testkit';
 
 defineKeyboardOrder(ROUTES.slice(15, 19));
