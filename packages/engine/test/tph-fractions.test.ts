@@ -3,6 +3,7 @@ import { registry } from '../src/index.js';
 import { references } from '../src/references/index.js';
 import {
   checkFractionSaturation,
+  checkMixtureSaturation,
   resolveFractions,
   tphForwardHazard,
   tphTotalLevel,
@@ -139,6 +140,36 @@ describe('saturation check', () => {
     const hi = checkFractionSaturation({ label: 'a', soil, chemical: chem, soilKgPerKg: 2 * fSat });
     expect(hi.exceeded).toBe(true);
     expect(hi.warnings[0]!.code).toBe('TPH_CSAT_EXCEEDED');
+  });
+});
+
+describe('mixture saturation check', () => {
+  const soil = { rhoB: 1500, foc: 0.01, theta: 0.15, thetaA: 0.2 };
+  const chem = { S: 0.22, H: 139, koc: 796 };
+  const mk = (label: string, share: number) => ({
+    label,
+    soil,
+    chemical: chem,
+    soilKgPerKg: share,
+  });
+  it('flags a mixture whose fractions each sit at half their pure limit', () => {
+    const fSat = checkFractionSaturation({ ...mk('a', 0) }).saturationKgPerKg;
+    const parts = ['a', 'b', 'c', 'd', 'e'].map((l) => mk(l, 0.5 * fSat));
+    for (const p of parts) expect(checkFractionSaturation(p).exceeded).toBe(false);
+    const r = checkMixtureSaturation(parts);
+    expect(rel(r.saturationIndex, 2.5)).toBeLessThan(1e-12);
+    expect(r.exceeded).toBe(true);
+    expect(r.warnings.map((w) => w.code)).toEqual(['TPH_CSAT_EXCEEDED']);
+  });
+  it('is silent when the sum of ratios is at most one', () => {
+    const fSat = checkFractionSaturation({ ...mk('a', 0) }).saturationKgPerKg;
+    const r = checkMixtureSaturation([mk('a', 0.4 * fSat), mk('b', 0.5 * fSat)]);
+    expect(rel(r.saturationIndex, 0.9)).toBeLessThan(1e-12);
+    expect(r.exceeded).toBe(false);
+    expect(r.warnings).toEqual([]);
+  });
+  it('rejects an empty fraction list', () => {
+    expect(() => checkMixtureSaturation([])).toThrow(RangeError);
   });
 });
 

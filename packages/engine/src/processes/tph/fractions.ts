@@ -173,3 +173,38 @@ export function checkFractionSaturation(input: FractionSaturationInput): Fractio
       : [],
   };
 }
+
+export interface MixtureSaturationResult {
+  /** Sum over fractions of f_j C_TPH / Csat_j(x = 1); above one the mixture has a separate phase. */
+  saturationIndex: number;
+  exceeded: boolean;
+  warnings: Warning[];
+}
+
+/**
+ * Mixture-level saturation check. The fractions share one separate phase, so under Raoult's law the
+ * condition is sum_j( f_j C_TPH / Csat_j(x = 1) ) > 1. The per-fraction check alone is non-conservative:
+ * several fractions each below their own pure-phase limit can still saturate the mixture.
+ */
+export function checkMixtureSaturation(
+  fractions: readonly FractionSaturationInput[],
+): MixtureSaturationResult {
+  if (fractions.length === 0) throw new RangeError('at least one TPH fraction is required');
+  let saturationIndex = 0;
+  for (const f of fractions) {
+    saturationIndex += f.soilKgPerKg / checkFractionSaturation(f).saturationKgPerKg;
+  }
+  const exceeded = saturationIndex > 1;
+  return {
+    saturationIndex,
+    exceeded,
+    warnings: exceeded
+      ? [
+          {
+            code: 'TPH_CSAT_EXCEEDED',
+            message: `the TPH fractions together exceed the mixture soil saturation limit (sum of fraction ratios ${saturationIndex}); a separate phase is present and the partitioning model does not apply`,
+          },
+        ]
+      : [],
+  };
+}

@@ -49,7 +49,8 @@ export function ecosslHazardQuotient(
 
 export interface EcosslScreenInput {
   soil_kg_per_kg: number;
-  ssl: Partial<Record<EcoGroup, SslEntry>>;
+  /** All four groups are required; a document that prints NA is an entry with status NA. */
+  ssl: Record<EcoGroup, SslEntry>;
 }
 
 export interface EcosslScreenResult {
@@ -57,12 +58,13 @@ export interface EcosslScreenResult {
   warnings: Warning[];
 }
 
-/** Hazard quotient per receptor group; always carries ECO_SCREENING_ONLY. A missing group counts as NA. */
+/** Hazard quotient per receptor group; always carries ECO_SCREENING_ONLY. A missing group throws. */
 export function runEcosslScreen(input: EcosslScreenInput): EcosslScreenResult {
   const rows: EcosslScreenResult['rows'] = [];
   const warnings: Warning[] = [screeningOnly()];
   for (const group of ECO_GROUPS) {
-    const entry = input.ssl[group] ?? { status: 'NA' as const, value: null };
+    const entry = input.ssl[group];
+    if (entry === undefined) throw new RangeError(`no Eco-SSL entry supplied for group ${group}`);
     const r = ecosslHazardQuotient(input.soil_kg_per_kg, entry, group);
     rows.push({ group, hq: r.hq });
     for (const w of r.warnings) if (w.code === 'ECO_NO_SSL') warnings.push(w);

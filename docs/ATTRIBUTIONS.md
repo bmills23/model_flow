@@ -768,7 +768,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 - Assumptions:
   - The fraction set maps onto the five RSL TPH surrogate records; no toxicity values are entered, and a fraction without a surrogate is reported and excluded.
   - Per-fraction levels are the levels for a hazard quotient of one from the cleanup process; fraction hazard quotients add because the RSL TPH records carry noncancer toxicity only.
-  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total.
+  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total, and the mixture is checked with the sum of fraction ratios to those limits (the per-fraction check alone is non-conservative).
 - RISC5 choice: RISC5 offers TPH fraction sets for forward risk and a total TPH level.
 - Sources:
   - Total Petroleum Hydrocarbon Criteria Working Group (1997). Total Petroleum Hydrocarbon Criteria Working Group Series, Volumes 1 to 5. Amherst Scientific Publishers, Amherst, Massachusetts.
@@ -781,7 +781,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
 - Assumptions:
   - The fraction set maps onto the five RSL TPH surrogate records; no toxicity values are entered, and a fraction without a surrogate is reported and excluded.
   - Per-fraction levels are the levels for a hazard quotient of one from the cleanup process; fraction hazard quotients add because the RSL TPH records carry noncancer toxicity only.
-  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total.
+  - The fraction mass fractions must sum to one; each fraction is checked against its own saturation limit at its share of the total, and the mixture is checked with the sum of fraction ratios to those limits (the per-fraction check alone is non-conservative).
 - Sources:
   - Massachusetts Department of Environmental Protection (2002). Characterizing Risks Posed by Petroleum Contaminated Sites: Implementation of the MADEP VPH/EPH Approach. Massachusetts Department of Environmental Protection, Bureau of Waste Site Cleanup. Policy #WSC-02-411, October 31, 2002.
 

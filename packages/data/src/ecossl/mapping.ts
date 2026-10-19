@@ -47,7 +47,7 @@ export const MAPPING: Record<string, SubstanceMapping> = {
     chemicalIds: ['50-29-3', '72-55-9', '72-54-8'],
     nameMatch:
       /^Dichlorodiphenyl(trichloroethane|dichloroethylene|dichloroethane), p,p'- \((DDT|DDE|DDD)\)$/,
-    note: 'The document names DDT with its breakdown products DDE and DDD.',
+    note: 'The document derives one value for DDT plus DDE plus DDD combined. The soil concentration to screen is the SUM of the three records; screening each record separately against the one value understates the hazard quotient by up to a factor of three.',
   },
   dieldrin: { name: 'Dieldrin', chemicalIds: ['60-57-1'], nameMatch: /^Dieldrin$/ },
   iron: { name: 'Iron', chemicalIds: ['7439-89-6'], nameMatch: /^Iron$/ },
@@ -81,11 +81,11 @@ export const UNMAPPED: Record<string, { name: string; reason: string }> = {
   'pah-lmw': {
     name: 'Low molecular weight PAHs',
     reason:
-      'The document defines the group by ring count (fewer than four rings) and lists no member compounds; membership is a chemistry mapping left to the ecological screening slice.',
+      'The document defines the group by ring count (fewer than four rings) and lists no member compounds; membership is a chemistry mapping not yet done; it is deferred to a named future slice (PAH group membership), after the ecological screening slice, which screens by group value and needs no member list.',
   },
   'pah-hmw': {
     name: 'High molecular weight PAHs',
     reason:
-      'The document defines the group by ring count (four or more rings) and lists no member compounds; membership is a chemistry mapping left to the ecological screening slice.',
+      'The document defines the group by ring count (four or more rings) and lists no member compounds; membership is a chemistry mapping not yet done; it is deferred to a named future slice (PAH group membership), after the ecological screening slice, which screens by group value and needs no member list.',
   },
 };

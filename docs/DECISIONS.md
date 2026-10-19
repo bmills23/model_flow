@@ -1276,12 +1276,12 @@ M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) imp
 
 M9 started with a methods note first, on the parallel track Bryan approved. The note is
 `docs/methods/plants-and-eco.md` (scope, equations, validity checks, coupling, Eco-SSL data plan, fixture
-plan and slice plan). No engine, data or web code is written in this stage. M9 does not depend on M7,
+plan and slice plan). The note was written before any code; slices D1, R1, E1, E3 and E4 have since landed. M9 does not depend on M7,
 which is scoped in parallel. Eco-SSL sources were checked on the EPA site on 2026-10-18. Rulings, each
 DEFAULT (open for Bryan to overturn) unless marked forced by a source:
 
 1. **Scope (DEFAULT).** In M9: neutral-organic plant uptake (legacy `plantUptake.trapp-matthies-1995` with
-   the `briggs1982` root and transpiration factors; modern `plantUptake.trapp-2015`), a `produce` pathway
+   the `briggs1982` root and transpiration factors; modern method `plantUptake.hhrap-2005` after ruling 11; the `trapp-2015` id was dropped), a `produce` pathway
    into M4 and closed-form into M5, plant and invertebrate hazard quotients against Eco-SSLs, the Eco-SSL
    wildlife food web, a legacy user-entered benchmark screen, and TPH fraction forward risk and total-TPH
    cleanup levels through M5. Deferred: ionizable organics, metals uptake beyond a user BCF, meat and milk,
@@ -1414,3 +1414,14 @@ overturn):
 14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
     S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens), the full S9 and S10
     passes and the S11 user guide wait for M7, M9 and M10.
+
+### M9 review fixes (2026-10-18)
+
+- **TPH saturation is checked for the mixture (DEFAULT).** The fractions share one separate phase, so the
+  Raoult condition is sum_j( f_j C_TPH / Csat_j(x = 1) ) > 1. `checkMixtureSaturation` raises
+  `TPH_CSAT_EXCEEDED` on it; the per-fraction check stays but is non-conservative alone.
+- **DDT Eco-SSL applies to DDT plus DDE plus DDD combined (DEFAULT).** The mapping note and `ecossl.json`
+  say to screen the sum of the three records, not each against the one value.
+- **The Eco-SSL screen requires all four receptor groups.** A missing group throws instead of being
+  reported as an EPA NA; the earlier test that omitted groups was rewritten to supply all four.
+- **PAH group membership** is deferred to a named future slice, not to the E3 slice that is already done.

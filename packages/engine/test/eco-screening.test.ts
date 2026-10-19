@@ -8,6 +8,7 @@ import {
   preyConcentration,
   runBenchmarkScreen,
   runEcosslScreen,
+  type EcosslScreenInput,
   wildlifeDose,
   wildlifeHazardQuotient,
   type WildlifeDoseInput,
@@ -202,10 +203,23 @@ describe('Eco-SSL hazard quotients', () => {
     expect(r.warnings.map((w) => w.code)).toContain('ECO_SCREENING_ONLY');
     expect(r.warnings.map((w) => w.code)).toContain('ECO_NO_SSL');
   });
+  it('throws on a missing receptor group instead of reporting it as NA', () => {
+    expect(() =>
+      runEcosslScreen({
+        soil_kg_per_kg: 1e-6,
+        ssl: { plants: { status: 'value', value: 1e-6 } } as unknown as EcosslScreenInput['ssl'],
+      }),
+    ).toThrow(RangeError);
+  });
   it('offers no ecological cleanup level', () => {
     const r = runEcosslScreen({
       soil_kg_per_kg: 1e-6,
-      ssl: { plants: { status: 'value', value: 1e-6 } },
+      ssl: {
+        plants: { status: 'value', value: 1e-6 },
+        invertebrates: { status: 'NA', value: null },
+        avian: { status: 'NA', value: null },
+        mammalian: { status: 'NA', value: null },
+      },
     });
     expect(Object.keys(r)).not.toContain('cleanupLevel');
   });
@@ -262,7 +276,11 @@ describe('registry', () => {
   });
   it('legacy method runs and validates through the registry', () => {
     const m = registry.get('eco.ecossl-2005');
-    const out = m.run({ soil_kg_per_kg: 1e-5, ssl: { plants: { status: 'NA', value: null } } }) as {
+    const na = { status: 'NA', value: null };
+    const out = m.run({
+      soil_kg_per_kg: 1e-5,
+      ssl: { plants: na, invertebrates: na, avian: na, mammalian: na },
+    }) as {
       rows: { hq: number | null }[];
     };
     expect(out.rows[0]!.hq).toBeNull();

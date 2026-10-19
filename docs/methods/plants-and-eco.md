@@ -4,8 +4,9 @@ Scope, equations, validity checks, coupling, data plan, fixture plan and slice p
 section 3 rows O, P and Q). Equations are written in our own words from the primary publications cited by
 reference key (full entries in `docs/ATTRIBUTIONS.md` once they move to `used`). The RISC5 manual was used
 only as a map of which pathways RISC5 offers; none of its text, figures or tables is reproduced. Status:
-stage 1 (scoping), 2026-10-18. The rulings are DEFAULT unless marked forced, recorded in
-`docs/DECISIONS.md` (2026-10-18, M9 block). No engine, data or web code is written in this stage.
+scoping done 2026-10-18; slices D1, R1, E1, E3 and E4 are implemented (the slice plan table below carries
+the status of every slice). The rulings are DEFAULT unless marked forced, recorded in
+`docs/DECISIONS.md` (2026-10-18, M9 block).
 
 Stage 1 in progress: slice R1 verified `trappmatthies1995` (Environ. Sci. Technol. 29(9), 2333-2338),
 `briggs1982` (Pesticide Science 13(5), 495-504), `sample1996` (ORNL ES/ER/TM-86/R3), `tphcwg1997` (series
@@ -144,7 +145,7 @@ table ships with the legacy method (ruling 6).
 - Eco-SSLs are screening values for Step 2 of the Superfund ecological process. The guidance states they
   are not cleanup levels, so M9 does not offer an ecological cleanup level (forced by the source, ruling 7).
 
-### Eco-SSL data slice (plan, no raw files in this stage)
+### Eco-SSL data slice (D1, done 2026-10-18)
 
 Checked 2026-10-18 on the EPA site.
 
@@ -173,7 +174,11 @@ RSL build in its reader:
   per-document directive, date, URL and checksum, licence status) and, per substance, the RSL
   `chemicals.json` record ids it maps to (ids read from the file and checked by name). Unmapped
   substances are listed in the file: the two PAH groups, because the document defines low and high
-  molecular weight PAHs by ring count and lists no members.
+  molecular weight PAHs by ring count and lists no members. PAH group membership is not mapped in E3
+  (the screen works on group values); it is deferred to a future slice named "PAH group membership".
+- The DDT document derives one value for DDT, DDE and DDD combined. The mapping lists the three RSL
+  records, and the soil concentration screened against that value is the sum of the three; screening
+  each record separately would understate the hazard quotient by up to a factor of three.
 
 What the data slice found, so the engine slices do not rediscover it:
 
@@ -214,7 +219,7 @@ What the data slice found, so the engine slices do not rediscover it:
 - Cleanup level for total TPH (through M5): with fraction mass fractions f_j summing to one and per-fraction
   cleanup levels CL_j from M5 (any M5 pathway set, including the modeled chains), the total level meeting a
   target hazard index HI_t is C_TPH = HI_t / sum_j( f_j / CL_j ). Each fraction is then checked against
-  its own saturation limit at f_j C_TPH.
+  the saturation limits (see the implementation note below).
 - Implementation (slice E4): the two registered methods share one kernel and differ in the fraction set
   and citation, which is what the legacy and modern pairing rule needs: `tph.tphcwg` (legacy, cites
   `tphcwg1997`) and `tph.madep` (modern, cites `madep2002`). No default fraction ranges ship: the
@@ -222,7 +227,10 @@ What the data slice found, so the engine slices do not rediscover it:
   mass fraction) with its RSL surrogate record id, and a fraction with no id is unmapped. The engine
   validates ids against the five RSL records. Per-fraction levels CL_j are those for a hazard quotient of
   one; the forward run takes a callback that runs one fraction as its own chemical through M4. The
-  saturation check uses the pure-phase limit (mole fraction 1), F_sat = S (rho_b K_d + theta + theta_a H) / rho_b.
+  saturation checks use the pure-phase limit (mole fraction 1), F_sat,j = S_j (rho_b K_d,j + theta + theta_a H_j) / rho_b.
+  The per-fraction check (f_j C_TPH against F_sat,j) alone is non-conservative, because the fractions
+  share one separate phase. The mixture check is sum_j( f_j C_TPH / F_sat,j ) > 1 (Raoult's law), and
+  `TPH_CSAT_EXCEEDED` is raised on either.
 - Fixture anchor: the M4 Table R-9 row for TPH aliphatic C12-C16 already reproduces; it fixes the
   per-fraction side.
 
@@ -240,7 +248,7 @@ What the data slice found, so the engine slices do not rediscover it:
 | `ECO_BENCHMARK_USER_ENTERED` | a legacy benchmark was user entered |
 | `TPH_FRACTIONS_DO_NOT_SUM` | fraction mass fractions differ from one by more than 1e-6 |
 | `TPH_FRACTION_UNMAPPED` | a fraction has no surrogate record |
-| `TPH_CSAT_EXCEEDED` | f_j C_TPH exceeds the fraction's saturation limit |
+| `TPH_CSAT_EXCEEDED` | f_j C_TPH exceeds the fraction's saturation limit, or the sum over fractions of f_j C_TPH / F_sat,j exceeds one |
 
 ## Coupling
 
