@@ -10,6 +10,8 @@ import { defaultCleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
 import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
 import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
+import { clearModeledSummary, getModeledSummary, modeledFingerprint } from './modeledSummary';
+import { getScreen } from '../project/store';
 
 let db: ChemicalDb;
 let req: ModeledRequest;
@@ -96,6 +98,34 @@ describe('ModeledSourceUncertainty', () => {
     expect(screen.getByText(/uncertainty\.small-sample-tail/)).toBeTruthy();
     expect(screen.getByText(/1 worker/)).toBeTruthy();
     expect(screen.getByText(/deterministic cleanup level/i)).toBeTruthy();
+  }, 120000);
+
+  it('keeps a summary of a finished run for the report, with the fingerprint it was computed from', async () => {
+    clearModeledSummary();
+    render(panel());
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '6' } });
+    expect(getModeledSummary()).toBeNull();
+    fireEvent.click(runButton());
+    await screen.findByRole('table', { name: /protective cleanup levels/i }, { timeout: 60000 });
+    const s = getModeledSummary();
+    expect(s).not.toBeNull();
+    expect(s!.n).toBe(6);
+    expect(s!.levels).toHaveLength(3);
+    expect(s!.label).toMatch(/Benzene at the source/);
+    expect(s!.fingerprint).toBe(modeledFingerprint(req, getScreen('uncertainty').modeled));
+    expect(JSON.stringify(s)).not.toContain('iterationLevels');
+  }, 120000);
+
+  it('keeps no summary for a cancelled run', async () => {
+    clearModeledSummary();
+    render(panel());
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '40' } });
+    fireEvent.click(runButton());
+    fireEvent.click(screen.getByRole('button', { name: /cancel run/i }));
+    await screen.findByText(/the run was cancelled/i);
+    expect(getModeledSummary()).toBeNull();
   }, 120000);
 
   it('marks the results stale when the request changes after a run', async () => {

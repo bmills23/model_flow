@@ -21,6 +21,7 @@ import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
 import { buildModeledSetup } from './modeledSetup';
 import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS } from './modeledUncertainty';
 import { ProbabilisticResults } from './ProbabilisticResults';
+import { modeledFingerprint, setModeledSummary, summarizeModeledRun } from './modeledSummary';
 
 type Shown = ModeledCleanupRun & { label: string; request: ModeledRequest };
 
@@ -108,7 +109,10 @@ export function ModeledSourceUncertainty(props: {
             }),
           ),
       });
-      setShown({ ...ran, label: `${name} at the source, ${LABELS[setup.method]}`, request });
+      const label = `${name} at the source, ${LABELS[setup.method]}`;
+      setShown({ ...ran, label, request });
+      // the report prints this summary; the fingerprint says later whether it still matches the inputs
+      setModeledSummary(summarizeModeledRun(ran, label, modeledFingerprint(request, setup0)));
     } catch (e) {
       if (e instanceof RunCancelledError) setError('The run was cancelled.');
       else setError(e instanceof UncertaintyError || e instanceof Error ? e.message : String(e));

@@ -3,6 +3,11 @@ import { emptyOverrides, setField } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { hashInputs, parseProject } from './index';
 import { REJECTED_ENTRY } from '../ui/decimalComma';
+import {
+  getModeledSummary,
+  setModeledSummary,
+  type ModeledUncertaintySummary,
+} from '../cleanup/modeledSummary';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
@@ -422,6 +427,27 @@ describe('project store', () => {
     setScreen('transport', { ...s, form: { ...s.form, K: '5' } });
     expect(() => vi.advanceTimersByTime(2000)).not.toThrow();
     expect(getScreen('transport').form.K).toBe('5');
+  });
+
+  describe('the kept modeled-source uncertainty summary', () => {
+    const kept = { fingerprint: 'fp', label: 'x', seed: 's' } as ModeledUncertaintySummary;
+
+    it('is session-only: it stays out of the autosave and the file', () => {
+      setModeledSummary(kept);
+      setScreen('cleanup', { form: { ...getScreen('cleanup').form, source: 'dissolved' } });
+      flushAutosave();
+      expect(localStorage.getItem(AUTOSAVE_KEY)).not.toContain('fp');
+      expect(JSON.stringify(currentProject())).not.toContain('"fingerprint"');
+    });
+
+    it('is dropped by a new project and by opening a project', () => {
+      setModeledSummary(kept);
+      newProject();
+      expect(getModeledSummary()).toBeNull();
+      setModeledSummary(kept);
+      loadProject(currentProject());
+      expect(getModeledSummary()).toBeNull();
+    });
   });
 
   it('new project clears forms, feeds, the autosave and any pending write, and bumps the epoch', () => {

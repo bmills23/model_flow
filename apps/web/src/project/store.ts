@@ -48,6 +48,7 @@ import {
   subscribeVaporRiskFeed,
   subscribeWaterTableFeed,
 } from '../vapor/feeds';
+import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { decodeJson, encodeJson } from './codec';
@@ -298,6 +299,8 @@ function clearAllFeeds(): void {
   clearHouseholdFeed();
   clearProduceFeed();
   clearTphFeed();
+  // a kept modeled-source uncertainty summary belongs to the project it was computed in
+  clearModeledSummary();
 }
 
 /** Drop in-memory state back to defaults without touching storage (a simulated reload in tests). */
