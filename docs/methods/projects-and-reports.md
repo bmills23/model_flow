@@ -108,6 +108,15 @@ A project is one JSON document, the single source for save, load, share, persist
   limit and the reason are shown, never a truncated link.
 - **Opening a shared link** replaces the current project only after a confirm when the current project has
   unsaved changes. The payload is validated exactly like a file.
+- **Implemented (S4, `apps/web/src/project/file.ts`, `share.ts`, `ProjectBar.tsx`).** A bar under the
+  masthead holds the project title (saved in the file and the autosave), Save project, Open project and
+  Share link. Opening a file (input or drop on the page), and opening a shared link, both go through
+  `parseProject`; a file over 25 MB is refused unread, and a share payload that inflates past 4 MB is
+  refused. The 8000 character limit counts the whole link (address plus payload). The project store tracks
+  unsaved changes against the last save, open or start; replacing the project when there are any asks
+  first. A shared link leaves the hash at `#/` once handled. The receiver is told the values passed between
+  screens were not shared and from which screens to send them again; the payload does not record which
+  feeds the sender had, so the list names every screen that sends one.
 - **Browser storage is a convenience only.** The current project (forms and feeds) autosaves to
   `localStorage` under one versioned key, debounced, wrapped in try and catch; a private window or a full
   quota degrades to today's behaviour without an error. No list of named projects in storage (DEFAULT):

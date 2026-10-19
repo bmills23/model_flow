@@ -41,6 +41,7 @@ import {
   parseProject,
   screensOf,
   type Feeds,
+  type Project,
   type Screens,
 } from './index';
 
@@ -53,6 +54,9 @@ type FeedKey = keyof Feeds;
 type Entry = { source: string; inputsHash: string; value: unknown };
 
 let screens: Screens = defaultScreens();
+let title = '';
+/** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
+let savedSnapshot: string | null = null;
 let epoch = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
 /** Source form fingerprint recorded when each feed was last sent (or restored). */
@@ -129,10 +133,43 @@ function currentFeeds(): Feeds {
   return feeds as unknown as Feeds;
 }
 
+function build(): ReturnType<typeof buildProject> {
+  return buildProject({
+    screens,
+    feeds: currentFeeds(),
+    createdWith: APP_VERSION,
+    ...(title !== '' ? { title } : {}),
+  });
+}
+
+/** The live project as the file and the autosave hold it. */
+export const currentProject = build;
+
+function snapshot(): string {
+  return stableStringify({ screens, title, feeds: currentFeeds() });
+}
+
+/** True when the project differs from the last save, open or start. */
+export const hasUnsavedChanges = (): boolean =>
+  snapshot() !==
+  (savedSnapshot ?? stableStringify({ screens: defaultScreens(), title: '', feeds: {} }));
+/** Record the project as saved (after a download, an open or a start). */
+export function markSaved(): void {
+  savedSnapshot = snapshot();
+}
+
+export const getTitle = (): string => title;
+export function setTitle(next: string): void {
+  if (next === title) return;
+  title = next;
+  schedule();
+  notify();
+}
+
 function write(): void {
   timer = null;
   try {
-    const project = buildProject({ screens, feeds: currentFeeds(), createdWith: APP_VERSION });
+    const project = build();
     localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(project));
   } catch {
     // a private window or a full quota: carry on without the autosave
@@ -206,8 +243,10 @@ export function forgetMemory(): void {
   if (timer !== null) clearTimeout(timer);
   timer = null;
   screens = defaultScreens();
+  title = '';
   hashes = {};
   stale = [];
+  savedSnapshot = null;
 }
 
 /**
@@ -224,9 +263,16 @@ export function hydrate(): void {
   if (text === null) return;
   const r = parseProject(text);
   if (!r.ok) return;
+  seed(r.project);
+  notify();
+}
+
+/** Put a parsed project into the screens and feeds. Falls back to a fresh project if a feed is unusable. */
+function seed(project: Project): void {
   try {
-    screens = screensOf(r.project);
-    const feeds = (r.project.feeds ?? {}) as Record<string, Entry | undefined>;
+    screens = screensOf(project);
+    title = project.title ?? '';
+    const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
     const restored: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
     const val = (k: FeedKey): never => decodeJson(feeds[k]?.value) as never;
     const note = (k: FeedKey): void => {
@@ -253,22 +299,35 @@ export function hydrate(): void {
       (k) =>
         restored[k]?.inputsHash !== feedEntry(SOURCE[k] as keyof Screens, forms[k], 0).inputsHash,
     );
-    if (timer !== null) clearTimeout(timer);
-    timer = null;
   } catch {
     screens = defaultScreens();
+    title = '';
     hashes = {};
     stale = [];
     clearAllFeeds();
-    if (timer !== null) clearTimeout(timer);
-    timer = null;
   }
+  if (timer !== null) clearTimeout(timer);
+  timer = null;
+}
+
+/**
+ * Replace the whole project with an opened file or shared link: forms, title and feeds (a project
+ * without feeds clears the old ones). Mounted screens remount through the epoch. The result counts as
+ * saved, and the autosave follows.
+ */
+export function loadProject(project: Project): void {
+  clearAllFeeds();
+  seed(project);
+  markSaved();
+  epoch += 1;
+  schedule();
   notify();
 }
 
 /** Clear the forms, the feeds and the autosave. Mounted screens remount through the epoch. */
 export function newProject(): void {
   screens = defaultScreens();
+  title = '';
   clearAllFeeds();
   hashes = {};
   stale = [];
@@ -279,6 +338,7 @@ export function newProject(): void {
   } catch {
     // nothing stored, or storage blocked
   }
+  markSaved();
   epoch += 1;
   notify();
 }
@@ -286,4 +346,6 @@ export function newProject(): void {
 /** Seed from storage; call once before the first render. */
 export function startProjectStore(): void {
   hydrate();
+  // the autosave is not a saved file: compare against a blank project, so a restored one is unsaved
+  savedSnapshot = null;
 }

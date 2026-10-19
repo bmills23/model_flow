@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import { ProjectBar } from './project/ProjectBar';
 import { getEpoch, getStaleFeeds, newProject, subscribeProject } from './project/store';
 
 // Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
@@ -85,6 +86,7 @@ export function App() {
           New project
         </button>
       </header>
+      <ProjectBar />
       {stale.length > 0 ? (
         <p className="stale-note" role="status">
           Restored values passed between screens ({stale.join(', ')}) were built from inputs that
