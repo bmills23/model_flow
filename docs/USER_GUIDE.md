@@ -57,7 +57,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 - Opening a project, from a file or a link, asks first when the current project has changes not saved to a
   file.
 - Closing or reloading the tab also asks first while the project has changes not saved to a file, because the
-  browser's copy of the project is not a saved file and a browser can clear it.
+  browser's copy of the project is not a saved file and a browser can clear it. A reload that only brings the
+  browser's copy back does not ask: the warning starts again with your next edit after the reload.
 - **Type numbers with a decimal comma** (a checkbox under the project buttons) lets you type and read
   "1,5" for 1.5 in every number box. It is a setting of this browser only. Saved files, share links and CSV
   always use the point. With it on, a box shows a message and keeps your text when it cannot tell what you
@@ -106,6 +107,10 @@ A dissolved plume from a finite source in uniform groundwater flow, with retarda
 Compare the legacy AT123D-class method with the modern exact solution at a receptor and across the site.
 Buttons below the result send the well concentration to the risk screen, the aquifer to cleanup levels, the
 water table concentration to vapor intrusion and the plume to surface water.
+
+Under the plume map, **Download CSV: plume grid** saves the whole map grid as a table: one row per grid cell
+with the method, the downgradient distance x (m), y (m) and the concentration (mg/L) at the time shown on the
+map. The transport table's own CSV does not carry the plume grid.
 
 The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so.
 
@@ -233,8 +238,8 @@ source and from under a second to several seconds for a soil source, so the iter
 200 rather than 1000; a run projected over a minute asks first and one over 10 minutes is refused. When
 fewer than 10 draws lie below the chosen protection level, the results carry the warning
 `uncertainty.small-sample-tail`. The method, distributions, iteration count, protected fraction and seed
-are saved in the project. The report does not repeat this run, because the report does not compute a
-modeled source.
+are saved in the project. The report does not compute a modeled source; with **Include uncertainty results**
+ticked it prints the result of the last run made here (see the report section below).
 
 ### Uncertainty analysis
 
@@ -261,6 +266,12 @@ they cannot be cancelled once started; a very long run asks you to confirm first
 chart of the spread, which inputs matter (tornado, Spearman and, if switched on, Sobol), the seed and the
 iteration count, and the probabilistic cleanup levels. A panel with no distribution set is skipped with a
 note saying why. Results are not saved with the project.
+
+For a modeled cleanup source the report does not run the analysis. It prints the result of the run you made on
+the cleanup screen in this session (levels table, iterations, seed, warnings and which inputs matter), or says
+the result is out of date because an input changed since the run and asks you to run it again there, or says no
+run has been made yet. That result is not saved with the project or the browser's copy, so after a reload, a new
+project or an opened project, run it again on the cleanup screen. Leaving to the report and coming back keeps it.
 
 ### Downloading tables
 

@@ -2073,9 +2073,8 @@ their own blocks.
    print pages at 9 pt and breaks the no-page-break-inside rule; 20 rows keeps the figure and table on one page. The
    full 100-row table stays on the groundwater screen. `PlumeMap` gained an optional `tableMaxRows`; `thinIndices`
    lives in `transport/chartData.ts` (the react-refresh lint rule).
-2. **No plume grid in the CSV (open question answered).** The transport CSV does not carry the plume grid, so the
-   full centreline is on screen only. A plume CSV is a follow-up if the full print-equivalent data is wanted as a
-   download (HANDOFF open item).
+2. **No plume grid in the transport CSV (open question answered).** The transport CSV does not carry the plume
+   grid. Superseded in part by wave J slice J1: the plume grid is now a separate download under the plume map.
 3. **Chart item (DEFAULT).** The plume chart item carries the scenario and the method, time and depth labels, built
    in `results.ts` with the same wording as `TransportPage`, and sits before the breakthrough chart to match screen
    order. It is absent when transport did not compute, so no Charts heading comes from the plume.
@@ -2105,12 +2104,10 @@ their own blocks.
    cleanup. `ProjectBar` registers it once in a `useEffect` with `[]` (it already owns the unsaved-changes prompts
    and is mounted once) and removes it on unmount. The guard calls `preventDefault` and sets `returnValue` only
    while `hasUnsavedChanges()` is true.
-2. **A restored autosave counts as unsaved (DEFAULT; open question answered).** The warning uses
-   `hasUnsavedChanges` unchanged. Measured behaviour: `startProjectStore` sets `savedSnapshot` to null for a
-   restored project, so every reload or close prompts until a file is saved. Kept, not suppressed: the autosave is
-   browser-local and can be cleared, so it is not a saved file, matching the Replace prompt's wording. Cost: a
-   user who restores and reloads without ever saving is asked again each time. Overturn by seeding the saved
-   snapshot from the restored state.
+2. **A restored autosave counted as unsaved (DEFAULT; open question answered). Overturned by Bryan in wave J
+   slice J3.** This block recorded `startProjectStore` setting `savedSnapshot` to null for a restored project, so
+   every reload or close prompted until a file was saved. J3 seeds the saved snapshot from the restored state, so
+   a restored autosave no longer prompts until an edit follows the restore.
 3. **Fixed wording (DEFAULT).** The browser prompt text is a fixed string; browsers may show their own.
 4. **Process note.** The test and module were written in one pass, so the red stage was not observed separately.
 
@@ -2184,8 +2181,9 @@ their own blocks.
 9. **Saved setup (DEFAULT).** A new optional `modeled` key in the uncertainty project state, separate from the
    direct-source `cleanup` key; format version 1 files still load. The run is disabled while the screen re-solves a
    changed request, so it never samples a stale request.
-10. **Report (DEFAULT).** Modeled-source uncertainty is not repeated in the report, consistent with G2 (the report
-    does not compute a modeled source); the guide says so.
+10. **Report (DEFAULT).** Modeled-source uncertainty was not repeated in the report, consistent with G2 (the report
+    does not compute a modeled source). Superseded by wave J slice J2: the report prints the result kept from the
+    cleanup screen, without recomputing it.
 11. **Corrected after review (F2).** `report/methodsRun.ts` now also counts the `modeled` setup for
     `uncertainty.cleanup-probabilistic`, so the methods statement and references cite the method when only the
     modeled panel ran. Red test first.
@@ -2196,3 +2194,117 @@ their own blocks.
 13. **Deviations.** `docs/methods/uncertainty.md` status paragraph edited (it named modeled sources as open). The
     component is `ModeledSourceUncertainty.tsx` because the case-insensitive filesystem resolves
     `./ModeledUncertainty` to `modeledUncertainty.ts`.
+
+
+## 2026-10-19: Wave J scope
+
+Bryan armed the work and directed, verbatim: "do 1, 2 and 3 as one wave". The three items were:
+
+1. Small UI follow-ups: a plume CSV download, modeled-source uncertainty in the report, and stopping a restored
+   autosave from prompting on every reload. Slices J1, J2 and J3.
+2. Gate speed: profile the slowest test files and cut the test time (the CI gate job grew by about 80 s in wave I).
+   Slice J4.
+3. Check the two unchecked local branches (`m1-groundwater-ui`, `ui-u9-wildlife`) against main and delete or keep
+   them. Slice J5.
+
+Per-slice rulings follow in their own blocks. Rulings a slice made on its own are DEFAULT; J3 is Bryan's decision.
+
+## 2026-10-19: Wave J slice J1, plume grid CSV
+
+1. **Separate download (DEFAULT).** A button under the plume map on the transport screen writes the plume grid.
+   The existing transport CSV is unchanged. A lone button reads "Download CSV: plume grid" (optional `showLabel`
+   prop on `DownloadCsv`); it is disabled while computing or when the inputs are invalid, like the existing
+   download.
+2. **Long format at full resolution (DEFAULT).** One row per grid cell (x outer, y inner), every cell of the map
+   grid (100 columns in x). A long format fits `exportCsv` and `DownloadCsv`, which write one header row plus flat
+   rows, and opens cleanly in a spreadsheet; a wide grid would need ragged headers.
+3. **One time (DEFAULT).** Only the time shown on the map is written, in the header ("concentration at 12.5 yr
+   (mg/L)"), because the result holds a grid for one time only.
+4. **Columns (DEFAULT).** method (registered id of the map method), x downgradient (m), y (m), concentration at
+   the shown time (mg/L, the computed grid times 1e3).
+5. **File name (DEFAULT).** From the shared `csvFileName` helper, `transport-plume-v<version>-<date>.csv`, with no
+   dataset editions. The depth the grid is evaluated at is not in the file.
+6. **Not verified.** No 390 px overflow check of the button was run in the slice; the wave close mobile check
+   (0 overflowing elements, 0 axe violations) ran on the merged tree. The keyboard test checks `tabIndex` and
+   `focus()` on the real button, not a simulated Tab press.
+
+## 2026-10-19: Wave J slice J2, modeled-source uncertainty in the report
+
+1. **Session only, not persisted (DEFAULT).** The modeled request is built from the transport chain feed, which
+   holds a closure and is memory-only, so after a reload a saved summary could not be checked against current
+   inputs. Project feeds are a closed key set at format version 1. No format bump and no autosave change. The
+   kept summary is dropped by `newProject` and `loadProject` (`clearAllFeeds`).
+2. **Summary contents (DEFAULT).** Label, unit, deterministic level, n, succeeded, seed, forward runs, workers,
+   chosen protection fraction, the 50, 90, 95 and chosen levels, warnings and the Spearman ranking. No draws and no
+   per-iteration levels, so the report prints no distribution chart for a modeled source.
+3. **Fingerprint (DEFAULT).** `stableStringify` of the full `ModeledRequest` plus the whole modeled uncertainty
+   setup, taken at click time. The report rebuilds the current request from the project's cleanup form, the
+   toxicity override database and the live transport, vadose and saturated feeds. A mismatch, or no chain
+   available, reads as out of date and the numbers are not printed.
+4. **Report states (DEFAULT).** Current (summary printed, labeled as computed on the cleanup screen), out of date
+   (re-run on the cleanup screen, numbers not printed), none (no run yet). The entry shows only when the cleanup
+   source is modeled. A modeled-source-only report no longer says there is nothing to run.
+5. **Methods statement unchanged.** `methodsRun` already lists `uncertainty.cleanup-probabilistic` when the modeled
+   setup is edited.
+6. **Shared table (DEFAULT).** The protective-levels table is a shared `LevelsTable` in `UncertaintyResults.tsx`,
+   used by the direct and modeled blocks.
+7. **Known limit.** The cleanup screen holds the unscrubbed setup and the report's project snapshot the scrubbed
+   one, so a row with a rejected decimal-comma entry can read as out of date. This errs toward "out of date"; no
+   wrong number is printed.
+8. **Not verified.** The red step was skipped for the report-side view tests, and the report's current-state block
+   was not rendered in a browser at 390 px (the summary exists only after an in-browser modeled run); the wave
+   close mobile check does not reach it.
+
+## 2026-10-19: Wave J slice J3, restored autosave no longer prompts
+
+1. **Bryan's decision; overturns the I3 DEFAULT.** The I3 block ruled that a restored autosave counts as unsaved.
+   Bryan chose to stop the prompt on every reload. The I3 block is amended in place.
+2. **Seeded from the restored state.** `startProjectStore` calls `markSaved()` after `hydrate()`, so the restored
+   autosave is the saved baseline and the leave-page warning appears only after an edit following the restore.
+3. With no autosave, or one that cannot be parsed, the baseline equals the blank state and behaviour is unchanged.
+   Opening a file, opening a share link, saving and `newProject` are untouched.
+4. Two tests in `project/store.test.ts` failed before the change: a restore with no edit does not prompt and a
+   later edit does; no autosave starts clean and a first edit flags.
+
+## 2026-10-19: Wave J slice J4, test time
+
+1. **Method.** The slowest engine and web test files were profiled, then cut without touching any assertion,
+   tolerance, timing bound or iteration count, and without changing pool, isolation or thread settings.
+2. **Engine cleanup level searches (DEFAULT).** Each transport was re-run cold at every trial source concentration.
+   The per-step AT123D time integrals (optional `integrals` map on `at123dConcentration`) and the PATCHI unit step
+   responses (optional `unitResponse` map on `patchiConcentration`) are now cached per transport, point and age
+   window in `wellConcentrations`, in a `WeakMap`, and used only when `absTol` is 0. They do not depend on the
+   concentration. `test/repeat-evaluation.test.ts` (3 tests, red first) shows the cached numbers are bitwise
+   those of a cold evaluation. Engine numerics are unchanged.
+3. **Engine file splits.** `surfacewater-discharge` into `-4b` and `-4c`, `vadose-coupling` into `-free-space` and
+   `-water-table`, `uncertain-coverage` into the rest and `-layered`, so heavy tests run side by side. Tests moved
+   unchanged (22, 16, 175).
+4. **Web setup (DEFAULT).** `test-setup.ts` no longer imports the project store or React Testing Library for every
+   file; its `afterEach` cleans up only modules the file already loaded (found through
+   `__vitest_worker__.evaluatedModules`). 38 pure-logic web test files got a `// @vitest-environment node` pragma,
+   picked by a static import-graph scan (no `.tsx`, no DOM identifiers, nothing reaching `project/store`).
+5. **Web file splits.** `screenKeyboard` into 4 files (its 19 route settle waits now overlap), `surfaceWater/compute`
+   into 3, `TransportPage` into 3. Counts identical (101, 11, 5).
+6. **Rejected.** `isolate: false` in the web package: one a11y skip-link test failed on the first run and passed on
+   the next, so it is order-dependent. Reverted before any commit.
+7. **Measured.** The before timings were taken on a loaded machine and are noisy. Before: engine 41 s, web 128 s
+   (76 s on a second plain run); `cleanup/modeled.test.ts` 97 s (48 s alone). After, at load average about 4:
+   engine 21 s, web 40 s; `cleanup/modeled.test.ts` about 3 s. Full gate 128 s, exit 0. CI minutes were not
+   measured in the slice.
+8. **Floors.** The engine is bound by single 15 to 18 s tests (layered perturbation sweep, two infinite-depth mass
+   sums, `-4b` and `-4c`); cutting them further needs engine numerics changes such as caching the x and y profiles
+   across z in `at123dGrid`. The web suite is CPU bound, with jsdom creation the largest remaining share.
+
+## 2026-10-19: Wave J slice J5, local branches
+
+Both branches were checked against main and deleted. Restore either with `git branch <name> <tip>`.
+1. **`m1-groundwater-ui` (tip `5d6c6c7b42c10568b0a190a02808fe84c5d215bc`), deleted.** 10 commits, none
+   patch-equivalent. The branch-only hunks in `apps/web/src/App.tsx` (lazy `TransportPage` import, `#/transport`
+   route, shell-wide class, step link, transport button) and `apps/web/package.json` (d3-contour, d3-scale and
+   types) are all on main in later form. `transport.css`, the `transport/` files, the groundwater engine, the
+   analgwst and mibitrans fixtures and the M1 DECISIONS heading are on main. The check covered those hunks plus
+   file presence for the other files, not a line-by-line diff of every file.
+2. **`ui-u9-wildlife` (tip `34b1229f29b3a4fbd092c5348207abfd25203f51`), deleted.** 1 commit, not an ancestor of
+   main. The wildlife dose panel in `PlantsEcoPage.tsx`, the `wildlife.ts` exports, `WILDLIFE_COLUMNS` in `csv.ts`,
+   the same test names and the U9 DECISIONS heading are on main, with later fixes (`2c7e895`, `792e011`).
+3. No remote branch was touched. The 15 stale `origin/` milestone branches stay Bryan's call.
