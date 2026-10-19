@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { integrate } from '../src/numerics/quadrature.js';
 import { erf } from '../src/numerics/special.js';
 import {
   at123dConcentration,
   instantaneousBoxConcentration,
-  type At123dAquifer,
   type BoxSource,
 } from '../src/processes/groundwater/index.js';
 import { axisDensity } from '../src/processes/groundwater/common.js';
@@ -13,29 +11,7 @@ import {
   planeIntegral,
   type PlaneConcentration,
 } from '../src/processes/surfaceWater/discharge.js';
-
-// Consistent units here: metres and days (the kernels are unit-agnostic); the engine's SI is s.
-const rel = (a: number, b: number): number => Math.abs(a - b) / Math.abs(b);
-
-const H = 20; // finite layer, water table at z = H
-const n = 0.3;
-const v = 0.1;
-const layer = (over: Partial<At123dAquifer> = {}): At123dAquifer => ({
-  velocity: v,
-  porosity: n,
-  retardation: 1,
-  decayRate: 0,
-  dx: 1,
-  dy: 0.02,
-  dz: 0.01,
-  thickness: H,
-  ...over,
-});
-/** Plane (y, depth) onto the layer's coordinates: z measured up from the bottom, water table at z = H. */
-const at =
-  (x: number, f: (p: { x: number; y: number; z: number }) => number): PlaneConcentration =>
-  (y, depth) =>
-    f({ x, y, z: H - depth });
+import { H, at, layer, n, rel, v } from './surfacewaterHelpers.js';
 
 describe('mass balance of the bank plane against AT123D (fixtures 4a to 4d)', () => {
   const box: BoxSource = { x1: -1, x2: 1, y1: -3, y2: 3, z1: 5, z2: 15 };
@@ -58,59 +34,6 @@ describe('mass balance of the bank plane against AT123D (fixtures 4a to 4d)', ()
     expect(rel(r.fluxAveragedConcentration[0]!, r.discharge[0]! / r.groundwaterFlow)).toBeLessThan(
       1e-14,
     );
-  }, 120_000);
-
-  // The unit-mass impulse response is closed form, so the time integral is cheap. A thin layer (2 m) with
-  // a source spanning all of it keeps the vertical profile exactly uniform, which the plane quadrature
-  // then integrates in one pass.
-  const HT = 2;
-  const thin = (over: Partial<At123dAquifer> = {}): At123dAquifer =>
-    layer({ thickness: HT, ...over });
-  const slab: BoxSource = { x1: -1, x2: 1, y1: -3, y2: 3, z1: 0, z2: HT };
-  const impulse =
-    (aq: At123dAquifer, b: BoxSource, x: number): PlaneConcentration =>
-    (y, depth, t) =>
-      instantaneousBoxConcentration(aq, b, { x, y, z: HT - depth }, t, 1);
-  const W = (c: PlaneConcentration, reach: number, t: number, q: number): number =>
-    bankPlaneDischarge(c, { reachLength: reach, thickness: HT, darcyFlux: q }, [t], {
-      relTol: 1e-7,
-      panels: 2,
-    }).discharge[0]!;
-  const timeIntegral = (f: (t: number) => number, tMax: number): number => {
-    let sum = 0;
-    const cuts = 6;
-    for (let i = 0; i < cuts; i++) {
-      sum += integrate(f, (i * tMax) / cuts, ((i + 1) * tMax) / cuts, {
-        relTol: 1e-8,
-        absTol: 1e-11,
-        maxDepth: 12,
-      }).value;
-    }
-    return sum;
-  };
-
-  it('4b: a pulse with no decay: the time integral of W equals the released mass', () => {
-    const c = impulse(thin({ dy: 0.002 }), slab, 20);
-    const total = timeIntegral((t) => (t > 0 ? W(c, 40, t, n * v) : 0), 8000);
-    expect(rel(total, 1)).toBeLessThan(1e-6);
-  }, 120_000);
-
-  it('4c: with decay, a source: ratio (v/s) exp((v-s)x/(2 Dx)) for the steady flux and the pulse integral', () => {
-    const cases: [number, number, number][] = [
-      [0, 1, 1],
-      [0.001, 1, 0.338133023],
-      [0.001, 2, 0.135051747],
-    ];
-    for (const [lambda, R, expected] of cases) {
-      // a plane in x (a point in x), since the closed form is for a point source along the flow
-      const c = impulse(
-        thin({ decayRate: lambda, retardation: R, dy: 0.001 }),
-        { ...slab, x1: 0, x2: 0 },
-        100,
-      );
-      const total = timeIntegral((t) => (t > 0 ? W(c, 60, t, n * v) : 0), 20000);
-      expect(rel(total, expected)).toBeLessThan(1e-6);
-    }
   }, 120_000);
 
   it('4d: the adaptive plane quadrature equals the closed-form full-width integral', () => {

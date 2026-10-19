@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import r7 from './fixtures/vadose/r7.json' with { type: 'json' };
+import {
+  aq,
+  aquiferMass,
+  day,
+  L,
+  loaded,
+  steps as massSteps,
+  thickness,
+  W,
+} from './vadoseCouplingMass.js';
 import { convert } from '../src/numerics/units.js';
 import {
   fluxToLoadingSteps,
@@ -13,7 +23,6 @@ import {
 } from '../src/processes/vadose/index.js';
 import {
   at123dConcentration,
-  at123dGrid,
   massRateFromConcentration,
   type At123dAquifer,
 } from '../src/processes/groundwater/kernel.js';
@@ -113,86 +122,10 @@ describe('toConcentrationSteps', () => {
 });
 
 describe('mass balance against the aquifer kernel (no decay in either process)', () => {
-  const day = 86400;
-  const series: FluxSeries = {
-    times: [0, 90 * day, 200 * day, 365 * day],
-    flux: [4e-9, 6e-9, 2e-9, 1e-9],
-  };
-  const L = 6;
-  const W = 4;
-  const A = L * W;
-  const steps = fluxToLoadingSteps(series, A, 365 * day, 60 * day);
-  const loaded = loadedMass(steps);
-  const thickness = 3;
-  // observe after the loading has ended, when every release age is at least two years and the plume
-  // is smooth on the 2 m summation grid
-  const observe = 3 * 365 * day;
-  const aq: At123dAquifer = {
-    velocity: 2e-7,
-    porosity: 0.3,
-    retardation: 1.7,
-    decayRate: 0,
-    dx: 4e-7,
-    dy: 1e-7,
-    dz: 2e-8,
-    thickness,
-  };
-
-  function aquiferMass(withThickness: boolean | 'water-table', zs: number[], dz: number): number {
-    const free: At123dAquifer = { ...aq, top: 'unbounded' };
-    delete free.thickness;
-    const a =
-      withThickness === 'water-table'
-        ? { ...free, top: 'no-flux' as const }
-        : withThickness
-          ? aq
-          : free;
-    const source =
-      withThickness === 'water-table'
-        ? waterTableSource(L, W, { aquifer: a })
-        : waterTableSource(L, W, withThickness ? { thickness } : {});
-    const dx = 2;
-    const xs: number[] = [];
-    for (let x = -30; x <= 60; x += dx) xs.push(x);
-    const ys: number[] = [];
-    for (let y = -26; y <= 26; y += dx) ys.push(y);
-    let total = 0;
-    for (const z of zs) {
-      const g = at123dGrid({ aquifer: a, source, loading: steps, time: observe }, xs, ys, z);
-      let s = 0;
-      for (const row of g) for (const c of row) s += c;
-      total += s * dx * dx * dz;
-    }
-    return total * aq.porosity * (aq.retardation ?? 1);
-  }
-
   it('finite layer, patch on the no-flux top: aquifer mass equals loaded mass within 1e-6', () => {
     const n = 6;
     const zs = Array.from({ length: n }, (_, k) => ((k + 0.5) * thickness) / n);
     const m = aquiferMass(true, zs, thickness / n);
-    expect(Math.abs(m - loaded) / loaded).toBeLessThan(1e-6);
-  }, 60000);
-
-  it('unbounded infinite depth: the free-space solution spreads equally above and below the plane', () => {
-    // The default infinite-depth medium (top 'unbounded', the POINT3 configuration) has no water
-    // table, so the plume diffuses upward as well and only the half below z = 0 is in the aquifer.
-    // Mass is conserved over all space, not over the aquifer; vadose-fed runs use top 'no-flux'.
-    const dz = 0.5;
-    const below = Array.from({ length: 12 }, (_, k) => -(k + 0.5) * dz);
-    const above = below.map((z) => -z);
-    const mBelow = aquiferMass(false, below, dz);
-    const mAbove = aquiferMass(false, above, dz);
-    expect(Math.abs(mBelow - mAbove) / loaded).toBeLessThan(1e-9);
-    expect(Math.abs(mBelow + mAbove - loaded) / loaded).toBeLessThan(2e-3);
-    expect(mBelow / loaded).toBeCloseTo(0.5, 2);
-  }, 60000);
-
-  it('infinite depth under the no-flux water table: aquifer mass equals loaded mass within 1e-6', () => {
-    // Yeh (1981) semi-infinite case: the aquifer is z <= 0 and the water table reflects, so nothing
-    // diffuses out of the top. The summation runs 15 m deep, past the plume's vertical reach.
-    const dz = 0.5;
-    const below = Array.from({ length: 30 }, (_, k) => -(k + 0.5) * dz);
-    const m = aquiferMass('water-table', below, dz);
     expect(Math.abs(m - loaded) / loaded).toBeLessThan(1e-6);
   }, 60000);
 
@@ -217,7 +150,7 @@ describe('mass balance against the aquifer kernel (no decay in either process)',
   it('a mass-rate step agrees with at123dConcentration used directly', () => {
     const source = waterTableSource(L, W, { thickness });
     const c = at123dConcentration(
-      { aquifer: aq, source, loading: steps, time: 365 * day },
+      { aquifer: aq, source, loading: massSteps, time: 365 * day },
       { x: 15, y: 0, z: thickness },
     );
     expect(c).toBeGreaterThan(0);
