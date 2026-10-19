@@ -1822,9 +1822,9 @@ Read-only `#/chemicals` (features C1, C4, C5, D5, J1, J2, J4, J7); edits per pro
 1. **Route and navigation (DEFAULT).** The screen is reached from a "Chemical database" link in the nav
    links and a button on the landing page. The numbered step bar is untouched because U1 is changing it;
    retargeting the Chemicals step is one line in `apps/web/src/App.tsx` (point it at `CHEMICALS_HASH`).
-2. **Data loading (DEFAULT).** The full property file (`chemicals.json`, about 0.6 MB minified) is over
+2. **Data loading (DEFAULT).** The full property file (`chemicals.json`, 1,218,894 bytes pretty-printed in the repo, 633,152 bytes as shipped because a build plugin in `vite.config.ts` minifies emitted JSON assets; the committed data is untouched) is over
    the 500 kB chunk limit as a script chunk, so it is imported as an asset URL and fetched on first
-   visit; the toxicity file is the chunk the risk screen already uses. The limit is not widened. The
+   visit; the toxicity file is the chunk the risk screen already uses. The limit is not widened, and `bundleSize.test.ts` caps built JSON assets at 700 kB. The
    cost is that the screen needs the network the first time it opens. Tests serve the same file from
    disk through a fetch stub in `test-setup.ts`.
 3. **Layout (DEFAULT).** A searchable list of 25 chemicals at a time ("Show more"), each an expandable

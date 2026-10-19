@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { build } from 'vite';
@@ -7,6 +7,8 @@ import { afterAll, describe, expect, it } from 'vitest';
 // DECISIONS M11 ruling 12: entry chunk under 200 kB, no chunk over 500 kB (minified, uncompressed).
 const ENTRY_LIMIT = 200 * 1000;
 const CHUNK_LIMIT = 500 * 1000;
+// Built JSON assets (the chemical property file is 633,152 bytes minified, 1,218,894 pretty-printed).
+const JSON_ASSET_LIMIT = 700 * 1000;
 
 interface ManifestEntry {
   file: string;
@@ -45,5 +47,10 @@ describe('production bundle size', () => {
     expect(entry, 'manifest has an entry chunk').toBeDefined();
     expect(entry!.size, `entry ${entry!.file}`).toBeLessThan(ENTRY_LIMIT);
     for (const s of sizes) expect(s.size, s.file).toBeLessThan(CHUNK_LIMIT);
+    const jsonAssets = readdirSync(join(outDir, 'assets')).filter((f) => f.endsWith('.json'));
+    expect(jsonAssets.length, 'built JSON assets').toBeGreaterThan(0);
+    for (const f of jsonAssets) {
+      expect(statSync(join(outDir, 'assets', f)).size, f).toBeLessThan(JSON_ASSET_LIMIT);
+    }
   }, 120_000);
 });
