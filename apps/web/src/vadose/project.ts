@@ -1,14 +1,23 @@
 import { z } from 'zod';
+import { SOIL_TEXTURES, type SoilTextureCode } from '@model-flow/engine';
 import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, texts } from '../project/fields';
-import { DEFAULT_FORM, type VadoseForm } from './form';
+import { DEFAULT_FORM, type LayerForm, type VadoseForm } from './form';
 
 /** The vadose screen's saved state: its form. */
 export interface VadoseState {
   form: VadoseForm;
 }
 
-const layer = z.object({ ...texts('thickness', 'thetaS', 'thetaR', 'n', 'Ks', 'rhoB', 'foc') });
+const textureChoice = z.enum([
+  'custom',
+  ...(Object.keys(SOIL_TEXTURES) as [SoilTextureCode, ...SoilTextureCode[]]),
+]);
+
+const layer = z.object({
+  ...texts('thickness', 'thetaS', 'thetaR', 'n', 'Ks', 'rhoB', 'foc'),
+  texture: textureChoice.optional(),
+});
 
 const formSchema = partialObject({
   ...texts('infiltration', 'chemicalId', 'M', 'S', 'H', 'Koc', 'Da', 'Dw', 'mu'),
@@ -33,5 +42,15 @@ export function toProject(state: VadoseState): VadoseProject {
 }
 
 export function fromProject(p: VadoseProject | undefined): VadoseState {
-  return { form: mergeDefaults(DEFAULT_FORM, p?.form) };
+  const form = mergeDefaults(DEFAULT_FORM, p?.form);
+  // a file written before texture presets existed has layers without the key: they were hand entered
+  const withTexture = (l: LayerForm): LayerForm => ({ ...l, texture: l.texture ?? 'custom' });
+  return {
+    form: {
+      ...form,
+      source: withTexture(form.source),
+      above: form.above.map(withTexture),
+      below: form.below.map(withTexture),
+    },
+  };
 }

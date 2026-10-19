@@ -73,6 +73,7 @@ arrival at the water table, a mass budget, and a validation case you can load. I
 and vapor screens.
 
 The chemical select fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input.
+Each soil layer (the source and every layer above and below it) has a Texture preset. Choosing one of the twelve classes fills porosity, residual water content, van Genuchten n, saturated conductivity and bulk density with the class averages the vapor screen uses; thickness and organic carbon stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Saturated soil source (`#/saturated`)
 
@@ -81,6 +82,7 @@ at a constant rate until it is gone (legacy) or in proportion to the mass left (
 feed the groundwater and vapor screens. A worked example is built in.
 
 The chemical select fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input.
+The Texture preset in the Soil group fills porosity, bulk density, residual water content and van Genuchten n from the twelve class averages the vapor screen uses. Organic carbon and the aquifer conductivity stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Vapor intrusion (`#/vapor`)
 

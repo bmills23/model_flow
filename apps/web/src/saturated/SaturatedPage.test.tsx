@@ -86,4 +86,14 @@ describe('SaturatedPage', () => {
     expect(feed && 'constant' in feed && feed.constant).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: /open vapor intrusion/i })).toBeTruthy();
   }, 20000);
+
+  it('fills the soil values from a texture preset and keeps a later edit', async () => {
+    await loaded();
+    fireEvent.change(screen.getByLabelText(/^texture preset/i), { target: { value: 'S' } });
+    expect((screen.getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.375');
+    expect((screen.getByLabelText(/^bulk density/i) as HTMLInputElement).value).toBe('1.66');
+    fireEvent.change(screen.getByLabelText(/^porosity/i), { target: { value: '0.4' } });
+    expect((screen.getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.4');
+    expect((screen.getByLabelText(/^texture preset/i) as HTMLSelectElement).value).toBe('S');
+  }, 30000);
 });

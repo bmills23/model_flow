@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SOIL_TEXTURES, type SoilTextureCode } from '@model-flow/engine';
 import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, texts } from '../project/fields';
 import type { SaturatedMethod } from './feed';
@@ -15,6 +16,10 @@ export const DEFAULT_METHOD: SaturatedMethod = 'legacy';
 const formSchema = partialObject({
   ...texts('srcLength', 'srcWidth', 'srcThickness', 'hMin', 'dh', 'fractionHigh'),
   schedule: z.enum(['annual-mean', 'seasonal']),
+  texture: z.enum([
+    'custom',
+    ...(Object.keys(SOIL_TEXTURES) as [SoilTextureCode, ...SoilTextureCode[]]),
+  ]),
   ...texts('porosity', 'rhoB', 'foc', 'thetaR', 'n'),
   hydraulicModel: z.enum(['default', 'brooksCorey1964', 'vanGenuchten1980']),
   ...texts('K', 'gradient', 'infiltration', 'chemicalId', 'F', 'M', 'S', 'H', 'Koc'),

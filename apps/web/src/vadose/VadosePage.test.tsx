@@ -103,4 +103,16 @@ describe('VadosePage', () => {
     expect(feed && 'series' in feed && feed.series.times.length).toBeGreaterThan(2);
     expect(screen.getByRole('link', { name: /open vapor intrusion/i })).toBeTruthy();
   }, 20000);
+
+  it('fills a layer from a texture preset and keeps a later edit', async () => {
+    await loaded();
+    const source = screen.getByRole('group', { name: /source soil/i });
+    fireEvent.change(within(source).getByLabelText(/^texture preset/i), { target: { value: 'S' } });
+    expect((within(source).getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.375');
+    expect((within(source).getByLabelText(/^van genuchten n/i) as HTMLInputElement).value).toBe(
+      '3.177',
+    );
+    fireEvent.change(within(source).getByLabelText(/^porosity/i), { target: { value: '0.4' } });
+    expect((within(source).getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.4');
+  }, 30000);
 });

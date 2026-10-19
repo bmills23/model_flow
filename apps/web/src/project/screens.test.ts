@@ -83,6 +83,13 @@ const cases: Case<unknown>[] = [
       {
         form: { ...VADOSE_DEFAULT, hydraulicModel: 'brooksCorey1964', below: [], measure: 'flux' },
       },
+      {
+        form: {
+          ...VADOSE_DEFAULT,
+          source: { ...VADOSE_DEFAULT.source, texture: 'SL' },
+          above: [{ ...VADOSE_DEFAULT.above[0]!, texture: 'S', thetaS: '0.4' }],
+        },
+      },
     ],
   },
   {
@@ -93,6 +100,7 @@ const cases: Case<unknown>[] = [
     states: [
       { form: SATURATED_DEFAULT, method: 'legacy' },
       { form: { ...SATURATED_DEFAULT, schedule: 'seasonal', method: 'modern' }, method: 'modern' },
+      { form: { ...SATURATED_DEFAULT, texture: 'LS', porosity: '0.42' }, method: 'legacy' },
     ],
   },
   {

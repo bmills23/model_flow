@@ -16,6 +16,7 @@ import {
   DEFAULT_FORM,
   R7_PUBLISHED,
   addLayer,
+  applyTexture,
   isR7Case,
   layerName,
   removeLayer,
@@ -24,6 +25,7 @@ import {
   type Side,
   type VadoseForm,
 } from './form';
+import { TEXTURE_OPTIONS, type TextureChoice } from '../vapor/form';
 import { SourceDepletionChart } from './SourceDepletionChart';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { vadoseCsvTables } from './csv';
@@ -49,14 +51,34 @@ function LayerFields(props: {
   legend: string;
   layer: LayerForm;
   onChange: (patch: Partial<LayerForm>) => void;
+  onTexture: (t: TextureChoice) => void;
   onRemove?: (() => void) | undefined;
   removeLabel?: string;
 }) {
   const { layer, onChange } = props;
+  const id = `texture-${props.legend.replace(/\W+/g, '-').toLowerCase()}`;
   return (
     <fieldset className="layer">
       <legend>{props.legend}</legend>
       <div className="fields">
+        <label className="field" htmlFor={id}>
+          <span className="field-label">Texture preset</span>
+          <select
+            id={id}
+            value={layer.texture}
+            onChange={(e) => props.onTexture(e.target.value as TextureChoice)}
+          >
+            {TEXTURE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <small>
+            Fills porosity, residual water, n, conductivity and bulk density. Every value stays
+            editable.
+          </small>
+        </label>
         <Field
           label="Thickness (m)"
           value={layer.thickness}
@@ -314,6 +336,7 @@ export function VadosePage() {
               legend="Source soil"
               layer={form.source}
               onChange={(patch) => set('source', { ...form.source, ...patch })}
+              onTexture={(t) => set('source', applyTexture(form.source, t))}
             />
             <div className="fields">
               <Field
@@ -380,6 +403,12 @@ export function VadosePage() {
                   legend={layerName(side, i)}
                   layer={layer}
                   onChange={(patch) => setLayer(side, i, patch)}
+                  onTexture={(t) =>
+                    setForm((f) => ({
+                      ...f,
+                      [side]: f[side].map((l, k) => (k === i ? applyTexture(l, t) : l)),
+                    }))
+                  }
                   onRemove={
                     side === 'below' && form.below.length <= 1
                       ? undefined
