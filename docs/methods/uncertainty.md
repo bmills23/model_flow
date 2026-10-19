@@ -356,6 +356,10 @@ Web (each one worker; verify at 390x844 through CDP, light and dark):
   `apps/web/src/uncertainty/` (`editor.ts`): per-input distribution rows from the registry, CDF preview, pairwise
   rank correlation entry with the positive definite check; not mounted on a screen yet (W3 places it on the
   exposure screen). Depends on E1, E2.
-- **W3 Results.** Percentile fan, CDF and histogram, tornado, Sobol bars with intervals, summary table, on
-  the exposure screen. Depends on W1, W2, E5.
+- **W3 Results (done).** `UncertaintyPanel` on the exposure screen (`RiskUncertainty`): distribution editor, seed,
+  iterations, sampling choice, optional Sobol, confirm dialog and progress bar over the W1 pool, then summary table,
+  CDF, histogram (log bins past two decades), one-at-a-time tornado, Spearman bars and Sobol bars with intervals
+  (`ResultsCharts`, pure data in `resultsData.ts`). The percentile fan component exists and is tested, but no exposure
+  output is a time series, so it is not shown on a screen yet. Only the legacy exposure method declares inputs, so the
+  panel samples its receptor factors. Depends on W1, W2, E5.
 - **W4 Probabilistic cleanup panel** on `#/cleanup`. Depends on W3, E6.

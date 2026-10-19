@@ -1059,3 +1059,12 @@ M10 slice W2 (distribution editor and correlation input, 2026-10-18) implementat
   inputs that appear in a pair, with unit diagonal and zero elsewhere, and refused unless the engine's `cholesky` succeeds.
   A constant or an unsampled input in a pair is refused. A phone-width pair list was chosen over a full k by k grid.
 - No new registry entry, assumption or reference changed, so no docs regeneration was needed.
+
+M10 slice W3 (results charts and panel on the exposure screen, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `UncertaintyPanel` (apps/web/src/uncertainty) is generic over a model, its base input and a list of scalar outputs as property paths; `risk/RiskUncertainty.tsx` mounts it on the exposure screen for the legacy method (`exposure.rags-a-1989`) with cancer risk and hazard index per receptor. The modern exposure method declares no uncertain inputs, so it is not sampled; the screen says so.
+- The pooled run produces the sample outputs; the tornado (2k + 1 runs) and the optional Sobol analysis run on the main thread, which is acceptable for the exposure methods because a run costs microseconds. Sobol N is its own field (default 512).
+- Entered units: exposure duration in years (365 days, the exposure convention) and water ingestion in L/day (factor 1e-3 / 86400), converted at the boundary.
+- The percentile fan (`FanChart`, `fanBands`) is built and unit tested but not mounted: no exposure output is a time series yet. Open for a screen that has one.
+- Results are marked stale with a notice when the scenario inputs change after a run. Charts are inline SVG with the shared theme tokens; the Sobol first-order intervals at the default N are often flagged not converged, which the panel reports with the advice to double N.
+- No registry entry, assumption or reference changed, so no docs regeneration was needed.
