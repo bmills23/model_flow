@@ -248,10 +248,11 @@ so it is the one feed that still starts empty after a reload.
   giving the full row count (the CSV download holds every row at full precision). Warnings are the engine
   `{code, message}` pairs with the method or table that raised them, de-duplicated. A screen that cannot
   be computed prints "Not computed" with the form's own error text instead of a table. Charts and
-  uncertainty results landed in Wave G slice G2 (a later bullet). Not in the report: (1) the plume map
-  and the modeled cleanup chart; (2) a modeled cleanup source, which solves through the groundwater chain
-  feed (it holds a function and is not saved), so the section says it needs the chain sent again from the
-  groundwater screen; (3) the household source levels panel of the cleanup screen, which has no CSV table
+  uncertainty results landed in Wave G slice G2 (a later bullet). Not in the report: (1) the modeled
+  cleanup chart (the plume map is printed since wave I); (2) a modeled cleanup source is not computed by the
+  report: it solves through the groundwater chain feed (it holds a function and is not saved), so the report
+  prints the modeled-source uncertainty summary kept from the cleanup screen this session when it is current,
+  says it is out of date, or says it has not been run; (3) the household source levels panel of the cleanup screen, which has no CSV table
   (the section says it is on the screen only). On a phone each result row prints as a labeled card so no
   table scrolls sideways; the printed page keeps the plain table.
   Viewport check (2026-10-18): `#/report` for a project with the groundwater, vadose, saturated, vapor,

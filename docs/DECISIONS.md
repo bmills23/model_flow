@@ -2107,7 +2107,8 @@ their own blocks.
 2. **A restored autosave counted as unsaved (DEFAULT; open question answered). Overturned by Bryan in wave J
    slice J3.** This block recorded `startProjectStore` setting `savedSnapshot` to null for a restored project, so
    every reload or close prompted until a file was saved. J3 seeds the saved snapshot from the restored state, so
-   a restored autosave no longer prompts until an edit follows the restore.
+   a restored autosave no longer raises the close or reload warning until an edit follows the restore (see slice
+   J3 for the second baseline that keeps the replace confirm).
 3. **Fixed wording (DEFAULT).** The browser prompt text is a fixed string; browsers may show their own.
 4. **Process note.** The test and module were written in one pass, so the red stage was not observed separately.
 
@@ -2213,8 +2214,12 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 
 1. **Separate download (DEFAULT).** A button under the plume map on the transport screen writes the plume grid.
    The existing transport CSV is unchanged. A lone button reads "Download CSV: plume grid" (optional `showLabel`
-   prop on `DownloadCsv`); it is disabled while computing or when the inputs are invalid, like the existing
-   download.
+   prop on `DownloadCsv`); it is disabled whenever the shown result is stale (computing, invalid input, or an
+   engine error that keeps the last good result on screen), so the file can never describe a grid it was not
+   computed for. The transport CSV (results and breakthrough) had the same last-good mislabel (its time column used
+   the current form time) and follows the same rule. The plume table is memoized on result, map method and time.
+   A page-level test checks both buttons are enabled after load, the plume button sits after the map and before the
+   breakthrough chart, and both are disabled after an engine overlap error.
 2. **Long format at full resolution (DEFAULT).** One row per grid cell (x outer, y inner), every cell of the map
    grid (100 columns in x). A long format fits `exportCsv` and `DownloadCsv`, which write one header row plus flat
    rows, and opens cleanly in a spreadsheet; a wide grid would need ragged headers.
@@ -2224,9 +2229,11 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
    the shown time (mg/L, the computed grid times 1e3).
 5. **File name (DEFAULT).** From the shared `csvFileName` helper, `transport-plume-v<version>-<date>.csv`, with no
    dataset editions. The depth the grid is evaluated at is not in the file.
-6. **Not verified.** No 390 px overflow check of the button was run in the slice; the wave close mobile check
-   (0 overflowing elements, 0 axe violations) ran on the merged tree. The keyboard test checks `tabIndex` and
-   `focus()` on the real button, not a simulated Tab press.
+6. **390 px.** `#/transport` computes by default, so the plume button is on screen when `mobile:check` visits the
+   route (charts=6), and it is inside the overflow and axe counts at 390 light, 390 dark and 1280 (0 and 0). The
+   script does not look for the button by name and does not click it, so the download itself and its label were
+   not exercised in a browser. The keyboard test checks `tabIndex` and `focus()` on the real button, not a
+   simulated Tab press.
 
 ## 2026-10-19: Wave J slice J2, modeled-source uncertainty in the report
 
@@ -2254,17 +2261,30 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 8. **Not verified.** The red step was skipped for the report-side view tests, and the report's current-state block
    was not rendered in a browser at 390 px (the summary exists only after an in-browser modeled run); the wave
    close mobile check does not reach it.
+9. **Summary cleared at run start (corrective pass).** `ModeledSourceUncertainty` clears the kept summary when a
+   new run starts, so a run that is cancelled or fails cannot leave the previous result on screen or in the
+   report. A test covers it.
 
 ## 2026-10-19: Wave J slice J3, restored autosave no longer prompts
 
 1. **Bryan's decision; overturns the I3 DEFAULT.** The I3 block ruled that a restored autosave counts as unsaved.
    Bryan chose to stop the prompt on every reload. The I3 block is amended in place.
-2. **Seeded from the restored state.** `startProjectStore` calls `markSaved()` after `hydrate()`, so the restored
-   autosave is the saved baseline and the leave-page warning appears only after an edit following the restore.
-3. With no autosave, or one that cannot be parsed, the baseline equals the blank state and behaviour is unchanged.
-   Opening a file, opening a share link, saving and `newProject` are untouched.
-4. Two tests in `project/store.test.ts` failed before the change: a restore with no edit does not prompt and a
-   later edit does; no autosave starts clean and a first edit flags.
+2. **Two baselines (corrective pass).** The first J3 build moved the one saved snapshot on a restore, which also
+   silenced the confirm before replacing the current project with an opened file, a dropped file or a share link.
+   The store now keeps `savedSnapshot` (moves on a save to file, an open or a new project) and `warnedSnapshot`
+   (also moves on a restore, through a private `markRestored()`). `hasUnsavedChanges()` compares against
+   `warnedSnapshot` first and drives the close or reload warning; the new exported `hasUnfiledChanges()` compares
+   against `savedSnapshot` only and drives the replace confirm in `ProjectBar.replaceWith`. `markSaved` sets both
+   and `forgetMemory` resets both.
+3. **Final behaviour.** A reload that only restores the autosave does not raise the close or reload warning, which
+   appears after the next edit. A restored project that was never saved to a file still counts as having changes
+   not saved to a file, so opening a file, dropping a file or opening a share link asks first, as before J3.
+   Starting a new project always confirms. With no autosave, or one that cannot be parsed, the baseline equals the
+   blank state and behaviour is unchanged. Saving to a file sets both baselines.
+4. Tests that failed before the change: in `project/store.test.ts`, a restore with no edit does not warn and a
+   later edit does, no autosave starts clean and a first edit flags, and a restored project reads as unfiled;
+   in `ProjectBar.test.tsx`, restored then open file asks, restored then share link asks, restored then
+   `beforeunload` does not warn.
 
 ## 2026-10-19: Wave J slice J4, test time
 
@@ -2273,8 +2293,9 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 2. **Engine cleanup level searches (DEFAULT).** Each transport was re-run cold at every trial source concentration.
    The per-step AT123D time integrals (optional `integrals` map on `at123dConcentration`) and the PATCHI unit step
    responses (optional `unitResponse` map on `patchiConcentration`) are now cached per transport, point and age
-   window in `wellConcentrations`, in a `WeakMap`, and used only when `absTol` is 0. They do not depend on the
-   concentration. `test/repeat-evaluation.test.ts` (3 tests, red first) shows the cached numbers are bitwise
+   window in `wellConcentrations`, in a `WeakMap`, and They do not depend on the
+   concentration. The AT123D integrals map is used only when `absTol` is 0 (guard in `kernel.ts`); the PATCHI
+   `unitResponse` map has no tolerance concept and is always used when passed. `test/repeat-evaluation.test.ts` (3 tests, red first) shows the cached numbers are bitwise
    those of a cold evaluation. Engine numerics are unchanged.
 3. **Engine file splits.** `surfacewater-discharge` into `-4b` and `-4c`, `vadose-coupling` into `-free-space` and
    `-water-table`, `uncertain-coverage` into the rest and `-layered`, so heavy tests run side by side. Tests moved
@@ -2286,7 +2307,16 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 5. **Web file splits.** `screenKeyboard` into 4 files (its 19 route settle waits now overlap), `surfaceWater/compute`
    into 3, `TransportPage` into 3. Counts identical (101, 11, 5).
 6. **Rejected.** `isolate: false` in the web package: one a11y skip-link test failed on the first run and passed on
-   the next, so it is order-dependent. Reverted before any commit.
+   the next, so it is order-dependent. Reverted before any commit. The corrective pass could not reproduce the
+   failure in six full runs, so its cause is not proven. The one verified leak is the route hash: the skip-link
+   tests set it and a failed assertion skips their own reset, so the next `App` render starts on the wrong
+   screen. The shared `afterEach` in `test-setup.ts` now resets the hash (red-first test in `testIsolation.test.tsx`).
+   The conditional cleanup stays: a temporary diagnostic over the full suite found no mounted nodes left behind
+   where the testing library was not loaded.
+7a. **Test helper naming (corrective pass).** Test-only helpers carry a `.testkit.` infix
+   (`surfaceWater/linkedRun.testkit.ts`, `a11y/screenKeyboard.testkit.tsx`, formerly `computeLinked.ts` and
+   `screenKeyboardOrder.tsx`), and `testIsolation.test.tsx` fails if any file in `src` that is neither a test nor
+   a testkit imports vitest or the testing library.
 7. **Measured.** The before timings were taken on a loaded machine and are noisy. Before: engine 41 s, web 128 s
    (76 s on a second plain run); `cleanup/modeled.test.ts` 97 s (48 s alone). After, at load average about 4:
    engine 21 s, web 40 s; `cleanup/modeled.test.ts` about 3 s. Full gate 128 s, exit 0. CI minutes were not

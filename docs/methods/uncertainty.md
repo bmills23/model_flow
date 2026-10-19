@@ -386,7 +386,6 @@ Web (each one worker; verify at 390x844 through CDP, light and dark):
   the legacy receptor factors distributions (the W2 editor), choose the protected fraction (95 percent default),
   iterations and seed; the panel reports the 50, 90 and chosen protection levels in the screen unit beside the
   deterministic level, the CDF and histogram of the solved levels, the censored count and the Spearman rank
-  correlation of each input with the level. Direct-pathway sources only: a modeled source (dissolved, vadose,
-  saturated) is not sampled: the engine now declares the transport inputs (E7, E8), but no screen builds the
-  transport chain around the cleanup solver yet, so the panel still samples the legacy receptor factors only.
-  Depends on W3, E6.
+  correlation of each input with the level. Direct-pathway sources are sampled on the legacy receptor factors; a modeled source (dissolved, vadose,
+  saturated) is sampled since wave I (I6) through the transport chain built around the cleanup solver, and the
+  report prints the summary kept from the screen this session (wave J). Depends on W3, E6.

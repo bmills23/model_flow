@@ -9,17 +9,15 @@ skipping a done one.
   branch `wave-ui`) and wave I (built on branch `wave-i`), all pushed 2026-10-19. Wave J (five slices, built on
   branch `wave-j`) is committed on `wave-j` and is NOT yet merged to main or pushed. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-j` (slice J4, after the test time work): exit 0 in 128 s, build included.
-  Test counts: engine 1382 tests (85 files), web 1535 tests (151 files), data and other packages 149 passed and 3
-  skipped (7 files; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs).
-  Wave I integration counts, before its review fixes: engine 1379, web 1503. The engine gained 3 repeat-evaluation
-  tests in J4; the J4 file splits moved tests without changing their counts. J1, J2 and J3 were checked with their
-  own targeted tests and the merged tree by lint, format and typecheck at integration; the gate above was taken
-  after J4. `corepack pnpm mobile:check` on the
-  merged `wave-j` tree after `corepack pnpm build`, 2026-10-19: green (0 overflowing elements, 0 axe violations on
-  every route at 390 light, 390 dark and 1280, including the seeded `#/risk` and fed `#/cleanup` routes). Run it
-  with `--url` when port 5178 is busy.
-- Not browser-verified at 390 px: the plume CSV button (it reuses the existing `p.csv-downloads` wrapper) and the
+- Last full `corepack pnpm gate` on `wave-j` after the review fixes were merged (2026-10-19): exit 0, build
+  included. Test counts: engine 1382 tests (85 files), web 1545 tests (152 files), data and other packages 149
+  passed and 3 skipped (7 files; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the
+  fetched PDFs). Wave I integration counts, before its review fixes: engine 1379, web 1503.
+  `corepack pnpm mobile:check` on that tree after `corepack pnpm build`, 2026-10-19: green (0 overflowing
+  elements, 0 axe violations on every route at 390 light, 390 dark and 1280, including the seeded `#/risk` and
+  fed `#/cleanup` routes). Run it with `--url` when port 5178 is busy.
+- At 390 px: `#/transport` computes by default, so the plume CSV button is on screen in that check and inside its
+  overflow and axe counts (the script neither looks for it by name nor clicks it). Not rendered in a browser: the
   report's modeled-source current-state block (the result exists only after an in-browser modeled run, which the
   check script does not perform).
 - Local branches: `main`, `wave-j`, the merged slice branches `wave-j-j1`, `wave-j-j2`, `wave-j-j3`, and three
@@ -47,11 +45,18 @@ one wave"; J3 is his decision, the other rulings are DEFAULT.
   date (checked by a fingerprint of the current request and setup) or not yet run. It is not saved with the
   project, so a reload, a new project or an opened project needs a re-run. No distribution chart for a modeled
   source.
-- J3 a restored autosave is the saved baseline, so the leave-page warning appears only after an edit following
-  the restore (overturns the I3 DEFAULT).
+- J3 a restored autosave no longer raises the close or reload warning until an edit follows the restore
+  (overturns the I3 DEFAULT). Two baselines: `warnedSnapshot` drives the warning, `savedSnapshot` drives the
+  confirm before an open, drop or share link replaces the project (`hasUnfiledChanges`), so a restored project
+  never saved to a file still asks first.
 - J4 test time: cached AT123D time integrals and PATCHI unit step responses in the cleanup level searches (engine
   numerics unchanged, bitwise equal), split heavy engine and web test files, and no per-file setup or jsdom for 38
   pure-logic web test files. Engine 41 s to 21 s, web 128 s to 40 s locally.
+- Review fixes (corrective pass): plume and transport CSV buttons are disabled while the shown result is stale
+  (J1); the J3 replace confirm restored (above); a new modeled run clears the kept summary at start (J2); the
+  route hash is reset between web tests and test-only helpers renamed to `.testkit.` with a guard test (J4); the
+  report notes in `docs/methods` brought up to date. The cause of the one order-dependent skip-link failure is not
+  proven (not reproduced in six runs); the hash leak was the only leak found.
 - J5 `m1-groundwater-ui` and `ui-u9-wildlife` deleted after checking against main.
 
 ## Wave I landed (2026-10-19)
@@ -315,7 +320,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   from the cleanup screen this session (J2), which is not saved with the project, so it needs a re-run after a
   reload, and it carries no distribution chart. The plume map is in the report since wave I.
 - Plume CSV: done in wave J (J1), a separate download under the plume map; the report still prints 20 of 100
-  centreline rows. The button and the report's modeled block were not rendered at 390 px in their slices.
+  centreline rows. At 390 px the button is covered by the
+  mobile check (it renders on the default `#/transport` compute); the report's modeled block was not rendered.
 - The wave I modeled-uncertainty timings were measured under host load (other slices running); the dissolved
   source run was re-checked in a browser (about 2 s for 200 iterations on 4 workers), but the slow chains (vadose,
   saturated modern, which ask first or are refused) were not run in a browser.
@@ -345,9 +351,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Review `wave-j`, then merge it to main and push once (re-measure the CI cost from that push and record it in
-  CLAUDE.md). After the merge, delete the slice branches `wave-j-j1`, `wave-j-j2`, `wave-j-j3`, the `worktree-wf_*`
-  branches and their worktrees.
+- Merge `wave-j` to main and push once (re-measure the CI cost from that push and record it in CLAUDE.md). Then
+  remove the wave J worktrees and branches: `wave-j-j1`, `wave-j-j2`, `wave-j-j3`, `wave-j-fix-a` to
+  `wave-j-fix-d`, the `worktree-wf_*` branches.
 - The 15 stale `origin/` milestone branches stay Bryan's call.
-- Then the open items above: read the unverified sources; run a 390 px check of the plume CSV button and of the
+- Then the open items above: read the unverified sources; run a 390 px check of the
   report's modeled-source block after an in-browser modeled run.

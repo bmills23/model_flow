@@ -55,7 +55,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 - A link longer than 8000 characters is not offered, because chat and mail programs often cut longer ones.
   Save a file instead. The app shows the limit rather than a shortened link.
 - Opening a project, from a file or a link, asks first when the current project has changes not saved to a
-  file.
+  file. This includes work restored from the browser's automatic save after a reload, until it is saved to a
+  file. The reload and close warning does not appear for restored work until it is edited again.
 - Closing or reloading the tab also asks first while the project has changes not saved to a file, because the
   browser's copy of the project is not a saved file and a browser can clear it. A reload that only brings the
   browser's copy back does not ask: the warning starts again with your next edit after the reload.
