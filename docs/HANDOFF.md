@@ -18,16 +18,16 @@ skipping a done one.
   2026-10-19 (0 overflowing elements, 0 axe violations on every route, including the seeded
   `#/risk` route that needs benzene, two open override panels and two edited marks); run it with `--url` when
   port 5178 is busy.
-- Branches that are ancestors of this branch (safe to delete once it lands; add the wave I slice branches `wave-i-i1` to `wave-i-i6`): `m0-foundation` to
-  `m6-vapor-models`, `m8-surface-water`, `wave-m5-m6-m8`, `m7-*`, `m9-*`, `m10-*`, `m11-*`, `t-m7`, `t-m9`,
-  `t-m10`, `t-m11`, `wave-gaps`, the wave H slice branches (`ui-u*`, `fix-h-*`) and the `worktree-*` working
-  branches. `m1-groundwater-ui` is NOT an ancestor (its commits carry different hashes from what landed);
-  confirm its content is on main before deleting it.
+- Local branches and worktrees were cleaned 2026-10-19 after wave I landed (85 merged branches deleted with
+  `git branch -d`, 22 worktrees removed, `../model_flow_wt/` gone). Two local branches remain because they are
+  not ancestors of main: `m1-groundwater-ui` (10 commits that landed under other hashes; main carries later
+  versions of its files, but about 30 branch-only lines in `apps/web/src/App.tsx` and `apps/web/package.json`
+  are unchecked) and `ui-u9-wildlife` (content not checked). Confirm each against main before deleting it.
 - Test time on this run: engine suite 34 s, web suite 53 s.
-- CI cost: about 5 billed minutes per push to main (measured 2026-10-18 and 2026-10-19 on main: gate job
-  2 min 38 s to 2 min 50 s, Pages build about 25 s, deploy 10 to 42 s). Re-measured 2026-10-19 after waves G
-  and H (runs 39298427676 and 39298427401): gate 2 min 26 s, Pages build 20 s plus deploy 11 s, still about 5
-  billed minutes (recorded in CLAUDE.md). Docs-only pushes trigger nothing.
+- CI cost: about 6 billed minutes per push to main since wave I (runs 39317507123 and 39317507269, 2026-10-19:
+  gate 3 min 46 s, Pages build 23 s plus deploy 8 s; recorded in CLAUDE.md). After waves G and H it was about 5
+  (gate 2 min 26 s). The wave I gate job is about 80 s slower; profile the slowest web test files before adding
+  more. Docs-only pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
@@ -314,8 +314,6 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   `groundwater-kernel.test.ts` (best of three under 1 s, mass conservation 30 s timeout) were made robust to
   parallel load. Other timing tests also fail under heavy host load (the methods citation test now has a 30 s
   timeout). If one fails, re-run that file alone before treating it as a regression.
-- Lingering worktrees of finished milestones: the local worktree directories next to the repo (`../model_flow_wt/`: m7, m9, m10, m11,
-  wave) and the extra working copies inside it. Remove them once nothing needs resuming; `git worktree list` shows all of them.
 - Manual text extraction lives outside the repo; re-extract when needed:
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (the appendix line index in ROADMAP section 3 refers to that extraction).
