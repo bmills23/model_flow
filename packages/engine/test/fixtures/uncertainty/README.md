@@ -7,9 +7,11 @@ the RISC5 user's guide (Nov 2014). Benzene in drinking water at a constant 0.005
 exposure data, 500 model runs; the two printed columns are RISC v4.0 and a commercial spreadsheet add-in.
 Values are entered as printed.
 
-The review does not give the input distributions. The test therefore asserts a shape only (ruling 12):
-monotone percentiles, and the 5th, 50th and 95th percentiles within a factor of 3 of the geometric mean of
-the two printed columns. The distribution set the test samples (body weight, exposure duration and
-drinking-water ingestion rate) is a fixture-only central-tendency assumption, not sourced data: it is not a
-product default, it carries no citation, and its spreads were chosen wide enough for the shape check. It is
-not a validation of the sampler; the analytic lognormal fixture is.
+The review does not give the input distributions, and no cited distribution set has been read yet. The
+test is therefore a smoke test (ruling 12): it runs the legacy method on the printed case (concentration and
+iteration count from this file) with body weight, exposure duration and drinking-water ingestion rate
+sampled, and asserts no failed iteration and monotone, non-degenerate percentiles. The spreads it samples are
+scaffolding with no source, not a product default and not a claim about RISC. The printed percentiles are
+recorded here but not compared: an earlier factor-of-3 band was met only by widening those unsourced
+spreads, so it could not fail and was removed. A comparison waits for sourced distributions
+(`roseberry1992` is the candidate for water intake). The analytic lognormal fixture validates the sampler.

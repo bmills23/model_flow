@@ -308,7 +308,7 @@ describe('legacy exposure declarations used by the runner', () => {
       {
         id: 'benzene',
         chemical: legacyBenzene,
-        epcs: { waterIngestion: constantEpc('waterIngestion', 0.005) },
+        epcs: { waterIngestion: constantEpc('waterIngestion', tableR2.concentrationMgPerL) },
       },
     ],
   } as const;
@@ -323,14 +323,10 @@ describe('legacy exposure declarations used by the runner', () => {
     expect(() => checkUncertainInputs(inputs, twoReceptors, 0.5)).not.toThrow();
   });
 
-  // Table R-2 shape check (ruling 12). The review gives no input distributions. The set below is a
-  // fixture-only central-tendency assumption (see fixtures/uncertainty/README.md), not sourced data.
-  it('Table R-2 shape: monotone percentiles, p5/p50/p95 within a factor of 3 of the printed geometric mean', () => {
-    const fx = tableR2.rows;
-    const gm = (s: string) => {
-      const r = fx.find((x) => x.statistic === s)!;
-      return Math.sqrt(r.risc * r.crystalBall);
-    };
+  // Table R-2 case (ruling 12), smoke test only. The review gives no input distributions, so no
+  // comparison with its printed percentiles is made. The spreads below are scaffolding to make the three
+  // factors vary, not sourced data (see fixtures/uncertainty/README.md); they carry no claim about RISC.
+  it('Table R-2 case runs the legacy method over three sampled receptor factors (smoke test)', () => {
     const bw = { kind: 'normal', mean: 70, sd: 14, lo: 30, hi: 150 } as const;
     const ed = {
       kind: 'lognormal',
@@ -359,17 +355,16 @@ describe('legacy exposure declarations used by the runner', () => {
       seed: 'table-r2',
     };
     const r = run(uncertaintySrsExposure, spec as unknown as UncertaintySpec<Toy, number>);
+    expect(r.ids).toEqual([
+      'exposure.receptor0.bw',
+      'exposure.receptor0.ed',
+      'exposure.receptor0.waterIngestionRate',
+    ]);
     expect(r.failures.count).toBe(0);
+    expect(r.succeeded).toBe(tableR2.iterations);
     const s = r.summary!;
     const seq = [s.min, s.p5, s.p25, s.p50, s.p75, s.p90, s.p95, s.max];
     for (let i = 1; i < seq.length; i++) expect(seq[i]!).toBeGreaterThanOrEqual(seq[i - 1]!);
-    for (const [k, v] of [
-      ['p5', s.p5],
-      ['p50', s.p50],
-      ['p95', s.p95],
-    ] as const) {
-      expect(v / gm(k)).toBeLessThan(3);
-      expect(v / gm(k)).toBeGreaterThan(1 / 3);
-    }
+    expect(s.p95).toBeGreaterThan(s.p5);
   });
 });

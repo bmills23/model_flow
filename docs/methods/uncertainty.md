@@ -1,6 +1,8 @@
 # Uncertainty: Monte Carlo, Latin hypercube, sensitivity and probabilistic cleanup levels (M10)
 
-Status: stage 1 (scope, 2026-10-18). Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
+Status: implemented 2026-10-18 (scope written in stage 1; engine slices E1 to E7 and web slices W1 to W4
+done, see the appendix; open items: M1 groundwater declarations, the unmounted percentile fan, modeled
+cleanup sources not sampled). Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
 uncertainty scope (stage 1)"; the ruling numbers below refer to that block. Every ruling marked DEFAULT is
 a screening choice open to Bryan's overturn. Equations are written in our own words from the primary
 publications; the RISC5 manual is used only as a map of what RISC5 offers.
@@ -35,7 +37,7 @@ the scope (exposure parameters only, simple random sampling) and not any undocum
 | Tornado (one at a time swings) and Spearman rank correlations from the sample | Yes | Ruling 8 |
 | Percentile fans for time series outputs, CDF and histogram of scalar outputs | Yes | Ruling 9 |
 | Probabilistic cleanup levels wrapping the M5 solver | Yes | Ruling 10 |
-| Table R-2 loose fixture | Yes | Ruling 12 |
+| Table R-2 case as a smoke test (no comparison with the printed percentiles) | Yes | Ruling 12 |
 | Web worker pool, pilot timing and run budget | Yes | Ruling 11 |
 | Morris elementary effects screening | Deferred | Ruling 13; Sobol covers the need at our input counts |
 | Quasi-random (Sobol low-discrepancy) base sequences for the Sobol design | Deferred | Ruling 7 |
@@ -298,20 +300,21 @@ The engine runner is a pure function over rows so the same code runs in Vitest w
    (1 - p) quantile matches within 2 percent; a forward run at the reported level gives an exceedance
    fraction within the binomial 99 percent band around 1 - p.
 7. **Reproducibility.** Same seed, one chunk versus four chunks: bit-identical outputs.
-8. **Table R-2 (loose, ruling 12).** Benzene in drinking water, 0.005 mg/L, legacy adult RME point values,
-   n = 500, legacy method with a documented distribution set chosen in stage 2 from cited sources (the
-   water intake distribution of `roseberry1992` is the candidate; body weight and duration from the
-   Exposure Factors Handbook). Because the manual does not give the input distributions and its own two
-   columns differ by a factor of 1.7 at the median while agreeing within 3 percent at the 75th percentile,
-   the fixture asserts only: monotone percentiles; the 5th, 50th and 95th percentiles within a factor of 3
-   of the geometric mean of the two printed columns. It is a shape check, not a validation, and the
-   fixture file says so with the citation `arcadis2001`.
+8. **Table R-2 case (smoke test, ruling 12).** Benzene in drinking water at the printed 0.005 mg/L, legacy
+   adult RME point values, the printed 500 iterations, legacy method with body weight, exposure duration and
+   water ingestion rate sampled. The manual does not give the input distributions, and no cited distribution
+   set has been read yet (`roseberry1992` is the candidate for water intake, its full text not read), so the
+   test samples scaffolding spreads with no source and asserts only that the method runs from the registry
+   over the three factors with no failed iteration and monotone, non-degenerate percentiles. It makes no
+   comparison with the printed percentiles: with unsourced spreads any band could be met by tuning them, so a
+   band would prove nothing. A comparison waits for sourced distributions. The printed values stay in the
+   fixture file with the citation `arcadis2001`.
 
 ## Where the manual is silent, and what we chose
 
 | Gap | Choice |
 |---|---|
-| Input distributions behind Table R-2 | Not reproduced; loose fixture only (ruling 12) |
+| Input distributions behind Table R-2 | Not reproduced; smoke test only, no comparison (ruling 12) |
 | Iteration count default | 500 for the legacy method, matching the comparison (ruling 4) |
 | Seeding | Explicit, shown, reproducible (ruling 11) |
 | Transport parameters | Legacy keeps them fixed; modern samples them (ruling 6) |
@@ -332,15 +335,15 @@ slice cites them (`sobol1993` is not cited by code: its title is still a descrip
 
 Engine (each one worker, TDD):
 
-- **E1 Distributions and AS 241.** `numerics/special.ts` Phi^-1, `processes/uncertainty/distributions.ts`
+- **E1 Distributions and AS 241 (done).** `numerics/special.ts` Phi^-1, `processes/uncertainty/distributions.ts`
   (library, truncation, unit conversion, checks). Fixtures 2. No dependency.
-- **E2 Parameter registry.** `uncertainInputs` on `MethodDescriptor`, declarations for the M4 exposure
+- **E2 Parameter registry (done).** `uncertainInputs` on `MethodDescriptor`, declarations for the M4 exposure
   methods (the M1 groundwater declarations were planned here but are not made; see E7), chain prefixing,
   registry tests. Depends on nothing; E4 needs it.
-- **E3 Samplers.** SRS, LHS mapping, Iman-Conover with Cholesky, seed streams, percentiles (definition 7).
+- **E3 Samplers (done).** SRS, LHS mapping, Iman-Conover with Cholesky, seed streams, percentiles (definition 7).
   Fixtures 1, 3, 4. Depends on E1.
 - **E4 Runner and the two registered methods (done).** `uncertainty.srs-exposure`, `uncertainty.lhs-ic`, row
-  runner with failure accounting, chunk-invariance test, Table R-2 fixture. Depends on E2, E3.
+  runner with failure accounting, chunk-invariance test, Table R-2 smoke test. Depends on E2, E3.
 - **E5 Sensitivity (done).** Saltelli and Jansen estimators, bootstrap, tornado, Spearman, the registered
   `uncertainty.sobol-saltelli`. Fixture 5. Depends on E3 and E4.
 - **E6 Probabilistic cleanup (done).** Wrap M5's solver per iteration, censoring, protection percentile, the

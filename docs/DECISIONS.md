@@ -1081,7 +1081,7 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
 1. **Scope** (DEFAULT). In: distribution library, parameter registry, legacy simple random sampling over
    exposure parameters, modern Latin hypercube with Iman-Conover rank correlation over exposure and
    transport parameters, Sobol indices with bootstrap intervals, tornado and Spearman, percentile fans and
-   CDFs, probabilistic cleanup levels, worker pool with a run budget, Table R-2 loose fixture. Deferred:
+   CDFs, probabilistic cleanup levels, worker pool with a run budget, Table R-2 case (a smoke test since the review fix to ruling 12). Deferred:
    Morris screening, quasi-random base sequences, two-dimensional Monte Carlo, distribution fitting and a
    cited default distribution library, toxicity-value sampling, M7 and M9 inputs until those land.
 2. **Parameter registry** (DEFAULT). A method declares `uncertainInputs`, each with a stable dotted id,
@@ -1111,10 +1111,14 @@ Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the 
 11. **Seeding and budget** (DEFAULT). Explicit seed with the default `model-flow`; purpose-labelled streams;
     the whole sample built on one thread before any run so results are independent of worker count; pool of
     min(4, cores - 1) workers, 5-row pilot, confirm above 60 s, refuse above 10 minutes.
-12. **Table R-2 fixture** (DEFAULT). Shape check only: the manual gives no input distributions and its two
-    columns differ by 1.7 at the median, so percentiles must be monotone and the 5th, 50th and 95th fall
-    within a factor of 3 of the geometric mean of the printed columns. This is the "loose" tolerance
-    ROADMAP section 6 assigns; analytic lognormal, Ishigami and identity fixtures carry the real validation.
+12. **Table R-2 case** (DEFAULT). Smoke test only, no comparison with the printed percentiles: the manual gives
+    no input distributions and none has been taken from a read source yet, so any band around the printed
+    values could be met by tuning unsourced spreads and would prove nothing. The test runs the legacy method
+    on the printed case (0.005 mg/L, 500 iterations) with three sampled receptor factors and asserts no
+    failed iteration and monotone, non-degenerate percentiles. Review fix: as first written the ruling asked
+    for the 5th, 50th and 95th percentiles within a factor of 3 of the printed geometric mean, and slice E4
+    widened unsourced spreads until that held, which made the band circular; the band was removed. The
+    analytic lognormal, Ishigami and identity fixtures carry the real validation.
 13. **Deferred methods** (DEFAULT). Morris 1991 screening and low-discrepancy sequences are deferred: with
     the input counts of these models (about 5 to 15) the Sobol design is affordable in the browser.
 
@@ -1153,9 +1157,10 @@ M10 slice E4 (runner and registered methods, 2026-10-18) implementation choices,
   the water intake. An absent optional factor reads as NaN, so the registry contract needs a base input
   that carries every declared factor.
 - Table R-2 fixture values are the printed ones (RISC5 guide, section R.7.2). The input distributions the
-  test samples are fixture-only central-tendency assumptions with no source; their spreads were widened
-  until the shape check (ruling 12) held, which makes the test a regression guard on the runner and the
-  exposure method, not evidence about RISC. See `packages/engine/test/fixtures/uncertainty/README.md`.
+  test samples are scaffolding with no source. Review fix: they had been widened until a factor-of-3 band
+  around the printed percentiles held, which made the band circular, so the band assertion was removed (see
+  ruling 12); the test is a smoke test of the runner and the legacy exposure method over three sampled
+  factors, not evidence about RISC. See `packages/engine/test/fixtures/uncertainty/README.md`.
 - `hyndmanfan1996` and `wichura1988` are cited by both methods because both use the percentile
   definition and the AS 241 inverse; the note's citation lists were updated in place.
 

@@ -234,7 +234,8 @@ describe('sobol: invariance to an additive offset of the output', () => {
   });
   it('on the log10 scale a 1e-6 scale output gives the same indices as the unscaled one', () => {
     const LN: Distribution = { kind: 'lognormal', gm: 1, gsd: 2 };
-    const prod = (x: number[]) => (x[0] as number) * (x[1] as number) ** 0.5 * (x[2] as number) ** 2;
+    const prod = (x: number[]) =>
+      (x[0] as number) * (x[1] as number) ** 0.5 * (x[2] as number) ** 2;
     const log = { n: 512, seed: 'log', scale: 'log10' as const };
     const r0 = runSobol(spec(3, prod, [LN, LN, LN], log));
     const r1 = runSobol(spec(3, (x) => 1e-6 * prod(x), [LN, LN, LN], log));
