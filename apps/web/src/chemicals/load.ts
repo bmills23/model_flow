@@ -5,8 +5,8 @@ import { buildBrowse, type BrowseDb } from './browse';
 let loading: Promise<BrowseDb> | null = null;
 
 /**
- * Loads the full RSL property file and the toxicity file on first use. The full file (about 0.6 MB
- * minified) is over the per-chunk size limit as a script chunk, so it is a separate asset fetched at
+ * Loads the full RSL property file and the toxicity file on first use. The full file (633,152 bytes
+ * once the build minifies it; 1,218,894 pretty-printed in the repo) is over the per-chunk size limit as a script chunk, so it is a separate asset fetched at
  * run time; the toxicity file is the same chunk the risk screen loads.
  */
 export function loadBrowse(): Promise<BrowseDb> {
