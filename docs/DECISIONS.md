@@ -1471,7 +1471,8 @@ overturn):
    engine warnings and the statement. The methods are decided from the forms, not from computed results;
    the result tables are each screen's own CSV tables, computed again from the saved forms and stored
    feeds. Charts are not in the report (they stay on the screens), and the report says so; see the
-   methods note, section 6.
+   methods note, section 6. Superseded 2026-10-19 by Wave G slice G2: the report now draws each screen's
+   main charts with their data tables.
 9. **Mobile check in the repo (DEFAULT).** `scripts/mobile-check.mjs` drives Chrome through CDP at a true
    390x844 viewport, light and dark, every route, overflow count 0. Run locally before each milestone push;
    not in `gate` or CI (needs a real browser).
