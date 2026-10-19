@@ -492,6 +492,35 @@ describe('project store', () => {
     expect(saved()?.screens?.transport?.form?.K).toBe('8');
   });
 
+  describe('a restored autosave', () => {
+    function restart(): void {
+      const text = localStorage.getItem(AUTOSAVE_KEY);
+      forgetMemory();
+      wipeFeeds();
+      if (text !== null) localStorage.setItem(AUTOSAVE_KEY, text);
+      startProjectStore();
+    }
+
+    it('is not unsaved until it is edited after the restore', () => {
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, K: '5' } });
+      flushAutosave();
+      restart();
+      expect(getScreen('transport').form.K).toBe('5');
+      expect(hasUnsavedChanges()).toBe(false);
+      const r = getScreen('transport');
+      setScreen('transport', { ...r, form: { ...r.form, K: '6' } });
+      expect(hasUnsavedChanges()).toBe(true);
+    });
+
+    it('with no autosave starts clean and flags a first edit', () => {
+      restart();
+      expect(hasUnsavedChanges()).toBe(false);
+      setSite({ ...defaultSite(), basis: 'modeled' });
+      expect(hasUnsavedChanges()).toBe(true);
+    });
+  });
+
   it('never lets a rejected decimal entry reach the saved project', () => {
     const s = getScreen('transport');
     setScreen('transport', { ...s, form: { ...s.form, K: REJECTED_ENTRY } });
