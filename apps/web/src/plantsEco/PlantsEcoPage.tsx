@@ -35,7 +35,12 @@ import {
   type UptakeChoice,
   type WildlifeRowForm,
 } from './form';
-import { computeWildlife, wildlifeRowsFor, WILDLIFE_GROUP_LABELS } from './wildlife';
+import {
+  computeWildlife,
+  REPRODUCTION_TOLERANCE,
+  wildlifeRowsFor,
+  WILDLIFE_GROUP_LABELS,
+} from './wildlife';
 import { buildProduceFeed, computeProduce, LEGACY_PLANT_ID, MODERN_PLANT_ID } from './produce';
 import { buildTphFeed, computeTph, TPH_LEGACY_ID, TPH_MODERN_ID } from './tph';
 import { HelpLink } from '../docs/HelpLink';
@@ -789,6 +794,13 @@ export function PlantsEcoPage() {
                           {r.printedMgPerKg === null
                             ? 'none'
                             : formatConcentration(r.printedMgPerKg)}
+                          {r.reproduces === false && (
+                            <span className="repro-flag">
+                              <br />
+                              Not reproduced within {Math.round(REPRODUCTION_TOLERANCE * 100)}{' '}
+                              percent
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}

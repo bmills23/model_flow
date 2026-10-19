@@ -158,7 +158,10 @@ can be edited, an area use factor (1 reproduces the Eco-SSL) is added, and you c
 own. The ecological screening panel then shows, per surrogate, the daily dose, the hazard quotient at the
 soil concentration, the soil level at which that quotient is one, and the Eco-SSL the document printed, so a
 change can be read against its source. These are screening comparisons, never cleanup levels, and the
-screening-only warning stays. The rows are saved in the project file, and a CSV table of them is offered.
+screening-only warning stays. Where the back-calculated soil level differs from the printed Eco-SSL by more
+than 5 percent, the printed value carries the text "Not reproduced within 5 percent", so the difference is
+read in words, not colour. Rows you add yourself have no printed value and no such flag. The rows are saved in
+the project file, and a CSV table of them is offered; its last column says yes or no for each surrogate.
 
 ### Exposure and risk (`#/risk`)
 

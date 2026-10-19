@@ -16,6 +16,22 @@ import {
 
 const MG = 1e-6; // kg/kg per mg/kg
 
+/**
+ * Relative tolerance within which a back-calculated soil level reproduces the printed Eco-SSL (5 percent). The
+ * engine's published-reproduction test uses the same bound; it is not widened here.
+ */
+export const REPRODUCTION_TOLERANCE = 0.05;
+
+/**
+ * Whether the back-calculated soil level reproduces the printed Eco-SSL within the tolerance. Null when the document
+ * prints no value for the row (a user row), since there is nothing to reproduce.
+ */
+export function reproducesPrinted(backCalc: number | null, printed: number | null): boolean | null {
+  if (printed === null || printed <= 0) return null;
+  if (backCalc === null) return false;
+  return Math.abs(backCalc - printed) / printed <= REPRODUCTION_TOLERANCE;
+}
+
 export const WILDLIFE_GROUP_LABELS: Record<WildlifeRowForm['group'], string> = {
   avian: 'Bird',
   mammalian: 'Mammal',
@@ -63,6 +79,8 @@ export interface WildlifeResultRow {
   backCalcMgPerKg: number | null;
   /** Eco-SSL printed in the document for this surrogate, mg/kg, or null. */
   printedMgPerKg: number | null;
+  /** Whether backCalcMgPerKg is within REPRODUCTION_TOLERANCE of the printed value; null when none is printed. */
+  reproduces: boolean | null;
 }
 
 export interface WildlifeResult {
@@ -125,6 +143,10 @@ export function computeWildlife(form: PlantsEcoForm): Section<WildlifeResult> {
   for (const p of prepared) {
     try {
       const dose = wildlifeDose(p.input, cs * MG);
+      const backCalcMgPerKg = ((): number | null => {
+        const x = backCalculateEcoSsl(p.input);
+        return x === null ? null : x / MG;
+      })();
       rows.push({
         label: p.label,
         group: p.r.group,
@@ -132,11 +154,9 @@ export function computeWildlife(form: PlantsEcoForm): Section<WildlifeResult> {
         doseMgPerKgD: dose / MG,
         trvMgPerKgD: p.trv,
         hq: dose / p.input.trv_kg_per_kg_d,
-        backCalcMgPerKg: ((): number | null => {
-          const x = backCalculateEcoSsl(p.input);
-          return x === null ? null : x / MG;
-        })(),
+        backCalcMgPerKg,
         printedMgPerKg: p.printed ?? null,
+        reproduces: reproducesPrinted(backCalcMgPerKg, p.printed ?? null),
       });
     } catch (e) {
       errors.push(`${p.tag}: ${e instanceof Error ? e.message : String(e)}`);
