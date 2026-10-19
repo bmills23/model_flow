@@ -2065,3 +2065,134 @@ Wave I slices: I1 plume map in the report, I2 wildlife reproduction flag, I3 clo
 project changes, I4 arrow-key navigation walk over every chart, I5 transport charts sized from the content box
 rather than the padded figure, I6 uncertainty sampling of modeled cleanup sources. Per-slice rulings follow in
 their own blocks.
+
+## 2026-10-19: Wave I slice I1, plume map in the report
+
+1. **Printed table thinned to 20 rows (DEFAULT).** The report's plume map table keeps 20 evenly spaced centreline
+   rows (first and last x always kept) and its caption says "20 of 100 x positions". Reason: 100 rows is about two
+   print pages at 9 pt and breaks the no-page-break-inside rule; 20 rows keeps the figure and table on one page. The
+   full 100-row table stays on the groundwater screen. `PlumeMap` gained an optional `tableMaxRows`; `thinIndices`
+   lives in `transport/chartData.ts` (the react-refresh lint rule).
+2. **No plume grid in the CSV (open question answered).** The transport CSV does not carry the plume grid, so the
+   full centreline is on screen only. A plume CSV is a follow-up if the full print-equivalent data is wanted as a
+   download (HANDOFF open item).
+3. **Chart item (DEFAULT).** The plume chart item carries the scenario and the method, time and depth labels, built
+   in `results.ts` with the same wording as `TransportPage`, and sits before the breakthrough chart to match screen
+   order. It is absent when transport did not compute, so no Charts heading comes from the plume.
+4. **Overturns the G2 exclusion** as ruled in the wave I scope block (ruling 7). Grayscale, break-inside and the
+   hidden probe rules already applied; no CSS change.
+
+## 2026-10-19: Wave I slice I2, wildlife reproduction flag
+
+1. **One named tolerance (DEFAULT).** `REPRODUCTION_TOLERANCE = 0.05` in `apps/web/src/plantsEco/wildlife.ts`; the
+   engine test keeps its literal 0.05 and the engine is unchanged. No fixture tolerance was widened.
+2. **Inclusive bound (DEFAULT).** A relative difference of 0.05 or less reproduces; beyond it is flagged.
+3. **Text flag (DEFAULT).** The printed-value cell carries the line "Not reproduced within 5 percent", not colour.
+4. **CSV column (DEFAULT).** "reproduces printed value within 5 percent (yes or no)", values yes, no or blank.
+5. **Rows without a printed value (DEFAULT)** (user rows) have reproduces null: no flag, blank CSV cell.
+6. **Corrected after review (F6).** The first version flagged a row that has a printed value but no back-calculated
+   level (the bisection bracket was not met). `reproducesPrinted` now returns null there, so the row shows no flag
+   and the CSV cell is blank; the "out of range" cell carries the distinct meaning. Chosen over a new "could not
+   back-calculate" text (ruling). Test added, red first.
+7. **Corrected after review (F1).** The new `.repro-flag` rule had been spliced into the shared `table.compare th,
+   table.compare td` list, so `th` lost its alignment, padding, rule and wrapping. `plantsEco.css` restores the
+   shared declarations, `th` keeps `font-weight: 600` in its own rule, and `.repro-flag` has its own rule. Regression
+   test `plantsEco.css.test.ts` failed before the fix.
+
+## 2026-10-19: Wave I slice I3, warning on closing the tab with unsaved changes
+
+1. **Small pure helper (DEFAULT).** `warnBeforeUnload(hasChanges, target)` in `project/unloadGuard.ts` returns its
+   cleanup. `ProjectBar` registers it once in a `useEffect` with `[]` (it already owns the unsaved-changes prompts
+   and is mounted once) and removes it on unmount. The guard calls `preventDefault` and sets `returnValue` only
+   while `hasUnsavedChanges()` is true.
+2. **A restored autosave counts as unsaved (DEFAULT; open question answered).** The warning uses
+   `hasUnsavedChanges` unchanged. Measured behaviour: `startProjectStore` sets `savedSnapshot` to null for a
+   restored project, so every reload or close prompts until a file is saved. Kept, not suppressed: the autosave is
+   browser-local and can be cleared, so it is not a saved file, matching the Replace prompt's wording. Cost: a
+   user who restores and reloads without ever saving is asked again each time. Overturn by seeding the saved
+   snapshot from the restored state.
+3. **Fixed wording (DEFAULT).** The browser prompt text is a fixed string; browsers may show their own.
+4. **Process note.** The test and module were written in one pass, so the red stage was not observed separately.
+
+## 2026-10-19: Wave I slice I4, arrow-key navigation walk over every chart
+
+1. **Per-chart result.** Already worked: `vadose/TimeLineChart`, `vadose/SourceDepletionChart`,
+   `vadose/DepthProfileChart` (Up and Down), `vapor/ProfileChart` (Up and Down). Fixed: `transport/BreakthroughChart`
+   (Left, Right, Home, End) and `transport/PlumeMap` (four arrows, one grid cell per press). Data table only, no
+   readout: `cleanup/ModeledChart`, `uncertainty/ResultsCharts`, `uncertainty/DistributionEditor`;
+   `saturated/CrossSection` is aria-hidden decoration; the inline svgs in `TransportPage` and `VadosePage` are 14 px
+   aria-hidden legend swatches.
+2. **No shared hook (DEFAULT).** Only two charts needed a fix and the working four use different axes and probe
+   state; each fix mirrors the `TimeLineChart` pattern inline.
+3. **Home and End on the breakthrough chart (DEFAULT)**, an extra the existing four do not have.
+4. **Plume map keyboard (DEFAULT).** Starts at the centre cell and clamps at the edges; ArrowUp moves to larger y,
+   matching the plot; the probe text uses the pointer readout format. Both probe paragraphs are now
+   `aria-live="polite"` (PlumeMap was off) and the idle hint mentions arrow keys.
+5. **Corrected after review (F7).** `onPointerLeave` now also clears the cell, so arrow keys start from the centre
+   after a hover. Red test first.
+6. **Corrected after review (F8, ruling).** The four existing charts tell screen readers about the keys only through
+   the probe paragraph, not their accessible names, so they were not the model and the fallback applied: the key
+   hint is added to the accessible names of all six focusable charts. Tests in `chartKeyboard`, `VadosePage` and
+   `VaporPage`.
+7. `report/ReportCharts.tsx` was not walked (not in the candidate list).
+
+## 2026-10-19: Wave I slice I5, transport charts sized from the content box
+
+1. **Cause verified.** `figure.chart` in `transport.css` has 12 px side padding and a 1 px border, and `useWidth`
+   read `getBoundingClientRect` (the border box), so the svg was 26 px too wide for its content area and
+   `max-width: 100%` clipped it.
+2. **Fixed in the shared hook (DEFAULT).** `useWidth` subtracts padding and border, so `ModeledChart` is fixed too;
+   unpadded containers measure unchanged. A test with a 400 px border box, 12 px padding and 1 px border expects
+   374 (failed with 400 before); a plain div still reads 400.
+3. The roughly 7 percent figure was not re-measured as a number; the 26 px offset is the verified cause on a phone
+   content width near 370 px. The wave I browser check found zero overflow at 390 on the cleanup route.
+
+## 2026-10-19: Wave I slice I6, uncertainty sampling of modeled cleanup sources
+
+1. **Sampled inputs (DEFAULT).** The engine's own declarations for the methods the chain runs, lifted onto the
+   plain-data `ModeledRequest`: groundwater `at123d` or `wexler1992` scalars (velocity, porosity on legacy only,
+   retardation, decay rate, dx, dy, dz), the vadose or saturated source inputs, and on the legacy side the
+   `exposure.receptorN` factors. Only inputs with a finite base value are offered. Dispersion coefficients are
+   sampled independently of velocity, as the engine declares them; the guide says so.
+2. **Solved source concentration never offered**: the chain sets it on every forward run.
+3. **One transport method per run (DEFAULT)**, legacy or modern among those the screen solved, stored in the
+   setup's `choice` field. The modern side samples no receptor factors because the modern exposure method declares
+   none.
+4. **Off the main thread.** Each row is one modeled solve sent to the existing worker pool through a new
+   `modeled-cleanup` message; pilot, budget (confirm over 60 s, refuse over 10 min), progress and cancel are
+   unchanged. The deterministic level and cap come from the screen's own worker solve. An inline stand-in runs when
+   `Worker` is undefined.
+5. **Engine refactor, not a method change.** The `runProbabilisticCleanup` summary is split into the exported
+   `summarizeCleanup`; the pooled run uses it and is tested equal to the in-line engine run and bit-identical on
+   one and two workers.
+6. **Bounded version (DEFAULT; open question answered).** Default n = 200 for a modeled source (1000 for a direct
+   one), which keeps 10 draws below the 95 percent level, with the warning `uncertainty.small-sample-tail` when
+   fewer than 10 draws lie at or below the chosen protection quantile. The run budget, not a hard cap, bounds slow
+   chains.
+7. **Measured solve costs** (Node, benzene, default screen forms, `solveModeled` only, host load 5 to 11):
+   dissolved legacy 84 ms and modern 41 ms (2 forward runs each); saturated legacy 0.36 s (17 runs) and modern
+   7.8 s (18 runs); vadose legacy 2.0 s and modern 1.9 s (3 runs, default target not reachable). Fit on a 3-worker
+   pool: dissolved n = 200 about 3 to 6 s, n = 1000 under 30 s; saturated legacy n = 200 about 24 s, n = 1000 about
+   2 min (asks first); vadose n = 200 about 2 min 13 s (asks first), n = 1000 about 11 min (refused); saturated
+   modern n = 200 about 8 to 9 min (asks first), n = 1000 refused. Measured under load from other slices, so read
+   them as upper bounds.
+8. **Browser check (wave close).** Dissolved benzene source, uniform seepage velocity 10 to 60 m/yr, 200 iterations,
+   390x844 emulation on a production build: finished in about 2 s on 4 workers (800 forward runs), deterministic
+   level 0.0258 mg/L, protected levels 0.0294 (50 percent), 0.0148 (90) and 0.0139 (95, chosen) mg/L. The module
+   worker loaded from the built assets with no error, zero overflowing elements, Cancel run stopped a run at
+   0.7 s with "The run was cancelled." and a later run completed.
+9. **Saved setup (DEFAULT).** A new optional `modeled` key in the uncertainty project state, separate from the
+   direct-source `cleanup` key; format version 1 files still load. The run is disabled while the screen re-solves a
+   changed request, so it never samples a stale request.
+10. **Report (DEFAULT).** Modeled-source uncertainty is not repeated in the report, consistent with G2 (the report
+    does not compute a modeled source); the guide says so.
+11. **Corrected after review (F2).** `report/methodsRun.ts` now also counts the `modeled` setup for
+    `uncertainty.cleanup-probabilistic`, so the methods statement and references cite the method when only the
+    modeled panel ran. Red test first.
+12. **Corrected after review (F3).** The "bit-identical on one and two workers" test never used two workers (one
+    post-pilot chunk). It now uses 12 rows and `chunkSize` 2 (four post-pilot chunks) and asserts 1 and 2 workers;
+    the cancellation test uses 40 rows and `chunkSize` 4 and asserts 2 workers. `RunHooks` in `headless.ts` gained an
+    optional `chunkSize`.
+13. **Deviations.** `docs/methods/uncertainty.md` status paragraph edited (it named modeled sources as open). The
+    component is `ModeledSourceUncertainty.tsx` because the case-insensitive filesystem resolves
+    `./ModeledUncertainty` to `modeledUncertainty.ts`.

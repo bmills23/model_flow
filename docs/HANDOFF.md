@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-19, end of wave H)
+# HANDOFF (written from the tree, 2026-10-19, end of wave I)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -6,14 +6,18 @@ skipping a done one.
 
 ## State of the tree
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`) and wave H (UI near-parity, built on
-  branch `wave-ui`), all pushed 2026-10-19. Pages deploys from main: https://bmills23.github.io/model_flow/
-- Gate (full `corepack pnpm gate`, green on `wave-ui` 2026-10-19, build included): engine 1377 tests (79 files,
-  34.34 s), web 1475 tests (135 files, 53.19 s), data and other packages 149 passed and 3 skipped (7 files,
-  1.69 s; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs).
-  `corepack pnpm mobile:check` was also green (0 overflowing elements, 0 axe violations, including the seeded
+  branch `wave-ui`), all pushed 2026-10-19. Wave I (six slices, built on branch `wave-i`) is committed locally on
+  `wave-i`, NOT yet merged to main and NOT pushed. Pages deploys from main: https://bmills23.github.io/model_flow/
+- Gate numbers on the wave I integration (tests after merging all six slices, before the review fixes; the final
+  full `corepack pnpm gate` result is recorded by the next stage, not here): engine 1379 tests (79 files), web 1503
+  tests (140 files), data and other packages 149 passed and 3 skipped (7 files; the skipped three are the Eco-SSL
+  `pdftotext` cross-checks, which need the fetched PDFs). Last full gate before wave I (`wave-ui`, 2026-10-19):
+  engine 1377, web 1475. The wave I browser check (production build, 390x844 emulation, cleanup modeled run and
+  cancel) found zero overflow and no console errors; `corepack pnpm mobile:check` has not been re-run on the
+  final wave I tree. Earlier `mobile:check` result on `wave-ui` was green (0 overflowing elements, 0 axe violations, including the seeded
   `#/risk` route that needs benzene, two open override panels and two edited marks); run it with `--url` when
   port 5178 is busy.
-- Branches that are ancestors of this branch (safe to delete once it lands): `m0-foundation` to
+- Branches that are ancestors of this branch (safe to delete once it lands; add the wave I slice branches `wave-i-i1` to `wave-i-i6`): `m0-foundation` to
   `m6-vapor-models`, `m8-surface-water`, `wave-m5-m6-m8`, `m7-*`, `m9-*`, `m10-*`, `m11-*`, `t-m7`, `t-m9`,
   `t-m10`, `t-m11`, `wave-gaps`, the wave H slice branches (`ui-u*`, `fix-h-*`) and the `worktree-*` working
   branches. `m1-groundwater-ui` is NOT an ancestor (its commits carry different hashes from what landed);
@@ -26,6 +30,24 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave I landed (2026-10-19)
+Rulings in the DECISIONS.md "Wave I scope" block and its "Wave I slice" blocks, all DEFAULT (delegated by Bryan).
+- I1 plume map in the report, before the breakthrough chart; the printed table is 20 evenly spaced rows, the screen
+  keeps all 100; the transport CSV carries no plume grid.
+- I2 wildlife flag "Not reproduced within 5 percent" (text, 5 percent via `REPRODUCTION_TOLERANCE`), CSV column
+  yes, no or blank; no flag when no level was back-calculated or no printed value exists.
+- I3 close-tab and reload warning while there are unsaved changes; a restored autosave counts as unsaved, so it
+  prompts on every reload until a file is saved.
+- I4 chart arrow keys: breakthrough curves (with Home and End) and the plume map fixed; the key hint is in the
+  accessible names of all six focusable charts.
+- I5 transport charts size from the content box (`useWidth`), which removes the roughly 7 percent undersize.
+- I6 uncertainty on modeled cleanup sources (`#/cleanup`, `apps/web/src/cleanup/ModeledSourceUncertainty.tsx`),
+  worker pool message `modeled-cleanup`, default 200 iterations, saved under the `modeled` key; engine
+  `summarizeCleanup` split out of `runProbabilisticCleanup`.
+- Review fixes: compare table header styling restored, no reproduction flag without a back-calculated level,
+  methods statement cites the probabilistic cleanup method for a modeled-only run, two-worker tests really use two
+  workers, plume probe cell resets on pointer leave.
 
 ## Wave H landed (UI near-parity, 2026-10-19)
 Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md "Wave H" blocks, DEFAULT where marked.
@@ -264,17 +286,22 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   draft. DeVaull 2007 is the modern alternative.
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted (sec-butylbenzene enthalpy,
   tert-butylbenzene row).
-- Cleanup screen gaps: produce does not apply to modeled sources (DEFAULT); whether TPH needs a cancer endpoint
-  is an open question; modeled cleanup sources are not sampled by the uncertainty panel.
-- Report gaps: the plume map is left out of the report's uncertainty results (DEFAULT).
-- Accessibility: chart SVG arrow-key navigation has not been walked.
-- Open questions for Bryan (wave H): (1) the transport mapping Kd = Koc x foc with foc entered by the user
-  (DEFAULT; the retardation then follows from Kd); (2) whether wildlife rows that do not reproduce within 5 percent
-  of the printed Eco-SSL should be flagged in the UI (today the printed value is shown beside the back-calculated
-  one, no flag); (3) the ecological site checklist flow (soil source only: chemicals, plants and ecology, report;
-  other media are refused); (4) per-project-only database edits (no reusable library; confirm this holds after
-  use). Multi-chemical fate runs, user-defined chemicals as project entries and a close-tab warning for unsaved
-  file changes remain unbuilt.
+- Cleanup screen gaps: produce does not apply to modeled sources (DEFAULT, delegated ruling in wave I); no total
+  TPH cancer endpoint (DEFAULT, delegated). Modeled cleanup sources are sampled since wave I.
+- Report gaps: modeled-source uncertainty is not repeated in the report (DEFAULT, I6); the report does not compute
+  a modeled source. The plume map is in the report since wave I.
+- Plume CSV: the transport CSV carries no plume grid and the report prints 20 of 100 centreline rows, so the full
+  plume data is on screen only. Add a plume CSV if the full data is wanted as a download.
+- The wave I modeled-uncertainty timings were measured under host load (other slices running); the dissolved
+  source run was re-checked in a browser (about 2 s for 200 iterations on 4 workers), but the slow chains (vadose,
+  saturated modern, which ask first or are refused) were not run in a browser.
+- Restored autosave prompts on every reload until a file is saved (I3, DEFAULT). If that proves annoying, seed the
+  saved snapshot from the restored state; it is Bryan's call.
+- Wave H open questions are answered by DEFAULT delegated rulings (DECISIONS.md "Wave I scope" block): Kd = Koc x
+  foc stays, the wildlife flag exists, the checklist stays soil only, database edits stay per project. Bryan can
+  still overturn any of them. Multi-chemical fate runs and user-defined chemicals as project entries remain
+  unbuilt; RISC5 project import is not built.
+- `report/ReportCharts.tsx` was not walked for keyboard behaviour in I4 (report figures are print output).
 - Slow run: a linked surface water run at a 2000 m reach takes 2.0 s in Node after the wave G fix (178 s
   before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix). Profile before
   changing tests.
@@ -288,13 +315,12 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   timeout). If one fails, re-run that file alone before treating it as a regression.
 - Lingering worktrees of finished milestones: the local worktree directories next to the repo (`../model_flow_wt/`: m7, m9, m10, m11,
   wave) and the extra working copies inside it. Remove them once nothing needs resuming; `git worktree list` shows all of them.
-- Optional extras, not scheduled: the transport charts measure the padded figure and render about 7 percent
-  small.
 - Manual text extraction lives outside the repo; re-extract when needed:
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Answer the wave H open questions above.
-- Then the open items above: read the unverified sources, and decide produce on modeled sources, the TPH
-  cancer endpoint and the plume map in the report.
+- Run the full gate on `wave-i`, run `corepack pnpm mobile:check`, merge to main and push once (about 5 billed
+  minutes), then delete the merged slice branches and worktrees.
+- Then the open items above: read the unverified sources; decide on a plume CSV, modeled-source uncertainty in
+  the report, and whether a restored autosave should prompt on reload.

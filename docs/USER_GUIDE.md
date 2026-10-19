@@ -23,6 +23,10 @@ and sources behind each calculation are in the methods notes listed on the docum
 - **New project** in the header clears every screen, the values passed between screens and the copy kept in
   this browser.
 - The page works on a phone and on a desktop, in light and dark themes (it follows your device setting).
+- Charts that show a value under the pointer can be read from the keyboard too: tab to the chart and use the arrow
+  keys (Left and Right on the breakthrough curves, with Home and End; Up and Down on the depth and vapor profiles;
+  all four on the plume map, one grid cell per press). The reading appears in the line below the chart. Every
+  chart also has a data table.
 
 ## Legacy and modern methods
 
