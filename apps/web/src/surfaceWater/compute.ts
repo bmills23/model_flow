@@ -16,11 +16,19 @@ import type { SwRequest } from './inputs';
 /** Sample times of a run (the curves have this many points after t = 0). */
 export const N_TIMES = 24;
 /**
- * Tolerance of the bank plane quadrature. The engine default (1e-9, eight panels per axis) costs about
- * 40 s for a 24 point curve in the browser; this setting is about ten times faster and the test in
- * compute.test.ts holds it within 1 percent of the tight integral.
+ * Tolerance of the bank plane quadrature. The engine default (1e-9, eight panels per axis) is many times
+ * dearer for a 24 point curve; this setting holds the plane integral within 1 percent of the tight one
+ * (the test in compute.test.ts).
  */
 export const BANK_QUADRATURE = { relTol: 1e-3, panels: 1 } as const;
+/**
+ * Absolute tolerance of each bank plane point, as a share of the centreline surface concentration at the
+ * same time. The plane spans the whole reach, which can be far wider than the plume, and without it the
+ * points in the far tail (many orders of magnitude below the peak) each ran the time integral to its
+ * deepest refinement: about 90 percent of the cost of a 2000 m reach. At 1e-9 of the peak the plane
+ * discharge moves by well under 1e-6 relative (compute.test.ts holds it).
+ */
+export const BANK_TAIL_TOLERANCE = 1e-9;
 /** Points of the trapezoid over the discharge thickness for the bank screen average. */
 const SCREEN_POINTS = 5;
 
@@ -222,7 +230,9 @@ export function compute(req: SwRequest): SwOutcome {
       void _t;
       bank = {
         kind: 'plane',
-        concentration: at123dBankPlane(fixed, source.bankX, scenario.zOf(0)),
+        concentration: at123dBankPlane(fixed, source.bankX, scenario.zOf(0), {
+          tailTolerance: BANK_TAIL_TOLERANCE,
+        }),
         plane: {
           reachLength,
           thickness: source.thickness,

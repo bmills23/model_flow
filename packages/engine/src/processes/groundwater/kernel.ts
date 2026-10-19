@@ -230,14 +230,112 @@ export function instantaneousBoxConcentration(
 }
 
 /**
+ * Axis factors remembered between calls of `at123dConcentration` that share one aquifer and source, one
+ * time and the same release ages (a plane of points at one x). The release ages of the time integral
+ * depend only on the time and the point's x, so the three axis profiles repeat exactly from point to
+ * point: the x profile for every point, the y profile for every point of one y, the z profile for every
+ * point of one depth. Values are the very numbers the uncached path computes, so results are identical.
+ * Valid only for one aquifer and source; create one per plane (`createAt123dMemo`).
+ */
+export interface At123dMemo {
+  time: number;
+  x: Map<number, Map<number, number>>;
+  y: Map<number, Map<number, number>>;
+  z: Map<number, Map<number, number>>;
+}
+
+/** Keys kept per axis before the oldest are dropped (a plane visits few y values at a time, many depths). */
+const MEMO_KEYS = { x: 4, y: 3, z: 512 } as const;
+
+export function createAt123dMemo(): At123dMemo {
+  return { time: Number.NaN, x: new Map(), y: new Map(), z: new Map() };
+}
+
+function memoRow(axis: Map<number, Map<number, number>>, key: number, cap: number) {
+  let row = axis.get(key);
+  if (row === undefined) {
+    if (axis.size >= cap) axis.delete(axis.keys().next().value as number);
+    row = new Map<number, number>();
+    axis.set(key, row);
+  }
+  return row;
+}
+
+export interface At123dPointOptions {
+  /** Axis factors shared between the calls of one plane at one time; see `At123dMemo`. */
+  memo?: At123dMemo;
+  /**
+   * Absolute tolerance on the returned concentration (same units as the result). Default 0: the time
+   * integral is refined until its relative tolerance is met however small the value. A caller that only
+   * needs the value to within a fraction of a known larger one (a plume tail on a plane integral) sets
+   * it so the refinement stops chasing digits that cannot matter.
+   */
+  absTol?: number;
+}
+
+/**
+ * `instantaneousBoxConcentration` at unit mass with the axis profiles taken from the memo when they were
+ * computed before. Same operations in the same order, so the same numbers.
+ */
+function memoisedResponse(
+  memo: At123dMemo,
+  aquifer: At123dAquifer,
+  box: BoxSource,
+  p: Point3,
+): (tau: number) => number {
+  const R = aquifer.retardation ?? 1;
+  const lambda = aquifer.decayRate ?? 0;
+  const u = aquifer.velocity / R;
+  const xs = memoRow(memo.x, p.x, MEMO_KEYS.x);
+  const ys = memoRow(memo.y, p.y, MEMO_KEYS.y);
+  const zs = memoRow(memo.z, p.z, MEMO_KEYS.z);
+  return (tau) => {
+    let fx = xs.get(tau);
+    if (fx === undefined) {
+      const wx = 2 * Math.sqrt((aquifer.dx / R) * tau);
+      fx = axisDensity(p.x - u * tau, box.x1, box.x2, wx);
+      xs.set(tau, fx);
+    }
+    if (fx === 0) return 0;
+    let fy = ys.get(tau);
+    if (fy === undefined) {
+      const wy = 2 * Math.sqrt((aquifer.dy / R) * tau);
+      fy = axisDensity(p.y, box.y1, box.y2, wy);
+      ys.set(tau, fy);
+    }
+    if (fy === 0) return 0;
+    let fz = zs.get(tau);
+    if (fz === undefined) {
+      const wz = 2 * Math.sqrt((aquifer.dz / R) * tau);
+      fz = verticalDensity(p.z, box, wz, aquifer);
+      zs.set(tau, fz);
+    }
+    return ((1 * Math.exp(-lambda * tau)) / (aquifer.porosity * R)) * fx * fy * fz;
+  };
+}
+
+/**
  * Concentration at `p` and `input.time` for piecewise-constant mass loading, by superposition of the
  * instantaneous response over each loading step (adaptive Gauss-Kronrod in the release age).
  */
-export function at123dConcentration(input: At123dInput, p: Point3): number {
+export function at123dConcentration(
+  input: At123dInput,
+  p: Point3,
+  opts: At123dPointOptions = {},
+): number {
   checkInput(input);
   if (!(finite(p.x) && finite(p.y) && finite(p.z)))
     throw new RangeError('Receptor coordinates must be finite');
+  const absTol = opts.absTol ?? 0;
+  if (!(finite(absTol) && absTol >= 0)) throw new RangeError('absTol must be finite and >= 0');
   const { aquifer, source, time } = input;
+  const memo = opts.memo;
+  if (memo && memo.time !== time) {
+    memo.time = time;
+    memo.x.clear();
+    memo.y.clear();
+    memo.z.clear();
+  }
   if (belowOrAbove(p.z, aquifer)) return 0;
   const R = aquifer.retardation ?? 1;
   const u = aquifer.velocity / R;
@@ -251,13 +349,16 @@ export function at123dConcentration(input: At123dInput, p: Point3): number {
     if (!(end > step.start)) continue;
     const lo = time - end;
     const hi = time - step.start;
-    const f = (tau: number): number => instantaneousBoxConcentration(aquifer, source, p, tau, 1);
+    const stepAbsTol = absTol > 0 ? absTol / step.rate : 0;
+    const f = memo
+      ? memoisedResponse(memo, aquifer, source, p)
+      : (tau: number): number => instantaneousBoxConcentration(aquifer, source, p, tau, 1);
     const cuts = peak > lo && peak < hi ? [lo, peak, hi] : [lo, hi];
     let sum = 0;
     for (let i = 0; i + 1 < cuts.length; i++) {
       sum += integrateTanhSinh(f, cuts[i]!, cuts[i + 1]!, {
         relTol: 1e-8,
-        absTol: 0,
+        absTol: stepAbsTol,
         maxDepth: 10,
       }).value;
     }

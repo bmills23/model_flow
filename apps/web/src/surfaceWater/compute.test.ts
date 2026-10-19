@@ -77,7 +77,7 @@ describe('surface water compute, linked to a transport run', () => {
     expect(Math.max(...res.legacy.groundwaterConcentrations)).toBeGreaterThan(0);
     expect(Math.max(...res.modern.fluxAveraged)).toBeGreaterThan(0);
     expect(Math.max(...res.modern.surfaceWater)).toBeGreaterThan(res.modern.surfaceWater[0]!);
-  }, 60000);
+  }, 30000);
 
   it('holds the fast bank quadrature within 1 percent of the tight integral', () => {
     const s = toScenario({ ...TRANSPORT_FORM, timeYr: '5' });
@@ -95,7 +95,7 @@ describe('surface water compute, linked to a transport run', () => {
     const tight = bankPlaneDischarge(c, plane, t).discharge[0]!;
     expect(tight).toBeGreaterThan(0);
     expect(Math.abs(fast - tight) / tight).toBeLessThan(0.01);
-  }, 60000);
+  }, 30000);
 });
 
 describe('surface water compute, plane checks and long reaches', () => {
@@ -120,12 +120,12 @@ describe('surface water compute, plane checks and long reaches', () => {
     const codes = (w: { code: string }[]) => w.map((x) => x.code);
     expect(codes(res.modern.warnings)).toContain('surfaceWater.plume-underflow');
     expect(codes(res.legacy.warnings)).toContain('surfaceWater.plume-underflow');
-  }, 120000);
+  }, 30000);
 
   it('warns that a short reach truncates the plume', () => {
     const res = linkedRun({ reachLength: '1', thickness: '3' });
     expect(res.modern.warnings.map((w) => w.code)).toContain('surfaceWater.reach-truncates-plume');
-  }, 120000);
+  }, 30000);
 
   it('keeps the modern loading for a long entered reach (it must not collapse to zero)', () => {
     const short = linkedRun({ reachLength: '40', thickness: '3' });
@@ -136,5 +136,5 @@ describe('surface water compute, plane checks and long reaches', () => {
     const ratio = peak(long.modern.fluxAveraged) / peak(short.modern.fluxAveraged);
     expect(ratio).toBeGreaterThan(0.5 * (40 / 2000));
     expect(ratio).toBeLessThan(1.5 * (40 / 2000));
-  }, 180000);
+  }, 30000);
 });
