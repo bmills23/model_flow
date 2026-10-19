@@ -1,4 +1,4 @@
-import type { Warning } from '@model-flow/engine';
+import { convert, type Warning } from '@model-flow/engine';
 import { csvHeader, type CsvCell } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import { screensOf, type Project, type Screens } from '../project';
@@ -36,6 +36,9 @@ import { computeEcossl, computeBenchmarks } from '../plantsEco/eco';
 import { computeTph } from '../plantsEco/tph';
 import { loadEcossl, substanceFor } from '../plantsEco/ecossl';
 import { plantsEcoCsvTables } from '../plantsEco/csv';
+import type { ChartItem } from './chartItems';
+import { saturatedSeries, saturatedVlines } from '../saturated/timeSeries';
+import { profileCurves, layerBands } from '../vapor/chartData';
 import type { VadoseFeed } from '../vadose/feed';
 import type { SaturatedFeed } from '../saturated/feed';
 import type { BankFeed } from '../transport/bankFeed';
@@ -55,6 +58,8 @@ export interface ResultWarning {
 /** What one screen contributes to the report: the screen's own CSV tables, its warnings and notes. */
 export interface SectionResults {
   tables: CsvTable[];
+  /** The screen's main charts, drawn with the screen's own chart components. */
+  charts: ChartItem[];
   warnings: ResultWarning[];
   notes: string[];
 }
@@ -95,12 +100,12 @@ type Method = 'legacy' | 'modern';
 const METHOD_NAME: Record<Method, string> = { legacy: 'legacy method', modern: 'modern method' };
 
 function empty(): SectionResults {
-  return { tables: [], warnings: [], notes: [] };
+  return { tables: [], charts: [], warnings: [], notes: [] };
 }
 
 function notComputed(why: string | string[]): SectionResults {
   const text = Array.isArray(why) ? why.join('; ') : why;
-  return { tables: [], warnings: [], notes: [`Not computed: ${text}`] };
+  return { tables: [], charts: [], warnings: [], notes: [`Not computed: ${text}`] };
 }
 
 function addWarnings(
@@ -118,7 +123,7 @@ function addWarnings(
 }
 
 /** A stored feed value as the screens hold it (decoded exactly as loading a project does), or null. */
-function feedOf<T>(project: Project, key: string): T | null {
+export function feedOf<T>(project: Project, key: string): T | null {
   const entry = (project.feeds as Record<string, { value?: unknown } | undefined> | undefined)?.[
     key
   ];
@@ -143,6 +148,7 @@ function transport(s: Screens, feed: Feed): SectionResults {
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
   sec.tables = transportCsvTables(out.result, Number(form.timeYr));
+  sec.charts = [{ kind: 'breakthrough', result: out.result, scale: form.scale }];
   addWarnings(sec, 'groundwater transport', out.result.warnings);
   return sec;
 }
@@ -154,6 +160,22 @@ function vadose(s: Screens): SectionResults {
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
   sec.tables = vadoseCsvTables(out.result);
+  const vform = s.vadose.form;
+  const vrun =
+    out.result.runs[vform.method] ??
+    out.result.runs[vform.method === 'legacy' ? 'modern' : 'legacy'];
+  if (vrun) {
+    sec.charts = [
+      { kind: 'vadoseDepth', run: vrun, scale: vform.scale },
+      {
+        kind: 'vadoseWaterTable',
+        runs: out.result.runs,
+        measure: vform.measure,
+        scale: vform.scale,
+      },
+      { kind: 'vadoseDepletion', run: vrun, scale: vform.scale },
+    ];
+  }
   for (const w of out.result.warnings) addWarnings(sec, VADOSE_METHOD_IDS[w.method], [w]);
   for (const [m, why] of Object.entries(out.result.unavailable)) {
     sec.notes.push(`The ${METHOD_NAME[m as Method]} did not run: ${why}`);
@@ -168,6 +190,28 @@ function saturated(s: Screens): SectionResults {
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
   sec.tables = saturatedCsvTables(out.result);
+  const sform = s.saturated.form;
+  const wanted: Method[] = sform.method === 'both' ? ['legacy', 'modern'] : [sform.method];
+  const shown = wanted.filter((m) => out.result.runs[m]);
+  const runs = shown.map((m) => out.result.runs[m]!);
+  if (runs.length > 0) {
+    const vlines = saturatedVlines(runs, parsed.scenario.input.tEnd / convert(1, 'yr', 's'));
+    const timesYr = out.result.curves.timesYr;
+    sec.charts = [
+      {
+        kind: 'saturatedRate',
+        timesYr,
+        series: saturatedSeries(out.result, shown, 'rate'),
+        vlines,
+      },
+      {
+        kind: 'saturatedRemaining',
+        timesYr,
+        series: saturatedSeries(out.result, shown, 'remaining'),
+        vlines,
+      },
+    ];
+  }
   for (const w of out.result.warnings) addWarnings(sec, METHOD_NAME[w.method], [w]);
   for (const [m, why] of Object.entries(out.result.unavailable)) {
     sec.notes.push(`The ${METHOD_NAME[m as Method]} did not run: ${why}`);
@@ -189,6 +233,16 @@ function vapor(s: Screens, feed: Feed): SectionResults {
   const epcs: VaporEpcs | null = source ? vaporEpcs(form, parsed, source, outdoor) : null;
   const sec = empty();
   sec.tables = vaporCsvTables(outcome, epcs);
+  const curves = profileCurves(outcome);
+  if (curves.length > 0) {
+    const names = form.layers.map((l, i) => l.name || `Stratum ${i + 1}`);
+    const cap =
+      form.source === 'groundwater'
+        ? (parsed.legacy.capillaryFringe?.thickness ?? parsed.modern.capillary?.height)
+        : undefined;
+    const bands = layerBands(parsed.modern.strata, names, parsed.modern.floorDepth, cap);
+    sec.charts = [{ kind: 'vaporProfile', curves, bands }];
+  }
   for (const m of ['legacy', 'modern'] as const) {
     const o = outcome[m];
     if (o.ok) addWarnings(sec, INDOOR_ORIGIN[m], o.result.warnings);
@@ -204,6 +258,11 @@ function surfaceWater(s: Screens, feed: Feed): SectionResults {
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
   sec.tables = surfaceWaterCsvTables(out.result);
+  const swScale = s.surfaceWater.form.scale;
+  sec.charts = [
+    { kind: 'surfaceWater', result: out.result, scale: swScale },
+    { kind: 'sediment', result: out.result, scale: swScale },
+  ];
   addWarnings(sec, LEGACY_ID, out.result.legacy.warnings);
   addWarnings(sec, MODERN_ID, out.result.modern.warnings);
   return sec;
@@ -226,6 +285,7 @@ function risk(s: Screens, feed: Feed, db: ChemicalDb): SectionResults {
   for (const c of form.chemicals) names[c.id] = c.name;
   const sec = empty();
   sec.tables = riskCsvTables(outcome, names);
+  sec.charts = [{ kind: 'risk', outcome, names }];
   for (const n of built.notes)
     addWarnings(sec, 'exposure screen', [{ code: 'ui.pathway-skipped', message: n }]);
   for (const m of ['legacy', 'modern'] as const) {
@@ -338,9 +398,10 @@ async function plantsEco(s: Screens): Promise<SectionResults> {
 function uncertainty(): SectionResults {
   return {
     tables: [],
+    charts: [],
     warnings: [],
     notes: [
-      'A project does not save uncertainty results. Each run is repeated from this setup and its seed on the exposure and cleanup screens, which gives the same numbers.',
+      'A project does not save uncertainty results. Each run is repeated from this setup and its seed, which gives the same numbers as the exposure and cleanup screens; tick "Include uncertainty results" below to run it for this report.',
     ],
   };
 }

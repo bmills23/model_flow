@@ -122,9 +122,18 @@ project, so a run repeats exactly.
 
 The report is built from the project: the inputs of each screen you used, each screen's result tables, the
 engine warnings, a methods statement that names the methods you chose with numbered references, and the
-non-affiliation notice. Charts stay on their screens and the report says so. **Print or save as PDF** uses
-your browser's print dialog, which has a PDF option. The optional "Prepared by" field is not saved to the
-project.
+non-affiliation notice. Each screen's main charts are included too, every one followed by its data table
+(the plume map stays on its screen). Charts print in shades of grey, so a black and white print stays
+readable. **Print or save as PDF** uses your browser's print dialog, which has a PDF option. The optional
+"Prepared by" field is not saved to the project.
+
+Uncertainty results are left out until you ask. In the uncertainty section, tick **Include uncertainty
+results** to repeat each analysis you set up on the exposure and cleanup screens, from its saved
+distributions and seed, so the numbers match the screens. A progress bar shows the run and **Cancel run**
+stops it; a very long run asks you to confirm first. The report then shows the percentile summary, the
+chart of the spread, which inputs matter (tornado, Spearman and, if switched on, Sobol), the seed and the
+iteration count, and the probabilistic cleanup levels. A panel with no distribution set is skipped with a
+note saying why. Results are not saved with the project.
 
 ### Downloading tables
 

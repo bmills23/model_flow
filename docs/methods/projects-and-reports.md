@@ -247,18 +247,39 @@ so it is the one feed that still starts empty after a reload.
   (units included), numbers shortened to six significant digits and at most 40 rows each, with a line
   giving the full row count (the CSV download holds every row at full precision). Warnings are the engine
   `{code, message}` pairs with the method or table that raised them, de-duplicated. A screen that cannot
-  be computed prints "Not computed" with the form's own error text instead of a table. Not in the report:
-  (1) charts, which stay on the screens, and the report says so; (2) the uncertainty panels' results,
-  because a project saves their setup and seed, not a run, so that section lists the setup and says the run
-  repeats from the seed; (3) a modeled cleanup source, which solves through the groundwater chain feed
-  (it holds a function and is not saved), so the section says it needs the chain sent again from the
-  groundwater screen; (4) the household source levels panel of the cleanup screen, which has no CSV table
+  be computed prints "Not computed" with the form's own error text instead of a table. Charts and
+  uncertainty results landed in Wave G slice G2 (a later bullet). Not in the report: (1) the plume map
+  and the modeled cleanup chart; (2) a modeled cleanup source, which solves through the groundwater chain
+  feed (it holds a function and is not saved), so the section says it needs the chain sent again from the
+  groundwater screen; (3) the household source levels panel of the cleanup screen, which has no CSV table
   (the section says it is on the screen only). On a phone each result row prints as a labeled card so no
   table scrolls sideways; the printed page keeps the plain table.
   Viewport check (2026-10-18): `#/report` for a project with the groundwater, vadose, saturated, vapor,
   surface water and plants screens used, through CDP device emulation at 390x844 (mobile, scale 2) in
   light and dark and at 1280x900 light: 8 result tables rendered, overflowing elements 0 in all three,
   scroll width equal to client width.
+- **Implemented (Wave G slice G2, charts and uncertainty results).** Each section carries the screen's
+  main charts, drawn by the screen's own chart components from the same compute result as the tables
+  (`ChartItem` in `report/chartItems.ts`, built in `results.ts`): the receptor breakthrough chart
+  (groundwater), the depth profile, water table and depletion charts (vadose), release rate and remaining
+  mass (saturated), surface water and sediment, the vapor profile, and the exposure bars. Every chart is
+  followed by its data table, shown open with no toggle in the report (a context read by the shared
+  data table and the two charts with their own). Print styling pins the chart palette to grey shades and
+  removes pointer readouts and buttons, so a black and white print keeps the series apart (shade plus the
+  screens' markers and dashes). Uncertainty results are an explicit "Include uncertainty results" control
+  in the uncertainty section, off by default. Ticking it repeats each configured panel's run from the
+  saved setup and seed (`report/uncertaintyReport.ts`, over the same `uncertainty/headless.ts` runs the
+  two panels use): the exposure sample goes through the worker pool with its progress, cancel and run
+  budget confirmation, so the page stays responsive; the probabilistic cleanup solve is synchronous, as
+  on its screen, and is bounded by the same budget check. Shown: the percentile summary, CDF and
+  histogram, tornado, Spearman and (when switched on) Sobol indices, the seed, the iteration count and
+  sampling kind, warnings, and the cleanup panel's protective level table with its chart and Spearman
+  bars. A panel with no sampled input, an invalid setup or a screen that does not compute is skipped with
+  a sentence saying why. Results are not saved in the project.
+  Viewport check (2026-10-19): `#/report` with the groundwater, vadose, saturated, vapor, surface water,
+  plants, exposure and cleanup screens used and both uncertainty panels run through the real worker pool:
+  19 charts rendered, 8 of them uncertainty figures, overflowing elements 0 at 390x844 in light and dark
+  and at 1280x900 light.
 - No author name, address or contact line is printed (DEFAULT); a free-text "prepared by" field the user
   fills is allowed, empty by default. Nothing in the template carries a personal contact address.
 
@@ -355,7 +376,7 @@ side-by-side comparison of two saved projects; offline PWA install; translation;
 | S3 | Autosave and persisted feeds, "New project" | S2 | yes |
 | S4 | File save and open, share link with compression and size limit | S2 | yes |
 | S5 | `exportCsv` helper and CSV on the existing screens | none | yes |
-| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closed after S8 (done: generator, inputs, methods, result tables and engine warnings per screen; charts are deliberately left on the screens) |
+| S6 | Methods statement generator and the `#/report` screen with print CSS | S2 | yes for the generator; the report must cover every screen, so it closed after S8 (done: generator, inputs, methods, result tables and engine warnings per screen; charts and the uncertainty results were added in Wave G slice G2) |
 | S7 | Bundle splitting and the build-size test | none | yes, but re-measure after M7, M9, M10 |
 | S8 | Project keys, CSV and report sections for the M7, M9 and M10 screens (done on the wave branch: keys, feeds, CSV and input and method sections; the per-screen result tables closed with S6c) | S2, S5, S6, and M7, M9, M10 landed | no |
 | S9 | `scripts/mobile-check.mjs` and fixes on every screen | none to write the script | the script yes; the full pass waits for every screen (done 2026-10-18, zero overflow) |

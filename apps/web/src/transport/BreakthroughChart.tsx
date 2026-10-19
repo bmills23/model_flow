@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
+import { TablesAlwaysOpen } from '../vadose/tablesOpen';
 import { scaleLinear, scaleLog } from 'd3-scale';
 import { formatConcentration, linePath, type ConcScale } from './chartData';
 import type { ComputeResult, MethodKey } from './compute';
@@ -15,7 +16,9 @@ const toYr = (s: number): number => convert(s, 's', 'yr');
 export function BreakthroughChart({ result, scale }: { result: ComputeResult; scale: ConcScale }) {
   const [ref, width] = useWidth();
   const [probeIdx, setProbeIdx] = useState<number | null>(null);
-  const [tableOpen, setTableOpen] = useState(false);
+  const always = useContext(TablesAlwaysOpen);
+  const [tableOpen0, setTableOpen] = useState(false);
+  const tableOpen = always || tableOpen0;
   const keys = (['legacy', 'modern', 'domenico'] as const).filter((k) => result.series[k]);
   const tYr = result.times.map(toYr);
   const data = useMemo(
@@ -154,14 +157,16 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
               .join(', ')} mg/L`}
       </p>
       <div className="table-view">
-        <button
-          type="button"
-          className="btn"
-          aria-expanded={tableOpen}
-          onClick={() => setTableOpen((o) => !o)}
-        >
-          {tableOpen ? 'Hide data table' : 'Show data table'}
-        </button>
+        {!always && (
+          <button
+            type="button"
+            className="btn"
+            aria-expanded={tableOpen}
+            onClick={() => setTableOpen((o) => !o)}
+          >
+            {tableOpen ? 'Hide data table' : 'Show data table'}
+          </button>
+        )}
         {tableOpen && (
           <div className="table-scroll">
             <table>

@@ -1,22 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   DEFAULT_N,
-  DEFAULT_SEED,
-  DEFAULT_SOBOL_N,
   UncertaintyError,
-  buildSampleMatrix,
-  runSobol,
-  runTornado,
-  spearmanWithOutput,
-  summarizeSample,
-  type SampleSummary,
   type SamplingKind,
-  type SobolResult,
-  type TornadoResult,
   type UncertainInput,
   type UncertainModel,
-  type UncertaintySpec,
-  type Warning,
 } from '@model-flow/engine';
 import { DownloadCsv, type CsvTable } from '../export/DownloadCsv';
 import { Field, Seg } from '../ui/controls';
@@ -25,15 +13,9 @@ import type { UncertaintySetup } from './project';
 import { useSetup } from './useSetup';
 import { DistributionEditor, type UnitDisplay } from './DistributionEditor';
 import type { EditorSpec } from './editor';
-import {
-  RunCancelledError,
-  createWorkerFactory,
-  runPooled,
-  type Progress,
-  type WorkerFactory,
-} from './pool';
+import { RunCancelledError, type Progress, type WorkerFactory } from './pool';
+import { exposureSettings, runExposureAnalysis, type ExposureRun } from './headless';
 import { formatDuration, type Projection } from './budget';
-import { pathExtractor } from './protocol';
 import {
   CdfChart,
   HistogramChart,
@@ -80,21 +62,7 @@ export interface UncertaintyPanelProps<I> {
   csvEditions?: CsvTable['editions'];
 }
 
-interface RunResult {
-  output: PanelOutput;
-  kind: SamplingKind;
-  n: number;
-  seed: string;
-  succeeded: number;
-  summary: SampleSummary | null;
-  values: number[];
-  spearman: { label: string; rho: number }[];
-  tornado: TornadoResult;
-  sobol: SobolResult | null;
-  warnings: Warning[];
-  workers: number;
-  base: unknown;
-}
+type RunResult = ExposureRun & { base: unknown };
 
 function message(e: unknown): string {
   if (e instanceof RunCancelledError) return 'The run was cancelled.';
@@ -148,44 +116,30 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
     if (!spec || !spec.ok || !output) return;
     setError(null);
     setResult(null);
-    const n = nText.trim() === '' ? DEFAULT_N[kind] : Number(nText);
-    if (!Number.isInteger(n) || n < 1) {
-      setError('The number of iterations must be a positive whole number.');
+    const settings = exposureSettings(setup);
+    if (!settings.ok) {
+      setError(settings.error);
       return;
     }
-    const sN = sobolN.trim() === '' ? DEFAULT_SOBOL_N : Number(sobolN);
-    if (sobol && (!Number.isInteger(sN) || sN < 2)) {
-      setError('The Sobol sample size N must be a whole number of at least 2.');
-      return;
-    }
-    const useSeed = seed.trim() === '' ? DEFAULT_SEED : seed;
-    const full: UncertaintySpec<unknown, unknown> = {
-      model: model as UncertainModel<unknown, unknown>,
-      base,
-      distributions: spec.distributions,
-      output: pathExtractor(output.path),
-      ...(kind === 'lhs' && spec.correlation ? { correlation: spec.correlation } : {}),
-      n,
-      seed: useSeed,
-    };
     const ctl = new AbortController();
     abort.current = ctl;
     setRunning(true);
-    setProgress({ done: 0, total: n });
+    setProgress({ done: 0, total: settings.value.n });
     try {
-      const matrix = buildSampleMatrix(kind, full);
-      const pooled = await runPooled(
+      const ran = await runExposureAnalysis(
         {
+          model,
           modelId: props.modelId,
           base,
-          ids: matrix.ids,
-          rows: matrix.samples,
-          outputPath: output.path,
+          output,
+          spec,
+          settings: settings.value,
+          labels,
         },
-        props.makeWorker ?? createWorkerFactory(),
         {
           onProgress: setProgress,
           signal: ctl.signal,
+          ...(props.makeWorker ? { makeWorker: props.makeWorker } : {}),
           ...(props.workers !== undefined ? { workers: props.workers } : {}),
           confirm: (p) =>
             new Promise<boolean>((resolve) => {
@@ -199,40 +153,7 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
             }),
         },
       );
-      const finite = pooled.outputs.filter(Number.isFinite);
-      const warnings: Warning[] = [...matrix.warnings];
-      if (pooled.failures.fraction > 0.01) {
-        const codes = Object.entries(pooled.failures.codes)
-          .map(([c, k]) => `${c}: ${k}`)
-          .join(', ');
-        warnings.push({
-          code: 'uncertainty.failed-iterations',
-          message: `${pooled.failures.count} of ${n} iterations were refused by the deterministic checks (${codes}); the summary uses the ${finite.length} that ran.`,
-        });
-      }
-      // The one-at-a-time and Sobol runs are cheap for the exposure methods and run on this thread.
-      const tornado = runTornado(full);
-      let sob: SobolResult | null = null;
-      if (sobol) {
-        sob = runSobol({ ...full, n: sN });
-        warnings.push(...sob.warnings);
-      }
-      const rho = spearmanWithOutput(matrix.samples, pooled.outputs);
-      setResult({
-        output,
-        kind,
-        n,
-        seed: matrix.seed,
-        succeeded: finite.length,
-        summary: finite.length > 0 ? summarizeSample(finite) : null,
-        values: finite,
-        spearman: matrix.ids.map((id, j) => ({ label: labels[id] ?? id, rho: rho[j] as number })),
-        tornado,
-        sobol: sob,
-        warnings,
-        workers: pooled.workers,
-        base,
-      });
+      setResult({ ...ran, base });
     } catch (e) {
       setError(e instanceof UncertaintyError ? e.message : message(e));
     } finally {

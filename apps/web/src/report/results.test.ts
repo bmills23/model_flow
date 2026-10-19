@@ -203,3 +203,35 @@ describe('tableText', () => {
     expect(t.rows[0]).toEqual(['0.123457', '12345700', 'true']);
   });
 });
+
+describe('computeResults charts', () => {
+  const kinds = async (edit: (s: Screens) => void, key: string): Promise<string[]> => {
+    const r = await computeResults(project(edit));
+    return (r[key as keyof typeof r]?.charts ?? []).map((c) => c.kind);
+  };
+
+  it('carries the breakthrough chart of the groundwater screen', async () => {
+    const k = await kinds((s) => {
+      s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5' } };
+    }, 'transport');
+    expect(k).toEqual(['breakthrough']);
+  });
+
+  it('carries the three vadose charts and the two saturated charts', async () => {
+    const v = await kinds((s) => {
+      s.vadose = { ...s.vadose, form: { ...s.vadose.form, foc: '0.0123' } } as Screens['vadose'];
+    }, 'vadose');
+    expect(v).toEqual(['vadoseDepth', 'vadoseWaterTable', 'vadoseDepletion']);
+    const sat = await kinds((s) => {
+      s.saturated = { ...s.saturated, form: { ...s.saturated.form, horizonYr: '20' } };
+    }, 'saturated');
+    expect(sat).toEqual(['saturatedRate', 'saturatedRemaining']);
+  });
+
+  it('has no charts for a screen that did not compute', async () => {
+    const k = await kinds((s) => {
+      s.transport = { ...s.transport, form: { ...s.transport.form, K: 'abc' } };
+    }, 'transport');
+    expect(k).toEqual([]);
+  });
+});

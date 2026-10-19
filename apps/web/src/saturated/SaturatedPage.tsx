@@ -24,29 +24,12 @@ import { FED_MAX_STEPS, saturatedFedSteps } from './steps';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { saturatedCsvTables } from './csv';
 import { useSaturatedResult } from './useSaturatedResult';
+import { SATURATED_METHODS as METHODS, saturatedSeries, saturatedVlines } from './timeSeries';
 
 type Setter = <K extends keyof SaturatedForm>(key: K, value: SaturatedForm[K]) => void;
 
 const YR = convert(1, 'yr', 's');
 const DAY = 86400;
-
-const METHODS: Record<
-  SaturatedMethod,
-  { label: string; short: string; cls: string; marker: SaturatedMethod }
-> = {
-  legacy: {
-    label: 'Legacy two-region (constant until exhausted)',
-    short: 'Legacy',
-    cls: 's-legacy',
-    marker: 'legacy',
-  },
-  modern: {
-    label: 'Modern exponential (declines with the mass left)',
-    short: 'Modern',
-    cls: 's-modern',
-    marker: 'modern',
-  },
-};
 
 function Table(props: { caption: string; head: string[]; rows: Row[] }) {
   return (
@@ -187,21 +170,8 @@ export function SaturatedPage() {
     : null;
 
   const series = (kind: 'rate' | 'remaining'): TimeSeries[] =>
-    shown.map((m) => ({
-      key: m,
-      label: METHODS[m].label,
-      short: METHODS[m].short,
-      cls: METHODS[m].cls,
-      marker: m,
-      values: result!.curves[kind][m]!,
-    }));
-  const vlines = runs
-    .filter((r) => Number.isFinite(r.depletionTime) && r.depletionTime / YR <= horizonYr)
-    .map((r) => ({
-      tYr: r.depletionTime / YR,
-      label: `${METHODS[r.method].short} t_d = ${fmt(r.depletionTime / YR)} yr`,
-      cls: METHODS[r.method].cls,
-    }));
+    saturatedSeries(result!, shown, kind);
+  const vlines = saturatedVlines(runs, horizonYr);
 
   const warnings: TaggedWarning[] = (result?.warnings ?? []).filter((w) =>
     shown.includes(w.method),
