@@ -3,6 +3,7 @@ import { getDecimalComma, setDecimalComma, subscribeDecimalComma } from '../ui/d
 import { downloadProject, readProjectFile } from './file';
 import type { LoadResult } from './index';
 import { SHARE_PREFIX, decodeShare, makeShareLink } from './share';
+import { warnBeforeUnload } from './unloadGuard';
 import {
   currentProject,
   getTitle,
@@ -29,6 +30,9 @@ export function ProjectBar() {
   const [message, setMessage] = useState<Message>(null);
   const [link, setLink] = useState<string | null>(null);
   const lastPayload = useRef<string | null>(null);
+
+  // confirm before the tab closes or reloads while the project has changes not saved to a file
+  useEffect(() => warnBeforeUnload(hasUnsavedChanges), []);
 
   const replaceWith = (r: LoadResult, done: string): boolean => {
     if (!r.ok) {

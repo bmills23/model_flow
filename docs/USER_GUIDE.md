@@ -52,6 +52,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   Save a file instead. The app shows the limit rather than a shortened link.
 - Opening a project, from a file or a link, asks first when the current project has changes not saved to a
   file.
+- Closing or reloading the tab also asks first while the project has changes not saved to a file, because the
+  browser's copy of the project is not a saved file and a browser can clear it.
 - **Type numbers with a decimal comma** (a checkbox under the project buttons) lets you type and read
   "1,5" for 1.5 in every number box. It is a setting of this browser only. Saved files, share links and CSV
   always use the point. With it on, a box shows a message and keeps your text when it cannot tell what you
