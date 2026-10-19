@@ -1,5 +1,6 @@
 import type { MethodDescriptor, Warning } from '../../registry/index.js';
 import { tphTotalLevel, type TphTotalLevelInput, type TphTotalLevelResult } from './fractions.js';
+import { tphUncertainInputs } from './uncertain.js';
 
 export * from './fractions.js';
 
@@ -11,6 +12,7 @@ const COMMON_ASSUMPTIONS = [
 
 export const tphTphcwg: MethodDescriptor<TphTotalLevelInput, TphTotalLevelResult> = {
   id: 'tph.tphcwg',
+  uncertainInputs: tphUncertainInputs(),
   process: 'tph',
   kind: 'legacy',
   name: 'TPH fraction cleanup level with the TPHCWG aliphatic and aromatic fraction set',
@@ -25,6 +27,7 @@ export const tphTphcwg: MethodDescriptor<TphTotalLevelInput, TphTotalLevelResult
 
 export const tphMadep: MethodDescriptor<TphTotalLevelInput, TphTotalLevelResult> = {
   id: 'tph.madep',
+  uncertainInputs: tphUncertainInputs(),
   process: 'tph',
   kind: 'modern',
   name: 'TPH fraction cleanup level with the MADEP carbon range fraction set',

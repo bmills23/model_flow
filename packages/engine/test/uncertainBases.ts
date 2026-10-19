@@ -1,6 +1,23 @@
 import { convert } from '../src/numerics/units.js';
 import type {
+  At123dRunInput,
   AttenuationFactorInput,
+  BenchmarkScreenInput,
+  DispersivityInput,
+  DomenicoRunInput,
+  EcosslScreenInput,
+  HhrapProduceInput,
+  HouseholdInput,
+  IrrigationMethodInput,
+  LegacyPlantInput,
+  LittleInput,
+  ParticulateBoxInput,
+  ParticulatePef2002Input,
+  ParticulatePefInput,
+  ShowerInput,
+  SprinklerMethodInput,
+  TphTotalLevelInput,
+  WexlerRunInput,
   DevaullInput,
   DominantLayerInput,
   EpaJeInput,
@@ -348,3 +365,248 @@ export const devaullGroundwaterBase: DevaullInput = {
   ...devaullBase,
   source: { kind: 'groundwater', cgw: 1e-3, H: 0.228, S: 1.75, x: 1 },
 };
+
+// M1 groundwater, M7 shower, irrigation and particulate, M9 plant uptake, eco and TPH bases.
+
+const gwSteps = [
+  { start: 0, end: 1e6, rate: 1e-6 },
+  { start: 1e6, end: 2e6, rate: 2e-6 },
+  { start: 2e6, end: 3e6, rate: 3e-6 },
+  { start: 3e6, end: Infinity, rate: 4e-6 },
+];
+export const at123dBase: At123dRunInput = {
+  aquifer: {
+    velocity: 1e-6,
+    porosity: 0.3,
+    retardation: 1.5,
+    decayRate: 1e-9,
+    dx: 1e-6,
+    dy: 2e-7,
+    dz: 5e-8,
+    thickness: 10,
+  },
+  source: { x1: -1, x2: 1, y1: -2, y2: 2, z1: 1, z2: 2 },
+  loading: gwSteps,
+  time: 1e7,
+  points: [{ x: 20, y: 0, z: 1.5 }],
+};
+
+const gwConc = [
+  { start: 0, end: 1e6, concentration: 1 },
+  { start: 1e6, end: 2e6, concentration: 0.5 },
+  { start: 2e6, end: 3e6, concentration: 0.25 },
+  { start: 3e6, end: 4e6, concentration: 0.1 },
+];
+export const wexlerBase: WexlerRunInput = {
+  params: {
+    velocity: 1e-6,
+    retardation: 1.5,
+    decayRate: 1e-9,
+    dx: 1e-6,
+    dy: 2e-7,
+    dz: 5e-8,
+    c0: 1,
+    patch: { y1: 1, y2: 3, z1: 0.5, z2: 1 },
+  },
+  width: 10,
+  thickness: 5,
+  time: 1e7,
+  loading: gwConc,
+  points: [{ x: 5, y: 2, z: 0.7 }],
+};
+export const domenicoBase: DomenicoRunInput = {
+  params: {
+    velocity: 1e-6,
+    retardation: 1.5,
+    decayRate: 1e-9,
+    alphaL: 3,
+    alphaT: 0.3,
+    alphaV: 0.03,
+    c0: 1,
+    sourceWidth: 10,
+    sourceThickness: 2,
+  },
+  time: 1e7,
+  loading: gwConc,
+  points: [{ x: 20, y: 0, z: 1 }],
+};
+export const dispersivityBase: DispersivityInput = { distance: 50 };
+
+export const showerBase: ShowerInput = {
+  waterConcentration: 1e-3,
+  henry: 0.2,
+  molecularWeight: 78,
+  dropletDiameter: 1e-3,
+  fallTime: 1,
+  waterFlow: 1e-4,
+  showerTime: 600,
+  stallVolume: 2,
+  filmReferences: { gasCmPerH: 3000, liquidCmPerH: 20 },
+  temperature: {
+    calibrationK: 293.15,
+    waterK: 313.15,
+    viscosityCalibration: 1,
+    viscosityWater: 0.65,
+  },
+};
+export const littleBase: LittleInput = { ...showerBase, gasFlow: 1e-3, postShowerTime: 300 };
+export const householdBase: HouseholdInput = {
+  waterConcentration: 1e-3,
+  transferFactorLPerM3: 0.5,
+  volatile: true,
+};
+
+const sprinkler = {
+  henry: 0.2,
+  molecularWeight: 78,
+  dropletDiameter: 2e-3,
+  fallTime: 2,
+  sprinklerFlow: 2e-4,
+  filmReferences: { gasCmPerH: 3000, liquidCmPerH: 20 },
+  temperature: {
+    calibrationK: 293.15,
+    waterK: 303.15,
+    viscosityCalibration: 1,
+    viscosityWater: 0.8,
+  },
+};
+export const sprinklerBase: SprinklerMethodInput = {
+  waterConcentration: 1e-3,
+  sprinkler,
+  box: { height: 2, windSpeed: 2, length: 10, width: 5 },
+};
+export const irrigationBase: IrrigationMethodInput = {
+  waterConcentration: 1e-3,
+  sprinkler,
+  box: { height: 2, windSpeed: 2, length: 10, width: 5 },
+  applicationRate: 1e-8,
+  chemical: 'benzene',
+};
+
+const windErosion = { vegetativeCover: 0.4, meanWind: 4, thresholdWind: 11, fx: 0.2 };
+export const particulateBoxBase: ParticulateBoxInput = {
+  soilConcentration: 1e-5,
+  flux: 1e-12,
+  wind: windErosion,
+  box: { length: 20, width: 20, height: 2, windSpeed: 2 },
+};
+export const particulateBoxWindBase: ParticulateBoxInput = {
+  soilConcentration: 1e-5,
+  wind: windErosion,
+  box: { length: 20, width: 20, height: 2, windSpeed: 2 },
+};
+export const pef1996Base: ParticulatePefInput = {
+  soilConcentration: 1e-5,
+  qOverC: 90,
+  wind: windErosion,
+};
+export const pef2002Base: ParticulatePef2002Input = {
+  soilConcentration: 1e-5,
+  qOverC: 90,
+  wind: windErosion,
+  areaAcres: 2,
+};
+
+const leaf = {
+  tscf: 0.5,
+  transpiration_m3_per_d: 1e-3,
+  conductance_m_per_d: 50,
+  leafArea_m2: 0.05,
+  mass_kg: 0.1,
+  kLeafAir_m3_per_kg: 1e3,
+  lossRate_per_d: 0.1,
+};
+export const legacyPlantBase: LegacyPlantInput = {
+  logKow: 3,
+  soil: {
+    concentration_kg_per_kg: 1e-6,
+    bulkDensity_kg_per_m3: 1500,
+    waterFilledPorosity: 0.3,
+    kd_m3_per_kg: 0.002,
+  },
+  airConcentration_kg_per_m3: 1e-9,
+  produce: 'aboveground',
+  leaf,
+  growthPeriod_d: 60,
+  rootZoneWater_kg_per_m3: 1e-6,
+  irrigation: {
+    input: { concentration_mg_per_L: 0.01, applicationRate_L_per_m2_per_d: 5, source: 'user' },
+    interceptionFraction: 0.3,
+    plantedArea_m2: 10,
+  },
+  userBcf: 0.1,
+};
+export const hhrapBase: HhrapProduceInput = {
+  logKow: 3,
+  kaw: 0.2,
+  kd_m3_per_kg: 0.002,
+  soilConcentration_kg_per_kg: 1e-6,
+  vaporAirConcentration_kg_per_m3: 1e-9,
+  produce: 'aboveground-exposed',
+  userBr: 0.2,
+};
+
+export const ecosslBase: EcosslScreenInput = {
+  soil_kg_per_kg: 1e-5,
+  ssl: {
+    plants: { status: 'value', value: 1e-4 },
+    invertebrates: { status: 'value', value: 2e-4 },
+    avian: { status: 'value', value: 3e-4 },
+    mammalian: { status: 'value', value: 4e-4 },
+  },
+};
+type Form = 'ratio' | 'affine' | 'ln';
+const foodItems = (forms: readonly Form[]) =>
+  forms.map((form, k) => ({
+    name: `item${k}`,
+    dietFraction: 0.2,
+    model:
+      form === 'ratio'
+        ? { form, a: 0.5, cdiet: 1 }
+        : form === 'affine'
+          ? { form, a: 0.4, b: 2, cdiet: 1 }
+          : { form, a: 0.6, b: 1 },
+  }));
+const wildlifeBase = (forms: readonly Form[]): BenchmarkScreenInput => ({
+  soil_kg_per_kg: 1e-5,
+  benchmarks: [1, 2, 3, 4].map((k) => ({
+    receptor: `r${k}`,
+    citation: 'user',
+    value_kg_per_kg: k * 1e-4,
+  })),
+  wildlife: [
+    {
+      receptor: 'w1',
+      food: {
+        foodIngestion_kg_per_kg_d: 0.1,
+        soilFraction: 0.05,
+        areaUseFactor: 1,
+        items: foodItems(forms),
+        trv_kg_per_kg_d: 1e-4,
+      },
+    },
+    {
+      receptor: 'w2',
+      food: {
+        foodIngestion_kg_per_kg_d: 0.2,
+        soilFraction: 0.1,
+        areaUseFactor: 0.5,
+        items: foodItems(forms),
+        trv_kg_per_kg_d: 2e-4,
+      },
+    },
+  ],
+});
+export const benchmarkBase = wildlifeBase(['ratio', 'affine', 'ln', 'ratio']);
+export const benchmarkAltBase = wildlifeBase(['affine', 'ln', 'affine', 'ln']);
+
+const tphSet = (n: number): TphTotalLevelInput['fractions'] =>
+  Array.from({ length: n }, (_, k) => ({
+    label: `f${k}`,
+    family: k % 2 === 0 ? ('aliphatic' as const) : ('aromatic' as const),
+    massFraction: 1 / n,
+    surrogate: 'E1790668',
+    levelKgPerKg: 1e-3 * (k + 1),
+  }));
+export const tphBase: TphTotalLevelInput = { fractions: tphSet(8), targetHazardIndex: 1 };
+export const tphShortBase: TphTotalLevelInput = { fractions: tphSet(3) };

@@ -7,6 +7,7 @@ import {
   type EcosslScreenInput,
   type EcosslScreenResult,
 } from './screen.js';
+import { benchmarkUncertainInputs, ecosslUncertainInputs } from './uncertain.js';
 
 export * from './uptake.js';
 export * from './wildlife.js';
@@ -14,6 +15,7 @@ export * from './screen.js';
 
 export const ecoBenchmarkHq: MethodDescriptor<BenchmarkScreenInput, BenchmarkScreenResult> = {
   id: 'eco.benchmark-hq',
+  uncertainInputs: benchmarkUncertainInputs(),
   process: 'eco',
   kind: 'legacy',
   name: 'User-entered benchmark hazard quotients with a simple food web',
@@ -33,6 +35,7 @@ export const ecoBenchmarkHq: MethodDescriptor<BenchmarkScreenInput, BenchmarkScr
 
 export const ecoEcossl2005: MethodDescriptor<EcosslScreenInput, EcosslScreenResult> = {
   id: 'eco.ecossl-2005',
+  uncertainInputs: ecosslUncertainInputs(),
   process: 'eco',
   kind: 'modern',
   name: 'EPA Eco-SSL hazard quotients and wildlife food web',

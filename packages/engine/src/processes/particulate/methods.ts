@@ -11,6 +11,11 @@ import {
 } from './pef.js';
 import { qOverC2002 } from './qOverC2002.js';
 import { PARTICULATE_DEFAULTS, windErosionFlux, type WindErosionInput } from './windErosion.js';
+import {
+  particulateBoxUncertainInputs,
+  pef1996UncertainInputs,
+  pef2002UncertainInputs,
+} from './uncertain.js';
 
 const VOLATILE_WARNING: Warning = {
   code: 'particulate.volatile-chemical',
@@ -115,6 +120,7 @@ export const particulateBoxEmissionMethod: MethodDescriptor<
   ParticulateBoxResult
 > = {
   id: 'particulate.box-emission',
+  uncertainInputs: particulateBoxUncertainInputs(),
   process: 'particulate',
   kind: 'legacy',
   name: 'Particulate flux into the outdoor box',
@@ -135,6 +141,7 @@ export const particulateBoxEmissionMethod: MethodDescriptor<
 
 export const particulateSsgPef1996: MethodDescriptor<ParticulatePefInput, ParticulatePefResult> = {
   id: 'particulate.ssg-pef-1996',
+  uncertainInputs: pef1996UncertainInputs(),
   process: 'particulate',
   kind: 'modern',
   name: 'Soil screening guidance particulate emission factor (1996)',
@@ -155,6 +162,7 @@ export const particulateSsgPef2002: MethodDescriptor<
   ParticulatePefResult
 > = {
   id: 'particulate.ssg-pef-2002',
+  uncertainInputs: pef2002UncertainInputs(),
   process: 'particulate',
   kind: 'modern',
   name: 'Supplemental soil screening guidance particulate emission factor (2002)',

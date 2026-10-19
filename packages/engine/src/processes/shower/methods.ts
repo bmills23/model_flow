@@ -3,9 +3,15 @@ import type { ShowerInput, ShowerResult } from './common.js';
 import { showerHouseholdAir, type HouseholdInput, type HouseholdResult } from './household.js';
 import { showerLegacyStall } from './legacyStall.js';
 import { showerLittle, type LittleInput, type LittleResult } from './little.js';
+import {
+  showerFcUncertainInputs,
+  showerLittleUncertainInputs,
+  showerHouseholdUncertainInputs,
+} from './uncertain.js';
 
 export const showerFc1986: MethodDescriptor<ShowerInput, ShowerResult> = {
   id: 'shower.fc-1986',
+  uncertainInputs: showerFcUncertainInputs(),
   process: 'shower',
   kind: 'legacy',
   name: 'Stagnant stall shower volatilization with two-resistance droplet transfer',
@@ -27,6 +33,7 @@ export const showerFc1986: MethodDescriptor<ShowerInput, ShowerResult> = {
 
 export const showerLittle1992: MethodDescriptor<LittleInput, LittleResult> = {
   id: 'shower.little-1992',
+  uncertainInputs: showerLittleUncertainInputs(),
   process: 'shower',
   kind: 'modern',
   name: 'Two-resistance stall with gas-phase back-pressure and ventilation',
@@ -44,6 +51,7 @@ export const showerLittle1992: MethodDescriptor<LittleInput, LittleResult> = {
 
 export const showerRslHousehold: MethodDescriptor<HouseholdInput, HouseholdResult> = {
   id: 'shower.rsl-household',
+  uncertainInputs: showerHouseholdUncertainInputs(),
   process: 'shower',
   kind: 'modern',
   name: 'RSL whole-house water-to-air volatilization term',

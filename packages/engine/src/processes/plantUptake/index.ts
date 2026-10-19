@@ -1,6 +1,7 @@
 import type { MethodDescriptor, Warning } from '../../registry/index.js';
 import { hhrapProduce, type HhrapProduceInput, type HhrapProduceResult } from './hhrap.js';
 import { legacyPlantUptake, type LegacyPlantInput, type LegacyPlantResult } from './legacy.js';
+import { legacyPlantUncertainInputs, hhrapPlantUncertainInputs } from './uncertain.js';
 
 export * from './partition.js';
 export * from './briggs.js';
@@ -13,6 +14,7 @@ export type { PlantWarning } from './checks.js';
 
 export const plantUptakeLegacy: MethodDescriptor<LegacyPlantInput, LegacyPlantResult> = {
   id: 'plantUptake.trapp-matthies-1995',
+  uncertainInputs: legacyPlantUncertainInputs(),
   process: 'plantUptake',
   kind: 'legacy',
   name: 'Briggs root factor with a one-compartment leaf model',
@@ -34,6 +36,7 @@ export const plantUptakeLegacy: MethodDescriptor<LegacyPlantInput, LegacyPlantRe
 
 export const plantUptakeModern: MethodDescriptor<HhrapProduceInput, HhrapProduceResult> = {
   id: 'plantUptake.hhrap-2005',
+  uncertainInputs: hhrapPlantUncertainInputs(),
   process: 'plantUptake',
   kind: 'modern',
   name: 'EPA HHRAP 2005 produce equations (fallback for the modern plant model)',

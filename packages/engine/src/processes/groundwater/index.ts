@@ -4,6 +4,11 @@ import { domenicoConcentration, domenicoWarnings, type DomenicoInput } from './d
 import { patchfConcentration, patchiConcentration, type WexlerInput } from './wexler.js';
 import type { Point3 } from './common.js';
 import type { ConcentrationStep } from './loading.js';
+import {
+  at123dUncertainInputs,
+  wexlerUncertainInputs,
+  domenicoUncertainInputs,
+} from './uncertain.js';
 
 export * from './common.js';
 export * from './kernel.js';
@@ -23,6 +28,7 @@ export interface GroundwaterOutput {
 
 export const groundwaterAt123d: MethodDescriptor<At123dRunInput, GroundwaterOutput> = {
   id: 'groundwater.at123d',
+  uncertainInputs: at123dUncertainInputs(),
   process: 'groundwater',
   kind: 'legacy',
   name: 'AT123D-class Green function solution with a finite volume source',
@@ -56,6 +62,7 @@ export interface WexlerRunInput {
 
 export const groundwaterWexler: MethodDescriptor<WexlerRunInput, GroundwaterOutput> = {
   id: 'groundwater.wexler1992',
+  uncertainInputs: wexlerUncertainInputs(),
   process: 'groundwater',
   kind: 'modern',
   name: 'Wexler (1992) exact patch-source solutions (PATCHI and PATCHF)',
@@ -98,6 +105,7 @@ export interface DomenicoRunInput {
 
 export const groundwaterDomenico: MethodDescriptor<DomenicoRunInput, GroundwaterOutput> = {
   id: 'groundwater.domenico1987',
+  uncertainInputs: domenicoUncertainInputs(),
   process: 'groundwater',
   kind: 'modern',
   name: 'BIOSCREEN/RBCA-compatible comparison (Domenico 1987 approximation)',

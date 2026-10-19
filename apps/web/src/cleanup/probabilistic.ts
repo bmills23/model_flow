@@ -25,7 +25,7 @@ import { FROM_SI, MEDIUM_UNIT, type CleanupLegacyInput } from './build';
  * largest of the cancer risk over its target and the hazard index over its target (and, for two
  * additive receptors, the summed risk over its target), so the root is the lowest of the cancer and
  * noncancer levels exactly as the closed-form back-calculation takes it. Modeled sources are not
- * sampled: the transport methods declare no uncertain inputs yet.
+ * sampled: no screen wires a transport chain into the sampler yet.
  */
 
 export interface ProbabilisticChoice {

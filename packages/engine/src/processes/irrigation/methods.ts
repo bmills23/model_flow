@@ -6,6 +6,7 @@ import {
   type SprinklerBox,
   type SprinklerInput,
 } from './sprinkler.js';
+import { sprinklerUncertainInputs, irrigationPathwaysUncertainInputs } from './uncertain.js';
 
 export interface SprinklerMethodInput {
   /** Irrigation water concentration, kg/m^3. */
@@ -16,6 +17,7 @@ export interface SprinklerMethodInput {
 
 export const irrigationSprinklerFc: MethodDescriptor<SprinklerMethodInput, SprinklerAirResult> = {
   id: 'irrigation.sprinkler-fc',
+  uncertainInputs: sprinklerUncertainInputs(),
   process: 'irrigation',
   kind: 'legacy',
   name: 'Sprinkler volatilization into the outdoor box',
@@ -39,6 +41,7 @@ export type IrrigationMethodInput = IrrigationInput & { waterConcentration: numb
 
 export const irrigationPathways: MethodDescriptor<IrrigationMethodInput, IrrigationEpcs> = {
   id: 'irrigation.pathways',
+  uncertainInputs: irrigationPathwaysUncertainInputs(),
   process: 'irrigation',
   kind: 'modern',
   name: 'Irrigation water exposure point concentrations',

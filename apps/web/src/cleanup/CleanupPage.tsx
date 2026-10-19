@@ -495,7 +495,7 @@ export function CleanupPage() {
           {modeledOn && (
             <p className="muted">
               The probabilistic cleanup level samples the receptor factors of a direct source. A
-              modeled source is not sampled yet: the transport methods declare no uncertain inputs.
+              modeled source is not sampled yet: no transport chain is wired into the sampler.
             </p>
           )}
           <SsgResults form={form} db={db} />

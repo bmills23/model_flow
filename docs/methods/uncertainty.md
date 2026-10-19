@@ -1,8 +1,9 @@
 # Uncertainty: Monte Carlo, Latin hypercube, sensitivity and probabilistic cleanup levels (M10)
 
 Status: implemented 2026-10-18 (scope written in stage 1; engine slices E1 to E7 and web slices W1 to W4
-done, see the appendix; open items: M1 groundwater declarations, the unmounted percentile fan, modeled
-cleanup sources not sampled). Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
+done, see the appendix, plus slice E8 for the remaining registry coverage; open items: the unmounted
+percentile fan, modeled cleanup sources not sampled because no screen wires a transport chain into the
+sampler). Rulings are recorded in `docs/DECISIONS.md`, block "2026-10-18: M10
 uncertainty scope (stage 1)"; the ruling numbers below refer to that block. Every ruling marked DEFAULT is
 a screening choice open to Bryan's overturn. Equations are written in our own words from the primary
 publications; the RISC5 manual is used only as a map of what RISC5 offers.
@@ -338,7 +339,7 @@ Engine (each one worker, TDD):
 - **E1 Distributions and AS 241 (done).** `numerics/special.ts` Phi^-1, `processes/uncertainty/distributions.ts`
   (library, truncation, unit conversion, checks). Fixtures 2. No dependency.
 - **E2 Parameter registry (done).** `uncertainInputs` on `MethodDescriptor`, declarations for the M4 exposure
-  methods (the M1 groundwater declarations were planned here but are not made; see E7), chain prefixing,
+  methods (the M1 groundwater declarations were planned here but made in E8), chain prefixing,
   registry tests. Depends on nothing; E4 needs it.
 - **E3 Samplers (done).** SRS, LHS mapping, Iman-Conover with Cholesky, seed streams, percentiles (definition 7).
   Fixtures 1, 3, 4. Depends on E1.
@@ -351,8 +352,19 @@ Engine (each one worker, TDD):
 - **E7 Registry coverage (done).** Declarations for the M2, M3, M6 and M8 methods (`vadose.vadsat`,
   `vadose.layered`, `saturatedSource.two-region`, `saturatedSource.exponential`, the seven `vapor.*` methods,
   `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `surfaceWater.well-mixed`, `surfaceWater.mass-discharge`) through
-  the `pathInput` helper. The M1 groundwater methods are not declared yet (E2 named them but declared only the
-  exposure methods): a chain through the aquifer cannot sample transport parameters until they are. Depends on E2.
+  the `pathInput` helper. E2 named the M1 groundwater methods but declared only the exposure methods; E8 closes
+  that gap. Depends on E2.
+- **E8 Registry coverage, remainder (done).** Declarations through the same `pathInput` helper for the M1
+  groundwater methods (`groundwater.at123d`, `groundwater.wexler1992`, `groundwater.domenico1987`, and the three
+  `dispersivity.*` correlations through the transport distance), the M7 methods (`shower.fc-1986`,
+  `shower.little-1992`, `shower.rsl-household`, `irrigation.sprinkler-fc`, `irrigation.pathways`,
+  `particulate.box-emission`, `particulate.ssg-pef-1996`, `particulate.ssg-pef-2002`) and the M9 methods
+  (`plantUptake.trapp-matthies-1995`, `plantUptake.hhrap-2005`, `eco.ecossl-2005`, `eco.benchmark-hq`, `tph.tphcwg`,
+  `tph.madep`). Not declared: molecular weights, switches and flags, receptor and station names, citations,
+  observation points and evaluation times, the TPH mass fractions (one composition that must sum to one, so
+  independent draws would break it) and the water viscosities and calibration temperature of the shower
+  temperature correction (constants of water). Loading steps, benchmarks, wildlife receptors, food items and TPH
+  fractions declare a fixed number of slots (4, 4, 2, 4 and 8); a base with fewer reads NaN for the rest. Depends on E7.
 
 Web (each one worker; verify at 390x844 through CDP, light and dark):
 
@@ -373,4 +385,6 @@ Web (each one worker; verify at 390x844 through CDP, light and dark):
   iterations and seed; the panel reports the 50, 90 and chosen protection levels in the screen unit beside the
   deterministic level, the CDF and histogram of the solved levels, the censored count and the Spearman rank
   correlation of each input with the level. Direct-pathway sources only: a modeled source (dissolved, vadose,
-  saturated) is not sampled because the M1 transport methods declare no uncertain inputs (see E7). Depends on W3, E6.
+  saturated) is not sampled: the engine now declares the transport inputs (E7, E8), but no screen builds the
+  transport chain around the cleanup solver yet, so the panel still samples the legacy receptor factors only.
+  Depends on W3, E6.

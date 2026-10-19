@@ -1,4 +1,5 @@
 import type { MethodDescriptor } from '../../registry/index.js';
+import { dispersivityUncertainInputs } from './uncertain.js';
 
 export interface DispersivityInput {
   /** Distance from source to receptor, metres. */
@@ -30,6 +31,7 @@ export function xuEckstein1995Longitudinal(length: number): number {
 
 export const gelhar1985Api1987: MethodDescriptor<DispersivityInput, DispersivityOutput> = {
   id: 'dispersivity.gelhar1985-api1987',
+  uncertainInputs: dispersivityUncertainInputs(),
   process: 'dispersivity',
   kind: 'legacy',
   name: 'Gelhar et al. (1985) regression with API (1987) ratios',
@@ -51,6 +53,7 @@ export const gelhar1985Api1987: MethodDescriptor<DispersivityInput, Dispersivity
 
 export const xuEckstein1995: MethodDescriptor<DispersivityInput, DispersivityOutput> = {
   id: 'dispersivity.xu-eckstein1995',
+  uncertainInputs: dispersivityUncertainInputs(),
   process: 'dispersivity',
   kind: 'modern',
   name: 'Xu and Eckstein (1995) regression with BIOSCREEN ratios',
@@ -98,6 +101,7 @@ export function schulzeMakuch2005Longitudinal(length: number): number {
 
 export const schulzeMakuch2005: MethodDescriptor<DispersivityInput, DispersivityOutput> = {
   id: 'dispersivity.schulze-makuch2005',
+  uncertainInputs: dispersivityUncertainInputs(),
   process: 'dispersivity',
   kind: 'modern',
   name: 'Schulze-Makuch (2005) power law with BIOSCREEN ratios',

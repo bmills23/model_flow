@@ -1223,11 +1223,36 @@ M10 slice E7 (registry coverage, 2026-10-18) implementation choices, none overtu
   parameters), concentration and discharge series (outputs of the chain, not parameters) and the bank-plane
   quadrature source of the modern surface water method. Layer lists declare four slots per side (four layers
   or strata for vapor and layered vadose); a base with fewer layers reads NaN for the rest.
-- The M1 groundwater methods are still not declared. E2 named them in the slice plan but declared only the
-  exposure methods, and E7's scope lists M2, M3, M6 and M8, so a chain through the aquifer has no transport
-  parameters to sample yet. Open: a later slice.
+- The M1 groundwater methods were not declared in E7: E2 named them in the slice plan but declared only the
+  exposure methods, and E7's scope lists M2, M3, M6 and M8. Closed by slice E8 (entry below).
 - The coverage tests use runnable base inputs written for the test (`test/uncertainBases.ts`); their numbers
   are scaffolding, not data and not a validation. No reference changed status and no assumption text changed.
+
+M10 slice E8 (registry coverage, remainder, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- The same `pathInput` and row helper as E7 declare the M1 groundwater methods (`groundwater.at123d`,
+  `.wexler1992`, `.domenico1987`; velocity, retardation, decay, dispersion or dispersivities, source or patch
+  geometry, finite aquifer width and thickness, the boundary concentration or release rate of four loading
+  steps), the three `dispersivity.*` correlations (the transport distance), the M7 shower, irrigation and
+  particulate methods, and the M9 plant uptake, eco and TPH methods. The full id lists are in
+  `docs/methods/uncertainty.md`, slice E8.
+- Not declared, with the reason: molecular weights and user switches or flags (constants and modes); receptor
+  and station names and citations (labels); observation points and evaluation times (scenario choices); the
+  TPH mass fractions (one composition that must sum to one; only the fraction levels and the target hazard
+  index are declared); the shower temperature correction's calibration temperature and viscosities (constants
+  of water, only the water temperature is declared); the irrigation season.
+- Slot counts for list inputs: four loading steps, four benchmarks, two wildlife receptors with four food items
+  each, eight TPH fractions. A base with fewer entries reads NaN for the rest and `set` refuses, as in E7.
+- The film reference coefficients and the water temperature are declared even though the shower and sprinkler
+  defaults are unverified RISC5 choices: they read NaN when the base omits them, so a default is never silently
+  turned into a sampled value, and a caller who enters them can sample them.
+- Categories stay transport, site or chemical (never exposure), which ruling 2 reserves for the legacy
+  exposure method's receptor factors. The wildlife ingestion rates, shower time and similar receptor-side
+  values are therefore categorised as site.
+- The coverage tests use runnable base inputs written for the test (`test/uncertainBases.ts`); their numbers
+  are scaffolding, not data and not a validation. No reference changed status and no assumption text changed.
+- Still not sampled on a screen: modeled cleanup sources. The engine now declares the transport inputs, but no
+  screen wires a transport chain into the cleanup solver; the W4 notes above describe the panel as shipped.
 
 M10 slice W1 (worker pool and budget, 2026-10-18) implementation choices, none overturning a ruling above:
 
@@ -1278,7 +1303,7 @@ M10 slice W3 (results charts and panel on the exposure screen, 2026-10-18) imple
 M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) implementation choices, none overturning a ruling above:
 
 - `CleanupUncertainty` (apps/web/src/cleanup) mounts under the direct-source results of `#/cleanup`; pure logic is in `cleanup/probabilistic.ts`. For a chosen chemical and medium it builds the legacy exposure scenario with that chemical held at the source concentration C in every switched-on pathway of the medium, and hands the engine's `runProbabilisticCleanup` (E6) a `problem` whose metric is the largest of cancer risk over its target and hazard index over its target (and the summed risk of two additive receptors over its target). The root is therefore the lower of the cancer and noncancer levels, as in the closed-form back-calculation; a test pins the deterministic level to `backCalculateLegacy` within 1e-8 relative for tap water, soil with explicit targets, and two additive receptors.
-- Only the legacy receptor factors are sampled (the inputs `exposureLegacy` declares: body weight, exposure duration, water ingestion rate, exposure frequency), with the W3 units. The modern method and modeled sources (dissolved, vadose, saturated) are not sampled: the modern exposure method and the M1 groundwater methods declare no uncertain inputs. The screen says so.
+- Only the legacy receptor factors are sampled (the inputs `exposureLegacy` declares: body weight, exposure duration, water ingestion rate, exposure frequency), with the W3 units. The modern method and modeled sources (dissolved, vadose, saturated) are not sampled: the modern exposure method declares no uncertain inputs, and the transport methods now declare theirs (E7, E8) but no screen builds a transport chain around the cleanup solver. The screen says so.
 - Each chemical is solved alone against its full risk and hazard targets (individual allocation) whatever allocation the screen uses; a groundwater concentration target (MCL) is not applied.
 - The run is on the main thread, not in the worker pool: a direct-pathway row costs microseconds (two forward runs by the linear shortcut). The W1 budget still applies: the first 5 rows are timed alone, the projection is mean row time times rows (one worker), confirm above 60 s and refuse above 10 minutes with `uncertainty.run-budget`. Cancel exists for the confirm dialog only.
 - The protected fraction is entered in percent (default 95) and must lie strictly between 0 and 100; 50 and 90 percent are always shown. Sampling is Latin hypercube with the optional rank correlation of the editor. Charts show the solved levels only; censored iterations are counted and the level is reported as not reachable when its quantile lands on one.
