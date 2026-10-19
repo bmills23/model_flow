@@ -8,13 +8,14 @@ skipping a done one.
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`) and wave H (UI near-parity, built on
   branch `wave-ui`), all pushed 2026-10-19. Wave I (six slices, built on branch `wave-i`) is committed locally on
   `wave-i`, NOT yet merged to main and NOT pushed. Pages deploys from main: https://bmills23.github.io/model_flow/
-- Gate numbers on the wave I integration (tests after merging all six slices, before the review fixes; the final
-  full `corepack pnpm gate` result is recorded by the next stage, not here): engine 1379 tests (79 files), web 1503
+- Final full `corepack pnpm gate` on `wave-i` after the review fixes: green 2026-10-19 (exit 0, build included).
+  Test counts from the wave I integration (after merging all six slices, before the review fixes added a few
+  tests): engine 1379 tests (79 files), web 1503
   tests (140 files), data and other packages 149 passed and 3 skipped (7 files; the skipped three are the Eco-SSL
   `pdftotext` cross-checks, which need the fetched PDFs). Last full gate before wave I (`wave-ui`, 2026-10-19):
   engine 1377, web 1475. The wave I browser check (production build, 390x844 emulation, cleanup modeled run and
-  cancel) found zero overflow and no console errors; `corepack pnpm mobile:check` has not been re-run on the
-  final wave I tree. Earlier `mobile:check` result on `wave-ui` was green (0 overflowing elements, 0 axe violations, including the seeded
+  cancel) found zero overflow and no console errors; `corepack pnpm mobile:check` on the final wave I tree was green
+  2026-10-19 (0 overflowing elements, 0 axe violations on every route, including the seeded
   `#/risk` route that needs benzene, two open override panels and two edited marks); run it with `--url` when
   port 5178 is busy.
 - Branches that are ancestors of this branch (safe to delete once it lands; add the wave I slice branches `wave-i-i1` to `wave-i-i6`): `m0-foundation` to
@@ -75,7 +76,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Cleanup (`#/cleanup`): homegrown produce level (does not apply to modeled sources, DEFAULT) and TPHCWG and
   MADEP total TPH levels, with CSV, project and report support.
 - Report (`#/report`): each screen's main charts with data tables, and an on-request "Include uncertainty
-  results" control that re-runs from the saved setup and seed (plume map excluded, DEFAULT). Only the exposure
+  results" control that re-runs from the saved setup and seed (plume map excluded, DEFAULT; overturned in wave I). Only the exposure
   sample runs in the background and can be cancelled; the one-at-a-time, Sobol and cleanup solves block the page.
 - Accessibility: `scripts/mobile-check.mjs` runs axe-core (dev dependency, MPL-2.0) on every route at 390 light,
   390 dark and 1280, including the fed cleanup screen; per-screen keyboard-order tests exist; the long-run
