@@ -46,12 +46,17 @@ const CleanupPage = lazy(() =>
   import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
 );
 
+const ChemicalsPage = lazy(() =>
+  import('./chemicals/ChemicalsPage').then((m) => ({ default: m.ChemicalsPage })),
+);
+
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
 
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
+const CHEMICALS_HASH = '#/chemicals';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
 const REPORT_HASH = '#/report';
@@ -86,6 +91,7 @@ export function App() {
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
+  const onChemicals = hash === CHEMICALS_HASH;
   const onRisk = hash === RISK_HASH;
   const onCleanup = hash === CLEANUP_HASH;
   const onVapor = hash === VAPOR_HASH;
@@ -105,6 +111,7 @@ export function App() {
               onVadose ||
               onSaturated ||
               onRisk ||
+              onChemicals ||
               onVapor ||
               onCleanup ||
               onSurfaceWater ||
@@ -167,6 +174,13 @@ export function App() {
           ))}
         </ol>
         <div className="nav-links">
+          <a
+            className="nav-link"
+            href={CHEMICALS_HASH}
+            aria-current={onChemicals ? 'page' : undefined}
+          >
+            Chemical database
+          </a>
           <a className="nav-link" href={VADOSE_HASH} aria-current={onVadose ? 'page' : undefined}>
             Vadose leaching
           </a>
@@ -255,6 +269,10 @@ export function App() {
           <Suspense fallback={<p className="muted">Loading the plants and ecology screen...</p>}>
             <PlantsEcoPage />
           </Suspense>
+        ) : onChemicals ? (
+          <Suspense fallback={<p className="muted">Loading the chemical database...</p>}>
+            <ChemicalsPage />
+          </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
@@ -297,6 +315,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={PLANTS_ECO_HASH}>
                 Open plants, ecology and TPH
+              </a>{' '}
+              <a className="button" href={CHEMICALS_HASH}>
+                Browse the chemical database
               </a>{' '}
               <a className="button" href={RISK_HASH}>
                 Open exposure and risk

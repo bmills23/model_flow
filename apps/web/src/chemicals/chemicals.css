@@ -1,0 +1,42 @@
+/* Chemical database browser. Reuses the vadose layout, field, button and table-scroll classes. */
+.chemicals .chem-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chemicals .chem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.chemicals .chem-card summary {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  cursor: pointer;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.chemicals .chem-card .table-scroll {
+  margin: 0 12px 12px;
+}
+
+.chemicals .chem-table th,
+.chemicals .chem-table td {
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.chemicals input[type='search'] {
+  min-width: 0;
+  width: 100%;
+}
