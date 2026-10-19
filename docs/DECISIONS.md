@@ -1780,3 +1780,30 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    screens to visit; no step is locked.
 4. **Scope: all ten slices**, U1 to U10, including the optional decimal comma entry (U10).
 
+
+## 2026-10-19: Wave H slice U3, chemical database browser
+
+Read-only `#/chemicals` (features C1, C4, C5, D5, J1, J2, J4, J7); edits per project come in U4.
+
+1. **Route and navigation (DEFAULT).** The screen is reached from a "Chemical database" link in the nav
+   links and a button on the landing page. The numbered step bar is untouched because U1 is changing it;
+   retargeting the Chemicals step is one line in `apps/web/src/App.tsx` (point it at `CHEMICALS_HASH`).
+2. **Data loading (DEFAULT).** The full property file (`chemicals.json`, about 0.6 MB minified) is over
+   the 500 kB chunk limit as a script chunk, so it is imported as an asset URL and fetched on first
+   visit; the toxicity file is the chunk the risk screen already uses. The limit is not widened. The
+   cost is that the screen needs the network the first time it opens. Tests serve the same file from
+   disk through a fetch stub in `test-setup.ts`.
+3. **Layout (DEFAULT).** A searchable list of 25 chemicals at a time ("Show more"), each an expandable
+   card holding a captioned table (Property, Value, Unit, Source) in a keyboard-reachable scroll region.
+   Search is a case-blind substring match on name or CAS number.
+4. **Values shown (DEFAULT).** Numbers appear at full stored precision so what is on screen equals the
+   data file. A property with no reference column says "not stated". Values the tables give without a
+   per-value reference (fraction absorbed in water, volatile and mutagen flags, absorption fractions,
+   soil saturation, MCL) carry the source "RSL table (no per-value reference)". Published soil screening
+   levels are left out: they are comparison values, not inputs.
+5. **J7 gap.** The generated data has no carcinogen weight-of-evidence class, so none is shown and none
+   is invented. Adding one needs a data build change and a source.
+6. **CSV (DEFAULT).** One row per value (Chemical, CAS, Group, Property, Value, Unit, Source). The edition
+   and date are in the file name like the other CSVs. When a search is active a second button saves only
+   the matching chemicals.
+7. **Schema.** No new saved state; the project file is unchanged.

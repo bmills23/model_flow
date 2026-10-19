@@ -99,6 +99,18 @@ a primary source is yours to enter, and the button that sends a result on stays 
 usable. The produce button sends the plant factors, the intake and the plant engine's warnings; the total
 TPH button sends the total level, the fraction table and the warnings, and the cleanup screen shows them.
 
+### Chemical database (`#/chemicals`)
+
+A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition
+2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
+chemical properties and its toxicity values. Each row gives the value as stored, its unit and its source:
+the reference named in the property table, or for toxicity the name of the agency behind the value. Flags
+such as volatile and mutagen, and a few screening values without a per-value reference, are listed with
+the source "RSL table". The data carries no carcinogen weight-of-evidence class, so none is shown.
+**Download CSV** saves every value of every chemical, or just the chemicals that match the search, one row
+per value with a source column. Values cannot be edited here; the full file loads the first time the
+screen opens, so it needs a connection that first time.
+
 ### Exposure and risk (`#/risk`)
 
 Pick chemicals from the EPA Regional Screening Level tables, enter concentrations in soil, water and air (or
