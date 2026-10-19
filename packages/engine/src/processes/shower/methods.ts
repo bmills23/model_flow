@@ -17,6 +17,7 @@ export const showerFc1986: MethodDescriptor<ShowerInput, ShowerResult> = {
     'The whole mass volatilized during the shower is in the stall from the start and stays there; the stall is fully mixed with no exchange with the bathroom.',
     'A stall value above the equilibrium concentration H C_w follows from the stagnant assumption and is warned, not clipped.',
     'Linear in the tap water concentration, so cleanup levels are the target over the coefficient.',
+    'little1992 is cited for the two-resistance film theory only. The stagnant, no-back-pressure stall is the approach that paper corrects, not a model it presents; the original source for the stagnant stall (foster1986) is a planned, unverified record and is not cited.',
   ],
   risc5Choice:
     'RISC5 treats the shower as a stagnant stall fed by two-resistance droplet transfer with film reference coefficients of 3000 cm/h (gas, water vapour) and 20 cm/h (liquid, carbon dioxide) and the stagnant mass balance; the primary paper behind these values could not be verified, so they are inputs and the defaults are warned.',

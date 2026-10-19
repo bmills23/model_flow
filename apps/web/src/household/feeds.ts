@@ -13,6 +13,11 @@ export interface HouseholdRiskFeed {
   label: string;
   /** Shower stall or house air for the shower inhalation pathway. */
   bathroomAir?: EpcSpec;
+  /**
+   * Whole-house air for the 24 h/day indoor inhalation pathway (the RSL household term). Never sent as
+   * shower-stall air: the stall pathway's exposure time is the bathing time.
+   */
+  indoorAir?: EpcSpec;
   /** Sprinkler spray air, an outdoor inhalation option. */
   outdoorSprinkler?: EpcSpec;
   /** Windblown particulate air, an outdoor inhalation option. */
@@ -21,7 +26,19 @@ export interface HouseholdRiskFeed {
    * Linear model coefficients of the chosen methods: receptor air per unit source, dimensionless for
    * water to air and (kg/m3)/(kg/kg) for soil to air. Cleanup levels are the air level over these.
    */
-  coefficients: { bathroomAir?: number; sprayAir?: number; particulateAir?: number };
+  coefficients: {
+    bathroomAir?: number;
+    householdAir?: number;
+    sprayAir?: number;
+    particulateAir?: number;
+  };
+  /** The household method id that produced each coefficient, shown beside the cleanup source levels. */
+  methods: {
+    bathroomAir?: string;
+    householdAir?: string;
+    sprayAir?: string;
+    particulateAir?: string;
+  };
 }
 
 const household = createFeed<HouseholdRiskFeed>();

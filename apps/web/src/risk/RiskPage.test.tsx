@@ -161,6 +161,7 @@ describe('RiskPage', () => {
       },
       outdoorParticulate: { kind: 'constant', value: 4e-10, origin: 'particulate.ssg-pef-1996' },
       coefficients: {},
+      methods: {},
     });
     await loaded();
     await addChemical('71-43-2', /add benzene/i);
@@ -179,6 +180,7 @@ describe('RiskPage', () => {
       label: 'Toluene, household run',
       bathroomAir: { kind: 'constant', value: 1e-8, origin: 'shower.little-1992' },
       coefficients: {},
+      methods: {},
     });
     await loaded();
     await addChemical('71-43-2', /add benzene/i);

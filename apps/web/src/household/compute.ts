@@ -6,6 +6,7 @@ import {
   particulatePef2002,
   showerFc1986,
   showerLittle1992,
+  rslVolatile,
   showerRslHousehold,
   type FilmReferences,
   type Warning,
@@ -14,6 +15,53 @@ import {
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { WellFeed } from '../transport/wellFeed';
 import { isBlank, makeReader, type HouseholdForm } from './form';
+
+export interface VolatileVerdict {
+  volatile: boolean;
+  source: 'criterion' | 'override' | 'unknown';
+  note: string;
+}
+
+/**
+ * The RSL volatility verdict: Henry above 1E-5 atm m3/mol or vapor pressure above 1 mm Hg, from the two
+ * entered fields, unless the user overrides it. With neither field entered the chemical is treated as
+ * not volatile (the household term is zero) and the note says what to enter.
+ */
+export function volatileVerdict(form: HouseholdForm): VolatileVerdict {
+  if (form.volatileOverride !== 'auto') {
+    const volatile = form.volatileOverride === 'volatile';
+    return {
+      volatile,
+      source: 'override',
+      note: `Treated as ${volatile ? 'volatile' : 'not volatile'} by your override.`,
+    };
+  }
+  const num = (v: string): number | undefined => {
+    if (v.trim() === '') return undefined;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  };
+  const henryAtmM3PerMol = num(form.henryAtm);
+  const vaporPressureMmHg = num(form.vaporPressure);
+  if (henryAtmM3PerMol === undefined && vaporPressureMmHg === undefined) {
+    return {
+      volatile: false,
+      source: 'unknown',
+      note: 'Enter the Henry constant (atm m3/mol) or the vapor pressure (mm Hg) to apply the RSL volatility criterion; until then the chemical is treated as not volatile.',
+    };
+  }
+  const volatile = rslVolatile({
+    ...(henryAtmM3PerMol === undefined ? {} : { henryAtmM3PerMol }),
+    ...(vaporPressureMmHg === undefined ? {} : { vaporPressureMmHg }),
+  });
+  return {
+    volatile,
+    source: 'criterion',
+    note: volatile
+      ? 'Volatile by the RSL criterion (Henry above 1E-5 atm m3/mol or vapor pressure above 1 mm Hg).'
+      : 'Not volatile by the RSL criterion (Henry at most 1E-5 atm m3/mol and vapor pressure at most 1 mm Hg).',
+  };
+}
 
 /** Series other screens hold, in SI (s, kg/m3). */
 export interface HeldSources {
@@ -139,7 +187,11 @@ function showerSections(form: HouseholdForm): HouseholdOutcome['shower'] {
       min: 'nonneg',
     });
     return guarded(errors, () =>
-      showerRslHousehold.run({ waterConcentration, transferFactorLPerM3, volatile: form.volatile }),
+      showerRslHousehold.run({
+        waterConcentration,
+        transferFactorLPerM3,
+        volatile: volatileVerdict(form).volatile,
+      }),
     );
   };
   return { legacy: legacy(), little: little(), rsl: rsl() };
@@ -234,7 +286,7 @@ function particulateSections(form: HouseholdForm): HouseholdOutcome['particulate
     const qOverC = isBlank(form, 'qOverC') ? undefined : read('qOverC', 'Q/C');
     return { soilConcentration, wind, qOverC };
   };
-  const volatile = form.volatile;
+  const volatile = volatileVerdict(form).volatile;
   const pefRow = (run: typeof particulatePef1996): Section<ParticulateRow> => {
     const errors: string[] = [];
     const c = common(errors);

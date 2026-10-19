@@ -188,7 +188,9 @@ describe('buildInputs', () => {
       },
       outdoorSprinkler: { kind: 'constant', value: 2e-9, origin: 'irrigation.sprinkler-fc' },
       outdoorParticulate: { kind: 'constant', value: 4e-10, origin: 'particulate.ssg-pef-1996' },
+      indoorAir: { kind: 'constant', value: 3e-9, origin: 'shower.rsl-household' },
       coefficients: { bathroomAir: 0.01, sprayAir: 1e-4, particulateAir: 1e-9 },
+      methods: {},
       ...over,
     });
     const withHousehold = (
@@ -212,6 +214,17 @@ describe('buildInputs', () => {
       expect(r.modern.receptors[0]!.pathways).toContain('showerInhalation');
       const out = runRisk(r);
       expect(out.legacy.ok).toBe(true);
+    });
+
+    it('takes the household (RSL) air as indoor air on the 24 h indoor pathway', () => {
+      const form = withHousehold(false, '');
+      form.chemicals[0] = { ...form.chemicals[0]!, indoorFromHousehold: true };
+      const r = built(form, null, null, null, householdFeed());
+      expect(r.legacy.receptors[0]!.chemicals[0]!.epcs.indoorInhalation).toMatchObject({
+        kind: 'constant',
+        origin: 'shower.rsl-household',
+      });
+      expect(r.legacy.receptors[0]!.chemicals[0]!.epcs.showerInhalation).toBeUndefined();
     });
 
     it('takes outdoor air from the sprinkler or from the particulates, with the right origin', () => {

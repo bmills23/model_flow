@@ -13,7 +13,11 @@ export interface HouseholdForm {
   soilConcentration: string; // mg/kg
   henry: string; // dimensionless
   molecularWeight: string; // g/mol
-  volatile: boolean;
+  /** Henry constant in atm m3/mol, for the RSL volatility criterion (the dimensionless one is above). */
+  henryAtm: string;
+  vaporPressure: string; // mm Hg
+  /** 'auto' applies the criterion to the two fields above; the others override its verdict. */
+  volatileOverride: VolatileOverride;
   householdFactor: string; // L water per m3 air
   filmGas: string; // cm/h, blank with filmLiquid blank = RISC5 choice (warned)
   filmLiquid: string; // cm/h
@@ -63,6 +67,7 @@ export const PARTICULATE_ORIGIN: Record<ParticulateChoice, string> = {
 };
 export const SPRINKLER_ORIGIN = 'irrigation.sprinkler-fc';
 
+export type VolatileOverride = 'auto' | 'volatile' | 'nonvolatile';
 export type ShowerChoice = 'legacy' | 'little' | 'rsl';
 export type ParticulateChoice = 'box' | 'pef1996' | 'pef2002';
 
@@ -73,7 +78,9 @@ export const DEFAULT_FORM: HouseholdForm = {
   soilConcentration: '',
   henry: '',
   molecularWeight: '',
-  volatile: false,
+  henryAtm: '',
+  vaporPressure: '',
+  volatileOverride: 'auto',
   householdFactor: '',
   filmGas: '',
   filmLiquid: '',

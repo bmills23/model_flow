@@ -509,6 +509,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The whole mass volatilized during the shower is in the stall from the start and stays there; the stall is fully mixed with no exchange with the bathroom.
   - A stall value above the equilibrium concentration H C_w follows from the stagnant assumption and is warned, not clipped.
   - Linear in the tap water concentration, so cleanup levels are the target over the coefficient.
+  - little1992 is cited for the two-resistance film theory only. The stagnant, no-back-pressure stall is the approach that paper corrects, not a model it presents; the original source for the stagnant stall (foster1986) is a planned, unverified record and is not cited.
 - RISC5 choice: RISC5 treats the shower as a stagnant stall fed by two-resistance droplet transfer with film reference coefficients of 3000 cm/h (gas, water vapour) and 20 cm/h (liquid, carbon dioxide) and the stagnant mass balance; the primary paper behind these values could not be verified, so they are inputs and the defaults are warned.
 - Sources:
   - Little, J.C. (1992). Applying the two-resistance theory to contaminant volatilization in showers. Environmental Science & Technology. 26(7):1341-1349. <https://doi.org/10.1021/es00031a010>
@@ -548,6 +549,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The droplet kernel is the one used for the shower, with outdoor droplet size, fall time (including ponding in the box) and flow supplied by the caller; none has a default.
   - The box is fully mixed and ventilated by the wind; the width defaults to 1 m (the RISC5 choice) and is warned, because for a real sprinkler the plume width matters.
   - Linear in the irrigation water concentration.
+  - little1992 is cited for the two-resistance film theory only. The stagnant, no-back-pressure stall is the approach that paper corrects, not a model it presents; the original source for the stagnant stall (foster1986) is a planned, unverified record and is not cited.
 - RISC5 choice: RISC5 feeds the outdoor box with the sprinkler droplet loss and fixes the box width at 1 m; the film reference coefficients are the unverified RISC5 values and are warned when defaulted.
 - Sources:
   - Walden, T., Spence, L.R. (1997). Risk-based BTEX screening criteria for a groundwater irrigation scenario. Human and Ecological Risk Assessment: An International Journal. 3(4):699-722. <https://doi.org/10.1080/10807039709383722>

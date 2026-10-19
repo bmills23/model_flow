@@ -187,3 +187,14 @@ describe('RSL household term', () => {
     ).toThrow(RangeError);
   });
 });
+
+describe('stagnant stall attribution', () => {
+  it('states that Little is cited for the film theory only, not for the stagnant stall model', async () => {
+    const { showerFc1986 } = await import('../src/processes/shower/methods.js');
+    const { irrigationSprinklerFc } = await import('../src/processes/irrigation/methods.js');
+    for (const m of [showerFc1986, irrigationSprinklerFc]) {
+      expect(m.citations).toContain('little1992');
+      expect(m.assumptions.join(' ')).toMatch(/film theory only/i);
+    }
+  });
+});

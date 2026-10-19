@@ -55,6 +55,8 @@ export interface ChemicalRow {
   surfaceWaterFromModel: boolean;
   /** Use the household screen's shower air for the bathroom air concentration. */
   bathroomFromHousehold: boolean;
+  /** Use the household screen's whole-house (RSL) air as the indoor air concentration. */
+  indoorFromHousehold: boolean;
   /** Use the household screen's sprinkler spray air or windblown particulate air as outdoor air. */
   outdoorFromHousehold: HouseholdOutdoor;
 }
@@ -111,6 +113,7 @@ export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
     outdoorFromVapor: false,
     surfaceWaterFromModel: false,
     bathroomFromHousehold: false,
+    indoorFromHousehold: false,
     outdoorFromHousehold: '',
   };
 }

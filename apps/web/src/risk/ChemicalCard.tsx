@@ -90,6 +90,7 @@ export function ChemicalCard(props: {
                 Groundwater concentration: {well ? well.label : 'no well result held'}.
               </p>
             ) : (m.key === 'bathroomAir' && row.bathroomFromHousehold) ||
+              (m.key === 'indoorAir' && row.indoorFromHousehold) ||
               (m.key === 'outdoorAir' && row.outdoorFromHousehold !== '') ? (
               <p className="muted well-note" key={m.key}>
                 {m.label} concentration:{' '}
@@ -137,6 +138,25 @@ export function ChemicalCard(props: {
           <span>Use the household shower air for the bathroom air concentration</span>
         </label>
       )}
+      {showConc &&
+        ((householdHere && household?.indoorAir !== undefined) || row.indoorFromHousehold) && (
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={row.indoorFromHousehold}
+              onChange={(e) =>
+                props.onChange({
+                  ...row,
+                  indoorFromHousehold: e.target.checked,
+                  indoorFromVapor: e.target.checked ? false : row.indoorFromVapor,
+                })
+              }
+            />
+            <span>
+              Use the household whole-house air (RSL term) for the indoor air concentration
+            </span>
+          </label>
+        )}
       {showConc && (householdHere || row.outdoorFromHousehold !== '') && (
         <Seg<HouseholdOutdoor>
           legend="Outdoor air from the household screen"
@@ -161,7 +181,13 @@ export function ChemicalCard(props: {
           <input
             type="checkbox"
             checked={row.indoorFromVapor}
-            onChange={(e) => props.onChange({ ...row, indoorFromVapor: e.target.checked })}
+            onChange={(e) =>
+              props.onChange({
+                ...row,
+                indoorFromVapor: e.target.checked,
+                indoorFromHousehold: e.target.checked ? false : row.indoorFromHousehold,
+              })
+            }
           />
           <span>Use the vapor screen indoor air for the indoor air concentration</span>
         </label>

@@ -16,6 +16,7 @@ describe('household feed store', () => {
       label: 'Benzene household run',
       bathroomAir: { kind: 'constant' as const, value: 1e-7, origin: 'shower.little-1992' },
       coefficients: { bathroomAir: 0.01 },
+      methods: {},
     };
     setHouseholdFeed(feed);
     expect(getHouseholdFeed()).toBe(feed);

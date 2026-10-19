@@ -68,6 +68,7 @@ describe('CleanupPage', () => {
       chemicalId: '71-43-2',
       label: 'Benzene, household run',
       coefficients: { bathroomAir: 0.002, sprayAir: 5e-5, particulateAir: 2e-9 },
+      methods: {},
     });
     await withBenzene();
     const region = await screen.findByRole('region', { name: /household source levels/i });

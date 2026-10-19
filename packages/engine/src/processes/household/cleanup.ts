@@ -22,7 +22,7 @@ export interface SourceLevel {
 
 export function sourceLevelsOverCoefficient(
   direct: DirectResult,
-  medium: 'bathroomAir' | 'outdoorAir',
+  medium: 'bathroomAir' | 'indoorAir' | 'outdoorAir',
   coefficients: Readonly<Record<string, number>>,
 ): SourceLevel[] {
   const m = direct.media.find((x) => x.medium === medium);

@@ -36,6 +36,19 @@ describe('HouseholdPage', () => {
     expect(within(shower).getByText(/henry constant is required/i)).toBeTruthy();
   });
 
+  it('derives the volatility verdict from Henry and vapor pressure, with an override', () => {
+    render(<HouseholdPage />);
+    expect(
+      screen.getByText(/enter the henry constant \(atm m3\/mol\) or the vapor pressure/i),
+    ).toBeTruthy();
+    fill(/^henry \(atm m3\/mol\)/i, '5e-3');
+    expect(screen.getByText(/^volatile by the rsl criterion/i)).toBeTruthy();
+    fill(/^henry \(atm m3\/mol\)/i, '1e-6');
+    expect(screen.getByText(/^not volatile by the rsl criterion/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: /force volatile/i }));
+    expect(screen.getByText(/treated as volatile by your override/i)).toBeTruthy();
+  });
+
   it('shows shower results equal to the engine and a comparison of all three methods', () => {
     render(<HouseholdPage />);
     fillShower();

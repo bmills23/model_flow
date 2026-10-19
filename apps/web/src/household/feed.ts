@@ -44,6 +44,7 @@ export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): Feed
     chemicalId: form.chemicalId.trim(),
     label: `${form.chemicalName.trim() || form.chemicalId.trim()}, household run`,
     coefficients: {},
+    methods: {},
   };
 
   const enteredWater = Number(form.waterConcentration) / 1000;
@@ -54,11 +55,21 @@ export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): Feed
   if (shower.ok) {
     const origin = SHOWER_ORIGIN[form.showerMethod];
     const water = waterSpec(form.showerWaterSource, enteredWater, held);
-    feed.bathroomAir =
+    const epc: EpcSpec =
       water === null || water.kind === 'constant'
         ? { kind: 'constant', value: shower.concentration, origin }
         : waterDrivenEpc(water, (cw) => ({ concentration: shower.coefficient * cw }), origin);
-    feed.coefficients.bathroomAir = shower.coefficient;
+    if (form.showerMethod === 'rsl') {
+      // A whole-house concentration applies for 24 h/day (RSL User's Guide, Table 1), so it goes to
+      // the indoor air pathway, never to the shower stall pathway whose time is the bathing time.
+      feed.indoorAir = epc;
+      feed.coefficients.householdAir = shower.coefficient;
+      feed.methods.householdAir = origin;
+    } else {
+      feed.bathroomAir = epc;
+      feed.coefficients.bathroomAir = shower.coefficient;
+      feed.methods.bathroomAir = origin;
+    }
   } else {
     notes.push(`Shower air not sent: ${errorsOf(shower)}`);
   }
@@ -72,6 +83,7 @@ export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): Feed
         ? { kind: 'constant', value: sprayAir, origin: SPRINKLER_ORIGIN }
         : waterDrivenEpc(water, (cw) => ({ concentration: coefficient * cw }), SPRINKLER_ORIGIN);
     feed.coefficients.sprayAir = coefficient;
+    feed.methods.sprayAir = SPRINKLER_ORIGIN;
   } else {
     notes.push(`Sprinkler spray air not sent: ${errorsOf(out.irrigation)}`);
   }
@@ -88,12 +100,14 @@ export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): Feed
       origin: PARTICULATE_ORIGIN[form.particulateMethod],
     };
     feed.coefficients.particulateAir = part.coefficient;
+    feed.methods.particulateAir = PARTICULATE_ORIGIN[form.particulateMethod];
   } else {
     notes.push(`Particulate air not sent: ${errorsOf(part)}`);
   }
 
   if (
     feed.bathroomAir === undefined &&
+    feed.indoorAir === undefined &&
     feed.outdoorSprinkler === undefined &&
     feed.outdoorParticulate === undefined
   ) {

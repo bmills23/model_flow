@@ -43,7 +43,8 @@ export function HouseholdPanel(props: {
           <thead>
             <tr>
               <th scope="col">Source</th>
-              <th scope="col">Method</th>
+              <th scope="col">Household method</th>
+              <th scope="col">Receptor method</th>
               <th scope="col">Level</th>
               <th scope="col">Limiting</th>
               <th scope="col">Cancer level</th>
@@ -56,7 +57,8 @@ export function HouseholdPanel(props: {
                 <th scope="row" data-label="Source">
                   {r.what}
                 </th>
-                <td data-label="Method">{r.method === 'legacy' ? 'Legacy' : 'Modern'}</td>
+                <td data-label="Household method">{r.householdMethod ?? 'not recorded'}</td>
+                <td data-label="Receptor method">{r.method === 'legacy' ? 'Legacy' : 'Modern'}</td>
                 <td data-label="Level" className="level">
                   <strong>
                     {fmt(r.level, r.fromSi)} {r.level === null ? '' : r.unit}

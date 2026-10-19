@@ -35,6 +35,11 @@ const FEED: HouseholdRiskFeed = {
   chemicalId: '71-43-2',
   label: 'Benzene, household run',
   coefficients: { bathroomAir: 0.002, sprayAir: 5e-5, particulateAir: 2e-9 },
+  methods: {
+    bathroomAir: 'shower.little-1992',
+    sprayAir: 'irrigation.sprinkler-fc',
+    particulateAir: 'particulate.ssg-pef-1996',
+  },
 };
 
 describe('householdSourceLevels', () => {
@@ -59,15 +64,58 @@ describe('householdSourceLevels', () => {
     expect(modern[2]!.unit).toBe('mg/kg');
   });
 
+  it('names the household method behind each row and puts the RSL term on indoor air', () => {
+    const out = outcome();
+    const rows = householdSourceLevels(out, FEED);
+    expect(rows.find((r) => r.what.startsWith('Tap water'))!.householdMethod).toBe(
+      'shower.little-1992',
+    );
+    expect(rows.find((r) => r.what.startsWith('Irrigation'))!.householdMethod).toBe(
+      'irrigation.sprinkler-fc',
+    );
+  });
+
+  it('labels the RSL whole-house term as household air', () => {
+    const f = defaultCleanupForm();
+    const pathways = Object.fromEntries(
+      PATHWAY_IDS.map((p) => [p, p === 'indoorInhalation']),
+    ) as Record<PathwayId, boolean>;
+    const b = buildCleanup(
+      {
+        ...f,
+        chemicals: [newChemicalRow(db.byId.get('71-43-2')!)],
+        a: { ...f.a, pathways },
+      },
+      db,
+    );
+    if (!b.ok) throw new Error(b.errors.join('; '));
+    const rows = householdSourceLevels(runCleanup(b), {
+      ...FEED,
+      coefficients: { householdAir: 0.5 },
+      methods: { householdAir: 'shower.rsl-household' },
+    });
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows[0]!.what).toBe('Tap water (household air)');
+    expect(rows[0]!.householdMethod).toBe('shower.rsl-household');
+  });
+
   it('skips a term the feed did not compute and a chemical it was not run for', () => {
     const out = outcome();
-    const some = householdSourceLevels(out, { ...FEED, coefficients: { bathroomAir: 0.002 } });
+    const some = householdSourceLevels(out, {
+      ...FEED,
+      coefficients: { bathroomAir: 0.002 },
+      methods: {},
+    });
     expect(some.every((r) => r.what.startsWith('Tap water'))).toBe(true);
     expect(householdSourceLevels(out, { ...FEED, chemicalId: '108-88-3' })).toEqual([]);
   });
 
   it('reports a zero coefficient as not quantified, with the engine warning', () => {
-    const rows = householdSourceLevels(outcome(), { ...FEED, coefficients: { bathroomAir: 0 } });
+    const rows = householdSourceLevels(outcome(), {
+      ...FEED,
+      coefficients: { bathroomAir: 0 },
+      methods: {},
+    });
     expect(rows[0]!.level).toBeNull();
     expect(rows[0]!.warnings.join(' ')).toMatch(/coefficient 0/);
   });

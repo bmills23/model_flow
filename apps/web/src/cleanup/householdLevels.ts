@@ -3,7 +3,10 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { CleanupOutcome } from './compute';
 
 export interface HouseholdLevelRow {
+  /** The receptor method of the M5 run the level comes from. */
   method: 'legacy' | 'modern';
+  /** The household method id that produced the coefficient (for example shower.little-1992). */
+  householdMethod: string | null;
   what: string;
   /** Source level in SI (kg/m3 for water, kg/kg for soil); null when not quantified. */
   level: number | null;
@@ -18,7 +21,7 @@ export interface HouseholdLevelRow {
 
 const TERMS: readonly {
   key: keyof HouseholdRiskFeed['coefficients'];
-  medium: Extract<Medium, 'bathroomAir' | 'outdoorAir'>;
+  medium: Extract<Medium, 'bathroomAir' | 'indoorAir' | 'outdoorAir'>;
   what: string;
   unit: 'mg/L' | 'mg/kg';
   fromSi: number;
@@ -27,6 +30,13 @@ const TERMS: readonly {
     key: 'bathroomAir',
     medium: 'bathroomAir',
     what: 'Tap water (shower air)',
+    unit: 'mg/L',
+    fromSi: 1e3,
+  },
+  {
+    key: 'householdAir',
+    medium: 'indoorAir',
+    what: 'Tap water (household air)',
     unit: 'mg/L',
     fromSi: 1e3,
   },
@@ -70,6 +80,7 @@ export function householdSourceLevels(
       }).find((l) => l.chemical === feed.chemicalId)!;
       rows.push({
         method,
+        householdMethod: feed.methods[t.key] ?? null,
         what: t.what,
         level: lv.level,
         cancerLevel: lv.cancerLevel,

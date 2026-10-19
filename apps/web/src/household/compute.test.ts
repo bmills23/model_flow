@@ -9,7 +9,7 @@ import {
   showerLegacyStall,
   showerLittle,
 } from '@model-flow/engine';
-import { computeHousehold } from './compute';
+import { computeHousehold, volatileVerdict } from './compute';
 import { DEFAULT_FORM, type HouseholdForm } from './form';
 
 // Test inputs only; none of these is a sourced default.
@@ -19,7 +19,7 @@ const FORM: HouseholdForm = {
   soilConcentration: '40',
   henry: '0.2',
   molecularWeight: '100',
-  volatile: true,
+  volatileOverride: 'volatile',
   householdFactor: '0.5',
   showerDropletDiameter: '1',
   showerFallTime: '2',
@@ -144,5 +144,45 @@ describe('computeHousehold', () => {
   it('reports a bad number as an error naming the field', () => {
     const out = computeHousehold({ ...FORM, vegetativeCover: '1' });
     expect(out.particulate.pef1996.ok).toBe(false);
+  });
+});
+
+describe('volatileVerdict', () => {
+  const f = (over: Partial<HouseholdForm>): HouseholdForm => ({ ...DEFAULT_FORM, ...over });
+  it('applies the RSL criterion to Henry (atm m3/mol) or vapor pressure (mm Hg)', () => {
+    expect(volatileVerdict(f({ henryAtm: '5.5e-3' }))).toMatchObject({
+      volatile: true,
+      source: 'criterion',
+    });
+    expect(volatileVerdict(f({ henryAtm: '1e-6', vaporPressure: '0.5' }))).toMatchObject({
+      volatile: false,
+      source: 'criterion',
+    });
+    expect(volatileVerdict(f({ henryAtm: '1e-6', vaporPressure: '10' })).volatile).toBe(true);
+    // the criterion is strictly greater than
+    expect(volatileVerdict(f({ henryAtm: '1e-5' })).volatile).toBe(false);
+  });
+  it('is not volatile and says why when nothing is entered', () => {
+    const v = volatileVerdict(f({}));
+    expect(v).toMatchObject({ volatile: false, source: 'unknown' });
+    expect(v.note).toMatch(/Henry|vapor pressure/);
+  });
+  it('lets an explicit override win over the criterion', () => {
+    expect(volatileVerdict(f({ henryAtm: '5e-3', volatileOverride: 'nonvolatile' }))).toMatchObject(
+      {
+        volatile: false,
+        source: 'override',
+      },
+    );
+    expect(volatileVerdict(f({ volatileOverride: 'volatile' }))).toMatchObject({
+      volatile: true,
+      source: 'override',
+    });
+  });
+  it('flows into the RSL term and the particulate warning', () => {
+    const out = computeHousehold(f({ ...FORM, henryAtm: '1e-6', volatileOverride: 'auto' }));
+    if (!out.shower.rsl.ok) throw new Error('x');
+    expect(out.shower.rsl.concentration).toBe(0);
+    expect(out.shower.rsl.warnings.map((w) => w.code)).toContain('shower.not-volatile');
   });
 });

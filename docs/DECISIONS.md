@@ -890,17 +890,21 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
    house models and gas-phase dermal uptake.
 2. **One droplet kernel.** The two-resistance droplet fraction is shared by the legacy shower and the
    sprinkler; the film coefficients scale from water vapour and carbon dioxide by the square root of the
-   molecular weight ratio, with the reference values verified against `foster1986` in slice S0 before
-   code.
+   molecular weight ratio. Outcome (S0, 2026-10-18): the reference values could not be verified, because
+   `foster1986` has no confirmed published record. They ship as warned defaults and are overridable
+   inputs; `little1992` is cited for the film theory only.
 3. **Legacy stall is stagnant** (RISC5 choice): all mass volatilized during the shower is in the stall
    from the start, no exchange; a stall value above H C_w is warned, not clipped.
 4. **Modern stall is Little's back-pressure and ventilation balance**, time-averaged over the time in
-   the stall, solved in closed form (linear first-order ODE); the equations in the note are checked line
-   by line against `little1992` in S0 before code.
+   the stall, solved in closed form (linear first-order ODE). Outcome (S0, 2026-10-18): the full text of
+   `little1992` could not be read, so the equations are our statement of the theory, checked by the limit
+   identities only, not line by line against the paper; no printed Little values are fixtures.
 5. **The RSL household term** (`shower.rsl-household`, the Andelman factor as the RSL user's guide states
-   it) is a separate modern screening method so M5 can reproduce the RSL tap water levels for volatiles;
-   its factor and volatility criterion are transcribed from `epa2024rslug` in S0 (forced by the source
-   once read).
+   it) is a separate modern screening method for the whole-house term of the RSL tap water level for
+   volatiles, sent to the 24 h/day indoor air pathway (not the shower stall pathway). Outcome (S0,
+   2026-10-18): the volatility criterion was verified in `epa2024rslug`; the factor K could not be
+   verified (the equations are images), so K is a required, always-warned input with no default, and no
+   RSL tap water level is reproduced by a fixture.
 6. **Sprinkler width.** The sprinkler emission enters the M6 box as a `massRate` through
    `outdoorAirEpc` (no interface change); the box width is an input defaulting to the RISC5 1 m, warned
    when left at the default.
@@ -1036,16 +1040,32 @@ Calls, open to overturn:
    `shower.little-1992`); a constant source sends the screen's own value unchanged.
 3. **Into risk.** The household feed (`household/feeds.ts`) carries bathroom air, sprinkler spray air and
    windblown particulate air for one chemical id (a CAS number entered on the screen, since the screen has no
-   chemical database). The risk card offers shower air for the bathroom air medium and a choice of none,
+   chemical database). The risk card offers shower air for the bathroom air medium (stall methods only; the
+   RSL whole-house term goes to the indoor air medium instead, as a separate option, see item 6) and a choice of none,
    sprinkler or particulates for outdoor air; choosing one outdoor source clears the vapor outdoor option and
    the reverse, because the pathway takes one EPC. Irrigation ingestion and dermal EPCs are not sent: M4 has
    nine pathways and none is irrigation contact, so adding one is M4 work, not W2.
 4. **Into cleanup.** The cleanup screen's direct mode shows, for the chemical of the household run, the tap
    water, irrigation water and soil level as the M5 air level over the model coefficient
-   (`sourceLevelsOverCoefficient`, no root find), per method. Air levels still need the receptor's bathing and
+   (`sourceLevelsOverCoefficient`, no root find), one row per receptor method (legacy, modern) per household
+   term, naming the household method that produced the coefficient (item 7). Air levels still need the receptor's bathing and
    outdoor times; without them the level reads not quantified.
 5. **Nothing held across a reload**, as for the other feeds. No tolerance was widened and no value was added
    from memory.
+6. **RSL term goes to indoor air (review fix, 2026-10-18).** The RSL whole-house term is applied for 24 h/day
+   (RSL User's Guide, Table 1, read 2026-10-18), so the feed carries it as `indoorAir` (risk option
+   `indoorFromHousehold`, the 24 h indoor inhalation pathway; cleanup row "Tap water (household air)"),
+   never as shower stall air whose time is the bathing time. The earlier routing overstated that pathway's
+   time by about 44 times. The claim that the term reproduces RSL tap water levels is unproven until K is
+   verified (item 4 of the E1 block).
+7. **Method column (review fix).** `HouseholdRiskFeed.methods` carries the household method id behind each
+   coefficient; the cleanup table prints it as "Household method" and the legacy/modern column is renamed
+   "Receptor method".
+8. **Volatility on the screen (review fix).** The self-declared checkbox is replaced by Henry (atm m3/mol)
+   and vapor pressure (mm Hg) fields, `rslVolatile` gives the verdict shown on the screen, and an explicit
+   override (force volatile or not volatile) wins. With neither field entered the chemical is treated as not
+   volatile and the screen says what to enter. No unit conversion of the dimensionless Henry constant is done
+   (it would need a stated temperature), so the atm m3/mol value is its own field.
 
 ## 2026-10-18: M10 uncertainty scope (stage 1)
 

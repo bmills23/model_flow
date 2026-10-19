@@ -81,6 +81,34 @@ describe('buildHouseholdFeed', () => {
     expect(r.feed.coefficients.particulateAir).toBe(out.particulate.pef1996.coefficient);
   });
 
+  it('sends the RSL whole-house term as indoor air (24 h/day), not shower air, and names the method', () => {
+    const form = { ...FORM, showerMethod: 'rsl' as const, volatileOverride: 'volatile' as const };
+    const r = buildHouseholdFeed(form, NONE);
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    const out = computeHousehold(form, NONE);
+    if (!out.shower.rsl.ok) throw new Error('fixture inputs should compute');
+    expect(r.feed.bathroomAir).toBeUndefined();
+    expect(r.feed.indoorAir).toEqual({
+      kind: 'constant',
+      value: out.shower.rsl.concentration,
+      origin: 'shower.rsl-household',
+    });
+    expect(r.feed.coefficients.bathroomAir).toBeUndefined();
+    expect(r.feed.coefficients.householdAir).toBe(out.shower.rsl.coefficient);
+    expect(r.feed.methods).toMatchObject({
+      householdAir: 'shower.rsl-household',
+      sprayAir: 'irrigation.sprinkler-fc',
+      particulateAir: 'particulate.ssg-pef-1996',
+    });
+  });
+
+  it('names the shower method behind the stall coefficient', () => {
+    const r = buildHouseholdFeed(FORM, NONE);
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    expect(r.feed.methods.bathroomAir).toBe('shower.little-1992');
+    expect(r.feed.indoorAir).toBeUndefined();
+  });
+
   it('gives a series EPC for a well series, equal to the engine at each sample', () => {
     const form = { ...FORM, showerWaterSource: 'well' as const };
     const r = buildHouseholdFeed(form, { well: WELL, surface: null });

@@ -265,11 +265,13 @@ export function buildInputs(
       const householdSpec =
         medium === 'bathroomAir' && row.bathroomFromHousehold
           ? { spec: household?.bathroomAir, what: 'shower air' }
-          : medium === 'outdoorAir' && row.outdoorFromHousehold === 'sprinkler'
-            ? { spec: household?.outdoorSprinkler, what: 'sprinkler spray air' }
-            : medium === 'outdoorAir' && row.outdoorFromHousehold === 'particulate'
-              ? { spec: household?.outdoorParticulate, what: 'windblown particulate air' }
-              : null;
+          : medium === 'indoorAir' && row.indoorFromHousehold
+            ? { spec: household?.indoorAir, what: 'household (whole-house) air' }
+            : medium === 'outdoorAir' && row.outdoorFromHousehold === 'sprinkler'
+              ? { spec: household?.outdoorSprinkler, what: 'sprinkler spray air' }
+              : medium === 'outdoorAir' && row.outdoorFromHousehold === 'particulate'
+                ? { spec: household?.outdoorParticulate, what: 'windblown particulate air' }
+                : null;
       if (householdSpec) {
         if (household === null || household.chemicalId !== row.id) {
           errors.add(

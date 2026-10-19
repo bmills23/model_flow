@@ -29,6 +29,7 @@ const chemical: ChemicalRow = {
   outdoorFromVapor: true,
   surfaceWaterFromModel: false,
   bathroomFromHousehold: true,
+  indoorFromHousehold: true,
   outdoorFromHousehold: 'sprinkler',
 };
 
@@ -194,6 +195,7 @@ describe('screen project: household feed flags', () => {
     expect(p.success).toBe(true);
     const row = risk.fromProject(p.data).form.chemicals[0];
     expect(row?.bathroomFromHousehold).toBe(false);
+    expect(row?.indoorFromHousehold).toBe(false);
     expect(row?.outdoorFromHousehold).toBe('');
     const c = cleanup.cleanupProjectSchema.safeParse({ form: { chemicals: [oldRow] } });
     expect(c.success).toBe(true);

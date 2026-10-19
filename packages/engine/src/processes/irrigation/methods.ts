@@ -26,6 +26,7 @@ export const irrigationSprinklerFc: MethodDescriptor<SprinklerMethodInput, Sprin
     'The droplet kernel is the one used for the shower, with outdoor droplet size, fall time (including ponding in the box) and flow supplied by the caller; none has a default.',
     'The box is fully mixed and ventilated by the wind; the width defaults to 1 m (the RISC5 choice) and is warned, because for a real sprinkler the plume width matters.',
     'Linear in the irrigation water concentration.',
+    'little1992 is cited for the two-resistance film theory only. The stagnant, no-back-pressure stall is the approach that paper corrects, not a model it presents; the original source for the stagnant stall (foster1986) is a planned, unverified record and is not cited.',
   ],
   risc5Choice:
     'RISC5 feeds the outdoor box with the sprinkler droplet loss and fixes the box width at 1 m; the film reference coefficients are the unverified RISC5 values and are warned when defaulted.',

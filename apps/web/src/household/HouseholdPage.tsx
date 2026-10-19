@@ -4,7 +4,7 @@ import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
-import { computeHousehold, type Section } from './compute';
+import { computeHousehold, volatileVerdict, type Section } from './compute';
 import { buildHouseholdFeed } from './feed';
 import { setHouseholdFeed } from './feeds';
 import {
@@ -14,6 +14,7 @@ import {
   type ParticulateChoice,
   type ShowerChoice,
   type ShowerWaterSource,
+  type VolatileOverride,
 } from './form';
 
 const SHOWER_METHODS = [
@@ -201,17 +202,22 @@ export function HouseholdPage() {
                 ? ' A held series is shown here at its peak; the full series goes to the risk screen.'
                 : ''}
             </p>
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={form.volatile}
-                onChange={(e) => set('volatile', e.target.checked)}
-              />
-              <span>
-                Volatile by the RSL criterion (Henry above 1E-5 atm m3/mol or vapor pressure above 1
-                mm Hg)
-              </span>
-            </label>
+            <div className="fields">
+              {text('henryAtm', 'Henry (atm m3/mol) for the RSL criterion')}
+              {text('vaporPressure', 'Vapor pressure (mm Hg) for the RSL criterion')}
+            </div>
+            <Seg<VolatileOverride>
+              legend="Volatility verdict"
+              name="volatile-override"
+              value={form.volatileOverride}
+              options={[
+                { value: 'auto', label: 'From the RSL criterion' },
+                { value: 'volatile', label: 'Force volatile' },
+                { value: 'nonvolatile', label: 'Force not volatile' },
+              ]}
+              onChange={(v) => set('volatileOverride', v)}
+            />
+            <p className="muted">{volatileVerdict(form).note}</p>
           </Group>
 
           <Group title="Shower">
