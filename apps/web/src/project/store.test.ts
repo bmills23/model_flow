@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { emptyOverrides, setField } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
-import { parseProject } from './index';
+import { hashInputs, parseProject } from './index';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed } from '../vadose/feed';
 import { DEFAULT_FORM as VADOSE_FORM, toScenario as vadoseScenario } from '../vadose/form';
-import { clearSaturatedFeed, getSaturatedFeed } from '../saturated/feed';
+import { DEFAULT_FORM as SAT_FORM, toScenario as toSaturated } from '../saturated/form';
+import { clearSaturatedFeed, getSaturatedFeed, setSaturatedFeed } from '../saturated/feed';
 import {
   clearVadoseVaporFeed,
   clearVaporRiskFeed,
@@ -220,6 +221,87 @@ describe('project store', () => {
     flushAutosave();
     reload();
     expect(getStaleFeeds()).toEqual([]);
+  });
+
+  describe('a file written before the wave H keys existed', () => {
+    type Obj = Record<string, unknown>;
+    const strip = (o: unknown, keys: string[]): void => {
+      if (Array.isArray(o)) o.forEach((x) => strip(x, keys));
+      else if (typeof o === 'object' && o !== null)
+        for (const k of Object.keys(o)) {
+          if (keys.includes(k)) delete (o as Obj)[k];
+          else strip((o as Obj)[k], keys);
+        }
+    };
+    /** Write the autosave as main wrote it: no new keys, and the fingerprints taken over that shape. */
+    function asOldFile(screen: string, keys: string[], feedKeys: string[]): void {
+      flushAutosave();
+      const file = saved() as unknown as { screens: Record<string, { form: Obj }>; feeds: Obj };
+      const form = file.screens[screen]!.form;
+      strip(form, keys);
+      for (const k of feedKeys)
+        (file.feeds[k] as { inputsHash: string }).inputsHash = hashInputs(form);
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(file));
+      reload();
+    }
+    const vad = () => {
+      const r = vadoseScenario(VADOSE_FORM);
+      if (!r.ok) throw new Error('vadose');
+      return r.scenario;
+    };
+
+    it('transport feeds stay current without chemicalId and foc', () => {
+      setWellFeed(wellFeed);
+      asOldFile('transport', ['chemicalId', 'foc'], ['well']);
+      expect(getWellFeed()).toEqual(wellFeed);
+      expect(getStaleFeeds()).toEqual([]);
+    });
+    it('vadose feeds stay current without chemicalId and texture', () => {
+      setVadoseFeed({ scenario: vad(), method: 'modern', label: 'vadose' });
+      setVadoseVaporFeed({} as never);
+      asOldFile('vadose', ['chemicalId', 'texture'], ['vadose', 'vaporVadose']);
+      expect(getVadoseFeed()).not.toBeNull();
+      expect(getStaleFeeds()).toEqual([]);
+    });
+    it('saturated feeds stay current without chemicalId and texture', () => {
+      const sat = toSaturated(SAT_FORM);
+      if (!sat.ok) throw new Error('scenario');
+      setSaturatedFeed({ input: sat.scenario.input, method: 'legacy', label: 'sat' });
+      asOldFile('saturated', ['chemicalId', 'texture'], ['saturated']);
+      expect(getSaturatedFeed()).not.toBeNull();
+      expect(getStaleFeeds()).toEqual([]);
+    });
+    it('produce and TPH feeds stay current without wildlifeRows', () => {
+      setTphFeed({
+        methodId: 'tph.tphcwg',
+        label: 't',
+        targetHazardIndex: 1,
+        totalMgPerKg: 1,
+        fractions: [],
+        unmapped: [],
+        warnings: [],
+      });
+      asOldFile('plantsEco', ['wildlifeRows'], ['tph']);
+      expect(getTphFeed()).not.toBeNull();
+      expect(getStaleFeeds()).toEqual([]);
+    });
+    it('a genuine change after the load still flags the feed', () => {
+      setWellFeed(wellFeed);
+      asOldFile('transport', ['chemicalId', 'foc'], ['well']);
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, K: '99' } });
+      flushAutosave();
+      reload();
+      expect(getStaleFeeds()).toEqual(['well']);
+    });
+    it('a changed organic carbon fraction flags a transport feed', () => {
+      setWellFeed(wellFeed);
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, foc: '0.02' } });
+      flushAutosave();
+      reload();
+      expect(getStaleFeeds()).toEqual(['well']);
+    });
   });
 
   describe('project overrides', () => {

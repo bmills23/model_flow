@@ -24,3 +24,40 @@ export function hashInputs(value: unknown): string {
   }
   return h.toString(16).padStart(8, '0');
 }
+
+/**
+ * Form keys added after the first file format, per source screen. A fingerprint is taken over the form
+ * without them, so a key added later cannot change the fingerprint of a file written before it existed
+ * (the loader fills a missing key with its default, which would otherwise read as an input change).
+ *
+ * `always`: the key only records where other fields were filled from (a chemical or soil texture
+ * picker); the filled values are fields of their own and are fingerprinted. `atDefault`: the key does
+ * feed the computation, so it counts as soon as it differs from its default and is left out only while
+ * it equals it. Add every new form key to one of these lists, or a saved project opens with stale feeds.
+ */
+export const FINGERPRINT_SKIP: Record<
+  string,
+  { always?: readonly string[]; atDefault?: Readonly<Record<string, unknown>> }
+> = {
+  transport: { always: ['chemicalId'], atDefault: { foc: '0.001' } },
+  vadose: { always: ['chemicalId', 'texture'] },
+  saturated: { always: ['chemicalId', 'texture'] },
+  plantsEco: { always: ['wildlifeRows'] },
+};
+
+function without(value: unknown, always: readonly string[]): unknown {
+  if (Array.isArray(value)) return value.map((v) => without(v, always));
+  if (typeof value !== 'object' || value === null) return value;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value)) if (!always.includes(k)) out[k] = without(v, always);
+  return out;
+}
+
+/** The part of a source form that a feed's fingerprint covers (see `FINGERPRINT_SKIP`). */
+export function fingerprintForm(source: string, form: unknown): unknown {
+  const rule = FINGERPRINT_SKIP[source];
+  if (rule === undefined) return form;
+  const out = without(form, rule.always ?? []) as Record<string, unknown>;
+  for (const [k, d] of Object.entries(rule.atDefault ?? {})) if (out[k] === d) delete out[k];
+  return out;
+}
