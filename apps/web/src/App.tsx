@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
 import { slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
+import { STEPS, stepForHash } from './steps';
 import { ProjectBar } from './project/ProjectBar';
 import {
   getDroppedFeeds,
@@ -47,8 +48,6 @@ const CleanupPage = lazy(() =>
 
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
 
-const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
-
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
@@ -94,6 +93,7 @@ export function App() {
   const onHousehold = hash === HOUSEHOLD_HASH;
   const onPlantsEco = hash === PLANTS_ECO_HASH;
   const onReport = hash === REPORT_HASH;
+  const currentStep = stepForHash(hash);
   const onDocs = hash === DOCS_HASH || hash.startsWith(`${DOCS_HASH}/`);
 
   return (
@@ -155,20 +155,14 @@ export function App() {
       <nav aria-label="Main">
         <ol className="steps">
           {STEPS.map((step, i) => (
-            <li key={step}>
-              {step === 'Transport' ? (
-                <a
-                  className="step-link"
-                  href={TRANSPORT_HASH}
-                  aria-current={onTransport ? 'page' : undefined}
-                >
-                  <span className="step-num">{i + 1}</span> {step}
-                </a>
-              ) : (
-                <button type="button" disabled>
-                  <span className="step-num">{i + 1}</span> {step}
-                </button>
-              )}
+            <li key={step.label}>
+              <a
+                className="step-link"
+                href={step.href}
+                aria-current={currentStep === step ? 'page' : undefined}
+              >
+                <span className="step-num">{i + 1}</span> {step.label}
+              </a>
             </li>
           ))}
         </ol>
@@ -278,9 +272,9 @@ export function App() {
             <h1>Fate-and-transport and risk modeling</h1>
             <p className="lede">
               An open reimplementation of RISC5-class methods with a switch between legacy and
-              modern alternatives for each process. Groundwater transport, vadose leaching, the
-              saturated soil source, surface water and sediment, and exposure and risk are working;
-              the other steps are placeholders for the milestones on the roadmap.
+              modern alternatives for each process. Work through the six steps above in order, or
+              open any screen directly: nothing is locked, and a screen that needs a value from
+              another says where it came from. The report gathers the results.
             </p>
             <p>
               <a className="button" href={TRANSPORT_HASH}>
@@ -309,6 +303,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={CLEANUP_HASH}>
                 Open cleanup levels
+              </a>{' '}
+              <a className="button" href={REPORT_HASH}>
+                Open the report
               </a>{' '}
               <a className="button" href={METHODS_HASH}>
                 Read how each calculation is sourced

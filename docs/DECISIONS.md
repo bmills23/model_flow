@@ -1795,3 +1795,22 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
    half-life stays a user input. New optional keys `chemicalId` and `foc`, inside format version 1.
 4. **Not changed.** Surface water is excluded until G4; no feed changes meaning; choosing "Entered by hand"
    keeps the current values.
+
+## 2026-10-19: Wave H slice U1, working step bar
+
+1. **Single definition of step targets (DEFAULT).** `apps/web/src/steps.ts` holds the six steps, each with
+   one `href` and the list of route hashes it owns. U3 retargets Chemicals to `#/chemicals` and U2
+   retargets Site model to `#/site` by changing that one line (and adding the route to `owns`).
+2. **Targets until then (per the plan).** Chemicals to `#/risk`, Site model to `#/transport`, Transport to
+   `#/transport`, Receptors to `#/risk`, Risk and cleanup to `#/cleanup`, Results to `#/report`. Steps
+   that share a target do not both light up: `aria-current` goes only to the step that owns the route, so
+   Chemicals and Site model show no current mark until their own routes exist.
+3. **Route ownership (DEFAULT).** The fate screens (`#/transport`, `#/vadose`, `#/saturated`, `#/vapor`,
+   `#/surface-water`) belong to Transport as the plan says. The plan did not place `#/household` and
+   `#/plants-eco`; both are fate and exposure-medium screens, so they are Transport too. Home, Methods
+   and Documentation own no step. A test asserts every screen route has exactly one owner.
+4. **Presentation.** The disabled buttons are gone; every step is a link styled as before, with the
+   current step drawn with an accent border and heavier weight (not colour alone). No new route, so the
+   mobile check route list and keyboard-order tests needed no change.
+5. **Home page.** The lede no longer says other steps are placeholders, and an "Open the report" button
+   is added.
