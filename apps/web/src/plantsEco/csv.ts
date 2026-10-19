@@ -2,7 +2,7 @@ import type { CsvColumn, CsvRow } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import { ECO_LEGACY_ID, ECO_MODERN_ID, type BenchmarkHqRow, type EcosslResult } from './eco';
 import type { Section } from './form';
-import { WILDLIFE_GROUP_LABELS, type WildlifeResult } from './wildlife';
+import { REPRODUCTION_TOLERANCE, WILDLIFE_GROUP_LABELS, type WildlifeResult } from './wildlife';
 import type { ProduceRow } from './produce';
 import type { TphResult } from './tph';
 
@@ -39,6 +39,11 @@ const WILDLIFE_COLUMNS: CsvColumn[] = [
   { key: 'hq', header: 'hazard quotient', unit: '-' },
   { key: 'backCalc', header: 'soil level for a hazard quotient of one', unit: 'mg/kg dry weight' },
   { key: 'printed', header: 'printed Eco-SSL', unit: 'mg/kg dry weight' },
+  {
+    key: 'reproduces',
+    header: `reproduces printed value within ${Math.round(REPRODUCTION_TOLERANCE * 100)} percent`,
+    unit: 'yes or no',
+  },
 ];
 
 const TPH_COLUMNS: CsvColumn[] = [
@@ -103,6 +108,7 @@ export function wildlifeCsvRows(s: PlantsEcoOutcome['wildlife']): CsvRow[] {
     hq: r.hq,
     backCalc: r.backCalcMgPerKg,
     printed: r.printedMgPerKg,
+    reproduces: r.reproduces === null ? null : r.reproduces ? 'yes' : 'no',
   }));
 }
 

@@ -23,6 +23,10 @@
 }
 
 .plants-eco table.compare th,
+.plants-eco .repro-flag {
+  font-weight: 600;
+}
+
 .plants-eco table.compare td {
   text-align: left;
   padding: 6px 6px;

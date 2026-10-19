@@ -178,6 +178,29 @@ describe('plants and ecology CSV', () => {
           hq: 0.2,
           backCalcMgPerKg: 28.1,
           printedMgPerKg: 28,
+          reproduces: true,
+        },
+        {
+          label: 'shrew',
+          group: 'mammalian' as const,
+          source: 'table 5.3, page 20',
+          doseMgPerKgD: 0.1,
+          trvMgPerKgD: 0.5,
+          hq: 0.2,
+          backCalcMgPerKg: 40,
+          printedMgPerKg: 30,
+          reproduces: false,
+        },
+        {
+          label: 'user',
+          group: 'mammalian' as const,
+          source: '',
+          doseMgPerKgD: 0.2,
+          trvMgPerKgD: 1,
+          hq: 0.2,
+          backCalcMgPerKg: 5,
+          printedMgPerKg: null,
+          reproduces: null,
         },
       ],
     };
@@ -191,10 +214,36 @@ describe('plants and ecology CSV', () => {
         hq: 0.2,
         backCalc: 28.1,
         printed: 28,
+        reproduces: 'yes',
+      },
+      {
+        group: 'Mammal',
+        surrogate: 'shrew',
+        source: 'table 5.3, page 20',
+        dose: 0.1,
+        trv: 0.5,
+        hq: 0.2,
+        backCalc: 40,
+        printed: 30,
+        reproduces: 'no',
+      },
+      {
+        group: 'Mammal',
+        surrogate: 'user',
+        source: '',
+        dose: 0.2,
+        trv: 1,
+        hq: 0.2,
+        backCalc: 5,
+        printed: null,
+        reproduces: null,
       },
     ]);
     expect(wildlifeCsvRows({ ok: false, errors: ['x'] })).toEqual([]);
     const t = plantsEcoCsvTables({ ...none, wildlife });
     expect(t.map((x) => x.name)).toEqual(['wildlife-dose']);
+    expect(exportCsv(t[0]!.rows, t[0]!.columns).split('\r\n')[0]).toMatch(
+      /,printed Eco-SSL \(mg\/kg dry weight\),reproduces printed value within 5 percent \(yes or no\)$/,
+    );
   });
 });
