@@ -1,6 +1,6 @@
 # Shower, irrigation and particulates (methods note for M7)
 
-Equations to be implemented in `packages/engine/src/processes/shower/`,
+Equations implemented in `packages/engine/src/processes/shower/`,
 `packages/engine/src/processes/irrigation/` and `packages/engine/src/processes/particulate/`, in our own
 words, derived from the primary publications and agency documents cited by reference key (see
 `docs/ATTRIBUTIONS.md` for full entries). The RISC5 manual (Appendices G, H and I) was used only as a map
@@ -397,7 +397,7 @@ Stage 3 (web), new lazy route `#/household` (shower, irrigation, particulates):
 - `waldenspence1997`: title, journal, volume, issue, pages and DOI verified through Crossref (2026-10-18);
   full text not read.
 - `cowherd1985`: authors, title and report number now read from the 2002 reference list (S0); status
-  planned. `foster1986`: still a descriptor, year doubtful; S0 could not find the published record.
+  `used` since slice E4. `foster1986`: still a descriptor, year doubtful; S0 could not find the published record.
 - `epa1996ssg`, `epa2002ssg`: the S0 sections are now recorded in their notes. `epa2011efh`,
   `epa2024rslug`, `epa2024rsl`, `arcadis2001`: already in `references.json`; sections not yet read.
 - Added in S0: `eq1994pef` (the EQ 1994 memo, read as Appendix D of the 1996 SSG).

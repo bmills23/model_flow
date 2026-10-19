@@ -1,9 +1,9 @@
 # Projects, reports and polish (M11): design note
 
-Stage 1 scoping note for M11, written 2026-10-18 while M7, M9 and M10 are still open. It is a design note,
+Stage 1 scoping note for M11, written 2026-10-18 when M7, M9 and M10 were still open (all three are DONE 2026-10-18). It is a design note,
 not equations. Choices marked DEFAULT are open for Bryan to overturn; the rulings are numbered in the
 DECISIONS.md block "2026-10-18: M11 projects, reports and polish scope (stage 1)". M11 is built last; the
-slice plan at the end says which slices can start before M7, M9 and M10 land.
+slice plan at the end says which slices could start before M7, M9 and M10 landed.
 
 ## 1. Where the app stands (surveyed 2026-10-18 on the M1 to M6 and M8 integration branch)
 

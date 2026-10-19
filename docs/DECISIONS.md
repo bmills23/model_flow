@@ -879,7 +879,7 @@ The M7 track was approved to start with a methods note first. The note is
 `docs/methods/shower-irrigation-particulates.md` (scope, equations in our own words, coupling, the
 irrigation interface for M9, validity checks, fixture plan and the slice plan). No engine, data or web
 code is written in this stage. `little1992` and `waldenspence1997` received their verified published
-titles, venues and DOIs (Crossref, 2026-10-18), both still `planned`.
+titles, venues and DOIs (Crossref, 2026-10-18); both were `planned` at this stage and are `used` since slice E4.
 
 Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
 

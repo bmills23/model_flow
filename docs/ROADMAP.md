@@ -17,10 +17,8 @@ session.
   ~1000 users; Colorado's Oil Inspection Section (now CDLE Division of Oil and Public Safety) used it to
   check every submitted petroleum-site risk assessment (manual, 2011).
 - **Primary source in hand:** `~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf` (302 pp, June 2011,
-  appendices updated March 2013). Text extraction for this session:
-  `/private/tmp/claude-501/-Users-bryanmills-repos/1ec8a7df-8e71-4701-954e-e5389562ea12/scratchpad/risc5_manual/risc5_guide.txt`
-  (13,185 lines; line index of appendices in section 3 below). Re-extract with `pdftotext -layout` if the
-  scratchpad is gone. The RISC4 manual (Oct 2001, same authors) is public on ISPRA's site
+  appendices updated March 2013). Text extracted locally with `pdftotext -layout` (13,185 lines; line index of appendices in section 3
+  below). Re-extract with `pdftotext -layout` when needed. The RISC4 manual (Oct 2001, same authors) is public on ISPRA's site
   (`isprambiente.gov.it/contentfiles/00002500/2516-c2179-risc4-manual.pdf`) as a second reference.
 - **Why this is feasible and legal:** the manual states that "all fate and transport models are externally
   developed" and documents every equation with its literature source. This is a clean-room
@@ -157,7 +155,7 @@ attached to results, never silent clamps, except where RISC5 clamps and the lega
 
 Each milestone: write the methods note (equations in our words, citations) -> TDD the engine (fixtures
 first) -> UI step and visualization -> ATTRIBUTIONS and references updated -> local gate green (lint,
-typecheck, full vitest, build, mobile viewport check) -> one push. Record per-push CI minutes in CLAUDE.md
+typecheck, full vitest, build, mobile viewport check) -> one push. Record per-push CI minutes in the repo instructions file
 after the first run.
 
 - **M0 Foundation (first session). DONE 2026-10-15.** Clone to `~/repos/model_flow`; copy this plan to `docs/ROADMAP.md`;

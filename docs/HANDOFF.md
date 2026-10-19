@@ -14,7 +14,7 @@ skipping a done one.
   before merging; `docs:check` and prettier were run for this docs commit.
 - Branches that are ancestors of this branch (safe to delete once it lands): `m0-foundation` to
   `m6-vapor-models`, `m8-surface-water`, `wave-m5-m6-m8`, `m7-*`, `m9-*`, `m10-*`, `m11-*`, `t-m7`, `t-m9`,
-  `t-m10`, `t-m11` and the `worktree-agent-*` branches. `m1-groundwater-ui` is NOT an ancestor (its commits
+  `t-m10`, `t-m11` and the `worktree-*` working branches. `m1-groundwater-ui` is NOT an ancestor (its commits
   carry different hashes from what landed); confirm its content is on main before deleting it.
 - Test time on this run: engine suite 33 s, web suite 226 s (the surface water web tests dominate).
 - CI cost: about 5 billed minutes per push to main (measured 2026-10-18 on main before this wave: gate job

@@ -323,7 +323,7 @@ D1, R1 run in parallel; E1 and E4 then run in parallel; E2 and E3 follow; W1 las
 
 | Key | Status in this stage |
 |---|---|
-| `epaecosslguidance` | `used` since slice E3 (wildlife dose model and screening-only status; Attachment 4-1 not read). Added as `planned`; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
+| `epaecosslguidance` | `used` since slice E3 (wildlife dose model and screening-only status; Attachment 4-1 not read). Added as `planned` in the stage 1 scoping; title, directive number, dates and URL read from the PDF cover on 2026-10-18 |
 | `epaecossl` | `used` since slice E3 (cited by `eco.ecossl-2005`), `data` since slice D1: documents page URL, its 21 documents, cover dates and directive numbers read 2026-10-18 |
 | `trappmatthies1995`, `briggs1982`, `trapp2015`, `sample1996`, `tphcwg1997`, `madep2002` | Existing descriptors; verification is slice R1. `sample1996` is `used` since slice E3 (cited by `eco.benchmark-hq` as the expected user benchmark source; text not read); `tphcwg1997` and `madep2002` are `used` since slice E4 (cited by `tph.tphcwg` and `tph.madep` for the fraction concept; the documents were not read) |
-| `epa2005hhrap`, `epa2011efh`, `epa2024rsl` | Existing; used as described above |
+| `epa2005hhrap`, `epa2011efh`, `epa2024rsl` | Existing; `epa2005hhrap` and `epa2011efh` are `used` as described above, `epa2024rsl` is `data` |

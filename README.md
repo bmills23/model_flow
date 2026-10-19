@@ -16,7 +16,7 @@ Screens (hash routes): `#/transport` groundwater transport, `#/vadose` vadose zo
 cleanup levels (with the probabilistic panel), `#/vapor` vapor intrusion and outdoor air, `#/surface-water`
 surface water and sediment, `#/household` shower, irrigation and particulates, `#/plants-eco` plant uptake,
 ecological screening and TPH fractions, `#/report` the printable report with the methods statement, and
-`#/docs` the in-app user guide, methods notes and attributions. Projects save to a file, a share link or
+`#/docs` the in-app user guide, methods notes and attributions, and `#/methods` the methods and references page. Projects save to a file, a share link or
 browser autosave.
 
 ## What it will do
