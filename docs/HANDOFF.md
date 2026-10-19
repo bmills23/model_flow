@@ -6,8 +6,8 @@ skipping a done one.
 
 ## State of the tree
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`) and wave H (UI near-parity, built on
-  branch `wave-ui`), all pushed 2026-10-19. Wave I (six slices, built on branch `wave-i`) is committed locally on
-  `wave-i`, NOT yet merged to main and NOT pushed. Pages deploys from main: https://bmills23.github.io/model_flow/
+  branch `wave-ui`), all pushed 2026-10-19. Wave I (six slices, built on branch `wave-i`) was merged to
+  main and pushed 2026-10-19. Pages deploys from main: https://bmills23.github.io/model_flow/
 - Final full `corepack pnpm gate` on `wave-i` after the review fixes: green 2026-10-19 (exit 0, build included).
   Test counts from the wave I integration (after merging all six slices, before the review fixes added a few
   tests): engine 1379 tests (79 files), web 1503
