@@ -1,27 +1,45 @@
-# HANDOFF (written from the tree, 2026-10-18, end of M7, M9, M10 and M11)
+# HANDOFF (written from the tree, 2026-10-19, end of wave G)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
 skipping a done one.
 
 ## State of the tree
-- Main holds M0 to M11. M7, M9, M10 and M11 were built on branch `wave-parity` (62 commits on top of `0c772c0`)
-  and fast-forwarded into main on 2026-10-18. Pages deploys from main: https://bmills23.github.io/model_flow/
-- Gate (full `corepack pnpm gate`, green 2026-10-18 in 5 min 10 s): engine 1373 tests (79 files), data 149 passed and
-  3 skipped (7 files; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs),
-  web 971 tests (112 files). Run `corepack pnpm gate` for the lint, typecheck, `data:check` and build steps
-  before merging; `docs:check` and prettier were run for this docs commit.
+- Main holds M0 to M11. Wave G (the parity gaps below) is on branch `wave-gaps`, ahead of main and not yet
+  merged or pushed when this was written; confirm with `git log main..wave-gaps`. Pages deploys from main:
+  https://bmills23.github.io/model_flow/
+- Gate (full `corepack pnpm gate`, green on `wave-gaps` 2026-10-19): engine 1377 tests (79 files, 34.95 s),
+  web 1100 tests (120 files, 48.97 s). The data package counts (149 passed, 3 skipped; the skipped three are the
+  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs) were not re-run for this docs commit.
+  `corepack pnpm mobile:check` was also green (0 overflowing elements, 0 axe violations); run it with `--url`
+  when port 5178 is busy.
 - Branches that are ancestors of this branch (safe to delete once it lands): `m0-foundation` to
   `m6-vapor-models`, `m8-surface-water`, `wave-m5-m6-m8`, `m7-*`, `m9-*`, `m10-*`, `m11-*`, `t-m7`, `t-m9`,
   `t-m10`, `t-m11` and the `worktree-*` working branches. `m1-groundwater-ui` is NOT an ancestor (its commits
   carry different hashes from what landed); confirm its content is on main before deleting it.
-- Test time on this run: engine suite 33 s, web suite 226 s (the surface water web tests dominate).
+- Test time on this run: engine suite 35 s, web suite 49 s (it was 226 s before wave G sped up the bank plane integral).
 - CI cost: about 5 billed minutes per push to main (measured 2026-10-18 on main before this wave: gate job
-  2 min 50 s, Pages build 26 s, deploy 10 s). Not re-measured with M7 to M11; the web suite is larger now.
+  2 min 50 s, Pages build 26 s, deploy 10 s; re-measured 2026-10-19 after M11: gate 2 min 38 s). Not re-measured
+  after wave G; the web suite is now much faster, so the gate job time is to be re-measured after the next push.
   Docs-only pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave G landed (parity gaps, 2026-10-19)
+- Cleanup (`#/cleanup`): homegrown produce level (does not apply to modeled sources, DEFAULT) and TPHCWG and
+  MADEP total TPH levels, with CSV, project and report support.
+- Report (`#/report`): each screen's main charts with data tables, and an on-request "Include uncertainty
+  results" control that re-runs from the saved setup and seed (plume map excluded, DEFAULT). Only the exposure
+  sample runs in the background and can be cancelled; the one-at-a-time, Sobol and cleanup solves block the page.
+- Accessibility: `scripts/mobile-check.mjs` runs axe-core (dev dependency, MPL-2.0) on every route at 390 light,
+  390 dark and 1280, including the fed cleanup screen; per-screen keyboard-order tests exist; the long-run
+  confirmations use `ui/AlertDialog.tsx` (focus to Cancel, Escape cancels, focus returns to the trigger); the
+  scrollable chart data tables are keyboard-focusable regions.
+- Surface water performance: the bank-plane integral got a tail tolerance and remembered axis factors (a 2000 m
+  linked run 178 s to 2.0 s in Node; `compute.test.ts` 205 s to 11.7 s). Rulings in the DECISIONS.md G1 to G4
+  blocks.
+- Generated `.vitest` output is ignored.
 
 ## M7 landed (shower, irrigation, particulates, App. G, H, I)
 - Methods note `docs/methods/shower-irrigation-particulates.md`. Rulings: DECISIONS.md "M7 shower,
@@ -64,8 +82,8 @@ skipping a done one.
   modern method is the HHRAP 2005 equations), ruling 12 (TSCF and the leaf-air partition coefficient are
   required inputs), ruling 9 (TPH fractions map onto the five RSL TPH records), ruling 8 (Eco-SSLs by hand
   entry; seven printed wildlife rows that do not reproduce are flagged, not corrected).
-- Deferred: the produce and TPH total levels are not in the cleanup screen; the wildlife surrogate food web
-  table is not wired to the screen; see the ROADMAP M9 row.
+- Deferred: the wildlife surrogate food web table is not wired to the screen (the produce and TPH total levels
+  reached the cleanup screen in wave G); see the ROADMAP M9 row.
 
 ## M10 landed (uncertainty, Monte Carlo)
 - Methods note `docs/methods/uncertainty.md`. Rulings: DECISIONS.md "M10 uncertainty scope (stage 1)" block
@@ -107,7 +125,7 @@ skipping a done one.
   Fixtures: SSG 1996 Table A-1 (partition formula only; its Koc and H' inputs are unverified) and the RSL
   MCL-based SSL (91 of 91 rows, the binding check). Deferred: vapor chains as modeled targets, shower
   inhalation, particulates, irrigation (M7 supplies wrappers, see above), surface water as a target, plant
-  uptake and TPH levels in the screen, target-organ segregation, pH-dependent Kd and Koc.
+  uptake and TPH levels in the screen (the produce and TPH total levels landed in wave G), target-organ segregation, pH-dependent Kd and Koc.
 - M6 vapor models (`docs/methods/vapor-models.md`, `#/vapor`): `processes/vapor/` and `processes/outdoorAir/`;
   registered `vapor.je-1991`, `vapor.dominant-layer-1998`, `vapor.je-epa`, `vapor.devaull-2007`,
   `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015`, `vapor.jury-bam` (zero water flux only),
@@ -223,19 +241,23 @@ skipping a done one.
   draft. DeVaull 2007 is the modern alternative.
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted (sec-butylbenzene enthalpy,
   tert-butylbenzene row).
-- Cleanup screen gaps: produce and TPH total levels are not wired in; modeled cleanup sources are not
-  sampled by the uncertainty panel; the report omits charts and uncertainty results; no axe-core run was made
-  and keyboard order was tested for the shell only.
-- Slow run: a linked surface water run on the screen takes about 81 s at a 2000 m reach (`N_TIMES` = 24
-  bank-plane series in `apps/web/src/surfaceWater/compute.ts`; measured 2026-10-18, not re-measured). Profile
-  it before changing tests. The web suite takes about 226 s.
+- Cleanup screen gaps: produce does not apply to modeled sources (DEFAULT); whether TPH needs a cancer endpoint
+  is an open question; modeled cleanup sources are not sampled by the uncertainty panel.
+- Report gaps: the plume map is left out of the report's uncertainty results (DEFAULT).
+- Accessibility: chart SVG arrow-key navigation has not been walked.
+- Slow run: a linked surface water run at a 2000 m reach takes 2.0 s in Node after the wave G fix (178 s
+  before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix). Profile before
+  changing tests.
 - CI cost per push to main is about 5 billed minutes (see State of the tree); push once per logical unit,
   and the heavy mobile check is local only.
 - `scripts/mobile-check.mjs` is committed and run by hand (`corepack pnpm mobile:check`); it is not in the
   gate. Re-run it before any push that changes a screen.
 - Timing checks under load: `vadose-legacy.test.ts` (best of nine under 250 ms) and
   `groundwater-kernel.test.ts` (best of three under 1 s, mass conservation 30 s timeout) were made robust to
-  parallel load. If one fails, re-run that file alone before treating it as a regression.
+  parallel load. Other timing tests also fail under heavy host load (the methods citation test now has a 30 s
+  timeout). If one fails, re-run that file alone before treating it as a regression.
+- Lingering worktrees of finished milestones: the local worktree directories next to the repo (`../model_flow_wt/`: m7, m9, m10, m11,
+  wave) and the extra working copies inside it. Remove them once nothing needs resuming; `git worktree list` shows all of them.
 - Optional extras, not scheduled: the transport charts measure the padded figure and render about 7 percent
   small.
 - Manual text extraction lives outside the repo; re-extract when needed:
@@ -243,6 +265,6 @@ skipping a done one.
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- All twelve milestones (M0 to M11) are built. Remaining work is the deferred lists in the ROADMAP rows and
-  the open items above: read the unverified sources, wire produce and TPH
-  into the cleanup screen, and run the axe-core and keyboard passes.
+- The UI near-parity wave (plan pending Bryan's review): bring the screens closer to the manual's screens.
+- Then the open items above: read the unverified sources, and decide produce on modeled sources, the TPH
+  cancer endpoint and the plume map in the report.

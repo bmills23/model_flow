@@ -13,9 +13,9 @@ scope, milestones and the research brief, and `docs/DECISIONS.md` for the decisi
 
 Screens (hash routes): `#/transport` groundwater transport, `#/vadose` vadose zone leaching,
 `#/saturated` saturated soil source, `#/risk` exposure and risk (with the uncertainty panel), `#/cleanup`
-cleanup levels (with the probabilistic panel), `#/vapor` vapor intrusion and outdoor air, `#/surface-water`
+cleanup levels (with the produce and total TPH levels and the probabilistic panel), `#/vapor` vapor intrusion and outdoor air, `#/surface-water`
 surface water and sediment, `#/household` shower, irrigation and particulates, `#/plants-eco` plant uptake,
-ecological screening and TPH fractions, `#/report` the printable report with the methods statement, and
+ecological screening and TPH fractions, `#/report` the printable report with the methods statement, charts and on-request uncertainty results, and
 `#/docs` the in-app user guide, methods notes and attributions, and `#/methods` the methods and references page. Projects save to a file, a share link or
 browser autosave.
 
