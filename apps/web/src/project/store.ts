@@ -434,6 +434,7 @@ function watchPageHide(): void {
 export function startProjectStore(): void {
   hydrate();
   watchPageHide();
-  // the autosave is not a saved file: compare against a blank project, so a restored one is unsaved
-  savedSnapshot = null;
+  // seed the saved snapshot from the restored state, so a reload alone is not an unsaved change;
+  // the unload warning appears only once something is edited after the restore
+  markSaved();
 }
