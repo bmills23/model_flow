@@ -119,6 +119,9 @@ describe('disclosure widgets', () => {
     expect(document.activeElement).toBe(b);
     expect(b.getAttribute('aria-expanded')).toBe('true');
     expect(screen.getByRole('table')).toBeTruthy();
+    // a scrollable table must be reachable by keyboard (axe: scrollable-region-focusable)
+    const region = screen.getByRole('region', { name: /c, scrollable/ });
+    expect(region.tabIndex).toBe(0);
   });
 
   it('toggle with the keyboard: a button with aria-expanded keeps focus and flips its state', async () => {

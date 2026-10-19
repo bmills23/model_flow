@@ -22,7 +22,12 @@ export function DataTable(props: {
         </button>
       )}
       {open && (
-        <div className="table-scroll">
+        <div
+          className="table-scroll"
+          tabIndex={0}
+          role="region"
+          aria-label={`${props.caption}, scrollable`}
+        >
           <table>
             <caption className="sr-only">{props.caption}</caption>
             <thead>

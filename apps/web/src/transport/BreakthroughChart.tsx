@@ -168,7 +168,12 @@ export function BreakthroughChart({ result, scale }: { result: ComputeResult; sc
           </button>
         )}
         {tableOpen && (
-          <div className="table-scroll">
+          <div
+            className="table-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="Breakthrough data table, scrollable"
+          >
             <table>
               <thead>
                 <tr>

@@ -140,7 +140,12 @@ export function ModeledChart(props: {
           {tableOpen ? 'Hide data table' : 'Show data table'}
         </button>
         {tableOpen && (
-          <div className="table-scroll">
+          <div
+            className="table-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="Chart data table, scrollable"
+          >
             <table>
               <thead>
                 <tr>

@@ -1743,6 +1743,10 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
 3. **Fix (DEFAULT).** The idle status line faded its text with `opacity: 0.6`, which pushed the muted
    token below 4.5:1. The fade is removed; the active state is shown with the full text token and a
    heavier weight instead. A test reads the rule so opacity cannot return.
+3a. **Late finding on `#/report` (DEFAULT).** The wave's final mobile check found one serious
+   `scrollable-region-focusable` violation (3 nodes) on `#/report`: the opened chart data tables scroll
+   but were not keyboard reachable. The three `table-scroll` containers (vadose `DataTable`, transport
+   breakthrough chart, cleanup modeled chart) are now focusable regions with a label.
 4. **Moderate and minor violations.** None were reported, so there is nothing to defer.
 5. **Keyboard-order tests (DEFAULT).** `apps/web/src/a11y/screenKeyboard.test.tsx` renders all 17
    routes and checks: no positive tabindex, no native control with `tabindex="-1"`, the skip link is the
