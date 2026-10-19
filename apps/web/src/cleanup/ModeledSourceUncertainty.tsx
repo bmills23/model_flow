@@ -18,7 +18,8 @@ import '../uncertainty/uncertainty.css';
 import type { Method } from './modeledChains';
 import { LABELS } from './modeledChains';
 import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
-import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS, buildModeledSetup } from './modeledUncertainty';
+import { buildModeledSetup } from './modeledSetup';
+import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS } from './modeledUncertainty';
 import { ProbabilisticResults } from './ProbabilisticResults';
 
 type Shown = ModeledCleanupRun & { label: string; request: ModeledRequest };

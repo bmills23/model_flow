@@ -21,7 +21,8 @@ import {
   type Warning,
 } from '@model-flow/engine';
 import { runCleanupProbabilistic, type ProbabilisticSetup } from '../cleanup/probabilistic';
-import { SMALL_TAIL_DRAWS, type ModeledSetup } from '../cleanup/modeledUncertainty';
+import { SMALL_TAIL_DRAWS } from '../cleanup/modeledUncertainty';
+import type { ModeledSetup } from '../cleanup/modeledSetup';
 import { PILOT_ROWS, assertWithinBudget, projectRun, type Projection } from './budget';
 import { buildEditorSpec, type EditorSpec } from './editor';
 import {

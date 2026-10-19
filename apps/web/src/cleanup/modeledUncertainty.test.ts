@@ -11,12 +11,8 @@ import type { EditorSpec } from '../uncertainty/editor';
 import type { ModeledRowsRequest, PoolRequest } from '../uncertainty/protocol';
 import { computeModeled, solveModeledIteration } from './compute';
 import { buildModeled } from './modeledBuild';
-import {
-  MODELED_DEFAULT_N,
-  SMALL_TAIL_DRAWS,
-  buildModeledSetup,
-  modeledUncertainInputs,
-} from './modeledUncertainty';
+import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS, modeledUncertainInputs } from './modeledUncertainty';
+import { buildModeledSetup } from './modeledSetup';
 import { defaultCleanupForm, type CleanupForm } from './form';
 import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
 
