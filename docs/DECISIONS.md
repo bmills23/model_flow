@@ -998,3 +998,29 @@ M10 slice E6 (probabilistic cleanup, 2026-10-18) implementation choices, none ov
 - Fixture 6 passed at its stated tolerances (quantiles within 2 percent of the analytic lognormal ones at
   n = 4000; exceedance fraction inside the binomial 99 percent band); no tolerance was widened. No reference
   changed status.
+
+M10 slice E7 (registry coverage, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- Declarations use a `pathInput` helper in the registry (a scalar at a fixed path of the method input). An
+  absent optional scalar reads NaN and is created by `set`; an absent parent object, an array index past the
+  end or a false guard (the other variant of a union: river or lake, entered or Domenico reach, flow or Darcy
+  discharge, soil, soil gas or groundwater source, oxygen mode, soil gas flow specification) reads NaN and
+  `set` throws a RangeError, so a sample is never silently dropped. A caller samples only inputs whose base
+  value is finite.
+- Declared: `vadose.vadsat` and `vadose.layered` (infiltration, per-layer soil properties and thicknesses,
+  source geometry, concentration and decay, chemical Koc, H, S, Da, Dw and mu, dispersivity),
+  `saturatedSource.two-region` and `.exponential` (geometry, fluctuation, soil, aquifer, infiltration,
+  chemical; the decay rate only on the exponential method because the legacy method refuses it), the seven
+  `vapor.*` methods (chemical diffusion and Henry constants, layers or strata, building and soil gas flow,
+  source, and for PVI the screen's own continuous inputs, which is the PVIScreen sampling M6 deferred),
+  `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `surfaceWater.well-mixed` and `.mass-discharge`.
+- Not declared: molar masses, the TPH pair, foundation type and user flags (constants or switches, not
+  parameters), concentration and discharge series (outputs of the chain, not parameters) and the bank-plane
+  quadrature source of the modern surface water method. Layer lists declare four slots per side (four layers
+  or strata for vapor and layered vadose); a base with fewer layers reads NaN for the rest.
+- The M1 groundwater methods are still not declared. E2 named them in the slice plan but declared only the
+  exposure methods, and E7's scope lists M2, M3, M6 and M8, so a chain through the aquifer has no transport
+  parameters to sample yet. Open: a later slice.
+- The coverage tests use runnable base inputs written for the test (`test/uncertainBases.ts`); their numbers
+  are scaffolding, not data and not a validation. No reference changed status and no assumption text changed.
+

@@ -119,3 +119,75 @@ export function prefixUncertainInputs<L, C>(
     set: (chain: C, value: number) => setLink(chain, u.set(getLink(chain), value)),
   }));
 }
+
+export interface PathInputSpec<I> {
+  id: string;
+  label: string;
+  unit: string;
+  category: UncertainInput<I>['category'];
+  bounds: readonly [number, number];
+  /** Keys and array indices from the input root to the scalar. */
+  path: readonly (string | number)[];
+  /**
+   * Guard for an input that exists only in one variant of a union (for example a Darcy discharge).
+   * When it is false `get` reads NaN and `set` refuses.
+   */
+  when?: (input: I) => boolean;
+}
+
+function readPath(root: unknown, path: readonly (string | number)[]): number {
+  let cur: unknown = root;
+  for (const key of path) {
+    if (cur === null || typeof cur !== 'object') return Number.NaN;
+    cur = (cur as Record<string | number, unknown>)[key];
+  }
+  return typeof cur === 'number' ? cur : Number.NaN;
+}
+
+function writePath(
+  node: unknown,
+  path: readonly (string | number)[],
+  value: number,
+  where: string,
+): unknown {
+  const [key, ...rest] = path as [string | number, ...(string | number)[]];
+  if (node === null || typeof node !== 'object') {
+    throw new RangeError(`"${where}" is not present in this input`);
+  }
+  if (Array.isArray(node)) {
+    if (typeof key !== 'number' || key < 0 || key >= node.length) {
+      throw new RangeError(`"${where}" is not present in this input`);
+    }
+    const copy = node.slice();
+    copy[key] = rest.length === 0 ? value : writePath(node[key], rest, value, where);
+    return copy;
+  }
+  const obj = node as Record<string | number, unknown>;
+  if (rest.length > 0 && (obj[key] === undefined || obj[key] === null)) {
+    throw new RangeError(`"${where}" is not present in this input`);
+  }
+  return { ...obj, [key]: rest.length === 0 ? value : writePath(obj[key], rest, value, where) };
+}
+
+/**
+ * An uncertain input that is one scalar at a fixed path of the method input. An absent optional scalar
+ * reads as NaN and is created by `set`; an absent parent, an array index past the end or a false guard
+ * reads NaN and `set` throws a RangeError, so a sample is never silently dropped.
+ */
+export function pathInput<I>(spec: PathInputSpec<I>): UncertainInput<I> {
+  const { path, when } = spec;
+  return {
+    id: spec.id,
+    label: spec.label,
+    unit: spec.unit,
+    category: spec.category,
+    bounds: spec.bounds,
+    get: (input) => (when !== undefined && !when(input) ? Number.NaN : readPath(input, path)),
+    set: (input, value) => {
+      if (when !== undefined && !when(input)) {
+        throw new RangeError(`"${spec.id}" is not present in this input`);
+      }
+      return writePath(input, path, value, spec.id) as I;
+    },
+  };
+}

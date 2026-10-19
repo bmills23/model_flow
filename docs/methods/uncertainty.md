@@ -331,7 +331,8 @@ Engine (each one worker, TDD):
 - **E1 Distributions and AS 241.** `numerics/special.ts` Phi^-1, `processes/uncertainty/distributions.ts`
   (library, truncation, unit conversion, checks). Fixtures 2. No dependency.
 - **E2 Parameter registry.** `uncertainInputs` on `MethodDescriptor`, declarations for the M4 exposure
-  methods and the M1 groundwater methods, chain prefixing, registry tests. Depends on nothing; E4 needs it.
+  methods (the M1 groundwater declarations were planned here but are not made; see E7), chain prefixing,
+  registry tests. Depends on nothing; E4 needs it.
 - **E3 Samplers.** SRS, LHS mapping, Iman-Conover with Cholesky, seed streams, percentiles (definition 7).
   Fixtures 1, 3, 4. Depends on E1.
 - **E4 Runner and the two registered methods (done).** `uncertainty.srs-exposure`, `uncertainty.lhs-ic`, row
@@ -340,7 +341,11 @@ Engine (each one worker, TDD):
   `uncertainty.sobol-saltelli`. Fixture 5. Depends on E3 and E4.
 - **E6 Probabilistic cleanup (done).** Wrap M5's solver per iteration, censoring, protection percentile, the
   registered `uncertainty.cleanup-probabilistic`. Fixture 6. Depends on E4.
-- **E7 Registry coverage.** Declarations for M2, M3, M6 and M8 methods. Depends on E2; parallel with E4 to E6.
+- **E7 Registry coverage (done).** Declarations for the M2, M3, M6 and M8 methods (`vadose.vadsat`,
+  `vadose.layered`, `saturatedSource.two-region`, `saturatedSource.exponential`, the seven `vapor.*` methods,
+  `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `surfaceWater.well-mixed`, `surfaceWater.mass-discharge`) through
+  the `pathInput` helper. The M1 groundwater methods are not declared yet (E2 named them but declared only the
+  exposure methods): a chain through the aquifer cannot sample transport parameters until they are. Depends on E2.
 
 Web (each one worker; verify at 390x844 through CDP, light and dark):
 

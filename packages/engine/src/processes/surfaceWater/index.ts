@@ -7,6 +7,10 @@ import {
   type ModernSurfaceWaterInput,
   type ModernSurfaceWaterResult,
 } from './scenario.js';
+import {
+  legacySurfaceWaterUncertainInputs,
+  modernSurfaceWaterUncertainInputs,
+} from './uncertain.js';
 
 export * from './legacy.js';
 export * from './reach.js';
@@ -49,6 +53,7 @@ export const surfaceWaterLegacy: MethodDescriptor<
   risc5Choice:
     'RISC5 loads the water body with the centreline groundwater concentration times a Darcy flow across the bed (bed conductivity, discharge thickness, reach length and gradient), mixes it with a fraction of the upstream flow and the body volume at steady state for each time, sets the reach length from the 5 percent Domenico plume width with its own dispersivities, and takes sediment as Kd times the groundwater concentration.',
   validate: (input): Warning[] => runLegacySurfaceWater(input).warnings,
+  uncertainInputs: legacySurfaceWaterUncertainInputs(),
   run: runLegacySurfaceWater,
 };
 
@@ -71,5 +76,6 @@ export const surfaceWaterModern: MethodDescriptor<
     'Downstream of the reach the whole river is mixed and moves as plug flow with first-order decay.',
   ],
   validate: (input): Warning[] => runModernSurfaceWater(input).warnings,
+  uncertainInputs: modernSurfaceWaterUncertainInputs(),
   run: runModernSurfaceWater,
 };

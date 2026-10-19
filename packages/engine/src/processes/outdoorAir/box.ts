@@ -1,6 +1,7 @@
 import type { MethodDescriptor } from '../../registry/index.js';
 import { layerDeff, type SoilLayer, type VaporChemical } from '../vapor/legacyJe.js';
 import { checkNonNeg, checkPos } from '../vapor/units.js';
+import { outdoorBoxUncertainInputs } from './uncertain.js';
 
 /**
  * Legacy outdoor air box (`outdoorAir.box`). Emissions enter a box over the source of length L along
@@ -90,5 +91,6 @@ export const outdoorAirBox: MethodDescriptor<OutdoorBoxInput, OutdoorBoxResult> 
     checkBox(input.box);
     return [];
   },
+  uncertainInputs: outdoorBoxUncertainInputs(),
   run: (input) => ({ concentration: boxConcentrationFromFlux(input.box, input.flux) }),
 };

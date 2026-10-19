@@ -3,6 +3,7 @@ import { millingtonQuirkDeff } from '../vadose/index.js';
 import { crackRadius, jeAlpha, permeabilityFromConductivity, soilGasFlow } from './building.js';
 import { sourceVapor, type SourceVaporInput } from './source.js';
 import { checkNonNeg, checkPos } from './units.js';
+import { legacyJeUncertainInputs } from './uncertain.js';
 
 /**
  * Legacy Johnson and Ettinger (1991) model, soil, soil gas or groundwater source to indoor air, no
@@ -263,5 +264,6 @@ export const vaporJe1991: MethodDescriptor<LegacyJeInput, LegacyJeResult> = {
   risc5Choice:
     'RISC5 takes the crack diffusion coefficient from the foundation layer entered as a soil layer, enters the capillary fringe as a layer of given moisture, asks for hydraulic conductivity to estimate the vapor permeability, takes air exchanges per day, holds the source constant, and uses an air viscosity of 1.8e-4 g/(cm s).',
   validate: (input) => jeLegacyIndoor(input).warnings,
+  uncertainInputs: legacyJeUncertainInputs(),
   run: jeLegacyIndoor,
 };

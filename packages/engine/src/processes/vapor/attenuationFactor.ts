@@ -1,6 +1,7 @@
 import type { MethodDescriptor, Warning } from '../../registry/index.js';
 import { henryAtTemperature, type HenryTemperatureInput } from './henry.js';
 import { checkNonNeg, checkPos } from './units.js';
+import { attenuationUncertainInputs } from './uncertain.js';
 
 /**
  * Empirical attenuation factors for vapor intrusion screening (EPA 2015 technical guide, Table 6-1;
@@ -157,5 +158,6 @@ export const vaporAttenuationFactor2015: MethodDescriptor<
     'Not intended for a source less than 5 ft below the foundation or where preferential pathways exist.',
   ],
   validate: (input) => attenuationFactorRun(input).warnings,
+  uncertainInputs: attenuationUncertainInputs(),
   run: attenuationFactorRun,
 };
