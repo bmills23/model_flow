@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { Field, Seg } from '../ui/controls';
 import { ChemicalCard } from '../risk/ChemicalCard';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
@@ -12,12 +13,14 @@ import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
 import { HouseholdPanel } from './HouseholdPanel';
 import { getTransportFeed, subscribeTransportFeed } from '../transport/chainFeed';
 import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
-import { ALLOCATIONS, SOURCES, TARGET_KINDS, defaultCleanupForm, type CleanupForm } from './form';
+import { ALLOCATIONS, SOURCES, TARGET_KINDS, type CleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
 import { CleanupUncertainty } from './CleanupUncertainty';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { cleanupCsvTables, modeledCsvTables } from './csv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<CleanupBuildResult, { ok: true }>;
@@ -29,7 +32,8 @@ interface Snapshot {
 const EXAMPLE_ID = '71-43-2';
 
 export function CleanupPage() {
-  const [form, setForm] = useState<CleanupForm>(defaultCleanupForm);
+  const [form, setForm] = useState<CleanupForm>(() => getScreen('cleanup').form);
+  useEffect(() => setScreen('cleanup', { form }), [form]);
   const [lastGood, setLastGood] = useState<Snapshot | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const { db, error: dbError } = useChemicalDb();
@@ -441,6 +445,10 @@ export function CleanupPage() {
                     name={modeled.answered.chemical.name}
                     notes={modeledBuilt?.ok ? modeledBuilt.notes : []}
                   />
+                  <DownloadCsv
+                    disabled={modeled.computing || !modeledBuilt?.ok}
+                    tables={modeledCsvTables(modeledReply, modeled.answered.chemical.name)}
+                  />
                 </div>
               )}
             </>
@@ -476,6 +484,7 @@ export function CleanupPage() {
               {householdFeed && (
                 <HouseholdPanel outcome={shown.outcome} feed={householdFeed} names={names} />
               )}
+              <DownloadCsv disabled={stale} tables={cleanupCsvTables(shown.outcome, names)} />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
             </div>

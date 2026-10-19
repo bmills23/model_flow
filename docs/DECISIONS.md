@@ -1251,6 +1251,7 @@ M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) imp
 - The run is on the main thread, not in the worker pool: a direct-pathway row costs microseconds (two forward runs by the linear shortcut). The W1 budget still applies: the first 5 rows are timed alone, the projection is mean row time times rows (one worker), confirm above 60 s and refuse above 10 minutes with `uncertainty.run-budget`. Cancel exists for the confirm dialog only.
 - The protected fraction is entered in percent (default 95) and must lie strictly between 0 and 100; 50 and 90 percent are always shown. Sampling is Latin hypercube with the optional rank correlation of the editor. Charts show the solved levels only; censored iterations are counted and the level is reported as not reachable when its quantile lands on one.
 - No registry entry, assumption or reference changed, so no docs regeneration was needed.
+
 ## 2026-10-18: M9 plant uptake and ecological screening scope (stage 1)
 
 M9 started with a methods note first, on the parallel track Bryan approved. The note is
@@ -1343,3 +1344,53 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
     TPHCWG and MADEP carbon-range tables were not read, so none ships: the caller names each fraction and
     its RSL surrogate record id (ruling 9), and a fraction without one is reported as unmapped and excluded.
     The saturation check uses the pure-phase limit (mole fraction 1) per fraction.
+
+## 2026-10-18: M11 projects, reports and polish scope (stage 1)
+
+M11 is built last, after M7, M9 and M10, on the parallel tracks Bryan approved; its plan is written now. The
+note is `docs/methods/projects-and-reports.md` (current state, project format, save and share, persisted
+feeds, CSV, report and methods statement, responsive and accessibility passes, docs site, bundle targets,
+scope and the slice plan). No code is written in this stage. Rulings, each DEFAULT (open for Bryan to
+overturn):
+
+1. **Project file (DEFAULT).** One versioned JSON document (`format: "model_flow.project"`, `version: 1`)
+   holding each screen's form as typed, the chosen method per screen, the feeds and the data editions. It
+   is the single source for save, load, share, autosave and the report.
+2. **Feeds stored as values (DEFAULT).** A saved feed keeps its series and a hash of the source form; on
+   load a changed source is warned, never silently recomputed.
+3. **Validation and migration (DEFAULT).** zod schemas per version in `apps/web/src/project/` (zod is a new
+   MIT runtime dependency); pure migrations n to n + 1, each with a fixture test; a newer version than the
+   app knows is refused, never half loaded; unknown keys dropped with a warning.
+4. **Local file is the durable store (DEFAULT).** Save downloads JSON; open uses a file input. No File
+   System Access API, no accounts, no server, no upload.
+5. **Share link (DEFAULT).** The project without feed values, deflated with the built-in
+   `CompressionStream` and base64url, in the hash as `#/p=`. Links over 8000 characters are not offered;
+   the user is told to save a file. lz-string is the fallback only if a target browser lacks the API.
+6. **Browser storage as convenience only (DEFAULT).** One debounced, versioned `localStorage` autosave of
+   the current project and its feeds, failing quietly to today's behaviour; no named project list. This
+   closes the HANDOFF item on persisting feeds across reloads once built.
+7. **CSV (DEFAULT).** One CSV per screen plus a time series CSV where the result is a series; RFC 4180,
+   UTF-8 without BOM, units in headers, full precision, a method column, and formula-injection prefixes
+   defused.
+8. **Report (DEFAULT).** A `#/report` HTML screen printed to PDF by the browser, no PDF library. The
+   methods statement is generated from the registry for the methods actually run: name, kind, summary,
+   assumptions, RISC5 choice, deduplicated citations from `references.json`, warnings and data editions.
+   No author or contact line is printed; an optional user-filled "prepared by" field starts empty.
+   Built so far (S6): the generator, and a report of each edited screen's inputs plus the statement; the
+   methods are decided from the forms, not from computed results, and per-screen result tables, charts
+   and warnings are still open (see the methods note, section 6).
+9. **Mobile check in the repo (DEFAULT).** `scripts/mobile-check.mjs` drives Chrome through CDP at a true
+   390x844 viewport, light and dark, every route, overflow count 0. Run locally before each milestone push;
+   not in `gate` or CI (needs a real browser).
+10. **Accessibility target (DEFAULT).** WCAG 2.2 AA: keyboard order and focus, labels tested per field,
+    contrast checked by a token-pair test, and a data table for every chart.
+11. **Docs site (DEFAULT).** An in-app `#/docs` reader over the committed methods notes, attributions and a
+    user guide, lazy loaded; no second static generator.
+12. **Bundle (DEFAULT).** Lazy load every screen, keep generated data and `references.json` out of the
+    entry, check engine tree shaking; entry under 200 kB and no chunk over 500 kB, enforced by a
+    build-size test on the Vite manifest, with numbers set from the first measurement.
+13. **Deferred (DEFAULT).** Named projects in storage, cloud or gist sharing, a PDF library, RISC5 project
+    import, comparing two saved projects, offline install, translation, and the mobile check in CI.
+14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
+    S2 (format) follows S1; S3, S4 and S6 follow S2; S8 (M7, M9 and M10 screens), the full S9 and S10
+    passes and the S11 user guide wait for M7, M9 and M10.

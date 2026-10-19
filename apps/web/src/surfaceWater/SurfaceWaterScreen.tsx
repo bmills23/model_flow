@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
@@ -13,6 +14,8 @@ import {
 } from './feed';
 import type { SwResult } from './compute';
 import { DEFAULT_FORM, LAKE_FORM, R8_PUBLISHED, isR8Case, toRequest, type SwForm } from './inputs';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { surfaceWaterCsvTables } from './csv';
 import { useSurfaceWaterResult } from './useSurfaceWaterResult';
 
 type Setter = <K extends keyof SwForm>(key: K, value: SwForm[K]) => void;
@@ -92,7 +95,8 @@ function R8Check({ form, result }: { form: SwForm; result: SwResult }) {
 }
 
 export function SurfaceWaterScreen() {
-  const [form, setForm] = useState<SwForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<SwForm>(() => getScreen('surfaceWater').form);
+  useEffect(() => setScreen('surfaceWater', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
   const held = useSyncExternalStore(
@@ -502,6 +506,10 @@ export function SurfaceWaterScreen() {
                 {result.linked && (
                   <p className="muted">Groundwater from the transport run: {result.linkLabel}.</p>
                 )}
+                <DownloadCsv
+                  disabled={computing || !parsed.ok || engineError !== null}
+                  tables={surfaceWaterCsvTables(result)}
+                />
               </section>
 
               <R8Check form={form} result={result} />

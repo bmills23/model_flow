@@ -1,0 +1,157 @@
+.report-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.report-page-title {
+  margin: 0;
+}
+
+.report-prepared {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.report-prepared input {
+  min-height: var(--tap);
+  min-width: 0;
+  width: 100%;
+  padding: 0 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.report-tools .btn {
+  min-height: var(--tap);
+  align-self: flex-start;
+}
+
+.report {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.report-title {
+  margin-top: 0;
+}
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin: 0 0 8px;
+}
+
+.report-meta div {
+  display: flex;
+  gap: 8px;
+}
+
+.report-meta dt {
+  color: var(--muted);
+}
+
+.report-meta dd {
+  margin: 0;
+}
+
+.report-affiliation {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.9rem;
+}
+
+.report-table th,
+.report-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.report-table thead th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.report-table tbody th {
+  font-weight: 500;
+  width: 45%;
+}
+
+.report-refs {
+  padding-left: 2.2em;
+}
+
+.report-refs li {
+  margin-bottom: 6px;
+}
+
+.report-method {
+  break-inside: avoid;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --text: #000000;
+    --muted: #333333;
+    --border: #999999;
+  }
+
+  .shell-report > .masthead,
+  .shell-report > nav,
+  .shell-report > .project-bar,
+  .shell-report > .stale-note,
+  .shell-report > footer,
+  .report-tools {
+    display: none;
+  }
+
+  .shell-report,
+  .shell-report main {
+    display: block;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .report {
+    border: 0;
+    padding: 0;
+    font-size: 11pt;
+  }
+
+  .report-section > h2 {
+    break-after: avoid;
+  }
+
+  .report-table tr {
+    break-inside: avoid;
+  }
+
+  .badge {
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text);
+  }
+}

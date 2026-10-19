@@ -1,4 +1,5 @@
 import type { Scenario } from './form';
+import { createFeed } from '../vapor/feedStore';
 
 /**
  * The groundwater screen's aquifer, source footprint, receptor well and evaluation time, offered to
@@ -11,29 +12,9 @@ export interface TransportFeed {
   label: string;
 }
 
-let current: TransportFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<TransportFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getTransportFeed(): TransportFeed | null {
-  return current;
-}
-
-export function setTransportFeed(feed: TransportFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearTransportFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeTransportFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getTransportFeed = store.get;
+export const setTransportFeed = store.set;
+export const clearTransportFeed = store.clear;
+export const subscribeTransportFeed = store.subscribe;

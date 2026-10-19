@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { ssgCsvTables } from './csv';
 import { Field, Seg } from '../ui/controls';
 import type { ChemicalDb } from '../risk/chemicalDb';
 import { fmtLevel } from './format';
@@ -259,6 +261,7 @@ export function SsgResults(props: { form: CleanupForm; db: ChemicalDb | null }) 
           ))}
         </ul>
       )}
+      <DownloadCsv tables={ssgCsvTables(out.rows)} />
       <ul className="muted">
         {out.notes.map((n) => (
           <li key={n}>{n}</li>

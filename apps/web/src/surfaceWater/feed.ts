@@ -1,3 +1,4 @@
+import { createFeed } from '../vapor/feedStore';
 export type SurfaceWaterFeedMethod = 'well-mixed' | 'mass-discharge';
 
 /**
@@ -14,29 +15,9 @@ export interface SurfaceWaterFeed {
   values: number[];
 }
 
-let current: SurfaceWaterFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<SurfaceWaterFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getSurfaceWaterFeed(): SurfaceWaterFeed | null {
-  return current;
-}
-
-export function setSurfaceWaterFeed(feed: SurfaceWaterFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearSurfaceWaterFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeSurfaceWaterFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getSurfaceWaterFeed = store.get;
+export const setSurfaceWaterFeed = store.set;
+export const clearSurfaceWaterFeed = store.clear;
+export const subscribeSurfaceWaterFeed = store.subscribe;

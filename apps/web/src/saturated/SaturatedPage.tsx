@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { fedStepLength } from '../transport/compute';
 import { Field, Group, Seg } from '../ui/controls';
@@ -20,6 +21,8 @@ import {
 import { saturatedVaporSource } from './vaporFeed';
 import { CASE_A, DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
 import { FED_MAX_STEPS, saturatedFedSteps } from './steps';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { saturatedCsvTables } from './csv';
 import { useSaturatedResult } from './useSaturatedResult';
 
 type Setter = <K extends keyof SaturatedForm>(key: K, value: SaturatedForm[K]) => void;
@@ -115,8 +118,11 @@ function CaseCheck(props: {
 }
 
 export function SaturatedPage() {
-  const [form, setForm] = useState<SaturatedForm>(DEFAULT_FORM);
-  const [feedMethod, setFeedMethod] = useState<SaturatedMethod>('legacy');
+  const [form, setForm] = useState<SaturatedForm>(() => getScreen('saturated').form);
+  const [feedMethod, setFeedMethod] = useState<SaturatedMethod>(
+    () => getScreen('saturated').method,
+  );
+  useEffect(() => setScreen('saturated', { form, method: feedMethod }), [form, feedMethod]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -515,6 +521,11 @@ export function SaturatedPage() {
                   {first.levels.capped ? ' (capped at the source thickness)' : ''}. The mass budget
                   closes to the initial mass at the horizon of {fmt(horizonYr)} yr.
                 </p>
+              </section>
+
+              <section className="panel" aria-label="Download">
+                <h2>Download</h2>
+                <DownloadCsv disabled={stale} tables={saturatedCsvTables(result)} />
               </section>
 
               <section className="panel" aria-label="Groundwater coupling">

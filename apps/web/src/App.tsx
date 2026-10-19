@@ -1,8 +1,21 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
-import { MethodsPage } from './pages/MethodsPage';
-import { TransportPage } from './transport/TransportPage';
-import { SaturatedPage } from './saturated/SaturatedPage';
-import { VadosePage } from './vadose/VadosePage';
+import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import { NON_AFFILIATION } from './nonAffiliation';
+import { ProjectBar } from './project/ProjectBar';
+import { getEpoch, getStaleFeeds, newProject, subscribeProject } from './project/store';
+
+// Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
+const MethodsPage = lazy(() =>
+  import('./pages/MethodsPage').then((m) => ({ default: m.MethodsPage })),
+);
+const TransportPage = lazy(() =>
+  import('./transport/TransportPage').then((m) => ({ default: m.TransportPage })),
+);
+const SaturatedPage = lazy(() =>
+  import('./saturated/SaturatedPage').then((m) => ({ default: m.SaturatedPage })),
+);
+const VadosePage = lazy(() =>
+  import('./vadose/VadosePage').then((m) => ({ default: m.VadosePage })),
+);
 
 // The risk screen carries the chemical database loader; it and the RSL data load on first visit.
 const VaporPage = lazy(() => import('./vapor/VaporPage').then((m) => ({ default: m.VaporPage })));
@@ -14,14 +27,15 @@ const HouseholdPage = lazy(() =>
 );
 const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.RiskPage })));
 
+const ReportPage = lazy(() =>
+  import('./report/ReportPage').then((m) => ({ default: m.ReportPage })),
+);
+
 const CleanupPage = lazy(() =>
   import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
 );
 
 const STEPS = ['Chemicals', 'Site model', 'Transport', 'Receptors', 'Risk & cleanup', 'Results'];
-
-const NON_AFFILIATION =
-  'This project is independent. It is not affiliated with, endorsed by, or derived from the software of Spence Environmental Engineering, BP, or GroundwaterSoftware.com. "RISC" and "BP RISC" are their marks.';
 
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
@@ -29,6 +43,7 @@ const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
+const REPORT_HASH = '#/report';
 const VAPOR_HASH = '#/vapor';
 const SURFACE_WATER_HASH = '#/surface-water';
 const HOUSEHOLD_HASH = '#/household';
@@ -40,6 +55,19 @@ export function App() {
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
+  const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
+  const [staleShown, setStaleShown] = useState(true);
+  const stale = staleShown ? getStaleFeeds() : [];
+  const onNewProject = (): void => {
+    if (
+      window.confirm(
+        'Start a new project? This clears every screen, the values passed between screens, and the automatic save in this browser.',
+      )
+    ) {
+      newProject();
+      setStaleShown(false);
+    }
+  };
   const onMethods = hash === METHODS_HASH;
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
@@ -49,27 +77,43 @@ export function App() {
   const onVapor = hash === VAPOR_HASH;
   const onSurfaceWater = hash === SURFACE_WATER_HASH;
   const onHousehold = hash === HOUSEHOLD_HASH;
+  const onReport = hash === REPORT_HASH;
 
   return (
     <div
       className={
-        onTransport ||
-        onVadose ||
-        onSaturated ||
-        onRisk ||
-        onVapor ||
-        onCleanup ||
-        onSurfaceWater ||
-        onHousehold
-          ? 'shell shell-wide'
-          : 'shell'
+        onReport
+          ? 'shell shell-report'
+          : onTransport ||
+              onVadose ||
+              onSaturated ||
+              onRisk ||
+              onVapor ||
+              onCleanup ||
+              onSurfaceWater ||
+              onHousehold
+            ? 'shell shell-wide'
+            : 'shell'
       }
     >
       <header className="masthead">
         <a className="brand" href="#/" aria-current={onMethods ? undefined : 'page'}>
           model_flow
         </a>
+        <button type="button" className="btn masthead-action" onClick={onNewProject}>
+          New project
+        </button>
       </header>
+      <ProjectBar />
+      {stale.length > 0 ? (
+        <p className="stale-note" role="status">
+          Restored values passed between screens ({stale.join(', ')}) were built from inputs that
+          have since changed. Send them again from their source screen to refresh them.{' '}
+          <button type="button" className="btn" onClick={() => setStaleShown(false)}>
+            Dismiss
+          </button>
+        </p>
+      ) : null}
       <nav aria-label="Main">
         <ol className="steps">
           {STEPS.map((step, i) => (
@@ -124,20 +168,31 @@ export function App() {
           <a className="nav-link" href={CLEANUP_HASH} aria-current={onCleanup ? 'page' : undefined}>
             Cleanup levels
           </a>
+          <a className="nav-link" href={REPORT_HASH} aria-current={onReport ? 'page' : undefined}>
+            Report
+          </a>
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
         </div>
       </nav>
-      <main>
+      <main key={epoch}>
         {onMethods ? (
-          <MethodsPage />
+          <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
+            <MethodsPage />
+          </Suspense>
         ) : onTransport ? (
-          <TransportPage />
+          <Suspense fallback={<p className="muted">Loading the groundwater transport screen...</p>}>
+            <TransportPage />
+          </Suspense>
         ) : onVadose ? (
-          <VadosePage />
+          <Suspense fallback={<p className="muted">Loading the vadose leaching screen...</p>}>
+            <VadosePage />
+          </Suspense>
         ) : onSaturated ? (
-          <SaturatedPage />
+          <Suspense fallback={<p className="muted">Loading the saturated soil source screen...</p>}>
+            <SaturatedPage />
+          </Suspense>
         ) : onVapor ? (
           <Suspense fallback={<p className="muted">Loading the vapor intrusion screen...</p>}>
             <VaporPage />
@@ -153,6 +208,10 @@ export function App() {
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
             <RiskPage />
+          </Suspense>
+        ) : onReport ? (
+          <Suspense fallback={<p className="muted">Loading the report...</p>}>
+            <ReportPage />
           </Suspense>
         ) : onCleanup ? (
           <Suspense fallback={<p className="muted">Loading the cleanup levels screen...</p>}>

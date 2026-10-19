@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { Seg, Field } from '../ui/controls';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
@@ -9,15 +10,11 @@ import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
 import { useChemicalDb } from './useChemicalDb';
 import { runRisk, type RiskOutcome } from './compute';
-import {
-  defaultForm,
-  defaultReceptor,
-  newChemicalRow,
-  type ChemicalRow,
-  type RiskForm,
-} from './form';
+import { defaultReceptor, newChemicalRow, type ChemicalRow, type RiskForm } from './form';
 import { ReceptorPanel } from './ReceptorPanel';
 import { RiskUncertainty } from './RiskUncertainty';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { riskCsvTables } from './csv';
 import { Charts, Comparison, EpcTable, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<BuildResult, { ok: true }>;
@@ -29,7 +26,8 @@ interface Snapshot {
 const EXAMPLE_ID = '71-43-2';
 
 export function RiskPage() {
-  const [form, setForm] = useState<RiskForm>(defaultForm);
+  const [form, setForm] = useState<RiskForm>(() => getScreen('risk').form);
+  useEffect(() => setScreen('risk', { form }), [form]);
   const [lastGood, setLastGood] = useState<Snapshot | null>(null);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const { db, error: dbError } = useChemicalDb();
@@ -272,6 +270,7 @@ export function RiskPage() {
           {shown && (
             <div className={stale ? 'stale' : undefined}>
               <Comparison outcome={shown.outcome} additive={shown.built.legacy.additive === true} />
+              <DownloadCsv disabled={stale} tables={riskCsvTables(shown.outcome, names)} />
               <Charts outcome={shown.outcome} names={names} />
               <NotQuantified outcome={shown.outcome} names={names} />
               <EpcTable outcome={shown.outcome} names={names} />

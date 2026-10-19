@@ -1,0 +1,99 @@
+import { z } from 'zod';
+import { cleanupProjectSchema } from '../cleanup/project';
+import { riskProjectSchema } from '../risk/project';
+import { saturatedProjectSchema } from '../saturated/project';
+import { surfaceWaterProjectSchema } from '../surfaceWater/project';
+import { transportProjectSchema } from '../transport/project';
+import { vadoseProjectSchema } from '../vadose/project';
+import { vaporProjectSchema } from '../vapor/project';
+import { text } from './fields';
+
+export const PROJECT_FORMAT = 'model_flow.project';
+
+/** Every screen key of format version 1. An absent key means that screen's defaults. */
+export const screensSchema = z.object({
+  transport: transportProjectSchema.optional(),
+  vadose: vadoseProjectSchema.optional(),
+  saturated: saturatedProjectSchema.optional(),
+  vapor: vaporProjectSchema.optional(),
+  surfaceWater: surfaceWaterProjectSchema.optional(),
+  risk: riskProjectSchema.optional(),
+  cleanup: cleanupProjectSchema.optional(),
+});
+
+const sameLength = (v: { times: unknown[]; values: unknown[] }): boolean =>
+  v.times.length === v.values.length;
+const sameLengthMessage = { message: 'times and values must have the same length' };
+const numbers = z.array(z.number().finite());
+
+/**
+ * A feed is stored as the values the user chose to send, with the screen it came from and a hash of
+ * that screen's form at the time (see `feedEntry`). A series feed (well, surface water) is checked
+ * in full; feeds that carry a whole scenario (vadose, saturated, bank, vapor) are checked for their
+ * top-level keys, with the scenario itself a JSON object (non-finite numbers are tagged, see
+ * `codec.ts`). The vapor entry holds up to four sub-feeds by origin: vadose, waterTable, saturated
+ * and risk. The transport chain feed holds a closure and is not stored.
+ */
+const feedEnvelope = <V extends z.ZodType>(value: V) =>
+  z.object({ source: text, inputsHash: text, value });
+
+const jsonObject = z.record(z.string(), z.json());
+
+export const feedsSchema = z.object({
+  well: feedEnvelope(
+    z
+      .object({
+        method: z.enum(['legacy', 'modern', 'domenico']),
+        label: text,
+        times: numbers,
+        values: numbers,
+      })
+      .refine(sameLength, sameLengthMessage),
+  ).optional(),
+  surfaceWater: feedEnvelope(
+    z
+      .object({
+        method: z.enum(['well-mixed', 'mass-discharge']),
+        origin: text,
+        label: text,
+        times: numbers,
+        values: numbers,
+      })
+      .refine(sameLength, sameLengthMessage),
+  ).optional(),
+  vadose: feedEnvelope(
+    z.object({ scenario: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+  ).optional(),
+  saturated: feedEnvelope(
+    z.object({ input: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+  ).optional(),
+  bank: feedEnvelope(z.object({ scenario: jsonObject, label: text })).optional(),
+  vapor: feedEnvelope(
+    z.object({
+      vadose: jsonObject.optional(),
+      waterTable: jsonObject.optional(),
+      saturated: jsonObject.optional(),
+      risk: jsonObject.optional(),
+    }),
+  ).optional(),
+});
+
+/** The data editions the project was made against (directory names under packages/data/generated). */
+export const dataSchema = z.object({
+  rsl: text.optional(),
+  nrwqc: text.optional(),
+  sediment: text.optional(),
+});
+
+export const projectV1Schema = z.object({
+  format: z.literal(PROJECT_FORMAT),
+  version: z.literal(1),
+  createdWith: text,
+  savedAt: z.iso.datetime({ offset: true }),
+  title: text.optional(),
+  screens: screensSchema,
+  feeds: feedsSchema.optional(),
+  data: dataSchema.optional(),
+});
+export type Project = z.infer<typeof projectV1Schema>;
+export type Feeds = z.infer<typeof feedsSchema>;

@@ -1,0 +1,172 @@
+import * as cleanup from '../cleanup/project';
+import * as risk from '../risk/project';
+import * as saturated from '../saturated/project';
+import * as surfaceWater from '../surfaceWater/project';
+import * as transport from '../transport/project';
+import * as vadose from '../vadose/project';
+import * as vapor from '../vapor/project';
+import { hashInputs } from './hash';
+import { unknownKeyPaths } from './merge';
+import { CURRENT_VERSION, migrate } from './migrate';
+import { PROJECT_FORMAT, projectV1Schema, type Feeds, type Project } from './schema';
+
+export { CURRENT_VERSION } from './migrate';
+export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
+export { hashInputs } from './hash';
+
+/** The live state of the seven screens, in the form each screen's `fromProject` hands back. */
+export interface Screens {
+  transport: transport.TransportState;
+  vadose: vadose.VadoseState;
+  saturated: saturated.SaturatedState;
+  vapor: vapor.VaporState;
+  surfaceWater: surfaceWater.SurfaceWaterState;
+  risk: risk.RiskState;
+  cleanup: cleanup.CleanupState;
+}
+
+/** Every screen at its defaults (a new project). */
+export function defaultScreens(): Screens {
+  return {
+    transport: transport.fromProject(undefined),
+    vadose: vadose.fromProject(undefined),
+    saturated: saturated.fromProject(undefined),
+    vapor: vapor.fromProject(undefined),
+    surfaceWater: surfaceWater.fromProject(undefined),
+    risk: risk.fromProject(undefined),
+    cleanup: cleanup.fromProject(undefined),
+  };
+}
+
+/** The live screens of a loaded project; an absent screen key gives that screen's defaults. */
+export function screensOf(project: Project): Screens {
+  const s = project.screens;
+  return {
+    transport: transport.fromProject(s.transport),
+    vadose: vadose.fromProject(s.vadose),
+    saturated: saturated.fromProject(s.saturated),
+    vapor: vapor.fromProject(s.vapor),
+    surfaceWater: surfaceWater.fromProject(s.surfaceWater),
+    risk: risk.fromProject(s.risk),
+    cleanup: cleanup.fromProject(s.cleanup),
+  };
+}
+
+export interface BuildOptions {
+  screens: Screens;
+  feeds?: Feeds;
+  data?: NonNullable<Project['data']>;
+  title?: string;
+  /** The app version string (from package.json) the file is written with. */
+  createdWith: string;
+  now?: Date;
+}
+
+/** Assemble the version 1 document from the live state. Pure apart from the clock default. */
+export function buildProject(o: BuildOptions): Project {
+  const { screens } = o;
+  const project: Project = {
+    format: PROJECT_FORMAT,
+    version: CURRENT_VERSION,
+    createdWith: o.createdWith,
+    savedAt: (o.now ?? new Date()).toISOString(),
+    screens: {
+      transport: transport.toProject(screens.transport),
+      vadose: vadose.toProject(screens.vadose),
+      saturated: saturated.toProject(screens.saturated),
+      vapor: vapor.toProject(screens.vapor),
+      surfaceWater: surfaceWater.toProject(screens.surfaceWater),
+      risk: risk.toProject(screens.risk),
+      cleanup: cleanup.toProject(screens.cleanup),
+    },
+  };
+  if (o.title !== undefined) project.title = o.title;
+  if (o.feeds !== undefined) project.feeds = o.feeds;
+  if (o.data !== undefined) project.data = o.data;
+  return project;
+}
+
+/** A feed as stored: the value, the screen it came from and a fingerprint of that screen's form. */
+export function feedEntry<V>(
+  source: keyof Screens,
+  sourceForm: unknown,
+  value: V,
+): { source: string; inputsHash: string; value: V } {
+  return { source, inputsHash: hashInputs(sourceForm), value };
+}
+
+/** True when the source form no longer matches the one the feed was built from. */
+export function isFeedStale(entry: { inputsHash: string }, currentSourceForm: unknown): boolean {
+  return entry.inputsHash !== hashInputs(currentSourceForm);
+}
+
+export interface LoadWarning {
+  path: string;
+  message: string;
+}
+
+export type LoadResult =
+  { ok: true; project: Project; warnings: LoadWarning[] } | { ok: false; error: string };
+
+const NOT_A_PROJECT = 'This file is not a model_flow project.';
+
+function pathText(path: readonly PropertyKey[]): string {
+  return path.reduce<string>(
+    (acc, seg) =>
+      typeof seg === 'number' ? `${acc}[${seg}]` : acc ? `${acc}.${String(seg)}` : String(seg),
+    '',
+  );
+}
+
+/**
+ * Read a project from file text or an already parsed value: check it is a project, refuse a newer
+ * version than this build knows, migrate older ones in order, validate against the current schema,
+ * and drop unknown keys with a warning. Never half loads: any failure returns an error and no project.
+ */
+export function parseProject(input: unknown): LoadResult {
+  let doc: unknown = input;
+  if (typeof input === 'string') {
+    try {
+      doc = JSON.parse(input);
+    } catch {
+      return { ok: false, error: 'This file is not valid JSON.' };
+    }
+  }
+  if (typeof doc !== 'object' || doc === null || Array.isArray(doc)) {
+    return { ok: false, error: NOT_A_PROJECT };
+  }
+  const raw = doc as Record<string, unknown>;
+  if (raw['format'] !== PROJECT_FORMAT) return { ok: false, error: NOT_A_PROJECT };
+  const version = raw['version'];
+  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
+    return { ok: false, error: 'The project file has no valid version number.' };
+  }
+  if (version > CURRENT_VERSION) {
+    return {
+      ok: false,
+      error: `This project was saved by a newer version of the app (file format ${version}; this app reads up to ${CURRENT_VERSION}). Update the app to open it.`,
+    };
+  }
+  let migrated: Record<string, unknown>;
+  try {
+    migrated = migrate(raw, CURRENT_VERSION);
+  } catch (e) {
+    return { ok: false, error: `The project could not be upgraded: ${(e as Error).message}.` };
+  }
+  const parsed = projectV1Schema.safeParse(migrated);
+  if (!parsed.success) {
+    const shown = parsed.error.issues
+      .slice(0, 5)
+      .map((i) => `${pathText(i.path) || 'project'}: ${i.message}`);
+    const more = parsed.error.issues.length - shown.length;
+    return {
+      ok: false,
+      error: `The project file is not valid. ${shown.join('; ')}${more > 0 ? `; and ${more} more` : ''}`,
+    };
+  }
+  const warnings = unknownKeyPaths(migrated, parsed.data, '').map((p) => {
+    const path = p.replace(/^\./, '');
+    return { path, message: `Ignored the unknown field "${path}".` };
+  });
+  return { ok: true, project: parsed.data, warnings };
+}

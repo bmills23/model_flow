@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { getScreen, setScreen } from '../project/store';
 import { convert, formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Marker } from '../transport/Marker';
@@ -22,6 +23,8 @@ import {
   type VadoseForm,
 } from './form';
 import { SourceDepletionChart } from './SourceDepletionChart';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { vadoseCsvTables } from './csv';
 import { useVadoseResult } from './useVadoseResult';
 import { METHOD_SERIES } from './series';
 import { WaterTableFluxChart } from './WaterTableFluxChart';
@@ -120,7 +123,8 @@ function relDiff(value: number, target: number): number {
 const pct = (x: number): string => `${x >= 0 ? '+' : ''}${(100 * x).toFixed(1)} percent`;
 
 export function VadosePage() {
-  const [form, setForm] = useState<VadoseForm>(DEFAULT_FORM);
+  const [form, setForm] = useState<VadoseForm>(() => getScreen('vadose').form);
+  useEffect(() => setScreen('vadose', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const setLayer = (side: Side, index: number, patch: Partial<LayerForm>): void =>
@@ -513,6 +517,7 @@ export function VadosePage() {
                     );
                   })}
                 </dl>
+                <DownloadCsv disabled={stale} tables={vadoseCsvTables(result)} />
               </section>
 
               {r7 && result.runs.legacy && <R7Check legacy={result.runs.legacy} />}

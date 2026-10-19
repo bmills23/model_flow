@@ -1,5 +1,6 @@
 import type { VadoseMethod } from './compute';
 import type { VadoseScenario } from './form';
+import { createFeed } from '../vapor/feedStore';
 
 /**
  * The vadose result offered to the groundwater screen as its source. It holds the scenario, not
@@ -12,29 +13,9 @@ export interface VadoseFeed {
   label: string;
 }
 
-let current: VadoseFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<VadoseFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getVadoseFeed(): VadoseFeed | null {
-  return current;
-}
-
-export function setVadoseFeed(feed: VadoseFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearVadoseFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeVadoseFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getVadoseFeed = store.get;
+export const setVadoseFeed = store.set;
+export const clearVadoseFeed = store.clear;
+export const subscribeVadoseFeed = store.subscribe;

@@ -1,3 +1,4 @@
+import { createFeed } from '../vapor/feedStore';
 export type WellMethod = 'legacy' | 'modern' | 'domenico';
 
 /**
@@ -13,29 +14,9 @@ export interface WellFeed {
   values: number[];
 }
 
-let current: WellFeed | null = null;
-const listeners = new Set<() => void>();
+const store = createFeed<WellFeed>();
 
-const emit = (): void => listeners.forEach((fn) => fn());
-
-export function getWellFeed(): WellFeed | null {
-  return current;
-}
-
-export function setWellFeed(feed: WellFeed): void {
-  current = feed;
-  emit();
-}
-
-export function clearWellFeed(): void {
-  if (current === null) return;
-  current = null;
-  emit();
-}
-
-export function subscribeWellFeed(fn: () => void): () => void {
-  listeners.add(fn);
-  return () => {
-    listeners.delete(fn);
-  };
-}
+export const getWellFeed = store.get;
+export const setWellFeed = store.set;
+export const clearWellFeed = store.clear;
+export const subscribeWellFeed = store.subscribe;
