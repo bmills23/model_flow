@@ -94,8 +94,27 @@ describe('ReportPage', () => {
     expect(section.querySelectorAll('th[scope="col"]').length).toBeGreaterThanOrEqual(5);
   });
 
+  it('lists the receptor factors and names the user supplied, with the preset value', () => {
+    setOverrides({
+      ...emptyOverrides(),
+      receptors: setField({}, 'risk.a', 'legacy.bwKg', { value: '60', note: '' }),
+      receptorNames: { 'risk.a': 'North lot worker' },
+    });
+    render(<ReportPage />);
+    const heading = screen.getByRole('heading', { name: 'Receptor factors supplied by the user' });
+    const section = heading.closest('section')!;
+    expect(section.textContent).toContain('North lot worker');
+    expect(section.textContent).toContain('Body weight (legacy)');
+    expect(section.textContent).toContain('70');
+    expect(section.textContent).toContain('60');
+    expect(section.querySelector('caption')).not.toBeNull();
+  });
+
   it('has no user values section without overrides', () => {
     render(<ReportPage />);
     expect(screen.queryByRole('heading', { name: 'Values supplied by the user' })).toBeNull();
+    expect(
+      screen.queryByRole('heading', { name: 'Receptor factors supplied by the user' }),
+    ).toBeNull();
   });
 });

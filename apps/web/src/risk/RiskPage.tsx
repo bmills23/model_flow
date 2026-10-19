@@ -11,6 +11,7 @@ import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
 import { setField, resetField } from '../overrides/model';
 import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
+import { withReceptorEdits } from '../overrides/receptors';
 import { useChemicalDb } from './useChemicalDb';
 import { runRisk, type RiskOutcome } from './compute';
 import { defaultReceptor, newChemicalRow, type ChemicalRow, type RiskForm } from './form';
@@ -56,9 +57,11 @@ export function RiskPage() {
   const setRow = (id: string, next: ChemicalRow): void =>
     setForm((f) => ({ ...f, chemicals: f.chemicals.map((c) => (c.id === id ? next : c)) }));
 
+  // the form with the project's receptor names and factor edits laid on, for the build
+  const buildForm = useMemo(() => withReceptorEdits(form, overrides, 'risk'), [form, overrides]);
   const built = useMemo(
-    () => (db ? buildInputs(form, db, well, vapor, surface, household, produce) : null),
-    [form, db, well, vapor, surface, household, produce],
+    () => (db ? buildInputs(buildForm, db, well, vapor, surface, household, produce) : null),
+    [buildForm, db, well, vapor, surface, household, produce],
   );
   const outcome = useMemo(() => (built?.ok ? runRisk(built) : null), [built]);
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
@@ -194,7 +197,13 @@ export function RiskPage() {
 
           <section className="panel" aria-label="Receptors">
             <h2>Receptors</h2>
-            <ReceptorPanel tag="Receptor A" id="a" form={form.a} onChange={(a) => patch({ a })} />
+            <ReceptorPanel
+              tag="Receptor A"
+              id="a"
+              screen="risk"
+              form={form.a}
+              onChange={(a) => patch({ a })}
+            />
             <label className="check">
               <input
                 type="checkbox"
@@ -209,7 +218,13 @@ export function RiskPage() {
               <span>Evaluate a second receptor</span>
             </label>
             {form.b && (
-              <ReceptorPanel tag="Receptor B" id="b" form={form.b} onChange={(b) => patch({ b })} />
+              <ReceptorPanel
+                tag="Receptor B"
+                id="b"
+                screen="risk"
+                form={form.b}
+                onChange={(b) => patch({ b })}
+              />
             )}
             {form.b && (
               <label className="check">

@@ -1,6 +1,7 @@
 import type { UncertainInput } from '@model-flow/engine';
 import { overridesOf, screensOf, type Project } from '../project';
 import { applyToxOverrides } from '../overrides/toxicity';
+import { withProjectReceptorEdits } from './userValues';
 import { buildCleanup } from '../cleanup/build';
 import { runCleanup } from '../cleanup/compute';
 import {
@@ -83,7 +84,7 @@ const NOT_SAMPLED = 'no input has a distribution in the saved setup';
  * screen is not in use or cannot compute, when its setup is invalid, or when no input is sampled.
  */
 export async function planUncertainty(project: Project): Promise<UncertaintyPlan> {
-  const screens = screensOf(project);
+  const screens = withProjectReceptorEdits(screensOf(project), overridesOf(project));
   const setups = screens.uncertainty;
   const plan: UncertaintyPlan = { exposure: null, cleanup: null, notes: [] };
   let db;

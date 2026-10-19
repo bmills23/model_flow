@@ -1,5 +1,10 @@
+import { useState } from 'react';
 import { DIRECT_PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { Field, Group, Seg } from '../ui/controls';
+import { AlertDialog } from '../ui/AlertDialog';
+import { useOverrides } from '../overrides/useOverrides';
+import { MAX_NAME_LENGTH, receptorKey, type ReceptorScreen } from '../overrides/receptors';
+import { ReceptorEditor } from './ReceptorEditor';
 import { PATHWAY_LABELS } from './chartData';
 import { PRESET_LABELS, type PresetId, type ReceptorForm } from './form';
 
@@ -8,21 +13,56 @@ const PRESETS: PresetId[] = ['resident', 'worker', 'child'];
 /** One receptor: scenario preset, the pathways it is exposed by, and the site-specific factors presets leave open. */
 export function ReceptorPanel(props: {
   tag: string;
-  id: string;
+  id: 'a' | 'b';
+  /** Which screen's receptor this is; its edits are kept apart from the other screen's. */
+  screen: ReceptorScreen;
   form: ReceptorForm;
   onChange: (next: ReceptorForm) => void;
 }) {
   const { form } = props;
+  const [overrides, setOverrides] = useOverrides();
+  const subject = receptorKey(props.screen, props.id);
+  const name = overrides.receptorNames[subject] ?? '';
+  const shownTag = name.trim() === '' ? props.tag : name.trim();
+  const [pending, setPending] = useState<PresetId | null>(null);
+  const factorEdits = Object.keys(overrides.receptors[subject] ?? {}).length;
+  const setName = (v: string): void =>
+    setOverrides({
+      ...overrides,
+      receptorNames:
+        v.trim() === ''
+          ? Object.fromEntries(
+              Object.entries(overrides.receptorNames).filter(([k]) => k !== subject),
+            )
+          : { ...overrides.receptorNames, [subject]: v },
+    });
+  const choosePreset = (v: PresetId): void => {
+    if (v === form.preset) return;
+    if (factorEdits > 0) setPending(v);
+    else props.onChange({ ...form, preset: v });
+  };
   const set = <K extends keyof ReceptorForm>(k: K, v: ReceptorForm[K]): void =>
     props.onChange({ ...form, [k]: v });
   return (
     <fieldset className="receptor">
-      <legend>{props.tag}</legend>
+      <legend>{shownTag}</legend>
+      <label className="field">
+        <span className="field-label">Receptor name (optional)</span>
+        <input
+          type="text"
+          autoComplete="off"
+          maxLength={MAX_NAME_LENGTH}
+          value={name}
+          placeholder={props.tag}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <small>Used in tables, downloads and the report in place of {props.tag}.</small>
+      </label>
       <Seg
         legend="Scenario preset"
         name={`preset-${props.id}`}
         value={form.preset}
-        onChange={(v) => set('preset', v)}
+        onChange={choosePreset}
         options={PRESETS.map((p) => ({ value: p, label: PRESET_LABELS[p] }))}
       />
       <p className="muted">
@@ -33,6 +73,46 @@ export function ReceptorPanel(props: {
         {form.preset === 'child' &&
           'Legacy: a 6-year child, 15 kg. Modern: the resident child stage alone.'}
       </p>
+      {pending !== null && (
+        <AlertDialog className="alert" label="Change preset" onCancel={() => setPending(null)}>
+          <p>
+            <strong>
+              {shownTag} has {factorEdits} edited exposure factor{factorEdits === 1 ? '' : 's'}.
+            </strong>{' '}
+            The edits belong to the {PRESET_LABELS[form.preset].toLowerCase()} preset. Switching to{' '}
+            {PRESET_LABELS[pending].toLowerCase()} resets them to that preset's values.
+          </p>
+          <div className="u-actions">
+            <button
+              type="button"
+              className="button"
+              onClick={() => {
+                setOverrides({
+                  ...overrides,
+                  receptors: Object.fromEntries(
+                    Object.entries(overrides.receptors).filter(([k]) => k !== subject),
+                  ),
+                });
+                props.onChange({ ...form, preset: pending });
+                setPending(null);
+              }}
+            >
+              Switch and reset edits
+            </button>
+            <button type="button" className="button button-quiet" onClick={() => setPending(null)}>
+              Keep {PRESET_LABELS[form.preset].toLowerCase()}
+            </button>
+          </div>
+        </AlertDialog>
+      )}
+      <ReceptorEditor
+        screen={props.screen}
+        which={props.id}
+        tag={shownTag}
+        preset={form.preset}
+        state={overrides}
+        onChange={setOverrides}
+      />
       <Group title="Pathways">
         {DIRECT_PATHWAY_IDS.map((p: PathwayId) => (
           <label className="check" key={p}>

@@ -25,7 +25,9 @@ import {
   mediumLabel,
   modernBoundary,
   modernChem,
+  parseEdits,
   parseSite,
+  receptorTag,
 } from '../risk/build';
 import type { CleanupForm } from './form';
 
@@ -153,8 +155,10 @@ export function buildCleanup(
   const legacyReceptors: DirectReceptor<LegacyReceptor>[] = [];
   const modernReceptors: DirectReceptor<ModernReceptor>[] = [];
   const ready = errors.list.length === 0;
-  for (const { tag, rf } of receptors) {
+  for (const { tag: defaultTag, rf } of receptors) {
+    const tag = receptorTag(rf, defaultTag);
     const site = parseSite(rf, tag, errors);
+    const edits = parseEdits(rf, tag, errors);
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
     const usable = (p: PathwayId): boolean => !cumulative || mediaWithValue.has(PATHWAYS[p].medium);
@@ -192,13 +196,13 @@ export function buildCleanup(
       const intake = produceOn && produce !== null ? produce.intakes : undefined;
       legacyReceptors.push({
         label,
-        receptor: legacyReceptor(legacyBoundary(rf.preset, site, intake)),
+        receptor: legacyReceptor(legacyBoundary(rf.preset, site, intake, edits)),
         pathways,
         routeExtrapolation: form.routeExtrapolation,
       });
       modernReceptors.push({
         label,
-        receptor: modernReceptor(modernBoundary(rf.preset, site, intake)),
+        receptor: modernReceptor(modernBoundary(rf.preset, site, intake, edits)),
         pathways,
       });
     } catch (e) {

@@ -1,6 +1,7 @@
 import { DIRECT_PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { ChemicalRecord } from './chemicalDb';
+import type { ReceptorEdits } from '../overrides/receptors';
 
 /** The six media a concentration is entered for, with the unit shown (the RSL's units). */
 export const MEDIA: readonly { key: Medium; label: string; unit: 'mg/kg' | 'mg/L' | 'mg/m3' }[] = [
@@ -38,6 +39,11 @@ export interface ReceptorForm {
    * it runs only for a chemical that also opts in (`ChemicalRow.produceFromPlantsEco`).
    */
   produce: boolean;
+  /**
+   * The project's edits to this receptor (name and exposure factors), laid on by the screen before a build
+   * (`withReceptorEdits`). Never part of the saved form; the project keeps them in `overrides`.
+   */
+  edits?: ReceptorEdits;
 }
 
 export interface ChemicalRow {

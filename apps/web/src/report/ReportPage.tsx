@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { currentProject } from '../project/store';
 import { overridesOf } from '../project';
-import { loadOverrideRows } from './userValues';
+import { loadOverrideRows, receptorEditRows, type ReceptorEditRow } from './userValues';
 import type { OverrideRow } from '../overrides/toxicity';
 import { fmtTox } from '../risk/format';
 import { buildReport, type Report } from './buildReport';
@@ -91,6 +91,7 @@ export function ReportView({
   results = null,
   uncertainty = null,
   userValues = [],
+  receptorEdits = [],
 }: {
   report: Report;
   preparedBy: string;
@@ -100,6 +101,8 @@ export function ReportView({
   uncertainty?: ReactNode;
   /** Values the user supplied in place of database values. */
   userValues?: readonly OverrideRow[];
+  /** Exposure factors the user edited in place of a receptor preset's. */
+  receptorEdits?: readonly ReceptorEditRow[];
 }) {
   const { statement } = report;
   return (
@@ -224,6 +227,38 @@ export function ReportView({
           </table>
         </section>
       )}
+      {receptorEdits.length > 0 && (
+        <section className="report-section" aria-labelledby="rep-receptor-edits">
+          <h2 id="rep-receptor-edits">Receptor factors supplied by the user</h2>
+          <p className="muted">
+            These exposure factors replace the receptor preset's value for this project only. Each
+            is the user's own entry; the presets were not changed.
+          </p>
+          <table className="report-table report-user-values">
+            <caption className="sr-only">Receptor exposure factors supplied by the user</caption>
+            <thead>
+              <tr>
+                <th scope="col">Receptor</th>
+                <th scope="col">Factor</th>
+                <th scope="col">Preset value</th>
+                <th scope="col">Value used</th>
+              </tr>
+            </thead>
+            <tbody>
+              {receptorEdits.map((r) => (
+                <tr key={`${r.receptor}:${r.factor}`}>
+                  <th scope="row">{r.receptor}</th>
+                  <td>
+                    {r.factor} ({r.unit})
+                  </td>
+                  <td>{r.presetValue}</td>
+                  <td>{r.userValue} (user-supplied)</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
       <p className="muted report-scope">
         Inputs are shown as typed, in the units each screen labels. Results are the screen's own
         tables, computed again from these inputs, with numbers shortened to six significant digits;
@@ -302,6 +337,7 @@ export function ReportPage() {
   const report = useMemo(() => buildReport(project), [project]);
   const [results, setResults] = useState<ProjectResults | null>(null);
   const [userValues, setUserValues] = useState<OverrideRow[]>([]);
+  const receptorEdits = useMemo(() => receptorEditRows(project), [project]);
   useEffect(() => {
     let live = true;
     if (Object.keys(overridesOf(project).toxicity).length === 0) return;
@@ -348,6 +384,7 @@ export function ReportPage() {
         preparedBy={preparedBy}
         results={results}
         userValues={userValues}
+        receptorEdits={receptorEdits}
         uncertainty={<ReportUncertainty project={project} />}
       />
     </section>

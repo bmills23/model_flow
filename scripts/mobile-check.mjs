@@ -119,6 +119,20 @@ const FED_ROUTES = [
     routeSetup: `(async()=>{const u=window.__ui;await u.pick('lead',/^add lead and compounds/i);await u.sleep(800);
       u.tick(/homegrown produce/i);await u.sleep(500)})()`,
   },
+  // "seeded" routes: no feed, the screen is opened and driven in place so a panel that only exists once a
+  // chemical is chosen is on screen. #/risk with benzene, its Edit values disclosure and the receptor
+  // exposure factor panel open, with an edit typed in each (the edited marks and reset buttons show).
+  {
+    route: '#/risk',
+    tag: 'seeded',
+    viaSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);await u.sleep(800);
+      u.fill(/^receptor name/i,'North lot worker');
+      u.fill(/^your value for oral slope factor/i,'0.5');u.fill(/^source note/i,'site toxicologist memo');
+      u.fill(/^body weight \\(kg\\)/i,'60');
+      await u.sleep(300);
+      document.querySelectorAll('main details.override-panel').forEach(d=>{d.open=true});
+      await u.sleep(500)})()`,
+  },
 ];
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
 const ONLY = opt('routes');
@@ -273,7 +287,7 @@ for (const view of VIEWS) {
   const visits = [...ROUTES.map((route) => ({ route, via: null })), ...FED_ROUTES].filter(
     (v) => !ONLY || ONLY.split(',').some((o) => v.route === o || v.route.startsWith(`${o}/`)),
   );
-  for (const { route, via, viaSetup, routeSetup } of visits) {
+  for (const { route, via, viaSetup, routeSetup, tag } of visits) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
@@ -296,7 +310,8 @@ for (const view of VIEWS) {
     }
     await sleep(800);
     const m = JSON.parse(await evaluate(MEASURE));
-    const slug = (route.replace(/[#/]/g, '') || 'home') + (via ? '-fed' : '');
+    const slug =
+      (route.replace(/[#/]/g, '') || 'home') + (via ? '-fed' : '') + (tag ? `-${tag}` : '');
     const shot = await send('Page.captureScreenshot', {
       format: 'png',
       // the long committed documents are measured in full but only their first screen is captured
@@ -309,7 +324,11 @@ for (const view of VIEWS) {
       const v = await runAxe();
       const hard = v.filter((x) => x.impact === 'serious' || x.impact === 'critical');
       axeBad = hard.length > 0;
-      axeReport.push({ view: view.name, route: via ? `${route} (fed)` : route, violations: v });
+      axeReport.push({
+        view: view.name,
+        route: via ? `${route} (fed)` : tag ? `${route} (${tag})` : route,
+        violations: v,
+      });
       axeNote = ` axe=${hard.length}+${v.length - hard.length}`;
       for (const x of v)
         axeNote += `\n    [${x.impact}] ${x.id} (${x.count}): ${x.nodes.slice(0, 3).join(' | ')}`;
@@ -317,7 +336,7 @@ for (const view of VIEWS) {
     const bad = m.n > 0 || m.sw > m.cw || axeBad || (via && !(m.fedPanel && m.fedProduce));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : tag ? ` (${tag})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
