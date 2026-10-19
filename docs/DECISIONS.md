@@ -1042,3 +1042,20 @@ M10 slice W1 (worker pool and budget, 2026-10-18) implementation choices, none o
 - Chunking, pool size and completion order never change the result: tested bit-identical to `runUncertainty`
   for 1 and 4 workers and with completion order reversed. The budget counts timed rows, so a probabilistic
   cleanup row that costs many forward runs is covered by its measured time rather than by a forward-run count.
+
+M10 slice W2 (distribution editor and correlation input, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `apps/web/src/uncertainty/editor.ts` is pure: text rows to SI distributions (`buildDistribution`), the CDF preview
+  grid (`cdfCurve`, truncation limits or the 0.1th to 99.9th percentile, log spaced for lognormal and log-uniform), the
+  correlation builder (`buildCorrelation`) and `buildEditorSpec`, which returns the `distributions` and `correlation`
+  of the E4 specification plus sentences for the form. `DistributionEditor.tsx` is the controlled-by-itself component
+  that calls `onChange` with that result; it is not mounted on a screen until W3.
+- Each input defaults to "point value" (not sampled). A distribution is checked with the engine's `checkDistribution`
+  against the input's physical bounds, so an untruncated normal on a bounded input is refused with the engine's message.
+- Entered units are an optional per-input `{ unit, factor }` from the caller (default: the input's SI unit, factor 1);
+  values are converted at the boundary with `convertDistributionUnits`. A lognormal given by arithmetic moments is
+  converted with `lognormalFromArithmetic` in the entered unit first. No unit factor table is added here.
+- The correlation is entered as pairs (a nonzero Spearman value strictly inside (-1, 1)); the matrix is built over the
+  inputs that appear in a pair, with unit diagonal and zero elsewhere, and refused unless the engine's `cholesky` succeeds.
+  A constant or an unsampled input in a pair is refused. A phone-width pair list was chosen over a full k by k grid.
+- No new registry entry, assumption or reference changed, so no docs regeneration was needed.

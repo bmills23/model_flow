@@ -352,8 +352,10 @@ Web (each one worker; verify at 390x844 through CDP, light and dark):
 
 - **W1 Worker pool and budget (done).** Pool, chunking, progress, cancel, pilot timing, in `apps/web/src/uncertainty/`
   (no screen; W3 puts the confirm dialog and progress bar on the exposure screen). Depends on E4.
-- **W2 Distribution editor and correlation matrix input.** Per-input distribution rows from the registry,
-  CDF preview, positive definite check. Depends on E1, E2.
+- **W2 Distribution editor and correlation matrix input (done).** `DistributionEditor` and its pure logic in
+  `apps/web/src/uncertainty/` (`editor.ts`): per-input distribution rows from the registry, CDF preview, pairwise
+  rank correlation entry with the positive definite check; not mounted on a screen yet (W3 places it on the
+  exposure screen). Depends on E1, E2.
 - **W3 Results.** Percentile fan, CDF and histogram, tornado, Sobol bars with intervals, summary table, on
   the exposure screen. Depends on W1, W2, E5.
 - **W4 Probabilistic cleanup panel** on `#/cleanup`. Depends on W3, E6.

@@ -1,0 +1,128 @@
+/* Distribution editor and correlation matrix input (M10 slice W2). Reuses the shared panel, field and table classes. */
+.dist-editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.dist-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0 0 12px;
+  min-width: 0;
+}
+.dist-row legend {
+  font-weight: 600;
+  padding: 0 6px;
+}
+.dist-top {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+.dist-row select,
+.dist-row textarea,
+.corr-add select {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap);
+  box-sizing: border-box;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+.dist-row textarea {
+  min-height: 96px;
+  font-family: ui-monospace, monospace;
+}
+.dist-error {
+  color: var(--legacy);
+  background: var(--legacy-bg);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+.dist-error p {
+  margin: 0;
+}
+.cdf {
+  margin: 8px 0 0;
+  max-width: 360px;
+}
+.cdf svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.cdf-axis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.cdf-mid {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.cdf-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+.cdf figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.cdf figcaption span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.corr-add {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  align-items: end;
+}
+.corr-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+  display: grid;
+  gap: 8px;
+}
+.corr-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  overflow-wrap: anywhere;
+}
+.corr-matrix {
+  overflow-x: auto;
+  max-width: 100%;
+  margin-top: 12px;
+}
+.dist-editor button.button {
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  justify-content: center;
+}
+.dist-editor button.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.dist-editor button.button-quiet {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  padding: 0 12px;
+}
