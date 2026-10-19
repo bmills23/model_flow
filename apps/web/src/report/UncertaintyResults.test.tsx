@@ -115,6 +115,28 @@ describe('ReportUncertainty', () => {
     expect(within(out).getByText(/\(chosen\)/)).toBeTruthy();
   }, 60000);
 
+  it('says to run a modeled source on the cleanup screen when no run exists, and not that nothing can run', async () => {
+    const db = await loadChemicalDb();
+    const screens = defaultScreens();
+    screens.cleanup = {
+      form: {
+        ...screens.cleanup.form,
+        source: 'dissolved',
+        chemicals: [newChemicalRow(db.byId.get('71-43-2')!)],
+      },
+    };
+    const project = buildProject({
+      screens,
+      createdWith: '0.0.1',
+      now: new Date('2026-10-19T12:00:00Z'),
+    });
+    render(<ReportUncertainty project={project} makeWorker={makeWorker} workers={1} />);
+    fireEvent.click(screen.getByLabelText(/include uncertainty results/i));
+    const out = await screen.findByLabelText('Modeled source uncertainty results');
+    expect(out.textContent).toMatch(/run it on the cleanup screen/i);
+    expect(screen.queryByText(/nothing to run/i)).toBeNull();
+  });
+
   it('says there is nothing to run when no input has a distribution', async () => {
     const screens = defaultScreens();
     const project = buildProject({

@@ -29,6 +29,7 @@ import {
 } from './uncertaintyReport';
 import '../uncertainty/uncertainty.css';
 import { AlertDialog } from '../ui/AlertDialog';
+import type { ModeledReportEntry } from './modeledReport';
 
 function Warnings({ items }: { items: { code: string; message: string }[] }) {
   if (items.length === 0) return null;
@@ -84,6 +85,41 @@ function ExposureResults({ run }: { run: ExposureRun }) {
   );
 }
 
+/** The level that protects each fraction of the sampled population, shared by both cleanup blocks. */
+function LevelsTable(props: {
+  unit: string;
+  fromSi: number;
+  chosen: number;
+  levels: { p: number; level: number | null }[];
+}) {
+  return (
+    <div className="table-wrap">
+      <table className="result-table" aria-label="Protective cleanup levels">
+        <caption>Level that protects a fraction of the sampled population ({props.unit})</caption>
+        <thead>
+          <tr>
+            <th scope="col">Protected</th>
+            <th scope="col">Cleanup level ({props.unit})</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.levels.map((l) => (
+            <tr key={l.p}>
+              <th scope="row">
+                {Number((l.p * 100).toFixed(4))} percent
+                {l.p === props.chosen ? ' (chosen)' : ''}
+              </th>
+              <td>
+                {l.level === null ? 'not reachable below the cap' : fmtNum(l.level * props.fromSi)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function CleanupResults({ run }: { run: NonNullable<UncertaintyReportRuns['cleanup']> }) {
   const conv = (x: number): number => x * run.fromSi;
   const censored = new Set(run.result.censoredRows);
@@ -110,28 +146,12 @@ function CleanupResults({ run }: { run: NonNullable<UncertaintyReportRuns['clean
         )}
       </p>
       <Warnings items={run.result.warnings} />
-      <div className="table-wrap">
-        <table className="result-table" aria-label="Protective cleanup levels">
-          <caption>Level that protects a fraction of the sampled population ({run.unit})</caption>
-          <thead>
-            <tr>
-              <th scope="col">Protected</th>
-              <th scope="col">Cleanup level ({run.unit})</th>
-            </tr>
-          </thead>
-          <tbody>
-            {run.result.levels.map((l) => (
-              <tr key={l.p}>
-                <th scope="row">
-                  {Number((l.p * 100).toFixed(4))} percent
-                  {l.p === run.result.protection.p ? ' (chosen)' : ''}
-                </th>
-                <td>{l.level === null ? 'not reachable below the cap' : fmtNum(conv(l.level))}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <LevelsTable
+        unit={run.unit}
+        fromSi={run.fromSi}
+        chosen={run.result.protection.p}
+        levels={run.result.levels}
+      />
       {solved.length > 0 ? (
         <>
           <CdfChart points={empiricalCdf(solved)} base={det} unit={run.unit} />
@@ -146,6 +166,75 @@ function CleanupResults({ run }: { run: NonNullable<UncertaintyReportRuns['clean
   );
 }
 
+const CLEANUP_SCREEN = (
+  <>
+    <code>#/cleanup</code> screen
+  </>
+);
+
+/**
+ * The modeled-source result. The report cannot repeat this run (the groundwater chain it solves
+ * through is not saved with a project), so it prints the summary the cleanup screen kept this
+ * session, or says to run or re-run it there.
+ */
+function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
+  const heading = 'Probabilistic cleanup level, modeled source';
+  if (entry.state === 'none') {
+    return (
+      <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
+        <h4>{heading}</h4>
+        <p>
+          No run yet. Run it on the cleanup screen ({CLEANUP_SCREEN}), then return to this report;
+          the result is printed here as computed there.
+        </p>
+      </section>
+    );
+  }
+  const s = entry.summary;
+  if (entry.state === 'stale') {
+    return (
+      <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
+        <h4>
+          {heading}: {s.label}
+        </h4>
+        <p role="status">
+          The result computed on the cleanup screen is out of date: the cleanup inputs, the
+          transport chain or the uncertainty setup changed after it ran, or the chain is no longer
+          available. Re-run it on the cleanup screen ({CLEANUP_SCREEN}) to include it. Its numbers
+          are not printed.
+        </p>
+      </section>
+    );
+  }
+  return (
+    <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
+      <h4>
+        {heading}: {s.label}
+      </h4>
+      <p>
+        Computed on the cleanup screen ({CLEANUP_SCREEN}) and not repeated here. {s.succeeded} of{' '}
+        {s.n} iterations ran (Latin hypercube sampling, seed <code>{s.seed}</code>, {s.forwardRuns}{' '}
+        forward runs, {s.workers} worker{s.workers === 1 ? '' : 's'}).{' '}
+        {s.deterministic !== null ? (
+          <>
+            The deterministic cleanup level is{' '}
+            <strong>
+              {fmtNum(s.deterministic * s.fromSi)} {s.unit}
+            </strong>
+            .
+          </>
+        ) : (
+          'The deterministic target is not reachable.'
+        )}
+      </p>
+      <Warnings items={s.warnings} />
+      <LevelsTable unit={s.unit} fromSi={s.fromSi} chosen={s.chosen} levels={s.levels} />
+      <h5>Which inputs matter</h5>
+      <SpearmanChart rows={s.spearman} />
+    </section>
+  );
+}
+
 /** The uncertainty results of a report, drawn with the screens' own tables and charts. */
 export function UncertaintyReportView({ runs }: { runs: UncertaintyReportRuns }) {
   return (
@@ -153,6 +242,7 @@ export function UncertaintyReportView({ runs }: { runs: UncertaintyReportRuns })
       <div className="report-uncertainty-results">
         {runs.exposure && <ExposureResults run={runs.exposure} />}
         {runs.cleanup && <CleanupResults run={runs.cleanup} />}
+        {runs.modeled && <ModeledResults entry={runs.modeled} />}
       </div>
     </TablesAlwaysOpen.Provider>
   );
@@ -198,11 +288,12 @@ export function ReportUncertainty(props: {
       const plan: UncertaintyPlan = await planUncertainty(props.project);
       if (!live.current) return;
       if (!plan.exposure && !plan.cleanup) {
+        // nothing to run here; a modeled source's kept result (or the lack of one) is still printed
         setPhase({
           name: 'done',
-          runs: { exposure: null, cleanup: null },
+          runs: { exposure: null, cleanup: null, modeled: plan.modeled },
           notes:
-            plan.notes.length > 0
+            plan.notes.length > 0 || plan.modeled
               ? plan.notes
               : [
                   'No panel has an input with a distribution in the saved setup, so there is nothing to run.',
@@ -271,7 +362,8 @@ export function ReportUncertainty(props: {
           the screens. It can take a while for a large iteration count. The exposure sample runs in
           the background and can be cancelled; the one-at-a-time, Sobol and cleanup solves run in
           the page itself, so it may stop responding until they finish and they cannot be cancelled
-          once started.
+          once started. A modeled cleanup source is not repeated here: the result computed on the
+          cleanup screen this session is printed, while its inputs and setup still match.
         </p>
         {busy && (
           <div className="u-progress" role="status">

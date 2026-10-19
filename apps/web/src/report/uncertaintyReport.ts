@@ -37,6 +37,7 @@ import type { EditorSpec } from '../uncertainty/editor';
 import type { PanelModel } from '../uncertainty/UncertaintyPanel';
 import type { LegacyScenarioInput } from '@model-flow/engine';
 import { feedOf } from './results';
+import { modeledReportEntry, type ModeledReportEntry } from './modeledReport';
 import type { WellFeed } from '../transport/wellFeed';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { VaporRiskFeed } from '../vapor/feeds';
@@ -70,6 +71,11 @@ export interface CleanupPlan {
 export interface UncertaintyPlan {
   exposure: ExposurePlan | null;
   cleanup: CleanupPlan | null;
+  /**
+   * The modeled-source result the cleanup screen kept this session, when the cleanup source is
+   * modeled. It is printed, not run: the report cannot solve a modeled source.
+   */
+  modeled: ModeledReportEntry | null;
   /** Why a panel has nothing to run, one sentence each. */
   notes: string[];
 }
@@ -86,7 +92,7 @@ const NOT_SAMPLED = 'no input has a distribution in the saved setup';
 export async function planUncertainty(project: Project): Promise<UncertaintyPlan> {
   const screens = withProjectReceptorEdits(screensOf(project), overridesOf(project));
   const setups = screens.uncertainty;
-  const plan: UncertaintyPlan = { exposure: null, cleanup: null, notes: [] };
+  const plan: UncertaintyPlan = { exposure: null, cleanup: null, modeled: null, notes: [] };
   let db;
   try {
     db = applyToxOverrides(await loadChemicalDb(), overridesOf(project));
@@ -97,6 +103,7 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
     return plan;
   }
   const feed = <T>(key: string): T | null => feedOf<T>(project, key);
+  plan.modeled = modeledReportEntry(screens, db);
 
   // Exposure panel: the legacy method's receptor factors.
   {
@@ -153,7 +160,9 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
     if (Object.keys(setup.rows).length === 0) {
       // Nothing was set up on this panel.
     } else if (form.source !== 'direct') {
-      plan.notes.push(`${name}: not run, the probabilistic level samples a direct source only.`);
+      plan.notes.push(
+        `${name}: not run here, this panel samples a direct source only (a modeled source is reported from the cleanup screen).`,
+      );
     } else {
       const built = buildCleanup(form, db, { produce: feed<ProduceRiskFeed>('produce') });
       if (!built.ok) {
@@ -207,6 +216,8 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
 export interface UncertaintyReportRuns {
   exposure: ExposureRun | null;
   cleanup: (CleanupRun & { label: string; protection: number }) | null;
+  /** Printed from the cleanup screen's kept summary, never run here. */
+  modeled?: ModeledReportEntry | null;
 }
 
 export type RunHooksAll = RunHooks & Pick<CleanupHooks, 'now' | 'yieldToUi'>;
@@ -216,7 +227,7 @@ export async function runUncertaintyPlan(
   plan: UncertaintyPlan,
   hooks: RunHooksAll = {},
 ): Promise<UncertaintyReportRuns> {
-  const out: UncertaintyReportRuns = { exposure: null, cleanup: null };
+  const out: UncertaintyReportRuns = { exposure: null, cleanup: null, modeled: plan.modeled };
   if (plan.exposure) {
     const p = plan.exposure;
     out.exposure = await runExposureAnalysis(
