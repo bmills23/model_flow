@@ -97,7 +97,7 @@ describe('CleanupPage', () => {
   it('offers a second receptor and the additive option', async () => {
     await withBenzene();
     fireEvent.click(screen.getByRole('checkbox', { name: /second receptor/i }));
-    expect(screen.getByRole('group', { name: /receptor b/i })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Receptor B' })).toBeTruthy();
     expect(screen.getByRole('checkbox', { name: /add the two receptors/i })).toBeTruthy();
   }, 30000);
 
@@ -105,5 +105,18 @@ describe('CleanupPage', () => {
     await withBenzene();
     const w = await screen.findByRole('region', { name: /warnings and notes/i });
     expect(within(w).getAllByText(/cleanup\.|exposure\./).length).toBeGreaterThan(0);
+  }, 30000);
+
+  it('offers the probabilistic cleanup panel for a direct source', async () => {
+    await withBenzene();
+    const panel = await screen.findByRole('region', { name: /probabilistic cleanup level/i });
+    expect(within(panel).getByRole('button', { name: /run probabilistic cleanup/i })).toBeTruthy();
+  }, 30000);
+
+  it('says a modeled source is not sampled', async () => {
+    await withBenzene();
+    fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
+    expect((await screen.findAllByText(/not sampled yet/i)).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('region', { name: /probabilistic cleanup level/i })).toBeNull();
   }, 30000);
 });

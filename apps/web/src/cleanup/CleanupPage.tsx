@@ -17,6 +17,7 @@ import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
 import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
+import { CleanupUncertainty } from './CleanupUncertainty';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<CleanupBuildResult, { ok: true }>;
@@ -478,6 +479,15 @@ export function CleanupPage() {
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
             </div>
+          )}
+          {!modeledOn && shown && shown.outcome.legacy.ok && (
+            <CleanupUncertainty input={shown.built.legacy} names={names} />
+          )}
+          {modeledOn && (
+            <p className="muted">
+              The probabilistic cleanup level samples the receptor factors of a direct source. A
+              modeled source is not sampled yet: the transport methods declare no uncertain inputs.
+            </p>
           )}
           <SsgResults form={form} db={db} />
         </div>

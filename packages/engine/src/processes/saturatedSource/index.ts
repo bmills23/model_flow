@@ -1,6 +1,7 @@
 import type { MethodDescriptor, Warning } from '../../registry/index.js';
 import { TPH_CONSTANT_THRESHOLD } from '../vadose/index.js';
 import { finite, nonNeg, pos } from './checks.js';
+import { exponentialUncertainInputs, twoRegionUncertainInputs } from './uncertain.js';
 import {
   checkGeometry,
   sourceInitialMass,
@@ -282,6 +283,7 @@ export const saturatedTwoRegion: MethodDescriptor<SaturatedSourceInput, Saturate
   risc5Choice:
     'RISC5 applies the residual-phase comparison to each chemical alone, delivers region 1 leachate to the aquifer undiluted and at once at a rate independent of region 1 thickness, takes region 1 moisture from a unit-gradient Brooks-Corey curve (n entered for the soil) with the aquifer conductivity as Ks, reduces infiltration above K to K, holds each region concentration constant until the pool is empty, uses one porosity for partitioning and transport, and leaves volatilization from region 1 out of the mass balance.',
   validate: (input) => warningsFor(input, prepare(input, 'legacy'), 'legacy'),
+  uncertainInputs: twoRegionUncertainInputs<SaturatedSourceInput>(),
   run: runTwoRegion,
 };
 
@@ -298,5 +300,6 @@ export const saturatedExponential: MethodDescriptor<SaturatedSourceInput, Satura
     'Pore-water concentration scales with the mass left, with and without a separate phase, so the residual-phase outcome does not change as the source depletes.',
   ],
   validate: (input) => warningsFor(input, prepare(input, 'modern'), 'modern'),
+  uncertainInputs: exponentialUncertainInputs<SaturatedSourceInput>(),
   run: runExponential,
 };

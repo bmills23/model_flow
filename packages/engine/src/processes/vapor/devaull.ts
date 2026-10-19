@@ -3,6 +3,7 @@ import { brent } from '../../numerics/roots.js';
 import { layerDeff, type ProfilePoint, type SoilLayer, type VaporChemical } from './legacyJe.js';
 import { sourceVapor, type SourceVaporInput } from './source.js';
 import { checkNonNeg, checkPos } from './units.js';
+import { devaullUncertainInputs } from './uncertain.js';
 
 /**
  * Indoor vapor intrusion with oxygen-limited aerobic biodegradation (DeVaull 2007, in the form its
@@ -367,5 +368,6 @@ export const vaporDevaull2007: MethodDescriptor<DevaullInput, DevaullResult> = {
     'With the aerobic depth zero the result equals the Johnson and Ettinger model with the same foundation term.',
   ],
   validate: (input) => devaullRun(input).warnings,
+  uncertainInputs: devaullUncertainInputs(),
   run: devaullRun,
 };

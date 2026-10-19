@@ -3,6 +3,7 @@ import type { VaporChemical } from '../vapor/legacyJe.js';
 import { juryTransport, type JurySoil } from '../vapor/jury.js';
 import { checkNonNeg, checkPos } from '../vapor/units.js';
 import { SSG_DEFAULT_Q_OVER_C, qOverCToSi } from './qOverC.js';
+import { ssgVfUncertainInputs } from './uncertain.js';
 
 /**
  * Soil Screening Guidance soil-to-air volatilization factor (`outdoorAir.ssg-vf-1996`), epa1996ssg
@@ -131,5 +132,6 @@ export const outdoorAirSsgVf1996: MethodDescriptor<SsgVfInput, SsgVfResult> = {
   risc5Choice:
     'Offered as the modern option for outdoor air; Q/C is user-entered with the guidance default of 68.81 g/(m^2 s) per kg/m^3 for a 0.5 acre source.',
   validate: (input) => ssgVolatilizationFactor(input).warnings,
+  uncertainInputs: ssgVfUncertainInputs(),
   run: ssgVolatilizationFactor,
 };

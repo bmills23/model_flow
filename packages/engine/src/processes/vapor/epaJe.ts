@@ -11,6 +11,7 @@ import {
 } from './textures.js';
 import { T_REF, atmToDimensionlessHenry, checkNonNeg, checkPos } from './units.js';
 import type { ProfilePoint } from './legacyJe.js';
+import { epaJeUncertainInputs } from './uncertain.js';
 
 /**
  * Modern EPA implementation of the Johnson and Ettinger model: the equations of the 2004 guide
@@ -679,5 +680,6 @@ export const vaporJeEpa: MethodDescriptor<EpaJeInput, EpaJeResult> = {
   risc5Choice:
     'RISC5 holds Henry constant at 25 deg C, takes the crack diffusion coefficient from a foundation layer, enters the capillary fringe as a layer, and keeps the source infinite; this method follows EPA on each point.',
   validate: (input) => jeEpaIndoor(input).warnings,
+  uncertainInputs: epaJeUncertainInputs(),
   run: jeEpaIndoor,
 };

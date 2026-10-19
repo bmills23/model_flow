@@ -1,4 +1,4 @@
-import type { MethodDescriptor, Warning } from '../../registry/index.js';
+import type { MethodDescriptor, UncertainInput, Warning } from '../../registry/index.js';
 import {
   runLegacyScenario,
   runModernScenario,
@@ -31,6 +31,39 @@ const COMMON_ASSUMPTIONS = [
   'A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.',
 ];
 
+function legacyReceptorInputs(count: number): UncertainInput<LegacyScenarioInput>[] {
+  const out: UncertainInput<LegacyScenarioInput>[] = [];
+  const field = (
+    idx: number,
+    key: 'bw' | 'ed' | 'waterIngestionRate' | 'ef',
+    name: string,
+    unit: string,
+    bounds: readonly [number, number] = [0, Number.POSITIVE_INFINITY],
+  ): UncertainInput<LegacyScenarioInput> => ({
+    id: `exposure.receptor${idx}.${key}`,
+    label: `Receptor ${idx + 1} ${name}`,
+    unit,
+    category: 'exposure',
+    bounds,
+    get: (i) => i.receptors[idx]?.receptor[key] ?? Number.NaN,
+    set: (i, v) => ({
+      ...i,
+      receptors: i.receptors.map((r, k) =>
+        k === idx ? { ...r, receptor: { ...r.receptor, [key]: v } } : r,
+      ),
+    }),
+  });
+  for (let idx = 0; idx < count; idx++) {
+    out.push(
+      field(idx, 'bw', 'body weight', 'kg'),
+      field(idx, 'ed', 'exposure duration', 's'),
+      field(idx, 'waterIngestionRate', 'drinking-water ingestion rate', 'm^3/s'),
+      field(idx, 'ef', 'exposure frequency', '1', [0, 1]),
+    );
+  }
+  return out;
+}
+
 export const exposureLegacy: MethodDescriptor<LegacyScenarioInput, LegacyScenarioResult> = {
   id: 'exposure.rags-a-1989',
   process: 'exposure',
@@ -48,6 +81,8 @@ export const exposureLegacy: MethodDescriptor<LegacyScenarioInput, LegacyScenari
   risc5Choice:
     'RISC5 uses dose-based inhalation with the slope factor and reference dose obtained from the unit risk and reference concentration at 20 m^3/d and 70 kg, evaluates two simultaneous receptors with cancer risks additive only on request and hazard indices never added, takes soil as a constant, and averages a time-varying groundwater concentration over the largest 7-year window for noncancer effects and the exposure duration for cancer.',
   validate: (input): Warning[] => runLegacyScenario(input).warnings,
+  // The scenario allows at most two receptors, so two receptors' inputs are declared.
+  uncertainInputs: legacyReceptorInputs(2),
   run: runLegacyScenario,
 };
 

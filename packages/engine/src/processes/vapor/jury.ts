@@ -4,6 +4,7 @@ import { integrate } from '../../numerics/quadrature.js';
 import { millingtonQuirkDeff } from '../vadose/index.js';
 import type { VaporChemical } from './legacyJe.js';
 import { checkNonNeg, checkPos } from './units.js';
+import { juryUncertainInputs } from './uncertain.js';
 
 /**
  * Jury behaviour-assessment soil volatilization for zero water flux (`vapor.jury-bam`): a chemical at
@@ -228,5 +229,6 @@ export const vaporJuryBam: MethodDescriptor<JuryInput, JuryResult> = {
   risc5Choice:
     'RISC5 offers Jury volatilization as a soil emission source; this implementation covers zero water flux only.',
   validate: juryWarnings,
+  uncertainInputs: juryUncertainInputs(),
   run: juryRun,
 };

@@ -16,6 +16,7 @@ import type { C13Params } from './kernel.js';
 import { c14Concentration, c14Evaluation, c14TotalFlux, type C14Evaluation } from './c14.js';
 import { solveLayeredColumn, type FvResult } from './layered.js';
 import { vadsatDispersivity } from './dispersivity.js';
+import { layeredUncertainInputs } from './uncertain.js';
 import type { VadoseChemical, VadsatLayer, VadsatSource } from './index.js';
 
 const DAY = 86400;
@@ -595,5 +596,6 @@ export const vadoseLayered: MethodDescriptor<LayeredInput, LayeredOutput> = {
     'One longitudinal dispersivity per run, plus pore-water molecular diffusion.',
   ],
   validate: (input) => preRunWarnings(prepareLayered(input)),
+  uncertainInputs: layeredUncertainInputs<LayeredInput>(),
   run: runLayered,
 };

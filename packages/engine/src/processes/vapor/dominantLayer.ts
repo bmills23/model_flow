@@ -11,6 +11,7 @@ import {
 } from './legacyJe.js';
 import { sourceVapor, type SourceVaporInput } from './source.js';
 import { checkNonNeg } from './units.js';
+import { dominantLayerUncertainInputs } from './uncertain.js';
 
 /**
  * Dominant-layer model with first-order degradation in a middle layer (Johnson 1998 / Johnson and
@@ -199,5 +200,6 @@ export const vaporDominantLayer1998: MethodDescriptor<DominantLayerInput, Domina
   risc5Choice:
     'RISC5 applies degradation to the water phase times moisture in the middle layer only, takes the source soil properties separately from the transport layers, and reports the indoor or outdoor result for the same column; with zero degradation the result equals the legacy Johnson and Ettinger model.',
   validate: (input) => dominantLayerRun(input).warnings,
+  uncertainInputs: dominantLayerUncertainInputs(),
   run: dominantLayerRun,
 };

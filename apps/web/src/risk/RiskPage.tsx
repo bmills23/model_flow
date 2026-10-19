@@ -17,6 +17,7 @@ import {
   type RiskForm,
 } from './form';
 import { ReceptorPanel } from './ReceptorPanel';
+import { RiskUncertainty } from './RiskUncertainty';
 import { Charts, Comparison, EpcTable, NotQuantified, WarningsList } from './Results';
 
 type Built = Extract<BuildResult, { ok: true }>;
@@ -275,6 +276,7 @@ export function RiskPage() {
               <NotQuantified outcome={shown.outcome} names={names} />
               <EpcTable outcome={shown.outcome} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
+              {shown.outcome.legacy.ok && <RiskUncertainty base={shown.built.legacy} />}
             </div>
           )}
         </div>

@@ -1,0 +1,16 @@
+{
+  "source": "arcadis2001",
+  "table": "R-2",
+  "note": "Comparison of Monte Carlo results from RISC v4.0 and Crystal Ball, as reproduced in Appendix R of the RISC5 user's guide (Nov 2014), section R.7.2. Benzene in drinking water at a constant 0.005 mg/L, default adult RME exposure data, 500 model runs. Printed values, cancer risk. The review does not state the input distributions.",
+  "concentrationMgPerL": 0.005,
+  "iterations": 500,
+  "rows": [
+    { "statistic": "minimum", "risc": 4.19e-9, "crystalBall": 5.6e-9 },
+    { "statistic": "p5", "risc": 4.02e-8, "crystalBall": 3.9e-8 },
+    { "statistic": "p50", "risc": 3.83e-7, "crystalBall": 2.3e-7 },
+    { "statistic": "p75", "risc": 4.73e-7, "crystalBall": 4.7e-7 },
+    { "statistic": "p90", "risc": 8.88e-7, "crystalBall": 8.7e-7 },
+    { "statistic": "p95", "risc": 1.23e-6, "crystalBall": 1.2e-6 },
+    { "statistic": "maximum", "risc": 5.59e-6, "crystalBall": 7.4e-6 }
+  ]
+}

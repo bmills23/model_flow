@@ -1046,3 +1046,208 @@ Calls, open to overturn:
    outdoor times; without them the level reads not quantified.
 5. **Nothing held across a reload**, as for the other feeds. No tolerance was widened and no value was added
    from memory.
+
+## 2026-10-18: M10 uncertainty scope (stage 1)
+
+Bryan approved M10 ("Yes, M7 and M10"). Stage 1 writes the methods note `docs/methods/uncertainty.md`
+(scope, equations, algorithms, warnings, fixture plan, slice plan) and corrects or adds references. No
+engine, data or web code is written in this stage. Four descriptor titles were replaced by verified
+bibliographic data (`mckay1979`, `imanconover1982`, `saltelli2010`, `morris1991`) and seven references were
+added as `planned` (`sobol2001`, `jansen1999`, `ishigami1990`, `hyndmanfan1996`, `wichura1988`,
+`blackman2021`, `roseberry1992`), all checked through Crossref on 2026-10-18 with full texts not read.
+
+Rulings (DEFAULT means open for Bryan to overturn; the others are forced by the source named):
+
+1. **Scope** (DEFAULT). In: distribution library, parameter registry, legacy simple random sampling over
+   exposure parameters, modern Latin hypercube with Iman-Conover rank correlation over exposure and
+   transport parameters, Sobol indices with bootstrap intervals, tornado and Spearman, percentile fans and
+   CDFs, probabilistic cleanup levels, worker pool with a run budget, Table R-2 loose fixture. Deferred:
+   Morris screening, quasi-random base sequences, two-dimensional Monte Carlo, distribution fitting and a
+   cited default distribution library, toxicity-value sampling, M7 and M9 inputs until those land.
+2. **Parameter registry** (DEFAULT). A method declares `uncertainInputs`, each with a stable dotted id,
+   label, SI unit, category (exposure, transport, site, chemical), physical bounds, and pure `get` and `set`
+   accessors; chains prefix ids by link so one sample drives the whole chain.
+3. **Distributions** (DEFAULT). Constant, uniform, log-uniform, triangular, normal, lognormal (geometric
+   or arithmetic parameters), empirical; inverse-CDF sampling only; truncation by mapping u into
+   [F(lo), F(hi)], never by rejection; a support outside the input's bounds must be truncated or is refused.
+   Phi^-1 by AS 241.
+4. **Legacy method.** Exposure parameters only with simple random sampling (forced by the RISC5 manual's
+   description of its Monte Carlo option); default n = 500, the count of the Table R-2 comparison (DEFAULT).
+5. **Modern method.** Latin hypercube with Iman-Conover rank correlation (the ROADMAP section 3 plan of
+   record); the sample correlation of the scores is corrected (T = Q Q'), not assumed to be the identity;
+   default n = 1000 (DEFAULT).
+6. **Transport sampling** (DEFAULT). Each iteration runs the whole deterministic chain; iterations refused
+   by deterministic checks are counted, not dropped silently, and above 1 percent the run is flagged.
+7. **Sobol estimator** (DEFAULT). Saltelli 2010 design, Saltelli first order and Jansen total effect
+   estimators, N = 512, two independent LHS base matrices, indices on log10 Y by default, 500-resample
+   bootstrap intervals with a 0.05 half-width convergence flag, correlations removed with a warning.
+8. **Tornado** (DEFAULT). One at a time between each input's 5th and 95th percentiles around the base run,
+   shown beside the Spearman rank correlations from the sample.
+9. **Percentiles** (DEFAULT). Hyndman and Fan definition 7; fans at 5, 25, 50, 75 and 95 percent with the
+   deterministic curve overlaid.
+10. **Probabilistic cleanup level.** The level protecting a fraction p is the (1 - p) quantile of the
+    per-iteration M5 cleanup levels (forced by M5's per-realization monotonicity); p = 0.95 by default, with
+    0.5 and 0.9 shown, and unreachable iterations censored at the cap (DEFAULT).
+11. **Seeding and budget** (DEFAULT). Explicit seed with the default `model-flow`; purpose-labelled streams;
+    the whole sample built on one thread before any run so results are independent of worker count; pool of
+    min(4, cores - 1) workers, 5-row pilot, confirm above 60 s, refuse above 10 minutes.
+12. **Table R-2 fixture** (DEFAULT). Shape check only: the manual gives no input distributions and its two
+    columns differ by 1.7 at the median, so percentiles must be monotone and the 5th, 50th and 95th fall
+    within a factor of 3 of the geometric mean of the printed columns. This is the "loose" tolerance
+    ROADMAP section 6 assigns; analytic lognormal, Ishigami and identity fixtures carry the real validation.
+13. **Deferred methods** (DEFAULT). Morris 1991 screening and low-discrepancy sequences are deferred: with
+    the input counts of these models (about 5 to 15) the Sobol design is affordable in the browser.
+
+M10 slice E3 (samplers, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- Samplers live in `packages/engine/src/processes/uncertainty/samplers.ts` and are pure over a passed-in
+  seeded stream. `seedStream(seed, purpose)` is `new Xoshiro128ss("<seed>:<purpose>")`.
+- Iman-Conover takes the full k columns it is given (callers pass an identity block for uncorrelated
+  inputs). A target that is asymmetric, lacks a unit diagonal, is not positive definite, or a sample with
+  n <= k is refused with `uncertainty.correlation-not-positive-definite`; n < 5k warns
+  `uncertainty.small-sample-correlation`. Ties in the reordering are broken by row index (stable).
+- Spearman uses average ranks for ties. Sample standard deviation uses the n - 1 denominator.
+- E3 registered nothing; `wichura1988`, `hyndmanfan1996`, `mckay1979` and `imanconover1982` became `used` when
+  E4 registered the methods that cite them.
+
+M10 slice E4 (runner and registered methods, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/runner.ts` holds a pure row runner. `buildSampleMatrix` makes the whole matrix on
+  one thread (streams `<seed>:srs`, `<seed>:lhs`, `<seed>:ic`); `evaluateRows` applies the sampled values
+  through the declared setters to a copy of the base input and runs the model over any slice of rows, so
+  the web worker pool (W1) can call it per chunk; `runUncertainty` chunks (default 50) and writes back by
+  row index. Chunking never changes the result (tested at one and four chunks).
+- The registered methods `uncertainty.srs-exposure` (legacy) and `uncertainty.lhs-ic` (modern) are process
+  `montecarlo`. Their input is a specification holding the model descriptor object, the base input, the
+  distributions in SI keyed by input id, a scalar output extractor and optional n, seed, chunk size and
+  correlation (modern only). Defaults: n 500 and 1000, seed `model-flow`. Callers build one with
+  `uncertaintySpec`. A worker that cannot receive functions resolves the model and extractor by id on its
+  side and calls `evaluateRows` with the rows it was sent.
+- Refusals throw `UncertaintyError` (a `RangeError` with a `code`), matching the engine's other thrown
+  refusals. A correlation on the legacy method, an unknown id, an empty specification and a bad n are
+  refused as `uncertainty.bad-specification` or `uncertainty.unknown-input`. Both are added to the note's
+  warning table, as is `uncertainty.non-finite-output` (a non-finite model output marks that iteration
+  failed, like a thrown refusal).
+- The legacy exposure method now declares water ingestion rate and exposure frequency per receptor next to
+  body weight and exposure duration (E2 declared only the latter two), because the Table R-2 case samples
+  the water intake. An absent optional factor reads as NaN, so the registry contract needs a base input
+  that carries every declared factor.
+- Table R-2 fixture values are the printed ones (RISC5 guide, section R.7.2). The input distributions the
+  test samples are fixture-only central-tendency assumptions with no source; their spreads were widened
+  until the shape check (ruling 12) held, which makes the test a regression guard on the runner and the
+  exposure method, not evidence about RISC. See `packages/engine/test/fixtures/uncertainty/README.md`.
+- `hyndmanfan1996` and `wichura1988` are cited by both methods because both use the percentile
+  definition and the AS 241 inverse; the note's citation lists were updated in place.
+
+M10 slice E5 (sensitivity, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/sensitivity.ts` holds `runSobol`, `runTornado` and `spearmanWithOutput`; the registered
+  method `uncertainty.sobol-saltelli` (process `montecarlo`, modern) wraps `runSobol`. Its input is the E4
+  specification plus optional `scale` and `bootstrap`; `n` is N (default 512). A and B use the streams
+  `<seed>:sobol-A` and `<seed>:sobol-B`, the bootstrap `<seed>:bootstrap`.
+- A row with a refused or non-finite run in any of the N (k + 2) evaluations is dropped from all designs together
+  and counted (`failedRows`); above 1 percent it raises `uncertainty.failed-iterations`. Intervals are the 2.5th and
+  97.5th bootstrap percentiles (definition 7); a first order estimate that is negative with an interval reaching
+  zero is shown as 0 and the raw value is kept in `firstRaw`.
+- The tornado uses `distributionQuantile` at 0.05 and 0.95, so truncation is respected; it costs 2k + 1 runs
+  (the base run included). `spearmanWithOutput` uses the E3 average-rank Spearman over rows with a finite output.
+- Fixture 5 passed at its stated tolerances (Ishigami N = 8192 within 0.03, linear additive within 0.02); no
+  tolerance was widened. `saltelli2010`, `jansen1999` and `sobol2001` are `used`.
+
+M10 slice E6 (probabilistic cleanup, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `processes/uncertainty/cleanup.ts` holds `runProbabilisticCleanup`, `solveCleanupRows` (the pure row solver a
+  worker can call) and `protectionQuantile`; the registered method `uncertainty.cleanup-probabilistic` (process
+  `montecarlo`, modern) wraps it. The sample is the E4 Latin hypercube matrix (optional Iman-Conover), built
+  on one thread; each row sets the sampled inputs through the declared setters and calls M5's
+  `solveSourceLevel` (a `problem` builder) or any caller solver returning level, reachability and forward runs
+  (`solve`, for example a chemical of `solveModeled` under cumulative or equal allocation). M5 numerics are unchanged.
+- Censoring: an unreachable iteration is counted and held at the cap (infinity when no cap is known) above every
+  solved level. The reported level at p is the Hyndman and Fan definition 7 (1 - p) quantile; when the
+  interpolation touches a censored iteration the level is null ("not reachable below the cap"). A refused or
+  non-positive solve is a failed iteration, counted like the other methods (above 1 percent
+  `uncertainty.failed-iterations`).
+- Protection fractions reported are the chosen one (default 0.95, must lie strictly in (0, 1)) plus 0.5 and 0.9.
+  `forwardRuns` sums the solver evaluations, the figure the run budget (ruling 11) counts.
+- Fixture 6 passed at its stated tolerances (quantiles within 2 percent of the analytic lognormal ones at
+  n = 4000; exceedance fraction inside the binomial 99 percent band); no tolerance was widened. No reference
+  changed status.
+
+M10 slice E7 (registry coverage, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- Declarations use a `pathInput` helper in the registry (a scalar at a fixed path of the method input). An
+  absent optional scalar reads NaN and is created by `set`; an absent parent object, an array index past the
+  end or a false guard (the other variant of a union: river or lake, entered or Domenico reach, flow or Darcy
+  discharge, soil, soil gas or groundwater source, oxygen mode, soil gas flow specification) reads NaN and
+  `set` throws a RangeError, so a sample is never silently dropped. A caller samples only inputs whose base
+  value is finite.
+- Declared: `vadose.vadsat` and `vadose.layered` (infiltration, per-layer soil properties and thicknesses,
+  source geometry, concentration and decay, chemical Koc, H, S, Da, Dw and mu, dispersivity),
+  `saturatedSource.two-region` and `.exponential` (geometry, fluctuation, soil, aquifer, infiltration,
+  chemical; the decay rate only on the exponential method because the legacy method refuses it), the seven
+  `vapor.*` methods (chemical diffusion and Henry constants, layers or strata, building and soil gas flow,
+  source, and for PVI the screen's own continuous inputs, which is the PVIScreen sampling M6 deferred),
+  `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `surfaceWater.well-mixed` and `.mass-discharge`.
+- Not declared: molar masses, the TPH pair, foundation type and user flags (constants or switches, not
+  parameters), concentration and discharge series (outputs of the chain, not parameters) and the bank-plane
+  quadrature source of the modern surface water method. Layer lists declare four slots per side (four layers
+  or strata for vapor and layered vadose); a base with fewer layers reads NaN for the rest.
+- The M1 groundwater methods are still not declared. E2 named them in the slice plan but declared only the
+  exposure methods, and E7's scope lists M2, M3, M6 and M8, so a chain through the aquifer has no transport
+  parameters to sample yet. Open: a later slice.
+- The coverage tests use runnable base inputs written for the test (`test/uncertainBases.ts`); their numbers
+  are scaffolding, not data and not a validation. No reference changed status and no assumption text changed.
+
+M10 slice W1 (worker pool and budget, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `apps/web/src/uncertainty/` holds `budget.ts` (pool size, the 5-row pilot, the 60 s and 10 minute limits,
+  the projection and the `uncertainty.run-budget` refusal), `protocol.ts` (the chunk message and `handleRows`, the
+  pure handler the worker and the tests share), `pool.ts` (`runPooled`) and `uncertainty.worker.ts`.
+- The worker resolves the model from the engine registry by method id and takes the scalar output as a property
+  path into the result, because functions do not cross the worker boundary. The sample matrix is still built on
+  one thread by the caller (`buildSampleMatrix`) and passed in as rows.
+- The pilot is the first 5 rows, run alone on one worker; its results are kept, not discarded. Time is measured
+  inside the worker around the model rows, so engine load is excluded. Projected wall time is the mean per-row
+  time times all rows divided by the pool size (an estimate: it assumes the pool scales linearly). Above 60 s the
+  caller's `confirm` decides (no callback means decline); above 10 minutes the run is refused with
+  `UncertaintyError` code `uncertainty.run-budget` (added to the engine's code union) before any further chunk is sent.
+- Cancel is an `AbortSignal`: every worker is terminated at once and the run rejects with `RunCancelledError`; a
+  declined confirmation rejects the same way. A worker error or an error response also terminates the pool.
+- Chunking, pool size and completion order never change the result: tested bit-identical to `runUncertainty`
+  for 1 and 4 workers and with completion order reversed. The budget counts timed rows, so a probabilistic
+  cleanup row that costs many forward runs is covered by its measured time rather than by a forward-run count.
+
+M10 slice W2 (distribution editor and correlation input, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `apps/web/src/uncertainty/editor.ts` is pure: text rows to SI distributions (`buildDistribution`), the CDF preview
+  grid (`cdfCurve`, truncation limits or the 0.1th to 99.9th percentile, log spaced for lognormal and log-uniform), the
+  correlation builder (`buildCorrelation`) and `buildEditorSpec`, which returns the `distributions` and `correlation`
+  of the E4 specification plus sentences for the form. `DistributionEditor.tsx` is the controlled-by-itself component
+  that calls `onChange` with that result; it is not mounted on a screen until W3.
+- Each input defaults to "point value" (not sampled). A distribution is checked with the engine's `checkDistribution`
+  against the input's physical bounds, so an untruncated normal on a bounded input is refused with the engine's message.
+- Entered units are an optional per-input `{ unit, factor }` from the caller (default: the input's SI unit, factor 1);
+  values are converted at the boundary with `convertDistributionUnits`. A lognormal given by arithmetic moments is
+  converted with `lognormalFromArithmetic` in the entered unit first. No unit factor table is added here.
+- The correlation is entered as pairs (a nonzero Spearman value strictly inside (-1, 1)); the matrix is built over the
+  inputs that appear in a pair, with unit diagonal and zero elsewhere, and refused unless the engine's `cholesky` succeeds.
+  A constant or an unsampled input in a pair is refused. A phone-width pair list was chosen over a full k by k grid.
+- No new registry entry, assumption or reference changed, so no docs regeneration was needed.
+
+M10 slice W3 (results charts and panel on the exposure screen, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `UncertaintyPanel` (apps/web/src/uncertainty) is generic over a model, its base input and a list of scalar outputs as property paths; `risk/RiskUncertainty.tsx` mounts it on the exposure screen for the legacy method (`exposure.rags-a-1989`) with cancer risk and hazard index per receptor. The modern exposure method declares no uncertain inputs, so it is not sampled; the screen says so.
+- The pooled run produces the sample outputs; the tornado (2k + 1 runs) and the optional Sobol analysis run on the main thread, which is acceptable for the exposure methods because a run costs microseconds. Sobol N is its own field (default 512).
+- Entered units: exposure duration in years (365 days, the exposure convention) and water ingestion in L/day (factor 1e-3 / 86400), converted at the boundary.
+- The percentile fan (`FanChart`, `fanBands`) is built and unit tested but not mounted: no exposure output is a time series yet. Open for a screen that has one.
+- Results are marked stale with a notice when the scenario inputs change after a run. Charts are inline SVG with the shared theme tokens; the Sobol first-order intervals at the default N are often flagged not converged, which the panel reports with the advice to double N.
+- No registry entry, assumption or reference changed, so no docs regeneration was needed.
+
+M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) implementation choices, none overturning a ruling above:
+
+- `CleanupUncertainty` (apps/web/src/cleanup) mounts under the direct-source results of `#/cleanup`; pure logic is in `cleanup/probabilistic.ts`. For a chosen chemical and medium it builds the legacy exposure scenario with that chemical held at the source concentration C in every switched-on pathway of the medium, and hands the engine's `runProbabilisticCleanup` (E6) a `problem` whose metric is the largest of cancer risk over its target and hazard index over its target (and the summed risk of two additive receptors over its target). The root is therefore the lower of the cancer and noncancer levels, as in the closed-form back-calculation; a test pins the deterministic level to `backCalculateLegacy` within 1e-8 relative for tap water, soil with explicit targets, and two additive receptors.
+- Only the legacy receptor factors are sampled (the inputs `exposureLegacy` declares: body weight, exposure duration, water ingestion rate, exposure frequency), with the W3 units. The modern method and modeled sources (dissolved, vadose, saturated) are not sampled: the modern exposure method and the M1 groundwater methods declare no uncertain inputs. The screen says so.
+- Each chemical is solved alone against its full risk and hazard targets (individual allocation) whatever allocation the screen uses; a groundwater concentration target (MCL) is not applied.
+- The run is on the main thread, not in the worker pool: a direct-pathway row costs microseconds (two forward runs by the linear shortcut). The W1 budget still applies: the first 5 rows are timed alone, the projection is mean row time times rows (one worker), confirm above 60 s and refuse above 10 minutes with `uncertainty.run-budget`. Cancel exists for the confirm dialog only.
+- The protected fraction is entered in percent (default 95) and must lie strictly between 0 and 100; 50 and 90 percent are always shown. Sampling is Latin hypercube with the optional rank correlation of the editor. Charts show the solved levels only; censored iterations are counted and the level is reported as not reachable when its quantile lands on one.
+- No registry entry, assumption or reference changed, so no docs regeneration was needed.

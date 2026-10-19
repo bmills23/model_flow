@@ -187,7 +187,7 @@ after the first run.
 - **M8 Surface water and sediment (App. L, M, N). DONE 2026-10-17** (rulings in the DECISIONS.md M8 block; methods note `docs/methods/surface-water.md`). Legacy well-mixed river and lake box with Darcy discharge, modern bank-plane mass discharge, transient box, downstream decay and selectable pore water sediment; comparison against EPA national recommended water quality criteria and EPA Region 4 2018 sediment benchmarks, both built from committed public sources; a surface water series feeds the M4 swimming pathways; screen at `#/surface-water`. Table R-8 reproduces. Deferred: the MacDonald et al. 2000 TEC and PEC (not shipped, values unverified), two-dimensional river mixing, estuaries, site-chemistry criteria (copper BLM, aluminum, ammonia, selenium), international criteria, equilibrium partitioning sediment benchmarks and marine ERL and ERM, human contact with sediment, fish ingestion.
 - **M9 Plant uptake and ecological screening (App. O, P, Q).** Trapp & Matthies vs Trapp 2015; Eco-SSLs;
   TPH fractions.
-- **M10 Uncertainty (Monte Carlo).** Legacy exposure-only simple sampling vs modern LHS with rank
+- **M10 Uncertainty (Monte Carlo). Stage 1 scope written 2026-10-18** (methods note `docs/methods/uncertainty.md`, DECISIONS.md "M10 uncertainty scope (stage 1)" block; engine and web not started). Legacy exposure-only simple sampling vs modern LHS with rank
   correlation over exposure and transport parameters, Sobol indices, tornado charts, percentile fans,
   probabilistic cleanup levels; Table R-2 fixture (loose).
 - **M11 Projects, reports, polish.** Save/load/share, CSV and printable report with methods statement,

@@ -20,6 +20,7 @@ import {
   type C13Params,
 } from './kernel.js';
 import { vadsatDispersivity } from './dispersivity.js';
+import { vadsatUncertainInputs } from './uncertain.js';
 
 export * from './hydraulics.js';
 export * from './partitioning.js';
@@ -636,5 +637,6 @@ export const vadoseVadsat: MethodDescriptor<VadsatInput, VadsatOutput> = {
   risc5Choice:
     'RISC5 reduces infiltration above Ks to Ks, holds the TPH mass constant in the Raoult source, takes the vapour path to the middle of the source with Deff averaged over the clean soil above it, evaluates a two-branch dispersivity regression at each observation depth without molecular diffusion, sets retardation to 1 below foc 0.001, applies decay to the dissolved phase only, leaves source biodegradation off by default and reports only the advective flux q C at the water table.',
   validate: (input) => warningsFor(prepareVadsat(input)),
+  uncertainInputs: vadsatUncertainInputs<VadsatInput>(),
   run: runVadsat,
 };

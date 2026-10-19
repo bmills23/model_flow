@@ -35,6 +35,12 @@ import {
   particulateSsgPef1996,
   particulateSsgPef2002,
 } from './processes/particulate/index.js';
+import {
+  uncertaintyCleanupProbabilistic,
+  uncertaintyLhsIc,
+  uncertaintySobolSaltelli,
+  uncertaintySrsExposure,
+} from './processes/uncertainty/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -65,6 +71,7 @@ export * from './processes/shower/index.js';
 export * from './processes/irrigation/index.js';
 export * from './processes/particulate/index.js';
 export * from './processes/household/index.js';
+export * from './processes/uncertainty/index.js';
 
 export const registry = new MethodRegistry();
 registry.register(gelhar1985Api1987);
@@ -102,3 +109,7 @@ registry.register(irrigationPathways);
 registry.register(particulateBoxEmissionMethod);
 registry.register(particulateSsgPef1996);
 registry.register(particulateSsgPef2002);
+registry.register(uncertaintySrsExposure);
+registry.register(uncertaintyLhsIc);
+registry.register(uncertaintySobolSaltelli);
+registry.register(uncertaintyCleanupProbabilistic);

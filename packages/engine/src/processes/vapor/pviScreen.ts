@@ -1,6 +1,7 @@
 import type { MethodDescriptor, Warning } from '../../registry/index.js';
 import { FEET_TO_METRES } from './attenuationFactor.js';
 import { checkNonNeg, checkPos } from './units.js';
+import { pviUncertainInputs } from './uncertain.js';
 
 /**
  * Petroleum vapor intrusion vertical-separation screen (EPA 2015 petroleum guide, Table 3). A verdict,
@@ -189,5 +190,6 @@ export const vaporPviScreen2015: MethodDescriptor<PviInput, PviResult> = {
     'Precluding factors (preferential pathways, high-ethanol blends, lead scavengers, a larger building over LNAPL, extensive impermeable cover, contamination in contact with the building) force further assessment.',
   ],
   validate: (input) => pviScreenRun(input).warnings,
+  uncertainInputs: pviUncertainInputs(),
   run: pviScreenRun,
 };
