@@ -1,10 +1,12 @@
 import {
+  SOIL_TEXTURES,
   convert,
   type FluctuationSchedule,
   type HydraulicModel,
   type SaturatedChemical,
   type SaturatedSourceInput,
 } from '@model-flow/engine';
+import type { TextureChoice } from '../vapor/form';
 
 /** Every field is kept as the typed string, in the units the person types. */
 export interface SaturatedForm {
@@ -17,6 +19,7 @@ export interface SaturatedForm {
   fractionHigh: string; // fraction of the year at high water
   schedule: FluctuationSchedule;
   // soil
+  texture: TextureChoice; // preset the soil values were filled from; custom = entered by hand
   porosity: string;
   rhoB: string; // g/cm3
   foc: string;
@@ -57,6 +60,7 @@ export const DEFAULT_FORM: SaturatedForm = {
   dh: '1',
   fractionHigh: '0.25',
   schedule: 'annual-mean',
+  texture: 'custom',
   porosity: '0.3',
   rhoB: '1.7',
   foc: '0.002',
@@ -79,6 +83,26 @@ export const DEFAULT_FORM: SaturatedForm = {
   horizonYr: '10',
   method: 'both',
 };
+
+const sig6 = (x: number): string => String(Number(x.toPrecision(6)));
+
+/**
+ * Fills the porosity, bulk density, residual water content and van Genuchten n from a texture preset
+ * (the class averages the vapor screen uses). Organic carbon and the aquifer conductivity are the
+ * site's own and are kept. Every filled value stays editable.
+ */
+export function applyTexture(f: SaturatedForm, texture: TextureChoice): SaturatedForm {
+  if (texture === 'custom') return { ...f, texture };
+  const t = SOIL_TEXTURES[texture];
+  return {
+    ...f,
+    texture,
+    porosity: sig6(t.porosity),
+    rhoB: sig6(t.bulkDensity / 1000),
+    thetaR: sig6(t.residualMoisture),
+    n: sig6(t.N),
+  };
+}
 
 /** The published hand-calculation values of case A, for the worked-example panel. */
 export const CASE_A = {

@@ -1864,3 +1864,22 @@ Scope: the site-specific wildlife hazard quotient panel on `#/plants-eco` (inven
    with a round-trip case in `project/screens.test.ts`. CSV table `wildlife-dose` is added to the screen's
    downloads. No new route, so the mobile check route list and keyboard-order tests are unchanged.
 
+
+## 2026-10-19: Wave H slice U7, soil texture presets on vadose and saturated
+
+Scope: a texture select on each vadose layer and on the saturated soil group (inventory C8, F4), filled from the
+engine's `SOIL_TEXTURES` as the vapor screen does. No engine or data change.
+
+1. **Field mapping confirmed against the vadose definitions.** Porosity is `thetaS`, residual moisture is
+   `thetaR`, N is the van Genuchten `n`, saturated conductivity (m/s in the table) is `Ks` shown in m/d, and bulk
+   density (kg/m3 in the table) is `rhoB` shown in g/cm3. The vadose checks (`thetaR` in [0, `thetaS`), `n` above 1,
+   `Ks` positive) hold for all twelve classes, so no mapping stopped the slice.
+2. **Kept as the site's own (DEFAULT).** Thickness and organic carbon on vadose layers; organic carbon and the
+   aquifer conductivity on saturated (the table is a soil texture, not an aquifer). The saturated screen takes no
+   `Ks`, so it fills four values, not five.
+3. **Values shown to six significant figures (DEFAULT)** so the unit conversion does not leave float noise in the field.
+4. **Selection stays after an edit (DEFAULT).** As on the vapor screen, editing a filled value keeps the preset name
+   chosen; Custom values only stops filling. There is no automatic refill.
+5. **Schema.** An optional `texture` key on each vadose layer and on the saturated form, format version 1, with
+   round-trip cases in `project/screens.test.ts`. A file without the key loads as Custom values. The Table R-7 case
+   and hand case A stay Custom, so both validation cases still load unchanged. No new route.

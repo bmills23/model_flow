@@ -21,7 +21,15 @@ import {
   subscribeSaturatedVaporFeed,
 } from '../vapor/feeds';
 import { saturatedVaporSource } from './vaporFeed';
-import { CASE_A, DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
+import { TEXTURE_OPTIONS, type TextureChoice } from '../vapor/form';
+import {
+  CASE_A,
+  DEFAULT_FORM,
+  applyTexture,
+  isCaseA,
+  toScenario,
+  type SaturatedForm,
+} from './form';
 import { FED_MAX_STEPS, saturatedFedSteps } from './steps';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { saturatedCsvTables } from './csv';
@@ -262,6 +270,24 @@ export function SaturatedPage() {
 
           <Group title="Soil">
             <div className="fields">
+              <label className="field" htmlFor="sat-texture">
+                <span className="field-label">Texture preset</span>
+                <select
+                  id="sat-texture"
+                  value={form.texture}
+                  onChange={(e) => setForm((f) => applyTexture(f, e.target.value as TextureChoice))}
+                >
+                  {TEXTURE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <small>
+                  Fills porosity, bulk density, residual water and n. Organic carbon and the aquifer
+                  conductivity stay yours. Every value stays editable.
+                </small>
+              </label>
               <Field
                 label="Porosity (-)"
                 value={form.porosity}

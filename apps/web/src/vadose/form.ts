@@ -1,4 +1,5 @@
 import {
+  SOIL_TEXTURES,
   convert,
   type HydraulicModel,
   type LayeredInput,
@@ -7,9 +8,11 @@ import {
   type VadsatLayer,
   type VadsatSoil,
 } from '@model-flow/engine';
+import type { TextureChoice } from '../vapor/form';
 
 /** One soil layer in the units the person types. Every field is kept as the typed string. */
 export interface LayerForm {
+  texture: TextureChoice; // preset the hydraulic values were filled from; custom = entered by hand
   thickness: string; // m
   thetaS: string; // total porosity
   thetaR: string; // residual water content
@@ -52,6 +55,7 @@ export interface VadoseForm {
 }
 
 const soil = (over: Partial<LayerForm> = {}): LayerForm => ({
+  texture: 'custom',
   thickness: '3',
   thetaS: '0.35',
   thetaR: '0.05',
@@ -108,6 +112,27 @@ export function isR7Case(f: VadoseForm): boolean {
   const inputs = (x: VadoseForm) =>
     JSON.stringify({ ...x, method: '', scale: '', measure: '', hydraulicModel: x.hydraulicModel });
   return inputs(f) === inputs(DEFAULT_FORM);
+}
+
+const sig6 = (x: number): string => String(Number(x.toPrecision(6)));
+
+/**
+ * Fills the porosity, residual water content, van Genuchten n, saturated conductivity and bulk
+ * density of a layer from a texture preset (the class averages the vapor screen uses). Thickness and
+ * organic carbon are the site's own and are kept. Every filled value stays editable.
+ */
+export function applyTexture(layer: LayerForm, texture: TextureChoice): LayerForm {
+  if (texture === 'custom') return { ...layer, texture };
+  const t = SOIL_TEXTURES[texture];
+  return {
+    ...layer,
+    texture,
+    thetaS: sig6(t.porosity),
+    thetaR: sig6(t.residualMoisture),
+    n: sig6(t.N),
+    Ks: sig6(convert(t.saturatedConductivity, 'm/s', 'm/d')),
+    rhoB: sig6(t.bulkDensity / 1000),
+  };
 }
 
 export type Side = 'above' | 'below';

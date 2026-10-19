@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { convert, runTwoRegion } from '@model-flow/engine';
-import { DEFAULT_FORM, isCaseA, toScenario, type SaturatedForm } from './form';
+import { SOIL_TEXTURES, convert, runTwoRegion } from '@model-flow/engine';
+import { DEFAULT_FORM, applyTexture, isCaseA, toScenario, type SaturatedForm } from './form';
 
 const YR = convert(1, 'yr', 's');
 const DAY = 86400;
@@ -94,5 +94,28 @@ describe('saturated form: hand case A detection', () => {
     const regionC = (s: typeof a) => JSON.stringify(runTwoRegion(s.input).regions);
     expect(regionC(b)).not.toBe(regionC(a));
     expect(isCaseA({ ...DEFAULT_FORM, hydraulicModel: 'vanGenuchten1980' })).toBe(false);
+  });
+});
+
+describe('saturated form: soil texture presets', () => {
+  it('fills porosity, bulk density, residual water and n from SOIL_TEXTURES', () => {
+    for (const t of Object.values(SOIL_TEXTURES)) {
+      const f = applyTexture(DEFAULT_FORM, t.code);
+      expect(f.texture).toBe(t.code);
+      expect(Number(f.porosity)).toBeCloseTo(t.porosity, 5);
+      expect(Number(f.thetaR)).toBeCloseTo(t.residualMoisture, 5);
+      expect(Number(f.n)).toBeCloseTo(t.N, 5);
+      expect(Number(f.rhoB)).toBeCloseTo(t.bulkDensity / 1000, 5);
+      expect(f.foc).toBe(DEFAULT_FORM.foc);
+      expect(f.K).toBe(DEFAULT_FORM.K);
+      expect(toScenario(f).ok, t.code).toBe(true);
+    }
+  });
+
+  it('keeps the values on Custom and keeps case A recognised with the default texture', () => {
+    const sand = applyTexture(DEFAULT_FORM, 'S');
+    expect(applyTexture(sand, 'custom')).toEqual({ ...sand, texture: 'custom' });
+    expect(DEFAULT_FORM.texture).toBe('custom');
+    expect(isCaseA(DEFAULT_FORM)).toBe(true);
   });
 });

@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { convert } from '@model-flow/engine';
+import { SOIL_TEXTURES, convert } from '@model-flow/engine';
 import {
   DEFAULT_FORM,
   R7_PUBLISHED,
   addLayer,
+  applyTexture,
   isR7Case,
   removeLayer,
   toScenario,
@@ -172,5 +173,53 @@ describe('vadose form: the Table R-7 case', () => {
     expect(R7_PUBLISHED.sourceMgPerL).toBe(224);
     expect(R7_PUBLISHED.yearTenMgPerL).toBe(10.8);
     expect(R7_PUBLISHED.citations).toEqual(['arcadis2001', 'spence2001']);
+  });
+});
+
+describe('vadose form: soil texture presets', () => {
+  const layer = DEFAULT_FORM.above[0]!;
+
+  it('fills porosity, residual water, n, conductivity and bulk density from SOIL_TEXTURES', () => {
+    for (const t of Object.values(SOIL_TEXTURES)) {
+      const f = applyTexture(layer, t.code);
+      expect(f.texture).toBe(t.code);
+      expect(Number(f.thetaS)).toBeCloseTo(t.porosity, 5);
+      expect(Number(f.thetaR)).toBeCloseTo(t.residualMoisture, 5);
+      expect(Number(f.n)).toBeCloseTo(t.N, 5);
+      expect(Number(f.Ks)).toBeCloseTo(t.saturatedConductivity * 86400, 4);
+      expect(Number(f.rhoB)).toBeCloseTo(t.bulkDensity / 1000, 5);
+      expect(f.thickness).toBe(layer.thickness);
+      expect(f.foc).toBe(layer.foc);
+    }
+  });
+
+  it('keeps every value when Custom is chosen and every filled value stays editable', () => {
+    const sand = applyTexture(layer, 'S');
+    expect(applyTexture(sand, 'custom')).toEqual({ ...sand, texture: 'custom' });
+    const edited = { ...sand, thetaS: '0.4' };
+    const r = toScenario({ ...DEFAULT_FORM, above: [edited, edited] });
+    expect(r.ok).toBe(true);
+  });
+
+  it('gives a runnable scenario for every texture and leaves the validation case Custom', () => {
+    for (const t of Object.values(SOIL_TEXTURES)) {
+      const l = applyTexture(layer, t.code);
+      const r = toScenario({ ...DEFAULT_FORM, above: [l], source: l, below: [l] });
+      expect(r.ok, t.code).toBe(true);
+    }
+    expect(DEFAULT_FORM.source.texture).toBe('custom');
+    expect(isR7Case(DEFAULT_FORM)).toBe(true);
+  });
+});
+
+describe('vadose project: files written before texture presets', () => {
+  it('loads layers without a texture as hand entered', async () => {
+    const { fromProject } = await import('./project');
+    const { texture: _t, ...bare } = DEFAULT_FORM.source;
+    void _t;
+    const state = fromProject({ form: { source: bare, above: [bare], below: [bare] } });
+    expect(state.form.source.texture).toBe('custom');
+    expect(state.form.above[0]!.texture).toBe('custom');
+    expect(state.form.below[0]!.texture).toBe('custom');
   });
 });
