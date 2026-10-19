@@ -135,13 +135,16 @@ describe('disclosure widgets', () => {
   }, 40000);
 
   it('every details group opens from its summary, which is a tab stop', async () => {
-    const { main } = await openRoute('#/risk');
-    for (const s of Array.from(main.querySelectorAll('details > summary'))) {
+    // the transport form draws its inputs inside open `details` groups
+    const { main } = await openRoute('#/transport');
+    const summaries = Array.from(main.querySelectorAll('details > summary'));
+    expect(summaries.length).toBeGreaterThan(0);
+    for (const s of summaries) {
       expect(tabbables(main.ownerDocument.body)).toContain(s);
     }
   }, 40000);
 
-  it('the app has no modal dialog that could trap focus; confirmations use the native confirm', () => {
+  it('the only dialog markup is the shared AlertDialog, which has its own focus tests', () => {
     const root = join(__dirname, '..');
     const walk = (d: string): string[] =>
       readdirSync(d).flatMap((f) => {
@@ -150,10 +153,11 @@ describe('disclosure widgets', () => {
         return /\.tsx$/.test(f) && !/\.test\./.test(f) ? [p] : [];
       });
     const offenders = walk(root).filter((p) =>
-      /<dialog|aria-modal|role="dialog"/.test(readFileSync(p, 'utf8')),
+      /<dialog|aria-modal|role="(alert)?dialog"/.test(readFileSync(p, 'utf8')),
     );
-    // If a dialog is ever added it needs a focus trap and focus return test of its own; fail loudly.
-    expect(offenders).toEqual([]);
+    // A dialog needs focus-in, Escape and focus-return tests of its own; ui/AlertDialog.tsx has them
+    // (ui/AlertDialog.test.tsx), so any other file that draws one fails here.
+    expect(offenders.map((p) => p.slice(root.length + 1))).toEqual(['ui/AlertDialog.tsx']);
   });
 });
 

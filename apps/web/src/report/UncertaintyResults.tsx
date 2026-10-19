@@ -28,6 +28,7 @@ import {
   type UncertaintyReportRuns,
 } from './uncertaintyReport';
 import '../uncertainty/uncertainty.css';
+import { AlertDialog } from '../ui/AlertDialog';
 
 function Warnings({ items }: { items: { code: string; message: string }[] }) {
   if (items.length === 0) return null;
@@ -294,7 +295,7 @@ export function ReportUncertainty(props: {
           </div>
         )}
         {confirm && (
-          <div className="alert" role="alertdialog" aria-label="Long run">
+          <AlertDialog className="alert" label="Long run" onCancel={() => confirm.answer(false)}>
             <p>
               <strong>This run is projected to take {formatDuration(confirm.p.projectedMs)}</strong>{' '}
               ({confirm.p.totalRows} iterations at {confirm.p.msPerRow.toFixed(1)} ms each). Run it
@@ -306,7 +307,7 @@ export function ReportUncertainty(props: {
             <button type="button" className="btn" onClick={() => confirm.answer(false)}>
               Cancel
             </button>
-          </div>
+          </AlertDialog>
         )}
         {phase.name === 'error' && (
           <div className="alert" role="alert">

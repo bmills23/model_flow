@@ -17,6 +17,7 @@ import '../uncertainty/uncertainty.css';
 import { MEDIA } from '../risk/form';
 import type { CleanupLegacyInput } from './build';
 import { buildProbabilisticSetup, probabilisticChoices } from './probabilistic';
+import { AlertDialog } from '../ui/AlertDialog';
 
 type Shown = CleanupRun & { label: string; input: CleanupLegacyInput };
 
@@ -229,7 +230,7 @@ export function CleanupUncertainty(props: {
       </div>
 
       {confirm && (
-        <div className="alert" role="alertdialog" aria-label="Long run">
+        <AlertDialog className="alert" label="Long run" onCancel={() => confirm.answer(false)}>
           <p>
             <strong>This run is projected to take {formatDuration(confirm.p.projectedMs)}</strong> (
             {confirm.p.totalRows} iterations at {confirm.p.msPerRow.toFixed(1)} ms each). Run it
@@ -247,7 +248,7 @@ export function CleanupUncertainty(props: {
               Cancel
             </button>
           </div>
-        </div>
+        </AlertDialog>
       )}
       {error && (
         <div className="alert" role="alert">

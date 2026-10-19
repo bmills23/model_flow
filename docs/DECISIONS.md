@@ -1742,10 +1742,14 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
    first tab stop and navigation precedes main, nothing outside main sits between main's first and last
    stop, the skip link moves focus to main without changing the hash, and main's tab order equals its
    document order. Visual order is guarded by a stylesheet scan for CSS `order` and `*-reverse`
-   (none exist). Disclosure buttons keep focus and flip `aria-expanded`; every `details` summary is a tab
-   stop. The app has no modal dialog (confirmation uses the browser's native confirm, which traps and
-   returns focus itself), and a test fails if a `dialog` or `aria-modal` is added without a focus-trap
-   test.
+   (none exist). Disclosure buttons keep focus and flip `aria-expanded`; every `details` summary on
+   `#/transport` is a tab stop (the test fails if it finds none; it first ran on `#/risk`, which draws no
+   `details` until results exist, and asserted nothing). The only dialogs are the three "Long run"
+   confirmations, drawn by the shared `ui/AlertDialog.tsx` (DEFAULT): focus moves to its Cancel button
+   when it opens, Escape cancels, and focus returns to the triggering control when it closes (waiting
+   for the control to be enabled again, since it is disabled while the run winds down). A test fails if
+   any other file draws a `dialog`, `alertdialog` or `aria-modal` element, so a new one needs its own
+   focus tests.
 6. **Not verified here.** axe-core does not judge screen reader output or cognitive load, and jsdom does
    not apply CSS, so tab order is tested from the DOM; the real-browser pass covers rendering only.
    The chart SVGs that take `tabindex="0"` were not walked with arrow keys in this slice.
