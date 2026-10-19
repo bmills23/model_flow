@@ -127,6 +127,12 @@ export function ReportView({
         <p className="report-affiliation">{report.nonAffiliation}</p>
       </header>
 
+      {report.site !== null && (
+        <p className="report-site">
+          <strong>Site model:</strong> {report.site}
+        </p>
+      )}
+
       {report.sections.length === 0 ? (
         <p className="muted">
           No screen has been edited, so there is nothing to report yet. Enter inputs on a screen and

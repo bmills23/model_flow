@@ -49,6 +49,7 @@ import {
   subscribeWaterTableFeed,
 } from '../vapor/feeds';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
+import { defaultSite, type SiteState } from '../site/model';
 import { decodeJson, encodeJson } from './codec';
 import { stableStringify } from './hash';
 import {
@@ -58,6 +59,7 @@ import {
   parseProject,
   screensOf,
   overridesOf,
+  siteOf,
   type Feeds,
   type Project,
   type Screens,
@@ -75,6 +77,8 @@ let screens: Screens = defaultScreens();
 let title = '';
 /** Project-level overrides (see overrides/); the same value shows on every screen that reads it. */
 let overrides: OverridesState = emptyOverrides();
+/** The advisory site model choices (see site/); they change no result. */
+let site: SiteState = defaultSite();
 /** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
 let savedSnapshot: string | null = null;
 let epoch = 0;
@@ -166,6 +170,7 @@ function build(): ReturnType<typeof buildProject> {
     screens,
     feeds: currentFeeds(),
     overrides,
+    site,
     createdWith: APP_VERSION,
     ...(title !== '' ? { title } : {}),
   });
@@ -175,7 +180,7 @@ function build(): ReturnType<typeof buildProject> {
 export const currentProject = build;
 
 function snapshot(): string {
-  return stableStringify({ screens, title, feeds: currentFeeds(), overrides });
+  return stableStringify({ screens, title, feeds: currentFeeds(), overrides, site });
 }
 
 /** True when the project differs from the last save, open or start. */
@@ -187,6 +192,7 @@ export const hasUnsavedChanges = (): boolean =>
       title: '',
       feeds: {},
       overrides: emptyOverrides(),
+      site: defaultSite(),
     }));
 /** Record the project as saved (after a download, an open or a start). */
 export function markSaved(): void {
@@ -198,6 +204,15 @@ export const getOverrides = (): OverridesState => overrides;
 export function setOverrides(next: OverridesState): void {
   if (stableStringify(next) === stableStringify(overrides)) return;
   overrides = next;
+  schedule();
+  notify();
+}
+
+export const getSite = (): SiteState => site;
+/** Replace the site model choices; subscribers are told. */
+export function setSite(next: SiteState): void {
+  if (stableStringify(next) === stableStringify(site)) return;
+  site = next;
   schedule();
   notify();
 }
@@ -291,6 +306,7 @@ export function forgetMemory(): void {
   screens = defaultScreens();
   title = '';
   overrides = emptyOverrides();
+  site = defaultSite();
   hashes = {};
   stale = [];
   dropped = [];
@@ -322,6 +338,7 @@ export function hydrate(): void {
 function seed(project: Project, droppedKeys: readonly string[] = []): void {
   screens = screensOf(project);
   overrides = overridesOf(project);
+  site = siteOf(project);
   title = project.title ?? '';
   dropped = [...droppedKeys];
   const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
@@ -381,6 +398,7 @@ export function newProject(): void {
   screens = defaultScreens();
   title = '';
   overrides = emptyOverrides();
+  site = defaultSite();
   clearAllFeeds();
   hashes = {};
   stale = [];

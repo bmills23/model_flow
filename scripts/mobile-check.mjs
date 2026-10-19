@@ -93,6 +93,7 @@ const ROUTES = [
   '#/surface-water',
   '#/household',
   '#/plants-eco',
+  '#/site',
   '#/chemicals',
   '#/risk',
   '#/cleanup',

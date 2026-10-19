@@ -151,7 +151,7 @@ describe('App shell', () => {
     const hrefs = [...steps].map((li) => li.querySelector('a')?.getAttribute('href'));
     expect(hrefs).toEqual([
       '#/chemicals',
-      '#/transport',
+      '#/site',
       '#/transport',
       '#/risk',
       '#/cleanup',

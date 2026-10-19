@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildProject, defaultScreens, type Screens } from '../project';
+import { defaultSite } from '../site/model';
 import { buildReport, flattenInputs, NON_AFFILIATION } from './buildReport';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
@@ -150,5 +151,31 @@ describe('buildReport', () => {
   it('prints no personal contact line', () => {
     const r = buildReport(project(undefined, 'T'));
     expect(JSON.stringify(r)).not.toMatch(/@[a-z0-9-]+\./i);
+  });
+});
+
+describe('buildReport site line', () => {
+  it('has no site line when the choices are the defaults', () => {
+    expect(buildReport(project()).site).toBeNull();
+  });
+
+  it('gives one line naming the site choices when they were changed', () => {
+    const p = buildProject({
+      screens: defaultScreens(),
+      createdWith: '0.0.1',
+      now: NOW,
+      site: {
+        ...defaultSite(),
+        basis: 'modeled',
+        media: ['groundwater'],
+        location: 'downgradient',
+      },
+    });
+    const line = buildReport(p).site;
+    expect(line).toMatch(/human receptors/);
+    expect(line).toMatch(/concentrations modeled/);
+    expect(line).toMatch(/Groundwater/);
+    expect(line).toMatch(/downgradient/);
+    expect(line).not.toContain('\n');
   });
 });

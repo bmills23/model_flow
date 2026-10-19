@@ -1921,3 +1921,27 @@ Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the ma
 9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
    disclosure inside an existing card.
 
+## 2026-10-19: Wave H slice U2, site model screen
+
+Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no other screen and no result.
+
+1. **Saved as a top-level optional `site` key (DEFAULT shape).** Inside format version 1, beside `overrides`, not
+   under `screens`: it holds no form for a calculation, so it takes no part in feeds or staleness. It is absent at
+   the defaults, so a project that never opened the screen is byte-for-byte as before. Round trips are tested in
+   `project/store.test.ts`; no version bump.
+2. **Choices that can be wrong are representable (DEFAULT).** Source media and the two produce sources are
+   tick boxes, so a two-medium or soil-plus-irrigation choice can be made and is explained on the page instead of
+   being made impossible. A problem hides the checklist; it does not alter the saved choices.
+3. **Five direct media, four modeled sources (DEFAULT).** Direct: soil, groundwater, surface water, indoor air,
+   outdoor air (bathroom air stays on the household screen). Modeled: soil, groundwater, soil to indoor air, soil gas
+   to indoor air. Soil gas is named the better basis when both vapor sources are ticked (E6).
+4. **Vapor method is the app's two methods (DEFAULT).** Legacy Johnson and Ettinger or modern EPA, not RISC5's three
+   models; the choice only words the vapor step.
+5. **Produce must match its medium for humans (DEFAULT).** Produce from soil needs soil as the source, from irrigation
+   water needs groundwater. Both together is refused (E7). Produce is a note, not a problem, for ecological receptors.
+6. **Ecological path is shorter (DEFAULT).** After the fate screens it goes to plants, ecology and TPH (and surface
+   water for a direct surface water source), then the report; no risk or cleanup step. Indoor air and a downgradient
+   vapor source get notes, not problems.
+7. **Report.** `buildReport` gains `site`, one line shown above the screen sections, null at the defaults.
+8. **Route.** `#/site` is owned by the Site model step in `steps.ts`, listed in the nav links, the mobile check route
+   list and the keyboard-order tests.

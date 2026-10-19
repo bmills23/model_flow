@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { STEPS, stepForHash } from './steps';
 
 const ALL_ROUTES = [
+  '#/site',
+  '#/chemicals',
   '#/transport',
   '#/vadose',
   '#/saturated',

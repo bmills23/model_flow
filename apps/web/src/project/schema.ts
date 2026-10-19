@@ -10,6 +10,7 @@ import { uncertaintyProjectSchema } from '../uncertainty/project';
 import { vadoseProjectSchema } from '../vadose/project';
 import { vaporProjectSchema } from '../vapor/project';
 import { overridesSchema } from '../overrides/project';
+import { siteSchema } from '../site/project';
 import { text } from './fields';
 
 export const PROJECT_FORMAT = 'model_flow.project';
@@ -104,6 +105,8 @@ export const projectV1Schema = z.object({
   screens: screensSchema,
   // project-level values that replace database values for this project only (see overrides/)
   overrides: overridesSchema.optional(),
+  // the advisory site model choices (see site/); absent means the defaults
+  site: siteSchema.optional(),
   // each entry is checked on its own by parseProject, so one unusable feed never refuses the file
   feeds: z.record(z.string(), z.unknown()).optional(),
   data: dataSchema.optional(),

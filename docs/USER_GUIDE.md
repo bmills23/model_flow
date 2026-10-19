@@ -12,8 +12,7 @@ and sources behind each calculation are in the methods notes listed on the docum
 - The six numbered steps (Chemicals, Site model, Transport, Receptors, Risk & cleanup, Results) are all
   links, and none is locked: open them in any order. The step that owns the screen you are on is
   highlighted; the groundwater, vadose, saturated soil, vapor, surface water, household and plants screens
-  count as Transport. Until the dedicated chemicals and site model screens arrive, Chemicals opens the
-  exposure and risk screen (where the chemical database loads) and Site model opens transport.
+  count as Transport. Chemicals opens the chemical database and Site model opens the site model screen.
 - Screens pass results to each other (for example the groundwater concentration at a well goes to the risk
   screen). A result is only passed when you press the button that sends it, and the receiving screen says
   where its value came from.
@@ -121,6 +120,22 @@ own. The ecological screening panel then shows, per surrogate, the daily dose, t
 soil concentration, the soil level at which that quotient is one, and the Eco-SSL the document printed, so a
 change can be read against its source. These are screening comparisons, never cleanup levels, and the
 screening-only warning stays. The rows are saved in the project file, and a CSV table of them is offered.
+
+### Site model (`#/site`)
+
+A planning aid, not a gate. Answer six questions about the site: who is exposed (human or ecological), whether
+you enter source concentrations directly or use the models, the single source medium, whether the exposure point
+is onsite or downgradient, the vapor intrusion method (shown when the source is indoor air from soil or soil gas)
+and whether homegrown produce takes its contaminant from the soil or from irrigation water. The page lists the
+screens to visit in that order, links to each, and names the feed button to press on it (for example **Use as
+groundwater source** on vadose leaching, then **Use as exposure well concentration** on transport).
+
+Some combinations are not allowed, and the page says why instead of listing screens: no source medium, more than
+one source medium (run the others as separate projects; when you have both soil and soil gas for indoor air,
+soil gas is the better basis), produce from soil and from irrigation water together, and produce from a medium
+that is not its source (soil for soil produce, groundwater for irrigation). Nothing on any other screen is
+locked or changed by these answers. They are saved with the project, and the report shows them as one line
+above the screen sections when they differ from the defaults.
 
 ### Chemical database (`#/chemicals`)
 

@@ -1,6 +1,8 @@
 import type { z } from 'zod';
 import * as overrides from '../overrides/project';
 import type { OverridesState } from '../overrides/model';
+import * as site from '../site/project';
+import type { SiteState } from '../site/model';
 import * as cleanup from '../cleanup/project';
 import * as household from '../household/project';
 import * as plantsEco from '../plantsEco/project';
@@ -71,6 +73,7 @@ export interface BuildOptions {
   screens: Screens;
   feeds?: Feeds;
   overrides?: OverridesState;
+  site?: SiteState;
   data?: NonNullable<Project['data']>;
   title?: string;
   /** The app version string (from package.json) the file is written with. */
@@ -103,6 +106,8 @@ export function buildProject(o: BuildOptions): Project {
   if (o.feeds !== undefined) project.feeds = o.feeds;
   const ov = o.overrides === undefined ? undefined : overrides.toProject(o.overrides);
   if (ov !== undefined) project.overrides = ov;
+  const st = o.site === undefined ? undefined : site.toProject(o.site);
+  if (st !== undefined) project.site = st;
   if (o.data !== undefined) project.data = o.data;
   return project;
 }
@@ -110,6 +115,9 @@ export function buildProject(o: BuildOptions): Project {
 /** The project-level overrides of a loaded project; none when the file has no `overrides` key. */
 export const overridesOf = (project: Project): OverridesState =>
   overrides.fromProject(project.overrides);
+
+/** The advisory site model choices of a loaded project; the defaults when the file has no `site` key. */
+export const siteOf = (project: Project): SiteState => site.fromProject(project.site);
 
 /** A feed as stored: the value, the screen it came from and a fingerprint of that screen's form. */
 export function feedEntry<V>(
