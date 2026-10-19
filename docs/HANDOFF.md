@@ -5,10 +5,9 @@ sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree be
 skipping a done one.
 
 ## State of the tree
-- Branch `wave-parity` holds M7, M9, M10 and M11 on top of main (`0c772c0`, which already holds M0 to M6 and
-  M8 and equals `origin/main`). 60 commits ahead of main before this docs commit. It is not on main and not pushed; merging to main
-  and pushing are Bryan's call. Pages deploys from main: https://bmills23.github.io/model_flow/
-- Gate on the branch (tests run 2026-10-18 for this file): engine 1373 tests (79 files), data 149 passed and
+- Main holds M0 to M11. M7, M9, M10 and M11 were built on branch `wave-parity` (62 commits on top of `0c772c0`)
+  and fast-forwarded into main on 2026-10-18. Pages deploys from main: https://bmills23.github.io/model_flow/
+- Gate (full `corepack pnpm gate`, green 2026-10-18 in 5 min 10 s): engine 1373 tests (79 files), data 149 passed and
   3 skipped (7 files; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs),
   web 971 tests (112 files). Run `corepack pnpm gate` for the lint, typecheck, `data:check` and build steps
   before merging; `docs:check` and prettier were run for this docs commit.
@@ -245,5 +244,5 @@ skipping a done one.
 
 ## Next
 - All twelve milestones (M0 to M11) are built. Remaining work is the deferred lists in the ROADMAP rows and
-  the open items above: merge `wave-parity` (Bryan's call), read the unverified sources, wire produce and TPH
+  the open items above: read the unverified sources, wire produce and TPH
   into the cleanup screen, and run the axe-core and keyboard passes.
