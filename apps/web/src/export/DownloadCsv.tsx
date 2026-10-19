@@ -15,7 +15,12 @@ export interface CsvTable {
 }
 
 /** "Download CSV" controls, one button per table. Renders nothing when there are no tables. */
-export function DownloadCsv(props: { tables: readonly CsvTable[]; disabled?: boolean }) {
+export function DownloadCsv(props: {
+  tables: readonly CsvTable[];
+  disabled?: boolean;
+  /** Name the table in the button even when it is the only one. */
+  showLabel?: boolean;
+}) {
   if (props.tables.length === 0) return null;
   return (
     <p className="csv-downloads">
@@ -27,7 +32,7 @@ export function DownloadCsv(props: { tables: readonly CsvTable[]; disabled?: boo
           disabled={props.disabled}
           onClick={() => downloadCsv(csvFileName(t), exportCsv(t.rows, t.columns))}
         >
-          Download CSV{props.tables.length > 1 ? `: ${t.label}` : ''}
+          Download CSV{props.tables.length > 1 || props.showLabel ? `: ${t.label}` : ''}
         </button>
       ))}
     </p>

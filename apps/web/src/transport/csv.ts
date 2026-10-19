@@ -52,6 +52,36 @@ export function transportSeriesRows(result: ComputeResult): CsvRow[] {
   return rows;
 }
 
+const PLUME_COLUMNS = (timeYr: number): CsvColumn[] => [
+  { key: 'method', header: 'method' },
+  { key: 'x', header: 'x downgradient', unit: 'm' },
+  { key: 'y', header: 'y', unit: 'm' },
+  { key: 'concentration', header: `concentration at ${timeYr} yr`, unit: 'mg/L' },
+];
+
+/**
+ * The plan-view grid the map draws, at full resolution, long format: one row per cell (x outer, y
+ * inner) for the map method at the time shown. The time is in the concentration header.
+ */
+export function plumeCsvTable(
+  result: ComputeResult,
+  mapMethod: MethodKey,
+  timeYr: number,
+): CsvTable {
+  const rows: CsvRow[] = [];
+  result.xs.forEach((x, i) => {
+    result.ys.forEach((y, j) => {
+      rows.push({
+        method: TRANSPORT_METHOD_IDS[mapMethod],
+        x,
+        y,
+        concentration: result.grid[i]![j]! * MG_PER_L,
+      });
+    });
+  });
+  return { name: 'transport-plume', label: 'plume grid', rows, columns: PLUME_COLUMNS(timeYr) };
+}
+
 export function transportCsvTables(result: ComputeResult, timeYr: number): CsvTable[] {
   return [
     {
