@@ -1,30 +1,54 @@
-# HANDOFF (written from the tree, 2026-10-19, end of wave G)
+# HANDOFF (written from the tree, 2026-10-19, end of wave H)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
 skipping a done one.
 
 ## State of the tree
-- Main holds M0 to M11. Wave G (the parity gaps below) is on branch `wave-gaps`, ahead of main and not yet
-  merged or pushed when this was written; confirm with `git log main..wave-gaps`. Pages deploys from main:
-  https://bmills23.github.io/model_flow/
-- Gate (full `corepack pnpm gate`, green on `wave-gaps` 2026-10-19): engine 1377 tests (79 files, 34.95 s),
-  web 1100 tests (120 files, 48.97 s). The data package counts (149 passed, 3 skipped; the skipped three are the
-  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs) were not re-run for this docs commit.
-  `corepack pnpm mobile:check` was also green (0 overflowing elements, 0 axe violations); run it with `--url`
-  when port 5178 is busy.
+- Main holds M0 to M11. Wave G (parity gaps) is on branch `wave-gaps` and wave H (UI near-parity) is on branch
+  `wave-ui`, which builds on it; both are ahead of main and not yet merged or pushed when this was written.
+  Confirm with `git log --oneline main..wave-ui`. Pages deploys from main: https://bmills23.github.io/model_flow/
+- Gate (full `corepack pnpm gate`, green on `wave-ui` 2026-10-19, build included): engine 1377 tests (79 files,
+  34.34 s), web 1475 tests (135 files, 53.19 s), data and other packages 149 passed and 3 skipped (7 files,
+  1.69 s; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs).
+  `corepack pnpm mobile:check` was also green (0 overflowing elements, 0 axe violations, including the seeded
+  `#/risk` route that needs benzene, two open override panels and two edited marks); run it with `--url` when
+  port 5178 is busy.
 - Branches that are ancestors of this branch (safe to delete once it lands): `m0-foundation` to
   `m6-vapor-models`, `m8-surface-water`, `wave-m5-m6-m8`, `m7-*`, `m9-*`, `m10-*`, `m11-*`, `t-m7`, `t-m9`,
-  `t-m10`, `t-m11` and the `worktree-*` working branches. `m1-groundwater-ui` is NOT an ancestor (its commits
-  carry different hashes from what landed); confirm its content is on main before deleting it.
-- Test time on this run: engine suite 35 s, web suite 49 s (it was 226 s before wave G sped up the bank plane integral).
-- CI cost: about 5 billed minutes per push to main (measured 2026-10-18 on main before this wave: gate job
-  2 min 50 s, Pages build 26 s, deploy 10 s; re-measured 2026-10-19 after M11: gate 2 min 38 s). Not re-measured
-  after wave G; the web suite is now much faster, so the gate job time is to be re-measured after the next push.
-  Docs-only pushes trigger nothing.
+  `t-m10`, `t-m11`, `wave-gaps`, the wave H slice branches (`ui-u*`, `fix-h-*`) and the `worktree-*` working
+  branches. `m1-groundwater-ui` is NOT an ancestor (its commits carry different hashes from what landed);
+  confirm its content is on main before deleting it.
+- Test time on this run: engine suite 34 s, web suite 53 s.
+- CI cost: about 5 billed minutes per push to main (measured 2026-10-18 and 2026-10-19 on main: gate job
+  2 min 38 s to 2 min 50 s, Pages build about 25 s, deploy 10 to 42 s). Not re-measured after waves G and H;
+  the gate job time is to be re-measured after the next push. Docs-only pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave H landed (UI near-parity, 2026-10-19)
+Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md "Wave H" blocks, DEFAULT where marked.
+- U1 step bar: all six steps are links (`apps/web/src/steps.ts`), the step owning the current route is marked,
+  the home page names no placeholder and links the report.
+- U2 `#/site`: advisory checklist of screens and feed buttons from six choices; forbidden combinations are
+  explained; saved under a `site` key; one line in the report. Nothing is locked.
+- U3 `#/chemicals`: read-only RSL 2024-11 browser with a source per value and CSV. The built JSON asset ships
+  minified (633,152 B against 1,218,894 B in the repo) under a 700 kB cap in `bundleSize.test.ts`.
+- U4 per-project toxicity overrides (an `overrides` key shared by risk and cleanup, a required source note,
+  listed in the report). U5 per-project exposure factors and receptor names; risk and cleanup keep their own
+  receptor edits.
+- U6 Help link on every screen into its user guide section.
+- U7 texture presets on the vadose layers and the saturated Soil group.
+- U8 fill from the database on transport, vadose and saturated; transport Kd = Koc x foc (DEFAULT). A record
+  with no Koc leaves transport retardation unchanged and says so.
+- U9 wildlife dose panel on `#/plants-eco`, rows from the Eco-SSL derivation rows, reproduced within 5 percent.
+- U10 decimal comma entry, off by default, per browser; an ambiguous entry blocks the calculation and is never
+  saved; text boxes ignore the setting.
+- Corrections made while closing the wave: feed fingerprints skip keys added in this wave (`FINGERPRINT_SKIP`
+  in `project/hash.ts`) so older project files are not flagged stale; `screenUsed` judges the saved screens;
+  the ecological checklist serves a soil source only.
+- Routes now also include `#/site` and `#/chemicals`.
 
 ## Wave G landed (parity gaps, 2026-10-19)
 - Cleanup (`#/cleanup`): homegrown produce level (does not apply to modeled sources, DEFAULT) and TPHCWG and
@@ -82,8 +106,8 @@ skipping a done one.
   modern method is the HHRAP 2005 equations), ruling 12 (TSCF and the leaf-air partition coefficient are
   required inputs), ruling 9 (TPH fractions map onto the five RSL TPH records), ruling 8 (Eco-SSLs by hand
   entry; seven printed wildlife rows that do not reproduce are flagged, not corrected).
-- Deferred: the wildlife surrogate food web table is not wired to the screen (the produce and TPH total levels
-  reached the cleanup screen in wave G); see the ROADMAP M9 row.
+- Deferred: the produce and TPH total levels reached the cleanup screen in wave G and the Eco-SSL wildlife
+  surrogate rows reached `#/plants-eco` in wave H; see the ROADMAP M9 row for what remains.
 
 ## M10 landed (uncertainty, Monte Carlo)
 - Methods note `docs/methods/uncertainty.md`. Rulings: DECISIONS.md "M10 uncertainty scope (stage 1)" block
@@ -113,7 +137,7 @@ skipping a done one.
 - `scripts/mobile-check.mjs` (`corepack pnpm mobile:check`, needs a built app and a local Chrome): true
   390x844 viewport through CDP, light and dark, every route plus four document pages, and once at 1280x900.
   Last result 2026-10-18: zero overflowing elements. It is not in `gate` or CI.
-- Routes now: `#/` and `#/methods`, `#/transport`, `#/vadose`, `#/saturated`, `#/risk`, `#/cleanup`,
+- Routes (wave H adds `#/site` and `#/chemicals`): `#/` and `#/methods`, `#/transport`, `#/vadose`, `#/saturated`, `#/risk`, `#/cleanup`,
   `#/vapor`, `#/surface-water`, `#/household`, `#/plants-eco`, `#/report`, `#/docs`.
 - Deferred: see the ROADMAP M11 row.
 
@@ -245,6 +269,13 @@ skipping a done one.
   is an open question; modeled cleanup sources are not sampled by the uncertainty panel.
 - Report gaps: the plume map is left out of the report's uncertainty results (DEFAULT).
 - Accessibility: chart SVG arrow-key navigation has not been walked.
+- Open questions for Bryan (wave H): (1) the transport mapping Kd = Koc x foc with foc entered by the user
+  (DEFAULT; the retardation then follows from Kd); (2) whether wildlife rows that do not reproduce within 5 percent
+  of the printed Eco-SSL should be flagged in the UI (today the printed value is shown beside the back-calculated
+  one, no flag); (3) the ecological site checklist flow (soil source only: chemicals, plants and ecology, report;
+  other media are refused); (4) per-project-only database edits (no reusable library; confirm this holds after
+  use). Multi-chemical fate runs, user-defined chemicals as project entries and a close-tab warning for unsaved
+  file changes remain unbuilt.
 - Slow run: a linked surface water run at a 2000 m reach takes 2.0 s in Node after the wave G fix (178 s
   before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix). Profile before
   changing tests.
@@ -265,6 +296,7 @@ skipping a done one.
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- The UI near-parity wave (plan pending Bryan's review): bring the screens closer to the manual's screens.
+- Merge `wave-gaps` and `wave-ui` to main in one push after a final local gate, then re-measure CI minutes.
+- Answer the wave H open questions above.
 - Then the open items above: read the unverified sources, and decide produce on modeled sources, the TPH
   cancer endpoint and the plume map in the report.

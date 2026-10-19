@@ -64,6 +64,36 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 
 ## Screens
 
+### Chemical database (`#/chemicals`)
+
+A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition
+2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
+chemical properties and its toxicity values. Each row gives the value as stored, its unit and its source:
+the reference named in the property table, or for toxicity the name of the agency behind the value. Flags
+such as volatile and mutagen, and a few screening values without a per-value reference, are listed with
+the source "RSL table". The data carries no carcinogen weight-of-evidence class, so none is shown.
+**Download CSV** saves every value of every chemical, or just the chemicals that match the search, one row
+per value with a source column. Values cannot be edited here; the full file loads the first time the
+screen opens, so it needs a connection that first time.
+
+### Site model (`#/site`)
+
+A planning aid, not a gate. Answer six questions about the site: who is exposed (human or ecological), whether
+you enter source concentrations directly or use the models, the single source medium, whether the exposure point
+is onsite or downgradient, the vapor intrusion method (shown when the source is indoor air from soil or soil gas)
+and whether homegrown produce takes its contaminant from the soil or from irrigation water. The page lists the
+screens to visit in that order, links to each, and names the feed button to press on it (for example **Use as
+groundwater source** on vadose leaching, then **Use as exposure well concentration** on transport).
+
+Some combinations are not allowed, and the page says why instead of listing screens: no source medium, more than
+one source medium (run the others as separate projects; when you have both soil and soil gas for indoor air,
+soil gas is the better basis), produce from soil and from irrigation water together, and produce from a medium
+that is not its source (soil for soil produce, groundwater for irrigation), and ecological receptors with any source
+other than soil (the ecological screen takes a soil concentration only, so only soil is supported; for soil the
+steps are the chemical database, the plants and ecology screen, then the report). Nothing on any other screen is
+locked or changed by these answers. They are saved with the project, and the report shows them as one line
+above the screen sections when they differ from the defaults.
+
 ### Groundwater transport (`#/transport`)
 
 A dissolved plume from a finite source in uniform groundwater flow, with retardation and first-order decay.
@@ -130,36 +160,6 @@ soil concentration, the soil level at which that quotient is one, and the Eco-SS
 change can be read against its source. These are screening comparisons, never cleanup levels, and the
 screening-only warning stays. The rows are saved in the project file, and a CSV table of them is offered.
 
-### Site model (`#/site`)
-
-A planning aid, not a gate. Answer six questions about the site: who is exposed (human or ecological), whether
-you enter source concentrations directly or use the models, the single source medium, whether the exposure point
-is onsite or downgradient, the vapor intrusion method (shown when the source is indoor air from soil or soil gas)
-and whether homegrown produce takes its contaminant from the soil or from irrigation water. The page lists the
-screens to visit in that order, links to each, and names the feed button to press on it (for example **Use as
-groundwater source** on vadose leaching, then **Use as exposure well concentration** on transport).
-
-Some combinations are not allowed, and the page says why instead of listing screens: no source medium, more than
-one source medium (run the others as separate projects; when you have both soil and soil gas for indoor air,
-soil gas is the better basis), produce from soil and from irrigation water together, and produce from a medium
-that is not its source (soil for soil produce, groundwater for irrigation), and ecological receptors with any source
-other than soil (the ecological screen takes a soil concentration only, so only soil is supported; for soil the
-steps are the chemical database, the plants and ecology screen, then the report). Nothing on any other screen is
-locked or changed by these answers. They are saved with the project, and the report shows them as one line
-above the screen sections when they differ from the defaults.
-
-### Chemical database (`#/chemicals`)
-
-A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition
-2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
-chemical properties and its toxicity values. Each row gives the value as stored, its unit and its source:
-the reference named in the property table, or for toxicity the name of the agency behind the value. Flags
-such as volatile and mutagen, and a few screening values without a per-value reference, are listed with
-the source "RSL table". The data carries no carcinogen weight-of-evidence class, so none is shown.
-**Download CSV** saves every value of every chemical, or just the chemicals that match the search, one row
-per value with a source column. Values cannot be edited here; the full file loads the first time the
-screen opens, so it needs a connection that first time.
-
 ### Exposure and risk (`#/risk`)
 
 Pick chemicals from the EPA Regional Screening Level tables, enter concentrations in soil, water and air (or
@@ -194,13 +194,13 @@ the report lists them under "Receptor factors supplied by the user" with the pre
 
 ### Cleanup levels (`#/cleanup`)
 
-Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits. The
-receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed
-on the cleanup screen does not change the exposure screen.
-
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and
 noncancer levels governs, and the screen says which one did.
+
+Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits. The
+receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed
+on the cleanup screen does not change the exposure screen.
 
 Homegrown produce and total petroleum hydrocarbons come from the plants, ecology and TPH screen. For
 produce, send the plant factors from that screen, switch on "plant factors for homegrown produce" on the

@@ -1,5 +1,7 @@
 # UI near-parity gaps: model_flow against RISC5 (2026-10-19)
 
+Status (2026-10-19): slices U1 to U10 are all landed on branch `wave-ui`; each slice carries a status line below. The gap table and slice text are the plan as written, not rewritten after the fact.
+
 Inputs: `docs/RISC5_UI_INVENTORY.md` (102 paraphrased features, IDs A1 to J8 used below), `docs/USER_GUIDE.md`,
 `apps/web/src/App.tsx`, `docs/ROADMAP.md` section 7 Deferred lists, and targeted source reads cited inline.
 Landed in wave G (2026-10-19) and excluded from slices: G1 produce and TPH totals on `#/cleanup`, G2 charts and
@@ -79,6 +81,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 `project/*.test.ts`; if a slice finds a version bump is needed, it stops and reports instead.
 
 ### U1 Working step bar and current home page (B1)
+- Status: LANDED 2026-10-19. All six steps are links (`steps.ts`); the Chemicals and Site model links were retargeted when U3 and U2 landed.
 - Scope: each of the six steps links to a real route (Chemicals to `#/risk` until U3 lands, Site model to
   `#/transport` until U2 lands, Transport to `#/transport`, Receptors to `#/risk`, Risk and cleanup to
   `#/cleanup`, Results to `#/report`); `aria-current` on the step that owns the current route (fate screens
@@ -89,6 +92,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: G3 merged (both edit the shell and focus order). Conflict: U2, U3 retarget one link each.
 
 ### U2 Site model screen (E1 to E8)
+- Status: LANDED 2026-10-19. `#/site` advisory checklist, saved under a `site` key, one line in the report.
 - Scope: new `#/site` screen with the choices human or ecological, direct concentrations or models, source
   medium, onsite or downgradient, vapor model, produce source; output is an advisory ordered checklist of
   screens with the feed button to press on each and links; no locking. Saved in the project under a new
@@ -102,6 +106,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: U1; G2 merged (report file). Conflict: report files with G2, shell with U3.
 
 ### U3 Chemical database browser (C1, C4, C5, D5, J1, J2, J4, J7)
+- Status: LANDED 2026-10-19. `#/chemicals`, read-only, with sources and CSV.
 - Scope: new `#/chemicals` read-only view of the RSL 2024-11 records: search by name or CAS, each property
   and toxicity value with its source tag, data edition shown, Download CSV (all or the filtered rows, with a
   source column per value). Mobile: cards or a scrolling table region, no page overflow.
@@ -113,6 +118,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: U1 (soft). Conflict: `App.tsx` route list with U2 (trivial).
 
 ### U4 Project toxicity overrides (D3, D4, G9, J8)
+- Status: LANDED 2026-10-19. Project-level `overrides` key, shared by risk and cleanup, listed in the report.
 - Scope: per chemical on `#/risk` and `#/cleanup`, an "Edit values" disclosure listing the toxicity values
   the chosen pathways use, each with the database value and source; a user value replaces it for this
   project, with a required short source note; edited fields marked (text label plus tint, not colour
@@ -128,6 +134,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: G1 and G2 merged (cleanup and report files). Conflict: high with U5 (same files), run serially.
 
 ### U5 Editable exposure factors and receptor names (G5, G7, G8)
+- Status: LANDED 2026-10-19. Risk and cleanup receptors keep their own edits; names flow to tables, CSV and report.
 - Scope: in each receptor panel, show the preset's legacy factors (body weight, exposure frequency and
   duration, averaging times, intake rates) and the modern stage scalars the engine boundary exposes, all
   editable per project, marked when they differ from the preset, "Reset to preset" per receptor; an
@@ -141,6 +148,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: U4 (shared files). Conflict: high with U4, medium with G2.
 
 ### U6 Help link per screen (B2)
+- Status: LANDED 2026-10-19. Help link on every screen into its guide section.
 - Scope: `#/docs/<slug>/<section>` support in `docs/catalog.ts` and heading ids in `docs/markdown.ts`; the
   reader scrolls to and focuses the heading; each screen gets a "Help" link to its user guide section.
 - Files: `docs/catalog.ts`, `docs/markdown.ts`, `docs/DocsPage.tsx`, one line in each `*Page.tsx`, tests.
@@ -149,6 +157,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: G3 (focus handling). Conflict: low, one line in every page file, so merge after U8 and U7.
 
 ### U7 Soil texture presets on vadose and saturated (C8, F4)
+- Status: LANDED 2026-10-19. Texture select on each vadose layer and in the saturated Soil group; Custom kept.
 - Scope: a texture select filling the hydraulic inputs from the engine's `SOIL_TEXTURES` (already sourced
   for vapor), with Custom kept and every value editable after filling, mirroring `vapor/form.ts`
   `applyTexture`. The slice first confirms each mapped field matches the vadose model's parameter
@@ -159,6 +168,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: U8 (same form files). Conflict: medium with U8.
 
 ### U8 Fill chemical properties from the database on fate screens (D4, F8)
+- Status: LANDED 2026-10-19. Transport, vadose and saturated; transport Kd = Koc x foc (DEFAULT mapping, open for Bryan). Surface water not included.
 - Scope: a chemical select on `#/transport`, `#/vadose` and `#/saturated` that fills the properties the
   RSL record carries (Koc, solubility, Henry's constant, diffusivities, molecular weight) using the
   `vapor/chemicals.ts` pattern; values stay editable; a note names the source; properties the database
@@ -170,6 +180,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: none. Conflict: medium with U7, low with U6.
 
 ### U9 Wildlife dose panel (C9)
+- Status: LANDED 2026-10-19. Rows prefilled from the Eco-SSL derivation rows; rows not reproduced are shown with the printed value beside them.
 - Scope: on `#/plants-eco`, a site-specific wildlife hazard quotient panel using `wildlifeDose` and
   `wildlifeHazardQuotient`: surrogate receptor rows prefilled from the `ecossl` derivation rows with page
   citations, every factor editable, screening-only warning kept.
@@ -178,6 +189,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Depends on: G1 (plants-eco feeds). Conflict: low.
 
 ### U10 Decimal comma entry (B3), optional
+- Status: LANDED 2026-10-19. Per-browser setting, off by default; files and CSV keep the point.
 - Scope: a per-viewer setting (localStorage, wrapped in try and catch) to read and show numbers with a comma
   decimal; one shared parser replaces the per-form `Number(s)` calls; project files and CSV stay point.
 - Files: `ui/controls.tsx`, every `*/form.ts` parse helper, tests.
