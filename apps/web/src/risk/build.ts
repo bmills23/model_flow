@@ -3,7 +3,7 @@ import {
   MODERN_RESIDENT_BOUNDARY,
   MODERN_WORKER_BOUNDARY,
   PATHWAYS,
-  PATHWAY_IDS,
+  DIRECT_PATHWAY_IDS,
   cmPerHourToMPerS,
   constantEpc,
   iurFromPerUgM3,
@@ -247,7 +247,7 @@ export function buildInputs(
       continue;
     }
     const byPathway: Partial<Record<PathwayId, EpcSpec>> = {};
-    for (const pathway of PATHWAY_IDS) {
+    for (const pathway of DIRECT_PATHWAY_IDS) {
       const medium = PATHWAYS[pathway].medium;
       if (medium === 'groundwater' && row.groundwaterFromWell) {
         if (well === null) {
@@ -345,10 +345,10 @@ export function buildInputs(
     const site = parseSite(rf, tag, errors);
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
-    const pathways = PATHWAY_IDS.filter(
+    const pathways = DIRECT_PATHWAY_IDS.filter(
       (p) => rf.pathways[p] && [...epcs.values()].some((e) => e[p] !== undefined),
     );
-    for (const p of PATHWAY_IDS) {
+    for (const p of DIRECT_PATHWAY_IDS) {
       if (rf.pathways[p] && !pathways.includes(p)) {
         notes.push(
           `${label}: ${PATHWAY_LABELS[p]} skipped, no concentration entered for ${mediumLabel(PATHWAYS[p].medium).toLowerCase()}.`,

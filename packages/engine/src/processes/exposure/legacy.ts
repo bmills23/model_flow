@@ -1,4 +1,10 @@
 import {
+  produceContact,
+  validateProduceFactors,
+  type ProduceFactors,
+  type ProduceIntakes,
+} from './produce.js';
+import {
   DAY_S,
   PATHWAYS,
   STANDARD_ADULT_BW,
@@ -26,6 +32,8 @@ export interface LegacyChemical extends ToxicityValues {
   bio?: number;
   /** Soil saturation concentration Csat, kg/kg (used only for the warning). */
   csat?: number;
+  /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil), for the `produce` pathway. */
+  produceFactors?: ProduceFactors;
 }
 
 /** Receptor exposure factors in SI. Anything the pathways do not use may be absent. */
@@ -58,6 +66,8 @@ export interface LegacyReceptor {
   swimIngestionRate?: number;
   /** Skin area exposed to surface water, m^2. */
   swimSkinArea?: number;
+  /** Homegrown produce intake per class (the `produce` pathway). */
+  produce?: ProduceIntakes;
 }
 
 export interface LegacyEpc {
@@ -191,6 +201,11 @@ export function legacyContactTerm(
     case 'swimDermal':
       numerator = need(m, 'swimSkinArea', receptor.swimSkinArea) * need(m, 'kp', chem.kp) * et();
       break;
+    case 'produce': {
+      // already per kg body weight
+      const c = produceContact(receptor.bw, receptor.produce, chem.produceFactors);
+      return { perEpc: c.perEpc, missing: c.missing };
+    }
   }
   return m.length > 0
     ? { perEpc: null, missing: m }
@@ -199,6 +214,7 @@ export function legacyContactTerm(
 
 /** Throws a RangeError for a fraction outside [0, 1] or a toxicity or permeability value out of range. */
 export function validateLegacyChemical(chem: LegacyChemical): void {
+  validateProduceFactors(chem.produceFactors);
   for (const [name, v] of [
     ['aaf', chem.aaf],
     ['bio', chem.bio],

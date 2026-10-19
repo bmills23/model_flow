@@ -7,6 +7,8 @@ export * from './briggs.js';
 export * from './leaf.js';
 export * from './hhrap.js';
 export * from './legacy.js';
+export * from './irrigation.js';
+export * from './produceFactor.js';
 export type { PlantWarning } from './checks.js';
 
 export const plantUptakeLegacy: MethodDescriptor<LegacyPlantInput, LegacyPlantResult> = {
@@ -22,6 +24,7 @@ export const plantUptakeLegacy: MethodDescriptor<LegacyPlantInput, LegacyPlantRe
     'The root factor constants are those the HHRAP appendix prints for the Briggs correlation; the transpiration stream concentration factor and the leaf-air partition coefficient are user inputs because their published regressions were not read.',
     'The leaf and stem form one well-mixed compartment with constant inputs over the growing period and zero initial concentration.',
     'Concentrations are fresh weight; the root factor is in L/kg of root fresh weight per water concentration.',
+    'Irrigation water enters only as the root-zone water or as an intercepted foliar mass; the irrigation season is not applied and soil build-up from irrigation is not modelled.',
   ],
   risc5Choice:
     'RISC5 offers Briggs-type root and transpiration factors with a one-compartment leaf model for vegetable uptake of organics.',
@@ -43,6 +46,7 @@ export const plantUptakeModern: MethodDescriptor<HhrapProduceInput, HhrapProduce
     'Particle deposition is not modelled; only root uptake and vapor-phase air-to-plant transfer.',
     'Concentrations are dry weight, as HHRAP states them; the root factor is converted from fresh weight with the 87 percent moisture content HHRAP uses.',
     'The empirical correction factor is 0.01 above log Kow 4 and 1.0 otherwise.',
+    'The fresh weight produce factor for the exposure pathway uses a user-entered moisture fraction; no moisture content is assumed.',
   ],
   validate: (input): Warning[] => hhrapProduce(input).warnings,
   run: hhrapProduce,

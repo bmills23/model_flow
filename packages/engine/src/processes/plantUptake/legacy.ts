@@ -13,6 +13,7 @@ import {
   type PlantWarning,
 } from './checks.js';
 import { leafSteadyState, leafTimeDependent, type LeafParameters } from './leaf.js';
+import { irrigationTerms, type PlantIrrigationUse } from './irrigation.js';
 import { poreWaterConcentration } from './partition.js';
 
 export interface LegacyPlantInput {
@@ -32,6 +33,12 @@ export interface LegacyPlantInput {
   growthPeriod_d?: number;
   /** Root-zone water concentration replacing the soil pore water (irrigation interface option). */
   rootZoneWater_kg_per_m3?: number;
+  /**
+   * Irrigation water as a plant source (the M9 interface fed from the M7 `IrrigationSource` or typed in):
+   * the root-zone water option replaces `rootZoneWater_kg_per_m3` and the soil pore water, and a foliar
+   * term adds the intercepted applied mass to the above-ground leaf.
+   */
+  irrigation?: PlantIrrigationUse;
   ionizable?: boolean;
   inorganic?: boolean;
   /** User bioconcentration factor, kg/kg soil to kg/kg plant (fresh weight); required for an inorganic. */
@@ -54,9 +61,12 @@ export function legacyPlantUptake(input: LegacyPlantInput): LegacyPlantResult {
   const warnings: PlantWarning[] = [];
   if (input.ionizable) warnings.push(ionizableWarning());
 
+  const irr = input.irrigation === undefined ? undefined : irrigationTerms(input.irrigation);
+  if (irr !== undefined) warnings.push(...irr.warnings);
+  const rootZone = irr?.rootZone_kg_per_m3 ?? input.rootZoneWater_kg_per_m3;
   const pw =
-    input.rootZoneWater_kg_per_m3 !== undefined
-      ? input.rootZoneWater_kg_per_m3
+    rootZone !== undefined
+      ? rootZone
       : poreWaterConcentration(
           s.concentration_kg_per_kg,
           s.bulkDensity_kg_per_m3,
@@ -88,7 +98,8 @@ export function legacyPlantUptake(input: LegacyPlantInput): LegacyPlantResult {
     return { poreWater_kg_per_m3: pw, concentration_kg_per_kg: rcf * 1e-3 * pw, warnings };
   }
 
-  const ss = leafSteadyState(input.leaf, pw, air);
+  const foliar = irr?.foliar_kg_per_d ?? 0;
+  const ss = leafSteadyState(input.leaf, pw, air, foliar);
   if (input.growthPeriod_d === undefined) {
     return { poreWater_kg_per_m3: pw, concentration_kg_per_kg: ss.concentration, warnings };
   }
@@ -102,7 +113,7 @@ export function legacyPlantUptake(input: LegacyPlantInput): LegacyPlantResult {
   }
   return {
     poreWater_kg_per_m3: pw,
-    concentration_kg_per_kg: leafTimeDependent(input.leaf, pw, air, input.growthPeriod_d)
+    concentration_kg_per_kg: leafTimeDependent(input.leaf, pw, air, input.growthPeriod_d, 0, foliar)
       .concentration,
     warnings,
   };

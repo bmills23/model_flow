@@ -1,4 +1,4 @@
-import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
+import { DIRECT_PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { Field, Group, Seg } from '../ui/controls';
 import { PATHWAY_LABELS } from './chartData';
 import { PRESET_LABELS, type PresetId, type ReceptorForm } from './form';
@@ -34,7 +34,7 @@ export function ReceptorPanel(props: {
           'Legacy: a 6-year child, 15 kg. Modern: the resident child stage alone.'}
       </p>
       <Group title="Pathways">
-        {PATHWAY_IDS.map((p: PathwayId) => (
+        {DIRECT_PATHWAY_IDS.map((p: PathwayId) => (
           <label className="check" key={p}>
             <input
               type="checkbox"

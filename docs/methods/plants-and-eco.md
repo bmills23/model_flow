@@ -4,7 +4,7 @@ Scope, equations, validity checks, coupling, data plan, fixture plan and slice p
 section 3 rows O, P and Q). Equations are written in our own words from the primary publications cited by
 reference key (full entries in `docs/ATTRIBUTIONS.md` once they move to `used`). The RISC5 manual was used
 only as a map of which pathways RISC5 offers; none of its text, figures or tables is reproduced. Status:
-scoping done 2026-10-18; slices D1, R1, E1, E3 and E4 are implemented (the slice plan table below carries
+scoping done 2026-10-18; slices D1, R1, E1, E2, E3 and E4 are implemented (the slice plan table below carries
 the status of every slice). The rulings are DEFAULT unless marked forced, recorded in
 `docs/DECISIONS.md` (2026-10-18, M9 block).
 
@@ -33,9 +33,9 @@ see "Eco-SSL data slice" below for what was and was not entered.
 | Item | In M9 | Deferred |
 |---|---|---|
 | Root, stem and leaf uptake of neutral organics, steady state and time-dependent | Yes (legacy and modern) | Ionizable organics (the cation and anion trap), metals uptake beyond a user BCF |
-| Produce ingestion pathway into M4 forward risk | Yes | Meat and milk (beef and dairy transfer factors) |
+| Produce ingestion pathway into M4 forward risk | Yes (slice E2: soil-derived plant factor, user-entered homegrown fraction) | Meat and milk (beef and dairy transfer factors); vapor and irrigation contributions to the produce concentration inside the pathway |
 | Produce pathway in M5 cleanup levels | Yes, closed form through the steady-state plant factor | Time-dependent plant uptake inside the Brent chain |
-| Irrigation water as a plant source | Yes, user-entered interface (below) | Coupling to the M7 irrigation model, soil build-up from irrigation (M7) |
+| Irrigation water as a plant source | Yes, interface consuming the M7 `IrrigationSource` or a typed input (below), as root-zone water and a foliar term in the plant engines | Soil build-up from irrigation (M7), the irrigation season, adding the irrigation-derived plant concentration to the M4 produce pathway |
 | Plant and soil invertebrate hazard quotients against Eco-SSLs | Yes | Site-specific toxicity testing |
 | Wildlife food web (mammal and bird guilds of the Eco-SSL guidance) | Yes | Aquatic food webs, fish ingestion (M8 deferred it too), population models |
 | Legacy benchmark screen (user-entered or `sample1996` benchmarks) | Yes, user-entered values with citation | Shipping the ORNL benchmark tables as data |
@@ -71,7 +71,8 @@ interface is active the user may instead set the root-zone water to the irrigati
   M dC_p/dt = TSCF Q C_pw + g A C_a - (g A / K_la) C_p - lambda M C_p, where K_la is the leaf-air partition
   coefficient formed from the leaf water and lipid contents, K_ow and K_aw. The steady state is
   C_p = (TSCF Q C_pw + g A C_a) / (g A / K_la + lambda M). The time-dependent form is the exact exponential
-  solution for constant inputs over a growing period, evaluated at harvest.
+  solution for constant inputs over a growing period, evaluated at harvest. The optional irrigation foliar
+  source F (kg/d, below) adds to the numerator of both forms.
 - Constants (slice E1, 2026-10-18): the Briggs root concentration factor is implemented with the constants
   the HHRAP appendix prints (log RCF = 0.77 log K_ow - 1.52 at log K_ow >= 2, log(RCF - 0.82) = 0.77 log
   K_ow - 1.52 below 2, fitted on log K_ow -0.57 to 4.6). The Briggs TSCF regression and the K_la
@@ -98,28 +99,51 @@ and is not implemented.
   dilution, solved as a small linear ODE system (exact matrix exponential for constant inputs, steady state
   by a linear solve). The engine already has the dense linear algebra this needs.
 
-### Produce ingestion pathway into M4
+### Produce ingestion pathway into M4 (slice E2)
 
 Intake from homegrown produce, per life stage s, for each produce class k (above-ground exposed,
 above-ground protected, root):
 
-    dose_s = sum_k( C_p,k (1 - L_k) IR_k,s FH_k ) EF_s ED_s / (BW_s AT)
+    dose_s = sum_k( Bp_k (1 - L_k) IR_k FH_k ) C_s EF_s ED_s / (BW_s AT)
 
-where IR is the intake rate of fresh produce (kg/d), L_k the preparation loss fraction and FH_k the
-fraction homegrown. Legacy and modern variants follow the M4 split: the legacy preset uses RAGS A
-averaging and the modern preset uses the `epa2011efh` homegrown intake rates with the ADAF handling of
-the M4 modern method. The pathway registers as `produce` beside the nine direct pathways, and its cancer
-risk and hazard quotient add into the M4 totals with the existing receptor additivity rules. M5 inverts it
-in closed form because the steady-state plant factor is linear in C_s.
+where C_s is the soil concentration (the EPC of the pathway), Bp_k the fresh-weight plant factor (kg
+produce per kg soil per unit soil concentration), IR the fresh-weight intake rate (kg/d, or per kg body
+weight, in which case the division by BW_s is dropped), L_k the preparation loss fraction (default 0) and
+FH_k the fraction homegrown (no default). The pathway registers as `produce` beside the nine direct
+pathways (`PATHWAY_IDS` has ten entries, `DIRECT_PATHWAY_IDS` the nine), reads the soil medium, and its
+cancer risk and hazard quotient add into the M4 totals with the existing receptor additivity rules.
+Because Bp is a constant, the pathway is linear in C_s, so M5 inverts it in closed form together with
+the other soil pathways with no new solver.
 
-### Irrigation input (interface until M7 lands)
+- Plant factors come from the plant uptake engines: `producePlantFactor` runs `legacyPlantUptake` or
+  `hhrapProduce` at a unit soil concentration. HHRAP returns dry weight, so the modern route needs a
+  user-entered moisture fraction of the fresh produce (no moisture content is assumed; DECISIONS 13
+  had left this conversion to E2). A chemical without a factor for a class that has an intake is not
+  quantified for the pathway (reported as a chemical gap), never zero.
+- The factor is soil-derived only. Vapor uptake and irrigation uptake are not soil-proportional, so they
+  are not part of Bp; the uptake engines report them directly. Adding them to the pathway would make it
+  affine in C_s and break the closed-form inversion, so it is deferred (DECISIONS 20).
+- Presets (`efhHomeProducedIntake`, `epa2011efh`): consumer-only mean home-produced intakes by age group
+  from chapter 13 (Tables 13-58 to 13-62), net of the Table 13-69 mean net preparation/cooking loss
+  (fruits 25.4 percent, vegetables 12.4 percent), with the homegrown fraction 1 because those intakes are
+  home-produced already. A class is omitted (and listed) for an age group whose food group has no
+  published mean (fewer than 20 observations). The preset is not attached to the modern resident or any
+  legacy preset: which age group stands for a life stage is the caller's choice. No legacy produce
+  preset ships (the RAGS Part A produce exhibit was not read).
 
-    IrrigationInput { concentration_mg_per_L: number; applicationRate_L_per_m2_per_d: number;
-                      source: 'user' | 'm7' }
+### Irrigation input (slice E2)
 
-M9 uses it two ways only: the root-zone water concentration option above, and a foliar term equal to the
-water interception fraction times the applied mass, retained on the leaf with the same lambda. Soil
-build-up from irrigation belongs to M7. Every run with `source: 'user'` raises `IRRIGATION_USER_ENTERED`.
+    PlantIrrigationInput { concentration_mg_per_L: number; applicationRate_L_per_m2_per_d: number;
+                           source: 'user' | 'm7'; season?: { startDay: number; endDay: number } }
+
+(Named `PlantIrrigationInput` because `IrrigationInput` is the M7 sprinkler input.)
+`irrigationInputFromSource(source, time_s)` evaluates the M7 `IrrigationSource` at a time and converts
+kg/m^3 to mg/L and m/s to L/m^2/d. `legacyPlantUptake` takes it as `irrigation` two ways only: the
+root-zone water option (`rootZone: true`, replacing the soil pore water) and a foliar term, the
+interception fraction times the applied mass over the planted area, entering the leaf balance as a source
+that is lost with the same terms as every other input. Soil build-up from irrigation belongs to M7. Every
+run with `source: 'user'` raises `IRRIGATION_USER_ENTERED`, and a source with a season raises
+`IRRIGATION_SEASON_NOT_APPLIED` (the application is taken to cover the whole growing period).
 
 ## Screening ecological risk
 
@@ -243,6 +267,7 @@ What the data slice found, so the engine slices do not rediscover it:
 | `PLANT_INORGANIC_NEEDS_BCF` | a metal or inorganic without a user-entered bioconcentration factor |
 | `PLANT_NOT_STEADY` | the growing period is shorter than three times 1/(g A / (K_la M) + lambda), so the steady state overstates harvest concentration |
 | `IRRIGATION_USER_ENTERED` | the irrigation input is user entered rather than from M7 |
+| `IRRIGATION_SEASON_NOT_APPLIED` | the M7 source carries an irrigation season, which the plant engines do not apply |
 | `ECO_NO_SSL` | no numeric Eco-SSL exists for the chemical and receptor group |
 | `ECO_SCREENING_ONLY` | always shown with Eco-SSL results: screening values, not cleanup levels |
 | `ECO_BENCHMARK_USER_ENTERED` | a legacy benchmark was user entered |
@@ -268,8 +293,8 @@ What the data slice found, so the engine slices do not rediscover it:
    against the linear solve, 1e-8; a worked example from the primary publication if it prints one, at the
    precision printed (expected 2 to 3 significant figures, so 1 percent).
 4. HHRAP fallback (if used): a hand calculation of the published equations, 1e-10.
-5. Produce pathway: an M4 receptor run with a fixed C_p against a hand-computed dose, 1e-10; the M5
-   closed-form produce level inverted back to target risk, 1e-9.
+5. Produce pathway: an M4 receptor run with a fixed plant factor against a hand-computed dose, 1e-10; the M5
+   closed-form produce level inverted back to target risk, 1e-9 (both in `packages/engine/test/produce-pathway.test.ts`).
 6. Eco-SSL wildlife: solve dose = TRV for C_s for at least cadmium and lead, mammal and bird guilds, and
    compare with the published Eco-SSLs. Published values are rounded to two significant figures, so the
    tolerance is 5 percent relative (a wider tolerance needs a DECISIONS entry). Plant and invertebrate HQs:
@@ -286,7 +311,7 @@ One worker per slice. Engine slices are TDD with the fixtures above.
 | D1 | Eco-SSL data: manifest, hand-entered values with page citations, pdftotext cross-check reader, generated `ecossl.json`, ATTRIBUTIONS data provenance (done 2026-10-18, branch t-m9) | none |
 | R1 | Reference verification: exact titles, venues and pages for the descriptor entries (Trapp and Matthies, Briggs, Trapp 2015, Sample, TPHCWG, MADEP); identify Trapp 2015 or rule the HHRAP fallback | none |
 | E1 | Plant uptake engine: pore water step, Briggs factors, one-compartment leaf model, modern model, warnings, registration of `plantUptake.trapp-matthies-1995` and `plantUptake.hhrap-2005` (done 2026-10-18, branch t-m9; the Trapp 2015 model was not verified, DECISIONS 11) | R1 |
-| E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type | E1 |
+| E2 | Produce pathway into M4 (`produce`), presets from `epa2011efh`, closed-form produce in M5, irrigation interface type (done 2026-10-18, branch wave-parity; DECISIONS 17 to 20) | E1 |
 | E3 | Ecological screening engine: `eco.benchmark-hq` and `eco.ecossl-2005`, food web dose, uptake models, warnings (done 2026-10-18, branch t-m9) | D1, R1 |
 | E4 | TPH fractions: fraction set mappings, forward risk by fraction, total level through M5, Csat check (done 2026-10-18, branch t-m9; DECISIONS 16) | R1 |
 | W1 | Web screen `#/plants-eco`: produce pathway inputs and results on the risk screen, eco HQ table, TPH composition editor; CDP check at 390x844 with zero overflow, light and dark | E2, E3, E4 |

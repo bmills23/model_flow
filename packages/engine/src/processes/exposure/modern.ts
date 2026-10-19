@@ -5,6 +5,7 @@ import {
   type DermalWaterParams,
 } from './dermal.js';
 import { timeWeightedBathingTime, type LifeStage, type ModernReceptor } from './lifeStages.js';
+import { produceContact, validateProduceFactors, type ProduceFactors } from './produce.js';
 import { DAY_S, PATHWAYS, type PathwayId, type ToxicityValues } from './units.js';
 
 /**
@@ -36,6 +37,8 @@ export interface ModernChemical extends ToxicityValues {
   inEpd?: boolean;
   /** An RSL special case (computed as an ordinary chemical, warned by the receptor evaluation). */
   special?: SpecialCase;
+  /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil), for the `produce` pathway. */
+  produceFactors?: ProduceFactors;
 }
 
 /**
@@ -76,6 +79,7 @@ function inRange(name: string, v: number | undefined, lo: number, hi: number): v
 
 /** Throws a RangeError for a fraction outside [0, 1] or a toxicity or permeability value out of range. */
 export function validateModernChemical(chem: ModernChemical): void {
+  validateProduceFactors(chem.produceFactors);
   inRange('absd', chem.absd, 0, 1);
   inRange('giabs', chem.giabs, 0, 1);
   inRange('rba', chem.rba, 0, 1);
@@ -204,6 +208,13 @@ export function modernStageContact(
         stage.swimEventsPerDay ?? 1,
       );
       break;
+    case 'produce': {
+      // the contact term is already per kg body weight; the common division below undoes it
+      const c = produceContact(stage.bw, stage.produce, chem.produceFactors);
+      m.push(...c.missing);
+      numerator = (c.perEpc ?? 0) * stage.bw;
+      break;
+    }
   }
   const ef = efFor(stage, pathway, m);
   if (m.length > 0) return { perEpc: null, missing: m, ef };

@@ -1,6 +1,6 @@
 import { usableMcl } from './mcl';
 import {
-  PATHWAY_IDS,
+  DIRECT_PATHWAY_IDS,
   backCalculateModern,
   resolveConcentrationTarget,
   ssgLeachingLevel,
@@ -92,10 +92,9 @@ function num(
 
 /** The risk-based tap water level (drinking plus bathing, receptor A, modern), kg/m^3, or null. */
 function tapWaterLevels(form: CleanupForm, db: ChemicalDb): Map<string, number | null> | string[] {
-  const pathways = Object.fromEntries(PATHWAY_IDS.map((p) => [p, TAP.includes(p)])) as Record<
-    PathwayId,
-    boolean
-  >;
+  const pathways = Object.fromEntries(
+    DIRECT_PATHWAY_IDS.map((p) => [p, TAP.includes(p)]),
+  ) as Record<PathwayId, boolean>;
   const base = buildCleanup(
     { ...form, allocation: 'individual', a: { ...form.a, pathways }, b: null, additive: false },
     db,

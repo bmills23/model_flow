@@ -10,6 +10,7 @@ export const PATHWAY_LABELS: Record<PathwayId, string> = {
   outdoorInhalation: 'Outdoor air inhalation',
   swimIngestion: 'Swimming ingestion',
   swimDermal: 'Swimming dermal contact',
+  produce: 'Homegrown produce',
 };
 
 /** Risk in scientific form with two figures, 3.2e-6. */

@@ -207,6 +207,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
   - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
+  - The homegrown produce pathway reads the soil concentration through a fresh-weight plant factor per produce class (soil-derived uptake only; vapor and irrigation contributions to the plant are not added), with a user-entered homegrown fraction and no default.
   - Dermal water uses the steady-state permeability with no lag time.
   - Soil bioavailability is 1 unless entered; route-to-route extrapolation is off unless switched on.
   - A concentration series is reduced to the largest 7-year average (noncancer, the duration when shorter) and the largest average over the exposure duration (cancer).
@@ -230,6 +231,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.
   - Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
+  - The homegrown produce pathway reads the soil concentration through a fresh-weight plant factor per produce class (soil-derived uptake only; vapor and irrigation contributions to the plant are not added), with a user-entered homegrown fraction and no default.
   - A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.
   - The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.
   - Inhalation uses the exposure concentration (no breathing rate or body weight).
@@ -709,6 +711,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - The root factor constants are those the HHRAP appendix prints for the Briggs correlation; the transpiration stream concentration factor and the leaf-air partition coefficient are user inputs because their published regressions were not read.
   - The leaf and stem form one well-mixed compartment with constant inputs over the growing period and zero initial concentration.
   - Concentrations are fresh weight; the root factor is in L/kg of root fresh weight per water concentration.
+  - Irrigation water enters only as the root-zone water or as an intercepted foliar mass; the irrigation season is not applied and soil build-up from irrigation is not modelled.
 - RISC5 choice: RISC5 offers Briggs-type root and transpiration factors with a one-compartment leaf model for vegetable uptake of organics.
 - Sources:
   - Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.
@@ -726,6 +729,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - Particle deposition is not modelled; only root uptake and vapor-phase air-to-plant transfer.
   - Concentrations are dry weight, as HHRAP states them; the root factor is converted from fresh weight with the 87 percent moisture content HHRAP uses.
   - The empirical correction factor is 0.01 above log Kow 4 and 1.0 otherwise.
+  - The fresh weight produce factor for the exposure pathway uses a user-entered moisture fraction; no moisture content is assumed.
 - Sources:
   - U.S. Environmental Protection Agency (2005). Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.
   - Briggs, G.G., Bromilow, R.H., Evans, A.A. (1982). Relationships between lipophilicity and root uptake and translocation of non-ionised chemicals by barley. Pesticide Science 13(5), 495-504. doi:10.1002/ps.2780130506.

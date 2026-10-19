@@ -16,6 +16,8 @@ export * from './legacy.js';
 export * from './receptorsLegacy.js';
 export * from './dermal.js';
 export * from './lifeStages.js';
+export * from './produce.js';
+export * from './produceEfh.js';
 export * from './modern.js';
 export * from './receptorsModern.js';
 export * from './scenario.js';
@@ -29,6 +31,7 @@ const COMMON_ASSUMPTIONS = [
   'The receptor is exposed for the whole averaging window chosen, with the exposure factors entered.',
   'Air and surface-water concentrations are user entered or fed from the vapor and surface-water screens; shower and outdoor particulate air are user entered or fed from the shower, sprinkler and particulate methods.',
   'A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.',
+  'The homegrown produce pathway reads the soil concentration through a fresh-weight plant factor per produce class (soil-derived uptake only; vapor and irrigation contributions to the plant are not added), with a user-entered homegrown fraction and no default.',
 ];
 
 function legacyReceptorInputs(count: number): UncertainInput<LegacyScenarioInput>[] {

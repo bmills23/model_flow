@@ -43,7 +43,8 @@ Not in M4, and where it goes:
 | Shower and sprinkler volatilization models (Foster and Chrostowski; Little); the RSL tap-water inhalation term with the Andelman factor | M7 | Pathway 5 takes a user-entered bathroom air concentration; nothing estimates it from the water concentration |
 | Indoor air from soil, soil gas or groundwater (vapour intrusion), outdoor air box and volatilization factors, particulate emission factors | M6 and M7 | Pathways 6 and 7 take user-entered air concentrations. Soil inhalation as the RSL tables compute it (soil times 1/VF plus 1/PEF) is not offered |
 | Surface-water mixing and sediment | M8 | Pathways 8 and 9 take a user-entered concentration |
-| Irrigation water pathways, homegrown vegetables | M7, M9 | Not offered |
+| Irrigation water pathways | M7 | See `docs/methods/shower-irrigation-particulates.md` |
+| Homegrown vegetables | M9 | Added as a tenth pathway, `produce` (soil medium, fresh-weight plant factor per class on the chemical, user-entered homegrown fraction), in slice M9-E2; see `docs/methods/plants-and-eco.md`. `DIRECT_PATHWAY_IDS` is the nine above |
 | Back-calculation of cleanup levels, individual versus cumulative | M5 | M4 exposes per-pathway linear coefficients (risk and HQ per unit EPC) so M5's direct-pathway case needs no solver |
 | Target-organ segregation of the hazard index | Later (no machine-readable target-organ source is in the data plan) | The total HI is reported with each HQ; a warning suggests segregation when the HI exceeds 1 |
 | Subchronic and acute noncancer evaluation | Later | Chronic reference values only, as RISC5 |
@@ -444,7 +445,7 @@ every reading below.
 | `epa2005cancer` | EPA copy (cover: EPA/630/P-03/001F, March 2005) | Cover and contents only |
 | `epa2012asrba` | EPA SEMS copy (OSWER 9200.1-113, December 2012) | Cover and recommendation |
 | `epa1992dea` | ORNL RAIS copy of the EPA report (cover: EPA/600/8-91/011B, January 1992, Interim Report) | Cover only |
-| `epa2011efh` | Federal Register notice of availability (76 FR, October 3, 2011) and EPA record (EPA/600/R-09/052F) | Not read; values used only as the RSL list cites them |
+| `epa2011efh` | Federal Register notice of availability (76 FR, October 3, 2011) and EPA record (EPA/600/R-09/052F) | Chapter 13 read (M9 produce preset, 2026-10-18); elsewhere not read, values used only as the RSL list cites them |
 | `epa2024rsl`, `epa2024rslug`, `epa2003toxhier` | See `docs/methods/chemical-database.md` | |
 | `arcadis2001`, `spence2001` | As in the vadose note; Table R-9 page 1 read in the RISC5 guide, RISC4 Tables 6-2 and 11-1 read | Fixture use only |
 

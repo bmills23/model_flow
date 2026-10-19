@@ -1,3 +1,4 @@
+import { produceFromBoundary, type ProduceBoundary, type ProduceIntakes } from './produce.js';
 import {
   DAYS_PER_YEAR,
   LIFETIME_YEARS,
@@ -67,6 +68,8 @@ export interface LifeStage {
   swimEventTime?: number;
   /** Swimming events per day; defaults to 1. */
   swimEventsPerDay?: number;
+  /** Homegrown produce intake per class (the `produce` pathway). */
+  produce?: ProduceIntakes;
 }
 
 export interface ModernReceptor {
@@ -108,6 +111,8 @@ export interface LifeStageBoundary {
   swimIngestionLPerHour?: number;
   swimSkinAreaCm2?: number;
   swimTimeHr?: number;
+  /** Homegrown produce intake per class, boundary units. */
+  produce?: ProduceBoundary;
   swimEventsPerDay?: number;
 }
 
@@ -220,6 +225,7 @@ export function lifeStage(b: LifeStageBoundary): LifeStage {
   );
   set('swimSkinArea', scaled(tag('swimSkinAreaCm2'), b.swimSkinAreaCm2, cm2ToM2));
   set('swimEventTime', scaled(tag('swimTimeHr'), b.swimTimeHr, hoursToSeconds));
+  if (b.produce !== undefined) set('produce', produceFromBoundary(`${b.id}: `, b.produce));
   set(
     'swimEventsPerDay',
     scaled(tag('swimEventsPerDay'), b.swimEventsPerDay, (x) => x),

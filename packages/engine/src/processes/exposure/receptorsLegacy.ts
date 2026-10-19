@@ -6,6 +6,7 @@ import {
   type LegacyEpc,
   type LegacyReceptor,
 } from './legacy.js';
+import { isProduceChemicalGap, produceFromBoundary, type ProduceBoundary } from './produce.js';
 import {
   DAYS_PER_YEAR,
   LIFETIME_YEARS,
@@ -44,6 +45,8 @@ export interface LegacyReceptorBoundary {
   inhalationM3PerHour?: number;
   swimIngestionMlPerHour?: number;
   swimSkinAreaCm2?: number;
+  /** Homegrown produce intake per class, boundary units. */
+  produce?: ProduceBoundary;
 }
 
 function finiteNonNegative(name: string, v: number | undefined): void {
@@ -123,6 +126,7 @@ export function legacyReceptor(b: LegacyReceptorBoundary): LegacyReceptor {
     rate('swimIngestionMlPerHour', b.swimIngestionMlPerHour, mlPerHourToM3PerS),
   );
   set('swimSkinArea', rate('swimSkinAreaCm2', b.swimSkinAreaCm2, cm2ToM2));
+  if (b.produce !== undefined) out.produce = produceFromBoundary('', b.produce);
   return out;
 }
 
@@ -297,8 +301,9 @@ export function evaluateLegacyReceptor(run: LegacyReceptorRun): LegacyReceptorRe
       }
 
       if (!cell.computable) {
-        const chemMissing = cell.missing.filter((m) => m === 'aaf' || m === 'kp');
-        const siteMissing = cell.missing.filter((m) => m !== 'aaf' && m !== 'kp');
+        const isChem = (m: string): boolean => m === 'aaf' || m === 'kp' || isProduceChemicalGap(m);
+        const chemMissing = cell.missing.filter(isChem);
+        const siteMissing = cell.missing.filter((m) => !isChem(m));
         if (chemMissing.length > 0) {
           warnings.push({
             code: 'exposure.not-quantified',

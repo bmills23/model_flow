@@ -1,5 +1,6 @@
 import type { Warning } from '../../registry/index.js';
 import type { DermalWaterParams } from './dermal.js';
+import { isProduceChemicalGap, type ProduceFactors } from './produce.js';
 import {
   isAgeSegmented,
   modernReceptorFromBoundary,
@@ -65,6 +66,8 @@ export interface ModernChemicalBoundary {
   organic?: boolean | undefined;
   inEpd?: boolean | undefined;
   special?: SpecialCase | undefined;
+  /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil). */
+  produceFactors?: ProduceFactors | undefined;
 }
 
 /** Converts a boundary chemical to SI, applying the arsenic RBA default and checking the ranges. */
@@ -80,6 +83,7 @@ export function modernChemical(b: ModernChemicalBoundary): ModernChemical {
   if (b.csat !== undefined) out.csat = mgPerKgToKgPerKg(b.csat);
   if (b.inEpd !== undefined) out.inEpd = b.inEpd;
   if (b.special !== undefined) out.special = b.special;
+  if (b.produceFactors !== undefined) out.produceFactors = { ...b.produceFactors };
   if (b.kp !== undefined && b.organic !== undefined) {
     out.dermalWater = dermalWaterParams(b, b.kp, b.organic);
   }
@@ -234,7 +238,8 @@ export interface ModernRunResult {
 
 const SOIL_CEILING = 1e-1; // 1e5 mg/kg, 10 percent of the soil by mass
 const RISK_LINEAR_LIMIT = 0.01;
-const CHEMICAL_VALUES = new Set(['absd', 'dermalWater']);
+const isChemicalValue = (m: string): boolean =>
+  m === 'absd' || m === 'dermalWater' || isProduceChemicalGap(m);
 
 function epcMax(e: ModernEpcInput): number {
   return typeof e === 'number'
@@ -303,8 +308,8 @@ export function evaluateModernReceptor(run: ModernReceptorRun): ModernReceptorRe
       }
 
       if (!cell.computable) {
-        const chemMissing = cell.missing.filter((m) => CHEMICAL_VALUES.has(m));
-        const siteMissing = cell.missing.filter((m) => !CHEMICAL_VALUES.has(m));
+        const chemMissing = cell.missing.filter((m) => isChemicalValue(m));
+        const siteMissing = cell.missing.filter((m) => !isChemicalValue(m));
         if (chemMissing.length > 0) {
           warnings.push({
             code: 'exposure.not-quantified',

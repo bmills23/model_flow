@@ -20,7 +20,7 @@ export const YEAR_S = DAYS_PER_YEAR * DAY_S;
 export const LIFETIME_YEARS = 70;
 
 /** The nine direct exposure pathways of M4. */
-export const PATHWAY_IDS = [
+export const DIRECT_PATHWAY_IDS = [
   'soilIngestion',
   'soilDermal',
   'waterIngestion',
@@ -31,7 +31,11 @@ export const PATHWAY_IDS = [
   'swimIngestion',
   'swimDermal',
 ] as const;
+
+/** Every M4 pathway: the nine direct ones and the M9 homegrown `produce` pathway (soil medium). */
+export const PATHWAY_IDS = [...DIRECT_PATHWAY_IDS, 'produce'] as const;
 export type PathwayId = (typeof PATHWAY_IDS)[number];
+export type DirectPathwayId = (typeof DIRECT_PATHWAY_IDS)[number];
 
 export type Medium =
   'soil' | 'groundwater' | 'bathroomAir' | 'indoorAir' | 'outdoorAir' | 'surfaceWater';
@@ -54,6 +58,8 @@ export const PATHWAYS: Record<PathwayId, PathwayInfo> = {
   outdoorInhalation: { medium: 'outdoorAir', route: 'inhalation', epcUnit: 'mg/m3' },
   swimIngestion: { medium: 'surfaceWater', route: 'oral', epcUnit: 'mg/L' },
   swimDermal: { medium: 'surfaceWater', route: 'dermal', epcUnit: 'mg/L' },
+  // the EPC is the soil concentration; the plant factor on the chemical turns it into produce
+  produce: { medium: 'soil', route: 'oral', epcUnit: 'mg/kg' },
 };
 
 /**

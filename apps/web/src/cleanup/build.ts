@@ -1,6 +1,6 @@
 import {
   PATHWAYS,
-  PATHWAY_IDS,
+  DIRECT_PATHWAY_IDS,
   legacyReceptor,
   modernReceptor,
   type DirectChemical,
@@ -128,8 +128,8 @@ export function buildCleanup(form: CleanupForm, db: ChemicalDb): CleanupBuildRes
     if (!ready || errors.list.length > 0) continue;
     const label = `${tag} (${PRESET_LABELS[rf.preset]})`;
     const usable = (p: PathwayId): boolean => !cumulative || mediaWithValue.has(PATHWAYS[p].medium);
-    const pathways = PATHWAY_IDS.filter((p) => rf.pathways[p] && usable(p));
-    for (const p of PATHWAY_IDS) {
+    const pathways = DIRECT_PATHWAY_IDS.filter((p) => rf.pathways[p] && usable(p));
+    for (const p of DIRECT_PATHWAY_IDS) {
       if (rf.pathways[p] && !usable(p)) {
         notes.push(
           `${label}: ${PATHWAY_LABELS[p]} skipped, no concentration entered for ${mediumLabel(PATHWAYS[p].medium).toLowerCase()}.`,

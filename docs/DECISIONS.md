@@ -1305,8 +1305,9 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
    equations (`epa2005hhrap`) under a new ruling, never silently.
 3. **Pore water from the M2 and M3 partitioning (DEFAULT).** C_pw = C_s rho_b / (theta_w + rho_b K_d), with
    the same chemical record, so a soil gives the same pore water in every milestone.
-4. **Irrigation as a plain interface (DEFAULT).** `IrrigationInput { concentration_mg_per_L,
-   applicationRate_L_per_m2_per_d, source }`, user entered until M7 lands; used only as an optional
+4. **Irrigation as a plain interface (DEFAULT).** `PlantIrrigationInput { concentration_mg_per_L,
+   applicationRate_L_per_m2_per_d, source }` (renamed from `IrrigationInput`, which is the M7 sprinkler
+   input), typed in or converted from the M7 `IrrigationSource` since slice E2; used only as an optional
    root-zone water concentration and a foliar interception term. Every user-entered run raises
    `IRRIGATION_USER_ENTERED`.
 5. **Produce pathway shape (DEFAULT).** Three produce classes (above-ground exposed, above-ground
@@ -1351,7 +1352,7 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
     prints them for the Briggs correlation (a secondary account of `briggs1982`); `briggs1982` and
     `trappmatthies1995` are marked `used` on that basis, with notes saying what was and was not read.
 13. **Dry weight HHRAP outputs (DEFAULT).** The modern method returns dry weight concentrations as HHRAP
-    states them; the fresh weight conversion for the produce pathway belongs to slice E2. The soil
+    states them; the fresh weight conversion for the produce pathway was done in slice E2 (ruling 18). The soil
     gas-phase vapor term takes a user or M6 vapor air concentration directly (no Fv split) and ignores
     particle deposition.
 
@@ -1377,6 +1378,38 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
     TPHCWG and MADEP carbon-range tables were not read, so none ships: the caller names each fraction and
     its RSL surrogate record id (ruling 9), and a fraction without one is reported as unmapped and excluded.
     The saturation check uses the pure-phase limit (mole fraction 1) per fraction.
+
+### M9 slice E2 rulings (2026-10-18)
+
+17. **The produce pathway is a tenth M4 pathway on the soil medium (DEFAULT).** `produce` is added to
+    `PATHWAY_IDS` (ten entries); `DIRECT_PATHWAY_IDS` keeps the nine, and the web risk and cleanup forms
+    still list only the direct nine until slice W1 builds the produce inputs. Its EPC is the soil
+    concentration and the chemical carries a fresh-weight plant factor per produce class
+    (`produceFactors`), so the pathway is linear in C_s and M5 inverts it in closed form with the other
+    soil pathways. Intake per class is a rate (kg/d) or a rate per kg body weight (g/kg-d); the preparation
+    loss defaults to 0 and the homegrown fraction has no default. A class with an intake and no factor is a
+    chemical gap (not quantified), a receptor with no produce intake is a site gap.
+18. **Plant factors come from the uptake engines at a unit soil concentration (DEFAULT).** The HHRAP route
+    converts dry to fresh weight with a user-entered moisture fraction in [0, 1); no moisture content is
+    assumed (the 87 percent HHRAP root value stays inside the root factor conversion only). The factor is
+    soil-derived: vapor and irrigation uptake are reported by the uptake engines but are not part of the
+    pathway.
+19. **EFH presets by age group, sourced from chapter 13 (DEFAULT).** Chapter 13 of `epa2011efh` was read on
+    2026-10-18 (PDF SHA-256 2d393f4459cb6fba518aa64ee8ccd92dc4bd6557f2ebf10706200df6dfc3decc, through
+    pdftotext). The preset is the consumer-only mean home-produced intake (Tables 13-58 to 13-62) net of the
+    Table 13-69 mean net preparation/cooking loss, homegrown fraction 1; exposed fruit and exposed
+    vegetables sum into above-ground exposed, protected fruits and vegetables into protected, root
+    vegetables are root. Withheld cells (fewer than 20 observations) omit the class and say so. It is not
+    attached to any receptor preset (age group to life stage is the caller's call), and no legacy preset
+    ships (the RAGS Part A produce exhibit was not read). The post-cooking loss column is not applied.
+    Consumer-only means describe consumers, so the preset overstates a population mean.
+20. **Irrigation-derived plant concentration stays out of the pathway (DEFAULT, open).** Irrigation water
+    as root-zone water replaces the pore water term and the foliar term is a constant source, so neither
+    is proportional to the soil concentration; adding them would make the pathway affine and break the
+    closed-form inversion. The plant engines accept the interface (`irrigation` on `legacyPlantUptake`,
+    `irrigationInputFromSource` for the M7 source) and report the concentration; folding it into M4 and M5
+    is deferred. The irrigation season is carried but not applied (`IRRIGATION_SEASON_NOT_APPLIED`).
+    Tolerances: hand-computed doses 1e-10, the M5 inversion 1e-9, as ruling 10; no fixture was widened.
 
 ## 2026-10-18: M11 projects, reports and polish scope (stage 1)
 

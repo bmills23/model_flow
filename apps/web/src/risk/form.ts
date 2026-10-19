@@ -1,4 +1,4 @@
-import { PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
+import { DIRECT_PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
 import type { DermalForm } from '@model-flow/data/rsl-types';
 import type { ChemicalRecord } from './chemicalDb';
 
@@ -77,7 +77,10 @@ export interface RiskForm {
 export function defaultReceptor(preset: PresetId = 'resident'): ReceptorForm {
   return {
     preset,
-    pathways: Object.fromEntries(PATHWAY_IDS.map((p) => [p, true])) as Record<PathwayId, boolean>,
+    pathways: Object.fromEntries(DIRECT_PATHWAY_IDS.map((p) => [p, true])) as Record<
+      PathwayId,
+      boolean
+    >,
     soilSkinArea: '',
     soilAdherence: '',
     waterIngestion: '',

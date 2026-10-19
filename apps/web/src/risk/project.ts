@@ -1,4 +1,4 @@
-import { PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
+import { DIRECT_PATHWAY_IDS, type Medium, type PathwayId } from '@model-flow/engine';
 import { z } from 'zod';
 import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, text, texts } from '../project/fields';
@@ -27,7 +27,7 @@ const optionalOf = <K extends string, S extends z.ZodType>(keys: readonly K[], s
 /** One receptor; every field optional, absent ones take the receptor defaults. */
 export const receptorSchema = partialObject({
   preset: z.enum(PRESETS),
-  pathways: optionalOf<PathwayId, z.ZodBoolean>(PATHWAY_IDS, flag),
+  pathways: optionalOf<PathwayId, z.ZodBoolean>(DIRECT_PATHWAY_IDS, flag),
   ...texts(
     'soilSkinArea',
     'soilAdherence',

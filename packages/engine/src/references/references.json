@@ -701,7 +701,7 @@
     "venue": "U.S. Environmental Protection Agency, National Center for Environmental Assessment",
     "identifier": "EPA/600/R-09/052F, September 2011",
     "url": "https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252",
-    "notes": "Bibliographic data verified through the Federal Register notice of availability (76 FR, October 3, 2011, FR Doc 2011-25412: final report released September 30, 2011) and the EPA record (2026-10-16). The handbook itself was not read; M4 uses only the values the RSL default-parameter list cites from it."
+    "notes": "Bibliographic data verified through the Federal Register notice of availability (76 FR, October 3, 2011, FR Doc 2011-25412: final report released September 30, 2011) and the EPA record (2026-10-16). Chapter 13 (Intake of Home-Produced Foods) was read on 2026-10-18 for the M9 produce preset (Tables 13-58 to 13-62 and 13-69). The rest of the handbook was not read; M4 uses otherwise only the values the RSL default-parameter list cites from it."
   },
   {
     "key": "waldenspence1997",

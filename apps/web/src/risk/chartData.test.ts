@@ -29,7 +29,8 @@ describe('formatting', () => {
 
   it('labels every pathway', () => {
     expect(PATHWAY_LABELS.waterDermal).toMatch(/dermal/i);
-    expect(Object.keys(PATHWAY_LABELS)).toHaveLength(9);
+    expect(Object.keys(PATHWAY_LABELS)).toHaveLength(10);
+    expect(PATHWAY_LABELS.produce).toMatch(/produce/i);
   });
 });
 
