@@ -11,7 +11,7 @@ export interface Step {
 
 export const STEPS: readonly Step[] = [
   { label: 'Chemicals', href: '#/chemicals', owns: ['#/chemicals'] },
-  { label: 'Site model', href: '#/transport', owns: [] },
+  { label: 'Site model', href: '#/site', owns: ['#/site'] },
   {
     label: 'Transport',
     href: '#/transport',

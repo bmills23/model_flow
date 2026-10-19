@@ -50,12 +50,15 @@ const ChemicalsPage = lazy(() =>
   import('./chemicals/ChemicalsPage').then((m) => ({ default: m.ChemicalsPage })),
 );
 
+const SitePage = lazy(() => import('./site/SitePage').then((m) => ({ default: m.SitePage })));
+
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
 
 const METHODS_HASH = '#/methods';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
+const SITE_HASH = '#/site';
 const CHEMICALS_HASH = '#/chemicals';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
@@ -91,6 +94,7 @@ export function App() {
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
+  const onSite = hash === SITE_HASH;
   const onChemicals = hash === CHEMICALS_HASH;
   const onRisk = hash === RISK_HASH;
   const onCleanup = hash === CLEANUP_HASH;
@@ -112,6 +116,7 @@ export function App() {
               onSaturated ||
               onRisk ||
               onChemicals ||
+              onSite ||
               onVapor ||
               onCleanup ||
               onSurfaceWater ||
@@ -174,6 +179,9 @@ export function App() {
           ))}
         </ol>
         <div className="nav-links">
+          <a className="nav-link" href={SITE_HASH} aria-current={onSite ? 'page' : undefined}>
+            Site model
+          </a>
           <a
             className="nav-link"
             href={CHEMICALS_HASH}
@@ -269,6 +277,10 @@ export function App() {
           <Suspense fallback={<p className="muted">Loading the plants and ecology screen...</p>}>
             <PlantsEcoPage />
           </Suspense>
+        ) : onSite ? (
+          <Suspense fallback={<p className="muted">Loading the site model screen...</p>}>
+            <SitePage />
+          </Suspense>
         ) : onChemicals ? (
           <Suspense fallback={<p className="muted">Loading the chemical database...</p>}>
             <ChemicalsPage />
@@ -315,6 +327,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={PLANTS_ECO_HASH}>
                 Open plants, ecology and TPH
+              </a>{' '}
+              <a className="button" href={SITE_HASH}>
+                Plan the site model
               </a>{' '}
               <a className="button" href={CHEMICALS_HASH}>
                 Browse the chemical database

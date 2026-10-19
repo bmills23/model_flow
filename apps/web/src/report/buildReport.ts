@@ -1,4 +1,5 @@
-import { screensOf, type Project, type Screens } from '../project';
+import { screensOf, siteOf, type Project, type Screens } from '../project';
+import { siteSummary } from '../site/model';
 import {
   dataEditionsFor,
   methodsRun,
@@ -101,6 +102,8 @@ export interface Report {
   savedAt: string;
   createdWith: string;
   nonAffiliation: string;
+  /** One line naming the advisory site model choices; null when they are the defaults. */
+  site: string | null;
   sections: ReportSection[];
   /** Names of the screens left at their defaults, which the report does not cover. */
   unused: string[];
@@ -136,6 +139,7 @@ export function buildReport(project: Project): Report {
     savedAt: project.savedAt,
     createdWith: project.createdWith,
     nonAffiliation: NON_AFFILIATION,
+    site: project.site === undefined ? null : siteSummary(siteOf(project)),
     sections,
     unused,
     statement,

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { emptyOverrides, setField } from '../overrides/model';
+import { defaultSite, type SiteState } from '../site/model';
 import { parseProject } from './index';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
@@ -33,6 +34,7 @@ import {
   getDroppedFeeds,
   getStaleFeeds,
   getOverrides,
+  getSite,
   hasUnsavedChanges,
   hydrate,
   currentProject,
@@ -41,6 +43,7 @@ import {
   newProject,
   setOverrides,
   setScreen,
+  setSite,
   startProjectStore,
 } from './store';
 
@@ -265,6 +268,52 @@ describe('project store', () => {
       reload();
       expect(getOverrides()).toEqual(ov());
       expect(getStaleFeeds()).toEqual(['well']);
+    });
+  });
+
+  describe('site model choices', () => {
+    const site = (): SiteState => ({
+      ...defaultSite(),
+      receptors: 'ecological',
+      basis: 'modeled',
+      media: ['soilGasToIndoorAir'],
+      vaporMethod: 'legacy',
+    });
+
+    it('survive a reload through the autosave', () => {
+      setSite(site());
+      flushAutosave();
+      expect(saved()).toMatchObject({ site: { basis: 'modeled', vaporMethod: 'legacy' } });
+      reload();
+      expect(getSite()).toEqual(site());
+    });
+
+    it('stay out of the file at the defaults, round trip through the file, and clear on a new project', () => {
+      expect(currentProject()).not.toHaveProperty('site');
+      setSite(site());
+      const r = parseProject(JSON.stringify(currentProject()));
+      expect(r.ok).toBe(true);
+      expect(r.ok && r.warnings).toEqual([]);
+      newProject();
+      expect(getSite()).toEqual(defaultSite());
+      if (r.ok) loadProject(r.project);
+      expect(getSite()).toEqual(site());
+      newProject();
+      expect(getSite()).toEqual(defaultSite());
+    });
+
+    it('count as an unsaved change', () => {
+      markSaved();
+      expect(hasUnsavedChanges()).toBe(false);
+      setSite(site());
+      expect(hasUnsavedChanges()).toBe(true);
+    });
+
+    it('load as the defaults from a file with no site key', () => {
+      const r = parseProject(JSON.stringify(currentProject()));
+      setSite(site());
+      if (r.ok) loadProject(r.project);
+      expect(getSite()).toEqual(defaultSite());
     });
   });
 
