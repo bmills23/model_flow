@@ -1251,3 +1251,95 @@ M10 slice W4 (probabilistic cleanup panel on the cleanup screen, 2026-10-18) imp
 - The run is on the main thread, not in the worker pool: a direct-pathway row costs microseconds (two forward runs by the linear shortcut). The W1 budget still applies: the first 5 rows are timed alone, the projection is mean row time times rows (one worker), confirm above 60 s and refuse above 10 minutes with `uncertainty.run-budget`. Cancel exists for the confirm dialog only.
 - The protected fraction is entered in percent (default 95) and must lie strictly between 0 and 100; 50 and 90 percent are always shown. Sampling is Latin hypercube with the optional rank correlation of the editor. Charts show the solved levels only; censored iterations are counted and the level is reported as not reachable when its quantile lands on one.
 - No registry entry, assumption or reference changed, so no docs regeneration was needed.
+## 2026-10-18: M9 plant uptake and ecological screening scope (stage 1)
+
+M9 started with a methods note first, on the parallel track Bryan approved. The note is
+`docs/methods/plants-and-eco.md` (scope, equations, validity checks, coupling, Eco-SSL data plan, fixture
+plan and slice plan). No engine, data or web code is written in this stage. M9 does not depend on M7,
+which is scoped in parallel. Eco-SSL sources were checked on the EPA site on 2026-10-18. Rulings, each
+DEFAULT (open for Bryan to overturn) unless marked forced by a source:
+
+1. **Scope (DEFAULT).** In M9: neutral-organic plant uptake (legacy `plantUptake.trapp-matthies-1995` with
+   the `briggs1982` root and transpiration factors; modern `plantUptake.trapp-2015`), a `produce` pathway
+   into M4 and closed-form into M5, plant and invertebrate hazard quotients against Eco-SSLs, the Eco-SSL
+   wildlife food web, a legacy user-entered benchmark screen, and TPH fraction forward risk and total-TPH
+   cleanup levels through M5. Deferred: ionizable organics, metals uptake beyond a user BCF, meat and milk,
+   time-dependent plants inside the M5 Brent chain, aquatic food webs and fish, shipping the ORNL benchmark
+   tables, probabilistic parameters (M10), and soil build-up from irrigation (M7).
+2. **Trapp 2015 must be identified before E1 (DEFAULT).** The modern reference is a descriptor only. Slice
+   R1 verifies it; if it cannot be verified, the modern method becomes the EPA 2005 HHRAP produce
+   equations (`epa2005hhrap`) under a new ruling, never silently.
+3. **Pore water from the M2 and M3 partitioning (DEFAULT).** C_pw = C_s rho_b / (theta_w + rho_b K_d), with
+   the same chemical record, so a soil gives the same pore water in every milestone.
+4. **Irrigation as a plain interface (DEFAULT).** `IrrigationInput { concentration_mg_per_L,
+   applicationRate_L_per_m2_per_d, source }`, user entered until M7 lands; used only as an optional
+   root-zone water concentration and a foliar interception term. Every user-entered run raises
+   `IRRIGATION_USER_ENTERED`.
+5. **Produce pathway shape (DEFAULT).** Three produce classes (above-ground exposed, above-ground
+   protected, root) with preparation loss and fraction homegrown; legacy and modern presets follow the M4
+   split, modern intake rates from `epa2011efh`; risk adds into the M4 totals with the existing additivity
+   rules.
+6. **Legacy eco screen ships no benchmark table (DEFAULT).** Benchmarks are user entered with a citation;
+   `sample1996` is the expected citation until its fields are verified.
+7. **No ecological cleanup level (forced by `epaecosslguidance`).** The guidance states Eco-SSLs are
+   screening values and inappropriate as cleanup standards; M9 reports hazard quotients only, and
+   `ECO_SCREENING_ONLY` is always shown.
+8. **Eco-SSL data slice by hand entry with a checksummed manifest (DEFAULT).** No machine-readable table
+   exists (checked 2026-10-18), so values are hand entered with document, table and page, cross-checked
+   against `pdftotext` extracts of the checksummed PDFs, and generated into
+   `packages/data/generated/ecossl-<date>/ecossl.json` with provenance and public-domain status. Decided in
+   slice D1 (2026-10-18): the PDFs (about 26 MB) are not committed; the manifest with SHA-256 and byte size is,
+   and a script fetches the PDFs and fails on a mismatch. Printed inconsistencies inside a document (seven
+   wildlife rows whose inputs do not reproduce their printed value, listed in the methods note) are
+   transcribed as printed and flagged, not corrected, and sit outside the 5 percent reproduction check of
+   ruling 10; no fixture of the wildlife back-calculation uses one.
+9. **TPH fractions map onto the RSL surrogates (DEFAULT).** TPHCWG and MADEP fraction sets map onto the
+   five RSL November 2024 TPH records; no new toxicity values are entered; an unmapped fraction is
+   reported. The total level is HI_t / sum_j( f_j / CL_j ), each fraction checked against its saturation
+   limit.
+10. **Fixture tolerances (DEFAULT).** Closed forms 1e-10 relative; ODE against linear solve 1e-8; published
+    worked examples at printed precision (1 percent); Eco-SSL wildlife back-calculation 5 percent because
+    the published values carry two significant figures. Wider tolerances need a new entry here.
+
+### M9 slice E1 rulings (2026-10-18)
+
+11. **Modern plant model is the HHRAP 2005 fallback (DEFAULT, ruling 2 applied).** Neither candidate for
+    Trapp 2015 (Environ. Sci. Pollut. Res. 11(1), 33-39, a 2004 review, or Environ. Sci. Technol. 49(1),
+    395-402) could be read: the first is behind a subscription wall and the second was not available. No
+    modern equation set was verified, so the modern method is the HHRAP produce equations
+    (`epa2005hhrap`, chapter 5 Equations 5-18, 5-20A, 5-20B and appendix A-2 Equations A-2-14 to A-2-20,
+    read from the EPA archive PDFs). It registers as `plantUptake.hhrap-2005`, not `plantUptake.trapp-2015`;
+    `trapp2015` stays a `planned` descriptor and is not cited.
+12. **Unreadable constants are user inputs, not typed from memory (DEFAULT).** The Briggs transpiration
+    stream concentration factor regression and the Trapp and Matthies leaf-air partition coefficient
+    could not be read from a primary source, so TSCF and K_la are required inputs of the legacy leaf model
+    (no default). The Briggs root concentration factor constants are entered as the HHRAP appendix
+    prints them for the Briggs correlation (a secondary account of `briggs1982`); `briggs1982` and
+    `trappmatthies1995` are marked `used` on that basis, with notes saying what was and was not read.
+13. **Dry weight HHRAP outputs (DEFAULT).** The modern method returns dry weight concentrations as HHRAP
+    states them; the fresh weight conversion for the produce pathway belongs to slice E2. The soil
+    gas-phase vapor term takes a user or M6 vapor air concentration directly (no Fv split) and ignores
+    particle deposition.
+
+### M9 slice E3 rulings (2026-10-18)
+
+14. **Ecological screening engine shape (DEFAULT).** `eco.benchmark-hq` (legacy, cites `sample1996`) and
+    `eco.ecossl-2005` (modern, cites `epaecossl` and `epaecosslguidance`) register under a new process id
+    `eco`. Both report hazard quotients only (ruling 7): the Eco-SSL screen returns `ECO_SCREENING_ONLY` on
+    every run and `ECO_NO_SSL` for a group with status NA, NC or procedure; the benchmark screen returns
+    `ECO_BENCHMARK_USER_ENTERED`. The wildlife dose is [sum(C_i P_i) + C_s P_s] IR AUF per kg body weight,
+    where the surrogate adapter uses a diet fraction of one for the prey term, as the data slice's
+    reproduction check does, so the printed derivation inputs reproduce.
+15. **No default receptor table (DEFAULT).** The guidance Attachment 4-1 receptor parameters were not read, so
+    the engine carries none; callers supply the food web (from `ecossl.json` derivation rows or by hand).
+    The three references above move to `used` because registered methods now cite them. `sample1996` is cited
+    for its role as the expected user benchmark source; its text was not read and no value from it ships.
+
+### M9 slice E4 rulings (2026-10-18)
+
+16. **TPH fractions are two registered methods over one kernel; no default fraction table (DEFAULT).**
+    The registry requires a legacy and a modern method per process, so `tph.tphcwg` (legacy, `tphcwg1997`)
+    and `tph.madep` (modern, `madep2002`) register under process `tph` with identical arithmetic. The
+    TPHCWG and MADEP carbon-range tables were not read, so none ships: the caller names each fraction and
+    its RSL surrogate record id (ruling 9), and a fraction without one is reported as unmapped and excluded.
+    The saturation check uses the pure-phase limit (mole fraction 1) per fraction.

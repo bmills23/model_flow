@@ -41,6 +41,9 @@ import {
   uncertaintySobolSaltelli,
   uncertaintySrsExposure,
 } from './processes/uncertainty/index.js';
+import { ecoBenchmarkHq, ecoEcossl2005 } from './processes/eco/index.js';
+import { tphMadep, tphTphcwg } from './processes/tph/index.js';
+import { plantUptakeLegacy, plantUptakeModern } from './processes/plantUptake/index.js';
 import { saturatedExponential, saturatedTwoRegion } from './processes/saturatedSource/index.js';
 
 export * from './numerics/special.js';
@@ -65,6 +68,9 @@ export * from './processes/outdoorAir/index.js';
 export type { SsgSoil as OutdoorAirSsgSoil } from './processes/outdoorAir/index.js';
 export type { SsgSoil } from './processes/cleanup/index.js';
 export * from './processes/surfaceWater/index.js';
+export * from './processes/plantUptake/index.js';
+export * from './processes/eco/index.js';
+export * from './processes/tph/index.js';
 export * from './processes/risk/index.js';
 export * from './processes/cleanup/index.js';
 export * from './processes/shower/index.js';
@@ -113,3 +119,9 @@ registry.register(uncertaintySrsExposure);
 registry.register(uncertaintyLhsIc);
 registry.register(uncertaintySobolSaltelli);
 registry.register(uncertaintyCleanupProbabilistic);
+registry.register(plantUptakeLegacy);
+registry.register(plantUptakeModern);
+registry.register(ecoBenchmarkHq);
+registry.register(ecoEcossl2005);
+registry.register(tphTphcwg);
+registry.register(tphMadep);

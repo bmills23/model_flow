@@ -1,0 +1,232 @@
+{
+  "edition": "2026-10-18",
+  "retrieved": "2026-10-18",
+  "listingPageDate": "2026-04-21",
+  "files": [
+    {
+      "file": "ecossl_guidance_chapters.pdf",
+      "role": "guidance",
+      "reference": "epaecosslguidance",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/ecossl_guidance_chapters.pdf",
+      "directive": "9285.7-55",
+      "date": "2003-11",
+      "revised": "2005-02",
+      "bytes": 3075395,
+      "sha256": "4eaf36dc6a1c9107b458e846e7368da38a1137d3ba8744bc1e48d54df28cd6ff"
+    },
+    {
+      "file": "eco-ssl_aluminum.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_aluminum.pdf",
+      "directive": "9285.7-60",
+      "date": "2003-11",
+      "bytes": 303165,
+      "sha256": "fc5176a83f7f58039afc8c1753ebbdf3a7c5023ffd2692c5b58baece94a1b8eb"
+    },
+    {
+      "file": "eco-ssl_antimony.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_antimony.pdf",
+      "directive": "9285.7-61",
+      "date": "2005-02",
+      "bytes": 456493,
+      "sha256": "659ab509f0ed32609fcf338132a8368a20930af084ab1c5a2438fceff85f1620"
+    },
+    {
+      "file": "eco-ssl_arsenic.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_arsenic.pdf",
+      "directive": "9285.7-62",
+      "date": "2005-03",
+      "bytes": 938873,
+      "sha256": "0c01cef9655ec61c41bef235731a30832fe7ace1314b48e9297771e7c048c856"
+    },
+    {
+      "file": "eco-ssl_barium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_barium.pdf",
+      "directive": "9285.7-63",
+      "date": "2005-02",
+      "bytes": 740124,
+      "sha256": "69020c6285ed6bcf3d98c4fbc52e959bbb997a8e70449c6baf1a05a2f8bbd05e"
+    },
+    {
+      "file": "eco-ssl_beryllium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_beryllium.pdf",
+      "directive": "9285.7-64",
+      "date": "2005-02",
+      "bytes": 558330,
+      "sha256": "e82c11a743781876dae075376d05d05341528eb591c9c8f261d2e5c20b3e4b06"
+    },
+    {
+      "file": "eco-ssl_cadmium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_cadmium.pdf",
+      "directive": "9285.7-65",
+      "date": "2005-03",
+      "bytes": 1495454,
+      "sha256": "623fe1eaf34ba37c2133b08a24eabce0a0035150f7f08da4bc33dcc15a1a2a49"
+    },
+    {
+      "file": "eco-ssl_chromium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_chromium.pdf",
+      "directive": "9285.7-66",
+      "date": "2005-03",
+      "revised": "2008-04",
+      "bytes": 575639,
+      "sha256": "f2252faeafe8589718f5a54d290bddc384a1402b96bd0f645f0e3c5d0ea09dcf"
+    },
+    {
+      "file": "eco-ssl_cobalt_.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_cobalt_.pdf",
+      "directive": "9285.7-67",
+      "date": "2005-03",
+      "bytes": 1043438,
+      "sha256": "201b77253a7e39b1f2f72496c8fcbb3f38f68cfa8849c53234abe7fa1d61dd5d"
+    },
+    {
+      "file": "eco-ssl_copper.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_copper.pdf",
+      "directive": "9285.7-68",
+      "date": "2006-07",
+      "revised": "2007-02",
+      "bytes": 1784495,
+      "sha256": "d87c918ce07c6a90025961cd12ebc2a345d79b54a672800b3173d31596cbe741"
+    },
+    {
+      "file": "eco-ssl_ddt.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_ddt.pdf",
+      "directive": "9285.7-57",
+      "date": "2007-04",
+      "bytes": 922450,
+      "sha256": "5b0e58b65acc243b8f18dd0affca8096ec991e649a78a95bab43b626b2a3ae67"
+    },
+    {
+      "file": "eco-ssl_dieldrin.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_dieldrin.pdf",
+      "directive": "9285.7-56",
+      "date": "2005-03",
+      "revised": "2007-04",
+      "bytes": 805084,
+      "sha256": "6601faadf93e367a25010e5774565ca066dd7719b237690278148e7e7b790c83"
+    },
+    {
+      "file": "eco-ssl_iron.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_iron.pdf",
+      "directive": "9285.7-69",
+      "date": "2003-11",
+      "bytes": 448911,
+      "sha256": "2dc30b2f61bd29542b5381e781268aeb365b797dec22f728907e87f374c3aac3"
+    },
+    {
+      "file": "eco-ssl_lead.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_lead.pdf",
+      "directive": "9285.7-70",
+      "date": "2005-03",
+      "bytes": 1500872,
+      "sha256": "434bb5cc1b2b47c6090e050549e7bf48c52e7acf4801eeeb10396f386feeeb78"
+    },
+    {
+      "file": "eco-ssl_manganese.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_manganese.pdf",
+      "directive": "9285.7-71",
+      "date": "2007-04",
+      "bytes": 1500644,
+      "sha256": "3a8afc8ced595d43235f92733a0c12aea60fc7984eea100c0da32afc0d36f3a5"
+    },
+    {
+      "file": "eco-ssl_nickel.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_nickel.pdf",
+      "directive": "9285.7-76",
+      "date": "2007-03",
+      "bytes": 848927,
+      "sha256": "69772e091c9ed0226f8aee94e3ae99bdd1a59ea21bb41121083982cf62322ce1"
+    },
+    {
+      "file": "eco-ssl_pah.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_pah.pdf",
+      "directive": "9285.7-78",
+      "date": "2007-06",
+      "bytes": 1799508,
+      "sha256": "f2f19135c3b24038b012949b64c1932849fc64ac4736768d578bd48ff4af89b3"
+    },
+    {
+      "file": "eco-ssl_pcp.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_pcp.pdf",
+      "directive": "9285.7-58",
+      "date": "2005-03",
+      "revised": "2007-04",
+      "bytes": 715698,
+      "sha256": "6ccb60e2daca67772c614a346d0e78ad0ef80213bda4b6f43936203d5df23c4c"
+    },
+    {
+      "file": "eco-ssl_selenium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_selenium.pdf",
+      "directive": "9285.7-72",
+      "date": "2007-07",
+      "bytes": 1085670,
+      "sha256": "0f905de5bf63730db440c7166a7b92af0ffdf1aa66cb579b7830d7d36ea39e35"
+    },
+    {
+      "file": "eco-ssl_silver.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_silver.pdf",
+      "directive": "9285.7-77",
+      "date": "2006-09",
+      "bytes": 635480,
+      "sha256": "14bfbb64c7c335fb7a28b24f282c11c0f82843cabe5205f0c3b50302fa755038"
+    },
+    {
+      "file": "eco-ssl_vanadium.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_vanadium.pdf",
+      "directive": "9285.7-75",
+      "date": "2005-04",
+      "bytes": 957798,
+      "sha256": "5e68de96c476a26cfd9f3f8fa2e98aa8f1335af861e349bfa2dbcab51d06216a"
+    },
+    {
+      "file": "eco-ssl_zinc.pdf",
+      "role": "chemical",
+      "reference": "epaecossl",
+      "url": "https://www.epa.gov/sites/default/files/2015-09/documents/eco-ssl_zinc.pdf",
+      "directive": "9285.7-73",
+      "date": "2007-06",
+      "bytes": 4972794,
+      "sha256": "1f348a67b9e24de58367f0de9182eabf06248924b1df6831c18fd2a72e66b9d7"
+    }
+  ]
+}
