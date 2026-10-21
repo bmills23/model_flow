@@ -52,9 +52,14 @@ const ChemicalsPage = lazy(() =>
 
 const SitePage = lazy(() => import('./site/SitePage').then((m) => ({ default: m.SitePage })));
 
+const ValidationPage = lazy(() =>
+  import('./validation/ValidationPage').then((m) => ({ default: m.ValidationPage })),
+);
+
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
 
 const METHODS_HASH = '#/methods';
+const VALIDATION_HASH = '#/validation';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
@@ -91,6 +96,7 @@ export function App() {
     }
   };
   const onMethods = hash === METHODS_HASH;
+  const onValidation = hash === VALIDATION_HASH;
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
@@ -121,7 +127,8 @@ export function App() {
               onCleanup ||
               onSurfaceWater ||
               onHousehold ||
-              onPlantsEco
+              onPlantsEco ||
+              onValidation
             ? 'shell shell-wide'
             : 'shell'
       }
@@ -235,6 +242,13 @@ export function App() {
           <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
             Methods &amp; References
           </a>
+          <a
+            className="nav-link"
+            href={VALIDATION_HASH}
+            aria-current={onValidation ? 'page' : undefined}
+          >
+            Validation
+          </a>
           <a className="nav-link" href={DOCS_HASH} aria-current={onDocs ? 'page' : undefined}>
             Documentation
           </a>
@@ -244,6 +258,10 @@ export function App() {
         {onDocs ? (
           <Suspense fallback={<p className="muted">Loading the documentation...</p>}>
             <DocsPage slug={slugFromHash(hash)} section={sectionFromHash(hash)} />
+          </Suspense>
+        ) : onValidation ? (
+          <Suspense fallback={<p className="muted">Loading the validation page...</p>}>
+            <ValidationPage />
           </Suspense>
         ) : onMethods ? (
           <Suspense fallback={<p className="muted">Loading the methods and references page...</p>}>
@@ -345,6 +363,9 @@ export function App() {
               </a>{' '}
               <a className="button" href={METHODS_HASH}>
                 Read how each calculation is sourced
+              </a>{' '}
+              <a className="button" href={VALIDATION_HASH}>
+                See what the tests reproduce
               </a>{' '}
               <a className="button" href={DOCS_HASH}>
                 Read the user guide

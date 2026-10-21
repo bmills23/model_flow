@@ -15,7 +15,8 @@ export function MethodsPage() {
       <h1 id="methods-heading">Methods &amp; References</h1>
       <p className="lede">
         Each process offers a legacy method (what RISC5 does) and a modern alternative. Every method
-        lists the sources it is implemented from.
+        lists the sources it is implemented from. The <a href="#/validation">validation page</a>{' '}
+        shows which published examples the engine reproduces and what is not verified.
       </p>
       {groups.map((group) => (
         <section key={group.process} className="process" aria-label={group.process}>

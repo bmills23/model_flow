@@ -99,6 +99,7 @@ const ROUTES = [
   '#/cleanup',
   '#/report',
   '#/methods',
+  '#/validation',
   '#/docs',
   '#/docs/user-guide',
   '#/docs/uncertainty',

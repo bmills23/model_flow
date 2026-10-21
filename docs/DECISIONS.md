@@ -2608,3 +2608,15 @@ Every ruling below is DEFAULT unless marked otherwise.
    fixture README gained a short section for `epa2004-sl-adv.json`, which had none.
 7. **No user-visible app change in M1.** `docs/USER_GUIDE.md` is not edited; slice M2 adds the page and its guide
    entry.
+
+## 2026-10-21: Wave M slice M2, validation page
+
+1. **Route and content (DEFAULT).** `#/validation`, built from `@model-flow/data/generated/validation/validation.json`. It
+   opens with a plain statement of what the evidence shows and does not show (no RISC5 licence, so nothing is checked
+   against RISC5 outputs), then a table of every manifest example (source, method, what is compared, cases, tolerance,
+   status) using the existing `doc-table` card pattern on narrow screens, then the unverified lists. The table shows all
+   statuses, not only reproduced, so named exceptions, deferred rows and smoke tests are visible beside the reproductions.
+2. **Links (DEFAULT).** A nav link after Methods and References, a home page button, a sentence on the methods page and a
+   line under the report's "Methods statement" heading. A Help link points at a new user guide section.
+3. **No new saved keys (DEFAULT).** The page reads static data only, so nothing is saved and `FINGERPRINT_SKIP` is unchanged.
+4. **Mobile check (DEFAULT).** `#/validation` added to the route list in `scripts/mobile-check.mjs`; not run in this slice.

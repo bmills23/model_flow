@@ -17,6 +17,7 @@ export const HELP_TARGETS = {
   risk: 'Exposure and risk (`#/risk`)',
   cleanup: 'Cleanup levels (`#/cleanup`)',
   report: 'Report (`#/report`)',
+  validation: 'Validation (`#/validation`)',
 } as const;
 
 export type HelpTarget = keyof typeof HELP_TARGETS;
