@@ -2361,3 +2361,22 @@ water source levels, and none of the three panels reach the report. Every ruling
    report's modeled-source block at 390 light, 390 dark and 1280, which no check has rendered so far.
 
 Per-slice rulings follow in their own blocks.
+
+## 2026-10-21: Wave K slice K4, modeled-source block in the mobile check
+
+Every ruling below is DEFAULT.
+
+1. **A new "modeled" visit in `scripts/mobile-check.mjs`.** The check opens `#/transport` and presses "Use for
+   cleanup levels", moves to `#/cleanup` by hash change (the kept feed and result are session memory, so no step
+   reloads), adds benzene (the seed already sets a dissolved cleanup source), samples the seepage velocity as
+   uniform 5 to 40, runs "Run probabilistic cleanup" at the default 200 iterations, waits for the results table,
+   moves to `#/report` by hash and ticks "Include uncertainty results". It runs at 390 light, 390 dark and 1280
+   with the existing overflow and axe checks.
+2. **Pass condition.** The visit fails unless the report's "Modeled source uncertainty results" section shows the
+   current result (text with "iterations ran" and "Which inputs matter"), never "No run yet" or "out of date".
+   The line printed for it carries the flags as `modeledBlock={...}`.
+3. **No generic button pass on this visit.** The shared button presser would also click run buttons on the
+   cleanup screen, so the visit is driven only by its own steps (`noPress`); the cleanup screen prints one
+   diagnostic line ("mid: ...") if the run button never enables.
+4. **No component change was needed.** The block rendered with no overflowing element and no axe violation in all
+   three views, so no component or test changed.

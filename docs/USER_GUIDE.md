@@ -242,6 +242,10 @@ fewer than 10 draws lie below the chosen protection level, the results carry the
 are saved in the project. The report does not compute a modeled source; with **Include uncertainty results**
 ticked it prints the result of the last run made here (see the report section below).
 
+The project's mobile layout check (`corepack pnpm mobile:check`) runs this panel in a browser with a sampled
+seepage velocity and the default 200 iterations, then opens the report with **Include uncertainty results**
+ticked, so the printed modeled-source block is checked for overflow and accessibility on a phone and a desktop.
+
 ### Uncertainty analysis
 
 The risk and cleanup screens each have an uncertainty section. Give an input a distribution to sample it;

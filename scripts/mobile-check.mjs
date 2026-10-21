@@ -134,6 +134,51 @@ const FED_ROUTES = [
       document.querySelectorAll('main details.override-panel').forEach(d=>{d.open=true});
       await u.sleep(500)})()`,
   },
+  // "modeled" route: the report's modeled-source uncertainty block, which only shows a result after an
+  // in-browser modeled cleanup run. The transport screen sends its aquifer to the cleanup screen, the
+  // cleanup screen (a dissolved source, the seed) runs "Probabilistic cleanup level, modeled source" at
+  // its default 200 iterations, and the hash then changes to the report with "Include uncertainty
+  // results" ticked. The kept result is session memory, so no step reloads the page.
+  {
+    route: '#/report',
+    via: '#/transport',
+    mid: '#/cleanup',
+    tag: 'modeled',
+    noPress: true,
+    viaSetup: `(async()=>{const u=window.__ui;
+      for(let i=0;i<80;i++){
+        const b=[...document.querySelectorAll('main button')].find(x=>/^use for cleanup levels/i.test(x.textContent.trim()));
+        if(b&&!b.disabled){b.click();break}
+        await u.sleep(250)}
+      await u.sleep(500)})()`,
+    midSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);
+      const find=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim()));
+      const findRow=()=>[...document.querySelectorAll('main fieldset.dist-row')].find(f=>/seepage velocity/i.test(f.getAttribute('aria-label')||''));
+      for(let i=0;i<240&&!findRow();i++)await u.sleep(250);
+      const row=findRow();
+      const ctl=(re)=>{const l=[...row.querySelectorAll('label')].find(x=>re.test(x.textContent.trim()));return l&&(l.control||l.querySelector('input,select'))};
+      const sel=row&&ctl(/distribution/i);
+      if(sel){Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(sel,'uniform');sel.dispatchEvent(new Event('change',{bubbles:true}));await u.sleep(300);
+        const lo=ctl(/minimum/i),hi=ctl(/maximum/i);
+        const set=(el,v)=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}))};
+        if(lo)set(lo,'5');if(hi)set(hi,'40');await u.sleep(300)}
+      let run=null;
+      for(let i=0;i<200&&!run;i++){const b=find(/^run probabilistic cleanup/i);if(b&&!b.disabled)run=b;else await u.sleep(250)}
+      if(!run)return 'run button never enabled: '+[...document.querySelectorAll('main button')].map(b=>b.textContent.trim()+(b.disabled?'(off)':'')).filter(t=>/run|use/i.test(t)).join(' | ')+' panel='+!!document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"]')+' panel='+document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"]').textContent.replace(/Sample the inputs.*?never sampled because it is the level being solved./,'').slice(0,700);
+      run.click();
+      for(let i=0;i<240;i++){
+        const done=!!document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"] [role=table],[aria-label="Probabilistic cleanup level, modeled source"] table')
+          &&!document.querySelector('[aria-label="Run progress"]');
+        if(done)break;
+        await u.sleep(250)}
+      await u.sleep(500);return 'ran'})()`,
+    routeSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
+      u.tick(/include uncertainty results/i);
+      for(let i=0;i<120;i++){
+        if(document.querySelector('[aria-label="Modeled source uncertainty results"]'))break;
+        await u.sleep(250)}
+      await u.sleep(1000)})()`,
+  },
 ];
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
 const ONLY = opt('routes');
@@ -257,7 +302,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{
@@ -288,7 +333,7 @@ for (const view of VIEWS) {
   const visits = [...ROUTES.map((route) => ({ route, via: null })), ...FED_ROUTES].filter(
     (v) => !ONLY || ONLY.split(',').some((o) => v.route === o || v.route.startsWith(`${o}/`)),
   );
-  for (const { route, via, viaSetup, routeSetup, tag } of visits) {
+  for (const { route, via, mid, viaSetup, midSetup, routeSetup, tag, noPress } of visits) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
@@ -299,7 +344,15 @@ for (const view of VIEWS) {
       await evaluate(UI);
       await evaluateAsync(viaSetup);
     }
-    await evaluate(PRESS);
+    if (!noPress) await evaluate(PRESS);
+    if (mid) {
+      // an intermediate screen, reached by hash change so the held feed and session results survive
+      await evaluate(`location.hash=${JSON.stringify(mid)}`);
+      await sleep(1500);
+      await evaluate(UI);
+      const note = await evaluateAsync(midSetup);
+      if (note) console.log(`    mid: ${note}`);
+    }
     if (via) {
       await evaluate(`location.hash=${JSON.stringify(route)}`);
       await sleep(1500);
@@ -307,7 +360,7 @@ for (const view of VIEWS) {
         await evaluate(UI);
         await evaluateAsync(routeSetup);
       }
-      await evaluate(PRESS);
+      if (!noPress) await evaluate(PRESS);
     }
     await sleep(800);
     const m = JSON.parse(await evaluate(MEASURE));
@@ -327,7 +380,7 @@ for (const view of VIEWS) {
       axeBad = hard.length > 0;
       axeReport.push({
         view: view.name,
-        route: via ? `${route} (fed)` : tag ? `${route} (${tag})` : route,
+        route: tag ? `${route} (${tag})` : via ? `${route} (fed)` : route,
         violations: v,
       });
       axeNote = ` axe=${hard.length}+${v.length - hard.length}`;
@@ -338,11 +391,12 @@ for (const view of VIEWS) {
       m.n > 0 ||
       m.sw > m.cw ||
       axeBad ||
-      (via && !(m.fedPanel && m.fedProduce)) ||
+      (via && !tag && !(m.fedPanel && m.fedProduce)) ||
+      (tag === 'modeled' && !m.modeledBlock.current) ||
       (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${via ? ` (fed from ${via})` : tag ? ` (${tag})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${via ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
