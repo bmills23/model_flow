@@ -2452,8 +2452,8 @@ Every ruling below is DEFAULT.
 5. **Division and chemical (DEFAULT).** `cleanup/surfaceWaterLevels.ts` divides the direct surface water level by the
    coefficient through the engine's `sourceLevelsOverCoefficient`, whose medium union gained `surfaceWater` (no other
    change); cancer and noncancer levels scale the same way, so the governing endpoint is unchanged. The feed carries
-   no chemical id (the surface water screen has none), so the coefficient is applied to each chemical of the cleanup
-   run and the panel says to use the run for the chemical it was run for. Its Koc, decay and solubility are the run's
+   no chemical id (the surface water screen has none), so the coefficient is applied only when the cleanup run holds
+   exactly one chemical; with two or more every row is not quantified with a reason (corrective pass, item 2). Its Koc, decay and solubility are the run's
    own. Both receptor methods are shown against the one surface water method that was sent.
 6. **Save and screen behaviour (DEFAULT).** Like the household panel: a panel with the same markup, classes and
    data-label table on narrow screens, shown when a feed exists and the cleanup run has a surface water medium, held
@@ -2491,8 +2491,8 @@ Every ruling below is DEFAULT.
    run's method id in their own columns. The surface water table adds the surface water level the source level
    reproduces.
 3. **Not quantified keeps its row.** A path with no level is written with empty level cells and the reason in a
-   "not quantified because" column, never zero and never dropped. The household panel has no such rows, so its
-   reason column is empty.
+   "not quantified because" column, never zero and never dropped. A household row whose coefficient is zero is written
+   the same way, with the engine's zero-coefficient warning as its reason (corrective pass, item 3).
 4. **Same place in the app.** The tables are added to the cleanup screen's Download CSV controls and to the cleanup
    section of the report (`report/results.ts`), after the cleanup levels and pathways. The report computes them
    from the project's held feeds, so a project saved and reopened prints the same rows. The report note that the
@@ -2504,3 +2504,44 @@ Every ruling below is DEFAULT.
 7. **Roadmap.** `docs/ROADMAP.md` line 1, item (3), is corrected in place: the vapor, shower and surface water gap
    it named is closed for linear paths. This follows the task's numbered step 3, which conflicts with the generic
    rule not to edit the roadmap; the numbered step was followed.
+
+## 2026-10-21: Wave K corrective pass
+
+An independent review of wave K produced four fixes (branches wave-k-fix-a, -b, -c, merged in that order) and two
+rulings. Items 1 to 4 are fix A, 5 and 6 are fix B, 7 and 8 are fix C. Earlier K1 ruling 2, K2 ruling 5 and K3
+ruling 3 were corrected in place.
+
+1. **Multi-chemical cleanup runs threw.** The household, vapor and surface water panels passed every chemical of the
+   medium to the engine, which throws on a chemical with no coefficient (RangeError with benzene and toluene).
+   `cleanup/chemicalLevel.ts` (`sourceLevelOfChemical`) now narrows the medium to the chemical the screen was run for
+   before the engine call. Test: `multiChemicalLevels.test.ts`.
+2. **Surface water coefficient applied to every chemical.** The surface water screen has no chemical id, so the
+   coefficient is applied only when the run holds exactly one chemical; otherwise rows are not quantified, with a
+   reason.
+3. **Zero household coefficient lost its reason in the CSV.** `HouseholdLevelRow` gained a reason field taken from the
+   engine warning, and the CSV writes it.
+4. **Stale surface water series sent after an engine error.** Both send buttons are disabled while an engine error
+   shows, and nothing is sent. Test: `SurfaceWaterScreen.engineError.test.tsx`.
+5. **A sent coefficient outlived its inputs.** Vapor and surface water screens drop the sent coefficient when an input
+   it depends on (for vapor also the source or method) changes; the air or series stays on the feed, so cleanup, CSV
+   and report say to send again.
+6. **Vapor Send ignored an invalid form.** Send is disabled with a reason while the form is invalid.
+7. **K1 ruling 2 overstated reachable methods.** `jury-bam` and `attenuation-factor-2015` are linear but never reach
+   the feed from the web (the screen maps legacy and modern to the Johnson and Ettinger and box/SSG methods). Ruling
+   corrected in place; guard test in `vapor/coefficients.test.ts`.
+8. **Mobile check printed `mid: ran` on every visit.** `midSetup` returns null on success, so the diagnostic prints only
+   when the run button never enables.
+
+Rulings, all DEFAULT:
+
+- **Chemical scoping.** Household and vapor coefficients are chemical-scoped by chemical id, so other chemicals in a
+  run have no rows. The engine's `sourceLevelsOverCoefficient` is unchanged and still throws on a missing
+  coefficient; the web narrows instead.
+- **Surface water chemical.** A chemical picker on the surface water screen is a possible future change.
+- **Household CSV reason** is the engine's `cleanup.zero-coefficient` warning text.
+- **Send disabled on engine error** rather than sending the last good series.
+- **Live staleness is not extended.** The `stale` list in `project/store.ts` is set only on open and restore, so the
+  household, groundwater, vadose, saturated, produce and tph feeds still show no stale indication after an in-session
+  edit. Fix B scoped itself to the two wave K feeds; extending live staleness to every feed is a separate decision.
+- **Drop the coefficient, keep the series**, rather than flagging the whole feed stale; no schema or
+  `FINGERPRINT_SKIP` change.
