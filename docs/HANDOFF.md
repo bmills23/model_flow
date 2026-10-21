@@ -23,7 +23,12 @@ skipping a done one.
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
   it shows the current result.
-- Local branches: only `main` remains. Deleted on 2026-10-21 after the wave K push, all merged into main (tip
+- Local branches: `main`, plus `wave-speed` (tip `6c69d30`, worktree `.claude/worktrees/wave-speed`, not merged:
+  mobile check and gate cadence work started outside the waves; left alone). Deleted on 2026-10-21 after the waves
+  L and M push, all merged into main: `wave-lm` (the pushed head), `wave-l-l1` `9bcff74`, `wave-l-l2` `cb73519`,
+  `wave-m-m1` `132ff58`, `wave-m-m2` `869502d`, `wave-d-parity` `659bcfb`, `wave-lm-fix-a` `e478373`,
+  `wave-lm-fix-b` `1983521`, and seven `worktree-wf_*` branches at `8b579ec`; their worktrees were removed.
+  Deleted on 2026-10-21 after the wave K push, all merged into main (tip
   shas): `wave-k` (the pushed head), `wave-k-k1` `6916905`, `wave-k-k2` `a96228d`, `wave-k-k4` `8fa6301`,
   `wave-k-fix-a` `8afe2ed`, `wave-k-fix-b` `a2f5a39`, `wave-k-fix-c` `e2ee518`, and `worktree-wf_c6eba2bb-249-1` `500eda0`, `worktree-wf_c6eba2bb-249-2` `500eda0`, `worktree-wf_c6eba2bb-249-3` `500eda0`, `worktree-wf_7be583f0-419-1` `500eda0`, `worktree-wf_7be583f0-419-2` `500eda0`, `worktree-wf_7be583f0-419-3` `500eda0`; their
   worktrees were removed. Deleted on 2026-10-21 after the wave J push, all merged into main (tip
@@ -42,8 +47,8 @@ skipping a done one.
 - Test time on wave J (local, load average about 4): engine suite 21 s, web suite 40 s (before wave J: engine
   41 s and web 128 s on a loaded machine, 34 s and 53 s on the wave I run). Remaining floors: single 15 to 18
   s engine tests and jsdom creation in the web suite.
-- CI cost: about 5 billed minutes per push to main, re-measured 2026-10-21 after the wave K push (runs
-  39650125519 and 39650125529: gate 2 min 52 s, Pages build 24 s plus deploy 9 s; recorded in CLAUDE.md). Docs-only
+- CI cost: about 6 billed minutes per push to main, re-measured 2026-10-21 after the waves L and M push (runs
+  39680530613 and 39680530951: gate 3 min 2 s, Pages build 17 s plus deploy 9 s; recorded in CLAUDE.md). Docs-only
   pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
@@ -385,7 +390,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix).
 - Test time: wave J cut the local suites to engine 21 s and web 40 s (see State of the tree). What remains needs
   engine numerics changes (for example caching the x and y profiles across z in `at123dGrid`) and is not done.
-- CI cost per push to main is about 5 billed minutes (re-measured 2026-10-21 after wave K, see State of the
+- CI cost per push to main is about 6 billed minutes (re-measured 2026-10-21 after waves L and M, see State of the
   tree); push once per logical unit, and the heavy mobile check is local only.
 - `scripts/mobile-check.mjs` is committed and run by hand (`corepack pnpm mobile:check`); it is not in the
   gate. Re-run it before any push that changes a screen.
