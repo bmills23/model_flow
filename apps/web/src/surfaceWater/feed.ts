@@ -1,4 +1,5 @@
 import { createFeed } from '../vapor/feedStore';
+import type { SurfaceWaterCoefficient } from './coefficient';
 export type SurfaceWaterFeedMethod = 'well-mixed' | 'mass-discharge';
 
 /**
@@ -13,6 +14,11 @@ export interface SurfaceWaterFeed {
   label: string;
   times: number[];
   values: number[];
+  /**
+   * Peak surface water per unit of the groundwater source that drove the run, for the cleanup screen's
+   * source levels. Absent on a feed saved before it existed (the cleanup panel then says so).
+   */
+  coefficient?: SurfaceWaterCoefficient;
 }
 
 const store = createFeed<SurfaceWaterFeed>();

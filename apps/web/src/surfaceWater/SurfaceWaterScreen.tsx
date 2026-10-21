@@ -6,6 +6,7 @@ import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
 import { Field, Group, Seg } from '../ui/controls';
 import { CriteriaPanel } from './CriteriaPanel';
 import { SedimentChart, SurfaceWaterChart } from './charts';
+import { surfaceWaterCoefficient } from './coefficient';
 import {
   getSurfaceWaterFeed,
   setSurfaceWaterFeed,
@@ -129,6 +130,9 @@ export function SurfaceWaterScreen() {
       label: `${legacy ? 'Legacy well-mixed' : 'Modern mass-discharge'} surface water, ${(result.times[last]! / (365.25 * DAY)).toFixed(1)} years`,
       times: [...result.times],
       values: [...values],
+      ...(request && !computing && outcome?.ok && outcome.result === result
+        ? { coefficient: surfaceWaterCoefficient(request, result, method) }
+        : {}),
     });
   };
   const foc = Number(form.foc);

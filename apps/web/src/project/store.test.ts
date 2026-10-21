@@ -22,7 +22,11 @@ import {
   setVadoseVaporFeed,
   setVaporRiskFeed,
 } from '../vapor/feeds';
-import { clearSurfaceWaterFeed } from '../surfaceWater/feed';
+import {
+  clearSurfaceWaterFeed,
+  getSurfaceWaterFeed,
+  setSurfaceWaterFeed,
+} from '../surfaceWater/feed';
 import { clearHouseholdFeed, getHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import {
   clearProduceFeed,
@@ -201,6 +205,34 @@ describe('project store', () => {
     expect(getScreen('uncertainty').risk.iterations).toBe('300');
     expect(getHouseholdFeed()?.coefficients.bathroomAir).toBe(0.5);
     expect(getProduceFeed()?.method).toBe('plantUptake.hhrap-2005');
+    expect(getStaleFeeds()).toEqual([]);
+  });
+
+  it('restores a surface water feed with its coefficient, and one saved without it, neither stale', () => {
+    const base = {
+      method: 'mass-discharge' as const,
+      origin: 'surfaceWater.mass-discharge',
+      label: 'Modern mass-discharge surface water',
+      times: [1, 2],
+      values: [1e-6, 2e-6],
+    };
+    const coefficient = {
+      value: 0.04,
+      reason: null,
+      method: 'surfaceWater.mass-discharge',
+      sourceMedium: 'groundwater' as const,
+      sourceUnit: 'mg/L' as const,
+      source: 0.005,
+    };
+    setSurfaceWaterFeed({ ...base, coefficient });
+    flushAutosave();
+    reload();
+    expect(getSurfaceWaterFeed()?.coefficient).toEqual(coefficient);
+    expect(getStaleFeeds()).toEqual([]);
+    setSurfaceWaterFeed(base);
+    flushAutosave();
+    reload();
+    expect(getSurfaceWaterFeed()?.coefficient).toBeUndefined();
     expect(getStaleFeeds()).toEqual([]);
   });
 

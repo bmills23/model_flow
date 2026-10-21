@@ -1,16 +1,7 @@
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { CleanupOutcome } from './compute';
+import { fmtSource as fmt } from './format';
 import { householdSourceLevels } from './householdLevels';
-
-const fmt = (si: number | null, fromSi: number): string => {
-  if (si === null) return 'not quantified';
-  const x = si * fromSi;
-  if (x !== 0 && (Math.abs(x) < 1e-3 || Math.abs(x) >= 1e6)) {
-    const [m, e] = x.toExponential(2).split('e');
-    return `${Number(m)}e${Number(e)}`;
-  }
-  return String(Number(x.toPrecision(3)));
-};
 
 /**
  * The tap water, irrigation water and soil levels that give each air level above, for the chemical the

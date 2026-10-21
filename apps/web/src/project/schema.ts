@@ -67,6 +67,17 @@ export const feedShapes = {
         label: text,
         times: numbers,
         values: numbers,
+        coefficient: z
+          .object({
+            value: z.number().nullable(),
+            reason: text.nullable(),
+            method: text,
+            sourceMedium: z.literal('groundwater'),
+            sourceUnit: z.literal('mg/L'),
+            source: z.number().optional(),
+            solubility: z.number().optional(),
+          })
+          .optional(),
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),

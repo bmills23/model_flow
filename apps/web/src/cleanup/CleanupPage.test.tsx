@@ -4,6 +4,7 @@ import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
 import { forgetMemory } from '../project/store';
+import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 
 async function loaded() {
   render(<CleanupPage />);
@@ -22,6 +23,7 @@ async function withBenzene() {
 
 afterEach(() => {
   clearHouseholdFeed();
+  clearSurfaceWaterFeed();
   clearProduceFeed();
   clearTphFeed();
   forgetMemory();
@@ -89,6 +91,33 @@ describe('CleanupPage', () => {
     await withBenzene();
     await screen.findByRole('region', { name: /cleanup levels, modern/i });
     expect(screen.queryByRole('region', { name: /household source levels/i })).toBeNull();
+  }, 30000);
+
+  it('shows the groundwater source levels behind the surface water levels for the surface water run', async () => {
+    setSurfaceWaterFeed({
+      method: 'mass-discharge',
+      origin: 'surfaceWater.mass-discharge',
+      label: 'Modern mass-discharge surface water, 10.0 years',
+      times: [1],
+      values: [1e-6],
+      coefficient: {
+        value: 0.04,
+        reason: null,
+        method: 'surfaceWater.mass-discharge',
+        sourceMedium: 'groundwater',
+        sourceUnit: 'mg/L',
+      },
+    });
+    await withBenzene();
+    const region = await screen.findByRole('region', { name: /surface water source levels/i });
+    expect(within(region).getAllByText(/groundwater source level/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText('surfaceWater.mass-discharge').length).toBeGreaterThan(0);
+  }, 30000);
+
+  it('shows no surface water panel without a surface water run', async () => {
+    await withBenzene();
+    await screen.findByRole('region', { name: /cleanup levels, modern/i });
+    expect(screen.queryByRole('region', { name: /surface water source levels/i })).toBeNull();
   }, 30000);
 
   it('recomputes when the target risk changes', async () => {
