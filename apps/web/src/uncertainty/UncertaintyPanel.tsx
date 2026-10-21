@@ -61,6 +61,8 @@ export interface UncertaintyPanelProps<I> {
   persistKey?: 'risk' | 'cleanup';
   /** Datasets the output reads, whose editions go in the CSV file names. */
   csvEditions?: CsvTable['editions'];
+  /** Feeds from other screens the base inputs were taken from; a stale one marks the CSV downloads. */
+  feeds?: CsvTable['feeds'];
 }
 
 type RunResult = ExposureRun & { base: unknown };
@@ -361,7 +363,7 @@ export function UncertaintyPanel<I>(props: UncertaintyPanelProps<I>) {
                 sobol: view.sobol ? sobolRows(view.sobol, labels) : null,
               },
               props.csvEditions,
-            )}
+            ).map((t) => ({ ...t, ...(props.feeds ? { feeds: props.feeds } : {}) }))}
           />
           {view.sobol && (
             <p className="muted">

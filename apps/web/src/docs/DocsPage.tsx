@@ -131,7 +131,13 @@ function DocView({ entry, section }: { entry: DocEntry; section: string | null }
 
 const GROUPS: DocEntry['group'][] = ['Guide', 'Methods notes', 'Sources'];
 
-export function DocsPage({ slug, section = null }: { slug: string | null; section?: string | null }) {
+export function DocsPage({
+  slug,
+  section = null,
+}: {
+  slug: string | null;
+  section?: string | null;
+}) {
   const entry = slug === null ? undefined : findDoc(slug);
   if (slug !== null && entry === undefined) {
     return (

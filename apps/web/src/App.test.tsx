@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from './App';
-import { forgetMemory, getScreen, setScreen } from './project/store';
+import { currentProject, forgetMemory, getScreen, loadProject, setScreen } from './project/store';
 import { clearWellFeed, setWellFeed } from './transport/wellFeed';
 
 describe('App shell', () => {
@@ -226,6 +226,17 @@ describe('stale values banner', () => {
     expect(screen.queryByText(note)).toBeNull();
     act(() => setWellFeed(well));
     editK('97');
+    expect(screen.getByText(note)).toBeTruthy();
+  });
+
+  it('a dismissal made in one project does not hide the note of the next project opened', () => {
+    render(<App />);
+    act(() => setWellFeed(well));
+    editK('99');
+    const staleProject = currentProject();
+    fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    expect(screen.queryByText(note)).toBeNull();
+    act(() => loadProject(staleProject));
     expect(screen.getByText(note)).toBeTruthy();
   });
 });

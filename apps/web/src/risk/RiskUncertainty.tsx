@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { LegacyScenarioInput } from '@model-flow/engine';
+import type { StaleFeedKey } from '../project/store';
 import { UncertaintyPanel } from '../uncertainty/UncertaintyPanel';
 import {
   EXPOSURE_DISPLAYS,
@@ -9,7 +10,11 @@ import {
 } from './uncertaintySetup';
 
 /** The uncertainty panel on the exposure screen: it samples the legacy method's receptor factors. */
-export function RiskUncertainty(props: { base: LegacyScenarioInput }) {
+export function RiskUncertainty(props: {
+  base: LegacyScenarioInput;
+  /** Feeds from other screens the base inputs were taken from. */
+  feeds?: readonly StaleFeedKey[];
+}) {
   const { base } = props;
   const model = useMemo(() => exposureUncertainty(base), [base]);
   const outputs = useMemo(() => exposureOutputs(base), [base]);
@@ -23,6 +28,7 @@ export function RiskUncertainty(props: { base: LegacyScenarioInput }) {
         displays={EXPOSURE_DISPLAYS}
         persistKey="risk"
         csvEditions={['rsl']}
+        {...(props.feeds ? { feeds: props.feeds } : {})}
       />
       <p className="muted">
         The analysis samples the legacy method&apos;s receptor factors (body weight, exposure

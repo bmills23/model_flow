@@ -13,10 +13,13 @@ const methodFiles = import.meta.glob('../../../../docs/methods/*.md', {
   query: '?raw',
   import: 'default',
 }) as Record<string, () => Promise<string>>;
-const topFiles = import.meta.glob(['../../../../docs/USER_GUIDE.md', '../../../../docs/ATTRIBUTIONS.md'], {
-  query: '?raw',
-  import: 'default',
-}) as Record<string, () => Promise<string>>;
+const topFiles = import.meta.glob(
+  ['../../../../docs/USER_GUIDE.md', '../../../../docs/ATTRIBUTIONS.md'],
+  {
+    query: '?raw',
+    import: 'default',
+  },
+) as Record<string, () => Promise<string>>;
 
 const METHOD_NOTES: Record<string, { title: string; summary: string }> = {
   'groundwater-transport': {
@@ -84,7 +87,8 @@ function build(): DocEntry[] {
     entries.push({
       slug: 'user-guide',
       title: 'User guide',
-      summary: 'Every screen, saving and sharing a project, the report, and the legacy and modern switch.',
+      summary:
+        'Every screen, saving and sharing a project, the report, and the legacy and modern switch.',
       group: 'Guide',
       load: guide,
     });
@@ -146,7 +150,8 @@ export function resolveLink(href: string): { kind: 'external' | 'doc' | 'none'; 
   if (/^https?:\/\//i.test(href)) return { kind: 'external', href };
   const m = /(?:^|\/)([^/#]+)\.md(?:#.*)?$/.exec(href);
   if (m) {
-    const slug = m[1] === 'USER_GUIDE' ? 'user-guide' : m[1] === 'ATTRIBUTIONS' ? 'attributions' : m[1]!;
+    const slug =
+      m[1] === 'USER_GUIDE' ? 'user-guide' : m[1] === 'ATTRIBUTIONS' ? 'attributions' : m[1]!;
     if (findDoc(slug)) return { kind: 'doc', href: docHash(slug) };
   }
   return { kind: 'none', href };

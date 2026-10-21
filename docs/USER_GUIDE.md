@@ -50,7 +50,10 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   from what was sent, a note at the top of the page names the value and the screen that sends it, and says
   it was built from inputs that have since changed. This holds while you work, for every value passed
   between screens (including the groundwater run offered to the cleanup screen, the well method you chose
-  and the vapor source series), and in a project you open. The value stays as it was sent and is never
+  and the vapor source series). In a project you open, the mark follows edits to the form that sent each
+  value; the extras above (the well method, the vapor source series, the groundwater run for cleanup) are not
+  saved in the file, so they are taken as they are when the project opens and only changes after that mark
+  the value. The value stays as it was sent and is never
   refreshed silently. The note goes away when you send the value again or edit the inputs back to what
   was sent; Dismiss hides it for the values it lists, and it comes back for a value that goes out of date
   later.
@@ -58,6 +61,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   again from: the chemical cards on the exposure and risk and cleanup screens, the cleanup source level
   panels (household, vapor, surface water and TPH), the groundwater run behind a modeled cleanup level, and
   the screens that read a series from another screen (transport, vapor, household, surface water). The
+  uncertainty analyses on the exposure and cleanup screens carry the same label and the same CSV marking
+  when the values they sample were passed from another screen. The
   values stay visible. The report puts the same label under the heading of each section that reads such a
   value and again in that section's notes. A CSV download that holds such values gains a last column,
   `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a

@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import type { UncertainInput } from '@model-flow/engine';
 import { UncertaintyPanel, type PanelModel } from './UncertaintyPanel';
 import { handleRows } from './protocol';
+import { act } from '@testing-library/react';
+import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
+import { forgetMemory, getScreen, setScreen } from '../project/store';
 import type { WorkerLike } from './pool';
 
 type I = { bw: number; ef: number };
@@ -154,5 +157,32 @@ describe('UncertaintyPanel', () => {
     fireEvent.click(screen.getByRole('button', { name: /run uncertainty/i }));
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toMatch(/run-budget/);
+  });
+
+  it('marks its CSV when a feed the setup reads is stale', async () => {
+    const well = { method: 'modern' as const, label: 'w', times: [0, 10], values: [0, 1e-6] };
+    act(() => setWellFeed(well));
+    const t = getScreen('transport');
+    act(() => setScreen('transport', { ...t, form: { ...t.form, K: '99' } }));
+    render(
+      <UncertaintyPanel
+        model={model}
+        modelId="test.model"
+        base={base}
+        outputs={outputs}
+        makeWorker={factory()}
+        workers={1}
+        feeds={['well']}
+      />,
+    );
+    sampleBodyWeight();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '100' } });
+    fireEvent.click(screen.getByRole('button', { name: /run uncertainty/i }));
+    await screen.findByRole('table', { name: /summary of the output/i });
+    expect(screen.getAllByRole('note').some((n) => /out of date/i.test(n.textContent ?? ''))).toBe(
+      true,
+    );
+    act(() => clearWellFeed());
+    forgetMemory();
   });
 });

@@ -7,7 +7,10 @@ import { HELP_TARGETS, helpHref } from './help';
 import { parseMarkdown, sectionId } from './markdown';
 
 // apps/web/src/docs -> the repository's docs folder
-const guide = readFileSync(join(__dirname, '..', '..', '..', '..', 'docs', 'USER_GUIDE.md'), 'utf8');
+const guide = readFileSync(
+  join(__dirname, '..', '..', '..', '..', 'docs', 'USER_GUIDE.md'),
+  'utf8',
+);
 const guideIds = new Set(
   parseMarkdown(guide).flatMap((b) => (b.type === 'heading' ? [sectionId(b.text)] : [])),
 );
@@ -63,14 +66,19 @@ describe('help link on every screen', () => {
     expect(link.getAttribute('href')).toBe(helpHref('chemicals'));
     // jsdom does not follow anchors, so the browser's navigation is applied to the hash directly
     window.location.hash = helpHref('chemicals');
-    const heading = await waitFor(() => {
-      const el = document.getElementById(sectionId(HELP_TARGETS.chemicals));
-      expect(el).not.toBeNull();
-      return el!;
-    }, { timeout: 5000 });
+    const heading = await waitFor(
+      () => {
+        const el = document.getElementById(sectionId(HELP_TARGETS.chemicals));
+        expect(el).not.toBeNull();
+        return el!;
+      },
+      { timeout: 5000 },
+    );
     expect(document.activeElement).toBe(heading);
     expect(heading.textContent).toMatch(/Chemical database/);
     window.location.hash = '#/chemicals';
-    expect(await screen.findByRole('heading', { level: 1, name: 'Chemical database' })).toBeTruthy();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Chemical database' }),
+    ).toBeTruthy();
   }, 40000);
 });

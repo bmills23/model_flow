@@ -79,7 +79,9 @@ describe('committed documents', () => {
       expect(blocks.length, d.slug).toBeGreaterThan(0);
       for (const b of blocks) {
         if (b.type !== 'paragraph') continue;
-        expect(b.text, `${d.slug}: ${b.text.slice(0, 60)}`).not.toMatch(/^(\||```|#{1,6}\s|[-*]\s|\d+\.\s)/);
+        expect(b.text, `${d.slug}: ${b.text.slice(0, 60)}`).not.toMatch(
+          /^(\||```|#{1,6}\s|[-*]\s|\d+\.\s)/,
+        );
       }
     }
   });

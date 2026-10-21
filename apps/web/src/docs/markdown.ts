@@ -167,7 +167,11 @@ function parseBlocks(lines: string[]): Block[] {
       continue;
     }
     const parts: string[] = [];
-    while (i < lines.length && lines[i]!.trim() !== '' && (parts.length === 0 || !startsBlock(lines, i))) {
+    while (
+      i < lines.length &&
+      lines[i]!.trim() !== '' &&
+      (parts.length === 0 || !startsBlock(lines, i))
+    ) {
       parts.push(lines[i]!.trim());
       i++;
     }

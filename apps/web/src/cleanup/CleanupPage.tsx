@@ -592,7 +592,7 @@ export function CleanupPage() {
             </div>
           )}
           {!modeledOn && shown && shown.outcome.legacy.ok && (
-            <CleanupUncertainty input={shown.built.legacy} names={names} />
+            <CleanupUncertainty input={shown.built.legacy} names={names} feeds={directFeeds} />
           )}
           {modeledOn && modeledReply && modeled.answered && modeledBuilt?.ok && (
             <ModeledSourceUncertainty
@@ -600,6 +600,7 @@ export function CleanupPage() {
               outcome={modeledReply}
               name={modeled.answered.chemical.name}
               pending={modeled.computing}
+              feeds={modeledFeeds}
             />
           )}
           <SsgResults form={buildForm} db={db} />
