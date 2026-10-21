@@ -20,8 +20,9 @@
     "docs:check": "pnpm docs:generate && git diff --quiet -- docs/ATTRIBUTIONS.md docs/THIRD_PARTY_LICENSES.md docs/VALIDATION.md packages/data/generated/validation/validation.json",
     "data:generate": "pnpm --filter @model-flow/data build:rsl && pnpm --filter @model-flow/data build:vapor && pnpm --filter @model-flow/data build:nrwqc && pnpm --filter @model-flow/data build:sediment && pnpm --filter @model-flow/data build:ecossl",
     "data:check": "pnpm data:generate && git diff --quiet -- packages/data/generated",
+    "check:markers": "pnpm --filter @model-flow/data check:markers",
     "mobile:check": "node scripts/mobile-check.mjs",
-    "gate": "pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:check && pnpm data:check && pnpm build"
+    "gate": "pnpm check:markers && pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:check && pnpm data:check && pnpm build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

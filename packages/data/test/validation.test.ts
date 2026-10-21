@@ -1,10 +1,21 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { references, registry } from '@model-flow/engine';
 import { describe, expect, it } from 'vitest';
 import {
   buildValidationManifest,
+  markersIn,
+  type ExampleSpec,
   renderValidationJson,
   renderValidationMarkdown,
   type ValidationManifest,
@@ -170,5 +181,122 @@ describe('validation documents', () => {
     expect(readFileSync(committedJson, 'utf8')).toBe(json);
     const date = /^Generated (\d{4}-\d{2}-\d{2}) /m.exec(readFileSync(committedMd, 'utf8'))![1]!;
     expect(readFileSync(committedMd, 'utf8')).toBe(renderValidationMarkdown(manifest, date));
+  });
+});
+
+describe('tolerance evidence is exact, not a substring', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'validation-'));
+  const write = (rel: string, text: string): void => {
+    mkdirSync(dirname(join(dir, rel)), { recursive: true });
+    writeFileSync(join(dir, rel), text);
+  };
+  write('packages/engine/test/fixtures/d/README.md', 'NEEDLE\n');
+  write('packages/engine/test/fixtures/d/f.json', '{"tolerance":5e-7,"cases":[1,2]}\n');
+  const spec = (over: Partial<ExampleSpec>): ExampleSpec => ({
+    id: 'x',
+    title: 'X',
+    files: ['d/f.json'],
+    referenceKey: null,
+    sourceText: 's',
+    methodIds: ['m.a'],
+    compares: 'c',
+    count: (j) => (j[0].cases as unknown[]).length,
+    casesUnit: 'u',
+    tolerance: 't',
+    status: 'reproduced',
+    testFile: 'x.test.ts',
+    evidence: [{ text: '5.1e-7', count: 2 }],
+    readmeNeedle: 'NEEDLE',
+    ...over,
+  });
+  const build = (s: ExampleSpec, testSource: string) => {
+    write('packages/engine/test/x.test.ts', testSource);
+    return buildValidationManifest({
+      root: dir,
+      references: [],
+      methodIds: ['m.a'],
+      methods: [],
+      catalog: { examples: [s], derived: () => [], defaults: [], notChecked: [] },
+    });
+  };
+
+  it('accepts the counted literal', () => {
+    expect(build(spec({}), 'f(5.1e-7);\ng(5.1e-7);\n').examples).toHaveLength(1);
+  });
+
+  it('rejects one of two shared tolerances loosened while the other keeps the literal', () => {
+    expect(() => build(spec({}), 'f(5.1e-6);\ng(5.1e-7);\n')).toThrow(/appears 1 times/);
+  });
+
+  it('rejects one of several repeated assertions loosened', () => {
+    const six = Array.from({ length: 6 }, () => 'lt(0.005)').join('\n');
+    const s = spec({ evidence: [{ text: 'lt(0.005)', count: 6 }] });
+    expect(build(s, six).examples).toHaveLength(1);
+    expect(() => build(s, six.replace('lt(0.005)', 'lt(0.05)'))).toThrow(/appears 5 times/);
+  });
+
+  it('rejects a fixture tolerance that no longer matches the stated value', () => {
+    const s = spec({ evidence: [], pins: [{ path: 'tolerance', value: 5e-7 }] });
+    expect(build(s, '').examples).toHaveLength(1);
+    write('packages/engine/test/fixtures/d/f.json', '{"tolerance":5e-6,"cases":[1,2]}\n');
+    expect(() => build(s, '')).toThrow(/fixture value tolerance/);
+  });
+
+  it('requires the reproduction marker when there is no fixture file', () => {
+    const s = spec({ files: [], evidence: [], count: () => 2 });
+    delete s.readmeNeedle;
+    expect(() => build(s, 'nothing')).toThrow(/no "published-reproduction: x" line/);
+    expect(build(s, '// published-reproduction: x\n').examples[0]!.files).toEqual([]);
+    expect(() => build(s, '// published-reproduction: x-other\n')).toThrow(/no "published/);
+  });
+});
+
+describe('published reproductions outside the fixture directories', () => {
+  const testDir = resolve(root, 'packages/engine/test');
+  const marked = readdirSync(testDir)
+    .filter((f) => f.endsWith('.test.ts'))
+    .flatMap((f) => markersIn(readFileSync(resolve(testDir, f), 'utf8')).map((id) => ({ f, id })));
+
+  it('lists every marked test reproduction, in the test file that carries the marker', () => {
+    expect(marked.length).toBeGreaterThan(0);
+    for (const { f, id } of marked) {
+      const e = manifest.examples.find((x) => x.id === id);
+      expect(e, `${f} marks ${id}`).toBeDefined();
+      expect(e?.testFile, id).toBe(f);
+    }
+  });
+
+  it('has a marker for every example that has no fixture file', () => {
+    const ids = new Set(marked.map((m) => m.id));
+    for (const e of manifest.examples.filter((x) => x.files.length === 0)) {
+      expect(ids.has(e.id), e.id).toBe(true);
+    }
+  });
+
+  it('lists the wildlife Eco-SSL, SSG PEF, NRWQC zinc, Table R-7 theta and Henry reproductions', () => {
+    const byId = new Map(manifest.examples.map((e) => [e.id, e]));
+    expect(byId.get('eco-wildlife-ecossl')?.cases).toBe(12);
+    for (const id of [
+      'eco-wildlife-guild',
+      'ssg1996-default-pef',
+      'ssg2002-default-pef',
+      'nrwqc-zinc-hardness',
+      'r7-theta',
+      'epa2004-henry-temperature',
+    ]) {
+      expect(byId.get(id)?.status, id).toBe('reproduced');
+    }
+  });
+
+  it('gives the Table R-3 to R-5 entry six printed results', () => {
+    expect(manifest.examples.find((e) => e.id === 'risc-r3-r5')?.cases).toBe(6);
+  });
+
+  it('ties each derived Table R-9 row to the test that handles it', () => {
+    const byId = new Map(manifest.examples.map((e) => [e.id, e]));
+    expect(byId.get('r9-exception-inhalation-in-shower')?.testFile).toBe('household-e4.test.ts');
+    expect(byId.get('r9-deferred-ingestion-of-root-vegetables-m9')?.testFile).toBe(
+      'household-e4.test.ts',
+    );
   });
 });

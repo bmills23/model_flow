@@ -64,6 +64,25 @@ export interface ValidationManifest {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Json = any;
 
+export type Evidence = string | { text: string; count: number };
+
+/** The marker line a test carries when it reproduces published values without a fixture file. */
+export const REPRODUCTION_MARKER = 'published-reproduction:';
+
+/** True when the source carries the marker line for exactly this id (not an id it is a prefix of). */
+export function hasMarker(source: string, id: string): boolean {
+  return markersIn(source).includes(id);
+}
+
+/** The ids named by `published-reproduction: <id>` lines of a test source. */
+export function markersIn(source: string): string[] {
+  return [...source.matchAll(/published-reproduction: ([a-z0-9-]+)/g)].map((m) => m[1]!);
+}
+
+function occurrences(haystack: string, needle: string): number {
+  return haystack.split(needle).length - 1;
+}
+
 export interface ExampleSpec {
   id: string;
   title: string;
@@ -79,10 +98,24 @@ export interface ExampleSpec {
   tolerance: string;
   status: ValidationStatus;
   testFile: string;
-  /** Strings that must appear in the test source: they pin the tolerance the text states. */
-  evidence: string[];
-  /** A string that must appear in the README of the fixture directory. */
-  readmeNeedle: string;
+  /**
+   * What the test source must contain to pin the tolerance the text states. A bare string must appear at
+   * least once. A `{ text, count }` entry must appear exactly `count` times, so loosening one of several
+   * assertions that share a literal changes the count and fails the build.
+   */
+  evidence: Evidence[];
+  /** A string that must appear in the README of the fixture directory (unused when `files` is empty). */
+  readmeNeedle?: string;
+  /**
+   * Tolerance values read from the fixture files (index into `files`, dotted path, expected value). The
+   * text above states them, so a fixture edit that changes one fails the build.
+   */
+  pins?: { file?: number; path: string; value: unknown }[];
+  /**
+   * With no fixture file the published values are typed into the test itself. The test must then carry the
+   * line `published-reproduction: <id>`, which the coverage test uses to find reproductions outside the
+   * fixture directories.
+   */
   note?: string;
 }
 
@@ -142,21 +175,49 @@ export function buildValidationManifest(input: BuildInput): ValidationManifest {
         throw new Error(`Validation example ${s.id}: fixture file ${f} does not exist`);
       }
     }
-    const dir = s.files[0]!.split('/')[0]!;
-    const readme = resolve(input.root, FIXTURES, dir, 'README.md');
-    if (!existsSync(readme) || !readFileSync(readme, 'utf8').includes(s.readmeNeedle)) {
-      throw new Error(
-        `Validation example ${s.id}: README of ${dir} does not mention "${s.readmeNeedle}"`,
-      );
+    if (s.files.length > 0) {
+      const dir = s.files[0]!.split('/')[0]!;
+      const readme = resolve(input.root, FIXTURES, dir, 'README.md');
+      if (
+        s.readmeNeedle === undefined ||
+        !existsSync(readme) ||
+        !readFileSync(readme, 'utf8').includes(s.readmeNeedle)
+      ) {
+        throw new Error(
+          `Validation example ${s.id}: README of ${dir} does not mention "${String(s.readmeNeedle)}"`,
+        );
+      }
     }
     const testPath = `${TESTS}/${s.testFile}`;
     if (!existsSync(resolve(input.root, testPath))) {
       throw new Error(`Validation example ${s.id}: test file ${s.testFile} does not exist`);
     }
     const testSource = fileText(testPath);
-    for (const ev of input.overrideEvidence !== undefined ? [input.overrideEvidence] : s.evidence) {
-      if (!testSource.includes(ev)) {
-        throw new Error(`Validation example ${s.id}: evidence "${ev}" is not in ${s.testFile}`);
+    if (s.files.length === 0 && !hasMarker(testSource, s.id)) {
+      throw new Error(
+        `Validation example ${s.id}: ${s.testFile} has no "${REPRODUCTION_MARKER} ${s.id}" line`,
+      );
+    }
+    for (const pin of s.pins ?? []) {
+      let v: Json = read(s.files[pin.file ?? 0]!);
+      for (const part of pin.path.split('.')) v = v?.[part];
+      if (v !== pin.value) {
+        throw new Error(
+          `Validation example ${s.id}: fixture value ${pin.path} is ${String(v)}, the text states ${String(pin.value)}`,
+        );
+      }
+    }
+    const evidence: Evidence[] =
+      input.overrideEvidence !== undefined ? [input.overrideEvidence] : s.evidence;
+    for (const ev of evidence) {
+      const text = typeof ev === 'string' ? ev : ev.text;
+      const found = occurrences(testSource, text);
+      if (typeof ev === 'string' ? found === 0 : found !== ev.count) {
+        throw new Error(
+          typeof ev === 'string'
+            ? `Validation example ${s.id}: evidence "${text}" is not in ${s.testFile}`
+            : `Validation example ${s.id}: evidence "${text}" appears ${found} times in ${s.testFile}, expected ${ev.count}`,
+        );
       }
     }
     for (const m of s.methodIds) {
@@ -291,12 +352,18 @@ export function renderValidationMarkdown(
     for (const e of group) {
       out.push(`#### ${e.title}`, '');
       out.push(`- Source: ${e.referenceKey !== null ? `\`${e.referenceKey}\`, ` : ''}${e.source}`);
-      out.push(`- Method: ${e.methodIds.map((m) => `\`${m}\``).join(', ')}`);
+      out.push(
+        `- Method: ${e.methodIds.length > 0 ? e.methodIds.map((m) => `\`${m}\``).join(', ') : 'none registered (a data or arithmetic function)'}`,
+      );
       out.push(`- Compared: ${e.compares}`);
       out.push(`- Cases: ${e.cases} ${e.casesUnit}`);
       out.push(`- Tolerance: ${e.tolerance}`);
       out.push(`- Status: ${e.status}`);
-      out.push(`- Fixture: ${e.files.map((f) => `\`${f}\``).join(', ')}; test \`${e.testFile}\``);
+      out.push(
+        e.files.length > 0
+          ? `- Fixture: ${e.files.map((f) => `\`${f}\``).join(', ')}; test \`${e.testFile}\``
+          : `- Fixture: none, the published values are typed in the test \`${e.testFile}\``,
+      );
       if (e.note) out.push(`- Note: ${e.note}`);
       out.push('');
     }

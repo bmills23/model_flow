@@ -4,7 +4,7 @@ Generated 2026-10-21 from the fixtures under `packages/engine/test/fixtures`, th
 
 Each published worked example the test suite reproduces is listed with its source, the method it checks, what is compared, the number of cases and the tolerance the test enforces. A test that passes at its tolerance shows agreement with the published value to that tolerance; it is not a statement about model accuracy. The observed largest error is not reported, only the enforced tolerance.
 
-Summary: 27 entries (21 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test only).
+Summary: 34 entries (28 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test only).
 
 ## Worked examples
 
@@ -200,8 +200,8 @@ Summary: 27 entries (21 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Source: `arcadis2001`, Review of Risk Integrated Software for Cleanups (RISC) v4.0
 - Method: `vapor.je-1991`, `vapor.dominant-layer-1998`
 - Compared: Soil to indoor air with and without TPH (R-3), the dominant layer with degradation (R-4) and groundwater to indoor air (R-5). The independent column of R-3 is recorded, not asserted.
-- Cases: 4 printed results
-- Tolerance: 0.5 percent of the RISC value.
+- Cases: 6 printed results
+- Tolerance: 0.5 percent of the RISC value (the test asserts it seven times: the six printed results and a second run of R-3 case A without degradation).
 - Status: reproduced
 - Fixture: `vapor/risc-r3-r5.json`; test `vapor-legacy.test.ts`
 
@@ -225,6 +225,77 @@ Summary: 27 entries (21 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Status: reproduced
 - Fixture: `vapor/epa2004-sl-adv.json`; test `vapor-epa-je.test.ts`
 
+#### Eco-SSL wildlife derivation, cadmium and lead surrogate rows
+
+- Source: `epaecossl`, Ecological Soil Screening Levels (Eco-SSLs)
+- Method: `eco.ecossl-2005`
+- Compared: The soil concentration at which the wildlife hazard quotient is 1, back-calculated from the transcribed derivation inputs of the printed surrogate rows, against the printed wildlife Eco-SSL. Avian (dove, woodcock, hawk) and mammalian (vole, shrew, weasel) surrogates for cadmium and lead.
+- Cases: 12 printed surrogate values
+- Tolerance: 5 percent relative (a ruling, DECISIONS.md entry 10 of the Eco-SSL milestone).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `eco-screening.test.ts`
+- Note: The derivation inputs come from the transcribed Eco-SSL data, so this checks the back-calculation arithmetic against the printed values, not the inputs.
+
+#### Eco-SSL wildlife guild values, cadmium mammalian and lead avian
+
+- Source: `epaecossl`, Ecological Soil Screening Levels (Eco-SSLs)
+- Method: `eco.ecossl-2005`
+- Compared: The smallest surrogate value of the guild against the printed guild Eco-SSL: 0.36 mg/kg for cadmium (mammalian) and 11 mg/kg for lead (avian).
+- Cases: 2 printed guild values
+- Tolerance: 5 percent relative (the same ruling as the surrogate rows).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `eco-screening.test.ts`
+
+#### SSG 1996 default particulate emission factor
+
+- Source: `epa1996ssg`, Soil Screening Guidance: Technical Background Document
+- Method: `particulate.ssg-pef-1996`
+- Compared: The default PEF of 1.32E9 m^3/kg from the printed wind erosion inputs.
+- Cases: 1 printed value
+- Tolerance: Equal to the printed three significant figures (1.32e9).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `particulate.test.ts`
+
+#### SSG 2002 default particulate emission factor
+
+- Source: `epa2002ssg`, Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites
+- Method: `particulate.ssg-pef-2002`
+- Compared: The default PEF of 1.36E9 m^3/kg with Q/C 93.77.
+- Cases: 1 printed value
+- Tolerance: Equal to the printed three significant figures (1.36e9).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `particulate.test.ts`
+
+#### NRWQC zinc criteria at a hardness of 100 mg/L
+
+- Source: `epanrwqc`, National Recommended Water Quality Criteria - Aquatic Life Criteria Table
+- Method: none registered (a data or arithmetic function)
+- Compared: The hardness-dependent acute and chronic freshwater zinc criteria computed from the Appendix B slope, intercept and conversion factor against the published 117.2 and 118.1 ug/L.
+- Cases: 2 published criteria
+- Tolerance: Within 0.5 ug/L (toBeCloseTo at zero decimals), and the acute value rounds to 120 at two significant figures.
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `surfacewater-criteria.test.ts`
+
+#### Table R-7, unit-gradient moisture content
+
+- Source: `arcadis2001`, Review of Risk Integrated Software for Cleanups (RISC) v4.0
+- Method: `vadose.vadsat`
+- Compared: The moisture content that carries 20 cm/yr in the vadose soil (theta 0.0885) and in the lens (theta 0.2031) with the Brooks and Corey relative permeability.
+- Cases: 2 printed values
+- Tolerance: 1e-4 absolute (four decimals as printed).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `vadose-hydraulics.test.ts`
+
+#### EPA 2004 Appendix C, benzene Henry constant at the system temperature
+
+- Source: `epa2004je`, User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings
+- Method: `vapor.je-epa`
+- Compared: The enthalpy of vaporization at 10 degrees C (8,122 cal/mol), the Henry constant (2.68e-3 atm m^3/mol) and the dimensionless constant (0.115) of the spreadsheet example.
+- Cases: 3 printed values
+- Tolerance: The printed digits: the enthalpy rounds to the integer, the two constants to three significant figures. The unrounded values are pinned to 1e-9 relative.
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `vapor-source.test.ts`
+
 ### Named exception
 
 #### Table R-6, groundwater to outdoor air
@@ -246,7 +317,7 @@ Summary: 27 entries (21 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Cases: 1 row
 - Tolerance: Not compared. Checked by identities and hand cases instead.
 - Status: named exception
-- Fixture: `exposure/r9.json`; test `exposure-legacy-r9.test.ts`
+- Fixture: `exposure/r9.json`; test `household-e4.test.ts`
 - Note: Ruling recorded in docs/DECISIONS.md, 2026-10-18, M7 slice E4, item 4.
 
 #### van Genuchten and Alves 1982 Table 6, eight named exceptions
@@ -281,7 +352,7 @@ Summary: 27 entries (21 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Cases: 1 row
 - Tolerance: Not compared yet.
 - Status: pending or deferred
-- Fixture: `exposure/r9.json`; test `exposure-legacy-r9.test.ts`
+- Fixture: `exposure/r9.json`; test `household-e4.test.ts`
 
 ### Smoke test only
 

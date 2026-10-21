@@ -381,9 +381,9 @@
         "vapor.dominant-layer-1998"
       ],
       "compares": "Soil to indoor air with and without TPH (R-3), the dominant layer with degradation (R-4) and groundwater to indoor air (R-5). The independent column of R-3 is recorded, not asserted.",
-      "cases": 4,
+      "cases": 6,
       "casesUnit": "printed results",
-      "tolerance": "0.5 percent of the RISC value.",
+      "tolerance": "0.5 percent of the RISC value (the test asserts it seven times: the six printed results and a second run of R-3 case A without degradation).",
       "status": "reproduced",
       "testFile": "vapor-legacy.test.ts",
       "note": ""
@@ -465,6 +465,123 @@
       "note": "Pending a run of the VISL calculator."
     },
     {
+      "id": "eco-wildlife-ecossl",
+      "title": "Eco-SSL wildlife derivation, cadmium and lead surrogate rows",
+      "files": [],
+      "referenceKey": "epaecossl",
+      "source": "Ecological Soil Screening Levels (Eco-SSLs)",
+      "methodIds": [
+        "eco.ecossl-2005"
+      ],
+      "compares": "The soil concentration at which the wildlife hazard quotient is 1, back-calculated from the transcribed derivation inputs of the printed surrogate rows, against the printed wildlife Eco-SSL. Avian (dove, woodcock, hawk) and mammalian (vole, shrew, weasel) surrogates for cadmium and lead.",
+      "cases": 12,
+      "casesUnit": "printed surrogate values",
+      "tolerance": "5 percent relative (a ruling, DECISIONS.md entry 10 of the Eco-SSL milestone).",
+      "status": "reproduced",
+      "testFile": "eco-screening.test.ts",
+      "note": "The derivation inputs come from the transcribed Eco-SSL data, so this checks the back-calculation arithmetic against the printed values, not the inputs."
+    },
+    {
+      "id": "eco-wildlife-guild",
+      "title": "Eco-SSL wildlife guild values, cadmium mammalian and lead avian",
+      "files": [],
+      "referenceKey": "epaecossl",
+      "source": "Ecological Soil Screening Levels (Eco-SSLs)",
+      "methodIds": [
+        "eco.ecossl-2005"
+      ],
+      "compares": "The smallest surrogate value of the guild against the printed guild Eco-SSL: 0.36 mg/kg for cadmium (mammalian) and 11 mg/kg for lead (avian).",
+      "cases": 2,
+      "casesUnit": "printed guild values",
+      "tolerance": "5 percent relative (the same ruling as the surrogate rows).",
+      "status": "reproduced",
+      "testFile": "eco-screening.test.ts",
+      "note": ""
+    },
+    {
+      "id": "ssg1996-default-pef",
+      "title": "SSG 1996 default particulate emission factor",
+      "files": [],
+      "referenceKey": "epa1996ssg",
+      "source": "Soil Screening Guidance: Technical Background Document",
+      "methodIds": [
+        "particulate.ssg-pef-1996"
+      ],
+      "compares": "The default PEF of 1.32E9 m^3/kg from the printed wind erosion inputs.",
+      "cases": 1,
+      "casesUnit": "printed value",
+      "tolerance": "Equal to the printed three significant figures (1.32e9).",
+      "status": "reproduced",
+      "testFile": "particulate.test.ts",
+      "note": ""
+    },
+    {
+      "id": "ssg2002-default-pef",
+      "title": "SSG 2002 default particulate emission factor",
+      "files": [],
+      "referenceKey": "epa2002ssg",
+      "source": "Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites",
+      "methodIds": [
+        "particulate.ssg-pef-2002"
+      ],
+      "compares": "The default PEF of 1.36E9 m^3/kg with Q/C 93.77.",
+      "cases": 1,
+      "casesUnit": "printed value",
+      "tolerance": "Equal to the printed three significant figures (1.36e9).",
+      "status": "reproduced",
+      "testFile": "particulate.test.ts",
+      "note": ""
+    },
+    {
+      "id": "nrwqc-zinc-hardness",
+      "title": "NRWQC zinc criteria at a hardness of 100 mg/L",
+      "files": [],
+      "referenceKey": "epanrwqc",
+      "source": "National Recommended Water Quality Criteria - Aquatic Life Criteria Table",
+      "methodIds": [],
+      "compares": "The hardness-dependent acute and chronic freshwater zinc criteria computed from the Appendix B slope, intercept and conversion factor against the published 117.2 and 118.1 ug/L.",
+      "cases": 2,
+      "casesUnit": "published criteria",
+      "tolerance": "Within 0.5 ug/L (toBeCloseTo at zero decimals), and the acute value rounds to 120 at two significant figures.",
+      "status": "reproduced",
+      "testFile": "surfacewater-criteria.test.ts",
+      "note": ""
+    },
+    {
+      "id": "r7-theta",
+      "title": "Table R-7, unit-gradient moisture content",
+      "files": [],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "vadose.vadsat"
+      ],
+      "compares": "The moisture content that carries 20 cm/yr in the vadose soil (theta 0.0885) and in the lens (theta 0.2031) with the Brooks and Corey relative permeability.",
+      "cases": 2,
+      "casesUnit": "printed values",
+      "tolerance": "1e-4 absolute (four decimals as printed).",
+      "status": "reproduced",
+      "testFile": "vadose-hydraulics.test.ts",
+      "note": ""
+    },
+    {
+      "id": "epa2004-henry-temperature",
+      "title": "EPA 2004 Appendix C, benzene Henry constant at the system temperature",
+      "files": [],
+      "referenceKey": "epa2004je",
+      "source": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings",
+      "methodIds": [
+        "vapor.je-epa"
+      ],
+      "compares": "The enthalpy of vaporization at 10 degrees C (8,122 cal/mol), the Henry constant (2.68e-3 atm m^3/mol) and the dimensionless constant (0.115) of the spreadsheet example.",
+      "cases": 3,
+      "casesUnit": "printed values",
+      "tolerance": "The printed digits: the enthalpy rounds to the integer, the two constants to three significant figures. The unrounded values are pinned to 1e-9 relative.",
+      "status": "reproduced",
+      "testFile": "vapor-source.test.ts",
+      "note": ""
+    },
+    {
       "id": "r9-exception-inhalation-in-shower",
       "title": "Table R-9, Inhalation in Shower",
       "files": [
@@ -480,7 +597,7 @@
       "casesUnit": "row",
       "tolerance": "Not compared. Checked by identities and hand cases instead.",
       "status": "named exception",
-      "testFile": "exposure-legacy-r9.test.ts",
+      "testFile": "household-e4.test.ts",
       "note": "Ruling recorded in docs/DECISIONS.md, 2026-10-18, M7 slice E4, item 4."
     },
     {
@@ -499,7 +616,7 @@
       "casesUnit": "row",
       "tolerance": "Not compared yet.",
       "status": "pending or deferred",
-      "testFile": "exposure-legacy-r9.test.ts",
+      "testFile": "household-e4.test.ts",
       "note": ""
     },
     {

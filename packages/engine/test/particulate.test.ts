@@ -15,11 +15,13 @@ import { outdoorAirEpc } from '../src/processes/outdoorAir/index.js';
 const box = { length: 22.5, width: 22.5, height: 2, windSpeed: 2.25 };
 
 describe('particulate wind erosion and PEF', () => {
+  // published-reproduction: ssg1996-default-pef
   it('reproduces the SSG 1996 default PEF 1.32E9 (printed 3 figures)', () => {
     const v = pef1996Default();
     expect(v / 1e9).toBeCloseTo(1.3162, 3);
     expect(Number(v.toPrecision(3))).toBe(1.32e9);
   });
+  // published-reproduction: ssg2002-default-pef
   it('reproduces the SSG 2002 default PEF 1.36E9 with Q/C 93.77', () => {
     const v = pef2002Default();
     expect(Number(v.toPrecision(3))).toBe(1.36e9);
