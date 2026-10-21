@@ -1,5 +1,6 @@
 import type { EpcSpec } from '@model-flow/engine';
 import { createFeed } from './feedStore';
+import type { VaporCoefficients } from './coefficients';
 import type { SourceSeries } from './series';
 
 /**
@@ -35,6 +36,11 @@ export interface VaporRiskFeed {
   label: string;
   indoor?: EpcSpec;
   outdoor?: EpcSpec;
+  /**
+   * Air concentration per unit source of the indoor and outdoor paths above, for the cleanup screen's
+   * vapor source levels (wave K slice K1). Absent in a project saved before it existed.
+   */
+  coefficients?: VaporCoefficients;
 }
 
 const risk = createFeed<VaporRiskFeed>();

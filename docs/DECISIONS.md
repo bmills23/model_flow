@@ -2361,3 +2361,53 @@ water source levels, and none of the three panels reach the report. Every ruling
    report's modeled-source block at 390 light, 390 dark and 1280, which no check has rendered so far.
 
 Per-slice rulings follow in their own blocks.
+
+## 2026-10-21: Wave K slice K1, vapor source levels on the cleanup screen
+
+Every ruling below is DEFAULT. Evidence: `packages/engine/test/vapor-linearity.test.ts` (each method doubles the
+source and checks the air doubles) and `apps/web/src/vapor/coefficients.test.ts` (the screen's own paths).
+
+1. **What the vapor screen publishes.** `VaporRiskFeed` gains an optional `coefficients: { indoor?, outdoor? }`.
+   Each is either `{ quantified: true, methodId, value, source, maxSource? }`, with `value` the air concentration
+   (kg/m3) per unit source in SI and `source` one of soil (kg/kg), groundwater, soil gas or soil pore water (kg/m3),
+   or `{ quantified: false, methodId, reason }`. The feed carries a coefficient only for a path whose air it also
+   carries. The cleanup panel (`cleanup/VaporPanel.tsx`, `vaporLevels.ts`) divides the direct indoor and outdoor air
+   levels by it with the existing `sourceLevelsOverCoefficient`, one row per receptor method and path, and skips
+   a chemical the feed was not run for. A feed saved before this key existed gets rows that say to send it again.
+   The key is optional and no vapor form key was added, so `FINGERPRINT_SKIP` needs no entry and an older project
+   does not flag stale.
+2. **Linearity of the listed methods (open question a).** Linear in the source, so quantified: `vapor.je-1991`
+   (infinite source), `vapor.je-epa` (the screen never requests `finiteSource`, which is the only nonlinear mode),
+   `vapor.jury-bam` (flux at every time proportional to the initial concentration, so the time-varying coefficient
+   is a fixed function of time), `vapor.attenuation-factor-2015` (the factor times the vapor, H prime fixed at the
+   groundwater temperature), `outdoorAir.box` (the steady diffusion flux is source vapor over a resistance, and the
+   box is proportional to the flux), and `outdoorAir.ssg-vf-1996` in both branches: the factor takes no
+   concentration, so `air = F / VF`, and the mass-limit branch (`VF = Q/C T / (rho_b d_s)`) depends on the source
+   depth and time, not on F. `vapor.pvi-screen-2015` returns a verdict, not an air concentration, so it has no
+   coefficient and is never quantified. `vapor.devaull-2007` is nonlinear in its fast-reaction and coupled modes
+   (`oxygenDepth` root-finds a depth that depends on the source) and is not on the web vapor screen, so it never
+   reaches the feed; a future screen offering it must publish `quantified: false` for those modes.
+3. **Two limits inside the linear methods.** A soil source stops giving more vapor once the equilibrium pore water
+   passes the solubility (the residual phase, `sourceVapor` fixed at H S). The soil coefficient is measured below
+   that point (a probe divided by ten from 1000 mg/kg until no separate phase shows) and carries `maxSource`, the soil
+   level where the vapor stops rising. A level above it is reported as not quantified with that reason, and a
+   cancer or noncancer level above it is kept with a warning. A soil source with a TPH mixture sets the mole
+   fraction from the source, so it is published as not quantified. The Soil Screening Guidance factor has no
+   residual cap, so it carries no `maxSource`.
+4. **A guard on the linear assumption.** Every probe is run at the source and at half the source and the air must
+   halve within 1e-9 relative; a failure is published as not quantified with that reason, so a path that is
+   nonlinear for a reason not foreseen here is never divided.
+5. **Time series source (open question b).** The coefficient is defined at a reference source (1 kg/m3, or the
+   below-residual soil probe), never as a ratio of a series value to its air. The steady method is applied at each
+   time (vapor ruling 7), so the model is linear and time invariant and the ratio of air to source is the same
+   number at every time; a test checks that each series value over its source equals the coefficient, so a zero
+   source value cannot break it. The source kind is the series kind (groundwater, or pore water through the soil
+   gas H times it). The Soil Screening Guidance factor needs a soil concentration, so with a series it is
+   published as not quantified; the series feed has no modern outdoor path in any case.
+6. **Where it is computed (open question c).** On the vapor side, in `vapor/coefficients.ts`, and carried on the
+   feed. The coefficient needs the parsed engine inputs (strata, building, Henry constant at the soil
+   temperature, the capillary zone), which only the vapor screen holds; recomputing on the cleanup side would
+   duplicate the form parser. `series.ts` exports the `seriesSources` it already used so the epc and the coefficient
+   build their sources the same way.
+7. **Save behaviour.** As the household panel: the feed is a plain JSON feed in the project file, fingerprinted
+   against the vapor form, and the panel reads whatever feed is held. No new cleanup form key exists.

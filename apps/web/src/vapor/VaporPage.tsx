@@ -7,6 +7,7 @@ import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './che
 import { layerBands, profileCurves } from './chartData';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { vaporCsvTables } from './csv';
+import { vaporCoefficients } from './coefficients';
 import { runVapor, type VaporOutcome } from './compute';
 import {
   getSaturatedVaporFeed,
@@ -291,11 +292,22 @@ export function VaporPage() {
     const indoor = r.indoor[riskMethod];
     if (!indoor) return;
     const outdoorSpec = r.outdoor[riskMethod];
+    const coefficients = vaporCoefficients(
+      form,
+      shownParsed,
+      feedEpcs ? active : null,
+      outdoorForm,
+      riskMethod,
+    );
     setVaporRiskFeed({
       chemicalId: riskChemical.id,
       label: `${riskChemical.name}, ${METHOD_LABEL[riskMethod]}${active ? `, ${active.label}` : ', entered source'}`,
       indoor,
       ...(outdoorSpec ? { outdoor: outdoorSpec } : {}),
+      coefficients: {
+        ...(coefficients.indoor ? { indoor: coefficients.indoor } : {}),
+        ...(outdoorSpec && coefficients.outdoor ? { outdoor: coefficients.outdoor } : {}),
+      },
     });
   };
   const riskReason =
