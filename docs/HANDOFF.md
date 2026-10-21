@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-19, end of wave J)
+# HANDOFF (written from the tree, 2026-10-21, after the wave J push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -6,8 +6,8 @@ skipping a done one.
 
 ## State of the tree
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`), wave H (UI near-parity, built on
-  branch `wave-ui`) and wave I (built on branch `wave-i`), all pushed 2026-10-19. Wave J (five slices, built on
-  branch `wave-j`) is committed on `wave-j` and is NOT yet merged to main or pushed. Pages deploys from main:
+  branch `wave-ui`), wave I (built on branch `wave-i`), all pushed 2026-10-19, and wave J (five slices, built on
+  branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`). Pages deploys from main:
   https://bmills23.github.io/model_flow/
 - Last full `corepack pnpm gate` on `wave-j` after the review fixes were merged (2026-10-19): exit 0, build
   included. Test counts: engine 1382 tests (85 files), web 1545 tests (152 files), data and other packages 149
@@ -20,17 +20,25 @@ skipping a done one.
   overflow and axe counts (the script neither looks for it by name nor clicks it). Not rendered in a browser: the
   report's modeled-source current-state block (the result exists only after an in-browser modeled run, which the
   check script does not perform).
-- Local branches: `main`, `wave-j`, the merged slice branches `wave-j-j1`, `wave-j-j2`, `wave-j-j3`, and three
-  `worktree-wf_*` branches left from the wave. `m1-groundwater-ui` and `ui-u9-wildlife` were checked against main
-  and deleted in J5 (tips `5d6c6c7` and `34b1229`; restore with `git branch <name> <tip>`). Delete the slice
-  branches and worktrees once `wave-j` is merged. Fifteen stale `origin/` milestone branches remain on the remote;
-  deleting them is Bryan's call.
-- Test time on `wave-j` (local, load average about 4): engine suite 21 s, web suite 40 s (before wave J: engine
+- Local branches: only `main` remains. Deleted on 2026-10-21 after the wave J push, all merged into main (tip
+  shas): `wave-j` `ad593e6`, `wave-j-j1` `4c6215d`, `wave-j-j2` `e6afaa4`, `wave-j-j3` `e8ed61c`, `wave-j-fix-a`
+  `98fa442`, `wave-j-fix-b` `a952e51`, `wave-j-fix-c` `58a583b`, `wave-j-fix-d` `d5eae5e`, and seven
+  `worktree-wf_*` branches at `b493c67` (`worktree-wf_69e4b9b1-fa7-1` to `-3`, `worktree-wf_cb31987a-5c6-1` to
+  `-4`). Their worktrees under `.claude/worktrees/` were removed. Restore a local branch with
+  `git branch <name> <sha>`. `m1-groundwater-ui` and `ui-u9-wildlife` were deleted in J5 (tips `5d6c6c7` and
+  `34b1229`; restore with `git branch <name> <tip>`).
+- Remote branches: the 15 stale `origin/` milestone branches that were fully merged into main were deleted on
+  2026-10-21 (tip shas): `m10-e1` `f3abc74`, `m10-e2` `3204f04`, `m10-uncertainty` `370dcd3`, `m11-projects-reports`
+  `4c2a7f0`, `m11-s5-csv` `464e9f1`, `m11-s7-bundle` `cae8847`, `m5-cleanup-levels` `dcdf060`, `m6-vapor-models`
+  `04b8446`, `m7-e3` `6b408d3`, `m7-s0-sources` `c3d694a`, `m7-shower-irrigation-particulates` `ddfe459`,
+  `m8-surface-water` `d71a876`, `m9-plants-eco` `c9656d7`, `m9-r1-refs` `644e090`, `wave-m5-m6-m8` `5e4c855`.
+  Restore one with `git push origin <sha>:refs/heads/<name>`. No remote milestone branch remains.
+- Test time on wave J (local, load average about 4): engine suite 21 s, web suite 40 s (before wave J: engine
   41 s and web 128 s on a loaded machine, 34 s and 53 s on the wave I run). Remaining floors: single 15 to 18
   s engine tests and jsdom creation in the web suite.
-- CI cost: about 6 billed minutes per push to main since wave I (runs 39317507123 and 39317507269, 2026-10-19:
-  gate 3 min 46 s, Pages build 23 s plus deploy 8 s; recorded in CLAUDE.md). Wave J cut the local test time; the
-  CI cost is re-measured after the wave J push. Docs-only pushes trigger nothing.
+- CI cost: about 6 billed minutes per push to main, re-measured 2026-10-21 after the wave J push (runs
+  39627501560 and 39627501542: gate 3 min 19 s, Pages build 19 s plus deploy 10 s; recorded in CLAUDE.md). Docs-only
+  pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
@@ -337,9 +345,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix).
 - Test time: wave J cut the local suites to engine 21 s and web 40 s (see State of the tree). What remains needs
   engine numerics changes (for example caching the x and y profiles across z in `at123dGrid`) and is not done.
-- CI cost per push to main was about 6 billed minutes after wave I (see State of the tree; re-measure after the
-  wave J push); push once per logical unit,
-  and the heavy mobile check is local only.
+- CI cost per push to main is about 6 billed minutes (re-measured 2026-10-21 after wave J, see State of the
+  tree); push once per logical unit, and the heavy mobile check is local only.
 - `scripts/mobile-check.mjs` is committed and run by hand (`corepack pnpm mobile:check`); it is not in the
   gate. Re-run it before any push that changes a screen.
 - Timing checks under load: `vadose-legacy.test.ts` (best of nine under 250 ms) and
@@ -351,9 +358,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Merge `wave-j` to main and push once (re-measure the CI cost from that push and record it in CLAUDE.md). Then
-  remove the wave J worktrees and branches: `wave-j-j1`, `wave-j-j2`, `wave-j-j3`, `wave-j-fix-a` to
-  `wave-j-fix-d`, the `worktree-wf_*` branches.
-- The 15 stale `origin/` milestone branches stay Bryan's call.
+- Done 2026-10-21: wave J merged to main and pushed (CI cost recorded in CLAUDE.md), wave J worktrees and branches
+  removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Then the open items above: read the unverified sources; run a 390 px check of the
   report's modeled-source block after an in-browser modeled run.
