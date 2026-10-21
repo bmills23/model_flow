@@ -247,7 +247,9 @@ and a swimming pathway is on, a **Surface water source levels** panel lists the 
 concentration that gives each surface water level, in mg/L. It divides the surface water level by the run's
 coefficient (the peak surface water concentration per unit of groundwater source, taken from the run you sent,
 for the series you sent), so a groundwater source at that level alone just meets the target. The run is not tied
-to a chemical, so use it for the chemical it was run for. The level reads "not quantified", with the reason, when
+to a chemical, so the panel quantifies a level only when the cleanup run holds one chemical (the one the surface
+water run was made for); with two or more, every row reads "not quantified" and says why. The send buttons are off
+while the surface water screen shows an engine error, so only a current result is sent. The level reads "not quantified", with the reason, when
 the run has an upstream background (the peak is then not proportional to the source), when the plume is fed by a
 vadose or saturated source screen (the run holds no groundwater source concentration), when nothing transfers
 to the surface water, when the source level would exceed the solubility entered on the surface water screen, or
