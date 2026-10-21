@@ -2411,3 +2411,47 @@ source and checks the air doubles) and `apps/web/src/vapor/coefficients.test.ts`
    build their sources the same way.
 7. **Save behaviour.** As the household panel: the feed is a plain JSON feed in the project file, fingerprinted
    against the vapor form, and the panel reads whatever feed is held. No new cleanup form key exists.
+## 2026-10-21: Wave K slice K2, surface water source levels on the cleanup screen
+
+Every ruling below is DEFAULT.
+
+1. **What the source is, per origin of the feed (DEFAULT).** The source is the dissolved groundwater concentration
+   that drove the run, in kg/m3 and printed in mg/L. Unlinked run: the typed groundwater concentration. Run linked
+   to a transport plume: the held source concentration c0 of the transport scenario; a mass rate source is the same
+   source (c0 is the rate over the Darcy flux times the source cross-section, and the engine uses the rate). A plume
+   fed by a vadose or saturated source screen has no groundwater source concentration on the feed (the drive is a
+   soil or leachate schedule of mass steps, and the feed records neither the soil level nor its units), so that origin
+   is not quantified, with the reason, rather than guessed. The level therefore always means "a dissolved
+   groundwater source alone at this concentration just meets the surface water target", the same reading as the
+   household panel's tap water level.
+2. **Peak over source is the right ratio (DEFAULT).** The chain is linear in the source: AT123D-class transport and
+   the plane quadrature, the legacy box (loading over flow plus decay), and the modern mass discharge are all
+   proportional to c0. `coefficient.test.ts` doubles the source (the concentration, and for a linked run c0 and the
+   mass rate together) and checks that the surface water peak doubles for both methods, unlinked and linked, to 9 and 6
+   decimals respectively. Since every sample of the series scales by the same factor, the peak over the 24 sample
+   times scales too, and the ratio is one constant. The peak is the maximum of the sampled series, not a continuous
+   maximum. An upstream background is affine, not proportional, so a run with a background above zero is not
+   quantified. A zero source or a zero peak is not quantified, never a zero coefficient.
+3. **Solubility (DEFAULT).** The engine only warns above solubility; it does not cap the chain, so the ratio stays
+   linear. The limit is applied to the answer: when the source level exceeds the solubility entered on the surface
+   water run (carried on the coefficient), a dissolved source cannot reach it and the level is not quantified with
+   that reason. A run with no solubility entered is not checked, as on the surface water screen.
+4. **Where the coefficient is computed (DEFAULT).** In the web layer, `surfaceWater/coefficient.ts`, when the
+   surface water screen sends a series (the same click that sets the feed), from the request and the result that
+   produced the series. It is not recomputed by a second run (the linked bank plane is expensive), the doubling
+   test is the evidence of linearity. It is attached only when the result on screen is the current computed one.
+   It is stored on `SurfaceWaterFeed.coefficient` (optional): value, reason, method id, source medium, unit, the
+   source and the solubility. The project schema accepts it as an optional key, and no form key was added, so
+   `FINGERPRINT_SKIP` is unchanged and older project files and feeds neither fail to load nor read as stale
+   (`project/store.test.ts`). A feed without a coefficient shows every level as not quantified, asking for the result
+   to be sent again.
+5. **Division and chemical (DEFAULT).** `cleanup/surfaceWaterLevels.ts` divides the direct surface water level by the
+   coefficient through the engine's `sourceLevelsOverCoefficient`, whose medium union gained `surfaceWater` (no other
+   change); cancer and noncancer levels scale the same way, so the governing endpoint is unchanged. The feed carries
+   no chemical id (the surface water screen has none), so the coefficient is applied to each chemical of the cleanup
+   run and the panel says to use the run for the chemical it was run for. Its Koc, decay and solubility are the run's
+   own. Both receptor methods are shown against the one surface water method that was sent.
+6. **Save and screen behaviour (DEFAULT).** Like the household panel: a panel with the same markup, classes and
+   data-label table on narrow screens, shown when a feed exists and the cleanup run has a surface water medium, held
+   with the project through the existing surface water feed envelope. The CSV and report are K3.
+
