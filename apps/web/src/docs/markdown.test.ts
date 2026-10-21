@@ -33,9 +33,7 @@ describe('parseMarkdown', () => {
         { text: 'alpha continues here', children: [] },
         {
           text: 'beta',
-          children: [
-            { type: 'list', ordered: false, items: [{ text: 'inner', children: [] }] },
-          ],
+          children: [{ type: 'list', ordered: false, items: [{ text: 'inner', children: [] }] }],
         },
       ],
     });

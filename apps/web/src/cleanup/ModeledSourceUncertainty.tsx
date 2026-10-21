@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { UncertaintyError, type UncertainInput } from '@model-flow/engine';
+import type { StaleFeedKey } from '../project/store';
 import { Field } from '../ui/controls';
 import { AlertDialog } from '../ui/AlertDialog';
 import { DistributionEditor } from '../uncertainty/DistributionEditor';
@@ -48,6 +49,8 @@ export function ModeledSourceUncertainty(props: {
   /** Defaults to module Web Workers (an inline stand-in without Worker support). */
   makeWorker?: WorkerFactory;
   workers?: number;
+  /** Feeds from other screens the request was taken from. */
+  feeds?: readonly StaleFeedKey[];
 }) {
   const { request, outcome, name } = props;
   const [setup0, patchSetup] = useSetup('modeled');
@@ -288,6 +291,7 @@ export function ModeledSourceUncertainty(props: {
           label={shown.label}
           stale={shown.request !== request}
           runNote={`${shown.workers} worker${shown.workers === 1 ? '' : 's'}`}
+          {...(props.feeds ? { feeds: props.feeds } : {})}
         />
       )}
     </section>

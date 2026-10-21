@@ -1,3 +1,4 @@
+import type { StaleFeedKey } from '../project/store';
 import { useCallback, useMemo, useState } from 'react';
 import { DEFAULT_N, type UncertainInput } from '@model-flow/engine';
 import { Field } from '../ui/controls';
@@ -26,6 +27,8 @@ type Shown = CleanupRun & { label: string; input: CleanupLegacyInput };
 export function CleanupUncertainty(props: {
   input: CleanupLegacyInput;
   names: Readonly<Record<string, string>>;
+  /** Feeds from other screens the input was taken from. */
+  feeds?: readonly StaleFeedKey[];
   /** Clock in milliseconds, replaceable in tests. */
   now?: () => number;
 }) {
@@ -245,7 +248,12 @@ export function CleanupUncertainty(props: {
       )}
 
       {shown && (
-        <ProbabilisticResults run={shown} label={shown.label} stale={shown.input !== input} />
+        <ProbabilisticResults
+          run={shown}
+          label={shown.label}
+          stale={shown.input !== input}
+          {...(props.feeds ? { feeds: props.feeds } : {})}
+        />
       )}
     </section>
   );

@@ -119,7 +119,7 @@ export function buildReport(project: Project): Report {
   const screens = screensOf(project);
   const feeds = project.feeds as FeedsLike | undefined;
   const run = methodsRun(screens, feeds);
-  const reads = feedsReadBy(screens, project.feeds as Record<string, unknown> | undefined);
+  const reads = feedsReadBy(screens, (project.feeds ?? {}) as Record<string, unknown>);
   const sections: ReportSection[] = [];
   const unused: string[] = [];
   for (const key of USED_SCREENS_ORDER) {

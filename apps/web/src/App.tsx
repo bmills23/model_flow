@@ -88,9 +88,15 @@ export function App() {
   // made, and a feed that clears and goes stale again is shown again
   const staleNow = useStaleFeeds();
   const [dismissedStale, setDismissedStale] = useState<readonly StaleFeedKey[]>([]);
+  // a dismissal belongs to the project it was made in: opening another project starts over
+  const [dismissedEpoch, setDismissedEpoch] = useState(epoch);
+  if (dismissedEpoch !== epoch) {
+    setDismissedEpoch(epoch);
+    setDismissedStale([]);
+  }
   const stillDismissed = dismissedStale.filter((k) => staleNow.includes(k));
   if (stillDismissed.length !== dismissedStale.length) setDismissedStale(stillDismissed);
-  const stale = staleNow.filter((k) => !dismissedStale.includes(k));
+  const stale = staleNow.filter((k) => dismissedEpoch !== epoch || !dismissedStale.includes(k));
   const dropped = staleShown ? getDroppedFeeds() : [];
   const onNewProject = (): void => {
     if (

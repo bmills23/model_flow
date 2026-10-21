@@ -331,6 +331,22 @@ describe('live feed staleness', () => {
       expect(getStaleFeeds()).toEqual(['well']);
     });
 
+    it('the vadose feed is not read while the saturated feed is on, so a vadose re-send marks nothing', () => {
+      setVadoseFeed({ scenario: vadoseScenario(), method: 'modern', label: 'v' });
+      setSaturatedFeed({ input: satInput(), method: 'legacy', label: 's' });
+      const t = getScreen('transport');
+      setScreen('transport', {
+        ...t,
+        form: { ...t.form, feedFromVadose: true, feedFromSaturated: true },
+      });
+      setWellFeed(wellFeed);
+      expect(getStaleFeeds()).toEqual([]);
+      setVadoseFeed({ scenario: vadoseScenario(), method: 'legacy', label: 'v2' });
+      expect(getStaleFeeds()).toEqual([]);
+      setSaturatedFeed({ input: satInput(), method: 'modern', label: 's2' });
+      expect(getStaleFeeds()).toEqual(['well']);
+    });
+
     it('the bank run the surface water screen is linked to', () => {
       const f = getScreen('surfaceWater');
       setScreen('surfaceWater', { form: { ...f.form, linked: true } });

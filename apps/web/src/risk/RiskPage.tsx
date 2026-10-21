@@ -84,7 +84,7 @@ export function RiskPage() {
 
   const shown = current ?? (needsInput ? null : lastGood);
   // the feeds the chemical rows take values from; a stale one is marked beside the results and in the CSV
-  const feedsUsed = riskFeedsRead(form.chemicals);
+  const feedsUsed = riskFeedsRead(form.chemicals, { household, vaporRisk: vapor });
   const stale = current === null;
   const names = useMemo(() => {
     const out: Record<string, string> = {};
@@ -321,7 +321,9 @@ export function RiskPage() {
               <NotQuantified outcome={shown.outcome} names={names} />
               <EpcTable outcome={shown.outcome} names={names} />
               <WarningsList outcome={shown.outcome} notes={shown.built.notes} />
-              {shown.outcome.legacy.ok && <RiskUncertainty base={shown.built.legacy} />}
+              {shown.outcome.legacy.ok && (
+                <RiskUncertainty base={shown.built.legacy} feeds={feedsUsed} />
+              )}
             </div>
           )}
         </div>

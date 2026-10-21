@@ -355,10 +355,15 @@ function contentKey(value: unknown): string {
  */
 function heldInputs(key: StaleFeedKey): unknown {
   const { transport, surfaceWater, saturated, vapor, household } = screens;
-  const received = (): unknown => ({
-    vadose: transport.form.feedFromVadose ? contentKey(getVadoseFeed()) : null,
-    saturated: transport.form.feedFromSaturated ? contentKey(getSaturatedFeed()) : null,
-  });
+  const received = (): unknown => {
+    // the transport screen reads the saturated source when it is on and held, and the vadose one
+    // only when it is not
+    const satOn = transport.form.feedFromSaturated && getSaturatedFeed() !== null;
+    return {
+      vadose: transport.form.feedFromVadose && !satOn ? contentKey(getVadoseFeed()) : null,
+      saturated: transport.form.feedFromSaturated ? contentKey(getSaturatedFeed()) : null,
+    };
+  };
   switch (key) {
     case 'well':
     case 'vaporWaterTable':
