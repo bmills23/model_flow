@@ -1,6 +1,6 @@
 # UI near-parity gaps: model_flow against RISC5 (2026-10-19)
 
-Status (2026-10-19): slices U1 to U10 are all landed on branch `wave-ui`; each slice carries a status line below. The gap table and slice text are the plan as written, not rewritten after the fact.
+Status (2026-10-21): slices U1 to U10 are all landed (wave H, 2026-10-19, merged to main); each slice carries a status line below. The gap table in section 2 was corrected in place on 2026-10-21 to match the tree, with each row naming what landed and in which wave or slice. The slice text in section 3 is the plan as written, not rewritten after the fact.
 
 Inputs: `docs/RISC5_UI_INVENTORY.md` (102 paraphrased features, IDs A1 to J8 used below), `docs/USER_GUIDE.md`,
 `apps/web/src/App.tsx`, `docs/ROADMAP.md` section 7 Deferred lists, and targeted source reads cited inline.
@@ -26,27 +26,27 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | A1 new project with warning (2-4) | Header "New project" clears all screens | None | - | - |
 | A2, A3 save and save as (2-4, 2-5) | Save project downloads JSON; title names the file | None | - | - |
 | A4 open project, discard warning (2-5) | Open by file or drop, asks when unsaved changes | None (RISC5 .prj import is out of scope, section 4) | - | - |
-| A5 exit prompts to save (2-5) | Autosave to browser; no unload warning | Minor: no warning on tab close with unsaved file changes; autosave covers recovery | L | S |
+| A5 exit prompts to save (2-5) | Autosave to browser; no unload warning | None (landed in wave I, slice I3: `project/ProjectBar.tsx` calls `warnBeforeUnload` on tab close or reload while the project has unsaved changes; wave J, J3: a restored autosave prompts only after a new edit) | - | - |
 | A6 default project folder (2-3) | Browser download folder | Out of scope | - | - |
-| B1 six numbered steps (2-3) | Step bar in `App.tsx` lists the six steps but five render as disabled buttons; only Transport links. Home page copy still says "other steps are placeholders" and has no report link | Broken nav: wire every step to a real route, fix stale home copy | H | S |
-| B2 context help on every screen (2-5) | `#/docs` reader exists; no per-screen help link; `slugFromHash` has no section anchors | Add a Help link per screen to its guide section | M | S |
-| B3 decimal comma option (FAQ-2) | `Number(s)` in each form parser; "1,5" is an error | No comma decimal entry | L | M |
+| B1 six numbered steps (2-3) | None (landed in wave H, slice U1: all six steps link to real routes from `steps.ts`, with `aria-current` on the owning step; home copy rewritten and report link added) | - | - |
+| B2 context help on every screen (2-5) | None (landed in wave H, slice U6: `docs/HelpLink.tsx` on 12 screens links to `#/docs/<slug>/<section>`; `docs/catalog.ts` resolves section anchors) | - | - |
+| B3 decimal comma option (FAQ-2) | None (landed in wave H, slice U10: per-browser setting, off by default, one shared parser; saved files and CSV keep the point) | - | - |
 | B4 revisit earlier steps (3-2) | Free navigation plus stale-feed notices | None (exceeds) | - | - |
-| B5 database editor entry (2-5) | No chemical database view at all | See C1 to C5 | - | - |
+| B5 database editor entry (2-5) | None (landed in wave H, slice U3: the browser at `#/chemicals`, see the C1 row); master edits stay out of scope (C2, C3) | - | - |
 | B6 tutorials and FAQ (FAQ-1) | User guide and methods notes; worked examples on vadose and saturated | Out of scope (guide covers it) | - | - |
-| C1, C5, J1, J2, J4, J7 browse the chemical database with per-value sources and a full summary table (FAQ-7, 10-1 to 10-7) | RSL 2024-11 loaded by `risk/useChemicalDb.ts` only to pick chemicals; values and source tags never shown as a table | Read-only chemical database browser with sources and CSV | M | M |
+| C1, C5, J1, J2, J4, J7 browse the chemical database with per-value sources and a full summary table (FAQ-7, 10-1 to 10-7) | None (landed in wave H, slice U3: read-only browser at `#/chemicals` (`apps/web/src/chemicals/`) with search by name or CAS, every value with its source tag, the data edition, and Download CSV with a source column) | - | - |
 | C2, C3 add or remove chemicals permanently (FAQ-8, 2-6) | None | Out of scope as a master edit; a user chemical can be a project-level entry later (not sliced) | L | L |
-| C4, D6 per-property reference text (FAQ-9, 3-3) | Source tags exist in the data, not displayed | Covered by the browser slice and the override slice (user note per override) | M | - |
+| C4, D6 per-property reference text (FAQ-9, 3-3) | None (landed in wave H: source tags are shown in the browser (U3) and each override carries a required source note (U4)) | - | - |
 | C6, G6 human receptor profiles and default dropdown (2-6, 6-4) | Three presets (resident, worker, child) per receptor | None for the dropdown; editing is G7 | - | - |
 | C7 Monte Carlo receptor profiles (FAQ-3) | Distributions per input saved in the project | Out of scope (EFH distribution library is M10 deferred engine and data work) | - | - |
-| C8, F4 soil type profiles and dropdown (2-6, 5-3) | Texture presets on `#/vapor` only (engine `SOIL_TEXTURES`); vadose and saturated take raw hydraulic inputs | Texture preset on vadose and saturated screens | M | S |
-| C9 ecological receptor profiles (2-6) | Eco-SSL benchmarks for birds and mammals; engine `wildlifeDose` and `wildlifeHazardQuotient` exist; M9 Deferred says the surrogate food web table is not wired to the screen | Site-specific wildlife dose panel (UI is the only missing piece) | L | M |
+| C8, F4 soil type profiles and dropdown (2-6, 5-3) | Texture presets on `#/vapor` (engine `SOIL_TEXTURES`), and since wave H (U7) on vadose and saturated | None (landed in wave H, slice U7: texture select on each vadose layer and in the saturated Soil group, Custom kept, values editable after filling) | - | - |
+| C9 ecological receptor profiles (2-6) | Eco-SSL benchmarks for birds and mammals; engine `wildlifeDose` and `wildlifeHazardQuotient` exist; M9 Deferred says the surrogate food web table is not wired to the screen | None (landed in wave H, slice U9: wildlife dose panel on `#/plants-eco` with rows prefilled from the Eco-SSL derivation rows; wave I, slice I2: a "Not reproduced within 5 percent" flag). Remaining: the ORNL benchmark tables are not shipped (M9 Deferred) | - | - |
 | C10, C11 restore and persist databases (2-6, 2-3) | Databases are versioned committed data | Out of scope (no master library) | - | - |
-| D1, D2 chemical picker, 50 limit (3-2) | Picker on risk and cleanup; per-screen chemical selection elsewhere | Partial: no project-wide chemical list shared by every screen | H | L |
-| D3, D4, G9, J8 project-only edit of chemical and toxicity values, same value everywhere (3-3, 6-5, 7-8) | `risk/build.ts` reads `rec.tox` straight from RSL; no override anywhere | Project-level toxicity override shared by risk and cleanup, marked as user values | H | M |
-| D4, F8 fate screens use the chemical's database properties (3-3, 5-5) | `#/vapor` fills M, S, H, Koc, Da, Dw from RSL (`vapor/chemicals.ts`); transport, vadose, saturated take typed values (vadose ships benzene) | "Fill from database" on transport, vadose, saturated | H | M |
-| D5 chemical summary table, two sheets (3-3) | None | Covered by the browser slice CSV (values plus source column) | M | - |
-| E1 to E8 conceptual site model choices (4-2 to 4-4) | No site model screen; feed buttons on each screen carry the chain | Advisory site model screen that turns choices into an ordered screen checklist with the feeds to send | H | M |
+| D1, D2 chemical picker, 50 limit (3-2) | Picker on risk and cleanup; per-screen chemical selection elsewhere | Partial: no project-wide chemical list shared by every screen (not built; see section 4) | H | L |
+| D3, D4, G9, J8 project-only edit of chemical and toxicity values, same value everywhere (3-3, 6-5, 7-8) | None (landed in wave H, slice U4: project-level `overrides` key with an "Edit values" panel on the risk and cleanup chemical cards, shared by both screens; each override needs a source note, is marked as edited, resets per field, and is listed in the report as a user value) | - | - |
+| D4, F8 fate screens use the chemical's database properties (3-3, 5-5) | None (landed in wave H, slice U8: `#/vapor` already filled from RSL (`vapor/chemicals.ts`); transport, vadose and saturated now fill from the database through the shared `ui/chemicalFill.ts`. Transport Kd = Koc x foc is a DEFAULT mapping; surface water is not included) | - | - |
+| D5 chemical summary table, two sheets (3-3) | None | None (landed in wave H, slice U3: the browser CSV carries values plus a source column) | - | - |
+| E1 to E8 conceptual site model choices (4-2 to 4-4) | None (landed in wave H, slice U2: advisory site model screen at `#/site` (`apps/web/src/site/`) turns the choices into an ordered screen checklist with the feed to send on each; saved under `site`, one line in the report; locks nothing) | - | - |
 | E9, G13 ecological Step 2 and 4 (4-4, 6-7) | `#/plants-eco` screening | Out of scope (RISC5 guide leaves it pending) | - | - |
 | F1 direct concentration entry (5-1) | Risk screen concentrations | None | - | - |
 | F2, F3, F5 site properties and source concentrations (5-2 to 5-4) | Per-screen forms | None | - | - |
@@ -56,8 +56,8 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | F13, F14 run models, model list (5-5, 1-3) | In-browser workers; every listed model has a screen (oxygen-limited vapor deferred engine) | None for UI | - | - |
 | G1, G2 pathway checklist (6-2, 7-1) | Per-receptor checkboxes on risk | None | - | - |
 | G3, G4 one or two receptors, additive (6-4) | Two receptors, additive on cleanup and risk | None | - | - |
-| G5 free-text receptor labels (6-5) | Label is "Receptor 1 (Resident)" from `PRESET_LABELS` | No user name for a receptor | M | S |
-| G7, G8 edit exposure factors, tint edited values (6-3 to 6-5) | Only nine factors with no default are editable (`ReceptorPanel.tsx` "Site-specific factors"); body weight, frequency, duration and intake rates are fixed by preset | Editable preset factors with an edited marker and reset | H | M |
+| G5 free-text receptor labels (6-5) | Label is "Receptor 1 (Resident)" from `PRESET_LABELS` | None (landed in wave H, slice U5: optional receptor name on the receptor panel (`risk/ReceptorPanel.tsx`), listed in the report's user values) | - | - |
+| G7, G8 edit exposure factors, tint edited values (6-3 to 6-5) | None (landed in wave H, slice U5: preset factors editable per project in `risk/ReceptorEditor.tsx`, with an "Edited" word and tint, a reset per field, and "Reset to preset" per receptor) | - | - |
 | G10 inhalation toxicity basis choice (6-5) | Legacy and modern method switch sets the basis | Out of scope as a toggle | - | - |
 | G11, G12 back-calc note, two scenarios at once (6-1, 1-5) | Two receptors with different presets | None | - | - |
 | H1 to H5, H7, H13, H14 risk vs cleanup, individual vs cumulative, targets, governing level (8-1 to 8-9) | `#/risk` and `#/cleanup` | None | - | - |
@@ -219,8 +219,9 @@ Serial chains: U4 then U5; U8 then U7. Parallel pairs with low conflict: U3 with
 - Ecological Step 2 and 4 screens (E9, G13): RISC5's own guide leaves them pending; `#/plants-eco` covers
   screening.
 - 50-chemical limit (D2): a constraint, not a feature.
-- Surface water as a cleanup target, international criteria, vapor cleanup levels (H9, I14): engine and
-  data deferrals in M5, M6 and M8, not UI.
+- Surface water as a cleanup target (H9) and international criteria (I14): engine and data deferrals in M5
+  and M8, not UI. Vapor and surface water source levels are on `#/cleanup` (wave K, slices K1 and K2); the
+  paths they do not quantify (nonlinear, soil above residual, upstream background) remain engine work.
 - Multi-chemical runs through every fate screen from one project chemical list (D1, D4 at full scope): needs
   a design ruling on shared chemical state and multi-chemical workers across six screens; too big for one
   slice, so it is recorded as an H gap for a design session, not sliced.
