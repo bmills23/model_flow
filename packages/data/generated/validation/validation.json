@@ -1,0 +1,746 @@
+{
+  "examples": [
+    {
+      "id": "analgwst-point3",
+      "title": "ANALGWST POINT3, continuous point source",
+      "files": [
+        "analgwst/point3-nodecay.json",
+        "analgwst/point3-decay.json"
+      ],
+      "referenceKey": "analgwst",
+      "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
+      "methodIds": [
+        "groundwater.at123d"
+      ],
+      "compares": "Concentration on the printed grid at each printed time and depth, decay 0 and 0.03 per day, against the program output.",
+      "cases": 756,
+      "casesUnit": "printed concentrations",
+      "tolerance": "Half a unit in the last printed decimal: 5e-7 absolute (test bound 5.1e-7), plus 1e-9 relative.",
+      "status": "reproduced",
+      "testFile": "groundwater-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "analgwst-patchi",
+      "title": "ANALGWST PATCHI, patch source on the inflow plane",
+      "files": [
+        "analgwst/patchi-nodecay.json",
+        "analgwst/patchi-decay.json"
+      ],
+      "referenceKey": "analgwst",
+      "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
+      "methodIds": [
+        "groundwater.wexler1992"
+      ],
+      "compares": "Concentration on the printed grid at each printed time and depth, decay 0 and 0.01 per day, against the program output.",
+      "cases": 1120,
+      "casesUnit": "printed concentrations",
+      "tolerance": "Half a unit in the last printed decimal: 5e-7 absolute (test bound 5.1e-7), plus 1e-9 relative.",
+      "status": "reproduced",
+      "testFile": "groundwater-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "analgwst-patchf",
+      "title": "ANALGWST PATCHF, finite aquifer with no-flux boundaries",
+      "files": [
+        "analgwst/patchf-nodecay.json",
+        "analgwst/patchf-decay.json"
+      ],
+      "referenceKey": "analgwst",
+      "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
+      "methodIds": [
+        "groundwater.wexler1992"
+      ],
+      "compares": "Concentration on the printed grid at each printed time and depth in a 60 m wide, 10 m thick aquifer, decay 0 and 0.01 per day, against the program output.",
+      "cases": 1296,
+      "casesUnit": "printed concentrations",
+      "tolerance": "Half a unit in the last printed decimal: 5e-6 absolute (test bound 5.1e-6), plus 1e-9 relative.",
+      "status": "reproduced",
+      "testFile": "groundwater-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "mibitrans-domenico",
+      "title": "mibitrans Bioscreen, truncated Domenico solution",
+      "files": [
+        "mibitrans/cases.json"
+      ],
+      "referenceKey": "mibitrans",
+      "source": "mibitrans",
+      "methodIds": [
+        "groundwater.domenico1987"
+      ],
+      "compares": "The truncated Domenico plume concentration at sampled (x, y, t) points against the package output.",
+      "cases": 96,
+      "casesUnit": "points",
+      "tolerance": "1e-9 absolute plus 1e-9 relative.",
+      "status": "reproduced",
+      "testFile": "groundwater-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "mibitrans-exact",
+      "title": "mibitrans Mibitrans, exact patch solution",
+      "files": [
+        "mibitrans/cases.json"
+      ],
+      "referenceKey": "mibitrans",
+      "source": "mibitrans",
+      "methodIds": [
+        "groundwater.wexler1992"
+      ],
+      "compares": "The exact Wexler patch solution (no source depletion) at the same sampled points against the package output.",
+      "cases": 96,
+      "casesUnit": "points",
+      "tolerance": "1e-10 absolute plus 1e-7 relative.",
+      "status": "reproduced",
+      "testFile": "groundwater-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "ssg1996-table-a1",
+      "title": "SSG 1996 Table A-1, generic soil-to-groundwater levels",
+      "files": [
+        "cleanup/ssg1996-table-a1.json"
+      ],
+      "referenceKey": "epa1996ssg",
+      "source": "Soil Screening Guidance: Technical Background Document",
+      "methodIds": [
+        "cleanup.ssg-leaching"
+      ],
+      "compares": "The MCL-based generic level at DAF 20 and DAF 1 for 15 chemicals. It checks the three-phase partition formula, the DAF arithmetic and the metal Kd values; it does not check the organic Koc and H, which were typed into the file.",
+      "cases": 30,
+      "casesUnit": "printed levels",
+      "tolerance": "Half a unit in the last printed digit: two significant figures from 10 up, one below 10.",
+      "status": "reproduced",
+      "testFile": "cleanup-ssg.test.ts",
+      "note": ""
+    },
+    {
+      "id": "rsl-tap-water-combined",
+      "title": "RSL November 2024 resident tap water, combined levels",
+      "files": [
+        "cleanup/rsl-2024-11-cleanup.json"
+      ],
+      "referenceKey": "epa2024rsl",
+      "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
+      "methodIds": [
+        "cleanup.rags-e-f-2014"
+      ],
+      "compares": "The carcinogenic and child noncarcinogenic tap water levels over ingestion and bathing dermal, back-calculated by the cleanup solver. A blank cell is asserted as no level.",
+      "cases": 9,
+      "casesUnit": "published levels",
+      "tolerance": "Half a unit in the second significant figure.",
+      "status": "reproduced",
+      "testFile": "cleanup-direct.test.ts",
+      "note": ""
+    },
+    {
+      "id": "rsl-risk-based-ssl",
+      "title": "RSL November 2024 risk-based soil-to-groundwater SSL",
+      "files": [
+        "cleanup/rsl-2024-11-cleanup.json"
+      ],
+      "referenceKey": "epa2024rsl",
+      "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
+      "methodIds": [
+        "cleanup.ssg-leaching",
+        "cleanup.rags-e-f-2014"
+      ],
+      "compares": "The DAF 1 risk-based SSL for the six chemicals with no household-use inhalation term: the unrounded lower tap water level times the partition factor.",
+      "cases": 6,
+      "casesUnit": "published levels",
+      "tolerance": "Half a unit in the second significant figure.",
+      "status": "reproduced",
+      "testFile": "cleanup-rsl-ssl.test.ts",
+      "note": ""
+    },
+    {
+      "id": "r9",
+      "title": "Table R-9, direct exposure pathways (page 1 of 3)",
+      "files": [
+        "exposure/r9.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "exposure.rags-a-1989"
+      ],
+      "compares": "Dose, cancer risk and hazard index for soil ingestion, soil dermal contact, groundwater ingestion and shower dermal contact, for four chemicals. A printed NQ is asserted as a null. The table lists no exposure inputs; the RISC4 manual values are fixture inputs for this case only, and the dermal soil rows use a back-solved product of 5,750.",
+      "cases": 48,
+      "casesUnit": "printed cells",
+      "tolerance": "Half a unit in the last printed digit, derived from the printed string.",
+      "status": "reproduced",
+      "testFile": "exposure-legacy-r9.test.ts",
+      "note": "This reproduces the review arithmetic and is not evidence of model accuracy."
+    },
+    {
+      "id": "rsl-2024-11",
+      "title": "RSL November 2024, independent check of the modern method",
+      "files": [
+        "exposure/rsl-2024-11.json"
+      ],
+      "referenceKey": "epa2024rsl",
+      "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
+      "methodIds": [
+        "exposure.rags-e-f-2014"
+      ],
+      "compares": "Resident soil, composite worker soil, resident tap water and resident air screening levels at target risk 1e-6 and hazard quotient 1. A blank cell is asserted as no coefficient.",
+      "cases": 50,
+      "casesUnit": "published levels",
+      "tolerance": "The engine value rounds to the published value: half a unit in the second significant figure.",
+      "status": "reproduced",
+      "testFile": "exposure-modern-rsl.test.ts",
+      "note": ""
+    },
+    {
+      "id": "rsl-2024-11-default-parameters",
+      "title": "RSL November 2024 default exposure parameters",
+      "files": [
+        "exposure/rsl-2024-11-default-parameters.json"
+      ],
+      "referenceKey": "epa2024rsl",
+      "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
+      "methodIds": [
+        "exposure.rags-e-f-2014"
+      ],
+      "compares": "The modern resident and composite worker presets, the ADAF age segments and the sheet’s own age-adjusted factors.",
+      "cases": 8,
+      "casesUnit": "age-adjusted factors (the preset values are compared as well)",
+      "tolerance": "Equal to the printed precision of each factor (toBeCloseTo at 1 to 6 decimals).",
+      "status": "reproduced",
+      "testFile": "exposure-modern-presets.test.ts",
+      "note": ""
+    },
+    {
+      "id": "ssg1996-csat",
+      "title": "SSG 1996 Table 3-A, soil saturation limits",
+      "files": [
+        "saturatedSource/ssg1996-csat.json"
+      ],
+      "referenceKey": "epa1996ssg",
+      "source": "Soil Screening Guidance: Technical Background Document",
+      "methodIds": [
+        "saturatedSource.two-region"
+      ],
+      "compares": "The soil saturation limit Csat for six chemicals with the document’s default soil.",
+      "cases": 6,
+      "casesUnit": "printed limits",
+      "tolerance": "Half a unit in the second printed significant figure (per-chemical bound in the file).",
+      "status": "reproduced",
+      "testFile": "saturated-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "bioscreen-mass",
+      "title": "BIOSCREEN soluble mass example",
+      "files": [
+        "saturatedSource/bioscreen-mass.json"
+      ],
+      "referenceKey": "newell1996",
+      "source": "BIOSCREEN natural attenuation decision support system, user's manual",
+      "methodIds": [
+        "saturatedSource.exponential"
+      ],
+      "compares": "The initial soluble mass of three zones, M0 = F rho_b H_s A.",
+      "cases": 3,
+      "casesUnit": "zone masses",
+      "tolerance": "0.5 kg absolute (the printed masses are rounded to kg).",
+      "status": "reproduced",
+      "testFile": "saturated-fixtures.test.ts",
+      "note": ""
+    },
+    {
+      "id": "saturated-hand-cases",
+      "title": "Saturated soil source constructed cases A and B",
+      "files": [
+        "saturatedSource/hand-cases.json"
+      ],
+      "referenceKey": null,
+      "source": "Constructed cases computed by an independent script from the equations of the methods note; not a published example.",
+      "methodIds": [
+        "saturatedSource.exponential",
+        "saturatedSource.two-region"
+      ],
+      "compares": "Depletion times, rates and initial masses of a source with and without a separate phase and a fluctuating water table.",
+      "cases": 2,
+      "casesUnit": "constructed cases",
+      "tolerance": "1e-9 relative (arithmetic); initial mass 1e-12.",
+      "status": "reproduced",
+      "testFile": "saturated-release.test.ts",
+      "note": "An arithmetic cross-check, not a comparison with a published value."
+    },
+    {
+      "id": "r8",
+      "title": "Table R-8, river and lake mixing",
+      "files": [
+        "surfaceWater/r8.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "surfaceWater.well-mixed",
+        "surfaceWater.mass-discharge"
+      ],
+      "compares": "Groundwater flow, mass flux, the river and lake concentrations and the sediment concentration. The RISC4 benzene Koc is a fixture input for this case only.",
+      "cases": 5,
+      "casesUnit": "printed values",
+      "tolerance": "Half a unit in the last printed digit (0.005 mg/L, 0.005 mg/kg, 0.5 mg/d).",
+      "status": "reproduced",
+      "testFile": "surfacewater-r8.test.ts",
+      "note": "The review reports exact agreement with its own hand calculation, so this reproduces arithmetic, not model accuracy."
+    },
+    {
+      "id": "manual-l4",
+      "title": "RISC5 user’s guide Appendix L, river and lake examples",
+      "files": [
+        "surfaceWater/manual-l4.json"
+      ],
+      "referenceKey": null,
+      "source": "RISC5 user’s guide, Appendix L (not a references.json record).",
+      "methodIds": [
+        "surfaceWater.well-mixed"
+      ],
+      "compares": "The river (30.8 mg/L) and lake (11.7 mg/L) concentrations. The adjusted-volume lake example is not used.",
+      "cases": 2,
+      "casesUnit": "printed values",
+      "tolerance": "Half a unit in the last printed digit (0.05 mg/L).",
+      "status": "reproduced",
+      "testFile": "surfacewater-r8.test.ts",
+      "note": ""
+    },
+    {
+      "id": "table-r2",
+      "title": "Table R-2, probabilistic drinking water case",
+      "files": [
+        "uncertainty/table-r2.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "uncertainty.srs-exposure"
+      ],
+      "compares": "The legacy method runs the printed case with body weight, exposure duration and water ingestion sampled, and the test asserts no failed iteration and monotone, non-degenerate percentiles. The printed percentiles are recorded and not compared, because the review gives no input distributions.",
+      "cases": 1,
+      "casesUnit": "case run",
+      "tolerance": "None. No printed value is compared.",
+      "status": "smoke test only",
+      "testFile": "uncertainty-runner.test.ts",
+      "note": "A comparison waits for sourced input distributions."
+    },
+    {
+      "id": "r7",
+      "title": "Table R-7, vadose leaching to the water table",
+      "files": [
+        "vadose/r7.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "vadose.vadsat"
+      ],
+      "compares": "The source pore water concentration and the water table concentration at 10 years (mean of the twelve month-end values of year 10). Benzene properties are RISC4 values used for this case only.",
+      "cases": 2,
+      "casesUnit": "printed values",
+      "tolerance": "1 percent (source pore water) and 3 percent (water table) relative.",
+      "status": "reproduced",
+      "testFile": "vadose-r7.test.ts",
+      "note": "The water table value is ill-conditioned (5 percent on Koc moves it about 25 percent), so this reproduces the review arithmetic and is not evidence of model accuracy."
+    },
+    {
+      "id": "vga1982-a1",
+      "title": "van Genuchten and Alves 1982 Table 6, program A1 output",
+      "files": [
+        "vadose/vga1982-a1.json"
+      ],
+      "referenceKey": "vangenuchten1982",
+      "source": "Analytical solutions of the one-dimensional convective-dispersive solute transport equation",
+      "methodIds": [
+        "vadose.vadsat",
+        "vadose.layered"
+      ],
+      "compares": "Concentration against distance at five times for the first-type and third-type inlets, without decay or depletion.",
+      "cases": 102,
+      "casesUnit": "printed values",
+      "tolerance": "5e-5 absolute (four decimals as printed).",
+      "status": "reproduced",
+      "testFile": "vadose-legacy.test.ts",
+      "note": "One first-type value (t = 10, x = 14) has a degraded printed glyph and is entered as the closed form reads it."
+    },
+    {
+      "id": "risc-r3-r5",
+      "title": "Tables R-3, R-4 and R-5, vapor intrusion",
+      "files": [
+        "vapor/risc-r3-r5.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "vapor.je-1991",
+        "vapor.dominant-layer-1998"
+      ],
+      "compares": "Soil to indoor air with and without TPH (R-3), the dominant layer with degradation (R-4) and groundwater to indoor air (R-5). The independent column of R-3 is recorded, not asserted.",
+      "cases": 4,
+      "casesUnit": "printed results",
+      "tolerance": "0.5 percent of the RISC value.",
+      "status": "reproduced",
+      "testFile": "vapor-legacy.test.ts",
+      "note": ""
+    },
+    {
+      "id": "table-r6",
+      "title": "Table R-6, groundwater to outdoor air",
+      "files": [
+        "vapor/risc-r3-r5.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "outdoorAir.box"
+      ],
+      "compares": "The printed 2.27e-3 mg/m^3 equals the indoor result of Table R-5 to three figures and no box reading reproduces it (the box gives 2.54e-6 mg/m^3). It is treated as a transcription error in the review. The box hand value is asserted instead.",
+      "cases": 1,
+      "casesUnit": "printed value",
+      "tolerance": "The box hand value at 1e-9 relative; the printed value is never widened into a tolerance.",
+      "status": "named exception",
+      "testFile": "outdoor-air.test.ts",
+      "note": "Not reproduced; the printed value is believed to be a transcription error."
+    },
+    {
+      "id": "appendix-j",
+      "title": "RISC5 user’s guide Appendix J, layered vapor example",
+      "files": [
+        "vapor/appendix-j.json"
+      ],
+      "referenceKey": null,
+      "source": "RISC5 user’s guide, Appendix J (not a references.json record).",
+      "methodIds": [
+        "vapor.dominant-layer-1998"
+      ],
+      "compares": "The normalized concentration at the top of layer 1 for the base, dry and wet cases. The values are stated in prose from figures, so they are figure readings.",
+      "cases": 3,
+      "casesUnit": "figure readings",
+      "tolerance": "0.01 absolute.",
+      "status": "reproduced",
+      "testFile": "vapor-legacy.test.ts",
+      "note": ""
+    },
+    {
+      "id": "epa2004-sl-adv",
+      "title": "EPA 2004 Appendix C, SL-ADV benzene worked example",
+      "files": [
+        "vapor/epa2004-sl-adv.json"
+      ],
+      "referenceKey": "epa2004je",
+      "source": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings",
+      "methodIds": [
+        "vapor.je-epa"
+      ],
+      "compares": "Printed intermediate and final values of the spreadsheet example: building geometry, ventilation, permeability, effective diffusion, source vapor, and the mass-limited building concentration.",
+      "cases": 22,
+      "casesUnit": "printed values",
+      "tolerance": "Half a unit in the last printed digit of each value (the test derives it from the printed string).",
+      "status": "reproduced",
+      "testFile": "vapor-epa-je.test.ts",
+      "note": ""
+    },
+    {
+      "id": "visl",
+      "title": "VISL screening levels, identity check",
+      "files": [
+        "vapor/visl.json"
+      ],
+      "referenceKey": "epavisl",
+      "source": "Vapor Intrusion Screening Level User's Guide",
+      "methodIds": [
+        "vapor.attenuation-factor-2015"
+      ],
+      "compares": "The online VISL calculator was not run, so no printed VISL value is asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.",
+      "cases": 2,
+      "casesUnit": "chemicals",
+      "tolerance": "1e-12 relative (an identity, not a published value).",
+      "status": "pending or deferred",
+      "testFile": "vapor-screening.test.ts",
+      "note": "Pending a run of the VISL calculator."
+    },
+    {
+      "id": "r9-exception-inhalation-in-shower",
+      "title": "Table R-9, Inhalation in Shower",
+      "files": [
+        "exposure/r9.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "shower.fc-1986"
+      ],
+      "compares": "The shower model inputs of the review (droplet size, fall time, water flow, stall volume, film coefficients, water temperature) are not printed in the table or in the RISC5 guide, and the RISC4 manual that carries them was not available, so the row cannot be reproduced without inventing inputs. The shower model is checked by identities and hand cases instead.",
+      "cases": 1,
+      "casesUnit": "row",
+      "tolerance": "Not compared. Checked by identities and hand cases instead.",
+      "status": "named exception",
+      "testFile": "exposure-legacy-r9.test.ts",
+      "note": "Ruling recorded in docs/DECISIONS.md, 2026-10-18, M7 slice E4, item 4."
+    },
+    {
+      "id": "r9-deferred-ingestion-of-root-vegetables-m9",
+      "title": "Table R-9, Ingestion of Root Vegetables (M9)",
+      "files": [
+        "exposure/r9.json"
+      ],
+      "referenceKey": "arcadis2001",
+      "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
+      "methodIds": [
+        "plantUptake.trapp-matthies-1995"
+      ],
+      "compares": "The root vegetable ingestion row of the page-1 table is not reproduced yet.",
+      "cases": 1,
+      "casesUnit": "row",
+      "tolerance": "Not compared yet.",
+      "status": "pending or deferred",
+      "testFile": "exposure-legacy-r9.test.ts",
+      "note": ""
+    },
+    {
+      "id": "vga1982-a1-exceptions",
+      "title": "van Genuchten and Alves 1982 Table 6, eight named exceptions",
+      "files": [
+        "vadose/vga1982-a1.json"
+      ],
+      "referenceKey": "vangenuchten1982",
+      "source": "Analytical solutions of the one-dimensional convective-dispersive solute transport equation",
+      "methodIds": [
+        "vadose.vadsat",
+        "vadose.layered"
+      ],
+      "compares": "Eight printed values the 1982 program evidently evaluated slightly differently at large x and t: first-type t = 5, x = 18 and seven third-type points. Each is asserted at the widened bound, and the other values stay at 5e-5.",
+      "cases": 8,
+      "casesUnit": "printed values",
+      "tolerance": "0.00015 absolute, by name (ruling in docs/DECISIONS.md, 2026-10-16: M2 tolerance rulings (Named exceptions at 1.5e-4)).",
+      "status": "named exception",
+      "testFile": "vadose-layered.test.ts",
+      "note": "The closed form agrees with the printed values only to 1.5e-4 at these points."
+    }
+  ],
+  "unverified": {
+    "plannedReferences": [
+      {
+        "key": "foster1986",
+        "title": "[Inhalation exposures to volatile organic contaminants in the shower]",
+        "reliedOnBy": [
+          "irrigation.sprinkler-fc",
+          "shower.fc-1986"
+        ]
+      },
+      {
+        "key": "trapp2015",
+        "title": "[Plant uptake and transport models for neutral and ionic chemicals]",
+        "reliedOnBy": [
+          "plantUptake.hhrap-2005"
+        ]
+      }
+    ],
+    "otherPlannedReferences": [
+      {
+        "key": "srinivasan2008a",
+        "title": "[Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part I]"
+      },
+      {
+        "key": "srinivasan2008b",
+        "title": "[Analytical solutions for sequentially coupled one-dimensional reactive transport problems, part II]"
+      },
+      {
+        "key": "cline1991",
+        "title": "Partitioning of aromatic constituents into water from gasoline and other complex solvent mixtures"
+      },
+      {
+        "key": "remchlor",
+        "title": "REMChlor"
+      },
+      {
+        "key": "aziz2000",
+        "title": "BIOCHLOR"
+      },
+      {
+        "key": "gelhar1992",
+        "title": "[A critical review of data on field-scale dispersion in aquifers]"
+      },
+      {
+        "key": "celia1990",
+        "title": "A general mass-conservative numerical solution for the unsaturated flow equation"
+      },
+      {
+        "key": "astme1739",
+        "title": "ASTM E1739-95 Standard guide for risk-based corrective action applied at petroleum release sites"
+      },
+      {
+        "key": "yao2011",
+        "title": "Comparison of the Johnson-Ettinger vapor intrusion screening model predictions with full three-dimensional model results"
+      },
+      {
+        "key": "yao2013",
+        "title": "A review of vapor intrusion models"
+      },
+      {
+        "key": "abreu2005",
+        "title": "Effect of vapor source-building separation and building construction on soil vapor intrusion as studied with a three-dimensional numerical model"
+      },
+      {
+        "key": "abreu2009",
+        "title": "Simulated soil vapor intrusion attenuation factors including biodegradation for petroleum hydrocarbons"
+      },
+      {
+        "key": "biovapor2010",
+        "title": "BioVapor"
+      },
+      {
+        "key": "pviscreen",
+        "title": "PVIScreen"
+      },
+      {
+        "key": "abreu2006",
+        "title": "Simulating the effect of aerobic biodegradation on soil vapor intrusion into buildings: influence of degradation rate, source concentration, and depth"
+      },
+      {
+        "key": "sobol1993",
+        "title": "[Sensitivity estimates for nonlinear mathematical models]"
+      },
+      {
+        "key": "morris1991",
+        "title": "Factorial sampling plans for preliminary computational experiments"
+      },
+      {
+        "key": "macdonald2000",
+        "title": "Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems"
+      },
+      {
+        "key": "noaasquirts",
+        "title": "Screening Quick Reference Tables (SQuiRTs)"
+      },
+      {
+        "key": "long1995",
+        "title": "Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments"
+      },
+      {
+        "key": "stephan1985",
+        "title": "Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses"
+      },
+      {
+        "key": "roseberry1992",
+        "title": "Lognormal distributions for water intake by children and adults"
+      },
+      {
+        "key": "ishigami1990",
+        "title": "An importance quantification technique in uncertainty analysis for computer models"
+      }
+    ],
+    "defaults": [
+      {
+        "subject": "Foster and Chrostowski film reference coefficients (3000 cm/h gas, 20 cm/h liquid)",
+        "methodIds": [
+          "shower.fc-1986"
+        ],
+        "warningCode": "shower.film-reference-unverified",
+        "referenceKey": "foster1986",
+        "referenceStatus": "planned",
+        "note": "RISC5 choices that could not be verified against the primary paper; they are inputs and the defaults are warned. The stagnant stall source is a planned, unverified record and is not cited."
+      },
+      {
+        "subject": "Little (1992) two-resistance stall mass balance",
+        "methodIds": [
+          "shower.little-1992"
+        ],
+        "warningCode": null,
+        "referenceKey": "little1992",
+        "referenceStatus": "used",
+        "note": "The mass balance is our statement of the two-resistance theory, checked by limit identities; it is not a transcription of the paper."
+      },
+      {
+        "subject": "Household transfer factor K (RSL whole-house water-to-air term)",
+        "methodIds": [
+          "shower.rsl-household"
+        ],
+        "warningCode": "shower.household-factor-unverified",
+        "referenceKey": "epa2024rslug",
+        "referenceStatus": "used",
+        "note": "An entered value that could not be verified against a primary page of the RSL documentation."
+      },
+      {
+        "subject": "HHRAP fallback standing in for Trapp (2015)",
+        "methodIds": [
+          "plantUptake.hhrap-2005"
+        ],
+        "warningCode": null,
+        "referenceKey": "trapp2015",
+        "referenceStatus": "planned",
+        "note": "The modern plant model is the EPA HHRAP 2005 produce equations until the Trapp (2015) models are read."
+      },
+      {
+        "subject": "Transpiration stream concentration factor (TSCF) and leaf-air partition coefficient",
+        "methodIds": [
+          "plantUptake.trapp-matthies-1995"
+        ],
+        "warningCode": null,
+        "referenceKey": "trappmatthies1995",
+        "referenceStatus": "used",
+        "note": "User inputs, because their published regressions were not read."
+      },
+      {
+        "subject": "Briggs root concentration factor constants",
+        "methodIds": [
+          "plantUptake.trapp-matthies-1995",
+          "plantUptake.hhrap-2005"
+        ],
+        "warningCode": null,
+        "referenceKey": "briggs1982",
+        "referenceStatus": "used",
+        "note": "The constants are those the HHRAP appendix prints for the Briggs correlation, not read from the original paper."
+      },
+      {
+        "subject": "Schulze-Makuch (2005) dispersivity coefficients",
+        "methodIds": [
+          "dispersivity.schulze-makuch2005"
+        ],
+        "warningCode": null,
+        "referenceKey": "schulzemakuch2005",
+        "referenceStatus": "used",
+        "note": "The unconsolidated-media pair c = 0.20, m = 0.44 is quoted from lecture notes that cite the paper, not from the paper’s own tables."
+      },
+      {
+        "subject": "Gelhar et al. (1985) two-branch vadose dispersivity regression",
+        "methodIds": [
+          "vadose.vadsat"
+        ],
+        "warningCode": null,
+        "referenceKey": "gelhar1985",
+        "referenceStatus": "used",
+        "note": "The coefficients are taken from the RISC5 manual’s statement of its choice; the EPRI report was not checked for them, so the reference entry does not vouch for them."
+      },
+      {
+        "subject": "Organic Koc and H of the SSG 1996 Table A-1 fixture",
+        "methodIds": [
+          "cleanup.ssg-leaching"
+        ],
+        "warningCode": null,
+        "referenceKey": "epa1996ssg",
+        "referenceStatus": "used",
+        "note": "Typed into the fixture and not read from Tables 36 or C-1 of the primary document; only loosely constrained by the printed levels."
+      }
+    ],
+    "notChecked": [
+      {
+        "subject": "RSL inhalation cells",
+        "note": "Tap water inhalation, soil inhalation and the noncancer worker air value of the RSL tables are not checked by the RSL independent check; the benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case."
+      },
+      {
+        "subject": "DeVaull (2007) vapor model",
+        "note": "No published numeric example could be verified, so the model rests on identities and hand cases built from independent closed forms. There is no fixture file."
+      },
+      {
+        "subject": "Table R-9 pages 2 and 3",
+        "note": "The RISC5 guide reproduces only page 1 of the three pages, so the other rows cannot be checked."
+      }
+    ]
+  }
+}

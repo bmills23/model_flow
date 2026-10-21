@@ -5,6 +5,11 @@ import { fileURLToPath } from 'node:url';
 import { references, registry } from '@model-flow/engine';
 import { renderAttributions, type DataEdition } from '../src/attributions.js';
 import { localIsoDate, renderStable } from '../src/stable.js';
+import {
+  buildValidationManifest,
+  renderValidationJson,
+  renderValidationMarkdown,
+} from '../src/validation.js';
 import { renderThirdPartyLicenses, type PnpmLicenseReport } from '../src/licenses.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -80,4 +85,18 @@ write('ATTRIBUTIONS.md', (generatedOn) =>
 write('THIRD_PARTY_LICENSES.md', (generatedOn) =>
   renderThirdPartyLicenses({ report, generatedOn }),
 );
-console.log('Wrote docs/ATTRIBUTIONS.md and docs/THIRD_PARTY_LICENSES.md');
+
+const validation = buildValidationManifest({
+  root,
+  references,
+  methodIds: registry.list().map((m) => m.id),
+  methods: registry.list(),
+});
+write('VALIDATION.md', (generatedOn) => renderValidationMarkdown(validation, generatedOn));
+// The JSON the web page imports carries no date, so it changes only when the manifest does.
+const validationDir = resolve(root, 'packages/data/generated/validation');
+mkdirSync(validationDir, { recursive: true });
+writeFileSync(resolve(validationDir, 'validation.json'), renderValidationJson(validation));
+console.log(
+  'Wrote docs/ATTRIBUTIONS.md, docs/THIRD_PARTY_LICENSES.md, docs/VALIDATION.md and packages/data/generated/validation/validation.json',
+);
