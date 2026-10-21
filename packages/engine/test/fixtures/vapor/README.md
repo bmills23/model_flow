@@ -42,3 +42,10 @@ The online VISL calculator was not run, so slice V6 (`test/vapor-screening.test.
 methods note: identity 8c (groundwater screening level times AF times H' times 1000 L/m^3 equals the target
 indoor air) against the RSL resident air values for benzene and naphthalene already used by M4. No printed
 VISL figure is asserted.
+
+## epa2004-sl-adv.json: EPA 2004 Appendix C worked example (`epa2004je`)
+
+The SL-ADV benzene example of the EPA Johnson and Ettinger user's guide (data entry, chemical properties and
+intermediate calculations sheets). The file holds the inputs, the reading of the strata (in its `readings`
+field) and the printed intermediate and final values. The test `test/vapor-epa-je.test.ts` compares each
+printed value the test uses to half a unit in its last printed digit.

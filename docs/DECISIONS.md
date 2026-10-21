@@ -2570,6 +2570,7 @@ Every ruling below is DEFAULT unless marked otherwise.
 3. **UI parity document.** The gap table in `docs/UI_PARITY.md` section 2 is corrected in place against the tree
    (several rows still read open for slices that landed).
 
+<<<<<<< HEAD
 ## 2026-10-21: Wave L slice L1, live feed staleness
 
 Slice L1 makes the stale mark live for every value passed between screens and exposes it to the consumers
@@ -2655,3 +2656,55 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    mark. The mark follows L1's coarseness (any edit of the sending form), so a source form edit that changes none of the
    sent values still marks.
 6. **No schema change.** Nothing new is saved, so `FINGERPRINT_SKIP` is untouched and older files are not flagged.
+=======
+## 2026-10-21: Wave M slice M1, validation manifest
+
+1. **Catalog plus checks, not a scraper (DEFAULT).** The descriptive text of each example (source key, method id,
+   what is compared, tolerance, status) is a hand-written catalog in `packages/data/src/validationCatalog.ts`,
+   because tolerances live in test code that has no common shape. The generator
+   (`packages/data/src/validation.ts`, run by `docs:generate`) checks every catalog statement against the tree and
+   throws when one fails: the fixture files exist and are counted from the parsed JSON, the fixture README
+   mentions a named string, the test source contains the strings that pin the stated tolerance, each reference key
+   exists in `references.json`, each method id is registered, and each warned default (and its warning code) is
+   still found in the file that raises it. Named exceptions and deferred rows of Table R-9 and the eight Table 6
+   exceptions are read from the fixture fields (`namedExceptions`, `deferred`), not retyped.
+2. **Outputs (DEFAULT).** `docs/VALIDATION.md` (dated like the other generated documents, the date moving only
+   when the content changes) and `packages/data/generated/validation/validation.json` (about 30 KB, no date, the
+   file the M2 page imports through `@model-flow/data/generated/validation/validation.json`). `docs:check` now
+   also fails on a stale copy of either. A data-package test fails if a fixture directory or fixture file is not
+   in the manifest, so a new fixture cannot ship without an entry.
+3. **Statuses (DEFAULT).** `reproduced`, `named exception`, `pending or deferred`, `smoke test only`. Table R-6,
+   the Table R-9 shower inhalation row, and the eight van Genuchten and Alves points are named exceptions; the
+   Table R-9 root vegetable row and the VISL identity check (the calculator was not run) are pending or deferred;
+   Table R-2 is a smoke test. Every other entry is reproduced at the stated tolerance.
+4. **Open question, observed largest error per example (ruling: no).** The generator cannot report it cheaply.
+   Each test maps its fixture to engine inputs with its own unit conversions, soil blocks and reading choices
+   (for example the Table R-7 month-end mean, or the R-9 back-solved dermal product), so calling the engine from
+   the generator would duplicate that test logic and could silently disagree with the test. The manifest reports
+   the enforced tolerance only, and the document says so. Revisit by having tests export an observed-error figure.
+5. **Unverified list (DEFAULT).** Planned references a shipped method relies on are derived (the key appears in a
+   registered method's own text, or a warned default names it): `foster1986` and `trapp2015` today; the other
+   planned references are listed apart. The warned or unverified defaults are the Foster and Chrostowski film
+   coefficients, the Little 1992 mass balance, the household factor K, the HHRAP fallback for Trapp 2015, TSCF
+   and the leaf-air partition coefficient, the Briggs root constants, the Schulze-Makuch 2005 coefficients, the
+   Gelhar 1985 vadose regression constants (taken from the RISC5 manual) and the typed organic Koc and H of the
+   SSG 1996 fixture. Only the Foster and household items raise a warning code today; the rest are located by the
+   exact sentence in the source that states the limitation.
+6. **No new values (DEFAULT).** No published value, tolerance or citation was added. The two sources without a
+   `references.json` key (the RISC5 guide Appendices J and L) are named in plain text and carry no key. The vapor
+   fixture README gained a short section for `epa2004-sl-adv.json`, which had none.
+7. **No user-visible app change in M1.** `docs/USER_GUIDE.md` is not edited; slice M2 adds the page and its guide
+   entry.
+
+## 2026-10-21: Wave M slice M2, validation page
+
+1. **Route and content (DEFAULT).** `#/validation`, built from `@model-flow/data/generated/validation/validation.json`. It
+   opens with a plain statement of what the evidence shows and does not show (no RISC5 licence, so nothing is checked
+   against RISC5 outputs), then a table of every manifest example (source, method, what is compared, cases, tolerance,
+   status) using the existing `doc-table` card pattern on narrow screens, then the unverified lists. The table shows all
+   statuses, not only reproduced, so named exceptions, deferred rows and smoke tests are visible beside the reproductions.
+2. **Links (DEFAULT).** A nav link after Methods and References, a home page button, a sentence on the methods page and a
+   line under the report's "Methods statement" heading. A Help link points at a new user guide section.
+3. **No new saved keys (DEFAULT).** The page reads static data only, so nothing is saved and `FINGERPRINT_SKIP` is unchanged.
+4. **Mobile check (DEFAULT).** `#/validation` added to the route list in `scripts/mobile-check.mjs`; not run in this slice.
+>>>>>>> wave-m-m2

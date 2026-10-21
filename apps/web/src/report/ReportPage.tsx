@@ -299,6 +299,9 @@ export function ReportView({
 
       <section className="report-section" aria-labelledby="rep-methods">
         <h2 id="rep-methods">Methods statement</h2>
+        <p className="muted">
+          What the methods are checked against is on the <a href="#/validation">validation page</a>.
+        </p>
         {statement.methods.length === 0 ? (
           <p className="muted">No methods were run.</p>
         ) : (

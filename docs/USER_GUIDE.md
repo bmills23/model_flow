@@ -329,6 +329,16 @@ unit, source level, limiting endpoint, cancer and noncancer levels; the surface 
 surface water level it reproduces). A level that is not quantified prints as an empty cell with its reason in the
 last column, never as zero. The three tables also have Download CSV buttons on the cleanup screen.
 
+### Validation (`#/validation`)
+
+This page shows the published worked examples the test suite reproduces: the source, the method, what is
+compared, the number of cases, the tolerance and the status. A status is reproduced, named exception,
+pending or deferred, or smoke test only. Below the table is a plain list of what is not verified: references a
+method relies on that have not been read, defaults that carry a warning, and values the tests do not check.
+There is no RISC5 licence, so nothing is checked against RISC5 outputs. The page is generated from the test
+fixtures, so it matches what the tests check. It is linked from Methods and References, the home page and the
+report's methods statement.
+
 ### Downloading tables
 
 Result tables have a Download CSV button. The file name carries the table name, the app version, the data
@@ -338,6 +348,7 @@ editions it used and the date, so a file can be traced to what produced it.
 
 - This reader (`#/docs`) shows this guide, every methods note and the attributions.
 - Methods and References (`#/methods`) lists every registered method with its kind, assumptions and sources.
+- Validation (`#/validation`) lists the published examples the tests reproduce and what is unverified.
 - The attributions document records the science and the data provenance. Third-party software licences are
   kept in a separate document in the repository.
 
