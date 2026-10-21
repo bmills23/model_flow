@@ -154,8 +154,8 @@ attached to results, never silent clamps, except where RISC5 clamps and the lega
 ## 7. Milestones
 
 Each milestone: write the methods note (equations in our words, citations) -> TDD the engine (fixtures
-first) -> UI step and visualization -> ATTRIBUTIONS and references updated -> local gate green (lint,
-typecheck, full vitest, build, mobile viewport check) -> one push. Record per-push CI minutes in the repo instructions file
+first) -> UI step and visualization -> ATTRIBUTIONS and references updated -> local gate green once on the
+integrated tree (lint, typecheck, full vitest, build, full mobile viewport check; cadence in CLAUDE.md) -> one push. Record per-push CI minutes in the repo instructions file
 after the first run.
 
 - **M0 Foundation (first session). DONE 2026-10-15.** Clone to `~/repos/model_flow`; copy this plan to `docs/ROADMAP.md`;

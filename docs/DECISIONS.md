@@ -2746,3 +2746,25 @@ on `wave-lm`. Every ruling is DEFAULT.
 12. **Transport vadose read (DEFAULT).** The transport screen reads the vadose feed only when the saturated feed is not on.
 13. **Conflict-marker guard (DEFAULT).** Exact `=======` counts as a marker in markdown outside fences, so a setext
     underline of exactly seven `=` would be flagged.
+## 2026-10-21: Check cadence between waves
+
+Bryan directed, verbatim: "yes, do all five", in reply to a proposal made after wave K was timed (about 20 of its
+174 minutes went to building and about 110 to gate, mobile check and CI runs or to waiting on them). The working
+rules are in CLAUDE.md under "Wave cadence"; this block records what changed.
+
+1. **Gate once per wave, at integration.** The full gate and the full mobile check run once on the integrated tree,
+   after the corrective pass if there is one. A push of that commit, or of it plus docs-only commits, is not
+   re-checked locally; CI confirms it.
+2. **Quick mobile check by default.** `corepack pnpm mobile:check` skips the K4 modeled visit (K4 ruling 1 still
+   holds for `corepack pnpm mobile:check:full`, which passes `--modeled`). `--views` limits the viewports.
+   Measured 2026-10-21 under host load: every route in three views without the modeled visit took 761 s, and
+   `--modeled --routes '#/report' --views m390-light` took 32 s, so narrowing is what makes iteration fast. Each run
+   takes free ports for `vite preview` and for Chrome's debugging port and a fresh Chrome profile, and stops both
+   process groups on exit, SIGINT and SIGTERM, so parallel runs from separate worktrees no longer share port 5178 or
+   one Chrome, and no preview server is left behind.
+3. **Waves overlap.** The next wave's slices may start from the gated integration branch while the review and
+   corrective pass run. Only correctness defects get the corrective pass inside the wave; wording, doc mismatches,
+   polish and missing tests go to the next wave's scope.
+4. **Gate stdin.** The `gate` script reads stdin from `/dev/null`, so a backgrounded run no longer stops in state T.
+5. **Docs and CI cost.** One docs commit per wave close. The CI cost is re-measured only when a workflow file or the
+   gate's steps change; CLAUDE.md keeps the latest measurement and git history keeps the earlier ones.

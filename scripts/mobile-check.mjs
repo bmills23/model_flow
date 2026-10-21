@@ -1,14 +1,21 @@
 // Mobile layout check: drives an installed Chrome through CDP device emulation (no dependencies).
-// Usage: corepack pnpm mobile:check [--url http://localhost:5178/] [--chrome <path>] [--out <dir>]
-// Without --url it serves the built app with `vite preview` on port 5178 (build first).
+// Usage: corepack pnpm mobile:check [--modeled] [--routes <list>] [--views <list>] [--url <url>]
+//        [--chrome <path>] [--out <dir>]
+// Without --url it serves the built app with `vite preview` on a free port (build first). Chrome also gets
+// a free debugging port and a fresh profile, so runs from parallel worktrees never share a server or a
+// browser. Both are stopped on exit, on SIGINT and on SIGTERM.
 // Visits every route at a true 390x844 viewport in light and dark, plus once at 1280x900, after
 // pressing the compute buttons so result tables and charts are on screen, and counts elements whose
 // right edge exceeds the document client width. Exits 1 if any count is above 0.
+// The "modeled" visit (an in-browser modeled cleanup run, then the report's modeled block) is the heaviest
+// visit, so it runs only with --modeled; `corepack pnpm mobile:check:full` passes it. While iterating on one
+// screen, narrow the run with --routes and --views: one route in one view takes seconds.
 // It also injects axe-core (a dev dependency, never bundled) into each page and fails on any serious or
 // critical violation; moderate and minor ones are counted and listed but do not fail the run.
 // Pass --no-axe to skip the axe pass, and --axe-json <file> to write every violation to a JSON file.
 import { spawn } from 'node:child_process';
-import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
@@ -24,8 +31,8 @@ const axeSource = AXE
   ? readFileSync(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8')
   : '';
 const axeReport = [];
-const PORT = 5178;
-const DEBUG_PORT = 9335;
+const MODELED = args.includes('--modeled');
+const startedAt = Date.now();
 const CHROME_CANDIDATES = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/usr/bin/google-chrome',
@@ -183,41 +190,75 @@ const FED_ROUTES = [
 ];
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
 const ONLY = opt('routes');
+// --views m390-light,d1280-light limits the run to those viewports.
+const ONLY_VIEWS = opt('views');
 const VIEWS = [
   { name: 'm390-light', w: 390, h: 844, mobile: true, dark: false },
   { name: 'm390-dark', w: 390, h: 844, mobile: true, dark: true },
   { name: 'd1280-light', w: 1280, h: 900, mobile: false, dark: false },
-];
+].filter((v) => !ONLY_VIEWS || ONLY_VIEWS.split(',').includes(v.name));
+if (!VIEWS.length) throw new Error(`--views matched nothing: ${ONLY_VIEWS}`);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const freePort = () =>
+  new Promise((resolve, reject) => {
+    const probe = createServer();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => {
+      const { port } = probe.address();
+      probe.close(() => resolve(port));
+    });
+  });
+// Each child leads its own process group, so stopping the group also stops the node and vite processes that
+// `corepack pnpm` starts under it (killing the wrapper alone left `vite preview` holding its port).
+const stopGroup = (child) => {
+  if (!child?.pid) return;
+  try {
+    process.kill(-child.pid, 'SIGTERM');
+  } catch {
+    /* already gone */
+  }
+};
 let server;
 let baseUrl = opt('url');
 if (!baseUrl) {
+  if (!existsSync(join(process.cwd(), 'apps/web/dist/index.html')))
+    throw new Error('No built app in apps/web/dist; run corepack pnpm build first, or pass --url');
+  const port = await freePort();
   server = spawn(
     'corepack',
-    ['pnpm', '--filter', '@model-flow/web', 'preview', '--port', String(PORT), '--strictPort'],
-    {
-      stdio: 'ignore',
-    },
+    ['pnpm', '--filter', '@model-flow/web', 'preview', '--port', String(port), '--strictPort'],
+    { stdio: 'ignore', detached: true },
   );
-  baseUrl = `http://localhost:${PORT}/`;
+  baseUrl = `http://localhost:${port}/`;
 }
+const profileDir = mkdtempSync(join(tmpdir(), 'mobile-check-'));
+// Port 0 lets Chrome pick a free debugging port; it writes the port to DevToolsActivePort in the profile.
 const chrome = spawn(
   chromePath,
   [
     '--headless=new',
-    `--remote-debugging-port=${DEBUG_PORT}`,
-    `--user-data-dir=${join(tmpdir(), 'mobile-check-profile')}`,
+    '--remote-debugging-port=0',
+    `--user-data-dir=${profileDir}`,
     '--no-first-run',
     'about:blank',
   ],
-  { stdio: 'ignore' },
+  { stdio: 'ignore', detached: true },
 );
+let cleaned = false;
 const cleanup = () => {
-  chrome.kill();
-  server?.kill();
+  if (cleaned) return;
+  cleaned = true;
+  stopGroup(chrome);
+  stopGroup(server);
+  rmSync(profileDir, { recursive: true, force: true, maxRetries: 3 });
 };
 process.on('exit', cleanup);
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'])
+  process.on(signal, () => {
+    cleanup();
+    process.exit(130);
+  });
 
 async function until(fn, ms = 20000) {
   const end = Date.now() + ms;
@@ -233,11 +274,15 @@ async function until(fn, ms = 20000) {
   }
 }
 await until(async () => (await fetch(baseUrl)).ok);
-const tabs = await until(async () =>
-  (await (await fetch(`http://localhost:${DEBUG_PORT}/json`)).json()).filter(
-    (t) => t.type === 'page',
-  ),
+const debugPort = await until(
+  () => Number(readFileSync(join(profileDir, 'DevToolsActivePort'), 'utf8').split('\n')[0]) || null,
 );
+const tabs = await until(async () => {
+  const pages = (await (await fetch(`http://127.0.0.1:${debugPort}/json`)).json()).filter(
+    (t) => t.type === 'page',
+  );
+  return pages.length ? pages : null;
+});
 const ws = new WebSocket(tabs[0].webSocketDebuggerUrl);
 await new Promise((r) => (ws.onopen = r));
 let id = 0;
@@ -320,6 +365,16 @@ const runAxe = async () => {
   return JSON.parse(res.result?.value ?? '[]');
 };
 
+const visits = [...ROUTES.map((route) => ({ route, via: null })), ...FED_ROUTES].filter(
+  (v) =>
+    (MODELED || v.tag !== 'modeled') &&
+    (!ONLY || ONLY.split(',').some((o) => v.route === o || v.route.startsWith(`${o}/`))),
+);
+console.log(
+  `${visits.length} visits x ${VIEWS.length} views (${VIEWS.map((v) => v.name).join(', ')})` +
+    (MODELED ? ', modeled visit included' : ', modeled visit skipped (pass --modeled)'),
+);
+
 let failures = 0;
 for (const view of VIEWS) {
   await send('Emulation.setDeviceMetricsOverride', {
@@ -331,9 +386,6 @@ for (const view of VIEWS) {
   await send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-color-scheme', value: view.dark ? 'dark' : 'light' }],
   });
-  const visits = [...ROUTES.map((route) => ({ route, via: null })), ...FED_ROUTES].filter(
-    (v) => !ONLY || ONLY.split(',').some((o) => v.route === o || v.route.startsWith(`${o}/`)),
-  );
   for (const { route, via, mid, viaSetup, midSetup, routeSetup, tag, noPress } of visits) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
@@ -402,5 +454,6 @@ for (const view of VIEWS) {
   }
 }
 if (opt('axe-json')) writeFileSync(opt('axe-json'), JSON.stringify(axeReport, null, 1));
+console.log(`${failures} failing, done in ${Math.round((Date.now() - startedAt) / 1000)} s`);
 cleanup();
 process.exit(failures ? 1 : 0);

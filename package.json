@@ -22,7 +22,8 @@
     "data:check": "pnpm data:generate && git diff --quiet -- packages/data/generated",
     "check:markers": "pnpm --filter @model-flow/data check:markers",
     "mobile:check": "node scripts/mobile-check.mjs",
-    "gate": "pnpm check:markers && pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:check && pnpm data:check && pnpm build"
+    "mobile:check:full": "node scripts/mobile-check.mjs --modeled",
+    "gate": "exec </dev/null; pnpm check:markers && pnpm lint && pnpm format && pnpm typecheck && pnpm test && pnpm docs:check && pnpm data:check && pnpm build"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

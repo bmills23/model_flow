@@ -11,20 +11,23 @@ skipping a done one.
   built on branch `wave-k`) and waves L and M (built together on branch `wave-lm` with a corrective pass), each
   fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-lm` after the corrective pass (2026-10-21): exit 0, build included. Test
-  counts: engine 1387 (86 files), web 1697 (166 files), data 179 passed and 3 skipped (the skipped three are the
-  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs). Wave K counts: engine 1387, web 1597. The gate
-  now starts with `check:markers` (fails on merge conflict markers in tracked files) and `docs:check` also covers
-  `docs/VALIDATION.md` and `packages/data/generated/validation/validation.json`.
-  Mobile check on that tree, 2026-10-21, run as `timeout 2400 node scripts/mobile-check.mjs --url <preview>
-  </dev/null`: exit 0, 0 overflowing elements and 0 axe violations at 390 light, 390 dark and 1280 on every route,
-  including `#/validation`, the seeded `#/risk`, fed `#/cleanup` and the modeled `#/report` state.
+- Last full `corepack pnpm gate` on `wave-speed` rebased onto main (2026-10-21, the check cadence change): exit 0,
+  build included, run backgrounded with no stdin redirect. Test counts: engine 1387 (86 files), web 1697 (166
+  files), data 179 passed and 3 skipped (the skipped three are the Eco-SSL `pdftotext` cross-checks, which need
+  the fetched PDFs); the same counts as `wave-lm` after its corrective pass. The gate starts with `check:markers`
+  (fails on merge conflict markers in tracked files) and `docs:check` also covers `docs/VALIDATION.md` and
+  `packages/data/generated/validation/validation.json`.
+  `corepack pnpm mobile:check:full` on that tree, 2026-10-21: 23 visits in 3 views, 69 ok, 0 failing, exit 0 in
+  375 s on an idle host; 0 overflowing elements and 0 axe violations at 390 light, 390 dark and 1280 on every
+  route, including `#/validation`, the seeded `#/risk`, fed `#/cleanup` and the modeled `#/report` state. Plain
+  `mobile:check` skips the modeled visit, and each run takes its own free ports, so a busy port 5178 no longer
+  matters.
 - At 390 px: `#/transport` computes by default, so the plume CSV button is on screen in that check and inside its
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
   it shows the current result.
-- Local branches: `main`, plus `wave-speed` (tip `6c69d30`, worktree `.claude/worktrees/wave-speed`, not merged:
-  mobile check and gate cadence work started outside the waves; left alone). Deleted on 2026-10-21 after the waves
+- Local branches: `main` only. `wave-speed` (the check cadence change, started outside the waves) was rebased onto
+  main, fast-forwarded and pushed 2026-10-21, and its worktree removed. Deleted on 2026-10-21 after the waves
   L and M push, all merged into main: `wave-lm` (the pushed head), `wave-l-l1` `9bcff74`, `wave-l-l2` `cb73519`,
   `wave-m-m1` `132ff58`, `wave-m-m2` `869502d`, `wave-d-parity` `659bcfb`, `wave-lm-fix-a` `e478373`,
   `wave-lm-fix-b` `1983521`, and seven `worktree-wf_*` branches at `8b579ec`; their worktrees were removed.
@@ -231,7 +234,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (entry chunk under 200 kB, no chunk over 500 kB).
 - `scripts/mobile-check.mjs` (`corepack pnpm mobile:check`, needs a built app and a local Chrome): true
   390x844 viewport through CDP, light and dark, every route plus four document pages, and once at 1280x900.
-  Last result 2026-10-18: zero overflowing elements. It is not in `gate` or CI.
+  `mobile:check:full` (`--modeled`) adds the in-browser modeled cleanup run and the report's modeled block;
+  `--routes` and `--views` narrow a run. Last full result: see State of the tree. It is not in `gate` or CI.
 - Routes (wave H adds `#/site` and `#/chemicals`): `#/` and `#/methods`, `#/transport`, `#/vadose`, `#/saturated`, `#/risk`, `#/cleanup`,
   `#/vapor`, `#/surface-water`, `#/household`, `#/plants-eco`, `#/report`, `#/docs`.
 - Deferred: see the ROADMAP M11 row.
@@ -392,8 +396,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   engine numerics changes (for example caching the x and y profiles across z in `at123dGrid`) and is not done.
 - CI cost per push to main is about 6 billed minutes (re-measured 2026-10-21 after waves L and M, see State of the
   tree); push once per logical unit, and the heavy mobile check is local only.
-- `scripts/mobile-check.mjs` is committed and run by hand (`corepack pnpm mobile:check`); it is not in the
-  gate. Re-run it before any push that changes a screen.
+- `scripts/mobile-check.mjs` is committed and run by hand; it is not in the gate. The full run
+  (`corepack pnpm mobile:check:full`) runs once per wave on the integrated tree and is not repeated before the
+  push unless code changed since (cadence in CLAUDE.md).
 - Timing checks under load: `vadose-legacy.test.ts` (best of nine under 250 ms) and
   `groundwater-kernel.test.ts` (best of three under 1 s, mass conservation 30 s timeout) were made robust to
   parallel load. Other timing tests also fail under heavy host load (the methods citation test now has a 30 s
@@ -409,6 +414,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   project-wide chemical list as the top workflow gap), a chemical on the surface water screen, surface water as a
   cleanup target medium, adding a chemical per project.
 - Then the open items above: read the unverified sources (now listed on `#/validation`).
-- Tooling notes: run the mobile check as `timeout 2400 node scripts/mobile-check.mjs --url <preview> </dev/null`
-  (the corepack wrapper does not pass a timeout to the node child); run background gates with stdin from
-  `/dev/null` (a prettier step that reads the terminal sits stopped in state T).
+- Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a
+  backgrounded prettier step used to sit stopped in state T), and `mobile:check` stops its preview server's and
+  Chrome's process groups on exit, SIGINT and SIGTERM (it used to leave `vite preview` holding port 5178). A
+  `timeout` wrapper around `corepack pnpm` still signals only the wrapper, so under a timeout call
+  `node scripts/mobile-check.mjs` directly.
