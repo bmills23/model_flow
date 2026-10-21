@@ -1,4 +1,4 @@
-import { sourceLevelsOverCoefficient } from '@model-flow/engine';
+import { sourceLevelOfChemical } from './chemicalLevel';
 import type { VaporSourceKind } from '../vapor/coefficients';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { CleanupOutcome } from './compute';
@@ -81,9 +81,7 @@ export function vaporSourceLevels(outcome: CleanupOutcome, feed: VaporRiskFeed):
         continue;
       }
       const src = SOURCE[coef.source];
-      const lv = sourceLevelsOverCoefficient(o.result, path.medium, {
-        [feed.chemicalId]: coef.value,
-      }).find((l) => l.chemical === feed.chemicalId)!;
+      const lv = sourceLevelOfChemical(o.result, path.medium, feed.chemicalId, coef.value)!;
       const row: VaporLevelRow = {
         method,
         vaporMethod: coef.methodId,

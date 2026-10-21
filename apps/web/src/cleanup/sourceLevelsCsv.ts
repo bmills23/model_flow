@@ -85,7 +85,7 @@ export function sourceLevelCsvTables(
       editions: ['rsl'],
       label: 'household source levels',
       rows: householdSourceLevels(outcome, f).map((r) =>
-        rowOf({ ...r, sourceMethod: r.householdMethod, reason: null }, name(f.chemicalId)),
+        rowOf({ ...r, sourceMethod: r.householdMethod }, name(f.chemicalId)),
       ),
       columns: columns('household method'),
     });

@@ -1,4 +1,5 @@
-import { sourceLevelsOverCoefficient, type Medium } from '@model-flow/engine';
+import type { Medium } from '@model-flow/engine';
+import { sourceLevelOfChemical } from './chemicalLevel';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { CleanupOutcome } from './compute';
 
@@ -13,6 +14,8 @@ export interface HouseholdLevelRow {
   cancerLevel: number | null;
   noncancerLevel: number | null;
   limiting: string | null;
+  /** Why the level is not quantified (for example a zero coefficient); null when it is. */
+  reason: string | null;
   /** Screen unit and the factor from SI. */
   unit: 'mg/L' | 'mg/kg';
   fromSi: number;
@@ -75,9 +78,7 @@ export function householdSourceLevels(
       if (!o.result.media.some((m) => m.medium === t.medium)) continue;
       const medium = o.result.media.find((m) => m.medium === t.medium)!;
       if (!medium.levels.some((l) => l.chemical === feed.chemicalId)) continue;
-      const lv = sourceLevelsOverCoefficient(o.result, t.medium, {
-        [feed.chemicalId]: coefficient,
-      }).find((l) => l.chemical === feed.chemicalId)!;
+      const lv = sourceLevelOfChemical(o.result, t.medium, feed.chemicalId, coefficient)!;
       rows.push({
         method,
         householdMethod: feed.methods[t.key] ?? null,
@@ -86,6 +87,10 @@ export function householdSourceLevels(
         cancerLevel: lv.cancerLevel,
         noncancerLevel: lv.noncancerLevel,
         limiting: lv.limiting,
+        reason:
+          lv.level === null
+            ? (lv.warnings[0]?.message ?? 'there is no level to trace to a source')
+            : null,
         unit: t.unit,
         fromSi: t.fromSi,
         warnings: lv.warnings.map((w) => w.message),

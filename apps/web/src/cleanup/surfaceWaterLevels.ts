@@ -1,5 +1,5 @@
-import { sourceLevelsOverCoefficient } from '@model-flow/engine';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import { sourceLevelOfChemical } from './chemicalLevel';
 import type { CleanupOutcome } from './compute';
 
 export interface SurfaceWaterLevelRow {
@@ -28,7 +28,9 @@ const UNIT = { unit: 'mg/L', fromSi: 1e3 } as const;
  * The dissolved groundwater source level behind the cleanup screen's surface water level, for the
  * surface water run the screen sent: the surface water level over the run's coefficient (peak surface
  * water per unit of the groundwater source), with no root find. The coefficient is the run's own, so it
- * applies to the chemical the run was made for. A level is not quantified, with the reason, where the
+ * applies to the chemical the run was made for; the run does not record which chemical that is (it takes
+ * typed properties, not a database id), so with more than one chemical in the cleanup run every row is
+ * not quantified, with the reason. A level is not quantified, with the reason, where the
  * run recorded no coefficient, the chain is not proportional to its source, nothing transfers, or the
  * source level exceeds the solubility entered on the run; it is never printed as zero.
  */
@@ -59,6 +61,14 @@ export function surfaceWaterSourceLevels(
       });
     };
     for (const lv of medium.levels) {
+      if (medium.levels.length > 1) {
+        none(
+          lv.chemical,
+          "The cleanup run holds more than one chemical and the surface water run does not record which chemical it was made for, so its coefficient (that chemical's Koc, decay and solubility) cannot be applied to this one. Run the cleanup screen with the one chemical the surface water run was made for.",
+          lv.level,
+        );
+        continue;
+      }
       if (c === undefined) {
         none(
           lv.chemical,
@@ -71,9 +81,7 @@ export function surfaceWaterSourceLevels(
         none(lv.chemical, c.reason ?? 'The run did not quantify a source coefficient.', lv.level);
         continue;
       }
-      const sl = sourceLevelsOverCoefficient(o.result, 'surfaceWater', {
-        [lv.chemical]: c.value,
-      }).find((l) => l.chemical === lv.chemical)!;
+      const sl = sourceLevelOfChemical(o.result, 'surfaceWater', lv.chemical, c.value)!;
       if (sl.level === null) {
         none(
           lv.chemical,

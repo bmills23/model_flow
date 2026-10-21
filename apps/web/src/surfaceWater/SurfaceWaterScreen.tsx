@@ -549,7 +549,7 @@ export function SurfaceWaterScreen() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok}
+                    disabled={computing || !parsed.ok || engineError !== null}
                     onClick={() => sendToRisk('well-mixed')}
                   >
                     Use legacy surface water for swimming risk
@@ -557,7 +557,7 @@ export function SurfaceWaterScreen() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok}
+                    disabled={computing || !parsed.ok || engineError !== null}
                     onClick={() => sendToRisk('mass-discharge')}
                   >
                     Use modern surface water for swimming risk
