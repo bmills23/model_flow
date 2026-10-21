@@ -2545,3 +2545,27 @@ Rulings, all DEFAULT:
   edit. Fix B scoped itself to the two wave K feeds; extending live staleness to every feed is a separate decision.
 - **Drop the coefficient, keep the series**, rather than flagging the whole feed stale; no schema or
   `FINGERPRINT_SKIP` change.
+
+## 2026-10-21: Waves L and M scope
+
+Bryan agreed with a product assessment ("i agree") whose recommended next work was a live stale mark on every
+feed (wave L) and a validation page (wave M), then directed, verbatim: "go ahead with waves L and M in parallel".
+Every ruling below is DEFAULT unless marked otherwise.
+
+1. **Wave L, live feed staleness.** Today a feed is flagged stale only when a project is opened or restored
+   (`apps/web/src/project/store.ts`). Wave L makes the mark live: the moment a sending screen's inputs no longer
+   match the inputs recorded when the feed was sent, every consumer (the receiving screens, the cleanup panels,
+   the report and the CSV files) marks the values as computed from out-of-date inputs. The values stay visible
+   with the mark; re-sending clears it, and so does editing the inputs back to what was sent. Slice L1 builds the
+   mechanism and connects every sender; slice L2 shows the mark in every consumer. Whether the wave K rule that
+   drops a vapor or surface water coefficient on an input change stays, or is replaced by the shared mark, is
+   L1's call, recorded in its block.
+2. **Wave M, validation page.** A page in the app that shows, for each published worked example the test suite
+   reproduces (the engine fixtures and the RSL reproductions), its source, what is compared, the tolerance and
+   the result, plus a plain list of what is unverified (references not yet read, warned defaults, named
+   exceptions, smoke-test-only tables). The content is generated from the fixtures and `references.json` by a
+   script with a gate check, as `docs/ATTRIBUTIONS.md` is, so the page cannot drift from what the tests check.
+   No new published values are added in this wave. Slice M1 builds the generator and the generated document;
+   slice M2 builds the page.
+3. **UI parity document.** The gap table in `docs/UI_PARITY.md` section 2 is corrected in place against the tree
+   (several rows still read open for slices that landed).
