@@ -171,7 +171,7 @@ const FED_ROUTES = [
           &&!document.querySelector('[aria-label="Run progress"]');
         if(done)break;
         await u.sleep(250)}
-      await u.sleep(500);return 'ran'})()`,
+      await u.sleep(500);return null})()`,
     routeSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
       u.tick(/include uncertainty results/i);
       for(let i=0;i<120;i++){
