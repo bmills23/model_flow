@@ -2337,4 +2337,27 @@ Both branches were checked against main and deleted. Restore either with `git br
 2. **`ui-u9-wildlife` (tip `34b1229f29b3a4fbd092c5348207abfd25203f51`), deleted.** 1 commit, not an ancestor of
    main. The wildlife dose panel in `PlantsEcoPage.tsx`, the `wildlife.ts` exports, `WILDLIFE_COLUMNS` in `csv.ts`,
    the same test names and the U9 DECISIONS heading are on main, with later fixes (`2c7e895`, `792e011`).
-3. No remote branch was touched. The 15 stale `origin/` milestone branches stay Bryan's call.
+3. No remote branch was touched in J5. The 15 stale `origin/` milestone branches were deleted on 2026-10-21, after
+   each was checked to be an ancestor of main (names, tips and restore commands in `docs/HANDOFF.md`).
+
+## 2026-10-21: Wave K scope
+
+Bryan directed, verbatim: "go for it, whatever you recommend", in reply to a proposal listing the open items. The
+recommended wave closes the cleanup screen gap that the tree still shows (ROADMAP line 1, item 3): the cleanup
+screen offers household source levels (`cleanup/HouseholdPanel.tsx`, M7 slice E4 ruling 5) but no vapor or surface
+water source levels, and none of the three panels reach the report. Every ruling below is DEFAULT.
+
+1. **K1 vapor source levels.** A vapor panel on `#/cleanup`, built like the household panel: the indoor or outdoor
+   air level from the direct back-calculation divided by the vapor run's air-over-source coefficient, for methods
+   where the air concentration is linear in the source. A method or mode that is not linear in the source (DeVaull
+   2007 outside its entered-depth mode, a finite or mass-limited source when that limit binds) is reported as not
+   quantified with its reason, never solved by a root find in this wave.
+2. **K2 surface water source levels.** A surface water panel on `#/cleanup`: the surface water level from the direct
+   back-calculation divided by the linked run's coefficient (peak surface water concentration per unit of the
+   groundwater source that drove it), where the chain is linear in that source; otherwise not quantified.
+3. **K3 report and CSV.** The household, vapor and surface water panels print in the report and write to the cleanup
+   CSV when their feed exists.
+4. **K4 mobile check.** `scripts/mobile-check.mjs` also performs an in-browser modeled cleanup run and checks the
+   report's modeled-source block at 390 light, 390 dark and 1280, which no check has rendered so far.
+
+Per-slice rulings follow in their own blocks.
