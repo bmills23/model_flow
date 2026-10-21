@@ -40,8 +40,8 @@ skipping a done one.
 - Test time on wave J (local, load average about 4): engine suite 21 s, web suite 40 s (before wave J: engine
   41 s and web 128 s on a loaded machine, 34 s and 53 s on the wave I run). Remaining floors: single 15 to 18
   s engine tests and jsdom creation in the web suite.
-- CI cost: about 6 billed minutes per push to main, re-measured 2026-10-21 after the wave J push (runs
-  39627501560 and 39627501542: gate 3 min 19 s, Pages build 19 s plus deploy 10 s; recorded in CLAUDE.md). Docs-only
+- CI cost: about 5 billed minutes per push to main, re-measured 2026-10-21 after the wave K push (runs
+  39650125519 and 39650125529: gate 2 min 52 s, Pages build 24 s plus deploy 9 s; recorded in CLAUDE.md). Docs-only
   pushes trigger nothing.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
@@ -370,7 +370,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   before); the browser time was not re-measured (81 s measured 2026-10-18 before the fix).
 - Test time: wave J cut the local suites to engine 21 s and web 40 s (see State of the tree). What remains needs
   engine numerics changes (for example caching the x and y profiles across z in `at123dGrid`) and is not done.
-- CI cost per push to main is about 6 billed minutes (re-measured 2026-10-21 after wave J, see State of the
+- CI cost per push to main is about 5 billed minutes (re-measured 2026-10-21 after wave K, see State of the
   tree); push once per logical unit, and the heavy mobile check is local only.
 - `scripts/mobile-check.mjs` is committed and run by hand (`corepack pnpm mobile:check`); it is not in the
   gate. Re-run it before any push that changes a screen.
