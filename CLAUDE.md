@@ -41,6 +41,7 @@ build 24 s plus deploy 42 s, still about 5 billed minutes. Re-measured 2026-10-1
 39298427676 and 39298427401): gate 2 min 26 s, Pages build 20 s plus deploy 11 s, about 5 billed minutes (3 for the
 gate, 1 each for build and deploy). Re-measured 2026-10-19 after wave I (runs 39317507123 and 39317507269): gate
 3 min 46 s, Pages build 23 s plus deploy 8 s, about 6 billed minutes (4 for the gate); the gate job grew by about
-80 s with wave I. Wave J measured the local suites at engine 21 s and web 40 s (from 41 s and 128 s on a loaded machine). Re-measured 2026-10-21 after wave J (runs 39627501560 and 39627501542): gate 3 min 19 s, Pages build 19 s plus deploy 10 s, about 6 billed minutes (4 for the gate, 1 each for build and deploy). The repo is public, so standard-runner minutes do not count
+80 s with wave I. Wave J measured the local suites at engine 21 s and web 40 s (from 41 s and 128 s on a loaded machine). Re-measured 2026-10-21 after wave J (runs 39627501560 and 39627501542): gate 3 min 19 s, Pages build 19 s plus deploy 10 s, about 6 billed minutes (4 for the gate, 1 each for build and deploy). Re-measured 2026-10-21 after wave K (runs
+39650125519 and 39650125529): gate 2 min 52 s, Pages build 24 s plus deploy 9 s, about 5 billed minutes (3 for the gate). The repo is public, so standard-runner minutes do not count
 against the account's included minutes; keep the local-gate-first rule anyway.
 Pushes that touch only docs or markdown trigger nothing.
