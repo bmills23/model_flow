@@ -2648,12 +2648,16 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    was (no column), so existing imports keep working; a column that appears only when stale is easy to test for and
    cannot be read as data. A note under the buttons names the stale values. The tables marked: risk results, cleanup
    levels (produce), modeled levels, the household, vapor and surface water source level tables, the TPH table, and
-   the transport, vapor, household and surface water tables for the feeds those screens read. A table that never reads
-   a feed (vadose, saturated, plants and ecology, chemicals, SSG, uncertainty) is not touched.
+   the transport, vapor, household and surface water tables for the feeds those screens read, and the uncertainty tables
+   (risk, direct cleanup, modeled cleanup; corrected 2026-10-21, see the corrective pass). A table that never reads
+   a feed (vadose, saturated, plants and ecology, chemicals, SSG) is not touched.
 5. **Not marked, on purpose.** The produce factors on the direct cleanup levels are marked above the levels, not per row.
-   The cleanup probabilistic and modeled uncertainty panels recompute from the screen, not a sent feed, and carry no
-   mark. The mark follows L1's coarseness (any edit of the sending form), so a source form edit that changes none of the
-   sent values still marks.
+   The mark follows L1's coarseness (any edit of the sending form), so a source form edit that changes none of the
+   sent values still marks. Corrected 2026-10-21: the uncertainty panels on the exposure and cleanup screens do read
+   the feeds their base inputs came from, and are marked. The exposure panel reads those of the risk chemical rows,
+   the direct cleanup panel reads the produce feed, and the modeled panel reads the transport chain, the vadose or
+   saturated source and the produce feed. Their CSVs gain the `stale inputs` column and `-stale-inputs` suffix while
+   any is stale, and the report's uncertainty section carries the mark (`feedsReadBy.uncertainty`).
 6. **No schema change.** Nothing new is saved, so `FINGERPRINT_SKIP` is untouched and older files are not flagged.
 
 ## 2026-10-21: Wave M slice M1, validation manifest
@@ -2663,7 +2667,7 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    because tolerances live in test code that has no common shape. The generator
    (`packages/data/src/validation.ts`, run by `docs:generate`) checks every catalog statement against the tree and
    throws when one fails: the fixture files exist and are counted from the parsed JSON, the fixture README
-   mentions a named string, the test source contains the strings that pin the stated tolerance, each reference key
+   mentions a named string, the test source contains the strings that pin the stated tolerance (evidence may be an exact count since the 2026-10-21 corrective pass), each reference key
    exists in `references.json`, each method id is registered, and each warned default (and its warning code) is
    still found in the file that raises it. Named exceptions and deferred rows of Table R-9 and the eight Table 6
    exceptions are read from the fixture fields (`namedExceptions`, `deferred`), not retyped.
@@ -2706,3 +2710,39 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    line under the report's "Methods statement" heading. A Help link points at a new user guide section.
 3. **No new saved keys (DEFAULT).** The page reads static data only, so nothing is saved and `FINGERPRINT_SKIP` is unchanged.
 4. **Mobile check (DEFAULT).** `#/validation` added to the route list in `scripts/mobile-check.mjs`; not run in this slice.
+
+## 2026-10-21: Waves L and M corrective pass
+
+An independent review of waves L and M produced the findings below; fix branches A (wave L) and B (wave M) are merged
+on `wave-lm`. Every ruling is DEFAULT.
+
+0. **Conflict markers.** The earlier decision blocks had carried merge conflict markers (removed in 8eb8b7c). A
+   guard now exists: `pnpm check:markers` (`packages/data/src/conflictMarkers.ts`) is the first step of `gate`. See 13.
+1. **L: uncertainty panels carried no stale mark (real).** `UncertaintyPanel`, `RiskUncertainty`, `CleanupUncertainty`,
+   `ProbabilisticResults` and `ModeledSourceUncertainty` take `feeds`; the risk and cleanup pages pass them, and
+   `feedsReadBy` gains an `uncertainty` entry. L2 rulings 4 and 5 corrected in place.
+2. **L: dismissal survived opening another project (real).** `App.tsx` resets `dismissedStale` when the project epoch changes.
+3. **L: household and vapor feeds marked chemicals they were not run for (real).** They count as read only for a row of the
+   chemical they were run for, on the risk screen, the cleanup screen and the report.
+4. **L: a vadose re-send marked while the saturated feed was on (real).** The transport screen reads the vadose feed only when
+   the saturated feed is not on (`heldInputs`, `transportFeedsRead`).
+5. **L: the user guide contradicted L1 rulings 3 and 5 (real, guide wrong).** The guide now says the extras are taken as
+   current at open and only later changes mark them. L1 rulings 3 and 5 stand unchanged.
+6. **M: evidence was substring only (real).** Evidence entries may be `{ text, count }`, matched exactly, so loosening one
+   assertion fails the build (verified by mutation). Bare identifier evidence is unchanged (known limit).
+7. **M: published reproductions with no fixture file were missing (real).** Seven added: eco-wildlife-ecossl, eco-wildlife-guild,
+   ssg1996-default-pef, ssg2002-default-pef, nrwqc-zinc-hardness, r7-theta, epa2004-henry-temperature. A test carries a
+   `published-reproduction: <id>` marker; the build fails without it and a coverage test fails on a marker with no entry.
+   Not added: the Jury and Briggs closed-form checks (formula identities) and the EFH intake presets (a mapping of
+   published means). No new published value was added.
+8. **M: fixture-held tolerances were not pinned (real).** `pins` check them, so loosening a fixture fails `docs:generate`.
+9. **M: R-3 to R-5 count was typed (real, low).** Derived from the fixture (6); the tolerance text notes the test asserts it 7 times.
+10. **M: R-9 exception and deferred rows pointed at the wrong file (real, low).** They use `household-e4.test.ts` with evidence on the
+    exact row list; the shower row keeps method id `shower.fc-1986`.
+11. **Rulings (DEFAULT).** Evidence entries are exact counts, not substring tests; a count change means the test changed and
+    the catalog must be re-read. A household or vapor feed counts as read only for a row of its chemical. The banner dismissal
+    belongs to the project it was made in. A published reproduction without a fixture file needs the marker and a catalog
+    entry, and shows as 'Fixture: none'. Fixture-held tolerances are pinned.
+12. **Transport vadose read (DEFAULT).** The transport screen reads the vadose feed only when the saturated feed is not on.
+13. **Conflict-marker guard (DEFAULT).** Exact `=======` counts as a marker in markdown outside fences, so a setext
+    underline of exactly seven `=` would be flagged.
