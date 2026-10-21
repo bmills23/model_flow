@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-21, after the wave J push)
+# HANDOFF (written from the tree, 2026-10-21, after the wave K push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -7,20 +7,24 @@ skipping a done one.
 ## State of the tree
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`), wave H (UI near-parity, built on
   branch `wave-ui`), wave I (built on branch `wave-i`), all pushed 2026-10-19, and wave J (five slices, built on
-  branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`). Pages deploys from main:
+  branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`), and wave K (four slices and a corrective pass,
+  built on branch `wave-k`), fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-j` after the review fixes were merged (2026-10-19): exit 0, build
-  included. Test counts: engine 1382 tests (85 files), web 1545 tests (152 files), data and other packages 149
-  passed and 3 skipped (7 files; the skipped three are the Eco-SSL `pdftotext` cross-checks, which need the
-  fetched PDFs). Wave I integration counts, before its review fixes: engine 1379, web 1503.
-  `corepack pnpm mobile:check` on that tree after `corepack pnpm build`, 2026-10-19: green (0 overflowing
-  elements, 0 axe violations on every route at 390 light, 390 dark and 1280, including the seeded `#/risk` and
-  fed `#/cleanup` routes). Run it with `--url` when port 5178 is busy.
+- Last full `corepack pnpm gate` on `wave-k` after the corrective pass (2026-10-21): exit 0, build included. Test
+  counts: engine 1387, web 1597, data and other packages 149 passed and 3 skipped (the skipped three are the
+  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs). Wave J counts: engine 1382, web 1545.
+  `corepack pnpm mobile:check` on that tree, 2026-10-21: 66 ok lines, 0 overflowing elements, 0 axe violations
+  at 390 light, 390 dark and 1280, including the seeded `#/risk`, fed `#/cleanup` and the new modeled `#/report`
+  state. That run took about an hour under host load and its exit code was not captured; the pass rests on the
+  log (no failing line). Run it with `--url` when port 5178 is busy.
 - At 390 px: `#/transport` computes by default, so the plume CSV button is on screen in that check and inside its
-  overflow and axe counts (the script neither looks for it by name nor clicks it). Not rendered in a browser: the
-  report's modeled-source current-state block (the result exists only after an in-browser modeled run, which the
-  check script does not perform).
-- Local branches: only `main` remains. Deleted on 2026-10-21 after the wave J push, all merged into main (tip
+  overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
+  also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
+  it shows the current result.
+- Local branches: only `main` remains. Deleted on 2026-10-21 after the wave K push, all merged into main (tip
+  shas): `wave-k` (the pushed head), `wave-k-k1` `6916905`, `wave-k-k2` `a96228d`, `wave-k-k4` `8fa6301`,
+  `wave-k-fix-a` `8afe2ed`, `wave-k-fix-b` `a2f5a39`, `wave-k-fix-c` `e2ee518`, and `worktree-wf_c6eba2bb-249-1` `500eda0`, `worktree-wf_c6eba2bb-249-2` `500eda0`, `worktree-wf_c6eba2bb-249-3` `500eda0`, `worktree-wf_7be583f0-419-1` `500eda0`, `worktree-wf_7be583f0-419-2` `500eda0`, `worktree-wf_7be583f0-419-3` `500eda0`; their
+  worktrees were removed. Deleted on 2026-10-21 after the wave J push, all merged into main (tip
   shas): `wave-j` `ad593e6`, `wave-j-j1` `4c6215d`, `wave-j-j2` `e6afaa4`, `wave-j-j3` `e8ed61c`, `wave-j-fix-a`
   `98fa442`, `wave-j-fix-b` `a952e51`, `wave-j-fix-c` `58a583b`, `wave-j-fix-d` `d5eae5e`, and seven
   `worktree-wf_*` branches at `b493c67` (`worktree-wf_69e4b9b1-fa7-1` to `-3`, `worktree-wf_cb31987a-5c6-1` to
@@ -42,6 +46,18 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave K landed (2026-10-21)
+Rulings in the DECISIONS.md "Wave K scope" block, its K1 to K4 slice blocks and the "Wave K corrective pass" block,
+all DEFAULT (Bryan: "go for it, whatever you recommend"). Summary in ROADMAP section 7, "Wave K".
+- K1 vapor source levels on `#/cleanup` (`cleanup/VaporPanel.tsx`, `vaporLevels.ts`, coefficients from
+  `vapor/coefficients.ts` on the vapor feed). K2 surface water source levels (`cleanup/SurfaceWaterPanel.tsx`,
+  `surfaceWaterLevels.ts`, `surfaceWater/coefficient.ts`). K3 all three source-level panels in the report and the
+  cleanup CSV (`cleanup/sourceLevelsCsv.ts`). K4 the modeled visit in `scripts/mobile-check.mjs`.
+- Corrective pass: per-chemical narrowing (`cleanup/chemicalLevel.ts`) fixes a crash of all three panels in a
+  multi-chemical run (the household one predates the wave); send blocked on an invalid vapor form and on a
+  surface water engine error; sent coefficients dropped when their inputs change; household zero-coefficient
+  reason written to the CSV.
 
 ## Wave J landed (2026-10-19)
 Rulings in the DECISIONS.md "Wave J scope" block and its "Wave J slice" blocks. Bryan directed "do 1, 2 and 3 as
@@ -323,13 +339,22 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted (sec-butylbenzene enthalpy,
   tert-butylbenzene row).
 - Cleanup screen gaps: produce does not apply to modeled sources (DEFAULT, delegated ruling in wave I); no total
-  TPH cancer endpoint (DEFAULT, delegated). Modeled cleanup sources are sampled since wave I.
+  TPH cancer endpoint (DEFAULT, delegated). Modeled cleanup sources are sampled since wave I. Vapor and surface
+  water source levels landed in wave K; the surface water level is quantified only for a single-chemical cleanup
+  run, because the surface water screen records no chemical (a chemical picker there would lift that).
+- Feed staleness: a feed is flagged stale only when a project is opened or restored. Editing a source screen after
+  sending leaves its feed in place with no stale mark on every screen (household, groundwater, vadose, saturated,
+  produce, TPH, and the air or series of the vapor and surface water feeds). Wave K drops only the vapor and
+  surface water coefficients when their inputs change. Making staleness live for all feeds changes behaviour on
+  every screen and is a separate decision (DECISIONS.md "Wave K corrective pass").
 - Report gaps: the report does not compute a modeled source; since wave J it prints the uncertainty result kept
   from the cleanup screen this session (J2), which is not saved with the project, so it needs a re-run after a
-  reload, and it carries no distribution chart. The plume map is in the report since wave I.
+  reload, and it carries no distribution chart. The plume map is in the report since wave I. The household,
+  vapor and surface water source levels print since wave K (K3).
 - Plume CSV: done in wave J (J1), a separate download under the plume map; the report still prints 20 of 100
   centreline rows. At 390 px the button is covered by the
-  mobile check (it renders on the default `#/transport` compute); the report's modeled block was not rendered.
+  mobile check (it renders on the default `#/transport` compute); the report's modeled block is covered since
+  wave K (K4).
 - The wave I modeled-uncertainty timings were measured under host load (other slices running); the dissolved
   source run was re-checked in a browser (about 2 s for 200 iterations on 4 workers), but the slow chains (vadose,
   saturated modern, which ask first or are refused) were not run in a browser.
@@ -358,7 +383,10 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21: wave J merged to main and pushed (CI cost recorded in CLAUDE.md), wave J worktrees and branches
-  removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
-- Then the open items above: read the unverified sources; run a 390 px check of the
-  report's modeled-source block after an in-browser modeled run.
+- Done 2026-10-21: wave J and wave K merged to main and pushed (CI cost in CLAUDE.md), their worktrees and
+  branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
+- Then the open items above: read the unverified sources; decide whether feed staleness should be live for every
+  feed; a chemical on the surface water screen.
+- Tooling notes from wave K: `mobile:check` under a `timeout` wrapper only stops the corepack wrapper, not the node
+  child, so a hung run keeps going; a backgrounded gate whose prettier step reads the terminal sits stopped (state
+  T), so run background gates with stdin from `/dev/null`.

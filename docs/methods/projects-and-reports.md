@@ -252,8 +252,8 @@ so it is the one feed that still starts empty after a reload.
   cleanup chart (the plume map is printed since wave I); (2) a modeled cleanup source is not computed by the
   report: it solves through the groundwater chain feed (it holds a function and is not saved), so the report
   prints the modeled-source uncertainty summary kept from the cleanup screen this session when it is current,
-  says it is out of date, or says it has not been run; (3) the household source levels panel of the cleanup screen, which has no CSV table
-  (the section says it is on the screen only). On a phone each result row prints as a labeled card so no
+  says it is out of date, or says it has not been run. The household, vapor and surface water source levels of the
+  cleanup screen print in its section and write to the cleanup CSV since wave K (slice K3). On a phone each result row prints as a labeled card so no
   table scrolls sideways; the printed page keeps the plain table.
   Viewport check (2026-10-18): `#/report` for a project with the groundwater, vadose, saturated, vapor,
   surface water and plants screens used, through CDP device emulation at 390x844 (mobile, scale 2) in
