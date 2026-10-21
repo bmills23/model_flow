@@ -136,6 +136,7 @@ describe('wildlife dose', () => {
 });
 
 describe('published wildlife Eco-SSL reproduction (5 percent, DECISIONS 10)', () => {
+  // published-reproduction: eco-wildlife-ecossl
   const cases: [string, string, string][] = [
     ['cadmium', 'avian', 'dove'],
     ['cadmium', 'avian', 'woodcock'],
@@ -157,6 +158,7 @@ describe('published wildlife Eco-SSL reproduction (5 percent, DECISIONS 10)', ()
       expect(rel(got, printed)).toBeLessThan(0.05);
     });
   }
+  // published-reproduction: eco-wildlife-guild
   it('the guild value is the smallest surrogate value (cadmium mammal 0.36, lead bird 11 mg/kg)', () => {
     const guild = (sub: string, group: string, names: string[]) =>
       Math.min(

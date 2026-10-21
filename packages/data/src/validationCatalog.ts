@@ -30,6 +30,9 @@ function analgwstCells(files: Json[]): number {
 
 const ANALGWST_SOURCE = 'analgwst';
 
+/** The test that asserts the named exception and deferred rows of Table R-9 against the fixture. */
+const R9_ROW_TEST = 'household-e4.test.ts';
+
 const examples: ExampleSpec[] = [
   {
     id: 'analgwst-point3',
@@ -45,7 +48,10 @@ const examples: ExampleSpec[] = [
       'Half a unit in the last printed decimal: 5e-7 absolute (test bound 5.1e-7), plus 1e-9 relative.',
     status: 'reproduced',
     testFile: 'groundwater-fixtures.test.ts',
-    evidence: ['5.1e-7', '1e-9'],
+    evidence: [
+      { text: '5.1e-7', count: 2 },
+      { text: '1e-9,\n', count: 3 },
+    ],
     readmeNeedle: 'POINT3',
   },
   {
@@ -62,7 +68,10 @@ const examples: ExampleSpec[] = [
       'Half a unit in the last printed decimal: 5e-7 absolute (test bound 5.1e-7), plus 1e-9 relative.',
     status: 'reproduced',
     testFile: 'groundwater-fixtures.test.ts',
-    evidence: ['5.1e-7', '1e-9'],
+    evidence: [
+      { text: '5.1e-7', count: 2 },
+      { text: '1e-9,\n', count: 3 },
+    ],
     readmeNeedle: 'PATCHI',
   },
   {
@@ -79,7 +88,10 @@ const examples: ExampleSpec[] = [
       'Half a unit in the last printed decimal: 5e-6 absolute (test bound 5.1e-6), plus 1e-9 relative.',
     status: 'reproduced',
     testFile: 'groundwater-fixtures.test.ts',
-    evidence: ['5.1e-6', '1e-9'],
+    evidence: [
+      { text: '5.1e-6', count: 1 },
+      { text: '1e-9,\n', count: 3 },
+    ],
     readmeNeedle: 'PATCHF',
   },
   {
@@ -202,7 +214,7 @@ const examples: ExampleSpec[] = [
       'The engine value rounds to the published value: half a unit in the second significant figure.',
     status: 'reproduced',
     testFile: 'exposure-modern-rsl.test.ts',
-    evidence: ['0.5 * unit * (1 + 1e-9)'],
+    evidence: [{ text: '0.5 * unit * (1 + 1e-9)', count: 1 }],
     readmeNeedle: 'RSL independent check',
   },
   {
@@ -250,6 +262,7 @@ const examples: ExampleSpec[] = [
     status: 'reproduced',
     testFile: 'saturated-fixtures.test.ts',
     evidence: ['absoluteKg'],
+    pins: [{ path: 'tolerance.absoluteKg', value: 0.5 }],
     readmeNeedle: 'soluble mass',
   },
   {
@@ -267,7 +280,8 @@ const examples: ExampleSpec[] = [
     tolerance: '1e-9 relative (arithmetic); initial mass 1e-12.',
     status: 'reproduced',
     testFile: 'saturated-release.test.ts',
-    evidence: ['toBeLessThan(1e-9)'],
+    evidence: [{ text: 'toBeLessThan(1e-9)', count: 7 }],
+    pins: [{ path: 'tolerance.relative', value: 1e-9 }],
     readmeNeedle: 'hand-cases.json',
     note: 'An arithmetic cross-check, not a comparison with a published value.',
   },
@@ -285,6 +299,11 @@ const examples: ExampleSpec[] = [
     status: 'reproduced',
     testFile: 'surfacewater-r8.test.ts',
     evidence: ['r8.tolerance.concentrationMgPerL'],
+    pins: [
+      { path: 'tolerance.concentrationMgPerL', value: 0.005 },
+      { path: 'tolerance.sedimentMgPerKg', value: 0.005 },
+      { path: 'tolerance.massFluxMgPerDay', value: 0.5 },
+    ],
     readmeNeedle: 'r8.json',
     note: 'The review reports exact agreement with its own hand calculation, so this reproduces arithmetic, not model accuracy.',
   },
@@ -303,6 +322,7 @@ const examples: ExampleSpec[] = [
     status: 'reproduced',
     testFile: 'surfacewater-r8.test.ts',
     evidence: ['manual.tolerance.concentrationMgPerL'],
+    pins: [{ path: 'tolerance.concentrationMgPerL', value: 0.05 }],
     readmeNeedle: 'manual-l4.json',
   },
   {
@@ -336,6 +356,10 @@ const examples: ExampleSpec[] = [
     status: 'reproduced',
     testFile: 'vadose-r7.test.ts',
     evidence: ['relativeTolerance'],
+    pins: [
+      { path: 'targets.sourcePoreWaterMgPerL.relativeTolerance', value: 0.01 },
+      { path: 'targets.waterTableYear10MeanMgPerL.relativeTolerance', value: 0.03 },
+    ],
     readmeNeedle: 'ill-conditioned',
     note: 'The water table value is ill-conditioned (5 percent on Koc moves it about 25 percent), so this reproduces the review arithmetic and is not evidence of model accuracy.',
   },
@@ -355,6 +379,7 @@ const examples: ExampleSpec[] = [
     status: 'reproduced',
     testFile: 'vadose-legacy.test.ts',
     evidence: ['vga.absTolerance'],
+    pins: [{ path: 'absTolerance', value: 5e-5 }],
     readmeNeedle: 'namedExceptions',
     note: 'One first-type value (t = 10, x = 14) has a degraded printed glyph and is entered as the closed form reads it.',
   },
@@ -366,12 +391,19 @@ const examples: ExampleSpec[] = [
     methodIds: ['vapor.je-1991', 'vapor.dominant-layer-1998'],
     compares:
       'Soil to indoor air with and without TPH (R-3), the dominant layer with degradation (R-4) and groundwater to indoor air (R-5). The independent column of R-3 is recorded, not asserted.',
-    count: (j) => (Object.keys(j[0].r3).filter((k) => k.startsWith('case')).length + 2) as number,
+    // R-3 cases A and B, the R-4 source vapor, indoor and soil-gas entry values, and the R-5 indoor value
+    count: (j) =>
+      (Object.keys(j[0].r3).filter((k) => k.startsWith('case')).length +
+        ['sourceVaporMgPerM3', 'indoorMgPerM3', 'indoorFromSoilGasMgPerM3'].filter(
+          (k) => j[0].r4[k] !== undefined,
+        ).length +
+        (j[0].r5.riscMgPerM3 !== undefined ? 1 : 0)) as number,
     casesUnit: 'printed results',
-    tolerance: '0.5 percent of the RISC value.',
+    tolerance:
+      '0.5 percent of the RISC value (the test asserts it seven times: the six printed results and a second run of R-3 case A without degradation).',
     status: 'reproduced',
     testFile: 'vapor-legacy.test.ts',
-    evidence: ['0.005'],
+    evidence: [{ text: 'toBeLessThan(0.005)', count: 7 }],
     readmeNeedle: 'Tolerance 0.5 percent',
   },
   {
@@ -388,7 +420,7 @@ const examples: ExampleSpec[] = [
       'The box hand value at 1e-9 relative; the printed value is never widened into a tolerance.',
     status: 'named exception',
     testFile: 'outdoor-air.test.ts',
-    evidence: ['Table R-6 column', '1e-9'],
+    evidence: ['Table R-6 column', { text: 'toBeLessThan(1e-9)', count: 2 }],
     readmeNeedle: 'Named exception: Table R-6',
     note: 'Not reproduced; the printed value is believed to be a transcription error.',
   },
@@ -406,7 +438,11 @@ const examples: ExampleSpec[] = [
     tolerance: '0.01 absolute.',
     status: 'reproduced',
     testFile: 'vapor-legacy.test.ts',
-    evidence: ['0.01 absolute'],
+    evidence: [
+      { text: 'toBeLessThan(0.01)', count: 2 },
+      { text: 'toBeLessThan(\n      0.01,\n    )', count: 1 },
+    ],
+    pins: [{ path: 'toleranceAbsolute', value: 0.01 }],
     readmeNeedle: 'figure readings',
   },
   {
@@ -443,6 +479,129 @@ const examples: ExampleSpec[] = [
     readmeNeedle: 'not obtained',
     note: 'Pending a run of the VISL calculator.',
   },
+  {
+    id: 'eco-wildlife-ecossl',
+    title: 'Eco-SSL wildlife derivation, cadmium and lead surrogate rows',
+    files: [],
+    referenceKey: 'epaecossl',
+    methodIds: ['eco.ecossl-2005'],
+    compares:
+      'The soil concentration at which the wildlife hazard quotient is 1, back-calculated from the transcribed derivation inputs of the printed surrogate rows, against the printed wildlife Eco-SSL. Avian (dove, woodcock, hawk) and mammalian (vole, shrew, weasel) surrogates for cadmium and lead.',
+    count: (_j, test) =>
+      (test.match(/^\s*\['(?:cadmium|lead)', '(?:avian|mammalian)', '/gm) ?? []).length,
+    casesUnit: 'printed surrogate values',
+    tolerance: '5 percent relative (a ruling, DECISIONS.md entry 10 of the Eco-SSL milestone).',
+    status: 'reproduced',
+    testFile: 'eco-screening.test.ts',
+    evidence: [{ text: 'rel(got, printed)).toBeLessThan(0.05)', count: 1 }],
+    note: 'The derivation inputs come from the transcribed Eco-SSL data, so this checks the back-calculation arithmetic against the printed values, not the inputs.',
+  },
+  {
+    id: 'eco-wildlife-guild',
+    title: 'Eco-SSL wildlife guild values, cadmium mammalian and lead avian',
+    files: [],
+    referenceKey: 'epaecossl',
+    methodIds: ['eco.ecossl-2005'],
+    compares:
+      'The smallest surrogate value of the guild against the printed guild Eco-SSL: 0.36 mg/kg for cadmium (mammalian) and 11 mg/kg for lead (avian).',
+    count: () => 2,
+    casesUnit: 'printed guild values',
+    tolerance: '5 percent relative (the same ruling as the surrogate rows).',
+    status: 'reproduced',
+    testFile: 'eco-screening.test.ts',
+    evidence: [
+      { text: 'toBeLessThan(\n      0.05,\n    )', count: 1 },
+      { text: "'hawk']), 11)).toBeLessThan(0.05)", count: 1 },
+    ],
+  },
+  {
+    id: 'ssg1996-default-pef',
+    title: 'SSG 1996 default particulate emission factor',
+    files: [],
+    referenceKey: 'epa1996ssg',
+    methodIds: ['particulate.ssg-pef-1996'],
+    compares: 'The default PEF of 1.32E9 m^3/kg from the printed wind erosion inputs.',
+    count: () => 1,
+    casesUnit: 'printed value',
+    tolerance: 'Equal to the printed three significant figures (1.32e9).',
+    status: 'reproduced',
+    testFile: 'particulate.test.ts',
+    evidence: [
+      { text: 'toBeCloseTo(1.3162, 3)', count: 1 },
+      { text: 'toBe(1.32e9)', count: 1 },
+    ],
+  },
+  {
+    id: 'ssg2002-default-pef',
+    title: 'SSG 2002 default particulate emission factor',
+    files: [],
+    referenceKey: 'epa2002ssg',
+    methodIds: ['particulate.ssg-pef-2002'],
+    compares: 'The default PEF of 1.36E9 m^3/kg with Q/C 93.77.',
+    count: () => 1,
+    casesUnit: 'printed value',
+    tolerance: 'Equal to the printed three significant figures (1.36e9).',
+    status: 'reproduced',
+    testFile: 'particulate.test.ts',
+    evidence: [{ text: 'toBe(1.36e9)', count: 1 }],
+  },
+  {
+    id: 'nrwqc-zinc-hardness',
+    title: 'NRWQC zinc criteria at a hardness of 100 mg/L',
+    files: [],
+    referenceKey: 'epanrwqc',
+    methodIds: [],
+    compares:
+      'The hardness-dependent acute and chronic freshwater zinc criteria computed from the Appendix B slope, intercept and conversion factor against the published 117.2 and 118.1 ug/L.',
+    count: () => 2,
+    casesUnit: 'published criteria',
+    tolerance:
+      'Within 0.5 ug/L (toBeCloseTo at zero decimals), and the acute value rounds to 120 at two significant figures.',
+    status: 'reproduced',
+    testFile: 'surfacewater-criteria.test.ts',
+    evidence: [
+      { text: 'toBeCloseTo(117.2, 0)', count: 1 },
+      { text: 'toBeCloseTo(118.1, 0)', count: 1 },
+    ],
+  },
+  {
+    id: 'r7-theta',
+    title: 'Table R-7, unit-gradient moisture content',
+    files: [],
+    referenceKey: 'arcadis2001',
+    methodIds: ['vadose.vadsat'],
+    compares:
+      'The moisture content that carries 20 cm/yr in the vadose soil (theta 0.0885) and in the lens (theta 0.2031) with the Brooks and Corey relative permeability.',
+    count: () => 2,
+    casesUnit: 'printed values',
+    tolerance: '1e-4 absolute (four decimals as printed).',
+    status: 'reproduced',
+    testFile: 'vadose-hydraulics.test.ts',
+    evidence: [
+      { text: 'r.theta - 0.0885)).toBeLessThan(1e-4)', count: 1 },
+      { text: 'r.theta - 0.2031)).toBeLessThan(1e-4)', count: 1 },
+    ],
+  },
+  {
+    id: 'epa2004-henry-temperature',
+    title: 'EPA 2004 Appendix C, benzene Henry constant at the system temperature',
+    files: [],
+    referenceKey: 'epa2004je',
+    methodIds: ['vapor.je-epa'],
+    compares:
+      'The enthalpy of vaporization at 10 degrees C (8,122 cal/mol), the Henry constant (2.68e-3 atm m^3/mol) and the dimensionless constant (0.115) of the spreadsheet example.',
+    count: () => 3,
+    casesUnit: 'printed values',
+    tolerance:
+      'The printed digits: the enthalpy rounds to the integer, the two constants to three significant figures. The unrounded values are pinned to 1e-9 relative.',
+    status: 'reproduced',
+    testFile: 'vapor-source.test.ts',
+    evidence: [
+      { text: 'toBe(8122)', count: 1 },
+      { text: 'toBe(2.68e-3)', count: 1 },
+      { text: 'toBe(0.115)', count: 1 },
+    ],
+  },
 ];
 
 export const validationCatalog: CatalogInput = {
@@ -462,8 +621,8 @@ export const validationCatalog: CatalogInput = {
         casesUnit: 'row',
         tolerance: 'Not compared. Checked by identities and hand cases instead.',
         status: 'named exception',
-        testFile: 'exposure-legacy-r9.test.ts',
-        evidence: ['tolerance(printed)'],
+        testFile: R9_ROW_TEST,
+        evidence: [{ text: `namedExceptions.map((e) => e.row)).toEqual(['${e.row}'])`, count: 1 }],
         readmeNeedle: 'Named exception',
         note: `Ruling recorded in ${e.decision}.`,
       });
@@ -480,8 +639,8 @@ export const validationCatalog: CatalogInput = {
         casesUnit: 'row',
         tolerance: 'Not compared yet.',
         status: 'pending or deferred',
-        testFile: 'exposure-legacy-r9.test.ts',
-        evidence: ['tolerance(printed)'],
+        testFile: R9_ROW_TEST,
+        evidence: [{ text: `r9.deferred).toEqual(['${d}'])`, count: 1 }],
         readmeNeedle: 'Row deferred',
       });
     }
@@ -499,7 +658,8 @@ export const validationCatalog: CatalogInput = {
       tolerance: `${String(vga.namedExceptions.absTolerance)} absolute, by name (ruling in ${String(vga.namedExceptions.source)}).`,
       status: 'named exception',
       testFile: 'vadose-layered.test.ts',
-      evidence: ['1.5e-4'],
+      evidence: [{ text: '1.5e-4', count: 3 }],
+      pins: [{ path: 'namedExceptions.absTolerance', value: 1.5e-4 }],
       readmeNeedle: 'namedExceptions',
       note: 'The closed form agrees with the printed values only to 1.5e-4 at these points.',
     });

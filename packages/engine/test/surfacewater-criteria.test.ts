@@ -83,6 +83,7 @@ describe('hardness-dependent criteria from a parameter record', () => {
     chronic: { slope: 0.8473, intercept: 0.884, conversionFactor: { constant: 0.986 } },
   };
 
+  // published-reproduction: nrwqc-zinc-hardness
   it('reproduces the published zinc values at 100 mg/L to two significant figures', () => {
     expect(hardnessCriterion(zinc.acute, 100)).toBeCloseTo(117.2, 0);
     expect(hardnessCriterion(zinc.chronic, 100)).toBeCloseTo(118.1, 0);

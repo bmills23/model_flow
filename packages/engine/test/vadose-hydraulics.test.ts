@@ -97,6 +97,7 @@ describe('unit-gradient moisture', () => {
   const vadose = { thetaS: 0.35, thetaR: 0.05, n: 2.68, Ks: 10 / 86400 };
   const lens = { thetaS: 0.35, thetaR: 0.15, n: 2, Ks: 1 / 86400 };
   const q = 0.2 / 365 / 86400; // 20 cm/yr in m/s
+  // published-reproduction: r7-theta
   it('Table R-7 vadose soil gives theta = 0.0885', () => {
     const r = unitGradientMoisture(vadose, q, 'brooksCorey1964');
     expect(Math.abs(r.theta - 0.0885)).toBeLessThan(1e-4);

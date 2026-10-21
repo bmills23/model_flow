@@ -35,6 +35,7 @@ describe('Henry constant at the system temperature (EPA 2004 Appendix C benzene)
     expect(watsonExponent(0.8)).toBe(0.41);
   });
 
+  // published-reproduction: epa2004-henry-temperature
   it('reproduces 8,122 cal/mol, 2.68e-3 atm m^3/mol and 0.115', () => {
     const dh = vaporEnthalpyAtTemperature(chem.dHvb, TS, chem.TB, chem.TC);
     expect(Math.round(dh)).toBe(8122);
