@@ -226,6 +226,20 @@ total TPH, send the total level from that screen: a "Total TPH level" panel show
 levels with its fraction table, method id and warnings, and it has its own CSV download. The total is a
 hazard index level held from that screen, so change the composition there and send it again.
 
+Vapor source levels: send the indoor and outdoor air from the vapor screen ("Send to exposure and risk"),
+add the chemical here, and a **Vapor source levels** panel lists the groundwater, soil gas, soil pore water
+or soil concentration that gives each indoor and outdoor air level above. Each is the air level divided by
+the vapor run's air-over-source coefficient (shown beside it as the vapor method id), so a source at that
+level alone just meets the target; the legacy and modern receptor methods each get a row. This holds where
+the vapor run's air is proportional to its source, which it is for the legacy and modern Johnson and
+Ettinger methods, the legacy box and the Soil Screening Guidance factor. A path that is not is listed as
+**not quantified** with the reason and no level, never as zero: a soil source with a TPH mixture, a soil
+level above the residual-phase limit (where the model's vapor stops rising, so no soil level reaches that
+air level), a Soil Screening Guidance factor for a source series, and a model that transfers nothing from
+the source. A source series sent from another screen gives the same coefficient as a single value, because
+the steady method is applied at each time. Change the vapor inputs and send again: a project saved before
+this panel existed says to send the vapor air again.
+
 A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
 **Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or
 modern transport method, give some inputs a distribution and run: every draw is a full solve through the

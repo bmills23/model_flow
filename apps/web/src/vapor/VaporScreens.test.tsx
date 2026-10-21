@@ -129,6 +129,11 @@ describe('source from another screen', () => {
     expect(feed?.indoor?.kind).toBe('series');
     expect(feed?.indoor?.origin).toBe('vapor.je-1991');
     expect(feed?.outdoor?.origin).toBe('outdoorAir.box');
+    // the air-over-source coefficients ride with the air for the cleanup screen's source levels
+    const ind = feed?.coefficients?.indoor;
+    expect(ind?.quantified && ind.methodId).toBe('vapor.je-1991');
+    expect(ind?.quantified && ind.source).toBe('groundwater');
+    expect(feed?.coefficients?.outdoor?.methodId).toBe('outdoorAir.box');
   }, 30000);
 
   it('uses a single saturated region 1 value as a constant', () => {

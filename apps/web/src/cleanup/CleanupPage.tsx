@@ -14,6 +14,8 @@ import { runCleanup, type CleanupOutcome } from './compute';
 import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
 import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
 import { HouseholdPanel } from './HouseholdPanel';
+import { VaporPanel } from './VaporPanel';
+import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
 import { TphPanel } from './TphPanel';
 import {
   getProduceFeed,
@@ -71,6 +73,11 @@ export function CleanupPage() {
     subscribeHouseholdFeed,
     getHouseholdFeed,
     getHouseholdFeed,
+  );
+  const vaporFeed = useSyncExternalStore(
+    subscribeVaporRiskFeed,
+    getVaporRiskFeed,
+    getVaporRiskFeed,
   );
   const produceFeed = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
   const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
@@ -529,6 +536,7 @@ export function CleanupPage() {
               {householdFeed && (
                 <HouseholdPanel outcome={shown.outcome} feed={householdFeed} names={names} />
               )}
+              {vaporFeed && <VaporPanel outcome={shown.outcome} feed={vaporFeed} names={names} />}
               <DownloadCsv disabled={stale} tables={cleanupCsvTables(shown.outcome, names)} />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList

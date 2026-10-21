@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
+import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
 import { forgetMemory } from '../project/store';
 
@@ -22,6 +23,7 @@ async function withBenzene() {
 
 afterEach(() => {
   clearHouseholdFeed();
+  clearVaporRiskFeed();
   clearProduceFeed();
   clearTphFeed();
   forgetMemory();
@@ -83,6 +85,35 @@ describe('CleanupPage', () => {
     expect(
       within(region).getAllByText(/surface soil \(windblown particulates\)/i).length,
     ).toBeGreaterThan(0);
+  }, 30000);
+
+  it('shows the groundwater and soil levels behind the indoor and outdoor air levels for the vapor run', async () => {
+    const epc = { kind: 'constant' as const, value: 1e-6, origin: 'vapor.je-1991' };
+    setVaporRiskFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, vapor run',
+      indoor: epc,
+      outdoor: epc,
+      coefficients: {
+        indoor: { quantified: true, methodId: 'vapor.je-1991', value: 2e-4, source: 'groundwater' },
+        outdoor: {
+          quantified: false,
+          methodId: 'outdoorAir.box',
+          reason: 'the box needs a source series',
+        },
+      },
+    });
+    await withBenzene();
+    const region = await screen.findByRole('region', { name: /vapor source levels/i });
+    expect(within(region).getAllByText(/groundwater \(indoor air\)/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText(/the box needs a source series/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText(/not quantified/i).length).toBeGreaterThan(0);
+  }, 30000);
+
+  it('shows no vapor panel without a vapor run for the chemical', async () => {
+    await withBenzene();
+    await screen.findByRole('region', { name: /cleanup levels, modern/i });
+    expect(screen.queryByRole('region', { name: /vapor source levels/i })).toBeNull();
   }, 30000);
 
   it('shows no household panel without a household run for the chemical', async () => {

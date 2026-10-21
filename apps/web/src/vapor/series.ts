@@ -6,9 +6,11 @@ import {
   quasiSteadyWarnings,
   seriesEpc,
   vaporSeriesEpc,
+  type EpaJeInput,
   type EpaJeResult,
   type EpcSeries,
   type EpcSpec,
+  type LegacyJeInput,
   type LegacyJeResult,
   type Warning,
 } from '@model-flow/engine';
@@ -56,6 +58,42 @@ function thin(times: readonly number[], values: readonly number[]): EpcSeries {
 const message = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
 /**
+ * The legacy and modern engine sources for a groundwater or pore water concentration `c` (kg/m3). A
+ * groundwater source is the groundwater at the water table; a pore water source gives the soil gas H times
+ * its concentration, and the modern method diffuses with H' at the soil temperature so it sources with the
+ * same H'.
+ */
+export function seriesSources(
+  form: VaporForm,
+  parsed: Extract<Parsed, { ok: true }>,
+  kind: 'groundwater' | 'poreWater',
+  c: number,
+): { legacy: LegacyJeInput['source']; modern: EpaJeInput['source'] } {
+  const H = Number(form.H);
+  const S = Number(form.S) * 1e-3;
+  if (kind === 'groundwater') {
+    return {
+      legacy: { kind: 'groundwater', cgw: c, H, S },
+      modern: { kind: 'groundwater', cgw: c },
+    };
+  }
+  const chem = parsed.modern.chemical;
+  const Hm = chem.thermo
+    ? henryAtTemperature({
+        HR: chem.henryAtm,
+        dHvb: chem.thermo.dHvb,
+        TB: chem.thermo.TB,
+        TC: chem.thermo.TC,
+        TS: parsed.modern.temperature,
+      }).Hprime
+    : H;
+  return {
+    legacy: { kind: 'soilGas', csg: H * c },
+    modern: { kind: 'soilGas', csg: Hm * c },
+  };
+}
+
+/**
  * The indoor and outdoor air a source that changes with time gives, as exposure point concentrations:
  * a steady vapor method applied at each time (DEFAULT ruling 7), tagged with the method id as origin.
  * A groundwater series is the groundwater source; a pore water source gives the soil gas H times its
@@ -67,37 +105,13 @@ export function vaporEpcs(
   src: SourceSeries,
   outdoorForm: OutdoorForm,
 ): VaporEpcs {
-  const H = Number(form.H);
-  const S = Number(form.S) * 1e-3;
   const isSeries = 'series' in src;
   const series: EpcSeries = isSeries
     ? thin(src.series.times, src.series.values)
     : { times: [0], values: [src.constant] };
   const times = series.times;
 
-  const sources = (c: number) => {
-    if (src.kind === 'groundwater') {
-      return {
-        legacy: { kind: 'groundwater' as const, cgw: c, H, S },
-        modern: { kind: 'groundwater' as const, cgw: c },
-      };
-    }
-    // The modern method diffuses with H' at the soil temperature, so it sources with the same H'.
-    const chem = parsed.modern.chemical;
-    const Hm = chem.thermo
-      ? henryAtTemperature({
-          HR: chem.henryAtm,
-          dHvb: chem.thermo.dHvb,
-          TB: chem.thermo.TB,
-          TC: chem.thermo.TC,
-          TS: parsed.modern.temperature,
-        }).Hprime
-      : H;
-    return {
-      legacy: { kind: 'soilGas' as const, csg: H * c },
-      modern: { kind: 'soilGas' as const, csg: Hm * c },
-    };
-  };
+  const sources = (c: number) => seriesSources(form, parsed, src.kind, c);
 
   const out: VaporEpcs = { indoor: {}, outdoor: {}, errors: {}, warnings: [] };
   const legacyRuns = new Map<number, LegacyJeResult>();
