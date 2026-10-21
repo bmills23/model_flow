@@ -2602,8 +2602,8 @@ Slice L1 makes the stale mark live for every value passed between screens and ex
    pass once they are removed). The effects also only ran while their screen was mounted and compared the coefficient
    only, so an edit that left it unchanged (or moved the series but not the coefficient) went unmarked. Wave scope
    ruling 1 says the values stay visible with the mark. The sent run, series and coefficient therefore stay on the feed
-   untouched after an edit, and the mark is the only signal. **Until slice L2 lands, the cleanup panels, report and CSV
-   use the sent coefficient without a mark; L2 must show it** (this branch does not merge alone).
+   untouched after an edit, and the mark is the only signal. The cleanup panels, report and CSV show that mark since
+   slice L2, which landed on the same branch.
 5. **The groundwater run for cleanup levels is a feed too.** `transportChain` (the transport screen's "Use for
    cleanup levels", held in `transport/chainFeed.ts`) is session only and was in no list. It joins the stale keys, and
    opening a project or starting a new one now clears it with the other feeds: before, it survived both and kept
