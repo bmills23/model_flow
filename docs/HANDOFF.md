@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-21, after the wave K push)
+# HANDOFF (written from the tree, 2026-10-21, after the waves L and M push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -8,15 +8,17 @@ skipping a done one.
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`), wave H (UI near-parity, built on
   branch `wave-ui`), wave I (built on branch `wave-i`), all pushed 2026-10-19, and wave J (five slices, built on
   branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`), and wave K (four slices and a corrective pass,
-  built on branch `wave-k`), fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
+  built on branch `wave-k`) and waves L and M (built together on branch `wave-lm` with a corrective pass), each
+  fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-k` after the corrective pass (2026-10-21): exit 0, build included. Test
-  counts: engine 1387, web 1597, data and other packages 149 passed and 3 skipped (the skipped three are the
-  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs). Wave J counts: engine 1382, web 1545.
-  `corepack pnpm mobile:check` on that tree, 2026-10-21: 66 ok lines, 0 overflowing elements, 0 axe violations
-  at 390 light, 390 dark and 1280, including the seeded `#/risk`, fed `#/cleanup` and the new modeled `#/report`
-  state. That run took about an hour under host load and its exit code was not captured; the pass rests on the
-  log (no failing line). Run it with `--url` when port 5178 is busy.
+- Last full `corepack pnpm gate` on `wave-lm` after the corrective pass (2026-10-21): exit 0, build included. Test
+  counts: engine 1387 (86 files), web 1697 (166 files), data 179 passed and 3 skipped (the skipped three are the
+  Eco-SSL `pdftotext` cross-checks, which need the fetched PDFs). Wave K counts: engine 1387, web 1597. The gate
+  now starts with `check:markers` (fails on merge conflict markers in tracked files) and `docs:check` also covers
+  `docs/VALIDATION.md` and `packages/data/generated/validation/validation.json`.
+  Mobile check on that tree, 2026-10-21, run as `timeout 2400 node scripts/mobile-check.mjs --url <preview>
+  </dev/null`: exit 0, 0 overflowing elements and 0 axe violations at 390 light, 390 dark and 1280 on every route,
+  including `#/validation`, the seeded `#/risk`, fed `#/cleanup` and the modeled `#/report` state.
 - At 390 px: `#/transport` computes by default, so the plume CSV button is on screen in that check and inside its
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
@@ -46,6 +48,21 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Waves L and M landed (2026-10-21)
+Bryan: "go ahead with waves L and M in parallel". Rulings DEFAULT in the DECISIONS.md "Waves L and M scope" block,
+the L1, L2, M1 and M2 blocks and the "Waves L and M corrective pass" block; summary in ROADMAP section 7.
+- L live stale marks: every feed (12 saved feeds plus the session-only `transportChain`) is stale the moment its
+  sending screen's inputs differ from those at send; re-send or editing back clears it. API in
+  `project/store.ts` (`getStaleFeeds`, `isFeedStaleNow`, `subscribeStale`) and `project/staleFeeds.ts`
+  (`useStaleFeeds`, `useFeedStale`, `FEED_INFO`). Marks: `project/StaleMark.tsx` on screens, panels and
+  uncertainty panels; report sections via `feedsRead.ts`; stale CSV files gain a `stale inputs` column and a
+  `-stale-inputs` file name suffix (`export/staleCsv.ts`). The wave K coefficient-dropping effects were replaced.
+- M validation: `packages/data/src/validationCatalog.ts` checked against the tree by `docs:generate`, writing
+  `docs/VALIDATION.md` (34 examples: 28 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test) and
+  the JSON behind the `#/validation` page. Tolerance evidence is an exact count; reproductions without a fixture
+  file carry a `published-reproduction: <id>` marker in their test.
+- `docs/UI_PARITY.md` gap rows corrected in place against the tree.
 
 ## Wave K landed (2026-10-21)
 Rulings in the DECISIONS.md "Wave K scope" block, its K1 to K4 slice blocks and the "Wave K corrective pass" block,
@@ -342,11 +359,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   TPH cancer endpoint (DEFAULT, delegated). Modeled cleanup sources are sampled since wave I. Vapor and surface
   water source levels landed in wave K; the surface water level is quantified only for a single-chemical cleanup
   run, because the surface water screen records no chemical (a chemical picker there would lift that).
-- Feed staleness: a feed is flagged stale only when a project is opened or restored. Editing a source screen after
-  sending leaves its feed in place with no stale mark on every screen (household, groundwater, vadose, saturated,
-  produce, TPH, and the air or series of the vapor and surface water feeds). Wave K drops only the vapor and
-  surface water coefficients when their inputs change. Making staleness live for all feeds changes behaviour on
-  every screen and is a separate decision (DECISIONS.md "Wave K corrective pass").
+- Feed staleness: live since wave L. The mark is as coarse as the source form (any edit of the sending form marks
+  its feeds, even one that changes no sent value), and staleness does not cascade through feed chains (DEFAULT,
+  L1).
 - Report gaps: the report does not compute a modeled source; since wave J it prints the uncertainty result kept
   from the cleanup screen this session (J2), which is not saved with the project, so it needs a re-run after a
   reload, and it carries no distribution chart. The plume map is in the report since wave I. The household,
@@ -383,10 +398,12 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21: wave J and wave K merged to main and pushed (CI cost in CLAUDE.md), their worktrees and
+- Done 2026-10-21: waves J, K, L and M merged to main and pushed (CI cost in CLAUDE.md), their worktrees and
   branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
-- Then the open items above: read the unverified sources; decide whether feed staleness should be live for every
-  feed; a chemical on the surface water screen.
-- Tooling notes from wave K: `mobile:check` under a `timeout` wrapper only stops the corepack wrapper, not the node
-  child, so a hung run keeps going; a backgrounded gate whose prettier step reads the terminal sits stopped (state
-  T), so run background gates with stdin from `/dev/null`.
+- Open, Bryan's calls: multi-chemical runs (a design session; the parity audit of 2026-10-21 ranks the missing
+  project-wide chemical list as the top workflow gap), a chemical on the surface water screen, surface water as a
+  cleanup target medium, adding a chemical per project.
+- Then the open items above: read the unverified sources (now listed on `#/validation`).
+- Tooling notes: run the mobile check as `timeout 2400 node scripts/mobile-check.mjs --url <preview> </dev/null`
+  (the corepack wrapper does not pass a timeout to the node child); run background gates with stdin from
+  `/dev/null` (a prettier step that reads the terminal sits stopped in state T).
