@@ -6,10 +6,11 @@ import { ProjectBar } from './project/ProjectBar';
 import {
   getDroppedFeeds,
   getEpoch,
-  getStaleFeeds,
   newProject,
   subscribeProject,
+  type StaleFeedKey,
 } from './project/store';
+import { FEED_INFO, useStaleFeeds } from './project/staleFeeds';
 
 // Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
 const MethodsPage = lazy(() =>
@@ -78,7 +79,13 @@ export function App() {
   }, []);
   const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
   const [staleShown, setStaleShown] = useState(true);
-  const stale = staleShown ? getStaleFeeds() : [];
+  // the stale mark is live (see project/staleFeeds); a dismissal covers the feeds stale when it was
+  // made, and a feed that clears and goes stale again is shown again
+  const staleNow = useStaleFeeds();
+  const [dismissedStale, setDismissedStale] = useState<readonly StaleFeedKey[]>([]);
+  const stillDismissed = dismissedStale.filter((k) => staleNow.includes(k));
+  if (stillDismissed.length !== dismissedStale.length) setDismissedStale(stillDismissed);
+  const stale = staleNow.filter((k) => !dismissedStale.includes(k));
   const dropped = staleShown ? getDroppedFeeds() : [];
   const onNewProject = (): void => {
     if (
@@ -88,6 +95,7 @@ export function App() {
     ) {
       newProject();
       setStaleShown(false);
+      setDismissedStale([]);
     }
   };
   const onMethods = hash === METHODS_HASH;
@@ -157,9 +165,11 @@ export function App() {
       ) : null}
       {stale.length > 0 ? (
         <p className="stale-note" role="status">
-          Restored values passed between screens ({stale.join(', ')}) were built from inputs that
-          have since changed. Send them again from their source screen to refresh them.{' '}
-          <button type="button" className="btn" onClick={() => setStaleShown(false)}>
+          These values passed between screens were built from inputs that have since changed:{' '}
+          {stale.map((k) => `${FEED_INFO[k].label} (${FEED_INFO[k].source})`).join(', ')}. They are
+          kept as they were sent. Send them again from their source screen to refresh them, or
+          change the inputs back.{' '}
+          <button type="button" className="btn" onClick={() => setDismissedStale(staleNow)}>
             Dismiss
           </button>
         </p>

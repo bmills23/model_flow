@@ -1,3 +1,5 @@
+import { StaleMark } from '../project/StaleMark';
+import { vaporFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
@@ -310,23 +312,6 @@ export function VaporPage() {
       },
     });
   };
-  // A sent run's coefficients describe the inputs at the time of sending. When an input behind them
-  // changes, drop them (the air stays) so the cleanup screen asks for a new send instead of dividing
-  // by the old coefficient.
-  useEffect(() => {
-    const held = riskHeld?.coefficients;
-    if (!held || !parsed.ok) return;
-    const now = currentCoefficients();
-    if (!now) return;
-    const same =
-      JSON.stringify(held.indoor) === JSON.stringify(now.indoor) &&
-      (held.outdoor === undefined || JSON.stringify(held.outdoor) === JSON.stringify(now.outdoor));
-    if (same) return;
-    const rest = { ...riskHeld };
-    delete rest.coefficients;
-    setVaporRiskFeed(rest);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [riskHeld, parsed, form, outdoorForm, active, feedEpcs, riskMethod]);
   const riskReason = !parsed.ok
     ? 'The inputs above have an error; fix it to send the air concentrations.'
     : riskChemical === null
@@ -720,7 +705,13 @@ export function VaporPage() {
                     </tbody>
                   </table>
                 </div>
-                <DownloadCsv disabled={stale} tables={vaporCsvTables(shown, feedEpcs)} />
+                <DownloadCsv
+                  disabled={stale}
+                  tables={vaporCsvTables(shown, feedEpcs).map((t) => ({
+                    ...t,
+                    feeds: vaporFeedsRead(active ? choice : 'entered'),
+                  }))}
+                />
                 {(['legacy', 'modern'] as const).map((m) => {
                   const o = shown[m];
                   return o.ok ? null : (
@@ -838,6 +829,7 @@ export function VaporPage() {
                 result={pviResult}
               />
 
+              <StaleMark feed={vaporFeedsRead(active ? choice : 'entered')} />
               <SourcePanel
                 choice={active ? choice : 'entered'}
                 onChoice={setChoice}

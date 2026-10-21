@@ -1,3 +1,4 @@
+import { StaleMark } from '../project/StaleMark';
 import type { TphRiskFeed } from '../plantsEco/feeds';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { tphCsvTables } from './csv';
@@ -24,10 +25,10 @@ export function TphPanel(props: { feed: TphRiskFeed }) {
         Total TPH level <small>{feed.methodId}</small>
       </h2>
       <p className="muted">
-        Soil level of total petroleum hydrocarbons that meets a hazard index of{' '}
-        {fmtMgKg(feed.targetHazardIndex)}, from the fraction composition and the fraction levels
-        entered on the plants, ecology and TPH screen. Fractions with no RSL surrogate are left out
-        of the total.
+        <StaleMark feed="tph" /> Soil level of total petroleum hydrocarbons that meets a hazard
+        index of {fmtMgKg(feed.targetHazardIndex)}, from the fraction composition and the fraction
+        levels entered on the plants, ecology and TPH screen. Fractions with no RSL surrogate are
+        left out of the total.
       </p>
       <dl className="readouts">
         <div className="readout">

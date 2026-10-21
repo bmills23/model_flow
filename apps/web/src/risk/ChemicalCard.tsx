@@ -9,6 +9,7 @@ import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
 import { MEDIA, type ChemicalRow, type HouseholdOutdoor } from './form';
 import { fmtTox } from './format';
+import { StaleMark } from '../project/StaleMark';
 import { OverridesPanel } from '../overrides/OverridesPanel';
 import type { OverrideEntry } from '../overrides/model';
 
@@ -111,25 +112,29 @@ export function ChemicalCard(props: {
           {MEDIA.map((m) =>
             m.key === 'groundwater' && row.groundwaterFromWell ? (
               <p className="muted well-note" key={m.key}>
-                Groundwater concentration: {well ? well.label : 'no well result held'}.
+                Groundwater concentration: {well ? well.label : 'no well result held'}.{' '}
+                {well && <StaleMark feed="well" />}
               </p>
             ) : (m.key === 'bathroomAir' && row.bathroomFromHousehold) ||
               (m.key === 'indoorAir' && row.indoorFromHousehold) ||
               (m.key === 'outdoorAir' && row.outdoorFromHousehold !== '') ? (
               <p className="muted well-note" key={m.key}>
                 {m.label} concentration:{' '}
-                {householdHere ? household.label : 'no household result held for this chemical'}.
+                {householdHere ? household.label : 'no household result held for this chemical'}.{' '}
+                {householdHere && <StaleMark feed="household" />}
               </p>
             ) : (m.key === 'indoorAir' && row.indoorFromVapor) ||
               (m.key === 'outdoorAir' && row.outdoorFromVapor) ? (
               <p className="muted well-note" key={m.key}>
                 {m.label} concentration:{' '}
-                {vaporHere ? vapor.label : 'no vapor result held for this chemical'}.
+                {vaporHere ? vapor.label : 'no vapor result held for this chemical'}.{' '}
+                {vaporHere && <StaleMark feed="vaporRisk" />}
               </p>
             ) : m.key === 'surfaceWater' && row.surfaceWaterFromModel ? (
               <p className="muted well-note" key={m.key}>
                 Surface water concentration:{' '}
-                {surface ? surface.label : 'no surface water result held'}.
+                {surface ? surface.label : 'no surface water result held'}.{' '}
+                {surface && <StaleMark feed="surfaceWater" />}
               </p>
             ) : (
               <Field
@@ -242,6 +247,12 @@ export function ChemicalCard(props: {
           <span>
             {props.produceNote ??
               'Use the plants and ecology plant factors for homegrown produce (driven by the soil concentration; receptors switch the pathway on)'}
+            {row.produceFromPlantsEco && produceHere && (
+              <>
+                {' '}
+                <StaleMark feed="produce" />
+              </>
+            )}
           </span>
         </label>
       )}

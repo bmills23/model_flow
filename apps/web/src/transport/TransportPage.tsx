@@ -1,3 +1,5 @@
+import { StaleMark } from '../project/StaleMark';
+import { transportFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
@@ -106,6 +108,11 @@ export function TransportPage() {
   const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
   const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
   const satOn = form.feedFromSaturated && satFeed !== null;
+  // the vadose or saturated result the run is fed from; marked beside it and in the CSV when stale
+  const feedsUsed = transportFeedsRead({
+    feedFromVadose: form.feedFromVadose && feed !== null && !satOn,
+    feedFromSaturated: satOn,
+  });
   const fedOn = (form.feedFromVadose && feed !== null) || satOn;
   const parsed = useMemo(() => toScenario(form, feed, satFeed), [form, feed, satFeed]);
   const request = useMemo<ComputeRequest | null>(
@@ -342,20 +349,21 @@ export function TransportPage() {
             )}
             {satOn && satFeed && (
               <p className="derived">
-                The release of the {satFeed.input.source.length} m by {satFeed.input.source.width} m
-                saturated source sets the loading schedule. Length, width, strength and loading come
-                from it, and so do the porosity, conductivity, gradient and retardation of the
-                aquifer. The box is as deep as the high-water saturated thickness when the source
-                reaches below the water table; otherwise the thickness below is the mixing depth.{' '}
+                <StaleMark feed="saturated" /> The release of the {satFeed.input.source.length} m by{' '}
+                {satFeed.input.source.width} m saturated source sets the loading schedule. Length,
+                width, strength and loading come from it, and so do the porosity, conductivity,
+                gradient and retardation of the aquifer. The box is as deep as the high-water
+                saturated thickness when the source reaches below the water table; otherwise the
+                thickness below is the mixing depth.{' '}
                 <a href="#/saturated">Open saturated soil source</a>
               </p>
             )}
             {fedOn && !satOn && feed && (
               <p className="derived">
-                The mass reaching the water table over the {feed.scenario.source.length} m by{' '}
-                {feed.scenario.source.width} m vadose source sets the release schedule. Length,
-                width, strength and loading come from it; the thickness below is the mixing depth.{' '}
-                <a href="#/vadose">Open vadose leaching</a>
+                <StaleMark feed="vadose" /> The mass reaching the water table over the{' '}
+                {feed.scenario.source.length} m by {feed.scenario.source.width} m vadose source sets
+                the release schedule. Length, width, strength and loading come from it; the
+                thickness below is the mixing depth. <a href="#/vadose">Open vadose leaching</a>
               </p>
             )}
             <div className="fields">
@@ -611,7 +619,11 @@ export function TransportPage() {
                 timeLabel={`at ${form.timeYr} years`}
                 depthLabel={depthLabel}
               />
-              <DownloadCsv showLabel disabled={csvStale} tables={[plumeTable!]} />
+              <DownloadCsv
+                showLabel
+                disabled={csvStale}
+                tables={[{ ...plumeTable!, feeds: feedsUsed }]}
+              />
               <BreakthroughChart result={result} scale={form.scale} />
               <section className="panel" aria-label="Receptor concentration at the evaluation time">
                 <h2>Receptor concentration at {form.timeYr} years</h2>
@@ -632,7 +644,10 @@ export function TransportPage() {
                 </dl>
                 <DownloadCsv
                   disabled={csvStale}
-                  tables={transportCsvTables(result, Number(form.timeYr))}
+                  tables={transportCsvTables(result, Number(form.timeYr)).map((t) => ({
+                    ...t,
+                    feeds: feedsUsed,
+                  }))}
                 />
               </section>
               <section className="panel" aria-label="Exposure and risk">

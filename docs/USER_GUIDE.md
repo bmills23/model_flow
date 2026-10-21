@@ -46,9 +46,22 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that was made by a newer version of the app, is refused with a message and nothing is changed. If a file
   has an unknown key it is ignored and listed. If a value passed between screens in the file is unusable
   it is dropped and named, and your inputs still load.
-- A value passed between screens records which inputs it was built from. If those inputs have since
-  changed, the app tells you the value is out of date and asks you to send it again. It is never refreshed
-  silently.
+- A value passed between screens records which inputs it was built from. The moment those inputs differ
+  from what was sent, a note at the top of the page names the value and the screen that sends it, and says
+  it was built from inputs that have since changed. This holds while you work, for every value passed
+  between screens (including the groundwater run offered to the cleanup screen, the well method you chose
+  and the vapor source series), and in a project you open. The value stays as it was sent and is never
+  refreshed silently. The note goes away when you send the value again or edit the inputs back to what
+  was sent; Dismiss hides it for the values it lists, and it comes back for a value that goes out of date
+  later.
+  The screens that use such a value say so beside it with an "Out of date" label and the screen to send it
+  again from: the chemical cards on the exposure and risk and cleanup screens, the cleanup source level
+  panels (household, vapor, surface water and TPH), the groundwater run behind a modeled cleanup level, and
+  the screens that read a series from another screen (transport, vapor, household, surface water). The
+  values stay visible. The report puts the same label under the heading of each section that reads such a
+  value and again in that section's notes. A CSV download that holds such values gains a last column,
+  `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a
+  current file is unchanged. A note beside the download says which values are out of date.
 - **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
   server, so the link carries the project without anyone hosting it. The link does not include the values
   passed between screens; whoever opens it sends those again from their source screens.
@@ -237,9 +250,9 @@ Ettinger methods, the legacy box and the Soil Screening Guidance factor. A path 
 level above the residual-phase limit (where the model's vapor stops rising, so no soil level reaches that
 air level), a Soil Screening Guidance factor for a source series, and a model that transfers nothing from
 the source. A source series sent from another screen gives the same coefficient as a single value, because
-the steady method is applied at each time. Change the vapor inputs and send again: once an input behind the sent coefficient changes,
-the panel says to send the vapor air again, as it does for a project saved before this panel existed. The send
-button is off while the vapor inputs have an error.
+the steady method is applied at each time. Change the vapor inputs and the note at the top of the page marks the sent vapor air as out of date; the panel keeps
+the values you sent until you send again. A project saved before this panel existed carries no coefficient, and the panel
+says to send the vapor air again. The send button is off while the vapor inputs have an error.
 
 The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file.
 
@@ -254,7 +267,9 @@ while the surface water screen shows an engine error, so only a current result i
 the run has an upstream background (the peak is then not proportional to the source), when the plume is fed by a
 vadose or saturated source screen (the run holds no groundwater source concentration), when nothing transfers
 to the surface water, when the source level would exceed the solubility entered on the surface water screen, or
-when the result was sent before this panel existed or the surface water inputs have changed since (send it again).
+when the result was sent before this panel existed (send it again). When the surface water inputs change after the
+send, the note at the top of the page marks the sent series as out of date, and the panel keeps using what was sent
+until you send again.
 
 A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
 **Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or

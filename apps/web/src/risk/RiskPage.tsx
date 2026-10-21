@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { Seg, Field } from '../ui/controls';
+import { StaleMark } from '../project/StaleMark';
+import { riskFeedsRead } from '../project/feedsRead';
 import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
@@ -81,6 +83,8 @@ export function RiskPage() {
   }
 
   const shown = current ?? (needsInput ? null : lastGood);
+  // the feeds the chemical rows take values from; a stale one is marked beside the results and in the CSV
+  const feedsUsed = riskFeedsRead(form.chemicals);
   const stale = current === null;
   const names = useMemo(() => {
     const out: Record<string, string> = {};
@@ -304,8 +308,15 @@ export function RiskPage() {
 
           {shown && (
             <div className={stale ? 'stale' : undefined}>
+              <StaleMark feed={feedsUsed} />
               <Comparison outcome={shown.outcome} additive={shown.built.legacy.additive === true} />
-              <DownloadCsv disabled={stale} tables={riskCsvTables(shown.outcome, names)} />
+              <DownloadCsv
+                disabled={stale}
+                tables={riskCsvTables(shown.outcome, names).map((t) => ({
+                  ...t,
+                  feeds: feedsUsed,
+                }))}
+              />
               <Charts outcome={shown.outcome} names={names} />
               <NotQuantified outcome={shown.outcome} names={names} />
               <EpcTable outcome={shown.outcome} names={names} />

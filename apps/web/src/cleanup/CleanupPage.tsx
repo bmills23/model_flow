@@ -34,6 +34,8 @@ import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
 import { CleanupUncertainty } from './CleanupUncertainty';
 import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
+import { StaleMark } from '../project/StaleMark';
+import { cleanupFeedsRead } from '../project/feedsRead';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupCsvTables, modeledCsvTables } from './csv';
 import { sourceLevelCsvTables } from './sourceLevelsCsv';
@@ -90,6 +92,10 @@ export function CleanupPage() {
   const produceFeed = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
   const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const modeledOn = form.source !== 'direct';
+  // the feeds the levels shown are computed from; a stale one is marked beside them and in the CSV
+  const feedsUsed = cleanupFeedsRead(form, {});
+  const modeledFeeds = feedsUsed.filter((k) => k !== 'produce');
+  const directFeeds = produceFeed ? feedsUsed.filter((k) => k === 'produce') : [];
   // the form with the project's receptor names and factor edits laid on, for every build below
   const buildForm = useMemo(() => withReceptorEdits(form, overrides, 'cleanup'), [form, overrides]);
 
@@ -290,12 +296,23 @@ export function CleanupPage() {
                   {transportFeed
                     ? `Aquifer and well: ${transportFeed.label}.`
                     : 'No aquifer yet: use the groundwater transport screen first.'}{' '}
+                  {transportFeed && <StaleMark feed="transportChain" />}{' '}
                   {form.source === 'vadose' &&
-                    (vadoseFeed ? `Vadose source: ${vadoseFeed.label}.` : 'No vadose source held.')}
+                    (vadoseFeed ? (
+                      <>
+                        {`Vadose source: ${vadoseFeed.label}.`} <StaleMark feed="vadose" />
+                      </>
+                    ) : (
+                      'No vadose source held.'
+                    ))}
                   {form.source === 'saturated' &&
-                    (saturatedFeed
-                      ? `Saturated source: ${saturatedFeed.label}.`
-                      : 'No saturated source held.')}
+                    (saturatedFeed ? (
+                      <>
+                        {`Saturated source: ${saturatedFeed.label}.`} <StaleMark feed="saturated" />
+                      </>
+                    ) : (
+                      'No saturated source held.'
+                    ))}
                 </p>
                 <div className="fields">
                   <Field
@@ -500,6 +517,7 @@ export function CleanupPage() {
               )}
               {modeledReply && modeled.answered && (
                 <div className={modeled.computing || !modeledBuilt?.ok ? 'stale' : undefined}>
+                  <StaleMark feed={modeledFeeds} />
                   <ModeledResults
                     outcome={modeledReply}
                     name={modeled.answered.chemical.name}
@@ -507,7 +525,9 @@ export function CleanupPage() {
                   />
                   <DownloadCsv
                     disabled={modeled.computing || !modeledBuilt?.ok}
-                    tables={modeledCsvTables(modeledReply, modeled.answered.chemical.name)}
+                    tables={modeledCsvTables(modeledReply, modeled.answered.chemical.name).map(
+                      (t) => ({ ...t, feeds: modeledFeeds }),
+                    )}
                   />
                 </div>
               )}
@@ -539,6 +559,7 @@ export function CleanupPage() {
 
           {!modeledOn && shown && (
             <div className={stale ? 'stale' : undefined}>
+              <StaleMark feed={directFeeds} />
               <LevelsSection method="modern" outcome={shown.outcome.modern} names={names} />
               <LevelsSection method="legacy" outcome={shown.outcome.legacy} names={names} />
               {householdFeed && (
@@ -551,7 +572,10 @@ export function CleanupPage() {
               <DownloadCsv
                 disabled={stale}
                 tables={[
-                  ...cleanupCsvTables(shown.outcome, names),
+                  ...cleanupCsvTables(shown.outcome, names).map((t) => ({
+                    ...t,
+                    feeds: directFeeds,
+                  })),
                   ...sourceLevelCsvTables(shown.outcome, names, {
                     household: householdFeed,
                     vapor: vaporFeed,

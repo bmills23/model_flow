@@ -1,6 +1,8 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 import { App } from './App';
+import { forgetMemory, getScreen, setScreen } from './project/store';
+import { clearWellFeed, setWellFeed } from './transport/wellFeed';
 
 describe('App shell', () => {
   it('shows the six RISC-style steps in the navigation', () => {
@@ -177,5 +179,53 @@ describe('App shell', () => {
     expect(document.body.textContent).not.toMatch(/placeholder/i);
     const main = document.getElementById('main')!;
     expect(main.querySelector('a[href="#/report"]')).toBeTruthy();
+  });
+});
+
+describe('stale values banner', () => {
+  afterEach(() => {
+    cleanup();
+    act(() => {
+      clearWellFeed();
+      forgetMemory();
+    });
+  });
+  const well = {
+    method: 'modern' as const,
+    label: 'Receptor well',
+    times: [0, 10],
+    values: [0, 1e-6],
+  };
+  const editK = (k: string): void =>
+    act(() => {
+      const t = getScreen('transport');
+      setScreen('transport', { ...t, form: { ...t.form, K: k } });
+    });
+  const note = /built from inputs that have since changed/i;
+
+  it('appears the moment the sending screen is edited and goes when it is edited back', () => {
+    render(<App />);
+    const k = getScreen('transport').form.K;
+    act(() => setWellFeed(well));
+    expect(screen.queryByText(note)).toBeNull();
+    editK('99');
+    expect(screen.getByText(note).textContent).toMatch(
+      /receptor well concentration \(transport\)/i,
+    );
+    editK(k);
+    expect(screen.queryByText(note)).toBeNull();
+  });
+
+  it('stays dismissed for the same stale feed and comes back for a later one', () => {
+    render(<App />);
+    act(() => setWellFeed(well));
+    editK('99');
+    fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    expect(screen.queryByText(note)).toBeNull();
+    editK('98');
+    expect(screen.queryByText(note)).toBeNull();
+    act(() => setWellFeed(well));
+    editK('97');
+    expect(screen.getByText(note)).toBeTruthy();
   });
 });

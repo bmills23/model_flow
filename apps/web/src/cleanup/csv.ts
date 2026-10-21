@@ -308,6 +308,7 @@ export function tphCsvTables(feed: TphRiskFeed): CsvTable[] {
       name: 'cleanup-tph',
       editions: ['rsl'],
       label: 'total TPH level',
+      feeds: ['tph'],
       rows: tphRows(feed),
       columns: TPH_COLUMNS,
     },
