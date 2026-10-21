@@ -237,8 +237,9 @@ Ettinger methods, the legacy box and the Soil Screening Guidance factor. A path 
 level above the residual-phase limit (where the model's vapor stops rising, so no soil level reaches that
 air level), a Soil Screening Guidance factor for a source series, and a model that transfers nothing from
 the source. A source series sent from another screen gives the same coefficient as a single value, because
-the steady method is applied at each time. Change the vapor inputs and send again: a project saved before
-this panel existed says to send the vapor air again.
+the steady method is applied at each time. Change the vapor inputs and send again: once an input behind the sent coefficient changes,
+the panel says to send the vapor air again, as it does for a project saved before this panel existed. The send
+button is off while the vapor inputs have an error.
 
 The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file.
 
@@ -251,7 +252,7 @@ to a chemical, so use it for the chemical it was run for. The level reads "not q
 the run has an upstream background (the peak is then not proportional to the source), when the plume is fed by a
 vadose or saturated source screen (the run holds no groundwater source concentration), when nothing transfers
 to the surface water, when the source level would exceed the solubility entered on the surface water screen, or
-when the result was sent before this panel existed (send it again).
+when the result was sent before this panel existed or the surface water inputs have changed since (send it again).
 
 A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
 **Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or

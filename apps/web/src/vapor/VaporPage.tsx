@@ -7,7 +7,7 @@ import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './che
 import { layerBands, profileCurves } from './chartData';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { vaporCsvTables } from './csv';
-import { vaporCoefficients } from './coefficients';
+import { vaporCoefficients, type VaporCoefficients } from './coefficients';
 import { runVapor, type VaporOutcome } from './compute';
 import {
   getSaturatedVaporFeed,
@@ -285,20 +285,20 @@ export function VaporPage() {
 
   const riskMethod = form.method;
   const riskChemical = chemicals.find((c) => c.id === form.chemicalId) ?? null;
+  const currentCoefficients = (): VaporCoefficients | null =>
+    shownParsed && parsed.ok
+      ? vaporCoefficients(form, shownParsed, feedEpcs ? active : null, outdoorForm, riskMethod)
+      : null;
   const sendToRisk = (): void => {
-    if (!shownParsed || !shown || riskChemical === null) return;
+    // an invalid form leaves the last good run on screen, which the live fields no longer describe
+    if (!parsed.ok || !shownParsed || !shown || riskChemical === null) return;
     const r: Pick<VaporEpcs, 'indoor' | 'outdoor'> =
       feedEpcs ?? constantEpcs(form, shownParsed, shown, outdoorForm, riskMethod);
     const indoor = r.indoor[riskMethod];
     if (!indoor) return;
     const outdoorSpec = r.outdoor[riskMethod];
-    const coefficients = vaporCoefficients(
-      form,
-      shownParsed,
-      feedEpcs ? active : null,
-      outdoorForm,
-      riskMethod,
-    );
+    const coefficients = currentCoefficients();
+    if (!coefficients) return;
     setVaporRiskFeed({
       chemicalId: riskChemical.id,
       label: `${riskChemical.name}, ${METHOD_LABEL[riskMethod]}${active ? `, ${active.label}` : ', entered source'}`,
@@ -310,8 +310,26 @@ export function VaporPage() {
       },
     });
   };
-  const riskReason =
-    riskChemical === null
+  // A sent run's coefficients describe the inputs at the time of sending. When an input behind them
+  // changes, drop them (the air stays) so the cleanup screen asks for a new send instead of dividing
+  // by the old coefficient.
+  useEffect(() => {
+    const held = riskHeld?.coefficients;
+    if (!held || !parsed.ok) return;
+    const now = currentCoefficients();
+    if (!now) return;
+    const same =
+      JSON.stringify(held.indoor) === JSON.stringify(now.indoor) &&
+      (held.outdoor === undefined || JSON.stringify(held.outdoor) === JSON.stringify(now.outdoor));
+    if (same) return;
+    const rest = { ...riskHeld };
+    delete rest.coefficients;
+    setVaporRiskFeed(rest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [riskHeld, parsed, form, outdoorForm, active, feedEpcs, riskMethod]);
+  const riskReason = !parsed.ok
+    ? 'The inputs above have an error; fix it to send the air concentrations.'
+    : riskChemical === null
       ? 'Pick a chemical from the database above to send its air concentrations; the Table R-3 test values are not a chemical.'
       : feedEpcs && !feedEpcs.indoor[riskMethod]
         ? `The ${riskMethod} method did not run on this source series.`

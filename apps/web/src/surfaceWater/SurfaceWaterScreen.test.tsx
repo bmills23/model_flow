@@ -129,4 +129,15 @@ describe('SurfaceWaterScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: /use modern surface water for swimming/i }));
     expect(getSurfaceWaterFeed()?.origin).toBe('surfaceWater.mass-discharge');
   }, 30000);
+
+  it('drops the sent coefficient when the run is edited afterwards', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
+    expect(getSurfaceWaterFeed()?.coefficient?.value).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText(/^upstream flow/i), { target: { value: '90000' } });
+    await waitFor(() => expect(getSurfaceWaterFeed()?.coefficient).toBeUndefined(), {
+      timeout: 15000,
+    });
+    expect(getSurfaceWaterFeed()?.values.length).toBeGreaterThan(0);
+  }, 40000);
 });
