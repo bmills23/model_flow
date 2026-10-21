@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { VaporPage } from './VaporPage';
 import {
@@ -145,4 +145,37 @@ describe('source from another screen', () => {
     fireEvent.click(within(region).getByLabelText(/hand case a, legacy/i));
     expect(within(region).getByText(/one value/i)).toBeTruthy();
   });
+});
+
+describe('sent vapor run after an edit', () => {
+  const sendBenzene = async () => {
+    render(<VaporPage />);
+    await screen.findByRole('option', { name: /benzene \(71-43-2\)/i });
+    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
+      target: { value: '71-43-2' },
+    });
+    const risk = screen.getByRole('region', { name: /exposure and risk/i });
+    return { send: within(risk).getByRole('button', { name: /send to exposure and risk/i }) };
+  };
+
+  it('drops the sent coefficients when an input they depend on changes', async () => {
+    const { send } = await sendBenzene();
+    fireEvent.click(send);
+    expect(getVaporRiskFeed()?.coefficients?.indoor).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/^air exchange rate/i), { target: { value: '2.5' } });
+    await waitFor(() => expect(getVaporRiskFeed()?.coefficients).toBeUndefined());
+    // the air concentrations stay; sending again restores the coefficients
+    expect(getVaporRiskFeed()?.indoor).toBeTruthy();
+    fireEvent.click(send);
+    expect(getVaporRiskFeed()?.coefficients?.indoor).toBeTruthy();
+  }, 30000);
+
+  it('does not send while the form is invalid', async () => {
+    const { send } = await sendBenzene();
+    expect(send).toHaveProperty('disabled', false);
+    fireEvent.change(screen.getByLabelText(/^henry's constant/i), { target: { value: '' } });
+    expect(send).toHaveProperty('disabled', true);
+    fireEvent.click(send);
+    expect(getVaporRiskFeed()).toBeNull();
+  }, 30000);
 });

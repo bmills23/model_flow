@@ -135,6 +135,16 @@ export function SurfaceWaterScreen() {
         : {}),
     });
   };
+  // A sent coefficient describes the run at the time of sending. When an edit changes it, drop it (the
+  // series stays) so the cleanup screen asks for a new send instead of dividing by the old one.
+  useEffect(() => {
+    if (!held?.coefficient || !request || computing || !outcome?.ok) return;
+    const now = surfaceWaterCoefficient(request, outcome.result, held.method);
+    if (JSON.stringify(now) === JSON.stringify(held.coefficient)) return;
+    const rest = { ...held };
+    delete rest.coefficient;
+    setSurfaceWaterFeed(rest);
+  }, [held, request, computing, outcome]);
   const foc = Number(form.foc);
 
   const setLinked = (on: boolean): void =>
