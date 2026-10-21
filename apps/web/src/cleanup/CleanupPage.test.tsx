@@ -89,6 +89,19 @@ describe('CleanupPage', () => {
     ).toBeGreaterThan(0);
   }, 30000);
 
+  it('offers a CSV download for the household source levels once the run is sent', async () => {
+    setHouseholdFeed({
+      chemicalId: '71-43-2',
+      label: 'Benzene, household run',
+      coefficients: { bathroomAir: 0.002 },
+      methods: {},
+    });
+    await withBenzene();
+    expect(
+      await screen.findByRole('button', { name: /download csv: household source levels/i }),
+    ).toBeTruthy();
+  }, 30000);
+
   it('shows the groundwater and soil levels behind the indoor and outdoor air levels for the vapor run', async () => {
     const epc = { kind: 'constant' as const, value: 1e-6, origin: 'vapor.je-1991' };
     setVaporRiskFeed({

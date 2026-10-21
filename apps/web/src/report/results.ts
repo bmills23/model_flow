@@ -13,6 +13,7 @@ import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
 import { buildModeled } from '../cleanup/modeledBuild';
 import { runCleanup } from '../cleanup/compute';
+import { sourceLevelCsvTables } from '../cleanup/sourceLevelsCsv';
 import {
   cleanupCsvTables,
   CLEANUP_METHOD_IDS,
@@ -354,11 +355,13 @@ async function cleanup(
       if (o.ok) addWarnings(sec, CLEANUP_METHOD_IDS[m], o.result.warnings);
       else sec.notes.push(`The ${METHOD_NAME[m]} did not run: ${o.error}`);
     }
-    if (feed<HouseholdRiskFeed>('household') !== null) {
-      sec.notes.push(
-        'The household source levels panel of the cleanup screen is on the screen only.',
-      );
-    }
+    sec.tables.push(
+      ...sourceLevelCsvTables(outcome, names, {
+        household: feed<HouseholdRiskFeed>('household'),
+        vapor: feed<VaporRiskFeed>('vaporRisk'),
+        surface: feed<SurfaceWaterFeed>('surfaceWater'),
+      }),
+    );
   } else if (!form.ssg.on && tphHeld === null) {
     return notComputed(built.errors);
   } else {

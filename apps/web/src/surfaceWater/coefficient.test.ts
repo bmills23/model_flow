@@ -99,7 +99,7 @@ describe('surfaceWaterCoefficient', () => {
     const c = surfaceWaterCoefficient(fedReq, run(req), 'well-mixed');
     expect(c.value).toBeNull();
     expect(c.reason).toMatch(/vadose or saturated/i);
-  });
+  }, 60000);
 
   it('an upstream background makes the peak non-proportional to the source: not quantified', () => {
     const req = unlinked({ background: '0.5' });

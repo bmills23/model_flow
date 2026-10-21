@@ -36,6 +36,7 @@ import { CleanupUncertainty } from './CleanupUncertainty';
 import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupCsvTables, modeledCsvTables } from './csv';
+import { sourceLevelCsvTables } from './sourceLevelsCsv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 import { HelpLink } from '../docs/HelpLink';
 
@@ -547,7 +548,17 @@ export function CleanupPage() {
               {surfaceFeed && (
                 <SurfaceWaterPanel outcome={shown.outcome} feed={surfaceFeed} names={names} />
               )}
-              <DownloadCsv disabled={stale} tables={cleanupCsvTables(shown.outcome, names)} />
+              <DownloadCsv
+                disabled={stale}
+                tables={[
+                  ...cleanupCsvTables(shown.outcome, names),
+                  ...sourceLevelCsvTables(shown.outcome, names, {
+                    household: householdFeed,
+                    vapor: vaporFeed,
+                    surface: surfaceFeed,
+                  }),
+                ]}
+              />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
               <WarningsList
                 outcome={shown.outcome}

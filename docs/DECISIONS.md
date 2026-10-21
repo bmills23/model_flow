@@ -2474,3 +2474,30 @@ Every ruling below is DEFAULT.
    diagnostic line ("mid: ...") if the run button never enables.
 4. **No component change was needed.** The block rendered with no overflowing element and no axe violation in all
    three views, so no component or test changed.
+
+## 2026-10-21: Wave K slice K3, source levels in the report and CSV
+
+Every ruling below is DEFAULT.
+
+1. **One table per panel.** The household, vapor and surface water panels each write one CSV table, named
+   `cleanup-household-levels`, `cleanup-vapor-levels` and `cleanup-surface-water-levels`, built in
+   `cleanup/sourceLevelsCsv.ts` from the same row functions the panels use, so the file and the screen cannot
+   disagree. A table exists only when its feed is held; the order is household, vapor, surface water.
+2. **Same rows, screen units.** Levels are written in the panel's unit (mg/L, mg/kg or mg/m3, named in a unit column)
+   at full precision, with the receptor method id (`cleanup.rags-b-1991` or `cleanup.rags-e-f-2014`) and the source
+   run's method id in their own columns. The surface water table adds the surface water level the source level
+   reproduces.
+3. **Not quantified keeps its row.** A path with no level is written with empty level cells and the reason in a
+   "not quantified because" column, never zero and never dropped. The household panel has no such rows, so its
+   reason column is empty.
+4. **Same place in the app.** The tables are added to the cleanup screen's Download CSV controls and to the cleanup
+   section of the report (`report/results.ts`), after the cleanup levels and pathways. The report computes them
+   from the project's held feeds, so a project saved and reopened prints the same rows. The report note that the
+   household panel is on the screen only is removed, since it is false.
+5. **No new saved keys.** The feeds already live in the project file; nothing is added to a form or feed, so
+   `FINGERPRINT_SKIP` is unchanged and older project files do not read as stale.
+6. **Warnings.** Panel row warnings stay on the screen; the report carries the engine warnings of the receptor
+   methods as before.
+7. **Roadmap.** `docs/ROADMAP.md` line 1, item (3), is corrected in place: the vapor, shower and surface water gap
+   it named is closed for linear paths. This follows the task's numbered step 3, which conflicts with the generic
+   rule not to edit the roadmap; the numbered step was followed.

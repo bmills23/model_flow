@@ -227,6 +227,77 @@ describe('computeResults', () => {
     );
   }, 60000);
 
+  it('adds the held household, vapor and surface water source levels to the cleanup section', async () => {
+    const db = await loadChemicalDb();
+    const rec = db.byId.get('71-43-2')!;
+    const on = ['showerInhalation', 'indoorInhalation', 'outdoorInhalation', 'swimIngestion'];
+    const pathways = Object.fromEntries(PATHWAY_IDS.map((p) => [p, on.includes(p)]));
+    const epc = { kind: 'constant', value: 1e-6, origin: 'x' };
+    const r = await computeResults(
+      project(
+        (s) => {
+          s.cleanup = {
+            form: {
+              ...s.cleanup.form,
+              chemicals: [newChemicalRow(rec)],
+              a: { ...s.cleanup.form.a, pathways: pathways as never },
+            },
+          };
+        },
+        (s) => ({
+          household: feedEntry('household', s.household.form, {
+            chemicalId: '71-43-2',
+            label: 'Benzene, household run',
+            coefficients: { bathroomAir: 0.002 },
+            methods: { bathroomAir: 'shower.little-1992' },
+          }),
+          vaporRisk: feedEntry('vapor', s.vapor.form, {
+            chemicalId: '71-43-2',
+            label: 'Benzene, vapor run',
+            indoor: epc,
+            outdoor: epc,
+            coefficients: {
+              indoor: {
+                quantified: true,
+                methodId: 'vapor.je-1991',
+                value: 2e-4,
+                source: 'groundwater',
+              },
+              outdoor: {
+                quantified: false,
+                methodId: 'outdoorAir.box',
+                reason: 'TPH mixture in the soil',
+              },
+            },
+          }),
+          surfaceWater: feedEntry('surfaceWater', s.surfaceWater.form, {
+            method: 'mass-discharge',
+            origin: 'surfaceWater.mass-discharge',
+            label: 'Modern mass-discharge surface water',
+            times: [1],
+            values: [1e-6],
+          }),
+        }),
+      ),
+    );
+    const sec = r['cleanup']!;
+    const names = sec.tables.map((t) => t.name);
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'cleanup-household-levels',
+        'cleanup-vapor-levels',
+        'cleanup-surface-water-levels',
+      ]),
+    );
+    const vapor = sec.tables.find((t) => t.name === 'cleanup-vapor-levels')!;
+    expect(vapor.rows.some((x) => x.reason === 'TPH mixture in the soil' && x.level === null)).toBe(
+      true,
+    );
+    const sw = sec.tables.find((t) => t.name === 'cleanup-surface-water-levels')!;
+    expect(sw.rows.every((x) => x.level === null && /again/i.test(String(x.reason)))).toBe(true);
+    expect(sec.notes.join(' ')).not.toMatch(/on the screen only/i);
+  }, 60000);
+
   it('notes that a modeled cleanup source needs the transport chain a saved project lacks', async () => {
     const db = await loadChemicalDb();
     const rec = db.byId.get('71-43-2')!;

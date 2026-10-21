@@ -240,6 +240,8 @@ the source. A source series sent from another screen gives the same coefficient 
 the steady method is applied at each time. Change the vapor inputs and send again: a project saved before
 this panel existed says to send the vapor air again.
 
+The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file.
+
 Surface water source levels: when the surface water screen has sent a result (the "use ... for swimming" buttons),
 and a swimming pathway is on, a **Surface water source levels** panel lists the dissolved groundwater
 concentration that gives each surface water level, in mg/L. It divides the surface water level by the run's
@@ -302,6 +304,12 @@ the cleanup screen in this session (levels table, iterations, seed, warnings and
 the result is out of date because an input changed since the run and asks you to run it again there, or says no
 run has been made yet. That result is not saved with the project or the browser's copy, so after a reload, a new
 project or an opened project, run it again on the cleanup screen. Leaving to the report and coming back keeps it.
+
+The household, vapor and surface water source level panels of the cleanup screen print in the report's cleanup
+section when their run has been sent here, each as a table of the same rows as the panel (method ids, source,
+unit, source level, limiting endpoint, cancer and noncancer levels; the surface water table also gives the
+surface water level it reproduces). A level that is not quantified prints as an empty cell with its reason in the
+last column, never as zero. The three tables also have Download CSV buttons on the cleanup screen.
 
 ### Downloading tables
 
