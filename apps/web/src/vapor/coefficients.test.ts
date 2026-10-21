@@ -4,7 +4,7 @@ import { jeEpaIndoor, jeLegacyIndoor } from '@model-flow/engine';
 import { DEFAULT_FORM, toInputs, type VaporForm } from './form';
 import { runVapor } from './compute';
 import { DEFAULT_OUTDOOR, runOutdoor } from './outdoor';
-import { constantEpcs, vaporEpcs } from './series';
+import { constantEpcs, INDOOR_ORIGIN, OUTDOOR_ORIGIN, vaporEpcs } from './series';
 import { vaporCoefficients, type VaporCoefficient } from './coefficients';
 
 const GW: Partial<VaporForm> = {
@@ -167,5 +167,14 @@ describe('vapor air-over-source coefficients', () => {
     const spec = epcs.indoor.legacy!;
     if (spec.kind !== 'constant') throw new Error('constant');
     expect(ind.value * 50e-6).toBeCloseTo(spec.value, 18);
+  });
+});
+
+describe('the risk feed reaches only the Johnson and Ettinger indoor and box or SSG outdoor methods', () => {
+  // DECISIONS K1 ruling 2: jury-bam and attenuation-factor-2015 are linear but no feed carries them,
+  // so the cleanup screen never quantifies them. A new origin here must be added to that ruling too.
+  it('maps each risk method to its origin ids and nothing else', () => {
+    expect(INDOOR_ORIGIN).toEqual({ legacy: 'vapor.je-1991', modern: 'vapor.je-epa' });
+    expect(OUTDOOR_ORIGIN).toEqual({ legacy: 'outdoorAir.box', modern: 'outdoorAir.ssg-vf-1996' });
   });
 });

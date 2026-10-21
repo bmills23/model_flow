@@ -2383,7 +2383,10 @@ source and checks the air doubles) and `apps/web/src/vapor/coefficients.test.ts`
    groundwater temperature), `outdoorAir.box` (the steady diffusion flux is source vapor over a resistance, and the
    box is proportional to the flux), and `outdoorAir.ssg-vf-1996` in both branches: the factor takes no
    concentration, so `air = F / VF`, and the mass-limit branch (`VF = Q/C T / (rho_b d_s)`) depends on the source
-   depth and time, not on F. `vapor.pvi-screen-2015` returns a verdict, not an air concentration, so it has no
+   depth and time, not on F. The risk feed carries only the Johnson and Ettinger indoor methods (`vapor.je-1991`
+   as legacy, `vapor.je-epa` as modern, `VaporPage.tsx` `riskMethod`) and the box and SSG outdoor factors, so
+   `vapor.jury-bam` and `vapor.attenuation-factor-2015` are linear but produce no coefficient and no cleanup row
+   on the web. `vapor.pvi-screen-2015` returns a verdict, not an air concentration, so it has no
    coefficient and is never quantified. `vapor.devaull-2007` is nonlinear in its fast-reaction and coupled modes
    (`oxygenDepth` root-finds a depth that depends on the source) and is not on the web vapor screen, so it never
    reaches the feed; a future screen offering it must publish `quantified: false` for those modes.
