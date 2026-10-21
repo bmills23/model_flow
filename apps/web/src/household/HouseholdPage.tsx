@@ -1,3 +1,5 @@
+import { StaleMark } from '../project/StaleMark';
+import { householdFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { registry, type Warning } from '@model-flow/engine';
 import { DownloadCsv } from '../export/DownloadCsv';
@@ -209,7 +211,8 @@ export function HouseholdPage() {
                 : ''}
               {form.showerWaterSource === 'well' || form.irrigationWaterSource !== 'entered'
                 ? ' A held series is shown here at its peak; the full series goes to the risk screen.'
-                : ''}
+                : ''}{' '}
+              <StaleMark feed={householdFeedsRead(form)} />
             </p>
             <div className="fields">
               {text('henryAtm', 'Henry (atm m3/mol) for the RSL criterion')}
@@ -492,7 +495,12 @@ export function HouseholdPage() {
             )}
           </section>
 
-          <DownloadCsv tables={householdCsvTables(out)} />
+          <DownloadCsv
+            tables={householdCsvTables(out).map((t) => ({
+              ...t,
+              feeds: householdFeedsRead(form),
+            }))}
+          />
 
           <section className="panel" aria-label="Warnings and notes">
             <h2>Warnings</h2>

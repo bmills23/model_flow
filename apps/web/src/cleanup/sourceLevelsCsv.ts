@@ -84,6 +84,7 @@ export function sourceLevelCsvTables(
       name: 'cleanup-household-levels',
       editions: ['rsl'],
       label: 'household source levels',
+      feeds: ['household'],
       rows: householdSourceLevels(outcome, f).map((r) =>
         rowOf({ ...r, sourceMethod: r.householdMethod }, name(f.chemicalId)),
       ),
@@ -96,6 +97,7 @@ export function sourceLevelCsvTables(
       name: 'cleanup-vapor-levels',
       editions: ['rsl'],
       label: 'vapor source levels',
+      feeds: ['vaporRisk'],
       rows: vaporSourceLevels(outcome, f).map((r) =>
         rowOf({ ...r, sourceMethod: r.vaporMethod }, name(f.chemicalId)),
       ),
@@ -107,6 +109,7 @@ export function sourceLevelCsvTables(
       name: 'cleanup-surface-water-levels',
       editions: ['rsl'],
       label: 'surface water source levels',
+      feeds: ['surfaceWater'],
       rows: surfaceWaterSourceLevels(outcome, feeds.surface).map((r) => ({
         ...rowOf(
           { ...r, sourceMethod: r.surfaceMethod, what: 'Groundwater source (surface water)' },

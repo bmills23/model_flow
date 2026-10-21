@@ -1,3 +1,5 @@
+import { StaleMark } from '../project/StaleMark';
+import { vaporFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
@@ -703,7 +705,13 @@ export function VaporPage() {
                     </tbody>
                   </table>
                 </div>
-                <DownloadCsv disabled={stale} tables={vaporCsvTables(shown, feedEpcs)} />
+                <DownloadCsv
+                  disabled={stale}
+                  tables={vaporCsvTables(shown, feedEpcs).map((t) => ({
+                    ...t,
+                    feeds: vaporFeedsRead(active ? choice : 'entered'),
+                  }))}
+                />
                 {(['legacy', 'modern'] as const).map((m) => {
                   const o = shown[m];
                   return o.ok ? null : (
@@ -821,6 +829,7 @@ export function VaporPage() {
                 result={pviResult}
               />
 
+              <StaleMark feed={vaporFeedsRead(active ? choice : 'entered')} />
               <SourcePanel
                 choice={active ? choice : 'entered'}
                 onChoice={setChoice}

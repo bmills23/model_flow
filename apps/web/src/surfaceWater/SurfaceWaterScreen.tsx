@@ -1,3 +1,4 @@
+import { StaleMark } from '../project/StaleMark';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
@@ -316,7 +317,10 @@ export function SurfaceWaterScreen() {
                   checked={form.linked}
                   onChange={(e) => setLinked(e.target.checked)}
                 />
-                <span>Use the groundwater transport run ({feed.label})</span>
+                <span>
+                  Use the groundwater transport run ({feed.label}){' '}
+                  {form.linked && <StaleMark feed="bank" />}
+                </span>
               </label>
             ) : (
               <p className="derived">
@@ -514,7 +518,10 @@ export function SurfaceWaterScreen() {
                 )}
                 <DownloadCsv
                   disabled={computing || !parsed.ok || engineError !== null}
-                  tables={surfaceWaterCsvTables(result)}
+                  tables={surfaceWaterCsvTables(result).map((t) => ({
+                    ...t,
+                    feeds: linkedOn ? ['bank' as const] : [],
+                  }))}
                 />
               </section>
 

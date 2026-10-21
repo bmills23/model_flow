@@ -54,6 +54,14 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   refreshed silently. The note goes away when you send the value again or edit the inputs back to what
   was sent; Dismiss hides it for the values it lists, and it comes back for a value that goes out of date
   later.
+  The screens that use such a value say so beside it with an "Out of date" label and the screen to send it
+  again from: the chemical cards on the exposure and risk and cleanup screens, the cleanup source level
+  panels (household, vapor, surface water and TPH), the groundwater run behind a modeled cleanup level, and
+  the screens that read a series from another screen (transport, vapor, household, surface water). The
+  values stay visible. The report puts the same label under the heading of each section that reads such a
+  value and again in that section's notes. A CSV download that holds such values gains a last column,
+  `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a
+  current file is unchanged. A note beside the download says which values are out of date.
 - **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
   server, so the link carries the project without anyone hosting it. The link does not include the values
   passed between screens; whoever opens it sends those again from their source screens.

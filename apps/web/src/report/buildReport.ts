@@ -1,4 +1,6 @@
 import { screensOf, siteOf, type Project, type Screens } from '../project';
+import { feedsReadBy } from '../project/feedsRead';
+import type { StaleFeedKey } from '../project/store';
 import { siteSummary } from '../site/model';
 import {
   dataEditionsFor,
@@ -95,6 +97,8 @@ export interface ReportSection {
   name: string;
   inputs: InputRow[];
   methodIds: string[];
+  /** The feeds from other screens this section's results are computed from (see `feedsReadBy`). */
+  reads: StaleFeedKey[];
 }
 
 export interface Report {
@@ -115,6 +119,7 @@ export function buildReport(project: Project): Report {
   const screens = screensOf(project);
   const feeds = project.feeds as FeedsLike | undefined;
   const run = methodsRun(screens, feeds);
+  const reads = feedsReadBy(screens, project.feeds as Record<string, unknown> | undefined);
   const sections: ReportSection[] = [];
   const unused: string[] = [];
   for (const key of USED_SCREENS_ORDER) {
@@ -128,6 +133,7 @@ export function buildReport(project: Project): Report {
       name: SCREEN_NAMES[key],
       inputs: flattenInputs(project(screens[key])).map(dropFormPrefix),
       methodIds: run.byScreen[key] ?? [],
+      reads: reads[key] ?? [],
     });
   }
   const statement = buildMethodsStatement({

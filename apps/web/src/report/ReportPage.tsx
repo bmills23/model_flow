@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { currentProject } from '../project/store';
+import { currentProject, type StaleFeedKey } from '../project/store';
+import { staleAmong, staleSentence, useStaleFeeds } from '../project/staleFeeds';
 import { overridesOf } from '../project';
 import { loadOverrideRows, receptorEditRows, type ReceptorEditRow } from './userValues';
 import type { OverrideRow } from '../overrides/toxicity';
@@ -93,6 +94,7 @@ export function ReportView({
   uncertainty = null,
   userValues = [],
   receptorEdits = [],
+  staleFeeds = [],
 }: {
   report: Report;
   preparedBy: string;
@@ -104,6 +106,8 @@ export function ReportView({
   userValues?: readonly OverrideRow[];
   /** Exposure factors the user edited in place of a receptor preset's. */
   receptorEdits?: readonly ReceptorEditRow[];
+  /** Feeds from other screens whose inputs changed after they were sent; sections computed from them say so. */
+  staleFeeds?: readonly StaleFeedKey[];
 }) {
   const { statement } = report;
   return (
@@ -143,49 +147,68 @@ export function ReportView({
           return here.
         </p>
       ) : (
-        report.sections.map((sec) => (
-          <section key={sec.key} className="report-section" aria-labelledby={`rep-${sec.key}`}>
-            <h2 id={`rep-${sec.key}`}>{sec.name}</h2>
-            <h3>Inputs</h3>
-            <table className="report-table">
-              <thead>
-                <tr>
-                  <th scope="col">Input</th>
-                  <th scope="col">Value as entered</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sec.inputs.map((row) => (
-                  <tr key={row.path}>
-                    <th scope="row">{row.label}</th>
-                    <td>{row.value}</td>
+        report.sections.map((sec) => {
+          const stale = staleAmong(sec.reads, staleFeeds);
+          const staleText =
+            stale.length === 0
+              ? ''
+              : `${staleSentence(stale)}. The values below were computed from the sent values, which no longer match the inputs of the sending screen.`;
+          return (
+            <section key={sec.key} className="report-section" aria-labelledby={`rep-${sec.key}`}>
+              <h2 id={`rep-${sec.key}`}>{sec.name}</h2>
+              {stale.length > 0 && (
+                <p className="report-stale" role="note">
+                  <span className="badge badge-legacy">Out of date inputs</span> {staleText}
+                </p>
+              )}
+              <h3>Inputs</h3>
+              <table className="report-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Input</th>
+                    <th scope="col">Value as entered</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <h3>Results</h3>
-            {results === null ? (
-              <p className="muted" role="status">
-                Computing results...
+                </thead>
+                <tbody>
+                  {sec.inputs.map((row) => (
+                    <tr key={row.path}>
+                      <th scope="row">{row.label}</th>
+                      <td>{row.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <h3>Results</h3>
+              {stale.length > 0 && (
+                <ul className="report-notes">
+                  <li>{staleText}</li>
+                </ul>
+              )}
+              {results === null ? (
+                <p className="muted" role="status">
+                  Computing results...
+                </p>
+              ) : results[sec.key] === undefined ? (
+                <p className="muted">No results for this screen.</p>
+              ) : (
+                <ResultTables results={results[sec.key]!} />
+              )}
+              {results?.[sec.key] !== undefined && (
+                <ReportCharts charts={results[sec.key]!.charts} />
+              )}
+              {results?.[sec.key] !== undefined && <ResultWarnings results={results[sec.key]!} />}
+              {sec.key === 'uncertainty' && uncertainty}
+              <p className="muted">
+                Methods run:{' '}
+                {statement.methods
+                  .filter((m) => sec.methodIds.includes(m.id))
+                  .map((m) => m.name)
+                  .join('; ')}
+                .
               </p>
-            ) : results[sec.key] === undefined ? (
-              <p className="muted">No results for this screen.</p>
-            ) : (
-              <ResultTables results={results[sec.key]!} />
-            )}
-            {results?.[sec.key] !== undefined && <ReportCharts charts={results[sec.key]!.charts} />}
-            {results?.[sec.key] !== undefined && <ResultWarnings results={results[sec.key]!} />}
-            {sec.key === 'uncertainty' && uncertainty}
-            <p className="muted">
-              Methods run:{' '}
-              {statement.methods
-                .filter((m) => sec.methodIds.includes(m.id))
-                .map((m) => m.name)
-                .join('; ')}
-              .
-            </p>
-          </section>
-        ))
+            </section>
+          );
+        })
       )}
 
       {report.unused.length > 0 && report.sections.length > 0 && (
@@ -342,6 +365,7 @@ export function ReportPage() {
   const id = useId();
   const project = useMemo(() => currentProject(), []);
   const report = useMemo(() => buildReport(project), [project]);
+  const staleFeeds = useStaleFeeds();
   const [results, setResults] = useState<ProjectResults | null>(null);
   const [userValues, setUserValues] = useState<OverrideRow[]>([]);
   const receptorEdits = useMemo(() => receptorEditRows(project), [project]);
@@ -393,6 +417,7 @@ export function ReportPage() {
         results={results}
         userValues={userValues}
         receptorEdits={receptorEdits}
+        staleFeeds={staleFeeds}
         uncertainty={<ReportUncertainty project={project} />}
       />
     </section>

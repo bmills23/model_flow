@@ -19,6 +19,20 @@ export function useFeedStale(key: StaleFeedKey): boolean {
   return useStaleFeeds().includes(key);
 }
 
+/** The keys of `wanted` that are in `stale`, in `wanted` order and without repeats. */
+export function staleAmong(
+  wanted: readonly StaleFeedKey[],
+  stale: readonly StaleFeedKey[],
+): StaleFeedKey[] {
+  return [...new Set(wanted)].filter((k) => stale.includes(k));
+}
+
+/** One sentence naming each stale value and the screen that sends it; the text every consumer shows. */
+export function staleSentence(keys: readonly StaleFeedKey[]): string {
+  const names = keys.map((k) => `${FEED_INFO[k].label} (${FEED_INFO[k].source})`).join(', ');
+  return `Out of date: ${names}`;
+}
+
 /** What a feed is called to a person, and the screen that sends it. */
 export const FEED_INFO: Record<StaleFeedKey, { label: string; source: string; href: string }> = {
   well: { label: 'Receptor well concentration', source: 'Transport', href: '#/transport' },

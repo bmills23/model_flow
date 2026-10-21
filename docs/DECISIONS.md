@@ -2618,3 +2618,40 @@ Slice L1 makes the stale mark live for every value passed between screens and ex
 8. **API for consumers.** `project/store.ts`: `getStaleFeeds()` (a stable array until the set changes), `isFeedStaleNow(key)`,
    `subscribeStale(fn)`, type `StaleFeedKey`. `project/staleFeeds.ts`: hooks `useStaleFeeds()` and `useFeedStale(key)`, and
    `FEED_INFO` (label, sending screen, route per key).
+
+## 2026-10-21: Wave L slice L2, stale marks in screens, report and CSV
+
+Slice L2 shows the live stale mark of slice L1 in every place a fed value is used. Values stay visible with the
+mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
+
+1. **One mark, one wording.** The label is `StaleMark` (`project/StaleMark.tsx`): a badge reading "Out of date" in the
+   existing legacy badge colours, then "Send again from <screen>, or edit its inputs back." It renders nothing while
+   the value is current, and names every sending screen when it is given several feeds. The sentence used in the
+   report and the CSV is `staleSentence` in `project/staleFeeds.ts`: "Out of date: <value> (<screen>), ...", from
+   `FEED_INFO`. No new colour token and no new class beyond the existing badge.
+2. **Where the mark shows.** Beside each feed label on a chemical card (well, household, vapor, surface water,
+   produce), above the exposure and risk results; on the cleanup screen beside the aquifer, vadose and saturated
+   source hint, above the modeled and direct levels, in the household, vapor, surface water and TPH panels; and beside
+   the series a receiving screen reads (transport vadose and saturated feed, vapor source series, household well and
+   surface water series, surface water linked run). A screen is marked only for the feeds it is set to read
+   (`project/feedsRead.ts`), so an unused stale feed marks nothing there.
+3. **Report.** `buildReport` gives each section `reads`, the feeds the screen reads given how its inputs are set (and,
+   for the cleanup screen, the source level panels the project's held feeds switch on). `ReportView` takes `staleFeeds`
+   (the live list, passed by `ReportPage`); a section whose `reads` meet it shows a note under its heading with the
+   badge and the sentence, and the same sentence as the first line of its results notes, so the printed page and a
+   reader who skips the heading both get it. Sections that send a stale feed but read none (for example the vapor
+   section when only its own air is stale) are not marked: their own results are current, the consumers are marked.
+4. **CSV.** `CsvTable` takes `feeds`, the feeds its numbers read. `DownloadCsv` reads the live list and, for a table
+   whose feeds include a stale one, writes it through `markStaleTable` (`export/staleCsv.ts`): a last column
+   `stale inputs` with the same sentence in lower case on every row, and `-stale-inputs` appended to the file stem so
+   the mark survives renaming and is visible in a folder. A table that reads no stale feed is byte for byte what it
+   was (no column), so existing imports keep working; a column that appears only when stale is easy to test for and
+   cannot be read as data. A note under the buttons names the stale values. The tables marked: risk results, cleanup
+   levels (produce), modeled levels, the household, vapor and surface water source level tables, the TPH table, and
+   the transport, vapor, household and surface water tables for the feeds those screens read. A table that never reads
+   a feed (vadose, saturated, plants and ecology, chemicals, SSG, uncertainty) is not touched.
+5. **Not marked, on purpose.** The produce factors on the direct cleanup levels are marked above the levels, not per row.
+   The cleanup probabilistic and modeled uncertainty panels recompute from the screen, not a sent feed, and carry no
+   mark. The mark follows L1's coarseness (any edit of the sending form), so a source form edit that changes none of the
+   sent values still marks.
+6. **No schema change.** Nothing new is saved, so `FINGERPRINT_SKIP` is untouched and older files are not flagged.
