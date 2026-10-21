@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { isFeedStaleNow } from '../project/store';
 import { clearSurfaceWaterFeed, getSurfaceWaterFeed } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
 
@@ -130,14 +131,20 @@ describe('SurfaceWaterScreen', () => {
     expect(getSurfaceWaterFeed()?.origin).toBe('surfaceWater.mass-discharge');
   }, 30000);
 
-  it('drops the sent coefficient when the run is edited afterwards', async () => {
+  it('keeps the sent series and coefficient and marks them stale when the run is edited', async () => {
     await loaded();
     fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
-    expect(getSurfaceWaterFeed()?.coefficient?.value).toBeGreaterThan(0);
+    const sent = getSurfaceWaterFeed();
+    expect(sent?.coefficient?.value).toBeGreaterThan(0);
+    expect(isFeedStaleNow('surfaceWater')).toBe(false);
     fireEvent.change(screen.getByLabelText(/^upstream flow/i), { target: { value: '90000' } });
-    await waitFor(() => expect(getSurfaceWaterFeed()?.coefficient).toBeUndefined(), {
-      timeout: 15000,
-    });
-    expect(getSurfaceWaterFeed()?.values.length).toBeGreaterThan(0);
+    await waitFor(() => expect(isFeedStaleNow('surfaceWater')).toBe(true));
+    // the sent feed is still the one that was sent, however long the new run takes
+    expect(getSurfaceWaterFeed()).toBe(sent);
+    const send = screen.getByRole('button', { name: /use legacy surface water for swimming/i });
+    await waitFor(() => expect(send).toHaveProperty('disabled', false), { timeout: 15000 });
+    fireEvent.click(send);
+    expect(getSurfaceWaterFeed()).not.toBe(sent);
+    expect(isFeedStaleNow('surfaceWater')).toBe(false);
   }, 40000);
 });

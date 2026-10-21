@@ -2569,3 +2569,52 @@ Every ruling below is DEFAULT unless marked otherwise.
    slice M2 builds the page.
 3. **UI parity document.** The gap table in `docs/UI_PARITY.md` section 2 is corrected in place against the tree
    (several rows still read open for slices that landed).
+
+## 2026-10-21: Wave L slice L1, live feed staleness
+
+Slice L1 makes the stale mark live for every value passed between screens and exposes it to the consumers
+(slice L2 shows it in the cleanup panels, the report and the CSV files). Every ruling below is DEFAULT.
+
+1. **The mark is computed, not stored at open.** `project/store.ts` keeps, for each held feed, the fingerprint of
+   its source form taken at send (the `inputsHash` the file already carries) and a session-only record of what else
+   the feed read (ruling 2). A feed is stale while it is held and either differs from the live screens. The list is
+   recomputed on every screen edit (`setScreen`), every send or clear of any feed, and on open, restore and new
+   project, and subscribers are told only when the set changes. Edit back, or send again, and the mark clears.
+2. **Inputs beyond the source form are part of the mark, in the session only.** A form fingerprint alone misses
+   inputs a sender reads from beside its form or from another screen. The extras (`heldInputs` in `store.ts`) are:
+   the well method on the transport screen (well and water table feeds), the vadose or saturated feed the transport
+   screen reads while its feed toggles are on (well, water table, bank and cleanup run), the saturated method picked
+   for sending (saturated and its vapor feed), the outdoor box, source choice and the chosen source series on the vapor
+   screen (the vapor feed; the attenuation-factor and PVI panels feed nothing and are left out), the bank run while
+   the surface water screen is linked to it, and the well and surface water feeds a household section reads while its
+   source is set to them. A held feed that is compared is compared by content (a short fingerprint worked out once per
+   feed object), so sending an upstream feed again with the same content is not a change. The extras are never written
+   to the file: no schema change, and `FINGERPRINT_SKIP` is untouched.
+3. **An opened or restored file reports what it always did.** The file's recorded fingerprints decide which feeds are
+   stale on open, exactly as before. The extras of a file's feeds are taken as they are at open, since a file does not
+   record them, so only a change made after the open can add a mark. After the open the mark is live: a stale feed
+   clears when its inputs are edited back or it is sent again.
+4. **The wave K coefficient-dropping effects are replaced by the shared mark.** Evidence: those effects (vapor and
+   surface water screens) removed the sent coefficient by calling the feed setter again, and the store records a new
+   fingerprint on every set, so the drop also reset the feed's mark; with both in place the edit made the coefficient
+   vanish and left the air or series looking current (tests `keeps the sent run ... marks it stale` in
+   `vapor/VaporScreens.test.tsx` and `surfaceWater/SurfaceWaterScreen.test.tsx` failed against the old effects, and
+   pass once they are removed). The effects also only ran while their screen was mounted and compared the coefficient
+   only, so an edit that left it unchanged (or moved the series but not the coefficient) went unmarked. Wave scope
+   ruling 1 says the values stay visible with the mark. The sent run, series and coefficient therefore stay on the feed
+   untouched after an edit, and the mark is the only signal. **Until slice L2 lands, the cleanup panels, report and CSV
+   use the sent coefficient without a mark; L2 must show it** (this branch does not merge alone).
+5. **The groundwater run for cleanup levels is a feed too.** `transportChain` (the transport screen's "Use for
+   cleanup levels", held in `transport/chainFeed.ts`) is session only and was in no list. It joins the stale keys, and
+   opening a project or starting a new one now clears it with the other feeds: before, it survived both and kept
+   driving the cleanup screen from a different project's aquifer.
+6. **The banner is live and dismissal is per value.** `App.tsx` lists each stale value by name and the screen that sends
+   it (`FEED_INFO` in `project/staleFeeds.ts`) instead of the raw feed keys. Dismiss hides the values listed at that
+   moment; a value that clears and goes stale again is shown again. The dropped-feed note is unchanged.
+7. **The mark is as coarse as the source form.** Any edit to the sending screen's form marks its feeds, including a
+   field the sent values do not read (the same conservative rule the open check always used). Staleness does not cascade
+   through chains: a stale well feed does not mark the household feed that read it until the well feed is sent again with
+   different content.
+8. **API for consumers.** `project/store.ts`: `getStaleFeeds()` (a stable array until the set changes), `isFeedStaleNow(key)`,
+   `subscribeStale(fn)`, type `StaleFeedKey`. `project/staleFeeds.ts`: hooks `useStaleFeeds()` and `useFeedStale(key)`, and
+   `FEED_INFO` (label, sending screen, route per key).

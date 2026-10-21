@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { isFeedStaleNow } from '../project/store';
 import { VaporPage } from './VaporPage';
 import {
   clearSaturatedVaporFeed,
@@ -158,16 +159,19 @@ describe('sent vapor run after an edit', () => {
     return { send: within(risk).getByRole('button', { name: /send to exposure and risk/i }) };
   };
 
-  it('drops the sent coefficients when an input they depend on changes', async () => {
+  it('keeps the sent run and marks it stale when an input it depends on changes', async () => {
     const { send } = await sendBenzene();
     fireEvent.click(send);
-    expect(getVaporRiskFeed()?.coefficients?.indoor).toBeTruthy();
+    const sent = getVaporRiskFeed();
+    expect(sent?.coefficients?.indoor).toBeTruthy();
+    expect(isFeedStaleNow('vaporRisk')).toBe(false);
     fireEvent.change(screen.getByLabelText(/^air exchange rate/i), { target: { value: '2.5' } });
-    await waitFor(() => expect(getVaporRiskFeed()?.coefficients).toBeUndefined());
-    // the air concentrations stay; sending again restores the coefficients
-    expect(getVaporRiskFeed()?.indoor).toBeTruthy();
+    await waitFor(() => expect(isFeedStaleNow('vaporRisk')).toBe(true));
+    // the values stay on the feed, untouched: the shared mark is what says they are out of date
+    expect(getVaporRiskFeed()).toBe(sent);
     fireEvent.click(send);
     expect(getVaporRiskFeed()?.coefficients?.indoor).toBeTruthy();
+    expect(isFeedStaleNow('vaporRisk')).toBe(false);
   }, 30000);
 
   it('does not send while the form is invalid', async () => {

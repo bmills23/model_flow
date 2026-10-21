@@ -28,6 +28,11 @@ import {
   subscribeSurfaceWaterFeed,
 } from '../surfaceWater/feed';
 import { clearBankFeed, getBankFeed, setBankFeed, subscribeBankFeed } from '../transport/bankFeed';
+import {
+  clearTransportFeed,
+  getTransportFeed,
+  subscribeTransportFeed,
+} from '../transport/chainFeed';
 import { clearWellFeed, getWellFeed, setWellFeed, subscribeWellFeed } from '../transport/wellFeed';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
 import {
@@ -52,7 +57,7 @@ import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { decodeJson, encodeJson } from './codec';
-import { stableStringify } from './hash';
+import { hashInputs, stableStringify } from './hash';
 import { scrubRejected } from '../ui/decimalComma';
 import {
   buildProject,
@@ -93,11 +98,20 @@ let warnedSnapshot: string | null = null;
 let epoch = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
 /** Source form fingerprint recorded when each feed was last sent (or restored). */
-let hashes: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
-let stale: FeedKey[] = [];
+let hashes: Partial<Record<StaleFeedKey, { source: string; inputsHash: string }>> = {};
+/**
+ * What each sent feed also depended on at send, besides its source form (see `heldInputs`). Kept in the
+ * session only: it is not written to the file, so the file format and the fingerprints are unchanged.
+ */
+let heldBaseline: Partial<Record<StaleFeedKey, string>> = {};
+/** The feeds whose sending inputs differ now from those recorded at send (see `recomputeStale`). */
+let stale: StaleFeedKey[] = [];
+/** True while a project is being put back, so the feed setters it runs do not notify half a state. */
+let seeding = false;
 /** Feeds a restored or opened project carried that could not be used and were dropped. */
 let dropped: string[] = [];
 const listeners = new Set<() => void>();
+const staleListeners = new Set<() => void>();
 const notify = (): void => listeners.forEach((fn) => fn());
 
 export const subscribeProject = (fn: () => void): (() => void) => {
@@ -108,12 +122,33 @@ export const subscribeProject = (fn: () => void): (() => void) => {
 };
 export const getEpoch = (): number => epoch;
 export const getScreen = <K extends keyof Screens>(key: K): Screens[K] => screens[key];
-/** Feeds restored from storage whose source form has changed since they were built. */
-export const getStaleFeeds = (): readonly FeedKey[] => stale;
+/**
+ * A feed that screens pass on and that can go stale: the persisted feeds plus the groundwater run the
+ * cleanup screen reads (`transportChain`), which lives in the session only.
+ */
+export type StaleFeedKey = FeedKey | 'transportChain';
+
+/**
+ * Live feed staleness. A held feed is stale while the inputs of the screen that sent it differ from
+ * the inputs recorded when it was sent, or when a project was opened or restored. Editing the inputs
+ * back, or sending again, clears it. The list keeps its identity until the set changes, so it can be
+ * a `useSyncExternalStore` snapshot (see `useStaleFeeds`).
+ */
+export const getStaleFeeds = (): readonly StaleFeedKey[] => stale;
+/** True when the held feed `key` is stale now (false when nothing is held under it). */
+export const isFeedStaleNow = (key: StaleFeedKey): boolean => stale.includes(key);
+/** Tell `fn` when the set of stale feeds changes; returns the unsubscribe. */
+export const subscribeStale = (fn: () => void): (() => void) => {
+  staleListeners.add(fn);
+  return () => {
+    staleListeners.delete(fn);
+  };
+};
 export const getDroppedFeeds = (): readonly string[] => dropped;
 
-function sourceForms(s: Screens): Record<FeedKey, unknown> {
+function sourceForms(s: Screens): Record<StaleFeedKey, unknown> {
   return {
+    transportChain: s.transport.form,
     well: s.transport.form,
     bank: s.transport.form,
     surfaceWater: s.surfaceWater.form,
@@ -128,7 +163,8 @@ function sourceForms(s: Screens): Record<FeedKey, unknown> {
     tph: s.plantsEco.form,
   };
 }
-const SOURCE: Record<FeedKey, string> = {
+const SOURCE: Record<StaleFeedKey, string> = {
+  transportChain: 'transport',
   well: 'transport',
   bank: 'transport',
   surfaceWater: 'surfaceWater',
@@ -143,7 +179,8 @@ const SOURCE: Record<FeedKey, string> = {
   tph: 'plantsEco',
 };
 
-const readers: Record<FeedKey, () => unknown> = {
+const readers: Record<StaleFeedKey, () => unknown> = {
+  transportChain: getTransportFeed,
   well: getWellFeed,
   surfaceWater: getSurfaceWaterFeed,
   vadose: getVadoseFeed,
@@ -158,10 +195,16 @@ const readers: Record<FeedKey, () => unknown> = {
   tph: getTphFeed,
 };
 
+/** The feeds the project file carries (every feed but the session-only groundwater run). */
+const PERSISTED = (Object.keys(readers) as StaleFeedKey[]).filter(
+  (k): k is FeedKey => k !== 'transportChain',
+);
+const STALE_KEYS = Object.keys(readers) as StaleFeedKey[];
+
 function currentFeeds(): Feeds {
   const forms = sourceForms(screens);
   const feeds: Record<string, Entry> = {};
-  for (const key of Object.keys(readers) as FeedKey[]) {
+  for (const key of PERSISTED) {
     const value = readers[key]();
     if (value === null) continue;
     const h = hashes[key];
@@ -278,18 +321,116 @@ export function setScreen<K extends keyof Screens>(key: K, value: Screens[K]): v
   if (stableStringify(screens[key]) === stableStringify(value)) return;
   screens = { ...screens, [key]: value };
   schedule();
+  recomputeStale();
 }
 
-function recordHash(key: FeedKey): void {
+const contentKeys = new WeakMap<object, string>();
+let contentCounter = 0;
+/**
+ * A short text that is equal for equal content of a held feed. It is worked out once per feed object,
+ * so a feed that is only read costs nothing; a value that cannot be written as text is told apart by
+ * identity instead (sending it again then reads as a change, which errs on the side of the mark).
+ */
+function contentKey(value: unknown): string {
+  if (value === null || value === undefined) return 'none';
+  if (typeof value !== 'object') return String(value);
+  const known = contentKeys.get(value);
+  if (known !== undefined) return known;
+  let key: string;
+  try {
+    key = hashInputs(value);
+  } catch {
+    contentCounter += 1;
+    key = `object-${contentCounter}`;
+  }
+  contentKeys.set(value, key);
+  return key;
+}
+
+/**
+ * Inputs a sent feed was built from that are not in its source form: a setting kept beside the form
+ * (the well method, the outdoor box, the source choice) and the feeds the sending screen reads from
+ * other screens. A change here makes the feed stale just as a form edit does. Only the ones the
+ * sending screen really reads are listed, so an unrelated edit does not mark a feed.
+ */
+function heldInputs(key: StaleFeedKey): unknown {
+  const { transport, surfaceWater, saturated, vapor, household } = screens;
+  const received = (): unknown => ({
+    vadose: transport.form.feedFromVadose ? contentKey(getVadoseFeed()) : null,
+    saturated: transport.form.feedFromSaturated ? contentKey(getSaturatedFeed()) : null,
+  });
+  switch (key) {
+    case 'well':
+    case 'vaporWaterTable':
+      return { method: transport.method, received: received() };
+    case 'bank':
+    case 'transportChain':
+      return { received: received() };
+    case 'saturated':
+    case 'vaporSaturated':
+      return { method: saturated.method };
+    case 'surfaceWater':
+      return { bank: surfaceWater.form.linked ? contentKey(getBankFeed()) : null };
+    case 'vaporRisk': {
+      const series =
+        vapor.choice === 'waterTable'
+          ? getWaterTableFeed()
+          : vapor.choice === 'vadose'
+            ? getVadoseVaporFeed()
+            : vapor.choice === 'saturated'
+              ? getSaturatedVaporFeed()
+              : null;
+      return { outdoor: vapor.outdoor, choice: vapor.choice, series: contentKey(series) };
+    }
+    case 'household': {
+      const f = household.form;
+      const usesWell = f.showerWaterSource === 'well' || f.irrigationWaterSource === 'well';
+      return {
+        well: usesWell ? contentKey(getWellFeed()) : null,
+        surface: f.irrigationWaterSource === 'surface' ? contentKey(getSurfaceWaterFeed()) : null,
+      };
+    }
+    default:
+      return null;
+  }
+}
+const heldKey = (key: StaleFeedKey): string => stableStringify(heldInputs(key));
+
+/** True while the sending inputs of the held feed `key` differ from those recorded at send. */
+function isStaleNow(key: StaleFeedKey, forms: Record<StaleFeedKey, unknown>): boolean {
+  if (readers[key]() === null) return false;
+  const h = hashes[key];
+  if (h === undefined) return false;
+  if (h.inputsHash !== feedEntry(SOURCE[key] as keyof Screens, forms[key], 0).inputsHash) {
+    return true;
+  }
+  const base = heldBaseline[key];
+  return base !== undefined && base !== heldKey(key);
+}
+
+/** Work the stale list out again; tell subscribers only when the set changed. */
+function recomputeStale(): void {
+  if (seeding) return;
+  const forms = sourceForms(screens);
+  const next = STALE_KEYS.filter((k) => isStaleNow(k, forms));
+  if (next.length === stale.length && next.every((k, i) => k === stale[i])) return;
+  stale = next;
+  staleListeners.forEach((fn) => fn());
+}
+
+function recordHash(key: StaleFeedKey): void {
   if (readers[key]() === null) {
     delete hashes[key];
+    delete heldBaseline[key];
   } else {
     hashes[key] = {
       source: SOURCE[key],
       inputsHash: feedEntry(SOURCE[key] as keyof Screens, sourceForms(screens)[key], 0).inputsHash,
     };
+    heldBaseline[key] = heldKey(key);
   }
-  schedule();
+  if (PERSISTED.includes(key as FeedKey)) schedule();
+  recomputeStale();
 }
 
 let watching = false;
@@ -298,6 +439,7 @@ function watchFeeds(): void {
   watching = true;
   subscribeWellFeed(() => recordHash('well'));
   subscribeBankFeed(() => recordHash('bank'));
+  subscribeTransportFeed(() => recordHash('transportChain'));
   subscribeSurfaceWaterFeed(() => recordHash('surfaceWater'));
   subscribeVadoseFeed(() => recordHash('vadose'));
   subscribeSaturatedFeed(() => recordHash('saturated'));
@@ -324,6 +466,7 @@ function clearAllFeeds(): void {
   clearHouseholdFeed();
   clearProduceFeed();
   clearTphFeed();
+  clearTransportFeed();
   // a kept modeled-source uncertainty summary belongs to the project it was computed in
   clearModeledSummary();
 }
@@ -337,6 +480,7 @@ export function forgetMemory(): void {
   overrides = emptyOverrides();
   site = defaultSite();
   hashes = {};
+  heldBaseline = {};
   stale = [];
   dropped = [];
   savedSnapshot = null;
@@ -388,23 +532,30 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
     produce: setProduceFeed,
     tph: setTphFeed,
   };
-  for (const k of Object.keys(setters) as FeedKey[]) {
-    const e = feeds[k];
-    if (!e) continue;
-    try {
-      setters[k](val(k));
-      restored[k] = { source: e.source, inputsHash: e.inputsHash };
-    } catch {
-      dropped.push(k);
+  seeding = true;
+  try {
+    for (const k of Object.keys(setters) as FeedKey[]) {
+      const e = feeds[k];
+      if (!e) continue;
+      try {
+        setters[k](val(k));
+        restored[k] = { source: e.source, inputsHash: e.inputsHash };
+      } catch {
+        dropped.push(k);
+      }
     }
+    // the setters above recorded fresh hashes; put back the ones the file carried
+    hashes = restored;
+    // a file records only the source form of each feed, so what else a feed read (held feeds, the
+    // well method) is taken as it is now: an opened file reports exactly the form changes it always
+    // did, and an edit after the open is what the live mark follows
+    heldBaseline = {};
+    for (const k of Object.keys(restored) as FeedKey[]) heldBaseline[k] = heldKey(k);
+  } finally {
+    seeding = false;
   }
-  // the setters above recorded fresh hashes; put back the ones the file carried
-  hashes = restored;
-  const forms = sourceForms(screens);
-  stale = (Object.keys(restored) as FeedKey[]).filter(
-    (k) =>
-      restored[k]?.inputsHash !== feedEntry(SOURCE[k] as keyof Screens, forms[k], 0).inputsHash,
-  );
+  stale = [];
+  recomputeStale();
   if (timer !== null) clearTimeout(timer);
   timer = null;
 }
@@ -431,8 +582,9 @@ export function newProject(): void {
   site = defaultSite();
   clearAllFeeds();
   hashes = {};
-  stale = [];
+  heldBaseline = {};
   dropped = [];
+  recomputeStale();
   if (timer !== null) clearTimeout(timer);
   timer = null;
   try {
