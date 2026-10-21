@@ -2570,7 +2570,6 @@ Every ruling below is DEFAULT unless marked otherwise.
 3. **UI parity document.** The gap table in `docs/UI_PARITY.md` section 2 is corrected in place against the tree
    (several rows still read open for slices that landed).
 
-<<<<<<< HEAD
 ## 2026-10-21: Wave L slice L1, live feed staleness
 
 Slice L1 makes the stale mark live for every value passed between screens and exposes it to the consumers
@@ -2656,7 +2655,7 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    mark. The mark follows L1's coarseness (any edit of the sending form), so a source form edit that changes none of the
    sent values still marks.
 6. **No schema change.** Nothing new is saved, so `FINGERPRINT_SKIP` is untouched and older files are not flagged.
-=======
+
 ## 2026-10-21: Wave M slice M1, validation manifest
 
 1. **Catalog plus checks, not a scraper (DEFAULT).** The descriptive text of each example (source key, method id,
@@ -2707,4 +2706,3 @@ mark; the mark is text, never colour alone. Every ruling below is DEFAULT.
    line under the report's "Methods statement" heading. A Help link points at a new user guide section.
 3. **No new saved keys (DEFAULT).** The page reads static data only, so nothing is saved and `FINGERPRINT_SKIP` is unchanged.
 4. **Mobile check (DEFAULT).** `#/validation` added to the route list in `scripts/mobile-check.mjs`; not run in this slice.
->>>>>>> wave-m-m2
