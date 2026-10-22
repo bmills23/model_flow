@@ -1,6 +1,10 @@
 import { registry } from '@model-flow/engine';
 import { describe, expect, it } from 'vitest';
 import { defaultScreens, type Screens } from '../project';
+import * as transportProject from '../transport/project';
+import * as vadoseProject from '../vadose/project';
+import { DEFAULT_FORM as TRANSPORT_FORM } from '../transport/form';
+import { DEFAULT_FORM as VADOSE_FORM } from '../vadose/form';
 import { dataEditionsFor, methodsRun, screenUsed, USED_SCREENS_ORDER } from './methodsRun';
 
 const base = (): Screens => defaultScreens();
@@ -16,6 +20,32 @@ describe('screenUsed', () => {
     s.vadose = { ...s.vadose, form: { ...s.vadose.form, foc: '0.0123' } } as Screens['vadose'];
     expect(screenUsed('vadose', s)).toBe(true);
     expect(screenUsed('saturated', s)).toBe(false);
+  });
+});
+
+describe('screenUsed on a project saved before wave R', () => {
+  const old = (): Screens => {
+    const s = base();
+    s.transport = transportProject.fromProject({ form: { ...TRANSPORT_FORM, dispLaw: 'legacy' } });
+    s.vadose = vadoseProject.fromProject({
+      form: { ...VADOSE_FORM, dispersivityBasis: undefined as never },
+    });
+    return s;
+  };
+
+  it('reads the untouched old groundwater and vadose screens as unused', () => {
+    const s = old();
+    expect(screenUsed('transport', s)).toBe(false);
+    expect(screenUsed('vadose', s)).toBe(false);
+    expect(methodsRun(s).ids).toEqual([]);
+  });
+
+  it('reads an edited old screen as used', () => {
+    const s = old();
+    s.transport = { ...s.transport, form: { ...s.transport.form, rx: '150' } };
+    s.vadose = { ...s.vadose, form: { ...s.vadose.form, durationYr: '77' } };
+    expect(screenUsed('transport', s)).toBe(true);
+    expect(screenUsed('vadose', s)).toBe(true);
   });
 });
 

@@ -435,6 +435,11 @@ export function toScenario(
       errors.push(`${label} dispersivity is required: enter a value in metres${instead}.`);
       return NaN;
     };
+    if (f.dispLaw === 'ssg' && Number.isFinite(rx) && !(rx > 0)) {
+      errors.push(
+        'The EPA SSG 1996 rule needs a receptor x greater than zero: it is 0.1 times the distance to the receptor.',
+      );
+    }
     alphaL =
       f.dispLaw === 'ssg' ? ssg1996Longitudinal(distance) : entry('Longitudinal', f.alphaLOverride);
     alphaT = entry('Transverse', f.alphaTOverride);
