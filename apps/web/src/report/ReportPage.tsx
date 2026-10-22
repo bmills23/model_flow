@@ -1,7 +1,15 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { currentProject, type StaleFeedKey, type StaleSlot } from '../project/store';
 import { staleAmong, staleSentence, useStaleSlots } from '../project/staleFeeds';
-import { overridesOf } from '../project';
+import { chemicalsOf, overridesOf } from '../project';
+import validation from '@model-flow/data/generated/validation/validation.json';
+import { loadChemicalDb } from '../risk/chemicalDb';
+import { effectiveDb, withUserFateRows } from '../overrides/userChemicals';
+import { loadVaporChemicals } from '../vapor/chemicals';
+import { DownloadCsv } from '../export/DownloadCsv';
+import { BUILD_COMMIT } from '../buildInfo';
+import { runBasis, type BasisDefault, type BasisRow, type ProjectBasis } from './basis';
+import { basisCsvTable, basisSummary, KIND_LABEL, publishedExampleCount } from './basisView';
 import {
   loadOverrideRows,
   receptorEditRows,
@@ -11,13 +19,13 @@ import {
 import type { UserChemicalRow } from '../overrides/userChemicals';
 import type { OverrideRow } from '../overrides/toxicity';
 import { fmtTox } from '../risk/format';
-import { buildReport, type Report } from './buildReport';
+import { buildReport, SCREEN_NAMES, type Report } from './buildReport';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
 import { HelpLink } from '../docs/HelpLink';
 
-const KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
+const MODEL_KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
 
 function dateText(iso: string): string {
   const d = new Date(iso);
@@ -93,6 +101,102 @@ function ResultWarnings({ results }: { results: SectionResults }) {
   );
 }
 
+const BASIS_COLUMNS = ['Kind', 'Subject', 'Value', 'Detail', 'Source note', 'Reference'] as const;
+
+function BasisTable({ rows, label }: { rows: readonly BasisRow[]; label: string }) {
+  return (
+    <table className="result-table report-basis" aria-label={label}>
+      <thead>
+        <tr>
+          {BASIS_COLUMNS.map((h) => (
+            <th key={h} scope="col">
+              {h}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r, i) => (
+          <tr key={`${i}:${r.kind}:${r.subject}:${r.via ?? ''}`}>
+            <td data-label="Kind">
+              {KIND_LABEL[r.kind]}
+              {r.via !== null && (
+                <span className="muted">
+                  {' '}
+                  (from {SCREEN_NAMES[r.via]}
+                  {r.stale ? ', out of date' : ''})
+                </span>
+              )}
+            </td>
+            <td data-label="Subject">{r.subject}</td>
+            <td data-label="Value">{r.value}</td>
+            <td data-label="Detail">{r.detail === '' ? 'none' : r.detail}</td>
+            <td data-label="Source note">{r.note}</td>
+            <td data-label="Reference">
+              {r.referenceKey === null ? 'none' : `${r.referenceKey} (${r.referenceStatus ?? ''})`}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function BasisSummary({ basis }: { basis: ProjectBasis }) {
+  const s = basisSummary(basis);
+  const kinds = (Object.keys(KIND_LABEL) as (keyof typeof KIND_LABEL)[]).filter(
+    (k) => s.counts[k] > 0,
+  );
+  return (
+    <section className="report-section report-basis-summary" aria-labelledby="rep-basis-summary">
+      <h2 id="rep-basis-summary">Summary of what this run rests on</h2>
+      {s.total === 0 ? (
+        <p>
+          No value in this run is an unverified default, an entry without a source or a user edit.
+        </p>
+      ) : (
+        <>
+          <ul>
+            {kinds.map((k) => (
+              <li key={k}>
+                {KIND_LABEL[k]}: {s.counts[k]}
+              </li>
+            ))}
+          </ul>
+          {s.defaults.length > 0 && (
+            <p>
+              Unverified defaults used: {s.defaults.join('; ')}. The tables below give the note and
+              the reference status of each.
+            </p>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+function MethodIds({ ids, names }: { ids: readonly string[]; names: ReadonlyMap<string, string> }) {
+  if (ids.length === 0) return null;
+  return (
+    <div className="report-method-ids">
+      <h3>Methods run</h3>
+      <ul>
+        {ids.map((id) => {
+          const n = publishedExampleCount(id);
+          return (
+            <li key={id}>
+              {names.get(id) ?? id} <code>{id}</code>,{' '}
+              <a href="#/validation">
+                checked by {n} published {n === 1 ? 'example' : 'examples'}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export function ReportView({
   report,
   preparedBy,
@@ -102,6 +206,7 @@ export function ReportView({
   receptorEdits = [],
   userChemicals = [],
   staleFeeds = [],
+  basis = null,
 }: {
   report: Report;
   preparedBy: string;
@@ -120,8 +225,11 @@ export function ReportView({
    * computed from them say so, naming the chemical. A bare feed key stands for its untagged slot.
    */
   staleFeeds?: readonly (StaleSlot | StaleFeedKey)[];
+  /** What the run rests on (see `runBasis`); null while it computes. */
+  basis?: ProjectBasis | null;
 }) {
   const { statement } = report;
+  const methodNames = new Map(statement.methods.map((m) => [m.id, m.name]));
   return (
     <article className="report" aria-label="Project report">
       <header className="report-head">
@@ -130,12 +238,16 @@ export function ReportView({
         </h2>
         <dl className="report-meta">
           <div>
-            <dt>Date</dt>
+            <dt>Generated</dt>
             <dd>{dateText(report.savedAt)}</dd>
           </div>
           <div>
             <dt>App version</dt>
             <dd>{report.createdWith}</dd>
+          </div>
+          <div>
+            <dt>Commit</dt>
+            <dd>{BUILD_COMMIT}</dd>
           </div>
           {preparedBy.trim() !== '' && (
             <div>
@@ -151,6 +263,11 @@ export function ReportView({
         <p className="report-site">
           <strong>Site model:</strong> {report.site}
         </p>
+      )}
+
+      {basis !== null && report.sections.length > 0 && <BasisSummary basis={basis} />}
+      {basis !== null && report.sections.length > 0 && (
+        <DownloadCsv tables={[basisCsvTable(report, basis)]} showLabel />
       )}
 
       {report.sections.length === 0 ? (
@@ -210,14 +327,20 @@ export function ReportView({
               )}
               {results?.[sec.key] !== undefined && <ResultWarnings results={results[sec.key]!} />}
               {sec.key === 'uncertainty' && uncertainty}
-              <p className="muted">
-                Methods run:{' '}
-                {statement.methods
-                  .filter((m) => sec.methodIds.includes(m.id))
-                  .map((m) => m.name)
-                  .join('; ')}
-                .
-              </p>
+              {basis !== null && (
+                <>
+                  <h3>What this run rests on</h3>
+                  {(basis.sections[sec.key] ?? []).length === 0 ? (
+                    <p className="muted">
+                      Nothing in this section is an unverified default, an entry without a source or
+                      a user edit.
+                    </p>
+                  ) : (
+                    <BasisTable rows={basis.sections[sec.key]!} label={`${sec.name}, run basis`} />
+                  )}
+                </>
+              )}
+              <MethodIds ids={sec.methodIds} names={methodNames} />
             </section>
           );
         })
@@ -312,7 +435,8 @@ export function ReportView({
           <h2 id="rep-receptor-edits">Receptor factors supplied by the user</h2>
           <p className="muted">
             These exposure factors replace the receptor preset's value for this project only. Each
-            is the user's own entry; the presets were not changed.
+            is the user's own entry with the source note given for it, or "no note"; the presets
+            were not changed.
           </p>
           <table className="report-table report-user-values">
             <caption className="sr-only">Receptor exposure factors supplied by the user</caption>
@@ -322,6 +446,7 @@ export function ReportView({
                 <th scope="col">Factor</th>
                 <th scope="col">Preset value</th>
                 <th scope="col">Value used</th>
+                <th scope="col">Source note</th>
               </tr>
             </thead>
             <tbody>
@@ -333,6 +458,7 @@ export function ReportView({
                   </td>
                   <td>{r.presetValue}</td>
                   <td>{r.userValue} (user-supplied)</td>
+                  <td>{r.note === '' ? 'no note' : r.note}</td>
                 </tr>
               ))}
             </tbody>
@@ -358,7 +484,7 @@ export function ReportView({
           statement.methods.map((m) => (
             <section key={m.id} className="report-method" aria-label={m.name}>
               <h3>
-                {m.name} <span className={`badge badge-${m.kind}`}>{KIND_LABEL[m.kind]}</span>
+                {m.name} <span className={`badge badge-${m.kind}`}>{MODEL_KIND_LABEL[m.kind]}</span>
               </h3>
               <p>
                 {m.summary}
@@ -423,6 +549,7 @@ export function ReportPage() {
   const [userValues, setUserValues] = useState<OverrideRow[]>([]);
   const receptorEdits = useMemo(() => receptorEditRows(project), [project]);
   const userChemicals = useMemo(() => userChemicalRowsOf(project), [project]);
+  const [basis, setBasis] = useState<ProjectBasis | null>(null);
   useEffect(() => {
     let live = true;
     if (Object.keys(overridesOf(project).toxicity).length === 0) return;
@@ -444,6 +571,31 @@ export function ReportPage() {
       live = false;
     };
   }, [project]);
+  useEffect(() => {
+    if (results === null) return;
+    let live = true;
+    Promise.all([loadChemicalDb(), loadVaporChemicals()]).then(
+      ([base, fate]) => {
+        if (!live) return;
+        const chemicals = chemicalsOf(project);
+        setBasis(
+          runBasis({
+            report,
+            results,
+            project,
+            db: effectiveDb(base, overridesOf(project), chemicals),
+            fateRows: withUserFateRows(fate, chemicals),
+            defaults: validation.unverified.defaults as BasisDefault[],
+            stale: staleFeeds,
+          }),
+        );
+      },
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [project, report, results, staleFeeds]);
   return (
     <section aria-labelledby="report-heading">
       <div className="report-tools">
@@ -473,6 +625,7 @@ export function ReportPage() {
         userChemicals={userChemicals}
         receptorEdits={receptorEdits}
         staleFeeds={staleFeeds}
+        basis={basis}
         uncertainty={<ReportUncertainty project={project} />}
       />
     </section>

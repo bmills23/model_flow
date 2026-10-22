@@ -36,6 +36,8 @@ export interface ReceptorEditRow {
   unit: string;
   presetValue: string;
   userValue: string;
+  /** The source note given for the edit; empty when none was. */
+  note: string;
 }
 
 /** Every saved receptor factor edit, with the preset value beside it. */
@@ -70,6 +72,7 @@ export function receptorEditRows(project: Project): ReceptorEditRow[] {
           unit: r.unit,
           presetValue: shownValue(r.preset),
           userValue: e.value.trim(),
+          note: e.note.trim(),
         });
       }
     }

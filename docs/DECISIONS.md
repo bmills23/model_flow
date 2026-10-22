@@ -3473,3 +3473,22 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    dispersivity regressions appear even when an entered value replaced them, until R2 moves them to warning scope.
 5. **Fixture chemical (DEFAULT).** The vapor screen's `risc4-benzene` fixture is not a database record, so its
    properties list as entered without a source.
+
+## 2026-10-22: Wave R slice R1c, report basis and version
+
+1. **Report layout (DEFAULT).** Each used section ends with a "What this run rests on" table (the run basis rows,
+   reusing the result-table markup and its data-label cards at 390 px), and a summary under the title counts the
+   distinct rows by kind and names the unverified defaults. A section with no rows says so. Method ids print beside
+   method names with "checked by N published examples" linked to `#/validation`.
+2. **Evidence count (DEFAULT).** N counts the examples of `validation.json` that name the method and have status
+   `reproduced`; a named exception, a pending case or a smoke test is not a check. N is printed even when it is 0.
+3. **Run basis CSV (DEFAULT).** One report-level file `run-basis` through `export/csv.ts`, with a screen column ("Project"
+   for project-level rows) and a via-screen column. Stale inherited rows gain the `stale inputs` column and the
+   `-stale-inputs` name suffix of the other exports, the mark on those rows only.
+4. **Version (DEFAULT).** `apps/web/package.json` is 0.1.0, which `createdWith` already reads; `buildInfo.ts` exports it
+   with the short commit that a vite `define` injects (`unknown` when git cannot be run, and under the test runner).
+   The report header labels the date "Generated" and adds "Commit". Fixture files and tests that name `0.0.0` as a
+   saved file value are unchanged: they are file contents, not the app version.
+5. **Receptor edit notes (DEFAULT).** The report's receptor table gains a source note column, "no note" when empty.
+6. **Defect fixed outside the slice (DEFAULT).** `runBasis` read `.form` of every screen and threw for the uncertainty
+   setup screen, which has none; it now treats a missing form as empty (`report/basis.ts`), with a test.

@@ -6,6 +6,9 @@ import { ReportPage } from './ReportPage';
 
 afterEach(() => newProject());
 
+// The run basis appears after the results compute and the databases load.
+const SLOW = { timeout: 12000 };
+
 describe('ReportPage', () => {
   it('says there is nothing to report for a new project', () => {
     render(<ReportPage />);
@@ -124,6 +127,76 @@ describe('ReportPage', () => {
     expect(section.textContent).toContain('70');
     expect(section.textContent).toContain('60');
     expect(section.querySelector('caption')).not.toBeNull();
+  });
+
+  it('prints the app version, the commit and the generation date', () => {
+    render(<ReportPage />);
+    const meta = document.querySelector('.report-meta')!;
+    expect(meta.textContent).toContain('0.1.0');
+    expect(meta.textContent).toContain('Commit');
+    expect(meta.textContent).toContain('Generated');
+    expect(meta.textContent).not.toContain('Date');
+  });
+
+  it('names the method ids and how many published examples check each, linked to the validation page', () => {
+    const v = getScreen('vadose');
+    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    render(<ReportPage />);
+    const ids = document.querySelectorAll('.report-method-ids code');
+    expect(ids.length).toBeGreaterThan(0);
+    const link = document.querySelector<HTMLAnchorElement>(
+      '.report-method-ids a[href="#/validation"]',
+    );
+    expect(link).not.toBeNull();
+    expect(link!.textContent).toMatch(/checked by \d+ published examples?/i);
+  });
+
+  it(
+    'prints what the run rests on, per section and in a summary at the top',
+    { timeout: 20000 },
+    async () => {
+      const v = getScreen('vadose');
+      setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+      render(<ReportPage />);
+      const summary = await screen.findByRole('region', { name: /What this run rests on/i }, SLOW);
+      expect(summary.textContent).toMatch(/unverified default/i);
+      const heading = await screen.findByRole('heading', { name: 'What this run rests on' }, SLOW);
+      const section = heading.closest('section')!;
+      const table = section.querySelector('table.report-basis')!;
+      expect(table.querySelector('td[data-label="Subject"]')).not.toBeNull();
+      expect(table.textContent).toContain('built-in default');
+    },
+  );
+
+  it('offers one run basis CSV download', { timeout: 20000 }, async () => {
+    const v = getScreen('vadose');
+    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    render(<ReportPage />);
+    expect(
+      await screen.findByRole('button', { name: 'Download CSV: run basis' }, SLOW),
+    ).toBeTruthy();
+  });
+
+  it('prints the note of a receptor edit, or "no note"', () => {
+    setOverrides({
+      ...emptyOverrides(),
+      receptors: setField({}, 'risk.a', 'legacy.bwKg', { value: '60', note: '' }),
+    });
+    const { unmount } = render(<ReportPage />);
+    const name = { name: 'Receptor factors supplied by the user' };
+    const cells = (): string[] =>
+      [...screen.getByRole('heading', name).closest('section')!.querySelectorAll('tbody td')].map(
+        (c) => c.textContent ?? '',
+      );
+    expect(cells()).toContain('no note');
+    unmount();
+    setOverrides({
+      ...emptyOverrides(),
+      receptors: setField({}, 'risk.a', 'legacy.bwKg', { value: '60', note: 'state memo' }),
+    });
+    render(<ReportPage />);
+    expect(cells()).toContain('state memo');
+    expect(cells()).not.toContain('no note');
   });
 
   it('has no user values section without overrides', () => {

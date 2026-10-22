@@ -358,7 +358,8 @@ export function runBasis(input: BasisInput): ProjectBasis {
   const own = new Map<ScreenKey, BasisRow[]>();
   for (const sec of report.sections) {
     const codes = new Set((results[sec.key]?.warnings ?? []).map((w) => w.code));
-    const form = (screens[sec.key] as unknown as { form: Record<string, unknown> }).form;
+    // The uncertainty setup screen has no `form`; it types no fate property.
+    const form = (screens[sec.key] as unknown as { form?: Record<string, unknown> }).form ?? {};
     own.set(sec.key, [...defaultRows(sec, codes, defaults), ...fateRowsFor(sec.key, form, byId)]);
   }
   const sectionKeys = new Set(report.sections.map((s) => s.key));

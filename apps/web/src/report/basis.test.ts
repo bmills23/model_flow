@@ -334,3 +334,13 @@ describe('exhaustiveness', () => {
     }
   });
 });
+
+describe('runBasis, uncertainty setup', () => {
+  it('handles the uncertainty screen, which has no fate form', () => {
+    const edit = (s: Screens) => {
+      s.uncertainty = { ...s.uncertainty, risk: { ...s.uncertainty.risk, seed: 'g2' } };
+    };
+    const b = run({ edit });
+    expect(b.sections.uncertainty).toBeDefined();
+  });
+});
