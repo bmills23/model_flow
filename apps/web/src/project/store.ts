@@ -481,14 +481,41 @@ export function addChemical(entry: ProjectChemical): void {
     { ...entry, id, name: entry.name.trim() === '' ? id : entry.name },
   ]);
 }
-/** Replace the entry that has this entry's id (a user chemical edited); an id not in the list is ignored. */
+/**
+ * Replace the entry that has this entry's id (a user chemical edited); an id not in the list is ignored.
+ * A new name reaches the risk and cleanup rows and the typed name on the household and plants and eco
+ * screens that hold this chemical, so every table, chart and the report shows it.
+ */
 export function updateChemical(entry: ProjectChemical): void {
-  if (!chemicals.some((c) => c.id === entry.id)) return;
-  changeChemicals(
-    chemicals.map((c) =>
-      c.id === entry.id ? { ...entry, name: entry.name.trim() === '' ? entry.id : entry.name } : c,
-    ),
-  );
+  const old = chemicals.find((c) => c.id === entry.id);
+  if (old === undefined) return;
+  const name = entry.name.trim() === '' ? entry.id : entry.name;
+  if (name !== old.name) renameInScreens(entry.id, name);
+  changeChemicals(chemicals.map((c) => (c.id === entry.id ? { ...entry, name } : c)));
+}
+
+function renameInScreens(id: string, name: string): void {
+  const rename = <T extends { id: string; name: string }>(rows: T[]): T[] =>
+    rows.map((r) => (r.id === id ? { ...r, name } : r));
+  const risk = getScreen('risk');
+  if (risk.form.chemicals.some((c) => c.id === id)) {
+    setScreen('risk', { ...risk, form: { ...risk.form, chemicals: rename(risk.form.chemicals) } });
+  }
+  const cleanup = getScreen('cleanup');
+  if (cleanup.form.chemicals.some((c) => c.id === id)) {
+    setScreen('cleanup', {
+      ...cleanup,
+      form: { ...cleanup.form, chemicals: rename(cleanup.form.chemicals) },
+    });
+  }
+  const household = getScreen('household');
+  if (household.form.chemicalId === id) {
+    setScreen('household', { ...household, form: { ...household.form, chemicalName: name } });
+  }
+  const plantsEco = getScreen('plantsEco');
+  if (plantsEco.form.chemicalId === id) {
+    setScreen('plantsEco', { ...plantsEco, form: { ...plantsEco.form, chemicalName: name } });
+  }
 }
 /** Remove the entry with this id; an id not in the list is ignored. Screens that name it keep their choice. */
 export function removeChemical(id: string): void {
@@ -523,7 +550,69 @@ export function removeProjectChemical(id: string): void {
     });
   }
   clearChemicalSlots(id);
+  if (USER_ID.test(id)) clearUserIdState(id);
   removeChemical(id);
+}
+
+const USER_ID = /^user-(\d+)$/;
+/** The highest `user-<n>` number removed in this session, so a removed id is not handed out again. */
+let retiredUserMax = 0;
+
+/**
+ * The next free `user-<n>` id: above every id on the list, every id a screen, the overrides or an
+ * uncertainty choice still holds (an older file may), and every id removed this session.
+ */
+export function nextProjectUserId(): string {
+  let max = retiredUserMax;
+  const see = (text: string): void => {
+    for (const m of text.matchAll(/user-(\d+)/g)) max = Math.max(max, Number(m[1]));
+  };
+  for (const c of chemicals) see(c.id);
+  for (const id of chemicalIdsOf(screens)) see(id);
+  for (const id of Object.keys(overrides.toxicity)) see(id);
+  for (const t of screens.cleanup.form.surfaceTargets) see(t.chemicalId);
+  for (const k of ['risk', 'cleanup', 'modeled'] as const) see(screens.uncertainty[k].choice);
+  return `user-${max + 1}`;
+}
+
+/** Drop the per-id state a removed user chemical left: targets, overrides, uncertainty choice, fate pointers. */
+function clearUserIdState(id: string): void {
+  retiredUserMax = Math.max(retiredUserMax, Number(USER_ID.exec(id)?.[1] ?? 0));
+  const cleanup = getScreen('cleanup');
+  if (cleanup.form.surfaceTargets.some((t) => t.chemicalId === id)) {
+    setScreen('cleanup', {
+      ...cleanup,
+      form: {
+        ...cleanup.form,
+        surfaceTargets: cleanup.form.surfaceTargets.filter((t) => t.chemicalId !== id),
+      },
+    });
+  }
+  if (id in overrides.toxicity) {
+    const rest = { ...overrides.toxicity };
+    delete rest[id];
+    setOverrides({ ...overrides, toxicity: rest });
+  }
+  const u = getScreen('uncertainty');
+  const next = { ...u };
+  for (const k of ['risk', 'cleanup', 'modeled'] as const) {
+    if (u[k].choice.startsWith(`${id}|`)) next[k] = { ...u[k], choice: '' };
+  }
+  setScreen('uncertainty', next);
+  for (const key of [
+    'transport',
+    'vadose',
+    'saturated',
+    'vapor',
+    'surfaceWater',
+    'household',
+    'plantsEco',
+  ] as const) {
+    const s = getScreen(key);
+    if (s.form.chemicalId === id) {
+      setScreen(key, { ...s, form: { ...s.form, chemicalId: '' } } as never);
+    }
+  }
 }
 
 export const getTitle = (): string => title;
@@ -894,6 +983,7 @@ export function loadProject(project: Project, droppedKeys: readonly string[] = [
 
 /** Clear the forms, the feeds and the autosave. Mounted screens remount through the epoch. */
 export function newProject(): void {
+  retiredUserMax = 0;
   screens = defaultScreens();
   title = '';
   overrides = emptyOverrides();

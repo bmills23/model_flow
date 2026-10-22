@@ -12,16 +12,12 @@ import { HelpLink } from '../docs/HelpLink';
 import {
   addChemical,
   getChemicals,
+  nextProjectUserId,
   removeProjectChemical,
   subscribeChemicals,
   updateChemical,
 } from '../project/store';
-import {
-  copiedValues,
-  isUserChemical,
-  nextUserId,
-  userBrowseRecords,
-} from '../overrides/userChemicals';
+import { copiedValues, isUserChemical, userBrowseRecords } from '../overrides/userChemicals';
 import {
   UserChemicalEditor,
   type UserChemicalDraft,
@@ -83,7 +79,7 @@ export function ChemicalsPage() {
   const save = (r: UserChemicalResult): void => {
     if (editing === null) return;
     const entry = {
-      id: editing.id ?? nextUserId(project),
+      id: editing.id ?? nextProjectUserId(),
       name: r.name,
       ...(r.cas === undefined ? {} : { cas: r.cas }),
       values: r.values,

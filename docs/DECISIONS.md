@@ -3236,3 +3236,29 @@ ruling below is DEFAULT.
    for a direct source (a modeled source is not computed in the report).
 8. **No fingerprint change.** The cleanup form is not the source of a feed, so `FINGERPRINT_SKIP` is unchanged.
 
+
+### Waves O and P corrective, slice CA
+
+Review findings on waves O and P. Every ruling below is DEFAULT.
+
+1. **User chemical ids are not reused, and removal leaves nothing keyed to the id.** `removeProjectChemical` of a
+   `user-<n>` id also deletes its cleanup surface water target rows and its toxicity overrides, blanks an
+   uncertainty `choice` of the form `<id>|<medium>`, and sets every fate screen whose `chemicalId` is that id back to
+   no chemical (the values typed there stay as hand-typed values). Row-keyed uncertainty inputs are keyed by receptor,
+   not chemical, so none needs clearing. The Chemicals page takes its id from `nextProjectUserId()` in the store, which
+   is above every `user-<n>` on the list, on any screen, in the overrides, in a target row or an uncertainty choice,
+   and above the highest id removed this session. No counter is saved: with the state cleared, a reused number could
+   carry nothing, and a file saved before this change opens unchanged. The pure `nextUserId(list)` stays for tests.
+2. **The surface water target check counts the run.** `surfaceTargetLevels` takes a required `runCount` (the chemicals
+   of the cleanup run, from the form rows) and passes it to `feedChemicalProblem`, instead of the number of target rows.
+3. **A rename reaches every name.** `updateChemical` also renames the risk and cleanup rows with that id and the typed
+   name on the household and plants and eco screens that hold it. The names maps, tables, charts, build messages and
+   the report read those, so they follow.
+4. **Saturated pick takes four properties.** The saturated screen passes `needs` of molar mass, solubility, Henry's
+   constant and Koc, and its pick copies only those four into the form (it has no diffusivity fields, so Da and Dw
+   are no longer saved and flagged as unknown on open). The vadose screen reads all six, so it keeps the default.
+5. **Remove confirmation wording.** For a user chemical, `RemoveChemicalConfirm` and the user guide say the target,
+   toxicity values and fate pointers go with it; for a database chemical the "keeps that choice" wording stands.
+6. **Mobile check.** A `#/chemicals` "projectlist" visit adds a database chemical, defines a user chemical named
+   "Bis(2-ethylhexyl)phthalate (copy)", opens Edit and Remove, and fails unless the list, editor and confirmation are
+   on screen. It found no overflow or axe violation at 390 px in light or dark, so no layout change was made.

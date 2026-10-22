@@ -33,9 +33,11 @@ export function RemoveChemicalConfirm(props: {
       <p>
         <strong>Remove {props.name} from the project?</strong> This deletes its row and everything
         entered on it on the exposure and risk screen and on the cleanup levels screen
-        {held.length > 0 ? `, and the results held for it: ${held.join(', ')}` : ''}. A screen that
-        is set to it keeps that choice and shows it as no longer in the project. This cannot be
-        undone.
+        {held.length > 0 ? `, and the results held for it: ${held.join(', ')}` : ''}.{' '}
+        {/^user-\d+$/.test(props.id)
+          ? 'It also deletes its surface water target and toxicity values, and a screen set to it is set back to no chemical, keeping the values typed there.'
+          : 'A screen that is set to it keeps that choice and shows it as no longer in the project.'}{' '}
+        This cannot be undone.
       </p>
       <p>
         <button type="button" className="btn remove" onClick={props.onConfirm}>

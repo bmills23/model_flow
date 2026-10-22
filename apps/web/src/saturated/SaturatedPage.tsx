@@ -369,8 +369,22 @@ export function SaturatedPage() {
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
+              needs={['mw', 's', 'hPrime', 'koc']}
               onPick={(id, row) =>
-                setForm((f) => ({ ...f, chemicalId: id, ...(row ? fateFill(row) : {}) }))
+                setForm((f) => {
+                  // this form has no diffusivity fields: take the four it has
+                  const { M, S, H, Koc } = row
+                    ? fateFill(row)
+                    : ({} as ReturnType<typeof fateFill>);
+                  return {
+                    ...f,
+                    chemicalId: id,
+                    ...(M !== undefined ? { M } : {}),
+                    ...(S !== undefined ? { S } : {}),
+                    ...(H !== undefined ? { H } : {}),
+                    ...(Koc !== undefined ? { Koc } : {}),
+                  };
+                })
               }
               note="The source decay rate is not in the database and stays your input."
             />

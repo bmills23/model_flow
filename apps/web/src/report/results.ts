@@ -409,6 +409,7 @@ async function cleanup(
             slots: feed.slots<SurfaceWaterFeed>('surfaceWater'),
             names,
             source: form.source,
+            runCount: form.chemicals.length,
           }),
         ),
       );

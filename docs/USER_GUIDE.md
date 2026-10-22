@@ -124,7 +124,9 @@ beside a chemical puts it on the list (a chemical already on it reads "In the pr
 chemical out of the whole project, after asking: the question names what goes with it, which is its row and
 everything entered on it on the exposure and risk and the cleanup levels screens, and the results held for it
 (the groundwater well result, the vapor air result and so on). A screen that is set to it keeps that choice and
-shows it as no longer in the list. Removing cannot be undone.
+shows it as no longer in the list. For a chemical you defined, removing also deletes its surface water target and
+toxicity values, and a screen set to it is set back to no chemical (the values typed on that screen stay); a chemical you
+define later does not inherit any of it. Removing cannot be undone.
 
 **Define a new chemical** makes a chemical that is not in the EPA tables. Only a name is required. You may add a
 CAS number (a number the database already holds is refused, with a pointer to the overrides, because that
@@ -134,7 +136,7 @@ concentration) and molar mass, solubility, Henry's constant, Koc and the two dif
 enter needs a source note; a value without one, or not above zero, stops the save. **Copy as a new chemical**,
 beside a database chemical, starts the form from that chemical's values. Each copied value carries the note
 "Copied from the EPA RSL tables, edition ..., for <name> (CAS ...); source: <the source the database gives>", which you
-can edit; the CAS number is not copied. **Edit** on a chemical you defined reopens the form. A chemical you
+can edit; the CAS number is not copied. **Edit** on a chemical you defined reopens the form; a new name is carried to its rows on the exposure and risk and cleanup levels screens, so every table and the report show it. A chemical you
 defined is on the exposure and risk and cleanup levels screens (it carries only the values you entered), and on the transport, vadose, saturated, vapor and plants and
 ecology screens, which fill what you entered and say which value is missing when it is chosen. The report lists each one
 under "Chemicals defined by the user" with every value, its source (user) and its note. The project file keeps

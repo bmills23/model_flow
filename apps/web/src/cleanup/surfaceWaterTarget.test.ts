@@ -94,6 +94,19 @@ describe('criterion lookup', () => {
 });
 
 describe('surfaceTargetLevels', () => {
+  it('refuses an untagged slot for a target in a two-chemical run, though only one chemical has a target', () => {
+    const [r] = surfaceTargetLevels({
+      targets: [user(BENZENE, '5', 'Permit limit')],
+      runCount: 2,
+      db: crit,
+      slots: slots(feed(undefined)),
+      names: NAMES,
+      source: 'dissolved',
+    });
+    expect(r!.level).toBeNull();
+    expect(r!.reason).toMatch(/does not record which chemical/);
+  });
+
   it('a user value over the coefficient reproduces the direct surface water level', () => {
     const f = defaultCleanupForm();
     const pathways = Object.fromEntries(
@@ -114,6 +127,7 @@ describe('surfaceTargetLevels', () => {
       targets: [user(BENZENE, String(ugPerL), 'Permit limit')],
       db: crit,
       slots: slots(sf),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
@@ -129,6 +143,7 @@ describe('surfaceTargetLevels', () => {
       targets: [nrwqc(BENZENE)],
       db: crit,
       slots: slots(feed(BENZENE, 0.5)),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
@@ -150,6 +165,7 @@ describe('surfaceTargetLevels', () => {
       targets: [nrwqc(BENZENE, id)],
       db: crit,
       slots: slots(feed(BENZENE)),
+      runCount: 1,
       names: NAMES,
       source: 'direct',
     });
@@ -161,6 +177,7 @@ describe('surfaceTargetLevels', () => {
       targets: [nrwqc(XYLENE)],
       db: crit,
       slots: slots(feed(XYLENE)),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
@@ -174,6 +191,7 @@ describe('surfaceTargetLevels', () => {
         targets: [t],
         db: crit,
         slots: slots(feed(XYLENE)),
+        runCount: 1,
         names: NAMES,
         source: 'dissolved',
       })[0]!;
@@ -193,6 +211,7 @@ describe('surfaceTargetLevels', () => {
         targets: [user(XYLENE, '10', 'n')],
         db: crit,
         slots: slots(feed(XYLENE)),
+        runCount: 1,
         names: NAMES,
         source,
       });
@@ -207,6 +226,7 @@ describe('surfaceTargetLevels', () => {
         targets: [user(BENZENE, '10', 'n')],
         db: crit,
         slots: sl,
+        runCount: 1,
         names: NAMES,
         source: 'dissolved',
       })[0]!;
@@ -223,6 +243,7 @@ describe('surfaceTargetLevels', () => {
       targets: [user(BENZENE, '10', 'n')],
       db: crit,
       slots: slots(feed(BENZENE, 0.04, { solubility: 1e-6 })),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
@@ -235,6 +256,7 @@ describe('surfaceTargetLevels', () => {
       targets: [user(BENZENE, '10', 'n'), user(XYLENE, '10', 'n')],
       db: crit,
       slots: slots(feed(BENZENE, 0.1), feed(XYLENE, 0.2)),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
@@ -250,6 +272,7 @@ describe('surfaceTargetTables', () => {
       targets: [user(XYLENE, '10', 'State standard'), nrwqc(BENZENE)],
       db: crit,
       slots: slots(feed(XYLENE), feed(BENZENE)),
+      runCount: 1,
       names: NAMES,
       source: 'dissolved',
     });
