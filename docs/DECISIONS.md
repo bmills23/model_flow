@@ -3454,3 +3454,22 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    `packages/data/generated`); their parsed JSON is passed to `count` as a third argument, and the manifest lists
    them. Existing examples render as before, with a `Data` line only when `dataFiles` is non-empty.
 4. **Regeneration (DEFAULT).** This slice commits the regenerated `docs/VALIDATION.md` and `validation.json`.
+
+## 2026-10-22: Wave R slice R1b, run basis
+
+1. **Pure function (DEFAULT).** `runBasis` in `apps/web/src/report/basis.ts` takes the report model, the section
+   results, the project, the chemical database, the fate rows (user chemicals laid in), the manifest defaults and the
+   stale slots, and returns rows per used section plus project-level rows. No markup; the report page and the CSV
+   read the rows in a later slice.
+2. **Row kinds (DEFAULT).** `unverified-default` (catalog default by warning code or method id that ran),
+   `entered-unsourced` (a fate property typed with a blank chemical id, or naming no database record),
+   `typed-over-database` (differs numerically from the row the chemical id names; transport Kd against Koc times
+   foc), and the project-level `user-override`, `user-chemical` and `receptor-edit`, each with its note or "no note".
+   Overrides and user chemical values left out of the run for lack of a usable number or note are not listed.
+3. **Feeds (DEFAULT).** A section that reads a feed inherits the sending screen's own rows, to any depth, marked
+   `via` that screen, and stale when any feed on the path is stale. Inherited rows reflect the sender's current
+   inputs, not the inputs at send.
+4. **Over-reporting until R2 (DEFAULT).** Method-scoped defaults are listed whenever their method ran, so the
+   dispersivity regressions appear even when an entered value replaced them, until R2 moves them to warning scope.
+5. **Fixture chemical (DEFAULT).** The vapor screen's `risc4-benzene` fixture is not a database record, so its
+   properties list as entered without a source.
