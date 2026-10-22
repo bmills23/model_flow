@@ -2822,3 +2822,29 @@ Plan. Wave N: N1 the project list and its derivation, N2 feed tagging and the id
 records. Wave O: risk and cleanup rows follow the list and `#/chemicals` gains "Add to project"; the fate screens
 and the surface water screen pick from the list; per-chemical feed slots with the version 2 migration. Wave P:
 user-defined chemicals and the surface water cleanup target.
+
+## 2026-10-21: Wave N slice S, source records
+
+All rulings are DEFAULT. Each source was re-read on 2026-10-21 before any change.
+
+1. **SSG 1996 fixture corrected.** Table 36 prints the PCE dimensionless Henry constant as 7.54E-01, so the fixture
+   carries 0.754 (was 0.753). The other eight organic H values (Table 36) and all nine organic Koc values (Table 39,
+   calculated Koc) match as typed. The cleanup test passes at its existing tolerance. The fixture README names the
+   table for each value. Table C-1 and the inorganic Kd values were not re-read.
+2. **Briggs (1982).** The constants 0.77 and -1.52 are printed in the paper (page 500, Equations 1 and 2; Equation 3
+   TSCF on page 502). Equation 1 is the macerated-root line; Equation 2 adds 0.82 to the root concentration factor at
+   every log Kow. The engine keeps its form (no 0.82 above log Kow 2, as the HHRAP appendix), unchanged; the
+   validation row says so.
+3. **EPRI EA-4190 (Gelhar and others, 1985).** The report prints no regression equation. The vadose two-branch
+   coefficients (and the saturated log-quadratic ones) have no primary source located; the vadose pair rests on
+   RISC5 statement of its choice. `vadose.vadsat` keeps citing `gelhar1985` because the report does compile the
+   unsaturated field dispersivity data the choice is attributed to; the reference note and the validation row say
+   the entry supports the data compilation, not the numbers. No reference deleted.
+4. **RSL household factor K.** Table 1 of the archived RSL User Guide (2021 snapshot) gives K = 0.5 L/m3, citing
+   U.S. EPA 1991b (pg. 20). Recorded on the validation row; the warning stays until the equation form is confirmed
+   (the page prints its equations as images). No references.json entry added: the page is a 2021 snapshot of a
+   guide the existing `epa2024rslug` entry describes at another date, and its other fields were not all read from it.
+5. **Not openly readable, unchanged.** Foster and Chrostowski (1986), Little (1992), Trapp (2015), Trapp and Matthies
+   (1995) and Schulze-Makuch (2005) stay unverified; no open copy was found on 2026-10-21.
+6. **One edit outside the named files.** `docs/methods/vadose-leaching.md` said the EPRI report was not checked; that
+   was false after item 3, so the sentence was corrected in place.

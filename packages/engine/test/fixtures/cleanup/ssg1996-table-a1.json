@@ -54,7 +54,7 @@
       "name": "tetrachloroethylene",
       "kind": "organic",
       "mclMgPerL": 0.005,
-      "henryDimensionless": 0.753,
+      "henryDimensionless": 0.754,
       "printedDaf20MgPerKg": 0.06,
       "printedDaf1MgPerKg": 0.003,
       "kocLPerKg": 155

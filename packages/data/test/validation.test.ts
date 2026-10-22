@@ -130,6 +130,18 @@ describe('validation manifest', () => {
     }
   });
 
+  it('records what the 2026-10-21 source check read', () => {
+    const rows = new Map(manifest.unverified.defaults.map((d) => [d.referenceKey, d]));
+    expect(rows.get('briggs1982')?.note).toContain('page 500');
+    expect(rows.get('briggs1982')?.note).toContain('0.82');
+    expect(rows.get('gelhar1985')?.note).toContain('no primary source');
+    expect(rows.get('epa2024rslug')?.note).toContain('0.5 L/m3');
+    expect(rows.get('epa1996ssg')?.note).toContain('Table 36');
+    expect(rows.get('epa1996ssg')?.note).toContain('Table 39');
+    const gelhar = references.find((r) => r.key === 'gelhar1985');
+    expect(gelhar?.notes ?? '').toContain('no primary source');
+  });
+
   it('rejects a manifest whose test evidence is missing', () => {
     expect(() =>
       buildValidationManifest({

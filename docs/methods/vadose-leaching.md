@@ -182,8 +182,11 @@ source base to the observation depth, attributed to the field data compiled by `
     ln alpha_L = -4.933 + 3.811 ln x    (x <= 2 m)
     ln alpha_L = -2.727 + 0.584 ln x    (x > 2 m)
 
-These coefficients are taken from the RISC5 manual's statement of its choice; the EPRI report was not
-checked for them, so the reference entry for `gelhar1985` does not vouch for them. The two branches do not
+These coefficients are taken from the RISC5 manual's statement of its choice. The EPRI report (EA-4190) was
+read in full on 2026-10-21 and does not print them: its unsaturated section gives a table and a plot of
+field-scale dispersivity against scale of observation, with no fitted equation, so no primary source for the
+coefficients has been located. The reference entry for `gelhar1985` supports only the field data compilation,
+not the numbers. The two branches do not
 meet exactly at 2 m (0.101 m versus 0.098 m). RISC5 evaluates alpha_L at each observation depth, so a depth
 profile is a family of solutions with different D; the water-table flux uses alpha_L(L_u). The legacy
 method reproduces this; a user-entered alpha_L overrides it. Molecular diffusion is not added (RISC5

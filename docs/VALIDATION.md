@@ -64,7 +64,7 @@ Summary: 34 entries (28 reproduced, 3 named exception, 2 pending or deferred, 1 
 
 - Source: `epa1996ssg`, Soil Screening Guidance: Technical Background Document
 - Method: `cleanup.ssg-leaching`
-- Compared: The MCL-based generic level at DAF 20 and DAF 1 for 15 chemicals. It checks the three-phase partition formula, the DAF arithmetic and the metal Kd values; it does not check the organic Koc and H, which were typed into the file.
+- Compared: The MCL-based generic level at DAF 20 and DAF 1 for 15 chemicals. It checks the three-phase partition formula, the DAF arithmetic and the metal Kd values; the organic Koc and H were read from Tables 36 and 39 of the document on 2026-10-21.
 - Cases: 30 printed levels
 - Tolerance: Half a unit in the last printed digit: two significant figures from 10 up, one below 10.
 - Status: reproduced
@@ -384,13 +384,13 @@ What the examples above do not establish: references not yet read that a shipped
 | --- | --- | --- | --- | --- |
 | Foster and Chrostowski film reference coefficients (3000 cm/h gas, 20 cm/h liquid) | `shower.fc-1986` | `shower.film-reference-unverified` | `foster1986` (planned) | RISC5 choices that could not be verified against the primary paper; they are inputs and the defaults are warned. The stagnant stall source is a planned, unverified record and is not cited. |
 | Little (1992) two-resistance stall mass balance | `shower.little-1992` | none | `little1992` (used) | The mass balance is our statement of the two-resistance theory, checked by limit identities; it is not a transcription of the paper. |
-| Household transfer factor K (RSL whole-house water-to-air term) | `shower.rsl-household` | `shower.household-factor-unverified` | `epa2024rslug` (used) | An entered value that could not be verified against a primary page of the RSL documentation. |
+| Household transfer factor K (RSL whole-house water-to-air term) | `shower.rsl-household` | `shower.household-factor-unverified` | `epa2024rslug` (used) | An entered value that could not be verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The equation form (C_a = C_w K) is not confirmed, because the page prints its equations as images, so the warning stays. |
 | HHRAP fallback standing in for Trapp (2015) | `plantUptake.hhrap-2005` | none | `trapp2015` (planned) | The modern plant model is the EPA HHRAP 2005 produce equations until the Trapp (2015) models are read. |
 | Transpiration stream concentration factor (TSCF) and leaf-air partition coefficient | `plantUptake.trapp-matthies-1995` | none | `trappmatthies1995` (used) | User inputs, because their published regressions were not read. |
-| Briggs root concentration factor constants | `plantUptake.trapp-matthies-1995`, `plantUptake.hhrap-2005` | none | `briggs1982` (used) | The constants are those the HHRAP appendix prints for the Briggs correlation, not read from the original paper. |
+| Briggs root concentration factor constants | `plantUptake.trapp-matthies-1995`, `plantUptake.hhrap-2005` | none | `briggs1982` (used) | The constants 0.77 and -1.52 were read in the paper itself on 2026-10-21 (Pestic. Sci. 13, 495-504, open copy in the Rothamsted repository, page 500, Equations 1 and 2; the TSCF equation is on page 502). The engine's form drops the paper's 0.82 term above log Kow 2, as the HHRAP appendix does: Equation 1 is the macerated-root line, and Equation 2 adds 0.82 to the root concentration factor at every log Kow. |
 | Schulze-Makuch (2005) dispersivity coefficients | `dispersivity.schulze-makuch2005` | none | `schulzemakuch2005` (used) | The unconsolidated-media pair c = 0.20, m = 0.44 is quoted from lecture notes that cite the paper, not from the paper’s own tables. |
-| Gelhar et al. (1985) two-branch vadose dispersivity regression | `vadose.vadsat` | none | `gelhar1985` (used) | The coefficients are taken from the RISC5 manual’s statement of its choice; the EPRI report was not checked for them, so the reference entry does not vouch for them. |
-| Organic Koc and H of the SSG 1996 Table A-1 fixture | `cleanup.ssg-leaching` | none | `epa1996ssg` (used) | Typed into the fixture and not read from Tables 36 or C-1 of the primary document; only loosely constrained by the printed levels. |
+| Gelhar et al. (1985) two-branch vadose dispersivity regression | `vadose.vadsat` | none | `gelhar1985` (used) | The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain. |
+| Organic Koc and H of the SSG 1996 Table A-1 fixture | `cleanup.ssg-leaching` | none | `epa1996ssg` (used) | The nine organic Koc values (Table 39, calculated Koc) and H (Table 36, dimensionless) were read from the primary document on 2026-10-21 and match, after correcting PCE H to 0.754. Table C-1 of the User's Guide and the inorganic Kd values were not re-read. |
 
 ### Named exceptions
 

@@ -8,6 +8,7 @@
     "title": "A review of field-scale physical solute transport processes in saturated and unsaturated porous media",
     "venue": "Electric Power Research Institute",
     "identifier": "EPRI EA-4190",
+    "notes": "Full text of the NRC copy (nrc.gov/docs/ML0331/ML033100477.pdf) read 2026-10-21. It compiles field-scale longitudinal dispersivity data (Table 3-4, Figure 3-2 for the unsaturated zone) and states that dispersivity rises with scale, but prints no regression equation. Neither the two-branch vadose coefficients nor the saturated log-quadratic coefficients the engine uses appear in it; no primary source for them has been located and the vadose pair comes from RISC5's statement of its choice. The entry supports the data compilation only.",
     "tags": ["dispersivity", "groundwater", "vadose"]
   },
   {
@@ -738,7 +739,7 @@
     "tags": ["plantUptake"],
     "venue": "Pesticide Science 13(5), 495-504",
     "identifier": "doi:10.1002/ps.2780130506",
-    "notes": "Verified against the Crossref record, retrieved 2026-10-18. Used for the root concentration factor; the constants were read as printed in the HHRAP 2005 appendix A-2 (Equations A-2-14 and A-2-15, retrieved 2026-10-18) because the paper text was not available. The transpiration stream concentration factor regression of this paper was not read and is a user input."
+    "notes": "Verified against the Crossref record, retrieved 2026-10-18. Used for the root concentration factor; the constants were read as printed in the HHRAP 2005 appendix A-2 (Equations A-2-14 and A-2-15, retrieved 2026-10-18) because the paper text was not available. The transpiration stream concentration factor regression of this paper was not read and is a user input. Update 2026-10-21: the open Rothamsted repository copy (repository.rothamsted.ac.uk/id/eprint/20210/1/pesticide%20science.pdf) was read; the constants 0.77 and -1.52 are printed on page 500 (Equation 1, macerated roots, and Equation 2, which subtracts 0.82 from the root concentration factor for all chemicals), and the TSCF equation is on page 502 (Equation 3). The engine uses Equation 1 above log Kow 2 and adds 0.82 below, as the HHRAP appendix does."
   },
   {
     "key": "trapp2015",
