@@ -137,7 +137,7 @@ const FED_ROUTES = [
   {
     route: '#/risk',
     tag: 'seeded',
-    viaSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);await u.sleep(800);
+    viaSetup: `(async()=>{const u=window.__ui;await X
       u.fill(/^receptor name/i,'North lot worker');
       u.fill(/^your value for oral slope factor/i,'0.5');u.fill(/^source note/i,'site toxicologist memo');
       u.fill(/^body weight \\(kg\\)/i,'60');
@@ -146,7 +146,8 @@ const FED_ROUTES = [
       await u.sleep(500)})()`,
   },
   // "modeled" route: the report's modeled-source uncertainty block, which only shows a result after an
-  // in-browser modeled cleanup run. The transport screen sends its aquifer to the cleanup screen, the
+  // in-browser modeled cleanup run. Benzene and toluene are added, the transport screen sends an aquifer
+  // for each to the cleanup screen (two chemicals, so the per-chemical blocks show), the
   // cleanup screen (a dissolved source, the seed) runs "Probabilistic cleanup level, modeled source" at
   // its default 200 iterations, and the hash then changes to the report with "Include uncertainty
   // results" ticked. The kept result is session memory, so no step reloads the page.
@@ -157,12 +158,22 @@ const FED_ROUTES = [
     tag: 'modeled',
     noPress: true,
     viaSetup: `(async()=>{const u=window.__ui;
-      for(let i=0;i<80;i++){
-        const b=[...document.querySelectorAll('main button')].find(x=>/^use for cleanup levels/i.test(x.textContent.trim()));
-        if(b&&!b.disabled){b.click();break}
-        await u.sleep(250)}
-      await u.sleep(500)})()`,
-    midSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);
+      // two chemicals, so the cleanup screen solves and reports each on its own: both are added on the
+      // chemicals page, then each gets its own groundwater run sent from the transport screen
+      location.hash='#/chemicals';await u.sleep(1500);
+      await u.pick('71-43-2',/^add to project: benzene/i);await u.sleep(800);
+      await u.pick('108-88-3',/^add to project: toluene/i);await u.sleep(800);
+      location.hash='#/transport';await u.sleep(1500);
+      for(const name of [/benzene/i,/^toluene/i]){
+        for(let i=0;i<40&&!u.choose(/^chemical/i,name);i++)await u.sleep(250);
+        await u.sleep(800);
+        for(let i=0;i<80;i++){
+          const b=[...document.querySelectorAll('main button')].find(x=>/^use for cleanup levels/i.test(x.textContent.trim()));
+          if(b&&!b.disabled){b.click();break}
+          await u.sleep(250)}
+        await u.sleep(500)}
+      })()`,
+    midSetup: `(async()=>{const u=window.__ui;await u.sleep(500);
       const find=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim()));
       const findRow=()=>[...document.querySelectorAll('main fieldset.dist-row')].find(f=>/seepage velocity/i.test(f.getAttribute('aria-label')||''));
       for(let i=0;i<240&&!findRow();i++)await u.sleep(250);
@@ -176,6 +187,10 @@ const FED_ROUTES = [
       let run=null;
       for(let i=0;i<200&&!run;i++){const b=find(/^run probabilistic cleanup/i);if(b&&!b.disabled)run=b;else await u.sleep(250)}
       if(!run)return 'run button never enabled: '+[...document.querySelectorAll('main button')].map(b=>b.textContent.trim()+(b.disabled?'(off)':'')).filter(t=>/run|use/i.test(t)).join(' | ')+' panel='+!!document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"]')+' panel='+document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"]').textContent.replace(/Sample the inputs.*?never sampled because it is the level being solved./,'').slice(0,700);
+      // both chemicals are solved on their own: each has a heading in the results
+      for(let i=0;i<240;i++){const hs=[...document.querySelectorAll('main h2,main h3,main h4')].map(h=>h.textContent);if(hs.some(t=>/benzene/i.test(t))&&hs.some(t=>/toluene/i.test(t)))break;await u.sleep(250)}
+      {const hs=[...document.querySelectorAll('main h2,main h3,main h4')].map(h=>h.textContent);
+       if(!(hs.some(t=>/benzene/i.test(t))&&hs.some(t=>/toluene/i.test(t))))return 'per-chemical headings missing: '+hs.join(' | ')}
       run.click();
       for(let i=0;i<240;i++){
         const done=!!document.querySelector('[aria-label="Probabilistic cleanup level, modeled source"] [role=table],[aria-label="Probabilistic cleanup level, modeled source"] table')
@@ -186,7 +201,7 @@ const FED_ROUTES = [
     routeSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
       u.tick(/include uncertainty results/i);
       for(let i=0;i<120;i++){
-        if(document.querySelector('[aria-label="Modeled source uncertainty results"]'))break;
+        if(document.querySelector('[aria-label^="Modeled source uncertainty results"]'))break;
         await u.sleep(250)}
       await u.sleep(1000)})()`,
   },
@@ -359,7 +374,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{

@@ -1,11 +1,14 @@
-import { computeModeled } from './compute';
 import type { ModeledRequest } from './modeledTypes';
+import { solveAll, type WorkerMessage } from './modeledSolve';
 
-self.onmessage = (e: MessageEvent<ModeledRequest>) => {
+self.onmessage = (e: MessageEvent<ModeledRequest[]>) => {
+  const post = (m: WorkerMessage): void => self.postMessage(m);
   try {
-    self.postMessage({ ok: true, outcome: computeModeled(e.data) });
+    post({
+      ok: true,
+      items: solveAll(e.data, (progress) => post({ progress })),
+    });
   } catch (err) {
-    // computeModeled reports each method's engine errors itself; this guards anything else.
-    self.postMessage({ ok: false, error: err instanceof Error ? err.message : String(err) });
+    post({ ok: false, error: err instanceof Error ? err.message : String(err) });
   }
 };

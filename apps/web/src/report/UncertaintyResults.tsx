@@ -29,7 +29,7 @@ import {
 } from './uncertaintyReport';
 import '../uncertainty/uncertainty.css';
 import { AlertDialog } from '../ui/AlertDialog';
-import type { ModeledReportEntry } from './modeledReport';
+import type { ModeledChemicalEntry, ModeledReportEntry } from './modeledReport';
 
 function Warnings({ items }: { items: { code: string; message: string }[] }) {
   if (items.length === 0) return null;
@@ -178,11 +178,27 @@ const CLEANUP_SCREEN = (
  * session, or says to run or re-run it there.
  */
 function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
+  // several cleanup chemicals: one block each, named, with its own state (wave P slice P3)
+  if (entry.state === 'many') {
+    return (
+      <>
+        {entry.entries.map((e) => (
+          <ModeledChemicalResults key={e.chemical} entry={e} />
+        ))}
+      </>
+    );
+  }
+  return <ModeledChemicalResults entry={entry} />;
+}
+
+function ModeledChemicalResults({ entry }: { entry: ModeledChemicalEntry }) {
   const heading = 'Probabilistic cleanup level, modeled source';
+  const baseLabel = 'Modeled source uncertainty results';
+  const label = entry.chemical ? `${baseLabel}: ${entry.chemical}` : baseLabel;
   if (entry.state === 'none') {
     return (
-      <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
-        <h4>{heading}</h4>
+      <section className="report-uncertainty" aria-label={label}>
+        <h4>{entry.chemical ? `${heading}: ${entry.chemical}` : heading}</h4>
         <p>
           No run yet. Run it on the cleanup screen ({CLEANUP_SCREEN}), then return to this report;
           the result is printed here as computed there.
@@ -193,7 +209,7 @@ function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
   const s = entry.summary;
   if (entry.state === 'stale') {
     return (
-      <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
+      <section className="report-uncertainty" aria-label={label}>
         <h4>
           {heading}: {s.label}
         </h4>
@@ -207,7 +223,7 @@ function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
     );
   }
   return (
-    <section className="report-uncertainty" aria-label="Modeled source uncertainty results">
+    <section className="report-uncertainty" aria-label={label}>
       <h4>
         {heading}: {s.label}
       </h4>

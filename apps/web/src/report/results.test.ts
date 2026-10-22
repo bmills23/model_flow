@@ -320,6 +320,21 @@ describe('computeResults', () => {
     expect(r['cleanup']!.notes.join(' ')).toMatch(/modeled/i);
   }, 60000);
 
+  it('lists the not-computed reasons of every chemical row of a modeled cleanup source', async () => {
+    const db = await loadChemicalDb();
+    const a = newChemicalRow(db.byId.get('71-43-2')!);
+    const b = newChemicalRow(db.byId.get('108-88-3')!);
+    const r = await computeResults(
+      project((s) => {
+        s.cleanup = { form: { ...s.cleanup.form, source: 'vadose', chemicals: [a, b] } };
+      }),
+    );
+    const text = r['cleanup']!.notes.join(' ');
+    expect(text.match(/vadose zone screen/gi)?.length).toBe(2);
+    expect(text).toContain(`${a.name}: Open the vadose`);
+    expect(text).toContain(`${b.name}: Open the vadose`);
+  }, 60000);
+
   it('notes that uncertainty runs are repeated from the setup, not saved', async () => {
     const r = await computeResults(
       project((s) => {

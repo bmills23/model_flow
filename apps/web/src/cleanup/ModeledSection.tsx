@@ -76,12 +76,14 @@ function MethodSection(props: {
   outcome: ModeledMethodOutcome;
   medium: ModeledOutcome['medium'];
   name: string;
+  /** Name the chemical in the section label (several chemicals on the screen). */
+  named?: boolean;
 }) {
   const { method, outcome, medium, name } = props;
   if (!outcome.ok) {
     return (
       <div className="alert" role="alert">
-        {LABEL[method]} method did not run: {outcome.error}
+        {LABEL[method]} method did not run{props.named ? ` for ${name}` : ''}: {outcome.error}
       </div>
     );
   }
@@ -90,7 +92,10 @@ function MethodSection(props: {
   const unit = MEDIUM_UNIT(medium);
   const sourceText = medium === 'soil' ? 'in the source soil' : 'in the source groundwater';
   return (
-    <section className="panel" aria-label={`Modeled cleanup level, ${LABEL[method]}`}>
+    <section
+      className="panel"
+      aria-label={`Modeled cleanup level, ${LABEL[method]}${props.named ? `, ${name}` : ''}`}
+    >
       <h2>
         {LABEL[method]} <small>{BASIS[method]}</small>
       </h2>
@@ -146,7 +151,12 @@ function MethodSection(props: {
   );
 }
 
-export function ModeledResults(props: { outcome: ModeledOutcome; name: string; notes: string[] }) {
+export function ModeledResults(props: {
+  outcome: ModeledOutcome;
+  name: string;
+  notes: string[];
+  named?: boolean;
+}) {
   const { outcome } = props;
   const items: { key: string; method: Method; w: Warning }[] = [];
   for (const m of ['legacy', 'modern'] as const) {
@@ -162,10 +172,20 @@ export function ModeledResults(props: { outcome: ModeledOutcome; name: string; n
       {(['modern', 'legacy'] as const).map((m) => {
         const o = outcome[m];
         return o ? (
-          <MethodSection key={m} method={m} outcome={o} medium={outcome.medium} name={props.name} />
+          <MethodSection
+            key={m}
+            method={m}
+            outcome={o}
+            medium={outcome.medium}
+            name={props.name}
+            {...(props.named ? { named: true } : {})}
+          />
         ) : null;
       })}
-      <section className="panel" aria-label="Warnings and notes">
+      <section
+        className="panel"
+        aria-label={props.named ? `Warnings and notes, ${props.name}` : 'Warnings and notes'}
+      >
         <h2>Warnings and notes ({total})</h2>
         {total === 0 ? (
           <p className="muted">No warnings.</p>

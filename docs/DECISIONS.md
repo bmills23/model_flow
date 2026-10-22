@@ -2864,8 +2864,9 @@ user-defined chemicals and the surface water cleanup target.
    household, vapor and produce branches already required a matching tag and are unchanged.
 4. **Modeled cleanup refuses another chemical's run (DEFAULT).** The groundwater transport run, and the vadose or
    saturated run when that is the source, must be for the cleanup chemical; the earlier note is kept. A vadose or
-   saturated run the source does not use is not checked. The one-chemical cap (`ONE_CHEMICAL`) stays, so the
-   untagged multi-chemical case never reaches these checks there.
+   saturated run the source does not use is not checked. (Superseded by wave P slice P3: the one-chemical cap
+   `ONE_CHEMICAL` is gone, every cleanup chemical is checked on its own row, and an untagged run in a run of two or
+   more chemicals is refused for each row.)
 5. **Surface water levels for a multi-chemical cleanup run (DEFAULT).** A feed tagged with one of the run's
    chemicals is quantified for that chemical's row and not quantified, with a reason naming both chemicals, for the
    others; this replaces the blanket refusal of two or more chemicals. `surfaceWaterSourceLevels` takes an optional
@@ -2961,8 +2962,9 @@ DEFAULT.
    chemical removed from the list is not re-added when a further screen names it (O4). The surface water sender's
    tag has no test (O2b). The list derivation for a file without a `chemicals` key ignores the surface water
    screen's new `chemicalId` (O4).
-3. **Multi-chemical modeled cleanup stays capped at one chemical in these waves.** The engine solver already takes
-   several chemicals; lifting the web cap is a later slice.
+3. **Multi-chemical modeled cleanup is no longer capped at one chemical.** Bryan, on 2026-10-21, while waves O and P
+   ran: "include the multi-chemical modeled cleanup too". This overrules the earlier ruling that the cap stays;
+   slice P3 lifts the web cap (see "Wave P slice P3, modeled cleanup for several chemicals").
 
 ## 2026-10-21: Wave O slice O4, feeds per chemical and version 2
 
@@ -3014,7 +3016,7 @@ scope" block. Every ruling below is DEFAULT.
 8. **Cleanup source level panels.** One household, vapor or surface water panel per held slot whose chemical is a
    cleanup row or untagged; when none is, the most recent slot, so a result for another chemical still shows why it
    gives no level (`panelFeeds` in `cleanup/sourceLevelsCsv.ts`). With two or more panels of one kind, each CSV file
-   name ends with its chemical id. A modeled source reads the chain, vadose and saturated slots of its one chemical.
+   name ends with its chemical id. A modeled source reads the chain, vadose and saturated slots of each of its chemicals (wave P slice P3).
 9. **Produce on risk and cleanup.** Each row's plant factors come from its own chemical's produce slot. The
    receptor's homegrown produce intake comes from the first row that uses produce, and the plant warnings are those
    of every slot in use.
@@ -3236,3 +3238,61 @@ ruling below is DEFAULT.
    for a direct source (a modeled source is not computed in the report).
 8. **No fingerprint change.** The cleanup form is not the source of a feed, so `FINGERPRINT_SKIP` is unchanged.
 
+
+## 2026-10-21: Wave P slice P3, modeled cleanup for several chemicals
+
+Bryan, while waves O and P ran: "include the multi-chemical modeled cleanup too". This lifts the web cap that
+wave N slice N2 ruling 4 kept and that ruling 3 of "Waves O and P scope" repeated (both corrected in place). The
+engine needed no change. Every ruling below is DEFAULT.
+
+1. **Each cleanup chemical is solved alone (DEFAULT).** `buildModeledRows` builds one request per cleanup row from
+   a form that holds only that row, with the feeds that chemical reads (`pickSlot` over its own slot, else the
+   untagged slot, else another chemical's latest, so the wave N check names the mismatch). Each request is one
+   `computeModeled` run, as before. The engine's multi-chemical `solveModeled` is not used: the chain differs per
+   chemical, the chart and convergence code are per run, and a request of one chemical is what the probabilistic
+   cleanup already samples. An equivalence test shows a two-chemical form gives the same requests and levels as
+   two single-chemical builds.
+2. **A chemical that cannot be built is left out and says why on its own row (DEFAULT).** A missing transport,
+   vadose or saturated run, a run tagged for another chemical, an untagged run in a run of two or more chemicals,
+   or any other build error is shown under that chemical's name. The other chemicals are still solved. Wave N's
+   identity checks are unchanged; `runCount` is the number of cleanup chemicals, not of rows built, so an untagged
+   run is refused for every row of a multi-chemical run. `buildModeled` still builds the first row of a form
+   (the report's not-computed note uses it).
+3. **Results, warnings, stale marks, CSV and report are per chemical (DEFAULT).** With two or more chemicals each
+   gets a heading with its name, its own method sections (their labels end with the chemical), its own warnings and
+   notes, and its own stale mark, which reads only that chemical's slots, so a stale benzene slot does not mark
+   toluene. CSV files are a pair per chemical, named with the chemical id and labelled with its name, each
+   marked stale only for its own chemical's feeds; the curve table gains a chemical column. One chemical keeps
+   the original two files. The kept probabilistic summary is one per chemical (`getOwnModeledSummary`); the report
+   entry is one block per chemical (`state: 'many'`), each current, out of date or "no run yet" on its own, and a
+   chemical never takes another chemical's summary.
+4. **Responsiveness (DEFAULT).** The worker solves the chemicals one after another and posts a message after each,
+   so the screen shows "n of m chemicals solved" with a progress bar. A chemical whose request is unchanged keeps
+   its earlier solve, so editing one chemical re-solves only that one. A new request set terminates the worker
+   (latest wins). There is no separate cancel button for this solve, as before; the probabilistic panel keeps its
+   own cancel. Chemicals are not solved in parallel: one worker keeps the load flat, and the cache removes most
+   repeat cost.
+5. **Probabilistic panel (DEFAULT).** The panel samples one solved chemical at a time; with several, a select
+   above it picks which. Its setup (rows, correlation, method, protection, count, seed) is shared, as it is one
+   screen setting in the project; each chemical's result is kept and reported under its own name.
+6. **Files outside the assigned list (DEFAULT).** `report/UncertaintyResults.tsx` prints a `many` entry as one
+   block per chemical. `useModeled`, `modeledRunner`, `modeled.worker`, `modeledSummary` and `csv` changed shape
+   (a list of requests, items per chemical, per-chemical summaries); `modeledSolve.ts` holds the worker's pure
+   solve loop so the worker bundle does not import the runner.
+
+### Waves O and P corrective, slice CM
+
+1. **P3 merged onto the wave O and P line (DEFAULT).** `wave-op-p3` merged with `--no-ff`; the only conflicts were
+   in this file and the user guide, resolved by keeping both sides (the P3 block follows the P2 block). The user
+   guide keeps the surface water target paragraph and the multi-chemical modeled paragraphs, and states the
+   probabilistic panel text once.
+2. **The report names the not-computed reasons of every chemical row (DEFAULT).** For a modeled cleanup source the
+   report builds every row with `buildModeledRows` (no feeds, since the chain is not saved) and lists each row's
+   reasons other than the missing groundwater chain. With two or more chemicals each reason is prefixed with the
+   chemical name; a single chemical reads as before.
+3. **The mobile check's modeled visit seeds two chemicals (DEFAULT).** It adds benzene and toluene, sends a
+   groundwater run for each from the transport screen (an untagged run is refused for a multi-chemical run), and
+   fails the visit when the per-chemical headings are missing from the cleanup screen.
+4. **Report modeled blocks are named landmarks (DEFAULT).** With several chemicals the report printed the same
+   region name once per chemical, which the mobile check's axe pass flags (landmark-unique). Each block is now
+   labelled "Modeled source uncertainty results: <chemical>"; a single-chemical block keeps the old label.

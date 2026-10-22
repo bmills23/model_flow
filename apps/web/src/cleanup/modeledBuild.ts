@@ -16,8 +16,6 @@ export const NEEDS_VADOSE =
   'Open the vadose zone screen and press "Use as groundwater source": the soil source and the column it describes are used here.';
 export const NEEDS_SATURATED =
   'Open the saturated soil source screen and press "Use as groundwater source": the source it describes is used here.';
-export const ONE_CHEMICAL =
-  'A modeled source describes one chemical: keep a single chemical in the list.';
 
 export interface Feeds {
   transport: TransportFeed | null;
@@ -45,18 +43,28 @@ function positive(
   return v;
 }
 
-/** Turns the form and the screens' feeds into one modeled-chain request, or says what is missing. */
-export function buildModeled(form: CleanupForm, db: ChemicalDb, feeds: Feeds): ModeledBuildResult {
+/**
+ * Turns the form and the screens' feeds into one modeled-chain request, or says what is missing. The
+ * request is for the form's first chemical row; a run of several chemicals is built row by row with
+ * `buildModeledRows`. `runCount` is how many chemicals the whole run holds (default: the form's rows),
+ * so an upstream run that does not say which chemical it was made for is refused when the run holds
+ * two or more.
+ */
+export function buildModeled(
+  form: CleanupForm,
+  db: ChemicalDb,
+  feeds: Feeds,
+  runCount: number = form.chemicals.length,
+): ModeledBuildResult {
   const errors: string[] = [];
   if (form.source === 'direct') return { ok: false, errors: ['No modeled source is selected.'] };
-  if (form.chemicals.length > 1) errors.push(ONE_CHEMICAL);
+  if (form.chemicals.length > 1) form = { ...form, chemicals: [form.chemicals[0]!] };
   if (feeds.transport === null) errors.push(NEEDS_TRANSPORT);
   if (form.source === 'vadose' && feeds.vadose === null) errors.push(NEEDS_VADOSE);
   if (form.source === 'saturated' && feeds.saturated === null) errors.push(NEEDS_SATURATED);
 
-  // Each upstream run is for one chemical and must be for the chemical of this run. A tagged run for
-  // another chemical is refused; an untagged one is taken (the run holds one chemical, or ONE_CHEMICAL
-  // has already said so).
+  // Each upstream run is for one chemical and must be for the chemical of this row. A tagged run for
+  // another chemical is refused; an untagged one is taken only when the run holds one chemical.
   if (form.chemicals.length === 1) {
     const row = form.chemicals[0]!;
     const nameOf = (id: string): string =>
@@ -80,7 +88,7 @@ export function buildModeled(form: CleanupForm, db: ChemicalDb, feeds: Feeds): M
         feed,
         feedChemical,
         rowId: row.id,
-        runCount: 1,
+        runCount,
         nameOf,
       });
       if (problem !== null) errors.push(`${row.name}: ${problem}`);
@@ -184,4 +192,29 @@ export function buildModeled(form: CleanupForm, db: ChemicalDb, feeds: Feeds): M
   };
   if (startMg !== undefined) request.start = startMg * (form.source === 'dissolved' ? 1e-3 : 1e-6);
   return { ok: true, request, notes };
+}
+
+/** One cleanup chemical's build: its request, or what is missing for it alone. */
+export interface ModeledRowBuild {
+  id: string;
+  name: string;
+  result: ModeledBuildResult;
+}
+
+/**
+ * Builds every cleanup chemical on its own: each row gets the chain built from its own slots
+ * (`feedsOf(id)`), and a row whose upstream run is missing, for another chemical, or untagged where it
+ * cannot be told gets that problem on its own row while the other rows are still built (wave P slice P3).
+ */
+export function buildModeledRows(
+  form: CleanupForm,
+  db: ChemicalDb,
+  feedsOf: (chemicalId: string) => Feeds,
+): ModeledRowBuild[] {
+  const runCount = form.chemicals.length;
+  return form.chemicals.map((row) => ({
+    id: row.id,
+    name: row.name,
+    result: buildModeled({ ...form, chemicals: [row] }, db, feedsOf(row.id), runCount),
+  }));
 }

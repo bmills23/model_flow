@@ -178,8 +178,46 @@ describe('ModeledSourceUncertainty', () => {
     fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '6' } });
     fireEvent.click(runButton());
     await screen.findByRole('table', { name: /protective cleanup levels/i }, { timeout: 60000 });
-    rerender(panel({ request: { ...req } }));
+    rerender(panel({ request: { ...req, windowSeconds: req.windowSeconds + 1 } }));
     expect(screen.getByText(/inputs changed after this run/i)).toBeTruthy();
+  }, 120000);
+
+  it('does not mark the results stale for an equal request that is a new object', async () => {
+    const { rerender } = render(panel());
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '6' } });
+    fireEvent.click(runButton());
+    await screen.findByRole('table', { name: /protective cleanup levels/i }, { timeout: 60000 });
+    rerender(panel({ request: structuredClone(req) }));
+    expect(screen.queryByText(/inputs changed after this run/i)).toBeNull();
+    expect(screen.getByRole('table', { name: /protective cleanup levels/i })).toBeTruthy();
+  }, 120000);
+
+  it('cancels a running probabilistic run when the panel unmounts', async () => {
+    let terminated = 0;
+    const counting: Parameters<typeof panel>[0] = {
+      makeWorker: () => {
+        const w: WorkerLike = {
+          onmessage: null,
+          onerror: null,
+          postMessage() {},
+          terminate() {
+            terminated += 1;
+          },
+        };
+        return w;
+      },
+    };
+    clearModeledSummary();
+    const { unmount } = render(panel(counting));
+    sampleVelocity();
+    fireEvent.change(screen.getByLabelText(/iterations/i), { target: { value: '40' } });
+    fireEvent.click(runButton());
+    await screen.findByRole('button', { name: /cancel run/i });
+    unmount();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(terminated).toBeGreaterThan(0);
+    expect(getModeledSummary()).toBeNull();
   }, 120000);
 
   it('can be cancelled while it runs', async () => {
