@@ -410,7 +410,8 @@ readable. **Print or save as PDF** uses your browser's print dialog, which has a
 
 The top of the report gives the generation date, the app version (0.1.0 while the evidence gap against
 published tables is open) and the short commit the build was made from ("unknown" when the build could not
-read it). A project you save is stamped with the same version.
+read it). A commit followed by "-dirty" means the build was made from a tree whose tracked files differed from
+that commit, so the commit alone does not name what was built; untracked files do not add the mark. A project you save is stamped with the same version.
 
 Each section ends with **What this run rests on**, a table of the values in that section that no checked
 source backs: built-in defaults that carry a warning (with the note and the reference status), fate
@@ -422,8 +423,18 @@ kind and names the unverified defaults used. **Download CSV: run basis** saves t
 screen column; when any row is out of date the file gains a stale inputs column and a `-stale-inputs` name
 suffix, like the other downloads. Beside each method name the report prints the method id and "checked by N
 published examples", a link to the validation page; N counts the reproduced worked examples that name the
-method, not named exceptions, pending cases or smoke tests. Until the dispersivity change lands, the
-dispersivity regressions are listed whenever their method ran, even when you entered a value.
+method, not named exceptions, pending cases or smoke tests. Both dispersivity regressions are listed only
+when their warning fires, that is when you chose a regression for the dispersivity instead of entering a
+value.
+
+Each screen's values are compared with the source that screen fills from: the plants and eco screen's Koc and
+log Kow with the cleanup property file, the other screens with the chemical property rows (plus the chemicals
+you defined). The rows inherited from another screen are read from that screen's form as it is now, which
+holds one chemical. For a modeled cleanup with several chemicals the report therefore lists only the chemical
+currently selected on the vadose or saturated screen, and says so above the table; the other chemicals'
+entries are not listed. While the run basis is still being built the report says so, and if the chemical
+database fails to load it says the basis could not be built and leaves out the summary, the tables and the
+run basis CSV; do not print a report in either state as a record of what the run rests on.
 
 Uncertainty results are left out until you ask. In the uncertainty section, tick **Include uncertainty
 results** to repeat each analysis you set up on the exposure and cleanup screens, from its saved

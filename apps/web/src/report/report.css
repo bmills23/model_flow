@@ -285,3 +285,11 @@
     color: var(--text);
   }
 }
+
+.report-basis-failed {
+  padding: 0.6em 0.8em;
+  border: 2px solid var(--legacy);
+  background: var(--legacy-bg);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}

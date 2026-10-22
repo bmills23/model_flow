@@ -3616,3 +3616,25 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    like any new edit.
 3. **Screens (DEFAULT).** The editor is shared by the exposure and cleanup receptor panels, so both change; no
    other screen edits receptor factors. The report's printing of notes belongs to another slice.
+
+### Wave R corrective, slice CB
+
+1. **Comparison source per screen (DEFAULT).** The basis compares each screen's typed values with the source
+   that screen fills from. The plants and eco screen fills Koc and log Kow from the cleanup properties (the
+   user chemicals' own Koc when the id is theirs), so `runBasis` takes `cleanupProps` and compares those two
+   fields there; a missing record is "no database record", a record without the field is "the database has no
+   value". Vadose, saturated, vapor and transport fill from the fate rows and keep that comparison. Household
+   fills nothing (both values are entered by hand), so its comparison against the fate row stays as a check
+   against the same published record.
+2. **Basis state on the report (DEFAULT).** A null basis prints a "still being built" note, and a failed
+   database load (or a throw in `runBasis`) prints a "could not be built" alert naming the missing parts;
+   neither is silent. The printed report keeps the note.
+3. **One-chemical rows (DEFAULT).** Any basis table with rows inherited from the vadose or saturated screen
+   carries a note that only the chemical currently selected there is listed. Listing every chemical of a
+   multi-chemical modeled cleanup stays out of scope (R1b.3).
+4. **Dirty builds (DEFAULT).** The printed commit gets a `-dirty` suffix when the version-control status
+   shows a change to a tracked file, staged or not. Untracked files and ignored directories do not count. The
+   logic lives in `src/buildCommit.ts` so a test can run it against a temporary repository.
+5. **User guide (DEFAULT).** The "until the dispersivity change lands" sentence is replaced by the landed
+   behavior (listed only when the regression warning fires), and the commit line, the comparison sources and
+   the basis states are described.
