@@ -4,6 +4,8 @@ import { clearVadoseFeed, getVadoseFeed } from './feed';
 import { VadosePage } from './VadosePage';
 import { clearVadoseVaporFeed, getVadoseVaporFeed } from '../vapor/feeds';
 
+import { getScreen, setScreen } from '../project/store';
+
 afterEach(() => {
   clearVadoseFeed();
   clearVadoseVaporFeed();
@@ -123,5 +125,20 @@ describe('VadosePage', () => {
     );
     fireEvent.change(within(source).getByLabelText(/^porosity/i), { target: { value: '0.4' } });
     expect((within(source).getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.4');
+  }, 30000);
+
+  it('tags both feeds it sends with the screen chemical', async () => {
+    const prior = getScreen('vadose');
+    const before = prior.form;
+    setScreen('vadose', { ...prior, form: { ...before, chemicalId: '71-43-2' } });
+    try {
+      await loaded();
+      fireEvent.click(screen.getByRole('button', { name: /use as groundwater source/i }));
+      fireEvent.click(screen.getByRole('button', { name: /use as vapor source/i }));
+      expect(getVadoseFeed()?.chemicalId).toBe('71-43-2');
+      expect(getVadoseVaporFeed()?.chemicalId).toBe('71-43-2');
+    } finally {
+      setScreen('vadose', prior);
+    }
   }, 30000);
 });

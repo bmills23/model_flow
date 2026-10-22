@@ -10,6 +10,7 @@ import {
   showerLittle,
 } from '@model-flow/engine';
 import { computeHousehold, volatileVerdict } from './compute';
+import { buildHouseholdFeed } from './feed';
 import { DEFAULT_FORM, type HouseholdForm } from './form';
 
 // Test inputs only; none of these is a sourced default.
@@ -184,5 +185,71 @@ describe('volatileVerdict', () => {
     if (!out.shower.rsl.ok) throw new Error('x');
     expect(out.shower.rsl.concentration).toBe(0);
     expect(out.shower.rsl.warnings.map((w) => w.code)).toContain('shower.not-volatile');
+  });
+
+  describe('water source chemical check', () => {
+    const YR = 365.25 * 86400;
+    const well = (chemicalId?: string) => ({
+      method: 'modern' as const,
+      label: 'Receptor well',
+      times: [0, 10 * YR],
+      values: [0, 1e-6],
+      ...(chemicalId ? { chemicalId } : {}),
+    });
+    const surface = (chemicalId?: string) => ({
+      method: 'well-mixed' as const,
+      origin: 'surfaceWater.well-mixed',
+      label: 'Surface water',
+      times: [0, 10 * YR],
+      values: [0, 1e-6],
+      ...(chemicalId ? { chemicalId } : {}),
+    });
+    const names = (id: string) =>
+      id === '71-43-2' ? 'Benzene' : id === '108-88-3' ? 'Toluene' : id;
+    const form = {
+      ...FORM,
+      chemicalId: '108-88-3',
+      showerWaterSource: 'well' as const,
+      irrigationWaterSource: 'surface' as const,
+    };
+    const check = (projectCount: number) => ({ projectCount, nameOf: names });
+
+    it('refuses a well and a surface series for another chemical, naming both', () => {
+      const out = computeHousehold(form, {
+        well: well('71-43-2'),
+        surface: surface('71-43-2'),
+        check: check(2),
+      });
+      expect(out.shower.legacy.ok).toBe(false);
+      if (!out.shower.legacy.ok)
+        expect(out.shower.legacy.errors.join(' ')).toMatch(/Benzene, not Toluene/);
+      expect(out.irrigation.ok).toBe(false);
+      if (!out.irrigation.ok)
+        expect(out.irrigation.errors.join(' ')).toMatch(/Benzene, not Toluene/);
+    });
+
+    it('takes a series for the household chemical', () => {
+      const out = computeHousehold(form, {
+        well: well('108-88-3'),
+        surface: surface('108-88-3'),
+        check: check(2),
+      });
+      expect(out.shower.legacy.ok).toBe(true);
+      expect(out.irrigation.ok).toBe(true);
+    });
+
+    it('takes an untagged series in a project of one chemical and refuses it in a project of two', () => {
+      const held = { well: well(), surface: surface() };
+      expect(computeHousehold(form, { ...held, check: check(1) }).shower.legacy.ok).toBe(true);
+      const two = computeHousehold(form, { ...held, check: check(2) });
+      expect(two.shower.legacy.ok).toBe(false);
+      if (!two.shower.legacy.ok)
+        expect(two.shower.legacy.errors.join(' ')).toMatch(/does not record which chemical/);
+    });
+
+    it('sends nothing computed from a refused series', () => {
+      const r = buildHouseholdFeed(form, { well: well('71-43-2'), surface: null, check: check(2) });
+      expect(r.ok && r.feed.bathroomAir).toBeFalsy();
+    });
   });
 });

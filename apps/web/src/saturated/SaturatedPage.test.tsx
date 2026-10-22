@@ -4,6 +4,8 @@ import { clearSaturatedFeed, getSaturatedFeed } from './feed';
 import { SaturatedPage } from './SaturatedPage';
 import { clearSaturatedVaporFeed, getSaturatedVaporFeed } from '../vapor/feeds';
 
+import { getScreen, setScreen } from '../project/store';
+
 afterEach(() => {
   clearSaturatedFeed();
   clearSaturatedVaporFeed();
@@ -95,5 +97,20 @@ describe('SaturatedPage', () => {
     fireEvent.change(screen.getByLabelText(/^porosity/i), { target: { value: '0.4' } });
     expect((screen.getByLabelText(/^porosity/i) as HTMLInputElement).value).toBe('0.4');
     expect((screen.getByLabelText(/^texture preset/i) as HTMLSelectElement).value).toBe('S');
+  }, 30000);
+
+  it('tags both feeds it sends with the screen chemical', async () => {
+    const prior = getScreen('saturated');
+    const before = prior.form;
+    setScreen('saturated', { ...prior, form: { ...before, chemicalId: '71-43-2' } });
+    try {
+      await loaded();
+      fireEvent.click(screen.getByRole('button', { name: /use as groundwater source/i }));
+      fireEvent.click(screen.getByRole('button', { name: /use as vapor source/i }));
+      expect(getSaturatedFeed()?.chemicalId).toBe('71-43-2');
+      expect(getSaturatedVaporFeed()?.chemicalId).toBe('71-43-2');
+    } finally {
+      setScreen('saturated', prior);
+    }
   }, 30000);
 });

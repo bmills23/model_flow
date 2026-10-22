@@ -1,7 +1,7 @@
 import { StaleMark } from '../project/StaleMark';
 import { transportFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { BreakthroughChart } from './BreakthroughChart';
 import { Marker } from './Marker';
@@ -23,7 +23,7 @@ import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
 import { waterTableSource } from './vaporFeed';
-import { chemicalTag } from '../project/feedChemical';
+import { chemicalTag, projectNameOf, screenFeedProblem } from '../project/feedChemical';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
@@ -106,8 +106,25 @@ export function TransportPage() {
   );
 
   const bankHeld = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
-  const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const satFeed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
+  const vadoseHeld = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
+  const satHeld = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
+  const chemicalList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  // a vadose or saturated result for another chemical (or untagged in a multi-chemical project) is not
+  // offered and computes nothing; the problem is shown in its place
+  const feedProblem = (held: { chemicalId?: string } | null, name: string): string | null =>
+    held === null
+      ? null
+      : screenFeedProblem({
+          feed: name,
+          feedChemical: held.chemicalId,
+          screenChemical: form.chemicalId,
+          projectCount: chemicalList.length,
+          nameOf: projectNameOf(chemicalList),
+        });
+  const vadoseProblem = feedProblem(vadoseHeld, 'vadose result');
+  const satProblem = feedProblem(satHeld, 'saturated soil source result');
+  const feed = vadoseProblem === null ? vadoseHeld : null;
+  const satFeed = satProblem === null ? satHeld : null;
   const satOn = form.feedFromSaturated && satFeed !== null;
   // the vadose or saturated result the run is fed from; marked beside it and in the CSV when stale
   const feedsUsed = transportFeedsRead({
@@ -316,6 +333,13 @@ export function TransportPage() {
           </Group>
 
           <Group title="Source">
+            {[vadoseProblem, satProblem].map((p) =>
+              p === null ? null : (
+                <p key={p} className="alert" role="alert">
+                  {p[0]!.toUpperCase() + p.slice(1)}
+                </p>
+              ),
+            )}
             {feed && (
               <label className="check">
                 <input

@@ -148,6 +148,40 @@ describe('source from another screen', () => {
   });
 });
 
+describe('source for another chemical', () => {
+  const tagged = (chemicalId: string) => ({
+    kind: 'groundwater' as const,
+    label: 'Water table under the building, modern',
+    series: { times: [0, 5 * YR, 10 * YR], values: [2e-3, 1e-3, 2e-4] },
+    chemicalId,
+  });
+
+  it('refuses a water table series for benzene on a toluene screen and offers nothing to send', async () => {
+    render(<VaporPage />);
+    await screen.findByRole('option', { name: /toluene \(108-88-3\)/i });
+    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
+      target: { value: '108-88-3' },
+    });
+    act(() => setWaterTableFeed(tagged('71-43-2')));
+    const region = screen.getByRole('region', { name: /source from another screen/i });
+    expect(within(region).getByRole('alert').textContent).toMatch(/is for .*, not /i);
+    expect(within(region).queryByLabelText(/water table under the building/i)).toBeNull();
+    expect(within(region).queryByRole('table', { name: /indoor air over time/i })).toBeNull();
+  }, 30000);
+
+  it('takes the same series on a benzene screen', async () => {
+    render(<VaporPage />);
+    await screen.findByRole('option', { name: /benzene \(71-43-2\)/i });
+    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
+      target: { value: '71-43-2' },
+    });
+    act(() => setWaterTableFeed(tagged('71-43-2')));
+    const region = screen.getByRole('region', { name: /source from another screen/i });
+    expect(within(region).queryByRole('alert')).toBeNull();
+    expect(within(region).getByLabelText(/water table under the building/i)).toBeTruthy();
+  }, 30000);
+});
+
 describe('sent vapor run after an edit', () => {
   const sendBenzene = async () => {
     render(<VaporPage />);

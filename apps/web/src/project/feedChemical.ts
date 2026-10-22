@@ -31,3 +31,30 @@ export function feedChemicalProblem(args: {
   }
   return null;
 }
+
+/**
+ * The same check for a screen that reads a feed as its own input (household, vapor, groundwater transport).
+ * The screen's chemical stands in for the row; the project chemical list stands in for the run, because
+ * an untagged feed can be told only when the project holds at most one chemical. A screen with no chemical
+ * (typed by hand) has nothing to compare with, so the feed is taken as before.
+ */
+export function screenFeedProblem(args: {
+  feed: string;
+  feedChemical: string | undefined;
+  /** The chemical the screen is set to; blank when typed by hand. */
+  screenChemical: string | undefined;
+  /** How many chemicals the project list holds. */
+  projectCount: number;
+  nameOf: (id: string) => string;
+}): string | null {
+  const { screenChemical, projectCount, ...rest } = args;
+  if (screenChemical === undefined || screenChemical.trim() === '') return null;
+  return feedChemicalProblem({ ...rest, rowId: screenChemical, runCount: projectCount });
+}
+
+/** Name lookup from the project chemical list, falling back to the id. */
+export function projectNameOf(
+  list: readonly { id: string; name: string }[],
+): (id: string) => string {
+  return (id) => list.find((c) => c.id === id)?.name ?? id;
+}

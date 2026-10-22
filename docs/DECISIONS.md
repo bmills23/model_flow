@@ -2875,9 +2875,11 @@ user-defined chemicals and the surface water cleanup target.
 6. **Produce stale check follows the chemical (DEFAULT).** A held produce feed for another chemical is not read by
    risk or cleanup rows of a different chemical, so editing it does not mark them stale. With no produce feed held,
    or an untagged one, the check is unchanged.
-7. **Not done here (DEFAULT).** The vapor screen and the transport screen read the tagged vadose, saturated and
-   water table feeds without comparing their chemical to the screen's own; that is outside this slice's files and
-   is left for wave O with the per-chemical slots.
+7. **Screens that read a feed as their own input (DEFAULT).** The household screen (well and surface water
+   sources), the vapor screen (water table, vadose and saturated sources) and the transport screen (vadose and
+   saturated feed toggles) make the same check against their own chemical, by the rule of item 3 with the project
+   chemical list standing in for the run. Done in the wave N corrective pass, slice FA (see its block at the end
+   of this file); slice N2 itself left them unchecked.
 
 ## 2026-10-21: Wave N slice S, source records
 
@@ -2904,3 +2906,25 @@ All rulings are DEFAULT. Each source was re-read on 2026-10-21 before any change
    (1995) and Schulze-Makuch (2005) stay unverified; no open copy was found on 2026-10-21.
 6. **One edit outside the named files.** `docs/methods/vadose-leaching.md` said the EPRI report was not checked; that
    was false after item 3, so the sentence was corrected in place.
+
+## 2026-10-21: Wave N corrective pass, slice FA
+
+1. **Screens that take a feed as input compare its chemical with their own (DEFAULT).** The household screen
+   (well and surface water series), the vapor screen (water table, vadose and saturated sources) and the
+   groundwater transport screen (vadose and saturated feed toggles) use `screenFeedProblem` in
+   `project/feedChemical.ts`, which is the item 3 rule of slice N2 with the screen's chemical as the row. A feed
+   for the screen's chemical is used. A feed for another chemical is an error naming both chemicals; it computes
+   nothing, is not offered as a choice or toggle, and nothing is sent from it (household sections refuse, so the
+   air concentrations are not sent; the vapor screen refuses to send while a refused source is chosen).
+2. **Untagged feed on a single-chemical screen (DEFAULT).** The screen cannot tell which chemical an untagged
+   feed was made for, so the project chemical list decides: with at most one chemical in the project the feed is
+   taken as before, since there is nothing else it could be for; with two or more it is refused with the "does not
+   record which chemical" message, as in the risk and cleanup branches. Evidence: slice N1 puts every chemical a
+   screen names into the list, so a project that holds two chemicals has at least one screen on another chemical,
+   and an old untagged result could belong to either. A screen whose chemical is blank (typed by hand) has nothing
+   to compare with and takes any feed, tagged or not.
+3. **Senders are tested (DEFAULT).** Page tests set the screen's chemical and assert the `chemicalId` on the
+   transport (well, chain, water table, bank), vadose (groundwater and vapor) and saturated (groundwater and
+   vapor) feeds; deleting a tag spread now fails a test. The surface water sender is not covered here.
+4. **Files outside the named list (DEFAULT).** The shared helper gained `screenFeedProblem` and `projectNameOf`
+   (`project/feedChemical.ts`, with its test), and the vapor screen gained `vapor/heldSources.ts`.

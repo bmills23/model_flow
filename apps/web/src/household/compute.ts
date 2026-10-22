@@ -14,6 +14,7 @@ import {
 } from '@model-flow/engine';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { WellFeed } from '../transport/wellFeed';
+import { screenFeedProblem } from '../project/feedChemical';
 import { isBlank, makeReader, type HouseholdForm } from './form';
 
 export interface VolatileVerdict {
@@ -67,6 +68,11 @@ export function volatileVerdict(form: HouseholdForm): VolatileVerdict {
 export interface HeldSources {
   well: WellFeed | null;
   surface: SurfaceWaterFeed | null;
+  /**
+   * What the chemical check needs: how many chemicals the project holds (an untagged series can be told
+   * only when it is one) and their names. Absent, the series are taken as held (one chemical assumed).
+   */
+  check?: { projectCount: number; nameOf: (id: string) => string };
 }
 
 type Fail = { ok: false; errors: string[] };
@@ -358,6 +364,14 @@ function withWater(
           : 'No surface water result is held; run the surface water screen and send its result here',
     };
   }
+  const problem = screenFeedProblem({
+    feed: source === 'well' ? 'transport well result' : 'surface water result',
+    feedChemical: feed.chemicalId,
+    screenChemical: form.chemicalId,
+    projectCount: held.check?.projectCount ?? 1,
+    nameOf: held.check?.nameOf ?? ((id) => id),
+  });
+  if (problem !== null) return { error: problem[0]!.toUpperCase() + problem.slice(1) };
   return { form: { ...form, waterConcentration: String(peak(feed.values) * 1000) } };
 }
 

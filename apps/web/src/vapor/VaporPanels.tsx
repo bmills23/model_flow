@@ -349,6 +349,8 @@ export function SourcePanel(props: {
   choice: SourceChoice;
   onChoice: (c: SourceChoice) => void;
   held: { choice: Exclude<SourceChoice, 'entered'>; source: SourceSeries }[];
+  /** Held sources this screen refuses: another chemical, or none recorded in a multi-chemical project. */
+  problems: { choice: Exclude<SourceChoice, 'entered'>; message: string }[];
   epcs: VaporEpcs | null;
   active: SourceSeries | null;
 }) {
@@ -362,12 +364,19 @@ export function SourcePanel(props: {
   return (
     <section className="panel" aria-label="Source from another screen">
       <h2>Source from another screen</h2>
+      {props.problems.map((p) => (
+        <div key={p.choice} className="alert" role="alert">
+          {p.message}
+        </div>
+      ))}
       {held.length === 0 ? (
-        <p className="muted">
-          No other screen has offered a source. Groundwater transport can offer the water table
-          under a building, vadose leaching its source pore water, and the saturated soil source its
-          region above the water table.
-        </p>
+        props.problems.length === 0 ? (
+          <p className="muted">
+            No other screen has offered a source. Groundwater transport can offer the water table
+            under a building, vadose leaching its source pore water, and the saturated soil source
+            its region above the water table.
+          </p>
+        ) : null
       ) : (
         <>
           <p>

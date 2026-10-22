@@ -3,7 +3,8 @@ import { householdFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { registry, type Warning } from '@model-flow/engine';
 import { DownloadCsv } from '../export/DownloadCsv';
-import { getScreen, setScreen } from '../project/store';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
+import { projectNameOf } from '../project/feedChemical';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg, TextField } from '../ui/controls';
 import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
@@ -91,11 +92,17 @@ export function HouseholdPage() {
   );
   const [sent, setSent] = useState<string | null>(null);
 
-  const out = useMemo(() => computeHousehold(form, { well, surface }), [form, well, surface]);
-  const feedResult = useMemo(
-    () => buildHouseholdFeed(form, { well, surface }),
-    [form, well, surface],
+  const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const held = useMemo(
+    () => ({
+      well,
+      surface,
+      check: { projectCount: chemicals.length, nameOf: projectNameOf(chemicals) },
+    }),
+    [well, surface, chemicals],
   );
+  const out = useMemo(() => computeHousehold(form, held), [form, held]);
+  const feedResult = useMemo(() => buildHouseholdFeed(form, held), [form, held]);
   const send = (): void => {
     if (!feedResult.ok) return;
     setHouseholdFeed(feedResult.feed);
