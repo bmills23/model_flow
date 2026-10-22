@@ -122,10 +122,13 @@ const FED_ROUTES = [
     route: '#/cleanup',
     via: '#/plants-eco',
     // lead (an inorganic, so no organic partitioning inputs), its produce factors sent to the cleanup screen
-    viaSetup: `(async()=>{const u=window.__ui;await u.pick('lead',/^add lead and compounds/i);await u.sleep(800);
+    viaSetup: `(async()=>{const u=window.__ui;
+      // the project list holds lead (added on #/chemicals), then plants and eco picks it from the list
+      location.hash='#/chemicals';await u.sleep(1500);await u.pick('lead',/^add to project: lead and compounds/i);await u.sleep(800);
+      location.hash='#/plants-eco';await u.sleep(1500);u.choose(/^chemical/i,/^lead and compounds/i);await u.sleep(800);
       u.fill(/^log kow/i,'3');u.fill(/^kd \\(l\\/kg\\)/i,'5');u.fill(/^moisture fraction/i,'0.8');u.fill(/^dry bulk density/i,'1.5');
       await u.sleep(500)})()`,
-    routeSetup: `(async()=>{const u=window.__ui;await u.pick('lead',/^add lead and compounds/i);await u.sleep(800);
+    routeSetup: `(async()=>{const u=window.__ui;await u.sleep(800);
       u.tick(/homegrown produce/i);await u.sleep(500)})()`,
   },
   // "seeded" routes: no feed, the screen is opened and driven in place so a panel that only exists once a
@@ -334,11 +337,19 @@ const UI = `(()=>{
       const input=[...document.querySelectorAll('main input')].find(i=>/find a chemical/i.test(i.labels?.[0]?.textContent||i.getAttribute('aria-label')||''))||search;
       setValue(input,query);
       for(let i=0;i<40;i++){
-        const b=[...document.querySelectorAll('main button')].find(x=>name.test(x.textContent.trim()||x.getAttribute('aria-label')||''));
+        const b=[...document.querySelectorAll('main button')].find(x=>(name.test(x.textContent.trim())||name.test(x.getAttribute('aria-label')||'')));
         if(b){b.click();return true}
         await sleep(250);
       }
       return false;
+    },
+    // choose an option of a labelled select by its visible text, the way a user picks from the project list
+    choose(labelRe,optionRe){
+      const l=labelled(labelRe);const sel=l&&(l.control||l.querySelector('select'));
+      const o=sel&&[...sel.options].find(x=>optionRe.test(x.textContent.trim()));
+      if(!o)return false;
+      const set=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;
+      set.call(sel,o.value);sel.dispatchEvent(new Event('change',{bubbles:true}));return true;
     },
     fill(re,v){const l=labelled(re);const i=l&&(l.control||l.querySelector('input'));if(i)setValue(i,v);return !!i},
     tick(re){const l=labelled(re);const i=l&&(l.control||l.querySelector('input'));if(i&&!i.checked)i.click();return !!i},

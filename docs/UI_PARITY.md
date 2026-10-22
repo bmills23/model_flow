@@ -35,14 +35,14 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | B5 database editor entry (2-5) | None (landed in wave H, slice U3: the browser at `#/chemicals`, see the C1 row); master edits stay out of scope (C2, C3) | - | - |
 | B6 tutorials and FAQ (FAQ-1) | User guide and methods notes; worked examples on vadose and saturated | Out of scope (guide covers it) | - | - |
 | C1, C5, J1, J2, J4, J7 browse the chemical database with per-value sources and a full summary table (FAQ-7, 10-1 to 10-7) | None (landed in wave H, slice U3: read-only browser at `#/chemicals` (`apps/web/src/chemicals/`) with search by name or CAS, every value with its source tag, the data edition, and Download CSV with a source column) | - | - |
-| C2, C3 add or remove chemicals permanently (FAQ-8, 2-6) | None | Out of scope as a master edit; a user chemical can be a project-level entry later (not sliced) | L | L |
+| C2, C3 add or remove chemicals permanently (FAQ-8, 2-6) | None | Master edits stay out of scope; None for a project-level entry (landed in wave P, slice P1: user-defined chemicals with a note per value) | L | L |
 | C4, D6 per-property reference text (FAQ-9, 3-3) | None (landed in wave H: source tags are shown in the browser (U3) and each override carries a required source note (U4)) | - | - |
 | C6, G6 human receptor profiles and default dropdown (2-6, 6-4) | Three presets (resident, worker, child) per receptor | None for the dropdown; editing is G7 | - | - |
 | C7 Monte Carlo receptor profiles (FAQ-3) | Distributions per input saved in the project | Out of scope (EFH distribution library is M10 deferred engine and data work) | - | - |
 | C8, F4 soil type profiles and dropdown (2-6, 5-3) | Texture presets on `#/vapor` (engine `SOIL_TEXTURES`), and since wave H (U7) on vadose and saturated | None (landed in wave H, slice U7: texture select on each vadose layer and in the saturated Soil group, Custom kept, values editable after filling) | - | - |
 | C9 ecological receptor profiles (2-6) | Eco-SSL benchmarks for birds and mammals; engine `wildlifeDose` and `wildlifeHazardQuotient` exist; M9 Deferred says the surrogate food web table is not wired to the screen | None (landed in wave H, slice U9: wildlife dose panel on `#/plants-eco` with rows prefilled from the Eco-SSL derivation rows; wave I, slice I2: a "Not reproduced within 5 percent" flag). Remaining: the ORNL benchmark tables are not shipped (M9 Deferred) | - | - |
 | C10, C11 restore and persist databases (2-6, 2-3) | Databases are versioned committed data | Out of scope (no master library) | - | - |
-| D1, D2 chemical picker, 50 limit (3-2) | Picker on risk and cleanup; per-screen chemical selection elsewhere | Partial: the project stores a chemical list (landed in wave N, slice N1) and the feeds carry the chemical (slice N2), but no screen reads or edits the list yet (wave O; see section 4) | H | L |
+| D1, D2 chemical picker, 50 limit (3-2) | Picker on risk and cleanup; per-screen chemical selection elsewhere | None (landed in waves N to P: one project chemical list shown and edited on `#/chemicals`, risk and cleanup rows follow it, every fate screen picks from it, feeds keep one slot per chemical) | H | L |
 | D3, D4, G9, J8 project-only edit of chemical and toxicity values, same value everywhere (3-3, 6-5, 7-8) | None (landed in wave H, slice U4: project-level `overrides` key with an "Edit values" panel on the risk and cleanup chemical cards, shared by both screens; each override needs a source note, is marked as edited, resets per field, and is listed in the report as a user value) | - | - |
 | D4, F8 fate screens use the chemical's database properties (3-3, 5-5) | None (landed in wave H, slice U8: `#/vapor` already filled from RSL (`vapor/chemicals.ts`); transport, vadose and saturated now fill from the database through the shared `ui/chemicalFill.ts`. Transport Kd = Koc x foc is a DEFAULT mapping; surface water is not included) | - | - |
 | D5 chemical summary table, two sheets (3-3) | None | None (landed in wave H, slice U3: the browser CSV carries values plus a source column) | - | - |
@@ -62,7 +62,7 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | G11, G12 back-calc note, two scenarios at once (6-1, 1-5) | Two receptors with different presets | None | - | - |
 | H1 to H5, H7, H13, H14 risk vs cleanup, individual vs cumulative, targets, governing level (8-1 to 8-9) | `#/risk` and `#/cleanup` | None | - | - |
 | H6, H8 MCL target, averaging time (8-2, 8-3) | MCL targets (`cleanup/mcl.ts`) and averaging time on modeled cleanup | None | - | - |
-| H9 surface water target overrides groundwater (8-5) | Not available | Engine deferral (M5: surface water as target medium) | - | - |
+| H9 surface water target overrides groundwater (8-5) | None (landed in wave P, slice P2: per-chemical surface water target on `#/cleanup`, linear route, dissolved groundwater sources) | Soil sources and nonlinear paths are not quantified | - | - |
 | H10 to H12 one receptor for modeled, deterministic only, run (8-1, 8-4) | Modeled cleanup chains; probabilistic cleanup also | None (exceeds) | - | - |
 | I1 to I5, I8 to I10 risk, hazard, input and output summary, cleanup results, per-medium tables (9-1, 5-6, 8-9) | Per-screen result tables with CSV; `#/report` with inputs, results, warnings, methods statement | None | - | - |
 | I6, I7, I13, I15 spreadsheet output, output menu, print via spreadsheet, macros (2-1, 9-1, FAQ-4) | CSV, report, browser print | Out of scope (web equivalents exist) | - | - |
@@ -202,9 +202,9 @@ Serial chains: U4 then U5; U8 then U7. Parallel pairs with low conflict: U3 with
 
 ## 4. Out of scope, with reasons
 
-- Permanent master database editing, add and remove chemicals, restore databases (C2, C3, C10, C11): no
+- Permanent master database editing, restore databases (C2, C10, C11): no
   accounts or server; browser storage is not reliable state; project-level overrides (U4, U5) carry the
-  need with provenance.
+  need with provenance, and project-level user chemicals (wave P) cover adding one.
 - Step locking (B1 unlock order): stale-feed detection already prevents the stale-input failure it guards
   against, and locking hurts mobile and share-link entry.
 - RISC5 project file import (A4): proprietary format, clean-room rule, already M11 Deferred.
@@ -219,9 +219,8 @@ Serial chains: U4 then U5; U8 then U7. Parallel pairs with low conflict: U3 with
 - Ecological Step 2 and 4 screens (E9, G13): RISC5's own guide leaves them pending; `#/plants-eco` covers
   screening.
 - 50-chemical limit (D2): a constraint, not a feature.
-- Surface water as a cleanup target (H9) and international criteria (I14): engine and data deferrals in M5
-  and M8, not UI. Vapor and surface water source levels are on `#/cleanup` (wave K, slices K1 and K2); the
+- International criteria (I14): an engine and data deferral in M8, not UI. Surface water as a cleanup target
+  (H9) landed in wave P, slice P2, for dissolved groundwater sources on the linear route. Vapor and surface water source levels are on `#/cleanup` (wave K, slices K1 and K2); the
   paths they do not quantify (nonlinear, soil above residual, upstream background) remain engine work.
-- Multi-chemical runs through every fate screen from one project chemical list (D1, D4 at full scope): needs
-  a design ruling on shared chemical state and multi-chemical workers across six screens; too big for one
-  slice, so it is recorded as an H gap for a design session, not sliced.
+- Multi-chemical runs through every fate screen (D1, D4 at full scope): landed in waves N to P as one project
+  chemical list, one active chemical per fate screen and one feed slot per chemical, not simultaneous multi-chemical workers.

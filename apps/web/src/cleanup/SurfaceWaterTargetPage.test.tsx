@@ -4,7 +4,7 @@ import { CleanupPage } from './CleanupPage';
 import { fromProject, toProject } from './project';
 import { defaultCleanupForm } from './form';
 import { newSurfaceTarget } from './surfaceWaterTarget';
-import { forgetMemory, getScreen, setScreen } from '../project/store';
+import { forgetMemory, getChemicals, getScreen, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 
 afterEach(() => {
@@ -54,8 +54,12 @@ describe('cleanup surface water target panel', () => {
     });
     render(<CleanupPage />);
     await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
-    fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
-    fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+    // a project that already lists benzene gives the page its row
+    if (!getChemicals().some((c) => c.id === '71-43-2')) {
+      fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
+      fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+    }
+    await screen.findByRole('group', { name: /benzene/i });
     const inputs = screen.getByRole('region', { name: /surface water targets/i });
     fireEvent.click(within(inputs).getByRole('radio', { name: /my value/i }));
     fireEvent.change(within(inputs).getByLabelText(/surface water target \(ug\/L\)/i), {
