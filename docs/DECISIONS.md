@@ -3297,6 +3297,16 @@ engine needed no change. Every ruling below is DEFAULT.
    region name once per chemical, which the mobile check's axe pass flags (landmark-unique). Each block is now
    labelled "Modeled source uncertainty results: <chemical>"; a single-chemical block keeps the old label.
 
+### Waves O and P corrective, slice P3F
+
+Review findings on the multi-chemical modeled cleanup. Every ruling below is DEFAULT.
+
+1. **Leaving a chemical's probabilistic panel cancels its run (DEFAULT).** An unmount cleanup effect aborts the
+   in-flight run, so picking another chemical stops the pool for the first one and no summary lands silently.
+2. **Staleness of a probabilistic result compares request content, not object identity (DEFAULT).** The request
+   stored at run time and the current one are compared as stable strings, so an equal rebuilt request no longer
+   shows "scenario inputs changed".
+
 ### Waves O and P corrective, slice CA
 
 Review findings on waves O and P. Every ruling below is DEFAULT.
@@ -3322,3 +3332,17 @@ Review findings on waves O and P. Every ruling below is DEFAULT.
 6. **Mobile check.** A `#/chemicals` "projectlist" visit adds a database chemical, defines a user chemical named
    "Bis(2-ethylhexyl)phthalate (copy)", opens Edit and Remove, and fails unless the list, editor and confirmation are
    on screen. It found no overflow or axe violation at 390 px in light or dark, so no layout change was made.
+
+### Waves O and P corrective, slice CB
+
+An older tab must never overwrite a newer autosave. Every ruling below is DEFAULT.
+
+1. **New key.** The autosave moves to `model_flow.project.autosave.v2` (`AUTOSAVE_KEY`). A version 1 build reads and
+   writes only `.v1`, so it neither refuses nor overwrites the version 2 copy.
+2. **Migration.** On load the new key is read; when it is empty the old `.v1` key (`LEGACY_AUTOSAVE_KEY`) is read and
+   passed through `parseProject`. The `.v1` key is never written or removed by this build, not even by New project,
+   so a version 1 tab keeps its own data.
+3. **Newer than this build.** When the text the build read holds a file version above `CURRENT_VERSION`, the tab does
+   not autosave and New project does not remove the key. `ProjectBar` shows the existing status line markup: the saved
+   copy was saved by a newer version of the app and this tab will not save over it. Saving to a file still works.
+4. **No fingerprint change.** No source form key was added, so `FINGERPRINT_SKIP` is unchanged.

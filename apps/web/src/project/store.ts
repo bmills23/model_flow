@@ -81,6 +81,8 @@ import { isChemicalFeed } from './schema';
 import { scrubRejected } from '../ui/decimalComma';
 import {
   buildProject,
+  CURRENT_VERSION,
+  PROJECT_FORMAT,
   chemicalsOf,
   defaultScreens,
   feedEntry,
@@ -94,8 +96,30 @@ import {
   type Screens,
 } from './index';
 
-/** The one versioned localStorage key the current project autosaves under. */
-export const AUTOSAVE_KEY = 'model_flow.project.autosave.v1';
+/**
+ * The localStorage key the current project autosaves under. It moved to .v2 with project file format
+ * version 2, so a tab still running a version 1 build never reads or writes it.
+ */
+export const AUTOSAVE_KEY = 'model_flow.project.autosave.v2';
+/** The key the version 1 build used: read once to migrate, never written or removed here. */
+export const LEGACY_AUTOSAVE_KEY = 'model_flow.project.autosave.v1';
+const NEWER_NOTICE =
+  'The saved copy in this browser was saved by a newer version of the app. This tab will not save over it.';
+/** Set when the autosave this build read holds a newer file version: this tab then never writes it. */
+let autosaveBlocked = false;
+export const getAutosaveNotice = (): string | null => (autosaveBlocked ? NEWER_NOTICE : null);
+function isTooNew(text: string): boolean {
+  try {
+    const doc = JSON.parse(text) as { format?: unknown; version?: unknown };
+    return (
+      doc?.format === PROJECT_FORMAT &&
+      typeof doc.version === 'number' &&
+      doc.version > CURRENT_VERSION
+    );
+  } catch {
+    return false;
+  }
+}
 const DEBOUNCE_MS = 600;
 const APP_VERSION: string = pkg.version;
 
@@ -625,6 +649,7 @@ export function setTitle(next: string): void {
 
 function write(): void {
   timer = null;
+  if (autosaveBlocked) return;
   try {
     const project = build();
     localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(project));
@@ -887,6 +912,7 @@ export function forgetMemory(): void {
   dropped = [];
   savedSnapshot = null;
   warnedSnapshot = null;
+  autosaveBlocked = false;
 }
 
 /**
@@ -897,10 +923,12 @@ export function hydrate(): void {
   let text: string | null;
   try {
     text = localStorage.getItem(AUTOSAVE_KEY);
+    if (text === null) text = localStorage.getItem(LEGACY_AUTOSAVE_KEY);
   } catch {
     return;
   }
   if (text === null) return;
+  autosaveBlocked = isTooNew(text);
   const r = parseProject(text);
   if (!r.ok) return;
   seed(r.project, r.droppedFeeds ?? []);
@@ -997,7 +1025,7 @@ export function newProject(): void {
   if (timer !== null) clearTimeout(timer);
   timer = null;
   try {
-    localStorage.removeItem(AUTOSAVE_KEY);
+    if (!autosaveBlocked) localStorage.removeItem(AUTOSAVE_KEY);
   } catch {
     // nothing stored, or storage blocked
   }
