@@ -2822,3 +2822,27 @@ Plan. Wave N: N1 the project list and its derivation, N2 feed tagging and the id
 records. Wave O: risk and cleanup rows follow the list and `#/chemicals` gains "Add to project"; the fate screens
 and the surface water screen pick from the list; per-chemical feed slots with the version 2 migration. Wave P:
 user-defined chemicals and the surface water cleanup target.
+
+## 2026-10-21: Wave N slice N1, project chemical list
+
+1. **The list is stored and edited, not derived live (DEFAULT).** `chemicals` is a plain list the store holds
+   and saves. A live derivation could not hold an entry a person added on purpose (wave O's "Add to project",
+   wave P's user chemicals) or a removal, and would re-add a removed chemical on the next edit of a screen that
+   still names it. So derivation runs once, when the key is absent (open, restore, share link; a new project
+   starts empty), and afterwards the list follows the screens in one direction: when a screen newly names a
+   chemical (a risk or cleanup row added, a screen's `chemicalId` changed to one not in the list), `setScreen`
+   adds it. Nothing is removed automatically, since a row removed from risk may still be wanted by another
+   screen; `removeChemical` is the only way out, and a screen that still names a removed id keeps its choice
+   until it names a chemical afresh.
+2. **Entry shape (DEFAULT).** `{ id, name }`, the id non-blank. Wave P adds optional keys for user values
+   without a version bump. A saved empty list stays empty on open (it is not re-derived); only an absent key
+   derives. Saving always writes the key.
+3. **Derivation order and names (DEFAULT).** Risk rows, cleanup rows, then transport, vadose, saturated, vapor,
+   household and plants and eco; blank ids and `risc4-benzene` are skipped; the first occurrence fixes the order.
+   A name comes from a row or the household and plants and eco typed name; a fate screen's id with no row takes
+   its id as the name until wave O fills names from the loaded database.
+4. **No stale effect (DEFAULT).** The list is outside every screen form, so no fingerprint or
+   `FINGERPRINT_SKIP` entry changes, and editing the list never marks a held feed.
+5. **Accessors (DEFAULT).** `getChemicals`, `subscribeChemicals`, `addChemical`, `removeChemical` in
+   `apps/web/src/project/store.ts`; `chemicalsOf` and `buildProject({ chemicals })` in `project/index.ts`;
+   `deriveChemicals` and `chemicalIdsOf` in `project/chemicals.ts`. No version bump.

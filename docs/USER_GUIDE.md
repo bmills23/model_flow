@@ -85,6 +85,10 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   the number with a single comma. A box that cannot be read blocks the calculation until you fix it, and
   that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
   plain text and are not affected by this setting.
+- The project now keeps a list of its chemicals, filled from the chemicals on the risk and cleanup screens
+  and the one chosen on each other screen. Nothing on screen shows it yet. An older file or link opens with
+  the list filled in the same way, and none of its sent results turns stale because of it. An older version
+  of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
   the reload recovery is lost.
 
