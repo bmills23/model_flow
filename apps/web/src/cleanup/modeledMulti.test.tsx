@@ -3,7 +3,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { clearTransportFeed, setTransportFeed, type TransportFeed } from '../transport/chainFeed';
 import { addChemical, forgetMemory, getScreen, setScreen } from '../project/store';
 import { buildModeled, buildModeledRows, type Feeds } from './modeledBuild';
@@ -18,6 +18,7 @@ import type { ModeledUncertaintySummary } from './modeledSummary';
 import { modeledReportEntry } from '../report/modeledReport';
 import { defaultScreens } from '../project';
 import { UncertaintyReportView } from '../report/UncertaintyResults';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 let db: ChemicalDb;
 beforeAll(async () => {

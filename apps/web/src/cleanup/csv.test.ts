@@ -3,7 +3,7 @@ import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { exportCsv } from '../export/csv';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { buildCleanup, FROM_SI } from './build';
 import { computeModeled, runCleanup } from './compute';
 import {
@@ -18,6 +18,7 @@ import {
 import { defaultCleanupForm, type CleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
 import { computeSsg, loadCleanupProps, type CleanupProps } from './ssg';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 let db: ChemicalDb;
 let props: CleanupProps;

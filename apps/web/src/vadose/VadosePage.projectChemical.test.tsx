@@ -4,6 +4,7 @@ import { addChemical, forgetMemory, getScreen, newProject } from '../project/sto
 import { loadVaporChemicals } from '../vapor/chemicals';
 import { clearVadoseFeed, getVadoseFeed, getVadoseFeedSlots } from './feed';
 import { VadosePage } from './VadosePage';
+import { seedVadoseRegression } from './regression.testkit';
 
 const BENZENE = '71-43-2';
 const TOLUENE = '108-88-3';
@@ -12,6 +13,7 @@ const OUTSIDE = '0000-00-0';
 beforeEach(() => {
   forgetMemory();
   newProject();
+  seedVadoseRegression();
 });
 afterEach(() => {
   clearVadoseFeed();

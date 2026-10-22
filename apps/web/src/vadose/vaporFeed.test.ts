@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { vadoseSoilVaporSeries } from '@model-flow/engine';
 import { compute } from './compute';
-import { DEFAULT_FORM, toScenario } from './form';
+import { R7_FORM as DEFAULT_FORM, toScenario } from './form';
 import { vadoseVaporSource } from './vaporFeed';
 
 describe('vadoseVaporSource', () => {

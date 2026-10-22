@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { addChemical, forgetMemory, newProject } from '../project/store';
 import { TransportPage } from './TransportPage';
+import { seedTransportRegression } from './regression.testkit';
 
 // A database fixture with one chemical that has no Koc (like hydrogen cyanide) and one that has a Koc.
 vi.mock('../vapor/chemicals', () => ({
@@ -16,6 +17,7 @@ const NOTE = /no Koc/i;
 beforeEach(() => {
   forgetMemory();
   newProject();
+  seedTransportRegression();
   addChemical({ id: '74-90-8', name: 'Hydrogen cyanide' });
   addChemical({ id: '71-43-2', name: 'Benzene' });
 });

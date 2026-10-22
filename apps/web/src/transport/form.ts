@@ -2,6 +2,7 @@ import {
   convert,
   gelhar1985Api1987,
   schulzeMakuch2005,
+  ssg1996Longitudinal,
   xuEckstein1995,
   dispersionCoefficients,
   waterLevels,
@@ -19,6 +20,15 @@ export interface StepRow {
   end: string;
   factor: string;
 }
+
+/**
+ * How the dispersivities are set. 'entered' (the default for a new project) takes all three typed
+ * values; 'ssg' takes the longitudinal value from the EPA 1996 Soil Screening Guidance rule (0.1 times
+ * the receptor distance) and the other two typed; 'legacy' is the RISC5 regression, which has no
+ * primary source and is warned whenever it is used; 'modern' and 'schulze-makuch' are the published
+ * scale laws. For the three laws a typed value still replaces that one value.
+ */
+export type DispersivityChoice = 'entered' | 'ssg' | 'legacy' | 'modern' | 'schulze-makuch';
 
 /**
  * Form state in RISC-style user units. Every numeric field is kept as the typed string so that
@@ -56,7 +66,8 @@ export interface TransportForm {
   /** Take the source from the saturated soil source result (when that screen holds one). */
   feedFromSaturated: boolean;
   // dispersivity
-  dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
+  dispLaw: DispersivityChoice;
+  /** Typed longitudinal dispersivity (m): the entry when 'entered', else an override of the law. */
   alphaLOverride: string;
   alphaTOverride: string;
   alphaVOverride: string;
@@ -109,7 +120,7 @@ export const DEFAULT_FORM: TransportForm = {
   ],
   feedFromVadose: false,
   feedFromSaturated: false,
-  dispLaw: 'legacy',
+  dispLaw: 'entered',
   alphaLOverride: '',
   alphaTOverride: '',
   alphaVOverride: '',
@@ -194,7 +205,7 @@ export interface Scenario {
   dispersivityDistance: number;
   /** The dispersivity law's own values (before overrides). */
   lawAlphas: { alphaL: number; alphaT: number; alphaV: number };
-  dispLaw: 'legacy' | 'modern' | 'schulze-makuch';
+  dispLaw: DispersivityChoice;
   notes: Warning[];
 }
 
@@ -406,22 +417,45 @@ export function toScenario(
     errors.push('Map x max must be greater than x min.');
   }
 
-  // dispersivity: the law's values, each replaceable by an override
+  // dispersivity: an entered value, the SSG rule, or a law's values each replaceable by an override
   const distance =
     Number.isFinite(rx) && rx > 0 ? rx : Number.isFinite(xMax) && xMax > 0 ? xMax : 1;
-  const law =
-    f.dispLaw === 'legacy'
-      ? gelhar1985Api1987
-      : f.dispLaw === 'schulze-makuch'
-        ? schulzeMakuch2005
-        : xuEckstein1995;
-  const lawOut = law.run({ distance });
-  const notes: Warning[] = [...(law.validate?.({ distance }) ?? [])];
-  const over = (label: string, s: string, fallback: number): number =>
-    s.trim() === '' ? fallback : need(label, s, nonneg, 'must be zero or more (m).');
-  const alphaL = over('Longitudinal dispersivity', f.alphaLOverride, lawOut.alphaL);
-  const alphaT = over('Transverse dispersivity', f.alphaTOverride, lawOut.alphaT);
-  const alphaV = over('Vertical dispersivity', f.alphaVOverride, lawOut.alphaV);
+  const typed = [f.alphaLOverride, f.alphaTOverride, f.alphaVOverride];
+  const notes: Warning[] = [];
+  let lawOut: { alphaL: number; alphaT: number; alphaV: number };
+  let alphaL: number;
+  let alphaT: number;
+  let alphaV: number;
+  if (f.dispLaw === 'entered' || f.dispLaw === 'ssg') {
+    const entry = (label: string, s: string): number => {
+      if (s.trim() !== '')
+        return need(`${label} dispersivity`, s, nonneg, 'must be zero or more (m).');
+      const instead =
+        f.dispLaw === 'ssg' ? '' : ', or choose the EPA SSG 1996 rule or the RISC5 regression';
+      errors.push(`${label} dispersivity is required: enter a value in metres${instead}.`);
+      return NaN;
+    };
+    alphaL =
+      f.dispLaw === 'ssg' ? ssg1996Longitudinal(distance) : entry('Longitudinal', f.alphaLOverride);
+    alphaT = entry('Transverse', f.alphaTOverride);
+    alphaV = entry('Vertical', f.alphaVOverride);
+    lawOut = { alphaL, alphaT, alphaV };
+  } else {
+    const law =
+      f.dispLaw === 'legacy'
+        ? gelhar1985Api1987
+        : f.dispLaw === 'schulze-makuch'
+          ? schulzeMakuch2005
+          : xuEckstein1995;
+    lawOut = law.run({ distance });
+    // a law's warning applies only while one of its values is used
+    if (typed.some((v) => v.trim() === '')) notes.push(...(law.validate?.({ distance }) ?? []));
+    const over = (label: string, s: string, fallback: number): number =>
+      s.trim() === '' ? fallback : need(label, s, nonneg, 'must be zero or more (m).');
+    alphaL = over('Longitudinal dispersivity', f.alphaLOverride, lawOut.alphaL);
+    alphaT = over('Transverse dispersivity', f.alphaTOverride, lawOut.alphaT);
+    alphaV = over('Vertical dispersivity', f.alphaVOverride, lawOut.alphaV);
+  }
 
   if (errors.length > 0) return { ok: false, errors };
 

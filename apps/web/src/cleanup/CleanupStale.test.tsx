@@ -7,7 +7,8 @@ import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../p
 import { forgetMemory, getChemicals, getScreen, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { clearTransportFeed, setTransportFeed } from '../transport/chainFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 afterEach(() => {
   clearHouseholdFeed();

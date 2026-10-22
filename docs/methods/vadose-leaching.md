@@ -176,8 +176,14 @@ it (`vadose.low-foc-retardation-ignored`). The modern method does not.
 
 ### Dispersivity
 
-RISC5 choice: the longitudinal dispersivity is a two-branch regression in the distance x (metres) from the
-source base to the observation depth, attributed to the field data compiled by `gelhar1985`:
+Dispersivity is a required entry. A new project starts on "Entered value" with no number and the screen does
+not compute until a positive longitudinal dispersivity (m) is typed; the one value is used for the whole
+column by both methods. No open primary source for a vadose-zone dispersivity rule was found (the EPA
+Soil Screening Guidance gives a rule for the aquifer only), so there is no sourced suggestion.
+
+The other choice is "RISC5 regression (no primary source)". RISC5 choice: the longitudinal dispersivity is a
+two-branch regression in the distance x (metres) from the source base to the observation depth, attributed
+to the field data compiled by `gelhar1985`:
 
     ln alpha_L = -4.933 + 3.811 ln x    (x <= 2 m)
     ln alpha_L = -2.727 + 0.584 ln x    (x > 2 m)
@@ -186,11 +192,16 @@ These coefficients are taken from the RISC5 manual's statement of its choice. Th
 read in full on 2026-10-21 and does not print them: its unsaturated section gives a table and a plot of
 field-scale dispersivity against scale of observation, with no fitted equation, so no primary source for the
 coefficients has been located. The reference entry for `gelhar1985` supports only the field data compilation,
-not the numbers. The two branches do not
+not the numbers. Both methods warn `vadose.dispersivity-regression-unsourced` whenever the regression is used,
+which is whenever no dispersivity was entered. The two branches do not
 meet exactly at 2 m (0.101 m versus 0.098 m). RISC5 evaluates alpha_L at each observation depth, so a depth
 profile is a family of solutions with different D; the water-table flux uses alpha_L(L_u). The legacy
-method reproduces this; a user-entered alpha_L overrides it. Molecular diffusion is not added (RISC5
-choice).
+method reproduces this, and the per-depth profile exists only with the regression: an entered alpha_L
+replaces it at every depth. Molecular diffusion is not added (RISC5 choice). The Table R-7 case gives no
+dispersivity, so its reproduction runs on the regression, chosen on purpose.
+
+A project saved before the choice existed opens with a blank dispersivity as the regression (chosen
+explicitly, numbers unchanged, now warned) and with a typed one as an entered value.
 
 ### Flux to the water table
 
@@ -259,7 +270,7 @@ of 2.7 percent of the peak flux), so every cell is then halved until halving cha
 than 1e-3 of their peak. Either loop that runs out of halvings warns (`vadose.numerics-not-converged`).
 The solver keeps a running mass budget (stored, decayed, outflow) and the result reports its closure
 error; above 1e-9 relative it warns (`vadose.mass-balance`), which should never happen. Dispersivity is one value per run (alpha_L(L_u) from
-the legacy regression or user-entered), so the profile is a single solution. Pore-water diffusion
+the regression or user-entered), so the profile is a single solution. Pore-water diffusion
 D_w theta^(7/3) / theta_s^2 is added to alpha_L v (the liquid-phase counterpart of the Millington-Quirk form).
 
 When the profile below the source is one homogeneous layer, the method evaluates the analytic solution of

@@ -3,16 +3,19 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { clearSaturatedFeed, setSaturatedFeed } from '../saturated/feed';
 import { DEFAULT_FORM as SAT_FORM, toScenario as toSaturated } from '../saturated/form';
 import { clearVadoseFeed, setVadoseFeed } from '../vadose/feed';
-import { DEFAULT_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
+import { R7_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
 import { getScreen, setScreen } from '../project/store';
 import { clearBankFeed, getBankFeed } from './bankFeed';
 import { clearTransportFeed, getTransportFeed } from './chainFeed';
 import { clearWellFeed, getWellFeed } from './wellFeed';
 import { clearWaterTableFeed, getWaterTableFeed } from '../vapor/feeds';
 import { TransportPage } from './TransportPage';
+import { seedTransportRegression } from './regression.testkit';
 
 const BENZENE = '71-43-2';
 const TOLUENE = '108-88-3';
+// a new project asks for the dispersivity; these tests run on the RISC5 regression, chosen on purpose
+seedTransportRegression();
 const original = getScreen('transport').form;
 
 function setChemical(id: string): void {
@@ -22,7 +25,10 @@ function setChemical(id: string): void {
   });
 }
 
-beforeEach(() => setChemical(TOLUENE));
+beforeEach(() => {
+  seedTransportRegression();
+  setChemical(TOLUENE);
+});
 afterEach(() => {
   setScreen('transport', { ...getScreen('transport'), form: original });
   clearVadoseFeed();

@@ -58,7 +58,10 @@ describe('computeResults', () => {
   it('runs the vadose screen from its form through the screen CSV builders', async () => {
     const r = await computeResults(
       project((s) => {
-        s.vadose = { ...s.vadose, form: { ...s.vadose.form, foc: '0.0123' } } as Screens['vadose'];
+        s.vadose = {
+          ...s.vadose,
+          form: { ...s.vadose.form, foc: '0.0123', dispersivityBasis: 'regression' },
+        } as Screens['vadose'];
       }),
     );
     expect(Object.keys(r)).toEqual(['vadose']);
@@ -71,7 +74,10 @@ describe('computeResults', () => {
   it('runs the groundwater screen and carries the engine warnings with the origin', async () => {
     const r = await computeResults(
       project((s) => {
-        s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5' } };
+        s.transport = {
+          ...s.transport,
+          form: { ...s.transport.form, K: '12.5', dispLaw: 'legacy' },
+        };
       }),
     );
     const sec = r['transport']!;
@@ -393,14 +399,17 @@ describe('computeResults charts', () => {
 
   it('carries the plume map and the breakthrough chart of the groundwater screen', async () => {
     const k = await kinds((s) => {
-      s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5' } };
+      s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5', dispLaw: 'legacy' } };
     }, 'transport');
     expect(k).toEqual(['plume', 'breakthrough']);
   });
 
   it('carries the three vadose charts and the two saturated charts', async () => {
     const v = await kinds((s) => {
-      s.vadose = { ...s.vadose, form: { ...s.vadose.form, foc: '0.0123' } } as Screens['vadose'];
+      s.vadose = {
+        ...s.vadose,
+        form: { ...s.vadose.form, foc: '0.0123', dispersivityBasis: 'regression' },
+      } as Screens['vadose'];
     }, 'vadose');
     expect(v).toEqual(['vadoseDepth', 'vadoseWaterTable', 'vadoseDepletion']);
     const sat = await kinds((s) => {

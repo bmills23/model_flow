@@ -4,6 +4,7 @@ import {
   gelhar1985Longitudinal,
   schulzeMakuch2005,
   schulzeMakuch2005Longitudinal,
+  ssg1996Longitudinal,
   xuEckstein1995,
   xuEckstein1995Longitudinal,
 } from '../src/processes/dispersivity/index.js';
@@ -25,6 +26,29 @@ describe('Gelhar et al. 1985 regression as used for saturated-zone longitudinal 
 
   it('rejects non-positive distances', () => {
     expect(() => gelhar1985Longitudinal(0)).toThrow(RangeError);
+  });
+
+  it('warns that the regression has no primary source whenever the law value is used', () => {
+    const w = gelhar1985Api1987.validate?.({ distance: 100 });
+    expect(w?.map((x) => x.code)).toEqual(['dispersivity.regression-unsourced']);
+    expect(w?.[0]?.message).toMatch(/no primary source/i);
+  });
+
+  it('leaves the numbers unchanged by the warning', () => {
+    expect(gelhar1985Api1987.run({ distance: 100 }).alphaL).toBeCloseTo(11.048, 2);
+  });
+});
+
+describe('EPA 1996 Soil Screening Guidance rule', () => {
+  it('is 0.1 times the distance to the receptor', () => {
+    expect(ssg1996Longitudinal(100)).toBeCloseTo(10, 12);
+    expect(ssg1996Longitudinal(25)).toBeCloseTo(2.5, 12);
+  });
+
+  it('rejects non-positive and non-finite distances', () => {
+    expect(() => ssg1996Longitudinal(0)).toThrow(RangeError);
+    expect(() => ssg1996Longitudinal(-5)).toThrow(RangeError);
+    expect(() => ssg1996Longitudinal(NaN)).toThrow(RangeError);
   });
 });
 

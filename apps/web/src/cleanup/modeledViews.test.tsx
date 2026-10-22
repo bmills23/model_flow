@@ -3,12 +3,13 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { computeModeled } from './compute';
 import { defaultCleanupForm } from './form';
 import { buildModeledRows, type ModeledRowBuild } from './modeledBuild';
 import { modeledCsvTablesAll } from './csv';
 import { ModeledRowsView, ModeledUncertaintyView, type ModeledSolved } from './ModeledCleanup';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 vi.mock('./ModeledSourceUncertainty', () => ({
   ModeledSourceUncertainty: (p: { name: string }) => <div data-testid="panel">{p.name}</div>,

@@ -81,8 +81,13 @@ describe('Table R-7 (arcadis2001) with the legacy method', () => {
     expect(mgL(wt[120]!)).toBeCloseTo(r7.reconstruction.pointValueAtTenYearsMgPerL, 1);
   });
 
-  it('warns only about the residual phase', () => {
-    expect(out.warnings.map((w) => w.code)).toEqual(['vadose.residual-phase']);
+  it('warns about the residual phase and that the reproduction rests on the dispersivity regression', () => {
+    // r7.json gives no dispersivity: the agreement above is the RISC5 regression, chosen on purpose
+    expect(input.alphaL).toBeUndefined();
+    expect(out.warnings.map((w) => w.code)).toEqual([
+      'vadose.residual-phase',
+      'vadose.dispersivity-regression-unsourced',
+    ]);
   });
 
   it('reports the first-type inlet excess at 10 yr and over the release', () => {

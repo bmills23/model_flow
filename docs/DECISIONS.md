@@ -3492,3 +3492,46 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 5. **Receptor edit notes (DEFAULT).** The report's receptor table gains a source note column, "no note" when empty.
 6. **Defect fixed outside the slice (DEFAULT).** `runBasis` read `.form` of every screen and threw for the uncertainty
    setup screen, which has none; it now treats a missing form as empty (`report/basis.ts`), with a test.
+
+## 2026-10-22: Wave R slice R2, dispersivity entry
+
+1. **Choices (DEFAULT).** The groundwater screen's `dispLaw` gains `entered` (the new-project default) and `ssg`
+   beside `legacy` (the RISC5 regression), `modern` and `schulze-makuch`. The two published scale laws stay
+   offered: they are cited, not unsourced, and saved projects may use them. The vadose screen gains
+   `dispersivityBasis` (`entered` or `regression`) and keeps `alphaL` as the entry.
+2. **Required entry (DEFAULT).** Under `entered`, all three groundwater dispersivities are required, each with
+   its own message; a blank blocks the compute. Under `ssg` only the longitudinal value is supplied, so the
+   transverse and vertical values are required: the confirmed passage gives no transverse ratio, and no ratio
+   without a source is invented. Under the three laws a typed value still overrides that one value.
+3. **SSG rule confirmed (DEFAULT).** `alpha_L = 0.1 x_r`, `x_r` the horizontal distance to the receptor, is in the
+   Technical Background Document (`epa1996ssg`) at printed page 45 (PDF page 58 of the 447-page file), under
+   equation 39, read 2026-10-22. The rule is the engine function `ssg1996Longitudinal`; it is not a registered
+   method (its output would need transverse and vertical ratios the passage does not give), so it names no
+   method id in the report. The screen evaluates it at the receptor x, as the laws are.
+4. **Warnings (DEFAULT).** `dispersivity.gelhar1985-api1987` warns `dispersivity.regression-unsourced` from its
+   `validate`; the screen keeps that note only while at least one of the three values still comes from the law.
+   `vadose.vadsat` and `vadose.layered` warn `vadose.dispersivity-regression-unsourced` whenever `alphaL` is
+   undefined. Numbers do not change. Both defaults in the validation catalog are now `warning` scope with those
+   codes, and their `where` points at the engine comments that carry the code.
+5. **Vadose has no suggestion (DEFAULT).** No open primary vadose-zone dispersivity rule exists (the evidence
+   notes found none; the SSG rule is for the aquifer), so the vadose screen offers the regression only, labelled
+   "no primary source". The legacy per-depth profile therefore exists only with the regression: an entered value
+   already replaces the regression at every depth in the engine, and the chart note says which applies.
+6. **Table R-7 (DEFAULT).** The vadose `DEFAULT_FORM` is the Table R-7 inputs with the dispersivity left to enter.
+   `R7_FORM` is the same with `regression` chosen on purpose; "Reset to the Table R-7 case" and `isR7Case` use it,
+   so the page's reproduction check appears only while the regression is chosen. The engine R-7 test is
+   unchanged in tolerance and now also asserts the regression warning.
+7. **Saved projects (DEFAULT).** No project version bump and no migration step: the loader reads the old meaning
+   of a missing key. A transport form with no `dispLaw` opens as `legacy`; a vadose form with no
+   `dispersivityBasis` opens as `regression` when `alphaL` is blank and `entered` when it is typed. A file with no
+   form for the screen is a new project. Share links go through the same loader.
+8. **Stale marks (DEFAULT).** `dispersivityBasis` is a new fingerprint key. `FINGERPRINT_SKIP` gains a `legacy`
+   rule: the key is left out while it equals what a file written before it would read as (blank `alphaL` is
+   `regression`), so an older feed keeps its fingerprint, and it counts as soon as it differs. A plain `always`
+   skip was rejected because switching between the two with a typed value would then change the result without
+   changing the fingerprint. `dispLaw` already existed and is unchanged as a key.
+9. **Uncertainty (DEFAULT).** No code change: the groundwater dispersion coefficients are sampled from the
+   resolved scenario, so they follow the choice, and the modeled-source input list already offers only inputs with
+   a finite base value, so `vadose.alphaL` appears only when one was entered. A test pins this.
+10. **Tests (DEFAULT).** Tests about something else than the dispersivity choice run on `REGRESSION_FORM`
+    (`transport/regression.testkit.ts`) and `R7_FORM`, chosen on purpose, rather than on the new blank default.

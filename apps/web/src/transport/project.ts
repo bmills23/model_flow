@@ -38,7 +38,7 @@ const formSchema = partialObject({
   steps: z.array(step),
   feedFromVadose: flag,
   feedFromSaturated: flag,
-  dispLaw: z.enum(['legacy', 'modern', 'schulze-makuch']),
+  dispLaw: z.enum(['entered', 'ssg', 'legacy', 'modern', 'schulze-makuch']),
   ...texts('alphaLOverride', 'alphaTOverride', 'alphaVOverride', 'rx', 'ry', 'rDepth'),
   screen: flag,
   ...texts('screenTop', 'screenBottom', 'timeYr', 'xMin', 'xMax', 'yHalf'),
@@ -58,8 +58,11 @@ export function toProject(state: TransportState): TransportProject {
 }
 
 export function fromProject(p: TransportProject | undefined): TransportState {
+  const form = mergeDefaults(DEFAULT_FORM, p?.form);
+  // a saved form with no law was written when the regression was the only default: keep it
+  if (p?.form !== undefined && p.form.dispLaw === undefined) form.dispLaw = 'legacy';
   return {
-    form: mergeDefaults(DEFAULT_FORM, p?.form),
+    form,
     method: p?.method ?? DEFAULT_METHOD,
   };
 }

@@ -505,7 +505,20 @@ describe('vadose.layered (modern method)', () => {
     expect(out.warnings.map((w) => w.code)).toEqual([
       'vadose.residual-phase',
       'vadose.tph-constant-approximation',
+      'vadose.dispersivity-regression-unsourced',
     ]);
+  });
+
+  it('warns about the unsourced dispersivity regression only when alphaL was not entered', () => {
+    const code = 'vadose.dispersivity-regression-unsourced';
+    const run = (extra: Partial<LayeredInput>) =>
+      runLayered(modernInput({ duration: 5 * YEAR, ...extra })).warnings.map((w) => w.code);
+    expect(run({})).toContain(code);
+    expect(run({ alphaL: 0.4 })).not.toContain(code);
+    expect(vadoseLayered.validate!(modernInput()).map((w) => w.code)).toContain(code);
+    expect(vadoseLayered.validate!(modernInput({ alphaL: 0.4 })).map((w) => w.code)).not.toContain(
+      code,
+    );
   });
 
   it('reports a solution that did not settle', () => {

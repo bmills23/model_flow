@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { loadedMass, runExponential, saturatedSourceBox } from '@model-flow/engine';
 import { compute, fedSteps, withFedSteps } from './compute';
-import { DEFAULT_FORM, toScenario, type Scenario, type TransportForm } from './form';
+import { toScenario, type Scenario, type TransportForm } from './form';
 import type { SaturatedFeed } from '../saturated/feed';
 import { DEFAULT_FORM as SAT_FORM, toScenario as toSaturated } from '../saturated/form';
+import { REGRESSION_FORM as DEFAULT_FORM } from './regression.testkit';
 
 const sat = toSaturated(SAT_FORM);
 if (!sat.ok) throw new Error('saturated scenario');

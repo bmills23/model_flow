@@ -89,7 +89,7 @@ function idsFor(key: ScreenKey, s: Screens): string[] {
       const entered = [f.alphaLOverride, f.alphaTOverride, f.alphaVOverride].every(
         (v) => v.trim() !== '',
       );
-      if (!entered) {
+      if (!entered && f.dispLaw !== 'entered' && f.dispLaw !== 'ssg') {
         ids.push(
           f.dispLaw === 'legacy'
             ? 'dispersivity.gelhar1985-api1987'

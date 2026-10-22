@@ -15,7 +15,7 @@ import { sourceDepletionRate, sourceState, type SourceParams } from './source.js
 import type { C13Params } from './kernel.js';
 import { c14Concentration, c14Evaluation, c14TotalFlux, type C14Evaluation } from './c14.js';
 import { solveLayeredColumn, type FvResult } from './layered.js';
-import { vadsatDispersivity } from './dispersivity.js';
+import { dispersivityRegressionWarning, vadsatDispersivity } from './dispersivity.js';
 import { layeredUncertainInputs } from './uncertain.js';
 import type { VadoseChemical, VadsatLayer, VadsatSource } from './index.js';
 
@@ -100,6 +100,8 @@ export interface LayeredModel {
   initialSourceMass: number;
   chemical: VadoseChemical;
   dispersivity: number;
+  /** True when no dispersivity was entered and the unsourced RISC5 regression supplied it. */
+  dispersivityFromRegression: boolean;
   waterTableDepth: number;
   below: LayeredTransportLayer[];
   evaluation: 'analytic-c14' | 'finite-volume';
@@ -339,6 +341,7 @@ export function prepareLayered(input: LayeredInput): LayeredModel {
     initialSourceMass: m0 * area,
     chemical: c,
     dispersivity,
+    dispersivityFromRegression: input.alphaL === undefined,
     waterTableDepth,
     below,
     evaluation,
@@ -372,6 +375,7 @@ function preRunWarnings(model: LayeredModel): Warning[] {
       message: `F / F_T = ${p.tphRatio.toPrecision(3)} exceeds ${TPH_CONSTANT_THRESHOLD}: holding the TPH mass constant understates the depletion rate by up to that fraction.`,
     });
   }
+  if (model.dispersivityFromRegression) w.push(dispersivityRegressionWarning());
   return w;
 }
 

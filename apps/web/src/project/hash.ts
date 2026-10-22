@@ -1,3 +1,5 @@
+import { legacyDispersivityBasis } from '../vadose/form';
+
 /** JSON text with object keys in sorted order, so equal content always gives equal text. */
 export function stableStringify(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map((v) => stableStringify(v ?? null)).join(',')}]`;
@@ -37,10 +39,27 @@ export function hashInputs(value: unknown): string {
  */
 export const FINGERPRINT_SKIP: Record<
   string,
-  { always?: readonly string[]; atDefault?: Readonly<Record<string, unknown>> }
+  {
+    always?: readonly string[];
+    atDefault?: Readonly<Record<string, unknown>>;
+    /**
+     * `legacy`: the key records a choice that an older file did not have and the loader reads off
+     * other fields. It is left out while it equals that reading, so an older file keeps its
+     * fingerprint, and counts as soon as it differs.
+     */
+    legacy?: Readonly<Record<string, (form: Record<string, unknown>) => unknown>>;
+  }
 > = {
   transport: { always: ['chemicalId'], atDefault: { foc: '0.001' } },
-  vadose: { always: ['chemicalId', 'texture'] },
+  vadose: {
+    always: ['chemicalId', 'texture'],
+    legacy: {
+      dispersivityBasis: (form) =>
+        legacyDispersivityBasis({
+          alphaL: typeof form['alphaL'] === 'string' ? form['alphaL'] : '',
+        }),
+    },
+  },
   saturated: { always: ['chemicalId', 'texture'] },
   plantsEco: { always: ['wildlifeRows'] },
   surfaceWater: { always: ['chemicalId'] },
@@ -60,5 +79,7 @@ export function fingerprintForm(source: string, form: unknown): unknown {
   if (rule === undefined) return form;
   const out = without(form, rule.always ?? []) as Record<string, unknown>;
   for (const [k, d] of Object.entries(rule.atDefault ?? {})) if (out[k] === d) delete out[k];
+  for (const [k, read] of Object.entries(rule.legacy ?? {}))
+    if (out[k] === read(out)) delete out[k];
   return out;
 }

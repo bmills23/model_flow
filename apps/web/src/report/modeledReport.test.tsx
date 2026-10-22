@@ -14,11 +14,12 @@ import { buildModeled } from '../cleanup/modeledBuild';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { clearTransportFeed, getTransportFeed, setTransportFeed } from '../transport/chainFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { withProjectReceptorEdits } from './userValues';
 import { modeledReportEntry } from './modeledReport';
 import { planUncertainty } from './uncertaintyReport';
 import { UncertaintyReportView } from './UncertaintyResults';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 const NOW = new Date('2026-10-19T12:00:00.000Z');
 let db: ChemicalDb;

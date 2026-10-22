@@ -10,9 +10,9 @@ import {
 } from '../cleanup/modeledSummary';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed } from '../vadose/feed';
-import { DEFAULT_FORM as VADOSE_FORM, toScenario as vadoseScenario } from '../vadose/form';
+import { R7_FORM as VADOSE_FORM, toScenario as vadoseScenario } from '../vadose/form';
 import { DEFAULT_FORM as SAT_FORM, toScenario as toSaturated } from '../saturated/form';
 import { clearSaturatedFeed, getSaturatedFeed, setSaturatedFeed } from '../saturated/feed';
 import {
@@ -58,6 +58,7 @@ import {
   setSite,
   startProjectStore,
 } from './store';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 const wellFeed = {
   method: 'modern' as const,

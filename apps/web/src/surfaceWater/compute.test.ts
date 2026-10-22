@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { at123dBankPlane, bankPlaneDischarge } from '@model-flow/engine';
 import { at123dInput } from '../transport/compute';
 import { BANK_QUADRATURE, compute } from './compute';
 import { DEFAULT_FORM, LAKE_FORM, toRequest } from './inputs';
+import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
 
 function run(form = DEFAULT_FORM) {
   const r = toRequest(form, null);

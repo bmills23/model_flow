@@ -2,13 +2,14 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
-import { toScenario as vadoseScenario, DEFAULT_FORM as VADOSE_FORM } from '../vadose/form';
+import { toScenario } from '../transport/form';
+import { toScenario as vadoseScenario, R7_FORM as VADOSE_FORM } from '../vadose/form';
 import type { TransportFeed } from '../transport/chainFeed';
 import type { VadoseFeed } from '../vadose/feed';
 import { buildModeled, NEEDS_TRANSPORT } from './modeledBuild';
 import { chainChemicalFor, computeModeled } from './compute';
 import { defaultCleanupForm, type CleanupForm } from './form';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 let db: ChemicalDb;
 beforeAll(async () => {

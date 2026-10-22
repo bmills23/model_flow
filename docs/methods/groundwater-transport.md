@@ -19,15 +19,31 @@ Write u = v/R and D_i' = D_i/R. Dispersion coefficients are D_i = alpha_i v + D_
 dispersivity laws in `processes/dispersivity` (`dispersionCoefficients`). Solutions are products of one
 dimensional kernels in x, y and z, which is why a single time integral suffices.
 
-Three dispersivity laws are offered. The legacy law is the Gelhar et al. 1985 regression with API 1987
-ratios (transverse one third, vertical 1/87 of transverse). The saturated-zone log-quadratic of the legacy law has no primary source
-that could be read: the EPRI report (EA-4190) prints field data and a plot against scale, not the regression equation, so its coefficients
-come from RISC5's statement of its choice and the validation document lists them as unverified. The modern laws are the Xu and Eckstein 1995
-regression and a power law after Schulze-Makuch 2005 (`schulzemakuch2005`), alpha_L = 0.20 L^0.44 for
-unconsolidated media, both paired with the BIOSCREEN ratios alpha_T = alpha_L/10 and alpha_V = alpha_L/100.
-The Schulze-Makuch compilation reports exponents of 0.44 to 0.94 for unconsolidated media with the most
-reliable data near the low end, and no evidence of an upper bound. Only the unconsolidated coefficient pair
-is encoded: it was verified from lecture notes that quote the paper, not from the paper's own tables.
+Dispersivity is a required entry. A new project starts on "Entered value" with no number, and the screen
+does not compute until the longitudinal, transverse and vertical dispersivities (m) are typed. Four other
+sources are offered beside it, and the report names whichever was used.
+
+- **EPA SSG 1996 rule** (`epa1996ssg`): the longitudinal dispersivity is 0.1 times the distance to the
+  receptor, alpha_L = 0.1 x_r (Technical Background Document, printed page 45, equation 39 and the
+  definitions under it, read 2026-10-22). The passage gives no transverse ratio, so the transverse and
+  vertical values stay entered. The screen evaluates the rule at the receptor distance.
+- **RISC5 regression (no primary source)**: the legacy law, the Gelhar et al. 1985 regression with API 1987
+  ratios (transverse one third, vertical 1/87 of transverse). The saturated-zone log-quadratic has no primary
+  source that could be read: the EPRI report (EA-4190) prints field data and a plot against scale, not the
+  regression equation, so its coefficients come from RISC5's statement of its choice and the validation
+  document lists them as unverified. It stays for RISC5 parity and for saved projects, and the method
+  warns `dispersivity.regression-unsourced` whenever one of its values is used (a screen that overrides all
+  three values does not use it, and does not warn). The numbers are unchanged.
+- **Xu and Eckstein 1995** and **Schulze-Makuch 2005** (`schulzemakuch2005`, alpha_L = 0.20 L^0.44 for
+  unconsolidated media): scale laws paired with the BIOSCREEN ratios alpha_T = alpha_L/10 and
+  alpha_V = alpha_L/100. The Schulze-Makuch compilation reports exponents of 0.44 to 0.94 for unconsolidated
+  media with the most reliable data near the low end, and no evidence of an upper bound. Only the
+  unconsolidated coefficient pair is encoded: it was verified from lecture notes that quote the paper, not
+  from the paper's own tables.
+
+For the three laws, a typed value still replaces that one dispersivity. A project saved before the choice
+existed keeps its law (the regression was the default), so its numbers do not change; it now carries the
+warning.
 
 ## Legacy method: AT123D-class (`groundwater.at123d`; citations `yeh1981`, `galya1987`)
 

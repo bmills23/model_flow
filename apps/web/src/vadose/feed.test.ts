@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { clearVadoseFeed, getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
-import { DEFAULT_FORM, toScenario } from './form';
+import { R7_FORM as DEFAULT_FORM, toScenario } from './form';
 
 const r = toScenario(DEFAULT_FORM);
 if (!r.ok) throw new Error('scenario');

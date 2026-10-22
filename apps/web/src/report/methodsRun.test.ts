@@ -91,6 +91,18 @@ describe('methodsRun', () => {
     expect(r.ids).not.toContain('groundwater.domenico1987');
   });
 
+  it('names the RISC5 regression only when it is chosen, not for an entered value or the SSG rule', () => {
+    const ids = (dispLaw: 'entered' | 'ssg' | 'legacy') => {
+      const s = base();
+      s.transport = { ...s.transport, form: { ...s.transport.form, c0: '7.7', dispLaw } };
+      return methodsRun(s).byScreen.transport;
+    };
+    const two = ['groundwater.at123d', 'groundwater.wexler1992'];
+    expect(ids('entered')).toEqual(two);
+    expect(ids('ssg')).toEqual(two);
+    expect(ids('legacy')).toEqual([...two, 'dispersivity.gelhar1985-api1987']);
+  });
+
   it('leaves the dispersivity law out when all three dispersivities are entered', () => {
     const s = base();
     s.transport = {

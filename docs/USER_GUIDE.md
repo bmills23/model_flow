@@ -176,6 +176,8 @@ Under the plume map, **Download CSV: plume grid** saves the whole map grid as a 
 with the method, the downgradient distance x (m), y (m) and the concentration (mg/L) at the time shown on the
 map. The transport table's own CSV does not carry the plume grid.
 
+Dispersivity is an entry you make. A new project starts on **Entered value** with no number, and the screen asks for the longitudinal, transverse and vertical dispersivity (m) before it computes. Beside it you can choose the **EPA SSG 1996 rule** (the longitudinal value is 0.1 times the distance to the receptor; you still enter the transverse and vertical values), or the **RISC5 regression (no primary source)**, which keeps the old numbers but says in the results' warnings that its coefficients have no primary source. Xu & Eckstein 1995 and Schulze-Makuch 2005 are still offered. A project saved before this choice opens on the law it used, with the same numbers.
+
 The Chemical select lists the chemicals of the project (add them on the chemicals screen). It fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 
 ### Vadose leaching (`#/vadose`)
@@ -184,6 +186,8 @@ A source in unsaturated soil loses chemical to the air and to infiltrating water
 water table with the legacy or the modern layered model. The screen shows the source and leaching, the
 arrival at the water table, a mass budget, and a validation case you can load. It can feed the groundwater
 and vapor screens.
+
+Dispersivity is an entry you make. A new project starts on **Entered value** with no number, and the screen asks for the longitudinal dispersivity (m) before it computes; one value serves the whole column. The only other choice is the **RISC5 regression (no primary source)**, which varies with depth in the legacy method and is warned in the results; no open source for a vadose-zone rule was found, so none is suggested. The **Reset to the Table R-7 case** button chooses the regression, because that table gives no dispersivity. A project saved before this choice opens with a blank dispersivity as the regression and a typed one as an entered value, with the same numbers.
 
 The Chemical select lists the chemicals of the project (add them on the chemicals screen) and fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 Each soil layer (the source and every layer above and below it) has a Texture preset. Choosing one of the twelve classes fills porosity, residual water content, van Genuchten n, saturated conductivity and bulk density with the class averages the vapor screen uses; thickness and organic carbon stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
@@ -373,7 +377,7 @@ transport chain, so the draws run in the background, a progress bar shows them, 
 **Cancel run** stops the run. The inputs offered are the aquifer values of the groundwater screen (seepage
 velocity, porosity for the legacy method, retardation, decay rate and the three dispersion coefficients,
 each sampled on its own, so a sampled velocity does not rescale the dispersion), the inputs of the vadose
-or saturated source method, and with the legacy method the receptor factors. The source concentration is
+or saturated source method (the vadose longitudinal dispersivity only when you entered one, since the regression has no value of its own to vary), and with the legacy method the receptor factors. The source concentration is
 never offered, because it is the level being solved. A solve takes tens of milliseconds for a dissolved
 source and from under a second to several seconds for a soil source, so the iteration count defaults to
 200 rather than 1000; a run projected over a minute asks first and one over 10 minutes is refused. When

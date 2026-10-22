@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { PATHWAY_IDS, runProbabilisticCleanup, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
-import { toScenario as vadoseScenario, DEFAULT_FORM as VADOSE_FORM } from '../vadose/form';
+import { toScenario } from '../transport/form';
+import { toScenario as vadoseScenario, R7_FORM as VADOSE_FORM } from '../vadose/form';
 import { handlePoolRequest } from '../uncertainty/dispatch';
 import { runModeledCleanupAnalysis } from '../uncertainty/headless';
 import { RunCancelledError, type WorkerFactory, type WorkerLike } from '../uncertainty/pool';
@@ -15,6 +15,7 @@ import { MODELED_DEFAULT_N, SMALL_TAIL_DRAWS, modeledUncertainInputs } from './m
 import { buildModeledSetup } from './modeledSetup';
 import { defaultCleanupForm, type CleanupForm } from './form';
 import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 let db: ChemicalDb;
 let dissolved: ModeledRequest;
@@ -23,10 +24,13 @@ let vadose: ModeledRequest;
 
 const WATER: PathwayId[] = ['waterIngestion', 'waterDermal'];
 
-function request(source: CleanupForm['source']): ModeledRequest {
+function request(
+  source: CleanupForm['source'],
+  vadoseForm: typeof VADOSE_FORM = VADOSE_FORM,
+): ModeledRequest {
   const t = toScenario({ ...DEFAULT_FORM, timeYr: '10' });
   if (!t.ok) throw new Error(t.errors.join('; '));
-  const v = vadoseScenario({ ...VADOSE_FORM });
+  const v = vadoseScenario({ ...vadoseForm });
   if (!v.ok) throw new Error('vadose scenario');
   const f = defaultCleanupForm();
   const pathways = Object.fromEntries(PATHWAY_IDS.map((p) => [p, WATER.includes(p)])) as Record<
@@ -100,6 +104,24 @@ describe('modeledUncertainInputs', () => {
     const moved = v.set(dissolved, 1e-6);
     expect(moved.transport.velocity).toBe(1e-6);
     expect(dissolved.transport.velocity).not.toBe(1e-6);
+  });
+
+  it('offers the vadose dispersivity only when one was entered, so the sampled input follows the choice', () => {
+    // the Table R-7 source runs on the regression: no dispersivity to sample
+    for (const method of ['legacy', 'modern'] as const) {
+      expect(modeledUncertainInputs(vadose, method).map((u) => u.id)).not.toContain(
+        'vadose.alphaL',
+      );
+    }
+    const entered = request('vadose', {
+      ...VADOSE_FORM,
+      dispersivityBasis: 'entered',
+      alphaL: '0.4',
+    });
+    for (const method of ['legacy', 'modern'] as const) {
+      const u = modeledUncertainInputs(entered, method).find((x) => x.id === 'vadose.alphaL');
+      expect(u?.get(entered)).toBe(0.4);
+    }
   });
 
   it('declares the source inputs of a soil source but never the solved source concentration', () => {

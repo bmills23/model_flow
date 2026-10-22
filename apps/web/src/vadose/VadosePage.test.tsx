@@ -1,10 +1,14 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { clearVadoseFeed, getVadoseFeed } from './feed';
 import { VadosePage } from './VadosePage';
 import { clearVadoseVaporFeed, getVadoseVaporFeed } from '../vapor/feeds';
 
 import { getScreen, setScreen } from '../project/store';
+import { seedVadoseRegression } from './regression.testkit';
+
+// a new project asks for the dispersivity; these tests run on the RISC5 regression, chosen on purpose
+beforeEach(() => seedVadoseRegression());
 
 afterEach(() => {
   clearVadoseFeed();
@@ -66,6 +70,43 @@ describe('VadosePage', () => {
     await loaded();
     const warnings = screen.getByRole('region', { name: /warnings/i });
     expect(within(warnings).getAllByText('vadose.residual-phase').length).toBe(2);
+    // the Table R-7 case runs on the unsourced regression, so both methods say so
+    expect(within(warnings).getAllByText('vadose.dispersivity-regression-unsourced').length).toBe(
+      2,
+    );
+  }, 20000);
+
+  it('asks a new project for the dispersivity and computes once one is chosen', async () => {
+    setScreen('vadose', {
+      form: { ...getScreen('vadose').form, dispersivityBasis: 'entered', alphaL: '' },
+    });
+    render(<VadosePage />);
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toMatch(/longitudinal dispersivity is required/i);
+    expect(
+      (screen.getByRole('radio', { name: /^entered value/i }) as HTMLInputElement).checked,
+    ).toBe(true);
+    expect(
+      screen.queryByRole('img', { name: /against depth below the base of the source/i }),
+    ).toBeNull();
+    fireEvent.change(screen.getByLabelText(/longitudinal dispersivity \(m\)/i), {
+      target: { value: '0.4' },
+    });
+    await screen.findByRole(
+      'img',
+      { name: /against depth below the base of the source/i },
+      { timeout: 15000 },
+    );
+    const warnings = screen.getByRole('region', { name: /warnings/i });
+    expect(within(warnings).queryByText('vadose.dispersivity-regression-unsourced')).toBeNull();
+  }, 40000);
+
+  it('labels the regression as having no primary source and hides the entry while it is chosen', async () => {
+    await loaded();
+    expect(
+      screen.getByRole('radio', { name: /RISC5 regression \(no primary source\)/i }),
+    ).toBeTruthy();
+    expect(screen.queryByLabelText(/longitudinal dispersivity \(m\)/i)).toBeNull();
   }, 20000);
 
   it('switches to the modern method and reports how it was evaluated', async () => {

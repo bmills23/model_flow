@@ -219,9 +219,10 @@ describe('warned default ids and scopes', () => {
     expect(byCode.map((d) => d.scope)).toEqual(byCode.map(() => 'warning'));
   });
 
-  it('lists the saturated Gelhar log-quadratic as a method-scoped default', () => {
+  it('lists the saturated Gelhar log-quadratic as a warning-scoped default', () => {
     const d = defaults.find((x) => x.methodIds.includes('dispersivity.gelhar1985-api1987'));
-    expect(d?.scope).toBe('method');
+    expect(d?.scope).toBe('warning');
+    expect(d?.warningCode).toBe('dispersivity.regression-unsourced');
     expect(d?.referenceKey).toBe('gelhar1985');
     expect(d?.note).toContain('EA-4190');
     expect(d?.note).toContain('no primary source');
@@ -230,6 +231,12 @@ describe('warned default ids and scopes', () => {
   it('lists vadose.layered on the vadose regression', () => {
     const d = defaults.find((x) => x.id === 'gelhar-vadose-regression');
     expect(d?.methodIds).toEqual(['vadose.vadsat', 'vadose.layered']);
+  });
+
+  it('warns on the vadose regression by its own code', () => {
+    const d = defaults.find((x) => x.id === 'gelhar-vadose-regression');
+    expect(d?.scope).toBe('warning');
+    expect(d?.warningCode).toBe('vadose.dispersivity-regression-unsourced');
   });
 
   it('rejects duplicate ids, a warning scope without a code and a method scope without methods', () => {

@@ -2,9 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   gelhar1985Longitudinal,
   schulzeMakuch2005Longitudinal,
+  ssg1996Longitudinal,
   xuEckstein1995Longitudinal,
 } from '@model-flow/engine';
-import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
+import { DEFAULT_FORM as FRESH_FORM, toScenario, type TransportForm } from './form';
+
+/** The tests below that are not about the dispersivity choice run on the RISC5 regression, chosen on purpose. */
+const DEFAULT_FORM: TransportForm = { ...FRESH_FORM, dispLaw: 'legacy' };
 
 const YR = 365.25 * 86400;
 
@@ -164,5 +168,96 @@ describe('toScenario: validation', () => {
       steps: [{ start: '4', end: '2', factor: '1' }],
     });
     expect(r.ok).toBe(false);
+  });
+});
+
+describe('toScenario: dispersivity is a required entry', () => {
+  const fail = (f: TransportForm): string[] => {
+    const r = toScenario(f);
+    if (r.ok) throw new Error('expected errors');
+    return r.errors;
+  };
+
+  it('starts a new project on an entered value with no number', () => {
+    expect(FRESH_FORM.dispLaw).toBe('entered');
+    expect(FRESH_FORM.alphaLOverride).toBe('');
+    expect(FRESH_FORM.alphaTOverride).toBe('');
+    expect(FRESH_FORM.alphaVOverride).toBe('');
+  });
+
+  it('blocks a blank entered value with a message for each missing dispersivity', () => {
+    const errors = fail(FRESH_FORM);
+    expect(errors.some((e) => /Longitudinal dispersivity is required/.test(e))).toBe(true);
+    expect(errors.some((e) => /Transverse dispersivity is required/.test(e))).toBe(true);
+    expect(errors.some((e) => /Vertical dispersivity is required/.test(e))).toBe(true);
+  });
+
+  it('names only the dispersivities still missing', () => {
+    const errors = fail({ ...FRESH_FORM, alphaLOverride: '4', alphaTOverride: '0.5' });
+    expect(errors.filter((e) => /dispersivity is required/.test(e))).toHaveLength(1);
+    expect(errors.some((e) => /Vertical dispersivity is required/.test(e))).toBe(true);
+  });
+
+  it('rejects a negative or non-numeric entry', () => {
+    const f = { ...FRESH_FORM, alphaLOverride: '4', alphaTOverride: '0.5', alphaVOverride: '0.05' };
+    expect(fail({ ...f, alphaLOverride: '-1' }).some((e) => /Longitudinal/.test(e))).toBe(true);
+    expect(fail({ ...f, alphaVOverride: 'x' }).some((e) => /Vertical/.test(e))).toBe(true);
+  });
+
+  it('takes the entered values as they are, without any warning about a regression', () => {
+    const s = ok({
+      ...FRESH_FORM,
+      alphaLOverride: '4',
+      alphaTOverride: '0.5',
+      alphaVOverride: '0.05',
+    });
+    expect([s.alphaL, s.alphaT, s.alphaV]).toEqual([4, 0.5, 0.05]);
+    expect(s.dispLaw).toBe('entered');
+    expect(s.notes).toEqual([]);
+  });
+
+  it('offers the EPA SSG 1996 rule for the longitudinal value at the receptor distance', () => {
+    const s = ok({
+      ...FRESH_FORM,
+      dispLaw: 'ssg',
+      rx: '80',
+      alphaLOverride: '999',
+      alphaTOverride: '0.7',
+      alphaVOverride: '0.04',
+    });
+    expect(s.alphaL).toBeCloseTo(ssg1996Longitudinal(80), 12);
+    expect(s.alphaL).toBeCloseTo(8, 12);
+    expect([s.alphaT, s.alphaV]).toEqual([0.7, 0.04]);
+    expect(s.notes).toEqual([]);
+  });
+
+  it('asks for transverse and vertical values beside the SSG rule, which gives no ratio', () => {
+    const errors = fail({ ...FRESH_FORM, dispLaw: 'ssg' });
+    expect(errors.some((e) => /Longitudinal dispersivity is required/.test(e))).toBe(false);
+    expect(errors.some((e) => /Transverse dispersivity is required/.test(e))).toBe(true);
+    expect(errors.some((e) => /Vertical dispersivity is required/.test(e))).toBe(true);
+  });
+
+  it('warns that the RISC5 regression has no primary source whenever its value is used', () => {
+    const s = ok({ ...FRESH_FORM, dispLaw: 'legacy', rx: '80' });
+    expect(s.notes.map((w) => w.code)).toEqual(['dispersivity.regression-unsourced']);
+    expect(s.alphaL).toBeCloseTo(gelhar1985Longitudinal(80), 12);
+    // one value left to the law still uses the regression
+    const part = ok({ ...FRESH_FORM, dispLaw: 'legacy', alphaLOverride: '4', alphaTOverride: '1' });
+    expect(part.notes.map((w) => w.code)).toEqual(['dispersivity.regression-unsourced']);
+    // every value entered: the regression is not used, so nothing to warn about
+    const all = ok({
+      ...FRESH_FORM,
+      dispLaw: 'legacy',
+      alphaLOverride: '4',
+      alphaTOverride: '1',
+      alphaVOverride: '0.05',
+    });
+    expect(all.notes).toEqual([]);
+  });
+
+  it('does not warn about the sourced laws', () => {
+    expect(ok({ ...FRESH_FORM, dispLaw: 'modern' }).notes).toEqual([]);
+    expect(ok({ ...FRESH_FORM, dispLaw: 'schulze-makuch' }).notes).toEqual([]);
   });
 });

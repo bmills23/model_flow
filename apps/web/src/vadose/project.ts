@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SOIL_TEXTURES, type SoilTextureCode } from '@model-flow/engine';
 import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, texts } from '../project/fields';
-import { DEFAULT_FORM, type LayerForm, type VadoseForm } from './form';
+import { DEFAULT_FORM, legacyDispersivityBasis, type LayerForm, type VadoseForm } from './form';
 
 /** The vadose screen's saved state: its form. */
 export interface VadoseState {
@@ -28,6 +28,7 @@ const formSchema = partialObject({
   above: z.array(layer),
   below: z.array(layer),
   ...texts('durationYr', 'alphaL'),
+  dispersivityBasis: z.enum(['entered', 'regression']),
   hydraulicModel: z.enum(['default', 'brooksCorey1964', 'vanGenuchten1980']),
   method: z.enum(['legacy', 'modern']),
   scale: z.enum(['linear', 'log']),
@@ -43,6 +44,11 @@ export function toProject(state: VadoseState): VadoseProject {
 
 export function fromProject(p: VadoseProject | undefined): VadoseState {
   const form = mergeDefaults(DEFAULT_FORM, p?.form);
+  // a file written before the choice existed: a blank dispersivity was the regression, chosen now
+  // explicitly so its numbers do not change; a typed one stays an entered value
+  if (p?.form !== undefined && p.form.dispersivityBasis === undefined) {
+    form.dispersivityBasis = legacyDispersivityBasis(form);
+  }
   // a file written before texture presets existed has layers without the key: they were hand entered
   const withTexture = (l: LayerForm): LayerForm => ({ ...l, texture: l.texture ?? 'custom' });
   return {
