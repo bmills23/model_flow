@@ -103,6 +103,10 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
   the reload recovery is lost.
+- The automatic copy of a version 2 project is kept under its own name in this browser, so a tab still
+  running an older version of the app cannot overwrite it. A copy made by the older app is read once and moved
+  to the new name; the older app keeps its own copy. If the copy was saved by a newer version of the app than
+  this tab runs, a short notice under the project bar says so and this tab does not save over it.
 
 ## Screens
 

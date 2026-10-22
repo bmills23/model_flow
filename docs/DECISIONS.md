@@ -3236,3 +3236,17 @@ ruling below is DEFAULT.
    for a direct source (a modeled source is not computed in the report).
 8. **No fingerprint change.** The cleanup form is not the source of a feed, so `FINGERPRINT_SKIP` is unchanged.
 
+
+### Waves O and P corrective, slice CB
+
+An older tab must never overwrite a newer autosave. Every ruling below is DEFAULT.
+
+1. **New key.** The autosave moves to `model_flow.project.autosave.v2` (`AUTOSAVE_KEY`). A version 1 build reads and
+   writes only `.v1`, so it neither refuses nor overwrites the version 2 copy.
+2. **Migration.** On load the new key is read; when it is empty the old `.v1` key (`LEGACY_AUTOSAVE_KEY`) is read and
+   passed through `parseProject`. The `.v1` key is never written or removed by this build, not even by New project,
+   so a version 1 tab keeps its own data.
+3. **Newer than this build.** When the text the build read holds a file version above `CURRENT_VERSION`, the tab does
+   not autosave and New project does not remove the key. `ProjectBar` shows the existing status line markup: the saved
+   copy was saved by a newer version of the app and this tab will not save over it. Saving to a file still works.
+4. **No fingerprint change.** No source form key was added, so `FINGERPRINT_SKIP` is unchanged.

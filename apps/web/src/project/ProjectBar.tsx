@@ -6,6 +6,7 @@ import { SHARE_PREFIX, decodeShare, makeShareLink } from './share';
 import { warnBeforeUnload } from './unloadGuard';
 import {
   currentProject,
+  getAutosaveNotice,
   getTitle,
   hasUnfiledChanges,
   hasUnsavedChanges,
@@ -187,6 +188,11 @@ export function ProjectBar() {
           </button>
           <p className="muted">{SHARE_CAVEAT}</p>
         </div>
+      ) : null}
+      {getAutosaveNotice() !== null ? (
+        <p className="project-message" role="status">
+          {getAutosaveNotice()}
+        </p>
       ) : null}
       {message?.kind === 'status' ? (
         <p className="project-message" role="status">
