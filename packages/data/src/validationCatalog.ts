@@ -700,10 +700,10 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['shower.rsl-household'],
       warningCode: 'shower.household-factor-unverified',
       referenceKey: 'epa2024rslug',
-      note: "An entered value that could not be verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The equation form (C_a = C_w K) is not confirmed, because the page prints its equations as images, so the warning stays.",
+      note: "An entered value, not verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The page prints its equations as images, so the form (C_a = C_w K) was not read from it. Numerically, K = 0.5 reproduces 263 of the 265 tap water inhalation levels of the RSL November 2024 table (the resident air level divided by K; the two misses are the trichloroethylene and vinyl chloride cancer cells, which the RSL computes with its own equations; see the tap water sweep above). That is consistency with the published table, not verification from a primary source, so the warning stays.",
       where: {
         file: 'packages/engine/src/processes/shower/household.ts',
-        needle: 'could not be verified against a primary page',
+        needle: 'it reproduces the tap water inhalation screening levels',
       },
     },
     {
@@ -801,11 +801,19 @@ export const validationCatalog: CatalogInput = {
   ],
   notChecked: [
     {
-      subject: 'RSL inhalation cells',
-      note: 'Tap water inhalation, soil inhalation and the noncancer worker air value of the RSL tables are not checked by the RSL independent check; the benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.',
+      subject: 'RSL soil inhalation cells',
+      note: 'The soil inhalation levels of the RSL tables (435 cells each for resident and industrial soil) and the soil totals that include them (another 435 each) are not checked: they rest on the RSL volatilization and particulate emission factors, which the November 2024 sweep does not compute. The sweeps check tap water inhalation and the industrial air levels; the 30-case independent check does not. The benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.',
       where: {
         file: 'packages/engine/test/fixtures/exposure/README.md',
         needle: 'Tap-water inhalation, soil inhalation',
+      },
+    },
+    {
+      subject: 'RSL sweep cells that do not reproduce',
+      note: 'Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: the trichloroethylene and vinyl chloride cancer cells (the RSL special-case equations), lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.',
+      where: {
+        file: 'packages/engine/test/fixtures/rsl-sweep/README.md',
+        needle: 'Aroclor 1242, 1248, 1254 and 1260',
       },
     },
     {

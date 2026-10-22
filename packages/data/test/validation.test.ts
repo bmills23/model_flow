@@ -260,7 +260,13 @@ describe('warned default ids and scopes', () => {
   });
 
   it('starts the sweep extension point empty and reads data file counts', () => {
-    expect(sweepExamples).toEqual([]);
+    expect(sweepExamples.map((e) => e.id)).toEqual([
+      'rsl-sweep-tapwater',
+      'rsl-sweep-soil-resident',
+      'rsl-sweep-soil-industrial',
+      'rsl-sweep-air',
+      'nrwqc-hardness-metals',
+    ]);
     const dir = mkdtempSync(join(tmpdir(), 'validation-data-'));
     mkdirSync(join(dir, 'packages/engine/test'), { recursive: true });
     mkdirSync(join(dir, 'packages/data/generated/q'), { recursive: true });
@@ -403,6 +409,36 @@ describe('published reproductions outside the fixture directories', () => {
     ]) {
       expect(byId.get(id)?.status, id).toBe('reproduced');
     }
+  });
+
+  it('lists each RSL sweep with the cells compared and its reproduced, excepted and unexplained counts', () => {
+    const byId = new Map(manifest.examples.map((e) => [e.id, e]));
+    const fixture = JSON.parse(
+      readFileSync(resolve(fixtureRoot, 'rsl-sweep/exceptions.json'), 'utf8'),
+    ) as {
+      sweeps: Record<
+        string,
+        { compared: number; reproduced: number; excepted: number; unexplained: number }
+      >;
+    };
+    for (const id of ['tapwater', 'soil-resident', 'soil-industrial', 'air']) {
+      const e = byId.get(`rsl-sweep-${id}`);
+      const s = fixture.sweeps[id]!;
+      expect(e?.cases, id).toBe(s.compared);
+      expect(e?.dataFiles, id).toEqual(['rsl-2024-11/screening-levels.json']);
+      expect(e?.files, id).toEqual(['rsl-sweep/exceptions.json']);
+      expect(e?.status, id).toBe('reproduced');
+      for (const n of [s.reproduced, s.excepted, s.unexplained]) {
+        expect(e?.compares, id).toContain(String(n));
+      }
+      expect(e?.testFile, id).toBe('rsl-tables-sweep.test.ts');
+    }
+    // the Aroclor totals are printed as unexplained, with the published and computed values
+    expect(byId.get('rsl-sweep-tapwater')?.note).toContain('Aroclor 1242');
+    expect(byId.get('rsl-sweep-tapwater')?.note).toContain('0.0078');
+    expect(byId.get('rsl-sweep-tapwater')?.note).toContain('0.007852');
+    expect(byId.get('nrwqc-hardness-metals')?.cases).toBe(10);
+    expect(byId.get('nrwqc-hardness-metals')?.testFile).toBe('surfacewater-criteria.test.ts');
   });
 
   it('gives the Table R-3 to R-5 entry six printed results', () => {

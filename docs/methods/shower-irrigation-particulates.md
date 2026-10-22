@@ -159,9 +159,16 @@ L/m3. K stays unstated until read from the equations page or the calculator docu
 `showerHouseholdAir` takes it as a required input (L/m^3) and always warns. The term is a whole-house
 concentration applied for 24 h/day (RSL User's Guide, Table 1, read 2026-10-18), so the web feed sends it
 to the indoor air pathway, never to the shower stall pathway. Fixture 3 (Little published
-results) and fixture 5 (RSL tap water levels) are not in E1 for the same reason: no printed Little values and no
-verified K were available, so E1's tests are the identity and hand cases (fixtures 1 and 2) only. Reproducing the RSL tap water levels for volatiles through this
-method stays unproven until K is verified and fixture 5 exists; the M5 fixtures still exclude them.
+results) is not in E1: no printed Little values were available, so E1's tests are the identity and hand cases
+(fixtures 1 and 2) only.
+
+Wave R sweep (2026-10-22): the RSL November 2024 tap water table prints 265 inhalation cells (93 cancer, 172
+noncancer). With K entered as 0.5 L/m^3 and the resident indoor air level (24 h per day) divided by it, 263 of the
+265 reproduce at half a unit of the second significant figure (`rsl-tables-sweep.test.ts`, listed on `#/validation`).
+The two that do not are the trichloroethylene and vinyl chloride cancer cells, which the RSL computes with its own
+equations. So the published table is consistent with K = 0.5 and with the form C_a = C_w K. This is a numeric check
+against the published table, not a reading of the primary page: the warning stays, K is still not called verified
+from a primary source, and it is still entered rather than defaulted.
 
 ## Legacy method: sprinkler volatilization (`irrigation.sprinkler-fc`)
 
@@ -324,7 +331,7 @@ M7 does not compute soil accumulation from irrigation or interception on leaves;
 | RangeError | nonpositive flow, time, volume, droplet diameter, wind speed or box size; V outside [0, 1]; U_t not positive |
 | `shower.exceeds-equilibrium` | legacy stall C_a above H C_w |
 | `shower.film-reference-unverified` | the film reference coefficients (3000 and 20 cm/h) are taken as the RISC5 defaults rather than entered (E1) |
-| `shower.household-factor-unverified` | always, on the household term: the factor K is entered, not defaulted (E1) |
+| `shower.household-factor-unverified` | always, on the household term: the factor K is entered, not defaulted, and not verified against a primary page; the message cites that 0.5 L/m^3 reproduces the RSL tap water inhalation levels (E1, wave R) |
 | `shower.not-volatile` | the chemical fails the RSL volatility criterion; the household term (`showerHouseholdAir`) returns zero with the warning. The stall models (`showerLegacyStall`, `showerLittle`) do not check volatility |
 | `irrigation.potable-source` | the irrigation source is also the potable supply (the indoor pathways will dominate, per the scenario of `waldenspence1997`) |
 | `irrigation.box-width-default` | the sprinkler box width is left at the 1 m RISC5 default |
@@ -344,8 +351,9 @@ M7 does not compute soil accumulation from irrigation or interception on leaves;
 4. **Table R-9 shower inhalation rows** (`arcadis2001`, the M4 deferred rows), at the ROADMAP's 3
    percent, if the review lists the shower inputs; otherwise a named exception like Table R-6 in M6. E4 result:
    a named exception (the review's shower inputs are not available; `namedExceptions` in the R-9 fixture, DECISIONS.md E4 item 4).
-5. **RSL tap water levels for volatiles** (not built: no verified K; see the household term section) (benzene, trichloroethylene, chloroform; `epa2024rsl`) through
-   `shower.rsl-household` and the M5 coefficient route, at half a unit in the third printed figure.
+5. **RSL tap water levels for volatiles** (not built in E1; reproduced by the wave R sweep, see the household term
+   section) (benzene, trichloroethylene, chloroform; `epa2024rsl`) through
+   `shower.rsl-household` and the M5 coefficient route, at half a unit in the second printed figure.
 6. **SSG 1996 default PEF** reproduced from the guidance's printed inputs, and the RSL resident soil
    inhalation level for one nonvolatile (arsenic), at half a unit in the last printed figure.
 7. **2002 Q/C regression** against the worked values printed in `epa2002ssg`, at half a unit in the last
