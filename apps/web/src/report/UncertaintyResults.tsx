@@ -182,19 +182,34 @@ function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
   if (entry.state === 'many') {
     return (
       <>
-        {entry.entries.map((e) => (
-          <ModeledChemicalResults key={e.chemical} entry={e} />
-        ))}
+        {entry.entries.map((e, i) => {
+          // two project chemicals can share a name (a user chemical defined twice): number the
+          // later ones so each block stays a uniquely named landmark
+          const earlier = entry.entries.slice(0, i).filter((x) => x.chemical === e.chemical).length;
+          return (
+            <ModeledChemicalResults
+              key={`${e.chemical}-${i}`}
+              entry={e}
+              landmarkSuffix={earlier > 0 ? ` (${earlier + 1})` : ''}
+            />
+          );
+        })}
       </>
     );
   }
   return <ModeledChemicalResults entry={entry} />;
 }
 
-function ModeledChemicalResults({ entry }: { entry: ModeledChemicalEntry }) {
+function ModeledChemicalResults({
+  entry,
+  landmarkSuffix = '',
+}: {
+  entry: ModeledChemicalEntry;
+  landmarkSuffix?: string;
+}) {
   const heading = 'Probabilistic cleanup level, modeled source';
   const baseLabel = 'Modeled source uncertainty results';
-  const label = entry.chemical ? `${baseLabel}: ${entry.chemical}` : baseLabel;
+  const label = entry.chemical ? `${baseLabel}: ${entry.chemical}${landmarkSuffix}` : baseLabel;
   if (entry.state === 'none') {
     return (
       <section className="report-uncertainty" aria-label={label}>

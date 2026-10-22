@@ -190,6 +190,24 @@ describe('UncertaintyReportView, modeled source', () => {
     expect(within(out).queryByRole('table')).toBeNull();
   });
 
+  it('gives each block a unique landmark name when two chemicals share a name', () => {
+    render(
+      <UncertaintyReportView
+        runs={runs({
+          state: 'many',
+          entries: [
+            { state: 'none', chemical: 'Copy' },
+            { state: 'none', chemical: 'Copy' },
+          ],
+        })}
+      />,
+    );
+    const names = screen
+      .getAllByText(/No run yet/)
+      .map((n) => n.closest('section')?.getAttribute('aria-label'));
+    expect(new Set(names).size).toBe(2);
+  });
+
   it('says to run it on the cleanup screen when no run exists', () => {
     render(<UncertaintyReportView runs={runs({ state: 'none' })} />);
     const out = screen.getByLabelText('Modeled source uncertainty results');

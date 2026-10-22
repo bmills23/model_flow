@@ -3346,3 +3346,11 @@ An older tab must never overwrite a newer autosave. Every ruling below is DEFAUL
    not autosave and New project does not remove the key. `ProjectBar` shows the existing status line markup: the saved
    copy was saved by a newer version of the app and this tab will not save over it. Saving to a file still works.
 4. **No fingerprint change.** No source form key was added, so `FINGERPRINT_SKIP` is unchanged.
+
+### Waves O and P integration notes
+
+1. **Report modeled blocks stay unique landmarks when names collide (DEFAULT).** Two project chemicals can share a
+   name (a user chemical defined twice, kept by the autosave across mobile check views); the later block's landmark
+   name gets a number suffix, so axe landmark-unique stays at zero.
+2. **The mobile check's seeded risk visit setup line is restored.** The P3 merge had left a stray token in place of
+   the benzene pick, which failed the visit in all views.
