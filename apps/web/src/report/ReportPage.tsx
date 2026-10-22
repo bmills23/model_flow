@@ -376,16 +376,18 @@ export function ReportView({
                     {r.chemical}
                     {r.cas !== '' ? ` (${r.cas})` : ''}
                   </th>
-                  <td>
+                  <td data-label="Value">
                     {r.label} ({r.unit})
                   </td>
-                  <td>{r.dbValue === null ? 'none' : fmtTox(r.dbValue)}</td>
-                  <td>
+                  <td data-label="Database value">
+                    {r.dbValue === null ? 'none' : fmtTox(r.dbValue)}
+                  </td>
+                  <td data-label="Value used">
                     {r.userValue === null
                       ? 'not used (incomplete entry)'
                       : `${fmtTox(r.userValue)} (user-supplied)`}
                   </td>
-                  <td>{r.note === '' ? '(none)' : r.note}</td>
+                  <td data-label="Source note">{r.note === '' ? '(none)' : r.note}</td>
                 </tr>
               ))}
             </tbody>
@@ -418,12 +420,14 @@ export function ReportView({
                     {r.chemical}
                     {r.cas !== '' ? ` (${r.cas})` : ''}
                   </th>
-                  <td>
+                  <td data-label="Value">
                     {r.label} ({r.unit})
                   </td>
-                  <td>{r.applied ? r.text : `${r.text} (not used, incomplete entry)`}</td>
-                  <td>{r.source}</td>
-                  <td>{r.note === '' ? '(none)' : r.note}</td>
+                  <td data-label="Entered">
+                    {r.applied ? r.text : `${r.text} (not used, incomplete entry)`}
+                  </td>
+                  <td data-label="Source">{r.source}</td>
+                  <td data-label="Source note">{r.note === '' ? '(none)' : r.note}</td>
                 </tr>
               ))}
             </tbody>
@@ -453,12 +457,12 @@ export function ReportView({
               {receptorEdits.map((r) => (
                 <tr key={`${r.receptor}:${r.factor}`}>
                   <th scope="row">{r.receptor}</th>
-                  <td>
+                  <td data-label="Factor">
                     {r.factor} ({r.unit})
                   </td>
-                  <td>{r.presetValue}</td>
-                  <td>{r.userValue} (user-supplied)</td>
-                  <td>{r.note === '' ? 'no note' : r.note}</td>
+                  <td data-label="Preset value">{r.presetValue}</td>
+                  <td data-label="Value used">{r.userValue} (user-supplied)</td>
+                  <td data-label="Source note">{r.note === '' ? 'no note' : r.note}</td>
                 </tr>
               ))}
             </tbody>

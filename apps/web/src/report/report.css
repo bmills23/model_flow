@@ -130,6 +130,7 @@
   .result-table,
   .result-table tbody,
   .result-table tr,
+  .result-table th,
   .result-table td {
     display: block;
     width: 100%;
@@ -162,6 +163,48 @@
     color: var(--muted);
     text-align: left;
     flex: 0 1 55%;
+    min-width: 0;
+  }
+
+  .report-user-values,
+  .report-user-values tbody,
+  .report-user-values tr,
+  .report-user-values th,
+  .report-user-values td {
+    display: block;
+    width: 100%;
+  }
+
+  .report-user-values thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .report-user-values tbody th {
+    width: 100%;
+  }
+
+  .report-user-values tr {
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  .report-user-values td {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    text-align: right;
+  }
+
+  .report-user-values td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    text-align: left;
+    flex: 0 1 40%;
     min-width: 0;
   }
 }
