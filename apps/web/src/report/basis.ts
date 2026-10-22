@@ -6,6 +6,8 @@ import { userChemicalRows } from '../overrides/userChemicals';
 import type { ChemicalDb } from '../risk/chemicalDb';
 import { staleAmong } from '../project/staleFeeds';
 import type { FeedRead, StaleFeedKey, StaleSlot } from '../project/store';
+import { userCleanupProps } from '../overrides/userChemicals';
+import type { CleanupProps } from '../cleanup/ssg';
 import { fateFill } from '../ui/chemicalFill';
 import { chemicalFields, type VaporChemicalRow } from '../vapor/chemicals';
 import type { Report, ReportSection } from './buildReport';
@@ -88,6 +90,8 @@ export interface BasisInput {
   db: ChemicalDb;
   /** The fate rows (see `loadVaporChemicals`), with the user chemicals laid in. */
   fateRows: readonly VaporChemicalRow[];
+  /** The cleanup properties (see `loadCleanupProps`), which the plants and eco screen fills Koc and log Kow from. */
+  cleanupProps: CleanupProps;
   defaults: readonly BasisDefault[];
   stale: readonly (StaleSlot | StaleFeedKey)[];
 }
@@ -137,8 +141,8 @@ interface FateField {
   unit: string;
   /** The database row's value as typed text, or undefined when the row has none. */
   fromRow: (r: VaporChemicalRow) => string | undefined;
-  /** False for a field no database row carries: it is only listed when the chemical was entered by hand. */
-  backed?: boolean;
+  /** For a screen that fills from the cleanup properties: that record's value as typed text. */
+  fromProps?: (p: CleanupProps extends Map<string, infer V> ? V : never) => string | undefined;
 }
 
 const fill = (k: 'M' | 'S' | 'H' | 'Koc' | 'Da' | 'Dw') => (r: VaporChemicalRow) => fateFill(r)[k];
@@ -184,13 +188,13 @@ const FATE_FIELDS: Partial<Record<ScreenKey, FateField[]>> = {
     { ...H_F, key: 'henry' },
   ],
   plantsEco: [
-    { ...KOC_F, key: 'koc' },
+    { ...KOC_F, key: 'koc', fromProps: (p) => (p.koc === undefined ? undefined : String(p.koc)) },
     {
       key: 'logKow',
       label: 'Log Kow',
       unit: '',
       fromRow: () => undefined,
-      backed: false,
+      fromProps: (p) => (p.logKow === undefined ? undefined : String(p.logKow)),
     },
   ],
 };
@@ -208,22 +212,31 @@ function fateRowsFor(
   key: ScreenKey,
   form: Record<string, unknown>,
   byId: Map<string, VaporChemicalRow>,
+  propsById: Map<string, CleanupProps extends Map<string, infer V> ? V : never>,
 ): BasisRow[] {
   const out: BasisRow[] = [];
   const id = typed(form.chemicalId);
+  // Each screen is compared against the source it fills from: the plants and eco screen fills Koc and
+  // log Kow from the cleanup properties, the others from the fate rows.
   const dbRow = id === '' ? undefined : byId.get(id);
+  const propsRec = id === '' ? undefined : propsById.get(id);
+  const fromProps = key === 'plantsEco';
+  const known = fromProps ? propsRec !== undefined : dbRow !== undefined;
   const handNote =
     id === '' ? 'entered by hand, no database chemical' : `no database record for ${id}`;
   for (const f of FATE_FIELDS[key] ?? []) {
     const text = typed(form[f.key]);
     if (text === '') continue;
     const value = withUnit(text, f.unit);
-    if (dbRow === undefined) {
+    if (!known) {
       out.push(row('entered-unsourced', f.label, value, { detail: handNote }));
       continue;
     }
-    if (f.backed === false) continue;
-    const dbText = f.fromRow(dbRow);
+    const dbText = fromProps
+      ? f.fromProps?.(propsRec!)
+      : dbRow !== undefined
+        ? f.fromRow(dbRow)
+        : undefined;
     if (dbText === undefined) {
       out.push(row('entered-unsourced', f.label, value, { detail: 'the database has no value' }));
     } else if (!same(text, dbText)) {
@@ -355,12 +368,16 @@ export function runBasis(input: BasisInput): ProjectBasis {
   const { report, results, project, defaults, stale } = input;
   const screens = screensOf(project);
   const byId = new Map(input.fateRows.map((r) => [r.id, r]));
+  const propsById = new Map([...userCleanupProps(chemicalsOf(project)), ...input.cleanupProps]);
   const own = new Map<ScreenKey, BasisRow[]>();
   for (const sec of report.sections) {
     const codes = new Set((results[sec.key]?.warnings ?? []).map((w) => w.code));
     // The uncertainty setup screen has no `form`; it types no fate property.
     const form = (screens[sec.key] as unknown as { form?: Record<string, unknown> }).form ?? {};
-    own.set(sec.key, [...defaultRows(sec, codes, defaults), ...fateRowsFor(sec.key, form, byId)]);
+    own.set(sec.key, [
+      ...defaultRows(sec, codes, defaults),
+      ...fateRowsFor(sec.key, form, byId, propsById),
+    ]);
   }
   const sectionKeys = new Set(report.sections.map((s) => s.key));
   const readsOf = (key: ScreenKey): FeedRead[] =>

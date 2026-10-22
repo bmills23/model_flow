@@ -5,6 +5,7 @@ import type { OverridesState } from '../overrides/model';
 import type { ProjectChemical } from '../project';
 import type { ChemicalDb } from '../risk/chemicalDb';
 import type { StaleSlot } from '../project/store';
+import type { CleanupProps } from '../cleanup/ssg';
 import type { VaporChemicalRow } from '../vapor/chemicals';
 import { buildReport } from './buildReport';
 import { runBasis, BASIS_SCOPES, type BasisDefault, type BasisRow } from './basis';
@@ -47,6 +48,7 @@ interface Setup {
   stale?: StaleSlot[];
   db?: ChemicalDb;
   rows?: VaporChemicalRow[];
+  cleanupProps?: CleanupProps;
   defaults?: BasisDefault[];
 }
 
@@ -67,6 +69,7 @@ function run(o: Setup = {}) {
     project,
     db: o.db ?? emptyDb,
     fateRows: o.rows ?? [BENZENE],
+    cleanupProps: o.cleanupProps ?? new Map(),
     defaults: o.defaults ?? DEFAULTS,
     stale: o.stale ?? [],
   });
@@ -336,6 +339,7 @@ describe('exhaustiveness', () => {
         project,
         db: emptyDb,
         fateRows: [],
+        cleanupProps: new Map(),
         defaults: DEFAULTS,
         stale: [],
       });
@@ -352,5 +356,66 @@ describe('runBasis, uncertainty setup', () => {
     };
     const b = run({ edit });
     expect(b.sections.uncertainty).toBeDefined();
+  });
+});
+
+describe('runBasis, plants and eco compares against the cleanup properties', () => {
+  const plants = (patch: Record<string, string>) => (s: Screens) => {
+    s.plantsEco = {
+      ...s.plantsEco,
+      form: { ...s.plantsEco.form, soilConcentration: '12', ...patch },
+    } as Screens['plantsEco'];
+  };
+  const ACRYL: CleanupProps = new Map([['79-06-1', { koc: 4.6, logKow: -0.67 }]]);
+  const plantRows = (b: ReturnType<typeof run>) => b.sections.plantsEco ?? [];
+
+  it('lists nothing for values filled from a cleanup-property chemical absent from the fate rows', () => {
+    const b = run({
+      edit: plants({ chemicalId: '79-06-1', koc: '4.6', logKow: '-0.67' }),
+      cleanupProps: ACRYL,
+    });
+    expect(plantRows(b).filter((r) => r.kind !== 'unverified-default')).toEqual([]);
+  });
+
+  it('flags a Koc typed over the cleanup value and a log Kow the record lacks', () => {
+    const b = run({
+      edit: plants({ chemicalId: '79-06-1', koc: '9', logKow: '1.2' }),
+      cleanupProps: new Map([['79-06-1', { koc: 4.6 }]]),
+    });
+    const rows = plantRows(b).filter((r) => r.kind !== 'unverified-default');
+    expect(rows.map((r) => [r.kind, r.subject])).toEqual([
+      ['typed-over-database', 'Koc'],
+      ['entered-unsourced', 'Log Kow'],
+    ]);
+    expect(rows[0]!.detail).toMatch(/4\.6/);
+  });
+
+  it('flags a log Kow typed over the cleanup value', () => {
+    const b = run({
+      edit: plants({ chemicalId: '79-06-1', koc: '4.6', logKow: '2' }),
+      cleanupProps: ACRYL,
+    });
+    const rows = plantRows(b).filter((r) => r.kind !== 'unverified-default');
+    expect(rows.map((r) => [r.kind, r.subject])).toEqual([['typed-over-database', 'Log Kow']]);
+  });
+
+  it('still reports a chemical with no record anywhere as unsourced', () => {
+    const b = run({ edit: plants({ chemicalId: '0-0-0', koc: '4.6' }) });
+    const rows = plantRows(b).filter((r) => r.kind !== 'unverified-default');
+    expect(rows.map((r) => r.kind)).toEqual(['entered-unsourced']);
+    expect(rows[0]!.detail).toMatch(/no database record/);
+  });
+
+  it('takes the Koc of a user chemical from its own values', () => {
+    const user: ProjectChemical = {
+      id: 'user-1',
+      name: 'Mine',
+      values: { koc: { value: '50', note: 'Lab' } },
+    } as ProjectChemical;
+    const b = run({
+      chemicals: [user],
+      edit: plants({ chemicalId: 'user-1', koc: '50' }),
+    });
+    expect(plantRows(b).filter((r) => r.kind !== 'unverified-default')).toEqual([]);
   });
 });

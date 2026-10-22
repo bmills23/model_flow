@@ -19,7 +19,9 @@ import {
 import type { UserChemicalRow } from '../overrides/userChemicals';
 import type { OverrideRow } from '../overrides/toxicity';
 import { fmtTox } from '../risk/format';
+import { loadCleanupProps } from '../cleanup/ssg';
 import { buildReport, SCREEN_NAMES, type Report } from './buildReport';
+import type { ScreenKey } from './methodsRun';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
@@ -103,42 +105,57 @@ function ResultWarnings({ results }: { results: SectionResults }) {
 
 const BASIS_COLUMNS = ['Kind', 'Subject', 'Value', 'Detail', 'Source note', 'Reference'] as const;
 
+/** Screens whose basis rows come from the one chemical currently in their single-chemical form. */
+const ONE_CHEMICAL_SENDERS: readonly ScreenKey[] = ['vadose', 'saturated'];
+
 function BasisTable({ rows, label }: { rows: readonly BasisRow[]; label: string }) {
+  const oneChemical = rows.some((r) => r.via !== null && ONE_CHEMICAL_SENDERS.includes(r.via));
   return (
-    <table className="result-table report-basis" aria-label={label}>
-      <thead>
-        <tr>
-          {BASIS_COLUMNS.map((h) => (
-            <th key={h} scope="col">
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r, i) => (
-          <tr key={`${i}:${r.kind}:${r.subject}:${r.via ?? ''}`}>
-            <td data-label="Kind">
-              {KIND_LABEL[r.kind]}
-              {r.via !== null && (
-                <span className="muted">
-                  {' '}
-                  (from {SCREEN_NAMES[r.via]}
-                  {r.stale ? ', out of date' : ''})
-                </span>
-              )}
-            </td>
-            <td data-label="Subject">{r.subject}</td>
-            <td data-label="Value">{r.value}</td>
-            <td data-label="Detail">{r.detail === '' ? 'none' : r.detail}</td>
-            <td data-label="Source note">{r.note}</td>
-            <td data-label="Reference">
-              {r.referenceKey === null ? 'none' : `${r.referenceKey} (${r.referenceStatus ?? ''})`}
-            </td>
+    <>
+      {oneChemical && (
+        <p className="muted">
+          Rows marked as coming from the vadose or saturated screen cover only the chemical
+          currently selected on that screen. A multi-chemical modeled cleanup is not listed chemical
+          by chemical, so the rows for its other chemicals are missing here.
+        </p>
+      )}
+      <table className="result-table report-basis" aria-label={label}>
+        <thead>
+          <tr>
+            {BASIS_COLUMNS.map((h) => (
+              <th key={h} scope="col">
+                {h}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={`${i}:${r.kind}:${r.subject}:${r.via ?? ''}`}>
+              <td data-label="Kind">
+                {KIND_LABEL[r.kind]}
+                {r.via !== null && (
+                  <span className="muted">
+                    {' '}
+                    (from {SCREEN_NAMES[r.via]}
+                    {r.stale ? ', out of date' : ''})
+                  </span>
+                )}
+              </td>
+              <td data-label="Subject">{r.subject}</td>
+              <td data-label="Value">{r.value}</td>
+              <td data-label="Detail">{r.detail === '' ? 'none' : r.detail}</td>
+              <td data-label="Source note">{r.note}</td>
+              <td data-label="Reference">
+                {r.referenceKey === null
+                  ? 'none'
+                  : `${r.referenceKey} (${r.referenceStatus ?? ''})`}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -207,6 +224,7 @@ export function ReportView({
   userChemicals = [],
   staleFeeds = [],
   basis = null,
+  basisFailed = false,
 }: {
   report: Report;
   preparedBy: string;
@@ -227,6 +245,8 @@ export function ReportView({
   staleFeeds?: readonly (StaleSlot | StaleFeedKey)[];
   /** What the run rests on (see `runBasis`); null while it computes. */
   basis?: ProjectBasis | null;
+  /** True when the databases the basis reads did not load, so it cannot be built. */
+  basisFailed?: boolean;
 }) {
   const { statement } = report;
   const methodNames = new Map(statement.methods.map((m) => [m.id, m.name]));
@@ -265,6 +285,20 @@ export function ReportView({
         </p>
       )}
 
+      {basis === null && report.sections.length > 0 && !basisFailed && (
+        <p className="muted" role="status">
+          The run basis is still being built. Until it appears, this report has no summary, no
+          &quot;What this run rests on&quot; tables and no run basis CSV; wait before printing.
+        </p>
+      )}
+      {basis === null && report.sections.length > 0 && basisFailed && (
+        <p className="report-basis-failed" role="alert">
+          <strong>The run basis could not be built</strong> because the chemical database did not
+          load. This report has no summary, no &quot;What this run rests on&quot; tables and no run
+          basis CSV, so it does not say which values are unverified defaults, unsourced entries or
+          edits. Reload the page and open the report again.
+        </p>
+      )}
       {basis !== null && report.sections.length > 0 && <BasisSummary basis={basis} />}
       {basis !== null && report.sections.length > 0 && (
         <DownloadCsv tables={[basisCsvTable(report, basis)]} showLabel />
@@ -554,6 +588,7 @@ export function ReportPage() {
   const receptorEdits = useMemo(() => receptorEditRows(project), [project]);
   const userChemicals = useMemo(() => userChemicalRowsOf(project), [project]);
   const [basis, setBasis] = useState<ProjectBasis | null>(null);
+  const [basisFailed, setBasisFailed] = useState(false);
   useEffect(() => {
     let live = true;
     if (Object.keys(overridesOf(project).toxicity).length === 0) return;
@@ -578,23 +613,34 @@ export function ReportPage() {
   useEffect(() => {
     if (results === null) return;
     let live = true;
-    Promise.all([loadChemicalDb(), loadVaporChemicals()]).then(
-      ([base, fate]) => {
+    Promise.all([loadChemicalDb(), loadVaporChemicals(), loadCleanupProps()]).then(
+      ([base, fate, cleanupProps]) => {
         if (!live) return;
         const chemicals = chemicalsOf(project);
-        setBasis(
-          runBasis({
-            report,
-            results,
-            project,
-            db: effectiveDb(base, overridesOf(project), chemicals),
-            fateRows: withUserFateRows(fate, chemicals),
-            defaults: validation.unverified.defaults as BasisDefault[],
-            stale: staleFeeds,
-          }),
-        );
+        try {
+          setBasisFailed(false);
+          setBasis(
+            runBasis({
+              report,
+              results,
+              project,
+              db: effectiveDb(base, overridesOf(project), chemicals),
+              fateRows: withUserFateRows(fate, chemicals),
+              cleanupProps,
+              defaults: validation.unverified.defaults as BasisDefault[],
+              stale: staleFeeds,
+            }),
+          );
+        } catch {
+          setBasis(null);
+          setBasisFailed(true);
+        }
       },
-      () => undefined,
+      () => {
+        if (!live) return;
+        setBasis(null);
+        setBasisFailed(true);
+      },
     );
     return () => {
       live = false;
@@ -630,6 +676,7 @@ export function ReportPage() {
         receptorEdits={receptorEdits}
         staleFeeds={staleFeeds}
         basis={basis}
+        basisFailed={basisFailed}
         uncertainty={<ReportUncertainty project={project} />}
       />
     </section>
