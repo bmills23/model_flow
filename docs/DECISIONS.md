@@ -3040,7 +3040,6 @@ scope" block. Every ruling below is DEFAULT.
     `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
     screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
 
-<<<<<<< HEAD
 ## 2026-10-21: Wave O slice O1, risk and cleanup follow the list
 
 Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
@@ -3203,7 +3202,7 @@ O2a and O2b.
 12. **Not done here (DEFAULT).** The cleanup source-level panel (`cleanup/SsgPanel.tsx`) still loads partition
     properties from the RSL file only, so a user chemical gets no soil-to-groundwater comparison there. Entering a
     user value for Kd, vapor thermo data or dermal data is a later scope row.
-=======
+
 ## 2026-10-21: Wave P slice P2, surface water cleanup target
 
 Scope ruling 4 of the "Project chemical list, waves N to P scope" block (the linear route, Bryan's choice). Every
@@ -3237,4 +3236,3 @@ ruling below is DEFAULT.
    for a direct source (a modeled source is not computed in the report).
 8. **No fingerprint change.** The cleanup form is not the source of a feed, so `FINGERPRINT_SKIP` is unchanged.
 
->>>>>>> wave-op-p2
