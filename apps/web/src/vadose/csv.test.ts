@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { exportCsv } from '../export/csv';
 import { compute, type VadoseComputeResult } from './compute';
 import { vadoseCsvTables, vadoseResultRows, vadoseSeriesRows } from './csv';
-import { DEFAULT_FORM, toScenario } from './form';
+import { R7_FORM as DEFAULT_FORM, toScenario } from './form';
 
 function result(): VadoseComputeResult {
   const r = toScenario(DEFAULT_FORM);

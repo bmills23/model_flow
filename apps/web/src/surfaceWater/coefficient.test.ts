@@ -1,9 +1,10 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { compute, type SwResult } from './compute';
 import { DEFAULT_FORM, toRequest, type SwRequest } from './inputs';
 import { surfaceWaterCoefficient } from './coefficient';
+import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
 
 const peak = (xs: number[]): number => Math.max(...xs);
 

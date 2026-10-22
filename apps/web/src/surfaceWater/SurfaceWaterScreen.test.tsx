@@ -1,10 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
-import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { addChemical, isFeedStaleNow } from '../project/store';
 import { clearSurfaceWaterFeed, getSurfaceWaterFeed, getSurfaceWaterFeedSlots } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
+import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
 
 afterEach(() => {
   clearBankFeed();

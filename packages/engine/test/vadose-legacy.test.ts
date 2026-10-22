@@ -363,6 +363,17 @@ describe('vadose.vadsat warnings', () => {
     expect(codes(b)).not.toContain('vadose.inlet-mass-excess');
   });
 
+  it('dispersivity-regression-unsourced fires only when no dispersivity was entered', () => {
+    expect(codes(baseInput())).toContain('vadose.dispersivity-regression-unsourced');
+    expect(codes(baseInput({ alphaL: 0.3 }))).not.toContain(
+      'vadose.dispersivity-regression-unsourced',
+    );
+    const w = vadoseVadsat
+      .run(baseInput())
+      .warnings.find((x) => x.code === 'vadose.dispersivity-regression-unsourced');
+    expect(w?.message).toMatch(/no primary source/i);
+  });
+
   it('validate() returns the same warnings as run()', () => {
     const input = baseInput({ q: 2 / DAY });
     expect(vadoseVadsat.validate!(input)).toEqual(vadoseVadsat.run(input).warnings);

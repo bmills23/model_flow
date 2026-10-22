@@ -488,12 +488,14 @@ export function TransportPage() {
 
           <Group title="Dispersivity">
             <Seg
-              legend="Dispersivity law"
+              legend="Dispersivity source"
               name="dispLaw"
               value={form.dispLaw}
               onChange={(v) => set('dispLaw', v)}
               options={[
-                { value: 'legacy', label: 'Gelhar 1985 + API 1987' },
+                { value: 'entered', label: 'Entered value' },
+                { value: 'ssg', label: 'EPA SSG 1996 rule' },
+                { value: 'legacy', label: 'RISC5 regression (no primary source)' },
                 { value: 'modern', label: 'Xu & Eckstein 1995' },
                 { value: 'schulze-makuch', label: 'Schulze-Makuch 2005' },
               ]}
@@ -514,29 +516,80 @@ export function TransportPage() {
                 </div>
               </dl>
             )}
-            <p className="derived">
-              The law is evaluated at the receptor distance
-              {scenario ? ` (${fmtAlpha(scenario.dispersivityDistance)} m)` : ''}. Override any
-              value below.
-            </p>
+            {form.dispLaw === 'entered' && (
+              <p className="derived">
+                Required. Enter the three dispersivities in metres, from a site tracer test or a
+                source you cite. The report prints them as entered values.
+              </p>
+            )}
+            {form.dispLaw === 'ssg' && (
+              <p className="derived">
+                The EPA Soil Screening Guidance (1996) sets the longitudinal dispersivity to 0.1
+                times the distance to the receptor
+                {scenario ? ` (${fmtAlpha(scenario.dispersivityDistance)} m)` : ''}. It gives no
+                transverse or vertical value, so enter those below.
+              </p>
+            )}
+            {form.dispLaw === 'legacy' && (
+              <p className="derived">
+                No primary source: this is the regression RISC5 attributes to Gelhar et al. (1985),
+                whose report prints field data and a plot, not this equation. Results that use it
+                carry a warning. It is evaluated at the receptor distance
+                {scenario ? ` (${fmtAlpha(scenario.dispersivityDistance)} m)` : ''}; override any
+                value below.
+              </p>
+            )}
+            {(form.dispLaw === 'modern' || form.dispLaw === 'schulze-makuch') && (
+              <p className="derived">
+                The law is evaluated at the receptor distance
+                {scenario ? ` (${fmtAlpha(scenario.dispersivityDistance)} m)` : ''}. Override any
+                value below.
+              </p>
+            )}
             <div className="fields">
+              {form.dispLaw !== 'ssg' && (
+                <Field
+                  label={
+                    form.dispLaw === 'entered'
+                      ? 'Longitudinal dispersivity (m)'
+                      : 'Override longitudinal (m)'
+                  }
+                  value={form.alphaLOverride}
+                  onChange={(v) => set('alphaLOverride', v)}
+                  placeholder={
+                    scenario && form.dispLaw !== 'entered'
+                      ? fmtAlpha(scenario.lawAlphas.alphaL)
+                      : ''
+                  }
+                />
+              )}
               <Field
-                label="Override longitudinal (m)"
-                value={form.alphaLOverride}
-                onChange={(v) => set('alphaLOverride', v)}
-                placeholder={scenario ? fmtAlpha(scenario.lawAlphas.alphaL) : ''}
-              />
-              <Field
-                label="Override transverse (m)"
+                label={
+                  form.dispLaw === 'entered' || form.dispLaw === 'ssg'
+                    ? 'Transverse dispersivity (m)'
+                    : 'Override transverse (m)'
+                }
                 value={form.alphaTOverride}
                 onChange={(v) => set('alphaTOverride', v)}
-                placeholder={scenario ? fmtAlpha(scenario.lawAlphas.alphaT) : ''}
+                placeholder={
+                  scenario && form.dispLaw !== 'entered' && form.dispLaw !== 'ssg'
+                    ? fmtAlpha(scenario.lawAlphas.alphaT)
+                    : ''
+                }
               />
               <Field
-                label="Override vertical (m)"
+                label={
+                  form.dispLaw === 'entered' || form.dispLaw === 'ssg'
+                    ? 'Vertical dispersivity (m)'
+                    : 'Override vertical (m)'
+                }
                 value={form.alphaVOverride}
                 onChange={(v) => set('alphaVOverride', v)}
-                placeholder={scenario ? fmtAlpha(scenario.lawAlphas.alphaV) : ''}
+                placeholder={
+                  scenario && form.dispLaw !== 'entered' && form.dispLaw !== 'ssg'
+                    ? fmtAlpha(scenario.lawAlphas.alphaV)
+                    : ''
+                }
               />
             </div>
           </Group>

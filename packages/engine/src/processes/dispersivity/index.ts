@@ -15,11 +15,30 @@ export interface DispersivityOutput {
   alphaV: number;
 }
 
-/** Gelhar et al. (1985) regression: ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2. */
+/**
+ * RISC5's saturated-zone regression, ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2, attributed to
+ * Gelhar et al. (1985). The saturated-zone log-quadratic has no primary source located: the EPRI
+ * report (EA-4190) prints field data and a plot against scale, not this equation, so the
+ * coefficients stand on RISC5's statement of its choice and the method warns whenever the law value
+ * is used (dispersivity.regression-unsourced).
+ */
 export function gelhar1985Longitudinal(x: number): number {
   if (!(x > 0)) throw new RangeError(`Distance must be positive, got ${x}`);
   const lx = Math.log(x);
   return Math.exp(-3.795 + 1.774 * lx - 0.093 * lx * lx);
+}
+
+/**
+ * EPA Soil Screening Guidance rule for the longitudinal dispersivity of the dilution-attenuation
+ * factor: alpha_L = 0.1 x_r, with x_r the horizontal distance to the receptor (U.S. EPA 1996,
+ * Technical Background Document, printed page 45, equation 39 and the definitions under it; read
+ * 2026-10-22). The passage gives no transverse ratio, so only the longitudinal value is a rule.
+ */
+export function ssg1996Longitudinal(distance: number): number {
+  if (!Number.isFinite(distance) || !(distance > 0)) {
+    throw new RangeError(`Distance must be positive, got ${distance}`);
+  }
+  return 0.1 * distance;
 }
 
 /** Xu and Eckstein (1995) regression: aL = 0.83 (log10 L)^2.414, zero below 1 m. */
@@ -44,6 +63,13 @@ export const gelhar1985Api1987: MethodDescriptor<DispersivityInput, Dispersivity
   ],
   risc5Choice:
     'RISC5 computes longitudinal dispersivity from the Gelhar et al. 1985 regression on receptor distance and applies the API 1987 ratios 3 and 87 when dispersivities are entered as zero.',
+  validate: () => [
+    {
+      code: 'dispersivity.regression-unsourced',
+      message:
+        'The longitudinal dispersivity regression (RISC5 choice, attributed to Gelhar et al. 1985) has no primary source: the cited report prints field data and a plot, not this equation. Enter a site value or a cited rule instead.',
+    },
+  ],
   run: ({ distance }) => {
     const alphaL = gelhar1985Longitudinal(distance);
     const alphaT = alphaL / 3;

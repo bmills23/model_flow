@@ -31,3 +31,22 @@ describe('fingerprintForm for the surface water form', () => {
     );
   });
 });
+
+describe('fingerprintForm for the vadose dispersivity choice', () => {
+  const older = { infiltration: '20', alphaL: '' };
+  const hash = (form: unknown) => hashInputs(fingerprintForm('vadose', form));
+
+  it('leaves the choice out while it is what a file written before it would be read as', () => {
+    expect(hash({ ...older, dispersivityBasis: 'regression' })).toBe(hash(older));
+    expect(hash({ ...older, alphaL: '0.4', dispersivityBasis: 'entered' })).toBe(
+      hash({ ...older, alphaL: '0.4' }),
+    );
+  });
+
+  it('counts the choice once it differs, so switching it marks a feed stale', () => {
+    expect(hash({ ...older, dispersivityBasis: 'entered' })).not.toBe(hash(older));
+    expect(hash({ ...older, alphaL: '0.4', dispersivityBasis: 'regression' })).not.toBe(
+      hash({ ...older, alphaL: '0.4' }),
+    );
+  });
+});

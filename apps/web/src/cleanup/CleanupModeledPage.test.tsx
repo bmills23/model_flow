@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { CleanupPage } from './CleanupPage';
 import { clearTransportFeed, setTransportFeed } from '../transport/chainFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 afterEach(() => {
   cleanup();

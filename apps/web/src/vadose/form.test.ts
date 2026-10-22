@@ -2,7 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { SOIL_TEXTURES, convert } from '@model-flow/engine';
 import {
-  DEFAULT_FORM,
+  DEFAULT_FORM as FRESH_FORM,
+  R7_FORM,
   R7_PUBLISHED,
   addLayer,
   applyTexture,
@@ -11,6 +12,10 @@ import {
   toScenario,
   type VadoseForm,
 } from './form';
+
+// The tests that are not about the dispersivity choice run on the Table R-7 case, which uses the
+// RISC5 regression on purpose.
+const DEFAULT_FORM = R7_FORM;
 
 const YR = convert(1, 'yr', 's');
 const DAY = 86400;
@@ -127,7 +132,7 @@ describe('vadose form: layers to the two methods', () => {
 
   it('passes a dispersivity override to both methods and leaves it unset when blank', () => {
     expect(scenario().modern.alphaL).toBeUndefined();
-    const s = scenario({ alphaL: '0.25' });
+    const s = scenario({ dispersivityBasis: 'entered', alphaL: '0.25' });
     expect(s.modern.alphaL).toBe(0.25);
     expect(s.legacy?.alphaL).toBe(0.25);
   });
@@ -222,5 +227,89 @@ describe('vadose project: files written before texture presets', () => {
     expect(state.form.source.texture).toBe('custom');
     expect(state.form.above[0]!.texture).toBe('custom');
     expect(state.form.below[0]!.texture).toBe('custom');
+  });
+});
+
+describe('vadose form: dispersivity is a required entry', () => {
+  it('starts a new project on an entered value with no number', () => {
+    expect(FRESH_FORM.dispersivityBasis).toBe('entered');
+    expect(FRESH_FORM.alphaL).toBe('');
+  });
+
+  it('blocks a blank entered value with a clear message', () => {
+    const r = toScenario(FRESH_FORM);
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.errors.some((e) => /Longitudinal dispersivity is required/.test(e))).toBe(true);
+    expect(r.errors.join(' ')).toMatch(/RISC5 regression/);
+  });
+
+  it('takes an entered value for every depth and both methods', () => {
+    const r = toScenario({ ...FRESH_FORM, alphaL: '0.4' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.scenario.alphaL).toBe(0.4);
+    expect(r.scenario.legacy?.alphaL).toBe(0.4);
+    expect(r.scenario.modern.alphaL).toBe(0.4);
+  });
+
+  it('still rejects a non-positive entry', () => {
+    expect(toScenario({ ...FRESH_FORM, alphaL: '0' }).ok).toBe(false);
+    expect(toScenario({ ...FRESH_FORM, alphaL: '-1' }).ok).toBe(false);
+  });
+
+  it('uses the regression only when it is chosen, and then ignores any typed value', () => {
+    const r = toScenario({ ...FRESH_FORM, dispersivityBasis: 'regression', alphaL: '0.4' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.scenario.alphaL).toBeUndefined();
+    expect(r.scenario.legacy?.alphaL).toBeUndefined();
+    expect(r.scenario.modern.alphaL).toBeUndefined();
+  });
+
+  it('keeps the Table R-7 case on the regression and tells it apart from a new project', () => {
+    expect(R7_FORM.dispersivityBasis).toBe('regression');
+    expect(R7_FORM.alphaL).toBe('');
+    expect(isR7Case(R7_FORM)).toBe(true);
+    expect(isR7Case(FRESH_FORM)).toBe(false);
+    expect({ ...R7_FORM, dispersivityBasis: undefined }).toEqual({
+      ...FRESH_FORM,
+      dispersivityBasis: undefined,
+    });
+  });
+});
+
+describe('vadose project: files written before the dispersivity choice', () => {
+  it('opens a saved blank as the regression, chosen explicitly', async () => {
+    const { fromProject } = await import('./project');
+    const { dispersivityBasis: _b, ...old } = R7_FORM;
+    void _b;
+    expect(old.alphaL).toBe('');
+    const state = fromProject({ form: old });
+    expect(state.form.dispersivityBasis).toBe('regression');
+    const r = toScenario(state.form);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.scenario.alphaL).toBeUndefined();
+  });
+
+  it('opens a saved typed value as an entered value with the same number', async () => {
+    const { fromProject } = await import('./project');
+    const { dispersivityBasis: _b, ...old } = R7_FORM;
+    void _b;
+    const state = fromProject({ form: { ...old, alphaL: '0.35' } });
+    expect(state.form.dispersivityBasis).toBe('entered');
+    const r = toScenario(state.form);
+    expect(r.ok && r.scenario.alphaL).toBe(0.35);
+  });
+
+  it('keeps a saved choice, and a file with no vadose form is a new project', async () => {
+    const { fromProject, toProject } = await import('./project');
+    const kept = fromProject(
+      toProject({ form: { ...FRESH_FORM, dispersivityBasis: 'regression' } }),
+    );
+    expect(kept.form.dispersivityBasis).toBe('regression');
+    expect(fromProject(undefined).form.dispersivityBasis).toBe('entered');
+    const entered = fromProject(toProject({ form: { ...FRESH_FORM, alphaL: '' } }));
+    expect(entered.form.dispersivityBasis).toBe('entered');
   });
 });

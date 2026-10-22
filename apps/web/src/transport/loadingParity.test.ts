@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { plumeGrid, receptorConcentration } from './compute';
-import { DEFAULT_FORM, toScenario, type TransportForm } from './form';
+import { toScenario, type TransportForm } from './form';
+import { REGRESSION_FORM as DEFAULT_FORM } from './regression.testkit';
 
 function scenario(over: Partial<TransportForm>) {
   const r = toScenario({ ...DEFAULT_FORM, ...over });

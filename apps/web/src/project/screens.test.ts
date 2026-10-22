@@ -46,6 +46,11 @@ interface Case<S> {
   toProject: (s: S) => unknown;
   fromProject: (p: never) => S;
   states: S[];
+  /**
+   * What a saved form with no fields reads as, when it is not the defaults: a file written before the
+   * dispersivity choice existed meant the RISC5 regression, so it opens as that, chosen explicitly.
+   */
+  emptyForm?: S;
 }
 
 function riskState() {
@@ -65,6 +70,7 @@ const cases: Case<unknown>[] = [
     schema: transport.transportProjectSchema,
     toProject: transport.toProject as never,
     fromProject: transport.fromProject as never,
+    emptyForm: { form: { ...TRANSPORT_DEFAULT, dispLaw: 'legacy' }, method: 'modern' },
     states: [
       { form: TRANSPORT_DEFAULT, method: 'modern' },
       {
@@ -78,6 +84,7 @@ const cases: Case<unknown>[] = [
     schema: vadose.vadoseProjectSchema,
     toProject: vadose.toProject as never,
     fromProject: vadose.fromProject as never,
+    emptyForm: { form: { ...VADOSE_DEFAULT, dispersivityBasis: 'regression' } },
     states: [
       { form: VADOSE_DEFAULT },
       {
@@ -296,7 +303,7 @@ describe.each(cases)('screen project: $name', (c) => {
     expect(fresh).toEqual(c.states[0]);
     const partial = c.schema.safeParse({ form: {} });
     expect(partial.success).toBe(true);
-    expect(c.fromProject(partial.data as never)).toEqual(c.states[0]);
+    expect(c.fromProject(partial.data as never)).toEqual(c.emptyForm ?? c.states[0]);
   });
 
   it('refuses a value of the wrong type', () => {

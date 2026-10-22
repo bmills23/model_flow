@@ -15,7 +15,10 @@ describe('ReportPage', () => {
 
   it('prints the inputs, the methods run and their numbered references for an edited screen', () => {
     const v = getScreen('vadose');
-    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    setScreen('vadose', {
+      ...v,
+      form: { ...v.form, foc: '0.0123', dispersivityBasis: 'regression' },
+    } as typeof v);
     render(<ReportPage />);
     expect(screen.getByRole('heading', { name: 'Vadose leaching' })).toBeTruthy();
     expect(screen.getByText('0.0123')).toBeTruthy();
@@ -28,7 +31,10 @@ describe('ReportPage', () => {
 
   it('prints the result tables and engine warnings of a used screen', async () => {
     const v = getScreen('vadose');
-    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    setScreen('vadose', {
+      ...v,
+      form: { ...v.form, foc: '0.0123', dispersivityBasis: 'regression' },
+    } as typeof v);
     render(<ReportPage />);
     expect(screen.getByText(/computing results/i)).toBeTruthy();
     const heading = await screen.findByRole('heading', { name: 'Results' });
@@ -40,7 +46,10 @@ describe('ReportPage', () => {
 
   it('draws each chart of a used screen with its data table open and no toggle', async () => {
     const v = getScreen('vadose');
-    setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+    setScreen('vadose', {
+      ...v,
+      form: { ...v.form, foc: '0.0123', dispersivityBasis: 'regression' },
+    } as typeof v);
     render(<ReportPage />);
     const heading = await screen.findByRole('heading', { name: 'Charts' });
     const charts = heading.closest('.report-charts')!;
@@ -54,7 +63,7 @@ describe('ReportPage', () => {
 
   it('draws the plume map with a thinned table in the groundwater section, none when not computed', async () => {
     const t = getScreen('transport');
-    setScreen('transport', { ...t, form: { ...t.form, K: '12.5' } });
+    setScreen('transport', { ...t, form: { ...t.form, K: '12.5', dispLaw: 'legacy' } });
     const { unmount } = render(<ReportPage />);
     const map = await screen.findByRole('img', { name: /plume map/i });
     const fig = map.closest('figure')!;

@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { toScenario, DEFAULT_FORM } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { inlineWorkerFactory } from '../uncertainty/dispatch';
 import type { WorkerLike } from '../uncertainty/pool';
 import { computeModeled } from './compute';
@@ -13,6 +13,7 @@ import type { ModeledOutcome, ModeledRequest } from './modeledTypes';
 import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
 import { clearModeledSummary, getModeledSummary, modeledFingerprint } from './modeledSummary';
 import { getScreen } from '../project/store';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 let db: ChemicalDb;
 let req: ModeledRequest;

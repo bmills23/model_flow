@@ -19,7 +19,7 @@ import { ownSlot } from '../project/feedSlots';
 import { vadoseVaporSource } from './vaporFeed';
 import { chemicalTag } from '../project/feedChemical';
 import {
-  DEFAULT_FORM,
+  R7_FORM,
   R7_PUBLISHED,
   addLayer,
   applyTexture,
@@ -244,7 +244,9 @@ export function VadosePage() {
           includes a 0.2 m lens, 2.8 m above the water table. The soil, source and loading come from
           Table R-7 of the review cited below; the benzene properties are the RISC4 chemical
           database values the table does not list. They are test inputs for this case, not a
-          chemical database.
+          chemical database. The table gives no dispersivity, so the reproduction runs on the RISC5
+          regression, which has no primary source; a new project starts with the dispersivity left
+          to enter.
         </p>
         <ul className="citations">
           {R7_PUBLISHED.citations.map((key) => {
@@ -257,7 +259,7 @@ export function VadosePage() {
         ) : (
           <p className="muted">Inputs differ from the Table R-7 case.</p>
         )}
-        <button type="button" className="btn" onClick={() => setForm(DEFAULT_FORM)}>
+        <button type="button" className="btn" onClick={() => setForm(R7_FORM)}>
           Reset to the Table R-7 case
         </button>{' '}
         <button
@@ -284,13 +286,33 @@ export function VadosePage() {
                 value={form.durationYr}
                 onChange={(v) => set('durationYr', v)}
               />
-              <Field
-                label="Longitudinal dispersivity (m)"
-                value={form.alphaL}
-                onChange={(v) => set('alphaL', v)}
-                hint="Blank = the regression at the water-table depth."
-              />
             </div>
+            <Seg
+              legend="Dispersivity source"
+              name="dispersivityBasis"
+              value={form.dispersivityBasis}
+              onChange={(v) => set('dispersivityBasis', v)}
+              options={[
+                { value: 'entered', label: 'Entered value' },
+                { value: 'regression', label: 'RISC5 regression (no primary source)' },
+              ]}
+            />
+            {form.dispersivityBasis === 'entered' ? (
+              <div className="fields">
+                <Field
+                  label="Longitudinal dispersivity (m)"
+                  value={form.alphaL}
+                  onChange={(v) => set('alphaL', v)}
+                  hint="Required. One value for the whole column, from a site test or a source you cite."
+                />
+              </div>
+            ) : (
+              <p className="derived">
+                No primary source: the regression RISC5 attributes to Gelhar et al. (1985) is
+                evaluated at each depth, but the cited report prints field data and a plot, not
+                these equations. Results that use it carry a warning.
+              </p>
+            )}
             <Seg
               legend="Moisture model"
               name="hydraulicModel"
@@ -583,9 +605,9 @@ export function VadosePage() {
               <DepthProfileChart run={run} scale={form.scale} />
               {run.method === 'legacy' && (
                 <p className="muted chart-note">
-                  The legacy method evaluates the dispersivity at each depth (RISC5 choice), so
-                  every depth is its own solution and a curve can bend where the dispersivity
-                  changes. The modern method uses one dispersivity for the whole column.
+                  {form.dispersivityBasis === 'regression'
+                    ? 'The legacy method evaluates the dispersivity at each depth (RISC5 choice), so every depth is its own solution and a curve can bend where the dispersivity changes. The modern method uses one dispersivity for the whole column.'
+                    : 'Both methods use the one entered dispersivity for the whole column.'}
                 </p>
               )}
               <WaterTableFluxChart runs={result.runs} measure={form.measure} scale={form.scale} />

@@ -1,4 +1,5 @@
-import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
+import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
 import { compute } from './compute';
 import { DEFAULT_FORM, toRequest } from './inputs';
 

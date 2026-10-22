@@ -19,7 +19,7 @@ import {
   type C13Evaluation,
   type C13Params,
 } from './kernel.js';
-import { vadsatDispersivity } from './dispersivity.js';
+import { dispersivityRegressionWarning, vadsatDispersivity } from './dispersivity.js';
 import { vadsatUncertainInputs } from './uncertain.js';
 
 export * from './hydraulics.js';
@@ -468,6 +468,7 @@ function warningsFor(model: VadsatModel): Warning[] {
       message: `The first-type inlet admits ${inletExcessRatio.toPrecision(4)} times the mass the source loses by leaching over the release (threshold ${INLET_EXCESS_THRESHOLD}): dispersion is strong relative to advection at this decay rate.`,
     });
   }
+  if (model.alphaL === undefined) w.push(dispersivityRegressionWarning());
   return w;
 }
 

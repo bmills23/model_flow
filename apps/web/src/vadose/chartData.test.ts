@@ -12,7 +12,7 @@ import {
   spreadLabels,
   waterTableSeries,
 } from './chartData';
-import { DEFAULT_FORM, addLayer, toScenario, type VadoseForm } from './form';
+import { R7_FORM as DEFAULT_FORM, addLayer, toScenario, type VadoseForm } from './form';
 
 function runs(over: Partial<VadoseForm> = {}) {
   const r = toScenario({ ...DEFAULT_FORM, ...over });

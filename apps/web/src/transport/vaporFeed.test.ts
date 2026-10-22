@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { receptorConcentration } from './compute';
-import { DEFAULT_FORM, toScenario } from './form';
+import { toScenario } from './form';
 import { waterTableSource } from './vaporFeed';
+import { REGRESSION_FORM as DEFAULT_FORM } from './regression.testkit';
 
 describe('waterTableSource', () => {
   const r = toScenario({ ...DEFAULT_FORM, rx: '60', ry: '2', rDepth: '1', timeYr: '8' });

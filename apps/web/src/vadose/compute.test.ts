@@ -1,7 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { compute, lastYearMean, vadoseFluxSeries, type VadoseComputeResult } from './compute';
-import { DEFAULT_FORM, R7_PUBLISHED, addLayer, toScenario, type VadoseForm } from './form';
+import {
+  R7_FORM as DEFAULT_FORM,
+  R7_PUBLISHED,
+  addLayer,
+  toScenario,
+  type VadoseForm,
+} from './form';
 
 function run(over: Partial<VadoseForm> = {}): VadoseComputeResult {
   const r = toScenario({ ...DEFAULT_FORM, ...over });

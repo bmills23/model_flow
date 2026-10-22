@@ -1,7 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, getBankFeed } from './bankFeed';
 import { TransportPage } from './TransportPage';
+import { seedTransportRegression } from './regression.testkit';
+
+// a new project asks for the dispersivity; these tests run on the RISC5 regression, chosen on purpose
+beforeEach(() => seedTransportRegression());
 
 afterEach(() => clearBankFeed());
 

@@ -6,10 +6,10 @@ import { DEFAULT_FORM as SAT_FORM, toScenario as toSaturated } from '../saturate
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearTransportFeed, getTransportFeed, setTransportFeed } from '../transport/chainFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearVadoseFeed, setVadoseFeed } from '../vadose/feed';
-import { DEFAULT_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
+import { R7_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
 import {
   clearSaturatedVaporFeed,
   clearVadoseVaporFeed,
@@ -33,6 +33,7 @@ import {
   subscribeStale,
   type StaleFeedKey,
 } from './store';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 const wellFeed = {
   method: 'modern' as const,

@@ -8,10 +8,11 @@ import {
   receptorConcentration,
   withFedSteps,
 } from './compute';
-import { DEFAULT_FORM, toScenario, type Scenario, type TransportForm } from './form';
+import { toScenario, type Scenario, type TransportForm } from './form';
 import { vadoseFluxSeries } from '../vadose/compute';
-import { DEFAULT_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
+import { R7_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
 import type { VadoseFeed } from '../vadose/feed';
+import { REGRESSION_FORM as DEFAULT_FORM } from './regression.testkit';
 
 const v = toVadose(VADOSE_FORM);
 if (!v.ok) throw new Error('vadose scenario');

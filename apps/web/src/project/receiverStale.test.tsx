@@ -6,11 +6,12 @@ import { TransportPage } from '../transport/TransportPage';
 import { VaporPage } from '../vapor/VaporPage';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearVadoseFeed, setVadoseFeed } from '../vadose/feed';
-import { DEFAULT_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
+import { R7_FORM as VADOSE_FORM, toScenario as toVadose } from '../vadose/form';
 import { clearWaterTableFeed, setWaterTableFeed } from '../vapor/feeds';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
-import { DEFAULT_FORM, toScenario } from '../transport/form';
+import { toScenario } from '../transport/form';
 import { forgetMemory, getScreen, setScreen } from './store';
+import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
 
 afterEach(() => {
   clearWellFeed();

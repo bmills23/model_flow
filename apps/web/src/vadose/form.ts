@@ -47,11 +47,27 @@ export interface VadoseForm {
   below: LayerForm[];
   // run and display
   durationYr: string;
-  alphaL: string; // m, blank = regression at the water-table depth
+  /**
+   * Where the longitudinal dispersivity comes from: 'entered' (the default for a new project) takes
+   * `alphaL`, which must be filled; 'regression' is the RISC5 two-branch regression on depth, which
+   * has no primary source and is warned whenever it is used. `alphaL` is ignored under 'regression'.
+   */
+  dispersivityBasis: DispersivityBasis;
+  alphaL: string; // m, the entry when the basis is 'entered'
   hydraulicModel: 'default' | HydraulicModel;
   method: 'legacy' | 'modern';
   scale: 'linear' | 'log';
   measure: 'concentration' | 'flux';
+}
+
+export type DispersivityBasis = 'entered' | 'regression';
+
+/**
+ * What a form saved before the choice existed meant: a blank dispersivity was the regression, a typed
+ * one was an entered value. The project loader and the feed fingerprint both read old files this way.
+ */
+export function legacyDispersivityBasis(f: { alphaL: string }): DispersivityBasis {
+  return f.alphaL.trim() === '' ? 'regression' : 'entered';
 }
 
 const soil = (over: Partial<LayerForm> = {}): LayerForm => ({
@@ -67,9 +83,10 @@ const soil = (over: Partial<LayerForm> = {}): LayerForm => ({
 });
 
 /**
- * The Table R-7 validation case (arcadis2001, as reproduced in RISC5 Appendix R): a benzene source
- * in a TPH mixture under a 4 m cover that includes a 0.2 m lens, 2.8 m above the water table.
- * Benzene properties come from the RISC4 chemical database (spence2001) and are fixture inputs.
+ * A new project: the inputs of the Table R-7 validation case (arcadis2001, as reproduced in RISC5
+ * Appendix R), a benzene source in a TPH mixture under a 4 m cover that includes a 0.2 m lens, 2.8 m
+ * above the water table, with the dispersivity left to be entered. Benzene properties come from the
+ * RISC4 chemical database (spence2001) and are fixture inputs.
  */
 export const DEFAULT_FORM: VadoseForm = {
   infiltration: '20',
@@ -92,12 +109,19 @@ export const DEFAULT_FORM: VadoseForm = {
   above: [soil({ thickness: '3.8' }), soil({ thickness: '0.2', thetaR: '0.15', n: '2', Ks: '1' })],
   below: [soil({ thickness: '2.8' })],
   durationYr: '10',
+  dispersivityBasis: 'entered',
   alphaL: '',
   hydraulicModel: 'default',
   method: 'legacy',
   scale: 'linear',
   measure: 'concentration',
 };
+
+/**
+ * The Table R-7 case as published: its table gives no dispersivity, so the reproduction runs on the
+ * RISC5 regression, chosen on purpose.
+ */
+export const R7_FORM: VadoseForm = { ...DEFAULT_FORM, dispersivityBasis: 'regression' };
 
 export const R7_PUBLISHED = {
   sourceMgPerL: 224,
@@ -111,7 +135,7 @@ export const R7_PUBLISHED = {
 export function isR7Case(f: VadoseForm): boolean {
   const inputs = (x: VadoseForm) =>
     JSON.stringify({ ...x, method: '', scale: '', measure: '', hydraulicModel: x.hydraulicModel });
-  return inputs(f) === inputs(DEFAULT_FORM);
+  return inputs(f) === inputs(R7_FORM);
 }
 
 const sig6 = (x: number): string => String(Number(x.toPrecision(6)));
@@ -287,10 +311,16 @@ export function toScenario(f: VadoseForm): ScenarioResult {
 
   const durationYr = need('Run length', f.durationYr, pos, 'must be positive (years).');
   const duration = convert(durationYr, 'yr', 's');
-  const alphaL =
-    f.alphaL.trim() === ''
-      ? undefined
-      : need('Longitudinal dispersivity', f.alphaL, pos, 'must be positive (m).');
+  let alphaL: number | undefined;
+  if (f.dispersivityBasis === 'entered') {
+    if (f.alphaL.trim() === '') {
+      errors.push(
+        'Longitudinal dispersivity is required: enter a value in metres, or choose the RISC5 regression (no primary source).',
+      );
+    } else {
+      alphaL = need('Longitudinal dispersivity', f.alphaL, pos, 'must be positive (m).');
+    }
+  }
 
   if (errors.length > 0) return { ok: false, errors };
 
