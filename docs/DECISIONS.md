@@ -3007,12 +3007,14 @@ scope" block. Every ruling below is DEFAULT.
    whose chemical cannot be told is left out and reported through `droppedFeeds` with its own message. A version 2
    slot whose key differs from its value's chemical is dropped and reported. Files, share links and the autosave
    all go through `parseProject`. The autosave key keeps its `.v1` suffix: it names the storage slot, not the
-   format. Fixtures: `project/fixtures/project-v1.json` and `share-v1.txt` were written by the version 1 code
+   format. (Corrected by the corrective slice CB below: a version 2 autosave uses `model_flow.project.autosave.v2`,
+   and the `.v1` key is only read to migrate.) Fixtures: `project/fixtures/project-v1.json` and `share-v1.txt` were written by the version 1 code
    before the schema changed; `project-v2-expected.json` was derived from the first by a separate script.
 7. **Version check.** `versionProblem(version, readsUpTo)` (`project/index.ts`) holds the existing newer-version
    message; a build that reads up to version 1 refuses a version 2 file with it. Risk, not changed here: a tab
    still running a version 1 build refuses a version 2 autosave and starts empty, and its next edit writes its own
-   autosave over the version 2 copy (the existing behaviour for a newer save).
+   autosave over the version 2 copy (the existing behaviour for a newer save). (Fixed by the corrective slice CB
+   below: a version 1 tab never sees the version 2 key, and a build that finds a newer autosave does not save over it.)
 8. **Cleanup source level panels.** One household, vapor or surface water panel per held slot whose chemical is a
    cleanup row or untagged; when none is, the most recent slot, so a result for another chemical still shows why it
    gives no level (`panelFeeds` in `cleanup/sourceLevelsCsv.ts`). With two or more panels of one kind, each CSV file

@@ -44,7 +44,7 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | C10, C11 restore and persist databases (2-6, 2-3) | Databases are versioned committed data | Out of scope (no master library) | - | - |
 | D1, D2 chemical picker, 50 limit (3-2) | Picker on risk and cleanup; per-screen chemical selection elsewhere | None (landed in waves N to P: one project chemical list shown and edited on `#/chemicals`, risk and cleanup rows follow it, every fate screen picks from it, feeds keep one slot per chemical) | H | L |
 | D3, D4, G9, J8 project-only edit of chemical and toxicity values, same value everywhere (3-3, 6-5, 7-8) | None (landed in wave H, slice U4: project-level `overrides` key with an "Edit values" panel on the risk and cleanup chemical cards, shared by both screens; each override needs a source note, is marked as edited, resets per field, and is listed in the report as a user value) | - | - |
-| D4, F8 fate screens use the chemical's database properties (3-3, 5-5) | None (landed in wave H, slice U8: `#/vapor` already filled from RSL (`vapor/chemicals.ts`); transport, vadose and saturated now fill from the database through the shared `ui/chemicalFill.ts`. Transport Kd = Koc x foc is a DEFAULT mapping; surface water is not included) | - | - |
+| D4, F8 fate screens use the chemical's database properties (3-3, 5-5) | None (landed in wave H, slice U8: `#/vapor` already filled from RSL (`vapor/chemicals.ts`); transport, vadose and saturated now fill from the database through the shared `ui/chemicalFill.ts`. Transport Kd = Koc x foc is a DEFAULT mapping; surface water is not included: since wave O it picks a project chemical, which its sent result records, and fills no properties) | - | - |
 | D5 chemical summary table, two sheets (3-3) | None | None (landed in wave H, slice U3: the browser CSV carries values plus a source column) | - | - |
 | E1 to E8 conceptual site model choices (4-2 to 4-4) | None (landed in wave H, slice U2: advisory site model screen at `#/site` (`apps/web/src/site/`) turns the choices into an ordered screen checklist with the feed to send on each; saved under `site`, one line in the report; locks nothing) | - | - |
 | E9, G13 ecological Step 2 and 4 (4-4, 6-7) | `#/plants-eco` screening | Out of scope (RISC5 guide leaves it pending) | - | - |
@@ -172,7 +172,7 @@ saved state: add an optional key or optional field inside format version 1 and a
 - Scope: a chemical select on `#/transport`, `#/vadose` and `#/saturated` that fills the properties the
   RSL record carries (Koc, solubility, Henry's constant, diffusivities, molecular weight) using the
   `vapor/chemicals.ts` pattern; values stay editable; a note names the source; properties the database
-  lacks (half-life, decay) stay user inputs and say so. Surface water excluded until G4 lands.
+  lacks (half-life, decay) stay user inputs and say so. Surface water excluded until G4 lands (G4 landed in wave G; since wave O the surface water screen picks a project chemical but fills no properties).
 - Files: shared helper lifted from `vapor/chemicals.ts`, `transport/form.ts` and page, `vadose/form.ts` and
   page, `saturated/` form and page, tests.
 - Acceptance: fill test per screen against a fixture record; the vadose benzene validation case still

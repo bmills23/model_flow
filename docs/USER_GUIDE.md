@@ -104,8 +104,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
   the reload recovery is lost.
 - The automatic copy of a version 2 project is kept under its own name in this browser, so a tab still
-  running an older version of the app cannot overwrite it. A copy made by the older app is read once and moved
-  to the new name; the older app keeps its own copy. If the copy was saved by a newer version of the app than
+  running an older version of the app cannot overwrite it. A copy made by the older app is read once and copied
+  to the new name; the older app's copy is left as it is. If the copy was saved by a newer version of the app than
   this tab runs, a short notice under the project bar says so and this tab does not save over it.
 
 ## Screens
@@ -127,7 +127,7 @@ The screen opens with **Project chemicals**, the one list of chemicals the proje
 beside a chemical puts it on the list (a chemical already on it reads "In the project"). **Remove** takes a
 chemical out of the whole project, after asking: the question names what goes with it, which is its row and
 everything entered on it on the exposure and risk and the cleanup levels screens, and the results held for it
-(the groundwater well result, the vapor air result and so on). A screen that is set to it keeps that choice and
+(the groundwater well result, the vapor air result and so on). A screen set to a database chemical keeps that choice and
 shows it as no longer in the list. For a chemical you defined, removing also deletes its surface water target and
 toxicity values, and a screen set to it is set back to no chemical (the values typed on that screen stay); a chemical you
 define later does not inherit any of it. Removing cannot be undone.
@@ -176,7 +176,7 @@ Under the plume map, **Download CSV: plume grid** saves the whole map grid as a 
 with the method, the downgradient distance x (m), y (m) and the concentration (mg/L) at the time shown on the
 map. The transport table's own CSV does not carry the plume grid.
 
-The Chemical select lists the chemicals of the project (add them on the chemicals screen). It fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen). It fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 
 ### Vadose leaching (`#/vadose`)
 
