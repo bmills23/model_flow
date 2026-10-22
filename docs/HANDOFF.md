@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-22, after the waves O and P push)
+# HANDOFF (written from the tree, 2026-10-22, after the wave Q push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -11,17 +11,18 @@ skipping a done one.
   built on branch `wave-k`) and waves L and M (built together on branch `wave-lm` with a corrective pass) and wave N (three slices and a
   corrective pass, built on branch `wave-n`; head `6c186e7`), each fast-forwarded to main and pushed 2026-10-21, and waves O
   and P (eight slices and a corrective pass, built together on branch `wave-op`; code head `d80adf6`, then the
-  wave close docs commit), fast-forwarded to main and pushed 2026-10-22. Pages deploys from main:
+  wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave Q (one slice on branch
+  `wave-q`), pushed 2026-10-22. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-op` after its corrective pass (2026-10-22): exit 0, build included. Test
+- Last full `corepack pnpm gate` on `wave-q` (2026-10-22): exit 0, build included. Test counts: engine 1388, web
+  1912, data 180 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 632 s, 0 overflow and 0 axe
+  violations on every route at 390 light, 390 dark and 1280.
+- Previous full `corepack pnpm gate` on `wave-op` after its corrective pass (2026-10-22): exit 0, build included. Test
   counts: engine 1388 (86 files), web 1899 (197 files), data 180 passed and 3 skipped. `mobile:check:full` on that
   tree: exit 0 in 578 s, 0 overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, including
   a `#/chemicals` visit with a filled project list (editor and remove panel open) and a modeled cleanup and
   report run with two chemicals.
-- Previous full `corepack pnpm gate`, on `wave-n` after its corrective pass (2026-10-21): exit 0, build included. Test
-  counts: engine 1388 (86 files), web 1763 (176 files), data 180 passed and 3 skipped. The mobile check on that
-  tree covered `#/household`, `#/vapor`, `#/transport`, `#/surface-water` and `#/risk` in every view (0 overflow, 0
-  axe violations, exit 0); `mobile:check:full` on the tree before the corrective pass: exit 0 on every route.
+
 - Earlier full gate, on `wave-speed` rebased onto main (2026-10-21, the check cadence change): exit 0,
   build included, run backgrounded with no stdin redirect. Test counts: engine 1387 (86 files), web 1697 (166
   files), data 179 passed and 3 skipped (the skipped three are the Eco-SSL `pdftotext` cross-checks, which need
@@ -453,20 +454,25 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   push unless code changed since (cadence in CLAUDE.md).
 - Timing checks under load: `vadose-legacy.test.ts` (best of nine under 250 ms) and
   `groundwater-kernel.test.ts` (best of three under 1 s, mass conservation 30 s timeout) were made robust to
-  parallel load. Other timing tests also fail under heavy host load (the methods citation test now has a 30 s
+  parallel load. Two test races were fixed 2026-10-22 (`rowsDiffer.test.tsx` read a row
+  synchronously after awaiting another; `VaporScreens.test.tsx` clicked send before a passive store-write effect
+  ran). Other timing tests also fail under heavy host load (the methods citation test now has a 30 s
   timeout). If one fails, re-run that file alone before treating it as a regression.
 - Manual text extraction lives outside the repo; re-extract when needed:
   `pdftotext -layout "~/Downloads/RISC5 Users Guide -- Nov 2014 (2).pdf" <out>.txt`
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 and 2026-10-22: waves J to P merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 and 2026-10-22: waves J to Q merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
-- No wave is planned. Candidates: the next-wave rows under the Wave P entry in ROADMAP section 7; the parity gaps
-  with no plan (RISC5 Appendix K, source levels through nonlinear paths, international criteria sets, MacDonald
-  et al. 2000 TEC and PEC values); and the evidence gap in the open items above (unread primary sources, no RISC5
-  output comparison), which is what separates the app from regulatory use. Bryan has not yet said whether the
-  target user is learning, screening or regulatory work; that answer orders these.
+- Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
+  the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). Next, his
+  pick: the evidence wave (the report lists the unverified and user-entered values a run uses; the two dispersivity
+  regressions without a primary source get a sourced replacement or become required inputs; cross-checks against
+  EPA's RSL and VISL calculators). Not ruled on, recommended: source levels through nonlinear paths after the
+  evidence wave; RISC5 Appendix K not built (its only source is an unpublished draft; DeVaull 2007 covers
+  oxygen-limited vapor); international criteria sets only for work outside the US; MacDonald et al. 2000 TEC and
+  PEC values once the paper is read.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
   2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a
