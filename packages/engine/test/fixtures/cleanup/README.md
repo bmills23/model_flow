@@ -14,12 +14,14 @@ thirty values.
 
 What this fixture validates and what it does not. It checks the three-phase partition formula and the
 DAF arithmetic to the table's rounding, and the metal Kd values (which agree with the RSL parameters table).
-It does not validate the organic Koc and H': those were typed into the file and were not read from the
-primary document's Tables 36 or C-1, so they are not claimed as sourced. They are only loosely constrained by
-the printed levels (one or two significant figures: benzene's H' is free between 0 and about 0.5 and its Koc
-only to about 40 to 65 L/kg); only styrene at DAF 20 and arsenic at DAF 1 bind tightly. Verifying the typed
-values against the document is open work. Fixture 2 (91 RSL rows, two figures, in the data package) is the real
-constraint on the formula.
+The nine organic Koc and H' values were checked on 2026-10-21 against the EPA SEMS copy of the document
+(semspub.epa.gov/work/HQ/207.pdf). Each H' is the dimensionless constant (column HN) of Table 36, "Chemical-Specific
+Properties Used in SSL Calculations" (printed pp. 132 to 136); each Koc is the "calculated Koc" of Table 39,
+"Comparison of Measured and Calculated Koc Values" (printed pp. 141 to 145). All nine Koc values and eight of
+nine H' values matched as typed; PCE's H' was typed 0.753 and Table 36 prints 7.54E-01, so the fixture now
+carries 0.754 (the test still passes at the same tolerance). Table C-1 of the User's Guide is not in that
+document and was not read. The inorganic Kd values come from Table 46 as stated above and were not re-read on
+that date. Fixture 2 (91 RSL rows, two figures, in the data package) is the independent constraint on the formula.
 
 The organic Koc and H' are not the RSL's current ones (the RSL has moved on from the 1996
 values), so the RSL table cannot stand in for them. Tolerance: the table's own rounding, half a unit in the

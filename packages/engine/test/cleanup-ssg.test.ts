@@ -229,3 +229,10 @@ describe('warnings', () => {
     expect(r.warnings).toHaveLength(0);
   });
 });
+
+describe('organic Koc and H of the fixture are the document printed values', () => {
+  it('uses the Table 36 dimensionless Henry constant of PCE, 7.54E-01', () => {
+    const pce = table.chemicals.find((c) => c.name === 'tetrachloroethylene');
+    expect(pce?.henryDimensionless).toBe(0.754);
+  });
+});

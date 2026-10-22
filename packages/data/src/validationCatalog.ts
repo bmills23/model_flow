@@ -133,7 +133,7 @@ const examples: ExampleSpec[] = [
     referenceKey: 'epa1996ssg',
     methodIds: ['cleanup.ssg-leaching'],
     compares:
-      'The MCL-based generic level at DAF 20 and DAF 1 for 15 chemicals. It checks the three-phase partition formula, the DAF arithmetic and the metal Kd values; it does not check the organic Koc and H, which were typed into the file.',
+      'The MCL-based generic level at DAF 20 and DAF 1 for 15 chemicals. It checks the three-phase partition formula, the DAF arithmetic and the metal Kd values; the organic Koc and H were read from Tables 36 and 39 of the document on 2026-10-21.',
     count: (j) => (j[0].chemicals.length * 2) as number,
     casesUnit: 'printed levels',
     tolerance:
@@ -693,7 +693,7 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['shower.rsl-household'],
       warningCode: 'shower.household-factor-unverified',
       referenceKey: 'epa2024rslug',
-      note: 'An entered value that could not be verified against a primary page of the RSL documentation.',
+      note: "An entered value that could not be verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The equation form (C_a = C_w K) is not confirmed, because the page prints its equations as images, so the warning stays.",
       where: {
         file: 'packages/engine/src/processes/shower/household.ts',
         needle: 'could not be verified against a primary page',
@@ -727,7 +727,7 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['plantUptake.trapp-matthies-1995', 'plantUptake.hhrap-2005'],
       warningCode: null,
       referenceKey: 'briggs1982',
-      note: 'The constants are those the HHRAP appendix prints for the Briggs correlation, not read from the original paper.',
+      note: "The constants 0.77 and -1.52 were read in the paper itself on 2026-10-21 (Pestic. Sci. 13, 495-504, open copy in the Rothamsted repository, page 500, Equations 1 and 2; the TSCF equation is on page 502). The engine's form drops the paper's 0.82 term above log Kow 2, as the HHRAP appendix does: Equation 1 is the macerated-root line, and Equation 2 adds 0.82 to the root concentration factor at every log Kow.",
       where: {
         file: 'packages/engine/src/processes/plantUptake/index.ts',
         needle: 'The root factor constants are those the HHRAP appendix prints',
@@ -749,10 +749,10 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['vadose.vadsat'],
       warningCode: null,
       referenceKey: 'gelhar1985',
-      note: 'The coefficients are taken from the RISC5 manual’s statement of its choice; the EPRI report was not checked for them, so the reference entry does not vouch for them.',
+      note: 'The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain.',
       where: {
         file: 'docs/methods/vadose-leaching.md',
-        needle: 'the EPRI report was not',
+        needle: 'no primary source for the',
       },
     },
     {
@@ -760,10 +760,10 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['cleanup.ssg-leaching'],
       warningCode: null,
       referenceKey: 'epa1996ssg',
-      note: 'Typed into the fixture and not read from Tables 36 or C-1 of the primary document; only loosely constrained by the printed levels.',
+      note: "The nine organic Koc values (Table 39, calculated Koc) and H (Table 36, dimensionless) were read from the primary document on 2026-10-21 and match, after correcting PCE H to 0.754. Table C-1 of the User's Guide and the inorganic Kd values were not re-read.",
       where: {
         file: 'packages/engine/test/fixtures/cleanup/README.md',
-        needle: 'were not read from the',
+        needle: 'were checked on 2026-10-21',
       },
     },
   ],
