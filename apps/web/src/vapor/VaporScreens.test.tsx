@@ -23,6 +23,9 @@ async function pickProjectChemical(id: string, name: string): Promise<void> {
   await waitFor(() =>
     expect((screen.getByLabelText(/^molar mass/i) as HTMLInputElement).value).not.toBe('78'),
   );
+  // waitFor can pass between a commit and its passive effects; the effect that writes the form to the
+  // project store must have run, or a send records the stale-mark fingerprint from the previous form
+  await act(async () => {});
 }
 
 afterEach(() => {
