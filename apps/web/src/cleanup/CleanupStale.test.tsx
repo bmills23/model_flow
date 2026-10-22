@@ -52,6 +52,12 @@ function edit(screenKey: 'household' | 'vapor' | 'surfaceWater' | 'plantsEco' | 
 describe('cleanup stale marks', () => {
   it('marks each source level panel, the produce choice and the TPH panel only while its feed is stale', async () => {
     const epc = { kind: 'constant' as const, value: 1e-6, origin: 'vapor.je-1991' };
+    // the sending screens are on benzene, as when these results were sent (a slot is checked while
+    // its screen is on the slot's chemical)
+    for (const key of ['household', 'vapor', 'plantsEco'] as const) {
+      const s = getScreen(key);
+      setScreen(key, { ...s, form: { ...s.form, chemicalId: '71-43-2' } } as never);
+    }
     setHouseholdFeed({
       chemicalId: '71-43-2',
       label: 'Benzene, household run',
@@ -123,7 +129,10 @@ describe('cleanup stale marks', () => {
     expect(within(household).getByText(/send again from household/i)).toBeTruthy();
     expect(within(vapor).queryByText(MARK)).toBeNull();
     expect(within(surface).queryByText(MARK)).toBeNull();
-    expect(screen.getByRole('note').textContent).toMatch(/Household exposure values \(Household\)/);
+    expect(screen.getByRole('note').textContent).toMatch(
+      // the note names the chemical of the stale slot
+      /Household exposure values for 71-43-2 \(Household\)/,
+    );
 
     edit('vapor');
     expect(within(vapor).getByText(MARK)).toBeTruthy();

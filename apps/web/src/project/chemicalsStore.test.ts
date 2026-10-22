@@ -80,6 +80,29 @@ describe('project chemical list in the store', () => {
     expect(getChemicals()).toHaveLength(1);
   });
 
+  it('a removed entry comes back when another screen newly names it, though a screen named it before', () => {
+    setTransportChemical('71-43-2');
+    removeChemical('71-43-2');
+    // the transport screen still names it; editing it does not bring it back
+    setScreen('transport', {
+      ...getScreen('transport'),
+      form: { ...getScreen('transport').form, K: '9' },
+    });
+    expect(getChemicals()).toEqual([]);
+    const v = getScreen('vadose');
+    setScreen('vadose', { ...v, form: { ...v.form, chemicalId: '71-43-2' } });
+    expect(getChemicals()).toEqual([{ id: '71-43-2', name: '71-43-2' }]);
+  });
+
+  it('the surface water screen chemical joins the list and the derivation', () => {
+    const sw = getScreen('surfaceWater');
+    setScreen('surfaceWater', { form: { ...sw.form, chemicalId: '127-18-4' } });
+    expect(getChemicals().map((c) => c.id)).toEqual(['127-18-4']);
+    const screens = defaultScreens();
+    screens.surfaceWater.form = { ...screens.surfaceWater.form, chemicalId: '127-18-4' };
+    expect(deriveChemicals(screens)).toEqual([{ id: '127-18-4', name: '127-18-4' }]);
+  });
+
   it('add ignores a blank or repeated id; subscribers hear about changes only', () => {
     const fn = vi.fn();
     const off = subscribeChemicals(fn);
@@ -151,7 +174,8 @@ describe('project chemical list in the store', () => {
       feeds: { well: feedEntry('transport', screens.transport.form, well) } as never,
       createdWith: '0',
     });
-    const r = parseProject(JSON.parse(JSON.stringify(doc)));
+    // an older file: version 1 holds a single well feed, which version 2 keeps per chemical
+    const r = parseProject({ ...JSON.parse(JSON.stringify(doc)), version: 1 });
     if (!r.ok) throw new Error(r.error);
     expect(r.project.chemicals).toBeUndefined();
     loadProject(r.project);

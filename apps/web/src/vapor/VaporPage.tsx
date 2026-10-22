@@ -11,11 +11,12 @@ import { DownloadCsv } from '../export/DownloadCsv';
 import { vaporCsvTables } from './csv';
 import { vaporCoefficients, type VaporCoefficients } from './coefficients';
 import { runVapor, type VaporOutcome } from './compute';
+import { ownSlot, pickSlot } from '../project/feedSlots';
 import {
-  getSaturatedVaporFeed,
-  getVadoseVaporFeed,
-  getVaporRiskFeed,
-  getWaterTableFeed,
+  getSaturatedVaporFeedSlots,
+  getVadoseVaporFeedSlots,
+  getVaporRiskFeedSlots,
+  getWaterTableFeedSlots,
   setVaporRiskFeed,
   subscribeSaturatedVaporFeed,
   subscribeVadoseVaporFeed,
@@ -218,22 +219,31 @@ export function VaporPage() {
     () => setScreen('vapor', { form, outdoor: outdoorForm, af, pvi, choice }),
     [form, outdoorForm, af, pvi, choice],
   );
-  const vadoseFeed = useSyncExternalStore(
-    subscribeVadoseVaporFeed,
-    getVadoseVaporFeed,
-    getVadoseVaporFeed,
+  // the sources sent for this screen's chemical (one slot per chemical), and what it sent for it
+  const vadoseFeed = pickSlot(
+    useSyncExternalStore(
+      subscribeVadoseVaporFeed,
+      getVadoseVaporFeedSlots,
+      getVadoseVaporFeedSlots,
+    ),
+    form.chemicalId,
   );
-  const tableFeed = useSyncExternalStore(
-    subscribeWaterTableFeed,
-    getWaterTableFeed,
-    getWaterTableFeed,
+  const tableFeed = pickSlot(
+    useSyncExternalStore(subscribeWaterTableFeed, getWaterTableFeedSlots, getWaterTableFeedSlots),
+    form.chemicalId,
   );
-  const satFeed = useSyncExternalStore(
-    subscribeSaturatedVaporFeed,
-    getSaturatedVaporFeed,
-    getSaturatedVaporFeed,
+  const satFeed = pickSlot(
+    useSyncExternalStore(
+      subscribeSaturatedVaporFeed,
+      getSaturatedVaporFeedSlots,
+      getSaturatedVaporFeedSlots,
+    ),
+    form.chemicalId,
   );
-  const riskHeld = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
+  const riskHeld = ownSlot(
+    useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeedSlots, getVaporRiskFeedSlots),
+    form.chemicalId,
+  );
 
   const chemicalList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const { held, problems } = useMemo(
@@ -721,7 +731,7 @@ export function VaporPage() {
                   disabled={stale}
                   tables={vaporCsvTables(shown, feedEpcs).map((t) => ({
                     ...t,
-                    feeds: vaporFeedsRead(active ? choice : 'entered'),
+                    feeds: vaporFeedsRead(active ? choice : 'entered', form.chemicalId),
                   }))}
                 />
                 {(['legacy', 'modern'] as const).map((m) => {
@@ -841,7 +851,7 @@ export function VaporPage() {
                 result={pviResult}
               />
 
-              <StaleMark feed={vaporFeedsRead(active ? choice : 'entered')} />
+              <StaleMark feed={vaporFeedsRead(active ? choice : 'entered', form.chemicalId)} />
               <SourcePanel
                 choice={active ? choice : 'entered'}
                 onChoice={setChoice}

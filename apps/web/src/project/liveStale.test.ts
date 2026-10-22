@@ -183,12 +183,26 @@ const CASES: Case[] = [
   { key: 'tph', send: sendTph, edit: editPlantsEco },
 ];
 
+/**
+ * A slot is checked while its screen is set to the slot's chemical (wave O slice O4), so the screens
+ * whose feeds always carry a chemical are set to the chemical of the feeds sent below.
+ */
+function setSenderChemicals(): void {
+  const v = getScreen('vapor');
+  setScreen('vapor', { ...v, form: { ...v.form, chemicalId: riskFeed.chemicalId } });
+  const h = getScreen('household');
+  setScreen('household', { form: { ...h.form, chemicalId: householdFeed.chemicalId } });
+  const p = getScreen('plantsEco');
+  setScreen('plantsEco', { form: { ...p.form, chemicalId: '71-43-2' } });
+}
+
 describe('live feed staleness', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     localStorage.clear();
     forgetMemory();
     wipe();
+    setSenderChemicals();
     vi.runAllTimers();
     localStorage.clear();
   });

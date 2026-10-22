@@ -118,6 +118,22 @@ input[type='text'] {
   padding: 0 10px;
 }
 
+/* the shared project chemical select (ui/ProjectChemicalSelect.tsx), sized as the text fields */
+.project-chemical-select select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--tap);
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.project-chemical-select select:focus-visible,
 input[type='text']:focus-visible,
 .seg input:focus-visible + span,
 .check input:focus-visible,

@@ -23,6 +23,10 @@ describe('exposure and risk stale marks', () => {
       values: [0, 1e-6, 4e-6],
     });
     const epc = { kind: 'constant' as const, value: 1e-6, origin: 'vapor.je-1991' };
+    // the vapor screen is on benzene, as when this result was sent (a slot is checked while its
+    // screen is on the slot's chemical)
+    const v0 = getScreen('vapor');
+    setScreen('vapor', { ...v0, form: { ...v0.form, chemicalId: '71-43-2' } });
     setVaporRiskFeed({
       chemicalId: '71-43-2',
       label: 'Vapor run, legacy',

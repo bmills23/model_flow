@@ -1,0 +1,937 @@
+{
+  "format": "model_flow.project",
+  "version": 1,
+  "createdWith": "0.0.0",
+  "savedAt": "2026-10-21T12:00:00.000Z",
+  "screens": {
+    "transport": {
+      "form": {
+        "aquiferMode": "darcy",
+        "K": "12",
+        "gradient": "0.003",
+        "velocityYr": "37.9",
+        "porosity": "0.25",
+        "thicknessMode": "infinite",
+        "thickness": "10",
+        "width": "",
+        "retardMode": "factor",
+        "retardation": "2",
+        "kd": "0.1",
+        "chemicalId": "71-43-2",
+        "foc": "0.001",
+        "bulkDensity": "1.7",
+        "halfLifeYr": "10",
+        "srcLength": "15",
+        "srcWidth": "20",
+        "srcDepth": "3",
+        "sourceMode": "concentration",
+        "c0": "10",
+        "massRate": "100",
+        "loading": "continuous",
+        "pulseYr": "5",
+        "steps": [
+          {
+            "start": "0",
+            "end": "5",
+            "factor": "1"
+          },
+          {
+            "start": "8",
+            "end": "12",
+            "factor": "0.5"
+          }
+        ],
+        "feedFromVadose": false,
+        "feedFromSaturated": false,
+        "dispLaw": "legacy",
+        "alphaLOverride": "",
+        "alphaTOverride": "",
+        "alphaVOverride": "",
+        "rx": "100",
+        "ry": "0",
+        "rDepth": "1.5",
+        "screen": false,
+        "screenTop": "0.5",
+        "screenBottom": "2.5",
+        "timeYr": "15",
+        "xMin": "-20",
+        "xMax": "250",
+        "yHalf": "50",
+        "mapMethod": "legacy",
+        "showDomenico": false,
+        "scale": "linear"
+      },
+      "method": "modern"
+    },
+    "vadose": {
+      "form": {
+        "infiltration": "20",
+        "M": "78",
+        "S": "1750",
+        "H": "0.228",
+        "chemicalId": "",
+        "Koc": "59",
+        "Da": "0.088",
+        "Dw": "9.8e-6",
+        "mu": "0.001",
+        "source": {
+          "texture": "custom",
+          "thickness": "3",
+          "thetaS": "0.35",
+          "thetaR": "0.05",
+          "n": "2.68",
+          "Ks": "10",
+          "rhoB": "1.7",
+          "foc": "0.01"
+        },
+        "srcLength": "10",
+        "srcWidth": "10",
+        "srcF": "500",
+        "tphOn": true,
+        "srcFT": "5000",
+        "srcMT": "100",
+        "srcDecay": "0",
+        "above": [
+          {
+            "texture": "custom",
+            "thickness": "3.8",
+            "thetaS": "0.35",
+            "thetaR": "0.05",
+            "n": "2.68",
+            "Ks": "10",
+            "rhoB": "1.7",
+            "foc": "0.01"
+          },
+          {
+            "texture": "custom",
+            "thickness": "0.2",
+            "thetaS": "0.35",
+            "thetaR": "0.15",
+            "n": "2",
+            "Ks": "1",
+            "rhoB": "1.7",
+            "foc": "0.01"
+          }
+        ],
+        "below": [
+          {
+            "texture": "custom",
+            "thickness": "2.8",
+            "thetaS": "0.35",
+            "thetaR": "0.05",
+            "n": "2.68",
+            "Ks": "10",
+            "rhoB": "1.7",
+            "foc": "0.01"
+          }
+        ],
+        "durationYr": "10",
+        "alphaL": "",
+        "hydraulicModel": "default",
+        "method": "legacy",
+        "scale": "linear",
+        "measure": "concentration"
+      }
+    },
+    "saturated": {
+      "form": {
+        "srcLength": "10",
+        "srcWidth": "10",
+        "srcThickness": "2",
+        "hMin": "0.5",
+        "dh": "1",
+        "fractionHigh": "0.25",
+        "schedule": "annual-mean",
+        "texture": "custom",
+        "porosity": "0.3",
+        "rhoB": "1.7",
+        "foc": "0.002",
+        "thetaR": "0.05",
+        "n": "1.5",
+        "hydraulicModel": "default",
+        "K": "5",
+        "gradient": "0.01",
+        "infiltration": "20",
+        "F": "50",
+        "M": "78",
+        "S": "1750",
+        "H": "0.228",
+        "chemicalId": "108-88-3",
+        "Koc": "59",
+        "tphOn": true,
+        "FT": "5000",
+        "MT": "100",
+        "srcDecay": "0",
+        "horizonYr": "10",
+        "method": "both"
+      },
+      "method": "legacy"
+    },
+    "vapor": {
+      "form": {
+        "chemicalId": "108-88-3",
+        "M": "78",
+        "S": "1750",
+        "H": "0.228",
+        "Koc": "59",
+        "Da": "0.088",
+        "Dw": "9.8e-6",
+        "TB": "",
+        "TC": "",
+        "dHvb": "",
+        "temperature": "25",
+        "source": "soil",
+        "soilConc": "1000",
+        "tphOn": false,
+        "tph": "1000",
+        "tphMolarMass": "100",
+        "soilGas": "1000",
+        "cgw": "1",
+        "layers": [
+          {
+            "name": "Soil above the floor",
+            "texture": "custom",
+            "thickness": "2",
+            "porosity": "0.35",
+            "bulkDensity": "1.7",
+            "foc": "0.01",
+            "moisture": "0.05"
+          },
+          {
+            "name": "Vadose zone",
+            "texture": "custom",
+            "thickness": "2.6",
+            "porosity": "0.35",
+            "bulkDensity": "1.7",
+            "foc": "0.01",
+            "moisture": "0.05"
+          },
+          {
+            "name": "Lens at the source",
+            "texture": "custom",
+            "thickness": "0.2",
+            "porosity": "0.35",
+            "bulkDensity": "1.7",
+            "foc": "0.01",
+            "moisture": "0.15"
+          }
+        ],
+        "floorDepth": "2",
+        "capHeight": "",
+        "capPorosity": "",
+        "capMoisture": "",
+        "foundation": "basementSlab",
+        "floorArea": "150",
+        "volume": "400",
+        "airExchange": "0.5",
+        "crackFraction": "0.001",
+        "foundationThickness": "0.15",
+        "foundationPorosity": "0.25",
+        "foundationMoisture": "0",
+        "soilGasMode": "pressure",
+        "dP": "1",
+        "kv": "1e-9",
+        "seam": "50",
+        "viscosity": "1.8e-4",
+        "viscosityModern": "1.75e-4",
+        "qsoil": "5",
+        "method": "legacy"
+      },
+      "outdoor": {
+        "windSpeed": "2.25",
+        "mixingHeight": "2",
+        "boxLength": "10",
+        "boxWidth": "10",
+        "qOverC": "68.81"
+      },
+      "af": {
+        "medium": "groundwater",
+        "depthBelowFoundation": 0,
+        "preferential": false
+      },
+      "pvi": {
+        "sourceType": "auto",
+        "fuel": "unweathered",
+        "soilBenzene": "",
+        "soilTph": "",
+        "gwBenzene": "",
+        "gwTph": "",
+        "separation": "",
+        "smallestDimension": "",
+        "ethanol": "",
+        "preferential": false,
+        "leadScavengers": false,
+        "surfaceCover": false,
+        "contactsBuilding": false
+      },
+      "choice": "entered"
+    },
+    "surfaceWater": {
+      "form": {
+        "bodyType": "river",
+        "crossSection": "5",
+        "volume": "100000",
+        "upstreamFlow": "180",
+        "background": "0",
+        "mixingFraction": "1",
+        "decay": "0",
+        "dischargeMode": "darcy",
+        "bedConductivity": "10",
+        "gradient": "0.05",
+        "flow": "250",
+        "thickness": "5",
+        "reachMode": "entered",
+        "reachLength": "100",
+        "sourceWidth": "",
+        "bankX": "",
+        "groundwaterConcentration": "5",
+        "durationYr": "10",
+        "linked": true,
+        "chemicalId": "",
+        "sedimentOn": true,
+        "foc": "0.01",
+        "koc": "59",
+        "kd": "",
+        "poreWater": "discharge",
+        "downstream": "",
+        "solubility": "",
+        "scale": "linear"
+      }
+    },
+    "risk": {
+      "form": {
+        "chemicals": [
+          {
+            "id": "71-43-2",
+            "name": "Benzene",
+            "conc": {},
+            "groundwaterFromWell": true,
+            "indoorFromVapor": false,
+            "outdoorFromVapor": false,
+            "surfaceWaterFromModel": false,
+            "bathroomFromHousehold": false,
+            "indoorFromHousehold": false,
+            "outdoorFromHousehold": "",
+            "produceFromPlantsEco": false
+          },
+          {
+            "id": "108-88-3",
+            "name": "Toluene",
+            "conc": {},
+            "groundwaterFromWell": false,
+            "indoorFromVapor": true,
+            "outdoorFromVapor": false,
+            "surfaceWaterFromModel": false,
+            "bathroomFromHousehold": false,
+            "indoorFromHousehold": false,
+            "outdoorFromHousehold": "",
+            "produceFromPlantsEco": false
+          }
+        ],
+        "a": {
+          "preset": "resident",
+          "pathways": {
+            "soilIngestion": true,
+            "soilDermal": true,
+            "waterIngestion": true,
+            "waterDermal": true,
+            "showerInhalation": true,
+            "indoorInhalation": true,
+            "outdoorInhalation": true,
+            "swimIngestion": true,
+            "swimDermal": true
+          },
+          "soilSkinArea": "",
+          "soilAdherence": "",
+          "waterIngestion": "",
+          "waterSkinArea": "",
+          "inhalationRate": "",
+          "bathTime": "",
+          "swimTime": "",
+          "swimDays": "",
+          "outdoorTime": "",
+          "produce": false
+        },
+        "b": null,
+        "additive": false,
+        "routeExtrapolation": false,
+        "startMode": "max-risk",
+        "startYr": "0"
+      }
+    },
+    "cleanup": {
+      "form": {
+        "ssg": {
+          "on": false,
+          "daf": "1",
+          "targetKind": "mcl",
+          "userTarget": "",
+          "sourceDepth": "",
+          "rhoB": "1.5",
+          "foc": "0.002",
+          "theta": "0.3",
+          "siteK": "10",
+          "siteGradient": "0.005",
+          "siteInfiltration": "18",
+          "siteL": "45",
+          "siteDa": "10"
+        },
+        "source": "direct",
+        "targetKind": "risk",
+        "wellTarget": "",
+        "windowYr": "",
+        "startConc": "",
+        "solubility": "",
+        "secantParity": false,
+        "tphHeld": false,
+        "chemicals": [],
+        "a": {
+          "preset": "resident",
+          "pathways": {
+            "soilIngestion": true,
+            "soilDermal": true,
+            "waterIngestion": true,
+            "waterDermal": true,
+            "showerInhalation": true,
+            "indoorInhalation": true,
+            "outdoorInhalation": true,
+            "swimIngestion": true,
+            "swimDermal": true
+          },
+          "soilSkinArea": "",
+          "soilAdherence": "",
+          "waterIngestion": "",
+          "waterSkinArea": "",
+          "inhalationRate": "",
+          "bathTime": "",
+          "swimTime": "",
+          "swimDays": "",
+          "outdoorTime": "",
+          "produce": false
+        },
+        "b": null,
+        "additive": false,
+        "routeExtrapolation": false,
+        "allocation": "individual",
+        "targetRisk": "",
+        "targetHq": ""
+      }
+    },
+    "household": {
+      "form": {
+        "chemicalId": "71-43-2",
+        "chemicalName": "Benzene",
+        "waterConcentration": "",
+        "soilConcentration": "",
+        "henry": "",
+        "molecularWeight": "",
+        "henryAtm": "",
+        "vaporPressure": "",
+        "volatileOverride": "auto",
+        "householdFactor": "",
+        "filmGas": "",
+        "filmLiquid": "",
+        "showerDropletDiameter": "",
+        "showerFallTime": "",
+        "showerFlow": "",
+        "showerMinutes": "",
+        "stallVolume": "",
+        "ventilation": "",
+        "postShowerMinutes": "",
+        "sprayDropletDiameter": "",
+        "sprayFallTime": "",
+        "sprinklerFlow": "",
+        "applicationRate": "",
+        "alsoPotable": false,
+        "windSpeed": "",
+        "mixingHeight": "",
+        "boxLength": "",
+        "boxWidth": "",
+        "vegetativeCover": "0.5",
+        "meanWind": "4.69",
+        "thresholdWind": "11.32",
+        "fx": "0.194",
+        "qOverC": "",
+        "pm10Flux": "",
+        "showerMethod": "little",
+        "particulateMethod": "pef1996",
+        "showerWaterSource": "entered",
+        "irrigationWaterSource": "entered"
+      }
+    },
+    "plantsEco": {
+      "form": {
+        "chemicalId": "71-43-2",
+        "chemicalName": "Benzene",
+        "soilConcentration": "",
+        "logKow": "",
+        "koc": "",
+        "kd": "",
+        "ionizable": false,
+        "inorganic": false,
+        "userBcf": "",
+        "bulkDensity": "",
+        "waterFilledPorosity": "",
+        "foc": "",
+        "uptake": "modern",
+        "tscf": "",
+        "transpiration": "",
+        "conductance": "",
+        "leafArea": "",
+        "plantMass": "",
+        "kLeafAir": "",
+        "lossRate": "",
+        "growthPeriod": "",
+        "moistureFraction": "",
+        "intakeMode": "efh",
+        "ageGroup": "20 to 39",
+        "custom": {
+          "abovegroundExposed": {
+            "gPerKgDay": "",
+            "loss": "",
+            "homegrown": ""
+          },
+          "abovegroundProtected": {
+            "gPerKgDay": "",
+            "loss": "",
+            "homegrown": ""
+          },
+          "root": {
+            "gPerKgDay": "",
+            "loss": "",
+            "homegrown": ""
+          }
+        },
+        "benchmarks": [],
+        "wildlifeRows": [],
+        "tphSet": "tphcwg",
+        "tphTotal": "",
+        "tphTargetHi": "1",
+        "tphThetaA": "",
+        "tphFractions": []
+      }
+    },
+    "uncertainty": {
+      "form": {
+        "risk": {
+          "rows": {},
+          "correlation": {},
+          "sampling": "srs",
+          "iterations": "",
+          "seed": "model-flow",
+          "output": "",
+          "sobol": false,
+          "sobolN": "512",
+          "protection": "95",
+          "choice": ""
+        },
+        "cleanup": {
+          "rows": {},
+          "correlation": {},
+          "sampling": "srs",
+          "iterations": "",
+          "seed": "model-flow",
+          "output": "",
+          "sobol": false,
+          "sobolN": "512",
+          "protection": "95",
+          "choice": ""
+        },
+        "modeled": {
+          "rows": {},
+          "correlation": {},
+          "sampling": "srs",
+          "iterations": "",
+          "seed": "model-flow",
+          "output": "",
+          "sobol": false,
+          "sobolN": "512",
+          "protection": "95",
+          "choice": ""
+        }
+      }
+    }
+  },
+  "feeds": {
+    "well": {
+      "source": "transport",
+      "inputsHash": "591e9fed",
+      "value": {
+        "method": "modern",
+        "label": "Benzene, receptor well",
+        "times": [0, 31500000],
+        "values": [0, 0.000001],
+        "chemicalId": "71-43-2"
+      }
+    },
+    "surfaceWater": {
+      "source": "surfaceWater",
+      "inputsHash": "2313f699",
+      "value": {
+        "method": "well-mixed",
+        "origin": "surfaceWater.well-mixed",
+        "label": "River",
+        "times": [0, 31500000],
+        "values": [0, 2e-8]
+      }
+    },
+    "vadose": {
+      "source": "vadose",
+      "inputsHash": "22933685",
+      "value": {
+        "scenario": {
+          "duration": 315576000,
+          "profileTimes": [31557600, 78894000, 157788000, 315576000],
+          "legacy": {
+            "q": 6.337617562805791e-9,
+            "chemical": {
+              "M": 0.078,
+              "S": 1.75,
+              "H": 0.228,
+              "Koc": 0.059000000000000004,
+              "Da": 0.0000088,
+              "Dw": 9.8e-10,
+              "mu": 1.1574074074074074e-8
+            },
+            "depths": [
+              0, 0.04666666666666666, 0.09333333333333332, 0.13999999999999999, 0.18666666666666665,
+              0.23333333333333334, 0.27999999999999997, 0.3266666666666666, 0.3733333333333333,
+              0.42, 0.4666666666666667, 0.5133333333333333, 0.5599999999999999, 0.6066666666666667,
+              0.6533333333333332, 0.7, 0.7466666666666666, 0.7933333333333332, 0.84,
+              0.8866666666666666, 0.9333333333333333, 0.98, 1.0266666666666666, 1.0733333333333333,
+              1.1199999999999999, 1.1666666666666667, 1.2133333333333334, 1.26, 1.3066666666666664,
+              1.353333333333333, 1.4, 1.4466666666666665, 1.4933333333333332, 1.5399999999999998,
+              1.5866666666666664, 1.6333333333333333, 1.68, 1.7266666666666666, 1.7733333333333332,
+              1.8199999999999998, 1.8666666666666667, 1.9133333333333333, 1.96, 2.0066666666666664,
+              2.0533333333333332, 2.0999999999999996, 2.1466666666666665, 2.1933333333333334,
+              2.2399999999999998, 2.2866666666666666, 2.3333333333333335, 2.38, 2.4266666666666667,
+              2.473333333333333, 2.52, 2.566666666666667, 2.613333333333333, 2.6599999999999997,
+              2.706666666666666, 2.753333333333333, 2.8
+            ],
+            "profileTimes": [31557600, 78894000, 157788000, 315576000],
+            "duration": 315576000,
+            "depthToSource": 4,
+            "above": {
+              "thetaS": 0.35,
+              "thetaR": 0.05,
+              "n": 2.68,
+              "Ks": 0.00011574074074074073,
+              "rhoB": 1700.0000000000002,
+              "foc": 0.01
+            },
+            "lens": {
+              "thickness": 0.2,
+              "thetaS": 0.35,
+              "thetaR": 0.15,
+              "n": 2,
+              "Ks": 0.000011574074074074073,
+              "rhoB": 1700.0000000000002,
+              "foc": 0.01
+            },
+            "source": {
+              "thickness": 3,
+              "thetaS": 0.35,
+              "thetaR": 0.05,
+              "n": 2.68,
+              "Ks": 0.00011574074074074073,
+              "rhoB": 1700.0000000000002,
+              "foc": 0.01,
+              "length": 10,
+              "width": 10,
+              "F": 0.0005,
+              "FT": 0.005,
+              "MT": 0.1,
+              "decayRate": 0
+            },
+            "below": {
+              "thickness": 2.8,
+              "thetaS": 0.35,
+              "thetaR": 0.05,
+              "n": 2.68,
+              "Ks": 0.00011574074074074073,
+              "rhoB": 1700.0000000000002,
+              "foc": 0.01
+            }
+          },
+          "legacyReason": null,
+          "modern": {
+            "q": 6.337617562805791e-9,
+            "chemical": {
+              "M": 0.078,
+              "S": 1.75,
+              "H": 0.228,
+              "Koc": 0.059000000000000004,
+              "Da": 0.0000088,
+              "Dw": 9.8e-10,
+              "mu": 1.1574074074074074e-8
+            },
+            "depths": [
+              0, 0.04666666666666666, 0.09333333333333332, 0.13999999999999999, 0.18666666666666665,
+              0.23333333333333334, 0.27999999999999997, 0.3266666666666666, 0.3733333333333333,
+              0.42, 0.4666666666666667, 0.5133333333333333, 0.5599999999999999, 0.6066666666666667,
+              0.6533333333333332, 0.7, 0.7466666666666666, 0.7933333333333332, 0.84,
+              0.8866666666666666, 0.9333333333333333, 0.98, 1.0266666666666666, 1.0733333333333333,
+              1.1199999999999999, 1.1666666666666667, 1.2133333333333334, 1.26, 1.3066666666666664,
+              1.353333333333333, 1.4, 1.4466666666666665, 1.4933333333333332, 1.5399999999999998,
+              1.5866666666666664, 1.6333333333333333, 1.68, 1.7266666666666666, 1.7733333333333332,
+              1.8199999999999998, 1.8666666666666667, 1.9133333333333333, 1.96, 2.0066666666666664,
+              2.0533333333333332, 2.0999999999999996, 2.1466666666666665, 2.1933333333333334,
+              2.2399999999999998, 2.2866666666666666, 2.3333333333333335, 2.38, 2.4266666666666667,
+              2.473333333333333, 2.52, 2.566666666666667, 2.613333333333333, 2.6599999999999997,
+              2.706666666666666, 2.753333333333333, 2.8
+            ],
+            "profileTimes": [31557600, 78894000, 157788000, 315576000],
+            "duration": 315576000,
+            "above": [
+              {
+                "thickness": 3.8,
+                "thetaS": 0.35,
+                "thetaR": 0.05,
+                "n": 2.68,
+                "Ks": 0.00011574074074074073,
+                "rhoB": 1700.0000000000002,
+                "foc": 0.01
+              },
+              {
+                "thickness": 0.2,
+                "thetaS": 0.35,
+                "thetaR": 0.15,
+                "n": 2,
+                "Ks": 0.000011574074074074073,
+                "rhoB": 1700.0000000000002,
+                "foc": 0.01
+              }
+            ],
+            "source": {
+              "thickness": 3,
+              "thetaS": 0.35,
+              "thetaR": 0.05,
+              "n": 2.68,
+              "Ks": 0.00011574074074074073,
+              "rhoB": 1700.0000000000002,
+              "foc": 0.01,
+              "length": 10,
+              "width": 10,
+              "F": 0.0005,
+              "FT": 0.005,
+              "MT": 0.1,
+              "decayRate": 0
+            },
+            "below": [
+              {
+                "thickness": 2.8,
+                "thetaS": 0.35,
+                "thetaR": 0.05,
+                "n": 2.68,
+                "Ks": 0.00011574074074074073,
+                "rhoB": 1700.0000000000002,
+                "foc": 0.01
+              }
+            ]
+          },
+          "source": {
+            "length": 10,
+            "width": 10,
+            "thickness": 3
+          },
+          "waterTableDepth": 2.8
+        },
+        "method": "modern",
+        "label": "Vadose by hand"
+      }
+    },
+    "saturated": {
+      "source": "saturated",
+      "inputsHash": "fa0200f6",
+      "value": {
+        "input": {
+          "source": {
+            "length": 10,
+            "width": 10,
+            "thickness": 2,
+            "minSaturatedThickness": 0.5,
+            "fluctuation": 1,
+            "fractionHigh": 0.25,
+            "schedule": "annual-mean"
+          },
+          "soil": {
+            "porosity": 0.3,
+            "rhoB": 1700.0000000000002,
+            "foc": 0.002,
+            "thetaR": 0.05,
+            "n": 1.5
+          },
+          "aquifer": {
+            "conductivity": 0.000057870370370370366,
+            "gradient": 0.01
+          },
+          "infiltration": 6.337617562805791e-9,
+          "chemical": {
+            "F": 0.000049999999999999996,
+            "M": 0.078,
+            "S": 1.75,
+            "H": 0.228,
+            "koc": 0.059000000000000004,
+            "FT": 0.005,
+            "MT": 0.1
+          },
+          "tEnd": 315576000
+        },
+        "method": "legacy",
+        "label": "Toluene source",
+        "chemicalId": "108-88-3"
+      }
+    },
+    "bank": {
+      "source": "transport",
+      "inputsHash": "591e9fed",
+      "value": {
+        "scenario": {
+          "velocity": 0.0000016666666666666667,
+          "porosity": 0.25,
+          "retardation": 2,
+          "decayRate": 2.1964508725630127e-9,
+          "alphaL": 11.04818115264568,
+          "alphaT": 3.6827270508818937,
+          "alphaV": 0.042330195987148204,
+          "dx": 0.000018413635254409468,
+          "dy": 0.00000613787841813649,
+          "dz": 7.055032664524701e-8,
+          "source": {
+            "x1": -15,
+            "x2": 0,
+            "y1": -10,
+            "y2": 10,
+            "z1": -3,
+            "z2": 0
+          },
+          "srcLength": 15,
+          "srcWidth": 20,
+          "srcDepth": 3,
+          "c0": 0.01,
+          "massRate": 2.5e-7,
+          "terms": [
+            {
+              "start": 0,
+              "end": {
+                "$nonfinite": "Infinity"
+              },
+              "factor": 1
+            }
+          ],
+          "receptor": {
+            "x": 100,
+            "y": 0
+          },
+          "receptorDepths": {
+            "top": 1.5,
+            "bottom": 1.5
+          },
+          "time": 473364000,
+          "top": "no-flux",
+          "extent": {
+            "xMin": -20,
+            "xMax": 250,
+            "yHalf": 50
+          },
+          "dispersivityDistance": 100,
+          "lawAlphas": {
+            "alphaL": 11.04818115264568,
+            "alphaT": 3.6827270508818937,
+            "alphaV": 0.042330195987148204
+          },
+          "dispLaw": "legacy",
+          "notes": []
+        },
+        "label": "Bank run"
+      }
+    },
+    "vaporWaterTable": {
+      "source": "transport",
+      "inputsHash": "591e9fed",
+      "value": {
+        "kind": "groundwater",
+        "label": "Water table",
+        "series": {
+          "times": [0, 1],
+          "values": [0, 0.000001]
+        },
+        "chemicalId": "71-43-2"
+      }
+    },
+    "vaporSaturated": {
+      "source": "saturated",
+      "inputsHash": "fa0200f6",
+      "value": {
+        "kind": "poreWater",
+        "label": "Saturated pore water",
+        "constant": 0.001
+      }
+    },
+    "vaporRisk": {
+      "source": "vapor",
+      "inputsHash": "177c6383",
+      "value": {
+        "chemicalId": "108-88-3",
+        "label": "Toluene, vapor"
+      }
+    },
+    "household": {
+      "source": "household",
+      "inputsHash": "a1f82ec7",
+      "value": {
+        "chemicalId": "71-43-2",
+        "label": "Benzene, household",
+        "coefficients": {
+          "bathroomAir": 0.01
+        },
+        "methods": {
+          "bathroomAir": "household.andelman-1990"
+        }
+      }
+    },
+    "produce": {
+      "source": "plantsEco",
+      "inputsHash": "4190f978",
+      "value": {
+        "chemicalId": "71-43-2",
+        "label": "Benzene, produce",
+        "method": "plantUptake.hhrap-2005",
+        "factors": {
+          "aboveProtected": 0.1,
+          "aboveExposed": 0.2,
+          "below": 0.3
+        },
+        "intakes": {
+          "aboveProtected": 1,
+          "aboveExposed": 1,
+          "below": 1
+        },
+        "intakeLabel": "user entered"
+      }
+    },
+    "tph": {
+      "source": "plantsEco",
+      "inputsHash": "4190f978",
+      "value": {
+        "methodId": "tph.tphcwg",
+        "label": "TPH",
+        "targetHazardIndex": 1,
+        "totalMgPerKg": 100,
+        "fractions": [],
+        "unmapped": [],
+        "warnings": []
+      }
+    }
+  },
+  "chemicals": [
+    {
+      "id": "71-43-2",
+      "name": "71-43-2"
+    },
+    {
+      "id": "108-88-3",
+      "name": "108-88-3"
+    }
+  ]
+}

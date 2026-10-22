@@ -16,7 +16,7 @@ import {
   newProject,
   setOverrides,
 } from '../project/store';
-import { parseProject } from '../project';
+import { CURRENT_VERSION, parseProject } from '../project';
 import { emptyOverrides, resetField, setField, type OverridesState } from './model';
 import { fromProject, overridesSchema, toProject } from './project';
 import {
@@ -236,7 +236,8 @@ describe('receptor edit helpers and saved shape', () => {
     const r = parseProject(JSON.stringify(currentProject()));
     expect(r.ok).toBe(true);
     expect(r.ok && r.warnings).toEqual([]);
-    expect(r.ok && r.project.version).toBe(1);
+    // the receptor keys needed no version of their own: the file is at the current version
+    expect(r.ok && r.project.version).toBe(CURRENT_VERSION);
     newProject();
     expect(getOverrides()).toEqual(emptyOverrides());
     if (r.ok) loadProject(r.project);

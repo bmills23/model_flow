@@ -33,10 +33,12 @@ export function modeledReportEntry(screens: Screens, db: ChemicalDb): ModeledRep
   if (form.source === 'direct') return null;
   const held = getModeledSummary();
   if (held === null) return { state: 'none' };
+  // the chain runs for the cleanup chemical (a modeled source takes one), as the cleanup screen reads them
+  const chemical = form.chemicals[0]?.id;
   const built = buildModeled(form, db, {
-    transport: getTransportFeed(),
-    vadose: getVadoseFeed(),
-    saturated: getSaturatedFeed(),
+    transport: getTransportFeed(chemical),
+    vadose: getVadoseFeed(chemical),
+    saturated: getSaturatedFeed(chemical),
   });
   if (!built.ok) return { state: 'stale', summary: held };
   const now = modeledFingerprint(built.request, screens.uncertainty.modeled);

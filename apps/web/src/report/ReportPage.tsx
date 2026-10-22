@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { currentProject, type StaleFeedKey } from '../project/store';
-import { staleAmong, staleSentence, useStaleFeeds } from '../project/staleFeeds';
+import { currentProject, type StaleFeedKey, type StaleSlot } from '../project/store';
+import { staleAmong, staleSentence, useStaleSlots } from '../project/staleFeeds';
 import { overridesOf } from '../project';
 import { loadOverrideRows, receptorEditRows, type ReceptorEditRow } from './userValues';
 import type { OverrideRow } from '../overrides/toxicity';
@@ -106,8 +106,11 @@ export function ReportView({
   userValues?: readonly OverrideRow[];
   /** Exposure factors the user edited in place of a receptor preset's. */
   receptorEdits?: readonly ReceptorEditRow[];
-  /** Feeds from other screens whose inputs changed after they were sent; sections computed from them say so. */
-  staleFeeds?: readonly StaleFeedKey[];
+  /**
+   * Feed slots (a feed for a chemical) whose sending inputs changed after they were sent; sections
+   * computed from them say so, naming the chemical. A bare feed key stands for its untagged slot.
+   */
+  staleFeeds?: readonly (StaleSlot | StaleFeedKey)[];
 }) {
   const { statement } = report;
   return (
@@ -368,7 +371,7 @@ export function ReportPage() {
   const id = useId();
   const project = useMemo(() => currentProject(), []);
   const report = useMemo(() => buildReport(project), [project]);
-  const staleFeeds = useStaleFeeds();
+  const staleFeeds = useStaleSlots();
   const [results, setResults] = useState<ProjectResults | null>(null);
   const [userValues, setUserValues] = useState<OverrideRow[]>([]);
   const receptorEdits = useMemo(() => receptorEditRows(project), [project]);

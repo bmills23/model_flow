@@ -3,11 +3,12 @@ import { getScreen, setScreen } from '../project/store';
 import { Seg, Field } from '../ui/controls';
 import { StaleMark } from '../project/StaleMark';
 import { riskFeedsRead } from '../project/feedsRead';
-import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
-import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
-import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
-import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
-import { getProduceFeed, subscribeProduceFeed } from '../plantsEco/feeds';
+import { getWellFeedSlots, subscribeWellFeed } from '../transport/wellFeed';
+import { getVaporRiskFeedSlots, subscribeVaporRiskFeed } from '../vapor/feeds';
+import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getHouseholdFeedSlots, subscribeHouseholdFeed } from '../household/feeds';
+import { getProduceFeedSlots, subscribeProduceFeed } from '../plantsEco/feeds';
+import { pickSlot } from '../project/feedSlots';
 import { buildInputs, ENTER_CONCENTRATION, type BuildResult } from './build';
 import { ChemicalCard } from './ChemicalCard';
 import { ChemicalPicker } from './ChemicalPicker';
@@ -40,21 +41,30 @@ export function RiskPage() {
   const { db: baseDb, error: dbError } = useChemicalDb();
   const [overrides, setOverridesState] = useOverrides();
   const db = useEffectiveDb(baseDb, overrides);
-  const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
-  const vapor = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
+  // every slot of each feed (one per chemical); each row reads its own chemical's slot
+  const well = useSyncExternalStore(subscribeWellFeed, getWellFeedSlots, getWellFeedSlots);
+  const vapor = useSyncExternalStore(
+    subscribeVaporRiskFeed,
+    getVaporRiskFeedSlots,
+    getVaporRiskFeedSlots,
+  );
   const surface = useSyncExternalStore(
     subscribeSurfaceWaterFeed,
-    getSurfaceWaterFeed,
-    getSurfaceWaterFeed,
+    getSurfaceWaterFeedSlots,
+    getSurfaceWaterFeedSlots,
   );
 
   const household = useSyncExternalStore(
     subscribeHouseholdFeed,
-    getHouseholdFeed,
-    getHouseholdFeed,
+    getHouseholdFeedSlots,
+    getHouseholdFeedSlots,
   );
 
-  const produce = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  const produce = useSyncExternalStore(
+    subscribeProduceFeed,
+    getProduceFeedSlots,
+    getProduceFeedSlots,
+  );
 
   const patch = (next: Partial<RiskForm>): void => setForm((f) => ({ ...f, ...next }));
   const setRow = (id: string, next: ChemicalRow): void =>
@@ -84,7 +94,7 @@ export function RiskPage() {
 
   const shown = current ?? (needsInput ? null : lastGood);
   // the feeds the chemical rows take values from; a stale one is marked beside the results and in the CSV
-  const feedsUsed = riskFeedsRead(form.chemicals, { household, vaporRisk: vapor });
+  const feedsUsed = riskFeedsRead(form.chemicals);
   const stale = current === null;
   const names = useMemo(() => {
     const out: Record<string, string> = {};
@@ -177,11 +187,11 @@ export function RiskPage() {
                     row={row}
                     rec={rec}
                     db={db}
-                    well={well}
-                    vapor={vapor}
-                    household={household}
-                    produce={produce}
-                    surface={surface}
+                    well={pickSlot(well, row.id)}
+                    vapor={pickSlot(vapor, row.id)}
+                    household={pickSlot(household, row.id)}
+                    produce={pickSlot(produce, row.id)}
+                    surface={pickSlot(surface, row.id)}
                     edits={overrides.toxicity[row.id]}
                     onEdit={(field, entry) =>
                       setOverridesState({

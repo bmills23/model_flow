@@ -9,8 +9,13 @@ import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { budgetRows, massRateKgPerDay } from './chartData';
 import { lastYearMean, type RunSummary, type VadoseMethod } from './compute';
 import { DepthProfileChart } from './DepthProfileChart';
-import { getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
-import { getVadoseVaporFeed, setVadoseVaporFeed, subscribeVadoseVaporFeed } from '../vapor/feeds';
+import { getVadoseFeedSlots, setVadoseFeed, subscribeVadoseFeed } from './feed';
+import {
+  getVadoseVaporFeedSlots,
+  setVadoseVaporFeed,
+  subscribeVadoseVaporFeed,
+} from '../vapor/feeds';
+import { ownSlot } from '../project/feedSlots';
 import { vadoseVaporSource } from './vaporFeed';
 import { chemicalTag } from '../project/feedChemical';
 import {
@@ -163,11 +168,18 @@ export function VadosePage() {
   const parsed = useMemo(() => toScenario(form), [form]);
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
   const { outcome, lastGood, computing } = useVadoseResult(request);
-  const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const vaporHeld = useSyncExternalStore(
-    subscribeVadoseVaporFeed,
-    getVadoseVaporFeed,
-    getVadoseVaporFeed,
+  // what this screen sent for its chemical (one slot per chemical)
+  const feed = ownSlot(
+    useSyncExternalStore(subscribeVadoseFeed, getVadoseFeedSlots, getVadoseFeedSlots),
+    form.chemicalId,
+  );
+  const vaporHeld = ownSlot(
+    useSyncExternalStore(
+      subscribeVadoseVaporFeed,
+      getVadoseVaporFeedSlots,
+      getVadoseVaporFeedSlots,
+    ),
+    form.chemicalId,
   );
 
   // An engine input error keeps the last good result (and the scenario it belongs to) on screen.

@@ -46,9 +46,19 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that was made by a newer version of the app, is refused with a message and nothing is changed. If a file
   has an unknown key it is ignored and listed. If a value passed between screens in the file is unusable
   it is dropped and named, and your inputs still load.
+- Project files are now format version 2, which keeps one sent value per chemical (see "Results sent between
+  screens carry their chemical" below). A file, link or browser copy from the earlier format opens as before:
+  each sent value moves to the chemical it was made for, or, when it records none, to the chemical its
+  sending screen was set to. A value whose chemical cannot be told (its screen had the chemical typed by
+  hand) is dropped and named, and your inputs still load. A value that was current when the file was saved is
+  still current after it opens. A version of the app from before this change refuses a version 2 file with
+  its newer-version message.
 - A value passed between screens records which inputs it was built from. The moment those inputs differ
-  from what was sent, a note at the top of the page names the value and the screen that sends it, and says
-  it was built from inputs that have since changed. This holds while you work, for every value passed
+  from what was sent, a note at the top of the page names the value, the chemical it was sent for and the
+  screen that sends it, and says it was built from inputs that have since changed. Each chemical's value is
+  marked on its own: changing the inputs while a screen is set to toluene marks its toluene value and not the
+  benzene value it sent before. While a screen is set to another chemical, a value it sent keeps the mark it
+  had, and is checked again when the screen is set back to that chemical. This holds while you work, for every value passed
   between screens (including the groundwater run offered to the cleanup screen, the well method you chose
   and the vapor source series). In a project you open, the mark follows edits to the form that sent each
   value; the extras above (the well method, the vapor source series, the groundwater run for cleanup) are not
@@ -66,7 +76,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   values stay visible. The report puts the same label under the heading of each section that reads such a
   value and again in that section's notes. A CSV download that holds such values gains a last column,
   `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a
-  current file is unchanged. A note beside the download says which values are out of date.
+  current file is unchanged. A note beside the download says which values are out of date, and for which
+  chemical.
 - **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
   server, so the link carries the project without anyone hosting it. The link does not include the values
   passed between screens; whoever opens it sends those again from their source screens.
@@ -86,7 +97,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
   plain text and are not affected by this setting.
 - The project now keeps a list of its chemicals, filled from the chemicals on the risk and cleanup screens
-  and the one chosen on each other screen. Nothing on screen shows it yet. An older file or link opens with
+  and the one chosen on each other screen. The surface water screen picks its chemical from it; the other
+  screens do not show it yet. An older file or link opens with
   the list filled in the same way, and none of its sent results turns stale because of it. An older version
   of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
@@ -372,14 +384,22 @@ you entered and attach the saved project file if you can; it holds your inputs a
 A result you send from a screen (the receptor well, the groundwater run for cleanup levels or for surface water,
 the vadose and saturated sources, the water table, vadose and saturated sources for vapor intrusion, and a surface
 water run) remembers the chemical the screen was set to. Exposure and risk and
-cleanup levels check it against each row: a row for another chemical shows an error naming both chemicals instead
-of taking the value, and the row for the matching chemical keeps it. Modeled cleanup refuses a groundwater,
-vadose or saturated run for another chemical. A result sent before this change, or from a screen with the
-chemical typed by hand, carries no chemical: it is still used when the run holds one chemical, and when the run
+cleanup levels check it against each row: a row with no result of its own chemical shows an error naming both
+chemicals instead of taking another chemical's value, and the row for the matching chemical keeps it. Modeled
+cleanup refuses a groundwater, vadose or saturated run for another chemical. A result sent from a screen with the
+chemical typed by hand carries no chemical: it is still used when the run holds one chemical, and when the run
 holds two or more the row says to choose the chemical on the sending screen and send it again. A surface water run
 linked to a groundwater run takes that run's chemical; an unlinked one takes the chemical you pick in the
 "Chemical" list on the surface water screen (the project's chemical list), and carries none while that reads "Not
-set", in which case a run of two or more chemicals refuses it.
+set", in which case a run of two or more chemicals refuses it. While the project list is empty, the surface water
+screen shows a link to the chemicals screen in place of the list. A chemical chosen earlier that has since been
+removed from the project list stays chosen, marked as not in the list.
+
+Each chemical keeps its own sent result. Sending toluene from a screen leaves the benzene result it sent before
+in place, so run a screen once per chemical and send each result: exposure and risk and cleanup levels then find a
+result for each row, and each row, panel and screen reads the result of its own chemical. Sending again for the
+same chemical replaces only that chemical's result. A result from a file saved before this change was given the
+chemical its sending screen was set to when it opened (see the project section above).
 
 The screens that read such a result as their own input make the same check against the chemical they are set to:
 the household screen for the receptor well and surface water series, the vapor screen for the water table, vadose

@@ -1,6 +1,6 @@
 import { screensOf, siteOf, type Project, type Screens } from '../project';
 import { feedsReadBy } from '../project/feedsRead';
-import type { StaleFeedKey } from '../project/store';
+import type { FeedRead } from '../project/store';
 import { siteSummary } from '../site/model';
 import {
   dataEditionsFor,
@@ -97,8 +97,11 @@ export interface ReportSection {
   name: string;
   inputs: InputRow[];
   methodIds: string[];
-  /** The feeds from other screens this section's results are computed from (see `feedsReadBy`). */
-  reads: StaleFeedKey[];
+  /**
+   * The feeds from other screens this section's results are computed from, each for the chemical it
+   * is read for (see `feedsReadBy`).
+   */
+  reads: FeedRead[];
 }
 
 export interface Report {

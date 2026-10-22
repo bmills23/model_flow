@@ -18,6 +18,7 @@ import type { ChemicalDb } from '../risk/chemicalDb';
 import { PATHWAY_LABELS } from '../risk/chartData';
 import { MEDIA, PRESET_LABELS, type ReceptorForm } from '../risk/form';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
+import { pickSlot, type FeedSlots } from '../project/feedSlots';
 import {
   Errors,
   legacyBoundary,
@@ -41,8 +42,11 @@ export const ADD_CHEMICAL = 'Add at least one chemical.';
 
 /** The held results of other screens this screen reads. */
 export interface CleanupFeeds {
-  /** The plants and ecology screen's produce result, for the homegrown produce pathway. */
-  produce?: ProduceRiskFeed | null;
+  /**
+   * The plants and ecology screen's produce results, for the homegrown produce pathway: the feed's
+   * slots (one per chemical) or one result. Each row reads its own chemical's slot.
+   */
+  produce?: ProduceRiskFeed | FeedSlots<ProduceRiskFeed> | null;
 }
 
 export type CleanupBuildResult =
@@ -102,23 +106,33 @@ export function buildCleanup(
   db: ChemicalDb,
   feeds: CleanupFeeds = {},
 ): CleanupBuildResult {
-  const produce = feeds.produce ?? null;
+  const produceHeld = feeds.produce ?? null;
+  // the produce result made for this chemical, or null (one slot per chemical)
+  const ownProduce = (id: string): ProduceRiskFeed | null => {
+    const f = pickSlot(produceHeld, id);
+    return f !== null && f.chemicalId === id ? f : null;
+  };
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add(ADD_CHEMICAL);
 
   const records = form.chemicals.map((row) => ({ row, rec: db.byId.get(row.id) }));
   for (const { row, rec } of records) {
     if (rec === undefined) errors.add(`${row.name}: not in the chemical database`);
-    if (row.produceFromPlantsEco && (produce === null || produce.chemicalId !== row.id)) {
+    if (row.produceFromPlantsEco && ownProduce(row.id) === null) {
       errors.add(
         `${row.name}: no plants and ecology result for this chemical to use; run the plants and ecology screen with it and send its produce result here`,
       );
     }
   }
   // the chemicals whose soil level includes the produce pathway (they opted in and the feed is theirs)
-  const usesProduce = (id: string, flagged: boolean): boolean =>
-    flagged && produce !== null && produce.chemicalId === id;
+  const usesProduce = (id: string, flagged: boolean): boolean => flagged && ownProduce(id) !== null;
   const anyProduce = form.chemicals.some((c) => usesProduce(c.id, c.produceFromPlantsEco));
+  // the produce results in use; the receptor's intake comes from the first (each chemical's plant
+  // factors come from its own result)
+  const usedProduce = form.chemicals
+    .filter((c) => usesProduce(c.id, c.produceFromPlantsEco))
+    .map((c) => ownProduce(c.id)!);
+  const produce = usedProduce[0] ?? null;
   const feedWarnings: { code: string; message: string }[] = [];
 
   const risk = parseTarget(form.targetRisk, 'Target cancer risk', errors);
@@ -169,7 +183,7 @@ export function buildCleanup(
       notes.push(
         `${label}: homegrown produce uses the ${produce.intakeLabel} intake for every life stage of the receptor.`,
       );
-      for (const w of produce.warnings ?? []) {
+      for (const w of usedProduce.flatMap((f) => f.warnings ?? [])) {
         if (!feedWarnings.some((x) => x.code === w.code && x.message === w.message)) {
           feedWarnings.push(w);
         }
@@ -228,10 +242,9 @@ export function buildCleanup(
     ) => C,
   ): DirectChemical<C>[] =>
     records.map(({ row, rec }) => {
-      const factors =
-        usesProduce(row.id, row.produceFromPlantsEco) && produce !== null
-          ? produce.factors
-          : undefined;
+      const factors = usesProduce(row.id, row.produceFromPlantsEco)
+        ? ownProduce(row.id)?.factors
+        : undefined;
       const out: DirectChemical<C> = { id: row.id, chemical: make(rec!, row.dermalForm, factors) };
       if (rec!.tox.volatile) out.volatile = true;
       const e = enteredFor(row.id);

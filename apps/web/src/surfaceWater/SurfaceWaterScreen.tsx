@@ -1,16 +1,18 @@
 import { StaleMark } from '../project/StaleMark';
 import { chemicalTag } from '../project/feedChemical';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
+import { getScreen, setScreen } from '../project/store';
+import { ownSlot, pickSlot } from '../project/feedSlots';
+import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
-import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
+import { getBankFeedSlots, subscribeBankFeed } from '../transport/bankFeed';
 import { Field, Group, Seg } from '../ui/controls';
 import { CriteriaPanel } from './CriteriaPanel';
 import { SedimentChart, SurfaceWaterChart } from './charts';
 import { surfaceWaterCoefficient } from './coefficient';
 import {
-  getSurfaceWaterFeed,
+  getSurfaceWaterFeedSlots,
   setSurfaceWaterFeed,
   subscribeSurfaceWaterFeed,
   type SurfaceWaterFeedMethod,
@@ -103,14 +105,20 @@ export function SurfaceWaterScreen() {
   useEffect(() => setScreen('surfaceWater', { form }), [form]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
-  const held = useSyncExternalStore(
+  const sentSlots = useSyncExternalStore(
     subscribeSurfaceWaterFeed,
-    getSurfaceWaterFeed,
-    getSurfaceWaterFeed,
+    getSurfaceWaterFeedSlots,
+    getSurfaceWaterFeedSlots,
   );
-  const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
-  const feed = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
+  // the bank run held for the chemical set here (one slot per chemical; see feedSlots.pickSlot)
+  const feed = pickSlot(
+    useSyncExternalStore(subscribeBankFeed, getBankFeedSlots, getBankFeedSlots),
+    form.chemicalId,
+  );
+  // a linked run is for the chemical of its transport run; an unlinked one for the chemical set here
+  const runChemical = form.linked && feed !== null ? feed.chemicalId : form.chemicalId;
+  const held = ownSlot(sentSlots, runChemical);
 
   const parsed = useMemo(() => toRequest(form, feed), [form, feed]);
   const request = useMemo(() => (parsed.ok ? parsed.request : null), [parsed]);
@@ -136,8 +144,7 @@ export function SurfaceWaterScreen() {
       ...(request && !computing && outcome?.ok && outcome.result === result
         ? { coefficient: surfaceWaterCoefficient(request, result, method) }
         : {}),
-      // a linked run is for the chemical of its transport run; an unlinked one for the chemical set here
-      ...chemicalTag(form.linked && feed !== null ? feed.chemicalId : form.chemicalId),
+      ...chemicalTag(runChemical),
     });
   };
   const foc = Number(form.foc);
@@ -323,7 +330,7 @@ export function SurfaceWaterScreen() {
                 />
                 <span>
                   Use the groundwater transport run ({feed.label}){' '}
-                  {form.linked && <StaleMark feed="bank" />}
+                  {form.linked && <StaleMark feed="bank" chemicalId={form.chemicalId} />}
                 </span>
               </label>
             ) : (
@@ -336,29 +343,12 @@ export function SurfaceWaterScreen() {
             <div className="fields">
               {!linkedOn && (
                 <>
-                  <label className="field">
-                    <span className="field-label">Chemical</span>
-                    <select
-                      value={form.chemicalId}
-                      onChange={(e) => set('chemicalId', e.target.value)}
-                    >
-                      <option value="">Not set</option>
-                      {form.chemicalId !== '' &&
-                        !chemicals.some((c) => c.id === form.chemicalId) && (
-                          <option value={form.chemicalId}>{form.chemicalId}</option>
-                        )}
-                      {chemicals.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                    <small>
-                      The chemical a result sent to risk or cleanup is for. Set it when those
-                      screens hold more than one chemical. A linked run takes the chemical of its
-                      transport run.
-                    </small>
-                  </label>
+                  <ProjectChemicalSelect
+                    label="Chemical"
+                    value={form.chemicalId}
+                    onChange={(id) => set('chemicalId', id)}
+                    hint="The chemical a result sent to risk or cleanup is for; each chemical keeps its own sent result. A linked run takes the chemical of its transport run."
+                  />
                   <Field
                     label="Groundwater concentration (mg/L)"
                     value={form.groundwaterConcentration}

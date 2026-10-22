@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
 import { addChemical, isFeedStaleNow } from '../project/store';
-import { clearSurfaceWaterFeed, getSurfaceWaterFeed } from './feed';
+import { clearSurfaceWaterFeed, getSurfaceWaterFeed, getSurfaceWaterFeedSlots } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
 
 afterEach(() => {
@@ -155,10 +155,13 @@ describe('SurfaceWaterScreen', () => {
     expect(getSurfaceWaterFeed()?.chemicalId).toBeUndefined();
     fireEvent.change(screen.getByLabelText(/^chemical/i), { target: { value: '71-43-2' } });
     fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
-    expect(getSurfaceWaterFeed()?.chemicalId).toBe('71-43-2');
+    // one slot per chemical: the benzene run is kept beside the untagged one
+    expect(getSurfaceWaterFeed('71-43-2')?.chemicalId).toBe('71-43-2');
+    expect([...getSurfaceWaterFeedSlots().keys()]).toEqual(['', '71-43-2']);
     fireEvent.change(screen.getByLabelText(/^chemical/i), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
-    expect(getSurfaceWaterFeed()?.chemicalId).toBeUndefined();
+    expect(getSurfaceWaterFeedSlots().get('')?.chemicalId).toBeUndefined();
+    expect([...getSurfaceWaterFeedSlots().keys()]).toEqual(['71-43-2', '']);
   }, 30000);
 
   it('tags a linked run with the bank run chemical and offers no picker', async () => {

@@ -51,15 +51,27 @@ const PROJECTORS: { [K in ScreenKey]: (s: Screens[K]) => unknown } = {
   uncertainty: uncertainty.toProject,
 };
 
-/** The stored feeds of a project, as far as the report needs them: which screen each came from. */
-export type FeedsLike = Record<string, { source: string } | undefined>;
+/**
+ * The stored feeds of a project, as far as the report needs them: which screen each came from. A feed
+ * about one chemical is an object of slots by chemical id, each with its source (format version 2).
+ */
+export type FeedsLike = Record<string, unknown>;
+
+/** True when a stored feed, or one of its slots, was sent from screen `key`. */
+function sentFrom(entry: unknown, key: string): boolean {
+  if (typeof entry !== 'object' || entry === null) return false;
+  if ('source' in entry && typeof entry.source === 'string') return entry.source === key;
+  return Object.values(entry).some(
+    (slot) => typeof slot === 'object' && slot !== null && 'source' in slot && slot.source === key,
+  );
+}
 
 /**
  * A screen counts as used when its state differs from the defaults a new project starts with. A
  * project holds every screen key, so presence says nothing; an edit does.
  */
 export function screenUsed(key: ScreenKey, screens: Screens, feeds?: FeedsLike): boolean {
-  if (feeds !== undefined && Object.values(feeds).some((e) => e?.source === key)) return true;
+  if (feeds !== undefined && Object.values(feeds).some((e) => sentFrom(e, key))) return true;
   const project = PROJECTORS[key] as (s: Screens[ScreenKey]) => unknown;
   return stableStringify(project(screens[key])) !== stableStringify(project(defaultScreens()[key]));
 }

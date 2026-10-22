@@ -1,27 +1,30 @@
 import type { EpcSpec } from '@model-flow/engine';
-import { createFeed } from './feedStore';
+import { createChemicalFeed } from './feedStore';
 import type { VaporCoefficients } from './coefficients';
 import type { SourceSeries } from './series';
 
 /**
  * Sources other screens offer the vapor screen, one store per origin so offering one does not drop
  * another: the vadose source pore water, the groundwater at the water table, and the saturated
- * source's region above the water table.
+ * source's region above the water table. Each holds one slot per chemical (see `project/feedSlots.ts`).
  */
-const vadose = createFeed<SourceSeries>();
+const vadose = createChemicalFeed<SourceSeries>();
 export const getVadoseVaporFeed = vadose.get;
+export const getVadoseVaporFeedSlots = vadose.slots;
 export const setVadoseVaporFeed = vadose.set;
 export const clearVadoseVaporFeed = vadose.clear;
 export const subscribeVadoseVaporFeed = vadose.subscribe;
 
-const waterTable = createFeed<SourceSeries>();
+const waterTable = createChemicalFeed<SourceSeries>();
 export const getWaterTableFeed = waterTable.get;
+export const getWaterTableFeedSlots = waterTable.slots;
 export const setWaterTableFeed = waterTable.set;
 export const clearWaterTableFeed = waterTable.clear;
 export const subscribeWaterTableFeed = waterTable.subscribe;
 
-const saturated = createFeed<SourceSeries>();
+const saturated = createChemicalFeed<SourceSeries>();
 export const getSaturatedVaporFeed = saturated.get;
+export const getSaturatedVaporFeedSlots = saturated.slots;
 export const setSaturatedVaporFeed = saturated.set;
 export const clearSaturatedVaporFeed = saturated.clear;
 export const subscribeSaturatedVaporFeed = saturated.subscribe;
@@ -43,8 +46,9 @@ export interface VaporRiskFeed {
   coefficients?: VaporCoefficients;
 }
 
-const risk = createFeed<VaporRiskFeed>();
+const risk = createChemicalFeed<VaporRiskFeed>();
 export const getVaporRiskFeed = risk.get;
+export const getVaporRiskFeedSlots = risk.slots;
 export const setVaporRiskFeed = risk.set;
 export const clearVaporRiskFeed = risk.clear;
 export const subscribeVaporRiskFeed = risk.subscribe;

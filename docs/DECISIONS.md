@@ -2965,3 +2965,79 @@ DEFAULT.
    screen's new `chemicalId` (O4).
 3. **Multi-chemical modeled cleanup stays capped at one chemical in these waves.** The engine solver already takes
    several chemicals; lifting the web cap is a later slice.
+
+## 2026-10-21: Wave O slice O4, feeds per chemical and version 2
+
+Scope rulings 2 and 5 of the "Project chemical list, waves N to P scope" block and ruling 2 of the "Waves O and P
+scope" block. Every ruling below is DEFAULT.
+
+1. **Which feeds are per chemical.** Every feed that carries a `chemicalId`: the well, bank, groundwater run for
+   cleanup (`transportChain`, session only), surface water, vadose, saturated, the three vapor input feeds
+   (vadose, water table, saturated), vapor air (`vaporRisk`), household and produce feeds. The TPH feed is about a
+   composition, not one chemical, and keeps one slot (`project/schema.ts`, `CHEMICAL_FEEDS`).
+2. **Slot shape.** A per-chemical feed holds a `Map` from slot key to value (`project/feedSlots.ts`, `FeedSlots`),
+   kept in send order. The slot key is the value's own `chemicalId`, or the empty text for a value sent while its
+   screen's chemical was typed by hand. `createChemicalFeed` (`vapor/feedStore.ts`) writes the slot of the value
+   it is given, so the senders, which already tag their value with the screen's chemical, write their own slot
+   unchanged and leave the other chemicals' slots alone; a re-send moves the slot to the end.
+3. **How a consumer reads.** `getXFeed(chemicalId)` and `pickSlot(slots, chemicalId)` return the consumer's own
+   chemical's slot; when there is none, the untagged slot; when neither is held, the most recently sent slot of
+   another chemical, so the wave N chemical check still names the chemical it was made for and the row errors. A
+   consumer with no chemical reads the untagged slot, else the most recent. Screens that read many chemicals (risk,
+   cleanup, the report) take the whole map (`getXFeedSlots()`, `feedSlotsOf`) and pick per row; a sender shows only
+   its own chemical's slot as sent (`ownSlot`, no fallback).
+4. **Staleness per feed and chemical.** Fingerprints and held-input baselines are kept per slot. A slot is checked
+   while its source screen is set to the slot's chemical (a linked surface water run: the chemical of the bank run
+   it reads); while the screen is on another chemical the slot keeps the mark it had, because the screen no longer
+   shows that chemical's inputs, and it is checked again when the screen is set back. Held inputs (the vadose or
+   saturated source of the transport screen, the vapor source series, the household well and surface water) are
+   read for the slot's chemical. Limit: a mark kept this way is not saved; an opened file checks only the slots of
+   each screen's current chemical, the others open current. A change to an input shared by every chemical (the
+   aquifer, say) made while the screen is on another chemical shows on a slot once the screen is set back to it.
+5. **Marks name the chemical.** `getStaleSlots`, `useStaleSlots` and `isFeedStaleNow(key, chemicalId)` are per
+   slot; `getStaleFeeds` and `useStaleFeeds` stay as the feeds with any stale slot. A consumer's read (`FeedRead`,
+   from `feedsRead.ts`) matches its own chemical's stale slot or the untagged one (it errs on the side of the mark
+   when both are held), and a read with no chemical matches any slot of the feed. The page note, the `StaleMark`
+   text, the report and the CSV note and column name the chemical from the project list ("Receptor well
+   concentration for Benzene (Transport)").
+6. **Version 2 migration.** `CURRENT_VERSION` is 2 (`project/migrate.ts`, `v1ToV2`). A version 1 feed becomes an
+   object of one slot. A tagged value keeps its tag; an untagged one takes its source screen's `chemicalId` (the
+   vapor screen's `risc4-benzene` fixture counts as none), and a linked surface water run with none set takes its
+   bank run's chemical; the value is tagged with the chemical it was given, so every consumer accepts it. A feed
+   whose chemical cannot be told is left out and reported through `droppedFeeds` with its own message. A version 2
+   slot whose key differs from its value's chemical is dropped and reported. Files, share links and the autosave
+   all go through `parseProject`. The autosave key keeps its `.v1` suffix: it names the storage slot, not the
+   format. Fixtures: `project/fixtures/project-v1.json` and `share-v1.txt` were written by the version 1 code
+   before the schema changed; `project-v2-expected.json` was derived from the first by a separate script.
+7. **Version check.** `versionProblem(version, readsUpTo)` (`project/index.ts`) holds the existing newer-version
+   message; a build that reads up to version 1 refuses a version 2 file with it. Risk, not changed here: a tab
+   still running a version 1 build refuses a version 2 autosave and starts empty, and its next edit writes its own
+   autosave over the version 2 copy (the existing behaviour for a newer save).
+8. **Cleanup source level panels.** One household, vapor or surface water panel per held slot whose chemical is a
+   cleanup row or untagged; when none is, the most recent slot, so a result for another chemical still shows why it
+   gives no level (`panelFeeds` in `cleanup/sourceLevelsCsv.ts`). With two or more panels of one kind, each CSV file
+   name ends with its chemical id. A modeled source reads the chain, vadose and saturated slots of its one chemical.
+9. **Produce on risk and cleanup.** Each row's plant factors come from its own chemical's produce slot. The
+   receptor's homegrown produce intake comes from the first row that uses produce, and the plant warnings are those
+   of every slot in use.
+10. **Shared select.** `ui/ProjectChemicalSelect.tsx` takes `label`, `value`, `onChange(id)` and an optional `hint`,
+    lists `getChemicals()` with "Not set" first, keeps a saved id no longer in the list as an option marked "not in
+    the project list", and with an empty list shows a link to `#/chemicals` in place of the select. The surface
+    water screen uses it; its select is styled by `.project-chemical-select` in `transport/transport.css`
+    (`min-width: 0`, the text field tokens).
+11. **Carried from wave N.** `setScreen` compares the chemicals the edited screen names before and after the edit,
+    so a chemical removed from the list comes back when a screen newly names it even if another screen named it all
+    along, and not when a screen that still names it is edited. `deriveChemicals` includes the surface water
+    screen's `chemicalId`, after plants and eco.
+12. **No fingerprint change.** No form key was added, so `FINGERPRINT_SKIP` is unchanged.
+13. **Tests changed where they asserted one slot per feed.** `liveStale.test.ts` (the vapor, household and plants
+    screens are set to the chemical of the feeds they send), `store.test.ts` (the household chemical, the saved slot
+    shape), `open.test.ts`, `project.test.ts`, `chemicalsStore.test.ts` (an older file is marked version 1),
+    `staleMarks.test.tsx` and `feedsReadChemical.test.ts` (reads carry a chemical), `report/results.test.ts` and
+    `report/uncertaintyReport.test.ts` (slot shape), `CleanupStale.test.tsx` and `RiskStale.test.tsx` (sender
+    chemicals; the CSV note names the chemical), `SurfaceWaterScreen.test.tsx` (two slots kept),
+    `overrides/receptors.test.ts` (the current version) and `chemicals.test.ts` (schema renamed `projectSchema`).
+14. **Files outside the named list.** `App.tsx` (the page note per slot), `report/methodsRun.ts` (a screen is used
+    when a slot came from it), `report/modeledReport.ts`, `report/uncertaintyReport.ts`, `cleanup/build.ts`,
+    `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
+    screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.

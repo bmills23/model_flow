@@ -4,13 +4,19 @@ import { NON_AFFILIATION } from './nonAffiliation';
 import { STEPS, stepForHash } from './steps';
 import { ProjectBar } from './project/ProjectBar';
 import {
+  getChemicals,
   getDroppedFeeds,
   getEpoch,
   newProject,
+  subscribeChemicals,
   subscribeProject,
-  type StaleFeedKey,
+  type StaleSlot,
 } from './project/store';
-import { FEED_INFO, useStaleFeeds } from './project/staleFeeds';
+import { slotLabel, useStaleSlots } from './project/staleFeeds';
+import { projectNameOf } from './project/feedChemical';
+
+/** A stale slot as text, so a dismissal outlives the slot objects of one stale list. */
+const slotKey = (s: StaleSlot): string => `${s.feed}\u0000${s.chemicalId}`;
 
 // Every screen loads on first visit so the entry chunk holds only the shell and the landing page.
 const MethodsPage = lazy(() =>
@@ -84,19 +90,23 @@ export function App() {
   }, []);
   const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
   const [staleShown, setStaleShown] = useState(true);
-  // the stale mark is live (see project/staleFeeds); a dismissal covers the feeds stale when it was
-  // made, and a feed that clears and goes stale again is shown again
-  const staleNow = useStaleFeeds();
-  const [dismissedStale, setDismissedStale] = useState<readonly StaleFeedKey[]>([]);
+  // the stale mark is live and per chemical (see project/staleFeeds); a dismissal covers the slots
+  // stale when it was made, and a slot that clears and goes stale again is shown again
+  const staleNow = useStaleSlots();
+  const nowKeys = staleNow.map(slotKey);
+  const chemicalList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const [dismissedStale, setDismissedStale] = useState<readonly string[]>([]);
   // a dismissal belongs to the project it was made in: opening another project starts over
   const [dismissedEpoch, setDismissedEpoch] = useState(epoch);
   if (dismissedEpoch !== epoch) {
     setDismissedEpoch(epoch);
     setDismissedStale([]);
   }
-  const stillDismissed = dismissedStale.filter((k) => staleNow.includes(k));
+  const stillDismissed = dismissedStale.filter((k) => nowKeys.includes(k));
   if (stillDismissed.length !== dismissedStale.length) setDismissedStale(stillDismissed);
-  const stale = staleNow.filter((k) => dismissedEpoch !== epoch || !dismissedStale.includes(k));
+  const stale = staleNow.filter(
+    (s) => dismissedEpoch !== epoch || !dismissedStale.includes(slotKey(s)),
+  );
   const dropped = staleShown ? getDroppedFeeds() : [];
   const onNewProject = (): void => {
     if (
@@ -179,10 +189,10 @@ export function App() {
       {stale.length > 0 ? (
         <p className="stale-note" role="status">
           These values passed between screens were built from inputs that have since changed:{' '}
-          {stale.map((k) => `${FEED_INFO[k].label} (${FEED_INFO[k].source})`).join(', ')}. They are
-          kept as they were sent. Send them again from their source screen to refresh them, or
-          change the inputs back.{' '}
-          <button type="button" className="btn" onClick={() => setDismissedStale(staleNow)}>
+          {stale.map((s) => slotLabel(s, projectNameOf(chemicalList))).join(', ')}. They are kept as
+          they were sent. Send them again from their source screen to refresh them, or change the
+          inputs back.{' '}
+          <button type="button" className="btn" onClick={() => setDismissedStale(nowKeys)}>
             Dismiss
           </button>
         </p>

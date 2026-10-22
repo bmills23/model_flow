@@ -10,7 +10,7 @@ import {
 } from './index';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { unknownKeyPaths } from './merge';
-import { projectV1Schema } from './schema';
+import { projectSchema } from './schema';
 
 const row = (id: string, name: string): ChemicalRow => ({
   id,
@@ -136,7 +136,7 @@ describe('the chemicals key in the file', () => {
     const doc = JSON.parse(
       JSON.stringify(buildProject({ screens: defaultScreens(), chemicals: [], createdWith })),
     );
-    const older = projectV1Schema.omit({ chemicals: true }).parse(doc);
+    const older = projectSchema.omit({ chemicals: true }).parse(doc);
     expect(unknownKeyPaths(doc, older, '')).toEqual(['.chemicals']);
   });
 });

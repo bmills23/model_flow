@@ -56,6 +56,8 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
+import { pickSlot, type FeedSlots } from '../project/feedSlots';
+import { isChemicalFeed } from '../project/schema';
 
 /** An engine warning with the method (or table) it came from. */
 export interface ResultWarning {
@@ -131,22 +133,45 @@ function addWarnings(
   }
 }
 
-/** A stored feed value as the screens hold it (decoded exactly as loading a project does), or null. */
-export function feedOf<T>(project: Project, key: string): T | null {
-  const entry = (project.feeds as Record<string, { value?: unknown } | undefined> | undefined)?.[
-    key
-  ];
-  return entry?.value === undefined ? null : (decodeJson(entry.value) as T);
+/**
+ * Every stored slot of a feed as the screens hold it (decoded exactly as loading a project does), in
+ * the saved order: one slot per chemical for a feed about one chemical, one untagged slot for TPH.
+ */
+export function feedSlotsOf<T>(project: Project, key: string): FeedSlots<T> {
+  type Envelope = { value?: unknown } | undefined;
+  const entry = (project.feeds as Record<string, unknown> | undefined)?.[key];
+  if (entry === undefined || entry === null) return new Map();
+  if (!isChemicalFeed(key)) {
+    const v = (entry as Envelope)?.value;
+    return v === undefined ? new Map() : new Map([['', decodeJson(v) as T]]);
+  }
+  const out = new Map<string, T>();
+  for (const [slot, e] of Object.entries(entry as Record<string, Envelope>)) {
+    if (e?.value !== undefined) out.set(slot, decodeJson(e.value) as T);
+  }
+  return out;
 }
 
-type Feed = <T>(key: string) => T | null;
+/**
+ * The stored value a consumer for `chemicalId` reads (its own chemical's slot, see
+ * `feedSlots.pickSlot`), or null. With no chemical, the untagged slot or the most recent.
+ */
+export function feedOf<T>(project: Project, key: string, chemicalId?: string): T | null {
+  return pickSlot(feedSlotsOf<T>(project, key), chemicalId);
+}
+
+/** A section's access to the stored feeds: one consumer's slot, or every slot of a feed. */
+interface Feed {
+  <T>(key: string, chemicalId?: string): T | null;
+  slots: <T>(key: string) => FeedSlots<T>;
+}
 
 function transport(s: Screens, feed: Feed): SectionResults {
   const form = s.transport.form;
   const parsed = transportScenario(
     form,
-    feed<VadoseFeed>('vadose'),
-    feed<SaturatedFeed>('saturated'),
+    feed<VadoseFeed>('vadose', form.chemicalId),
+    feed<SaturatedFeed>('saturated', form.chemicalId),
   );
   if (!parsed.ok) return notComputed(parsed.errors);
   const out = computeTransport({
@@ -254,7 +279,7 @@ function vapor(s: Screens, feed: Feed): SectionResults {
     vadose: 'vaporVadose',
     saturated: 'vaporSaturated',
   };
-  const source = choice === 'entered' ? null : feed<SourceSeries>(held[choice]!);
+  const source = choice === 'entered' ? null : feed<SourceSeries>(held[choice]!, form.chemicalId);
   const epcs: VaporEpcs | null = source ? vaporEpcs(form, parsed, source, outdoor) : null;
   const sec = empty();
   sec.tables = vaporCsvTables(outcome, epcs);
@@ -277,7 +302,10 @@ function vapor(s: Screens, feed: Feed): SectionResults {
 }
 
 function surfaceWater(s: Screens, feed: Feed): SectionResults {
-  const parsed = surfaceWaterRequest(s.surfaceWater.form, feed<BankFeed>('bank'));
+  const parsed = surfaceWaterRequest(
+    s.surfaceWater.form,
+    feed<BankFeed>('bank', s.surfaceWater.form.chemicalId),
+  );
   if (!parsed.ok) return notComputed(parsed.errors);
   const out = computeSurfaceWater(parsed.request);
   if (!out.ok) return notComputed(out.error);
@@ -298,11 +326,11 @@ function risk(s: Screens, feed: Feed, db: ChemicalDb): SectionResults {
   const built = buildInputs(
     form,
     db,
-    feed<WellFeed>('well'),
-    feed<VaporRiskFeed>('vaporRisk'),
-    feed<SurfaceWaterFeed>('surfaceWater'),
-    feed<HouseholdRiskFeed>('household'),
-    feed<ProduceRiskFeed>('produce'),
+    feed.slots<WellFeed>('well'),
+    feed.slots<VaporRiskFeed>('vaporRisk'),
+    feed.slots<SurfaceWaterFeed>('surfaceWater'),
+    feed.slots<HouseholdRiskFeed>('household'),
+    feed.slots<ProduceRiskFeed>('produce'),
   );
   if (!built.ok) return notComputed(built.errors);
   const outcome = runRisk(built);
@@ -336,7 +364,7 @@ async function cleanup(
     ]);
   }
   const sec = empty();
-  const built = buildCleanup(form, db, { produce: feed<ProduceRiskFeed>('produce') });
+  const built = buildCleanup(form, db, { produce: feed.slots<ProduceRiskFeed>('produce') });
   const tphHeld = feed<TphRiskFeed>('tph');
   if (tphHeld !== null) {
     sec.tables.push(...tphCsvTables(tphHeld));
@@ -357,9 +385,9 @@ async function cleanup(
     }
     sec.tables.push(
       ...sourceLevelCsvTables(outcome, names, {
-        household: feed<HouseholdRiskFeed>('household'),
-        vapor: feed<VaporRiskFeed>('vaporRisk'),
-        surface: feed<SurfaceWaterFeed>('surfaceWater'),
+        household: feed.slots<HouseholdRiskFeed>('household'),
+        vapor: feed.slots<VaporRiskFeed>('vaporRisk'),
+        surface: feed.slots<SurfaceWaterFeed>('surfaceWater'),
       }),
     );
   } else if (!form.ssg.on && tphHeld === null) {
@@ -382,8 +410,8 @@ async function cleanup(
 
 function household(s: Screens, feed: Feed): SectionResults {
   const out = computeHousehold(s.household.form, {
-    well: feed<WellFeed>('well'),
-    surface: feed<SurfaceWaterFeed>('surfaceWater'),
+    well: feed<WellFeed>('well', s.household.form.chemicalId),
+    surface: feed<SurfaceWaterFeed>('surfaceWater', s.household.form.chemicalId),
   });
   const sec = empty();
   sec.tables = householdCsvTables(out);
@@ -449,7 +477,10 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
   const saved = screensOf(project);
   const screens = withProjectReceptorEdits(saved, overridesOf(project));
   const feeds = project.feeds as FeedsLike | undefined;
-  const feed: Feed = (key) => feedOf(project, key);
+  const feed: Feed = Object.assign(
+    <T>(key: string, chemicalId?: string): T | null => feedOf<T>(project, key, chemicalId),
+    { slots: <T>(key: string): FeedSlots<T> => feedSlotsOf<T>(project, key) },
+  );
   // used-ness is judged on the saved forms: a receptor edit alone does not make a screen used
   const used = USED_SCREENS_ORDER.filter((k) => screenUsed(k, saved, feeds));
   const needsDb = used.includes('risk') || used.includes('cleanup');

@@ -1,5 +1,5 @@
 import type { Scenario } from './form';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 
 /**
  * The groundwater screen's aquifer, source footprint, receptor well and evaluation time, offered to
@@ -14,9 +14,11 @@ export interface TransportFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<TransportFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getTransportFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<TransportFeed>();
 
 export const getTransportFeed = store.get;
+export const getTransportFeedSlots = store.slots;
 export const setTransportFeed = store.set;
 export const clearTransportFeed = store.clear;
 export const subscribeTransportFeed = store.subscribe;

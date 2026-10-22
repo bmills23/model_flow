@@ -36,7 +36,7 @@ import {
 import type { EditorSpec } from '../uncertainty/editor';
 import type { PanelModel } from '../uncertainty/UncertaintyPanel';
 import type { LegacyScenarioInput } from '@model-flow/engine';
-import { feedOf } from './results';
+import { feedSlotsOf } from './results';
 import { modeledReportEntry, type ModeledReportEntry } from './modeledReport';
 import type { WellFeed } from '../transport/wellFeed';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
@@ -102,7 +102,8 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
     );
     return plan;
   }
-  const feed = <T>(key: string): T | null => feedOf<T>(project, key);
+  // every slot of a feed (one per chemical); each chemical row reads its own
+  const slots = <T>(key: string) => feedSlotsOf<T>(project, key);
   plan.modeled = modeledReportEntry(screens, db);
 
   // Exposure panel: the legacy method's receptor factors.
@@ -111,11 +112,11 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
     const built = buildInputs(
       screens.risk.form,
       db,
-      feed<WellFeed>('well'),
-      feed<VaporRiskFeed>('vaporRisk'),
-      feed<SurfaceWaterFeed>('surfaceWater'),
-      feed<HouseholdRiskFeed>('household'),
-      feed<ProduceRiskFeed>('produce'),
+      slots<WellFeed>('well'),
+      slots<VaporRiskFeed>('vaporRisk'),
+      slots<SurfaceWaterFeed>('surfaceWater'),
+      slots<HouseholdRiskFeed>('household'),
+      slots<ProduceRiskFeed>('produce'),
     );
     const setup = setups.risk;
     if (Object.keys(setup.rows).length === 0) {
@@ -164,7 +165,7 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
         `${name}: not run here, this panel samples a direct source only (a modeled source is reported from the cleanup screen).`,
       );
     } else {
-      const built = buildCleanup(form, db, { produce: feed<ProduceRiskFeed>('produce') });
+      const built = buildCleanup(form, db, { produce: slots<ProduceRiskFeed>('produce') });
       if (!built.ok) {
         plan.notes.push(
           `${name}: not run, the screen's inputs do not compute (${built.errors.join('; ')}).`,

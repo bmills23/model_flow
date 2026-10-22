@@ -44,7 +44,7 @@ describe('opening and saving a project in the store', () => {
     setWellFeed(well);
     const p = currentProject();
     expect(p.title).toBe('Site C');
-    expect(p.feeds?.well?.value).toEqual(well);
+    expect(p.feeds?.well?.['']?.value).toEqual(well);
     expect(p.screens.transport).toBeDefined();
   });
 

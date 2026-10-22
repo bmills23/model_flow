@@ -26,10 +26,11 @@ export function SurfaceWaterPanel(props: {
         Surface water source levels <small>{feed.label}</small>
       </h2>
       <p className="muted">
-        <StaleMark feed="surfaceWater" /> Each level is the surface water level above divided by the
-        peak surface water concentration the run gives per unit of dissolved groundwater source, so
-        a groundwater source at this level alone just meets the target. The run is the one sent from
-        the surface water screen; use it for the chemical it was run for.
+        <StaleMark feed="surfaceWater" chemicalId={feed.chemicalId} /> Each level is the surface
+        water level above divided by the peak surface water concentration the run gives per unit of
+        dissolved groundwater source, so a groundwater source at this level alone just meets the
+        target. The run is the one sent from the surface water screen; use it for the chemical it
+        was run for.
       </p>
       <div className="cleanup-table-wrap">
         <table className="sat cleanup-table">

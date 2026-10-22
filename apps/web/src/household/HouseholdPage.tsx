@@ -7,8 +7,9 @@ import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../proje
 import { projectNameOf } from '../project/feedChemical';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg, TextField } from '../ui/controls';
-import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
-import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
+import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getWellFeedSlots, subscribeWellFeed } from '../transport/wellFeed';
+import { pickSlot } from '../project/feedSlots';
 import { computeHousehold, volatileVerdict, type Section } from './compute';
 import { householdCsvTables } from './csv';
 import { buildHouseholdFeed } from './feed';
@@ -84,11 +85,18 @@ export function HouseholdPage() {
     />
   );
 
-  const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
-  const surface = useSyncExternalStore(
-    subscribeSurfaceWaterFeed,
-    getSurfaceWaterFeed,
-    getSurfaceWaterFeed,
+  // the well and surface water results sent for this screen's chemical (one slot per chemical)
+  const well = pickSlot(
+    useSyncExternalStore(subscribeWellFeed, getWellFeedSlots, getWellFeedSlots),
+    form.chemicalId,
+  );
+  const surface = pickSlot(
+    useSyncExternalStore(
+      subscribeSurfaceWaterFeed,
+      getSurfaceWaterFeedSlots,
+      getSurfaceWaterFeedSlots,
+    ),
+    form.chemicalId,
   );
   const [sent, setSent] = useState<string | null>(null);
 

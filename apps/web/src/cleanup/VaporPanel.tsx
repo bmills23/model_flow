@@ -36,10 +36,10 @@ export function VaporPanel(props: {
         </small>
       </h2>
       <p className="muted">
-        <StaleMark feed="vaporRisk" /> Each level is the indoor or outdoor air level above divided
-        by the air-over-source coefficient of the vapor run, so a source at this level alone just
-        meets the target. It holds where the air is proportional to the source; a path that is not
-        is listed with the reason and no level.
+        <StaleMark feed="vaporRisk" chemicalId={feed.chemicalId} /> Each level is the indoor or
+        outdoor air level above divided by the air-over-source coefficient of the vapor run, so a
+        source at this level alone just meets the target. It holds where the air is proportional to
+        the source; a path that is not is listed with the reason and no level.
       </p>
       <div className="cleanup-table-wrap">
         <table className="sat cleanup-table">

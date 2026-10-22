@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { UncertaintyError, type UncertainInput } from '@model-flow/engine';
-import type { StaleFeedKey } from '../project/store';
+import type { FeedRef } from '../project/staleFeeds';
 import { Field } from '../ui/controls';
 import { AlertDialog } from '../ui/AlertDialog';
 import { DistributionEditor } from '../uncertainty/DistributionEditor';
@@ -50,7 +50,7 @@ export function ModeledSourceUncertainty(props: {
   makeWorker?: WorkerFactory;
   workers?: number;
   /** Feeds from other screens the request was taken from. */
-  feeds?: readonly StaleFeedKey[];
+  feeds?: readonly FeedRef[];
 }) {
   const { request, outcome, name } = props;
   const [setup0, patchSetup] = useSetup('modeled');

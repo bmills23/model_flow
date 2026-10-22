@@ -144,15 +144,17 @@ describe('planUncertainty', () => {
     const proj = buildProject({
       screens,
       feeds: {
-        produce: feedEntry('plantsEco', screens.plantsEco.form, {
-          chemicalId: BENZENE,
-          label: 'Benzene',
-          method: 'plantUptake.hhrap-2005',
-          factors: { root: 0.02 },
-          intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
-          intakeLabel: 'user entered',
-          warnings: [],
-        }),
+        produce: {
+          [BENZENE]: feedEntry('plantsEco', screens.plantsEco.form, {
+            chemicalId: BENZENE,
+            label: 'Benzene',
+            method: 'plantUptake.hhrap-2005',
+            factors: { root: 0.02 },
+            intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
+            intakeLabel: 'user entered',
+            warnings: [],
+          }),
+        },
       } as never,
       createdWith: '0.0.1',
       now: NOW,

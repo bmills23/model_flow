@@ -10,6 +10,7 @@ import {
 import { loadCleanupProps, type CleanupProps } from '../cleanup/ssg';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { getScreen, setScreen } from '../project/store';
+import { ownSlot } from '../project/feedSlots';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
 import { fmtHi } from '../risk/chartData';
 import { useChemicalDb } from '../risk/useChemicalDb';
@@ -19,7 +20,7 @@ import { plantsEcoCsvTables } from './csv';
 import { computeBenchmarks, computeEcossl, ECO_LEGACY_ID, ECO_MODERN_ID } from './eco';
 import { loadEcossl, substanceFor, type EcosslSubstance } from './ecossl';
 import {
-  getProduceFeed,
+  getProduceFeedSlots,
   getTphFeed,
   setProduceFeed,
   setTphFeed,
@@ -134,7 +135,11 @@ export function PlantsEcoPage() {
   const { db, error: dbError } = useChemicalDb();
   const props = useLoaded<CleanupProps>(loadCleanupProps);
   const substances = useLoaded<EcosslSubstance[]>(loadEcossl);
-  const held = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  // the produce result this screen sent for its chemical (one slot per chemical)
+  const held = ownSlot(
+    useSyncExternalStore(subscribeProduceFeed, getProduceFeedSlots, getProduceFeedSlots),
+    form.chemicalId,
+  );
   const heldTph = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const [sent, setSent] = useState<string | null>(null);
   const [sentTph, setSentTph] = useState<string | null>(null);

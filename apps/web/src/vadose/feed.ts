@@ -1,6 +1,6 @@
 import type { VadoseMethod } from './compute';
 import type { VadoseScenario } from './form';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 
 /**
  * The vadose result offered to the groundwater screen as its source. It holds the scenario, not
@@ -15,9 +15,11 @@ export interface VadoseFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<VadoseFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getVadoseFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<VadoseFeed>();
 
 export const getVadoseFeed = store.get;
+export const getVadoseFeedSlots = store.slots;
 export const setVadoseFeed = store.set;
 export const clearVadoseFeed = store.clear;
 export const subscribeVadoseFeed = store.subscribe;
