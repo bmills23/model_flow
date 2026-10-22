@@ -166,6 +166,21 @@
   }
 }
 
+.report-method-ids ul,
+.report-basis-summary ul {
+  padding-left: 1.2em;
+  overflow-wrap: anywhere;
+}
+
+.report-method-ids li {
+  margin-bottom: 4px;
+}
+
+.report-basis-summary p,
+.report-section > .csv-downloads {
+  overflow-wrap: anywhere;
+}
+
 .report-refs {
   padding-left: 2.2em;
 }

@@ -3438,3 +3438,57 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 8. **Slices (DEFAULT).** R1a catalog ids and scopes first; then in parallel R1b (run basis function) followed by
    R1c (report, CSV, version), R2 (dispersivity), R3a (RSL data) followed by R3b (engine sweeps), and R4 (receptor
    notes). One gate and one full mobile check at integration, one review.
+
+## 2026-10-22: Wave R slice R1a, catalog ids and scopes
+
+1. **Ids and scopes (DEFAULT).** Each warned default in the validation catalog carries a unique, stable `id` and a
+   `scope`. `warning` defaults are listed for a section when their `warningCode` appears in its warnings, and must
+   have a code. `method` defaults are listed when any of their method ids ran, and must have at least one. The
+   manifest builder throws on a duplicate id or a scope without its key.
+2. **Saturated log-quadratic (DEFAULT).** `dispersivity.gelhar1985-api1987` gets its own default entry
+   (`gelhar-saturated-log-quadratic`, reference `gelhar1985`). No primary source could be read: EPRI EA-4190 prints
+   field data and a plot, not the regression. Its needle is a sentence added to
+   `docs/methods/groundwater-transport.md`. The vadose regression entry now also lists `vadose.layered`.
+3. **Sweep extension point and data files (DEFAULT).** `validationCatalogSweep.ts` exports an empty
+   `sweepExamples` array that the catalog appends to `examples`. An example spec may name `dataFiles` (relative to
+   `packages/data/generated`); their parsed JSON is passed to `count` as a third argument, and the manifest lists
+   them. Existing examples render as before, with a `Data` line only when `dataFiles` is non-empty.
+4. **Regeneration (DEFAULT).** This slice commits the regenerated `docs/VALIDATION.md` and `validation.json`.
+
+## 2026-10-22: Wave R slice R1b, run basis
+
+1. **Pure function (DEFAULT).** `runBasis` in `apps/web/src/report/basis.ts` takes the report model, the section
+   results, the project, the chemical database, the fate rows (user chemicals laid in), the manifest defaults and the
+   stale slots, and returns rows per used section plus project-level rows. No markup; the report page and the CSV
+   read the rows in a later slice.
+2. **Row kinds (DEFAULT).** `unverified-default` (catalog default by warning code or method id that ran),
+   `entered-unsourced` (a fate property typed with a blank chemical id, or naming no database record),
+   `typed-over-database` (differs numerically from the row the chemical id names; transport Kd against Koc times
+   foc), and the project-level `user-override`, `user-chemical` and `receptor-edit`, each with its note or "no note".
+   Overrides and user chemical values left out of the run for lack of a usable number or note are not listed.
+3. **Feeds (DEFAULT).** A section that reads a feed inherits the sending screen's own rows, to any depth, marked
+   `via` that screen, and stale when any feed on the path is stale. Inherited rows reflect the sender's current
+   inputs, not the inputs at send.
+4. **Over-reporting until R2 (DEFAULT).** Method-scoped defaults are listed whenever their method ran, so the
+   dispersivity regressions appear even when an entered value replaced them, until R2 moves them to warning scope.
+5. **Fixture chemical (DEFAULT).** The vapor screen's `risc4-benzene` fixture is not a database record, so its
+   properties list as entered without a source.
+
+## 2026-10-22: Wave R slice R1c, report basis and version
+
+1. **Report layout (DEFAULT).** Each used section ends with a "What this run rests on" table (the run basis rows,
+   reusing the result-table markup and its data-label cards at 390 px), and a summary under the title counts the
+   distinct rows by kind and names the unverified defaults. A section with no rows says so. Method ids print beside
+   method names with "checked by N published examples" linked to `#/validation`.
+2. **Evidence count (DEFAULT).** N counts the examples of `validation.json` that name the method and have status
+   `reproduced`; a named exception, a pending case or a smoke test is not a check. N is printed even when it is 0.
+3. **Run basis CSV (DEFAULT).** One report-level file `run-basis` through `export/csv.ts`, with a screen column ("Project"
+   for project-level rows) and a via-screen column. Stale inherited rows gain the `stale inputs` column and the
+   `-stale-inputs` name suffix of the other exports, the mark on those rows only.
+4. **Version (DEFAULT).** `apps/web/package.json` is 0.1.0, which `createdWith` already reads; `buildInfo.ts` exports it
+   with the short commit that a vite `define` injects (`unknown` when git cannot be run, and under the test runner).
+   The report header labels the date "Generated" and adds "Commit". Fixture files and tests that name `0.0.0` as a
+   saved file value are unchanged: they are file contents, not the app version.
+5. **Receptor edit notes (DEFAULT).** The report's receptor table gains a source note column, "no note" when empty.
+6. **Defect fixed outside the slice (DEFAULT).** `runBasis` read `.form` of every screen and threw for the uncertainty
+   setup screen, which has none; it now treats a missing form as empty (`report/basis.ts`), with a test.

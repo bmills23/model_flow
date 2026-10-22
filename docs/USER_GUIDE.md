@@ -283,7 +283,8 @@ split) is not editable. The soil skin area, adherence, water, breathing and time
 "Site-specific factors". Changing the scenario preset of a receptor that has edited factors asks first: the
 edits belong to the old preset, and switching resets them. The exposure and cleanup screens keep their own
 receptor edits. The uncertainty runs centre on the edited values, the project file keeps the edits, and
-the report lists them under "Receptor factors supplied by the user" with the preset value beside each.
+the report lists them under "Receptor factors supplied by the user" with the preset value and the source note
+beside each ("no note" when none was given).
 
 ### Cleanup levels (`#/cleanup`)
 
@@ -400,6 +401,23 @@ non-affiliation notice. Each screen's main charts are included too, every one fo
 (including the groundwater plume map; its printed table is an evenly spaced sample of 20 centreline rows, and the groundwater screen's table holds every row). Charts print in shades of grey, so a black and white print stays
 readable. **Print or save as PDF** uses your browser's print dialog, which has a PDF option. The optional
 "Prepared by" field is not saved to the project.
+
+The top of the report gives the generation date, the app version (0.1.0 while the evidence gap against
+published tables is open) and the short commit the build was made from ("unknown" when the build could not
+read it). A project you save is stamped with the same version.
+
+Each section ends with **What this run rests on**, a table of the values in that section that no checked
+source backs: built-in defaults that carry a warning (with the note and the reference status), fate
+properties typed with no database chemical, properties typed over the database value (with the database value
+beside), toxicity values and chemicals you supplied, and receptor factors you edited, each with its source note
+or "no note". A section that reads values sent from another screen also lists that screen's rows, marked with
+the sender and "out of date" when the sent values no longer match. A summary under the title counts the rows by
+kind and names the unverified defaults used. **Download CSV: run basis** saves the same rows in one file with a
+screen column; when any row is out of date the file gains a stale inputs column and a `-stale-inputs` name
+suffix, like the other downloads. Beside each method name the report prints the method id and "checked by N
+published examples", a link to the validation page; N counts the reproduced worked examples that name the
+method, not named exceptions, pending cases or smoke tests. Until the dispersivity change lands, the
+dispersivity regressions are listed whenever their method ran, even when you entered a value.
 
 Uncertainty results are left out until you ask. In the uncertainty section, tick **Include uncertainty
 results** to repeat each analysis you set up on the exposure and cleanup screens, from its saved

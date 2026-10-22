@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
@@ -17,9 +18,23 @@ function minifyJsonAssets(): Plugin {
   };
 }
 
+// The short commit the report prints. A build without git (or outside a checkout) says "unknown".
+function shortCommit(): string {
+  try {
+    const out = execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    return out === '' ? 'unknown' : out;
+  } catch {
+    return 'unknown';
+  }
+}
+
 // BASE_PATH is set by the Pages workflow to "/model_flow/" for project-pages hosting.
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
+  define: { __BUILD_COMMIT__: JSON.stringify(shortCommit()) },
   plugins: [react(), minifyJsonAssets()],
   build: {
     target: 'es2022',
