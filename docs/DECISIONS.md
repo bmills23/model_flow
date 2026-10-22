@@ -3356,3 +3356,21 @@ An older tab must never overwrite a newer autosave. Every ruling below is DEFAUL
    name gets a number suffix, so axe landmark-unique stays at zero.
 2. **The mobile check's seeded risk visit setup line is restored.** The P3 merge had left a stray token in place of
    the benzene pick, which failed the visit in all views.
+
+## 2026-10-22: Target user and wave Q scope
+
+Bryan, after the waves N to P close report: "target user: regulatory work, fix the low findings, not sure where to
+go with the other stuff".
+
+1. **Target user (BRYAN).** The app is aimed at regulatory work. Where a choice trades learning or screening
+   convenience against defensibility (a sourced value, a stated limit, a reproducible record of a run), take the
+   defensible side. What this means for the evidence gap and the remaining parity gaps is decided in a later block.
+2. **Wave Q scope (BRYAN).** Fix the low findings left from the waves O and P reviews, listed under the Wave P entry
+   in ROADMAP section 7: the report's held probabilistic result when the cleanup list is emptied, a chemical's
+   source hint showing another chemical's fallback transport run without its stale mark, every chemical's block
+   greying while one re-solves, the flat heading outline of the per-chemical modeled blocks, the progress line
+   counting only buildable chemicals, report blocks keyed by chemical name, the missing tests (per-chemical cache and
+   progress, CSV stale pairing per chemical, the report's stale state), and the mobile check's `#/chemicals` setup
+   defining its user chemical again in each view.
+3. **Shape (DEFAULT).** One slice on branch `wave-q`, then the gate and `mobile:check:full` once. The slice's own
+   rulings follow in a "Wave Q" block.
