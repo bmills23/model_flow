@@ -2946,3 +2946,22 @@ All rulings are DEFAULT. Each source was re-read on 2026-10-21 before any change
    unreadable value) goes through the same `errors` list, and any entry returns `ok: false` for all rows
    (`risk/build.ts`, the final `errors.list.length > 0` check). The feed chemical errors follow that and are not
    special-cased.
+
+## 2026-10-21: Waves O and P scope
+
+Bryan, after wave N's corrective pass: "after that, go ahead with waves O and P". The design rulings are those of
+the "Project chemical list, waves N to P scope" block (rulings 1 to 4 BRYAN, 5 to 9 DEFAULT); every ruling below is
+DEFAULT.
+
+1. **Slices.** O4 moves the chemical-scoped feeds to one slot per chemical with the version 2 project file
+   migration, and adds the shared project-list select. Then, in parallel: O1 risk and cleanup rows follow the list
+   and `#/chemicals` gains "Add to project" and a way to remove a chemical; O2a the transport, vadose and saturated
+   screens pick from the list; O2b the vapor, household and plants and eco screens pick from the list, and a linked
+   surface water run matches the transport run's chemical; P2 the surface water cleanup target. P1, user-defined
+   chemicals, starts once O1, O2a and O2b are done.
+2. **Carried from wave N.** `setScreen` re-adds a chemical only when no screen named it before the edit, so a
+   chemical removed from the list is not re-added when a further screen names it (O4). The surface water sender's
+   tag has no test (O2b). The list derivation for a file without a `chemicals` key ignores the surface water
+   screen's new `chemicalId` (O4).
+3. **Multi-chemical modeled cleanup stays capped at one chemical in these waves.** The engine solver already takes
+   several chemicals; lifting the web cap is a later slice.
