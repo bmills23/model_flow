@@ -165,7 +165,10 @@ describe('ReportPage', () => {
     { timeout: 20000 },
     async () => {
       const v = getScreen('vadose');
-      setScreen('vadose', { ...v, form: { ...v.form, foc: '0.0123' } } as typeof v);
+      setScreen('vadose', {
+        ...v,
+        form: { ...v.form, foc: '0.0123', dispersivityBasis: 'regression' },
+      } as typeof v);
       render(<ReportPage />);
       const summary = await screen.findByRole('region', { name: /What this run rests on/i }, SLOW);
       expect(summary.textContent).toMatch(/unverified default/i);

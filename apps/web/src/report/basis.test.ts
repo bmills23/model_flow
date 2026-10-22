@@ -107,8 +107,11 @@ describe('runBasis, unverified defaults', () => {
     expect(row.note).not.toBe('');
   });
 
-  it('lists a method-scoped default when a method id of the section ran', () => {
-    const b = run({ edit: vadose({ foc: '0.0123' }) });
+  it('lists the vadose regression default when its warning code is in the section warnings', () => {
+    const b = run({
+      edit: vadose({ foc: '0.0123', dispersivityBasis: 'regression' }),
+      results: { vadose: sec([warn('vadose.dispersivity-regression-unsourced')]) },
+    });
     const ids = b.sections
       .vadose!.filter((r) => r.kind === 'unverified-default')
       .map((r) => r.defaultId);
@@ -118,7 +121,14 @@ describe('runBasis, unverified defaults', () => {
 
   it('lists a default once per section', () => {
     const b = run({
+      results: {
+        cleanup: sec([
+          warn('vadose.dispersivity-regression-unsourced'),
+          warn('vadose.dispersivity-regression-unsourced'),
+        ]),
+      },
       edit: (s) => {
+        vadose({ dispersivityBasis: 'regression' })(s);
         s.cleanup = { form: { ...s.cleanup.form, source: 'vadose' } };
       },
     });

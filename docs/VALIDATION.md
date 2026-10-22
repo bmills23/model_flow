@@ -4,7 +4,7 @@ Generated 2026-10-22 from the fixtures under `packages/engine/test/fixtures`, th
 
 Each published worked example the test suite reproduces is listed with its source, the method it checks, what is compared, the number of cases and the tolerance the test enforces. A test that passes at its tolerance shows agreement with the published value to that tolerance; it is not a statement about model accuracy. The observed largest error is not reported, only the enforced tolerance.
 
-Summary: 34 entries (28 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test only).
+Summary: 39 entries (33 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test only).
 
 ## Worked examples
 
@@ -296,6 +296,65 @@ Summary: 34 entries (28 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Status: reproduced
 - Fixture: none, the published values are typed in the test `vapor-source.test.ts`
 
+#### RSL November 2024 sweep, tap water
+
+- Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
+- Method: `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: Resident tap water ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1): all 3053 printed cells against the engine. 3040 reproduce, 9 are excepted (eight trichloroethylene and vinyl chloride cancer cells, which the RSL treats with its own equations, and one lead cell with no toxicity value in the database), 4 are unexplained.
+- Cases: 3053 published screening levels
+- Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
+- Status: reproduced
+- Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
+- Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
+- Note: The 265 inhalation cells (93 cancer, 172 noncancer) are the resident air level divided by the household factor K, entered as 0.5 L/m3; 263 reproduce and the two that do not are the trichloroethylene and vinyl chloride cancer cells. Unexplained: the total cancer level of Aroclor 1242, 1248, 1254 and 1260 is printed 0.0078 ug/L and computed 0.007852 ug/L (0.7 percent above); the ingestion and inhalation cells of these rows reproduce and the dermal cell is blank, and no reason was found.
+
+#### RSL November 2024 sweep, resident soil
+
+- Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
+- Method: `exposure.rags-e-f-2014`
+- Compared: Resident soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1): all 3012 printed cells against the engine. 2138 reproduce, 874 are excepted (870 soil inhalation cells and totals that include them, two trichloroethylene and vinyl chloride cancer cells, and two lead cells with no toxicity value in the database), 0 are unexplained.
+- Cases: 3012 published screening levels
+- Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
+- Status: reproduced
+- Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
+- Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
+- Note: The soil inhalation level rests on the RSL volatilization and particulate emission factors, which the sweep does not compute, so the 435 inhalation cells and the 435 totals that include them are excepted, not compared.
+
+#### RSL November 2024 sweep, composite worker soil
+
+- Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
+- Method: `exposure.rags-e-f-2014`
+- Compared: Industrial soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (hazard quotient 1): all 3011 printed cells against the engine. 2140 reproduce, 871 are excepted (870 soil inhalation cells and totals that include them, and one lead cell with no toxicity value in the database), 0 are unexplained.
+- Cases: 3011 published screening levels
+- Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
+- Status: reproduced
+- Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
+- Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
+- Note: The soil inhalation level rests on the RSL volatilization and particulate emission factors, which the sweep does not compute, so the 435 inhalation cells and the 435 totals that include them are excepted, not compared.
+
+#### RSL November 2024 sweep, resident and industrial air
+
+- Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
+- Method: `exposure.rags-e-f-2014`
+- Compared: Resident air inhalation, cancer and noncancer, and the summary governing level for industrial air (the lower of the cancer and noncancer levels): all 812 printed cells against the engine. 807 reproduce, 5 are excepted (two trichloroethylene and vinyl chloride cancer cells, one lead cell with no toxicity value in the database and two refractory ceramic fiber cells whose database value is in fibers), 0 are unexplained.
+- Cases: 812 published screening levels
+- Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
+- Status: reproduced
+- Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
+- Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
+- Note: In all 365 reproduced industrial air cells the summary key letter (c or n) names the endpoint the engine finds governing.
+
+#### NRWQC hardness-dependent metals at a hardness of 100 mg/L
+
+- Source: `epanrwqc`, National Recommended Water Quality Criteria - Aquatic Life Criteria Table
+- Method: none registered (a data or arithmetic function)
+- Compared: The acute and chronic freshwater criteria of cadmium, chromium III, lead, nickel, silver and zinc, computed from the slope, intercept and conversion factor of the Appendix B data file at a hardness of 100 mg/L, against the printed criteria of the aquatic life table. Cadmium chronic (vacated) and silver chronic (none) print no value.
+- Cases: 10 published criteria
+- Tolerance: Within half a unit of the second significant figure of the printed value (all ten printed values have two).
+- Status: reproduced
+- Fixture: none, the published values are typed in the test `surfacewater-criteria.test.ts`
+- Note: Extends the zinc entry above to every hardness-dependent metal of the data files.
+
 ### Named exception
 
 #### Table R-6, groundwater to outdoor air
@@ -384,13 +443,13 @@ What the examples above do not establish: references not yet read that a shipped
 | --- | --- | --- | --- | --- |
 | Foster and Chrostowski film reference coefficients (3000 cm/h gas, 20 cm/h liquid) | `shower.fc-1986` | `shower.film-reference-unverified` | `foster1986` (planned) | RISC5 choices that could not be verified against the primary paper; they are inputs and the defaults are warned. The stagnant stall source is a planned, unverified record and is not cited. |
 | Little (1992) two-resistance stall mass balance | `shower.little-1992` | none | `little1992` (used) | The mass balance is our statement of the two-resistance theory, checked by limit identities; it is not a transcription of the paper. |
-| Household transfer factor K (RSL whole-house water-to-air term) | `shower.rsl-household` | `shower.household-factor-unverified` | `epa2024rslug` (used) | An entered value that could not be verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The equation form (C_a = C_w K) is not confirmed, because the page prints its equations as images, so the warning stays. |
+| Household transfer factor K (RSL whole-house water-to-air term) | `shower.rsl-household` | `shower.household-factor-unverified` | `epa2024rslug` (used) | An entered value, not verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The page prints its equations as images, so the form (C_a = C_w K) was not read from it. Numerically, K = 0.5 reproduces 263 of the 265 tap water inhalation levels of the RSL November 2024 table (the resident air level divided by K; the two misses are the trichloroethylene and vinyl chloride cancer cells, which the RSL computes with its own equations; see the tap water sweep above). That is consistency with the published table, not verification from a primary source, so the warning stays. |
 | HHRAP fallback standing in for Trapp (2015) | `plantUptake.hhrap-2005` | none | `trapp2015` (planned) | The modern plant model is the EPA HHRAP 2005 produce equations until the Trapp (2015) models are read. |
 | Transpiration stream concentration factor (TSCF) and leaf-air partition coefficient | `plantUptake.trapp-matthies-1995` | none | `trappmatthies1995` (used) | User inputs, because their published regressions were not read. |
 | Briggs root concentration factor constants | `plantUptake.trapp-matthies-1995`, `plantUptake.hhrap-2005` | none | `briggs1982` (used) | The constants 0.77 and -1.52 were read in the paper itself on 2026-10-21 (Pestic. Sci. 13, 495-504, open copy in the Rothamsted repository, page 500, Equations 1 and 2; the TSCF equation is on page 502). The engine's form drops the paper's 0.82 term above log Kow 2, as the HHRAP appendix does: Equation 1 is the macerated-root line, and Equation 2 adds 0.82 to the root concentration factor at every log Kow. |
 | Schulze-Makuch (2005) dispersivity coefficients | `dispersivity.schulze-makuch2005` | none | `schulzemakuch2005` (used) | The unconsolidated-media pair c = 0.20, m = 0.44 is quoted from lecture notes that cite the paper, not from the paper’s own tables. |
-| Gelhar et al. (1985) two-branch vadose dispersivity regression | `vadose.vadsat`, `vadose.layered` | none | `gelhar1985` (used) | The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain. |
-| Gelhar et al. (1985) saturated-zone log-quadratic dispersivity regression | `dispersivity.gelhar1985-api1987` | none | `gelhar1985` (used) | The coefficients of ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2 have no primary source located: the EPRI report (EA-4190) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain. |
+| Gelhar et al. (1985) two-branch vadose dispersivity regression | `vadose.vadsat`, `vadose.layered` | `vadose.dispersivity-regression-unsourced` | `gelhar1985` (used) | The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain. |
+| Gelhar et al. (1985) saturated-zone log-quadratic dispersivity regression | `dispersivity.gelhar1985-api1987` | `dispersivity.regression-unsourced` | `gelhar1985` (used) | The coefficients of ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2 have no primary source located: the EPRI report (EA-4190) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain. |
 | Organic Koc and H of the SSG 1996 Table A-1 fixture | `cleanup.ssg-leaching` | none | `epa1996ssg` (used) | The nine organic Koc values (Table 39, calculated Koc) and H (Table 36, dimensionless) were read from the primary document on 2026-10-21 and match, after correcting PCE H to 0.754. Table C-1 of the User's Guide and the inorganic Kd values were not re-read. |
 
 ### Named exceptions
@@ -407,7 +466,8 @@ What the examples above do not establish: references not yet read that a shipped
 
 ### Published values not checked
 
-- RSL inhalation cells: Tap water inhalation, soil inhalation and the noncancer worker air value of the RSL tables are not checked by the RSL independent check; the benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.
+- RSL soil inhalation cells: The soil inhalation levels of the RSL tables (435 cells each for resident and industrial soil) and the soil totals that include them (another 435 each) are not checked: they rest on the RSL volatilization and particulate emission factors, which the November 2024 sweep does not compute. The sweeps check tap water inhalation and the industrial air levels; the 30-case independent check does not. The benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.
+- RSL sweep cells that do not reproduce: Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: the trichloroethylene and vinyl chloride cancer cells (the RSL special-case equations), lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.
 - DeVaull (2007) vapor model: No published numeric example could be verified, so the model rests on identities and hand cases built from independent closed forms. There is no fixture file.
 - Table R-9 pages 2 and 3: The RISC5 guide reproduces only page 1 of the three pages, so the other rows cannot be checked.
 
