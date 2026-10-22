@@ -12,6 +12,8 @@ export interface SaturatedFeed {
   input: SaturatedSourceInput;
   method: SaturatedMethod;
   label: string;
+  /** Database id of the chemical the screen was set to; absent when entered by hand or untagged. */
+  chemicalId?: string;
 }
 
 const store = createFeed<SaturatedFeed>();

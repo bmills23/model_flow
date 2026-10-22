@@ -23,6 +23,7 @@ import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
 import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
 import { waterTableSource } from './vaporFeed';
+import { chemicalTag } from '../project/feedChemical';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
@@ -678,6 +679,7 @@ export function TransportPage() {
                         label: `Receptor well, ${SERIES[k].label}, ${form.timeYr} years`,
                         times: [...result.times],
                         values: [...values],
+                        ...chemicalTag(form.chemicalId),
                       });
                     }}
                   >
@@ -712,6 +714,7 @@ export function TransportPage() {
                       setTransportFeed({
                         scenario,
                         label: `${form.timeYr} years, receptor at ${form.rx} m`,
+                        ...chemicalTag(form.chemicalId),
                       });
                     }}
                   >
@@ -745,13 +748,14 @@ export function TransportPage() {
                     onClick={() => {
                       if (!parsed.ok) return;
                       const k = keys.includes(wellMethod) ? wellMethod : 'modern';
-                      setWaterTableFeed(
-                        waterTableSource(
+                      setWaterTableFeed({
+                        ...waterTableSource(
                           parsed.scenario,
                           k,
                           `Water table under the receptor point, ${SERIES[k].label}, ${form.timeYr} years`,
                         ),
-                      );
+                        ...chemicalTag(form.chemicalId),
+                      });
                     }}
                   >
                     Use as vapor groundwater source
@@ -787,6 +791,7 @@ export function TransportPage() {
                       setBankFeed({
                         scenario: plain,
                         label: `Groundwater transport run, ${form.timeYr} years`,
+                        ...chemicalTag(form.chemicalId),
                       });
                     }}
                   >

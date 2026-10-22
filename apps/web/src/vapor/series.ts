@@ -23,8 +23,8 @@ import { runOutdoor, type OutdoorForm } from './outdoor';
  * kg/m3 of the groundwater at the water table, or of the pore water of a soil source.
  */
 export type SourceSeries =
-  | { kind: 'groundwater' | 'poreWater'; label: string; series: EpcSeries }
-  | { kind: 'poreWater'; label: string; constant: number };
+  | { kind: 'groundwater' | 'poreWater'; label: string; series: EpcSeries; chemicalId?: string }
+  | { kind: 'poreWater'; label: string; constant: number; chemicalId?: string };
 
 export const INDOOR_ORIGIN = { legacy: 'vapor.je-1991', modern: 'vapor.je-epa' } as const;
 export const OUTDOOR_ORIGIN = {

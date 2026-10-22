@@ -362,3 +362,15 @@ editions it used and the date, so a file can be traced to what produced it.
 Open an issue on the project's repository:
 [github.com/bmills23/model_flow/issues](https://github.com/bmills23/model_flow/issues). Please describe what
 you entered and attach the saved project file if you can; it holds your inputs and nothing else.
+
+### Results sent between screens carry their chemical
+
+A result you send from a screen (the receptor well, the groundwater run for cleanup levels or for surface water,
+the vadose and saturated sources, the water table, vadose and saturated sources for vapor intrusion, and a surface
+water run linked to a groundwater run) remembers the chemical the screen was set to. Exposure and risk and
+cleanup levels check it against each row: a row for another chemical shows an error naming both chemicals instead
+of taking the value, and the row for the matching chemical keeps it. Modeled cleanup refuses a groundwater,
+vadose or saturated run for another chemical. A result sent before this change, or from a screen with the
+chemical typed by hand, carries no chemical: it is still used when the run holds one chemical, and when the run
+holds two or more the screen says to send it again. A surface water run not linked to a groundwater run carries no
+chemical, so in a multi-chemical cleanup run its levels are not quantified until it is linked.

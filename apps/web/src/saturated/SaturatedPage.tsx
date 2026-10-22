@@ -21,6 +21,7 @@ import {
   subscribeSaturatedVaporFeed,
 } from '../vapor/feeds';
 import { saturatedVaporSource } from './vaporFeed';
+import { chemicalTag } from '../project/feedChemical';
 import { TEXTURE_OPTIONS, type TextureChoice } from '../vapor/form';
 import {
   CASE_A,
@@ -171,6 +172,7 @@ export function SaturatedPage() {
       input: scenario.input,
       method: feedable,
       label: `${caseA ? 'Hand case A' : 'Saturated soil source run'}, ${METHODS[feedable].short} method`,
+      ...chemicalTag(form.chemicalId),
     });
   };
 
@@ -611,7 +613,10 @@ export function SaturatedPage() {
                     type="button"
                     className="btn"
                     disabled={stale || vaporSource === null}
-                    onClick={() => vaporSource && setSaturatedVaporFeed(vaporSource)}
+                    onClick={() =>
+                      vaporSource &&
+                      setSaturatedVaporFeed({ ...vaporSource, ...chemicalTag(form.chemicalId) })
+                    }
                   >
                     Use as vapor source
                   </button>{' '}

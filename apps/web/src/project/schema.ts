@@ -56,6 +56,7 @@ export const feedShapes = {
         label: text,
         times: numbers,
         values: numbers,
+        chemicalId: text.optional(),
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),
@@ -78,16 +79,29 @@ export const feedShapes = {
             solubility: z.number().optional(),
           })
           .optional(),
+        chemicalId: text.optional(),
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),
   vadose: feedEnvelope(
-    z.object({ scenario: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+    z.object({
+      scenario: jsonObject,
+      method: z.enum(['legacy', 'modern']),
+      label: text,
+      chemicalId: text.optional(),
+    }),
   ).optional(),
   saturated: feedEnvelope(
-    z.object({ input: jsonObject, method: z.enum(['legacy', 'modern']), label: text }),
+    z.object({
+      input: jsonObject,
+      method: z.enum(['legacy', 'modern']),
+      label: text,
+      chemicalId: text.optional(),
+    }),
   ).optional(),
-  bank: feedEnvelope(z.object({ scenario: jsonObject, label: text })).optional(),
+  bank: feedEnvelope(
+    z.object({ scenario: jsonObject, label: text, chemicalId: text.optional() }),
+  ).optional(),
   vaporVadose: feedEnvelope(jsonObject).optional(),
   vaporWaterTable: feedEnvelope(jsonObject).optional(),
   vaporSaturated: feedEnvelope(jsonObject).optional(),

@@ -39,6 +39,7 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
+import { feedChemicalProblem } from '../project/feedChemical';
 import {
   LEGACY_FIELDS,
   LIFETIME_KEY,
@@ -306,6 +307,16 @@ export function buildInputs(
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
 
   const records = form.chemicals.map((row) => ({ row, rec: db.byId.get(row.id) }));
+  const nameOf = (id: string): string =>
+    form.chemicals.find((c) => c.id === id)?.name ?? db.byId.get(id)?.name ?? id;
+  const feedProblem = (feed: string, feedChemical: string | undefined, rowId: string) =>
+    feedChemicalProblem({
+      feed,
+      feedChemical,
+      rowId,
+      runCount: form.chemicals.length,
+      nameOf,
+    });
   const epcs = new Map<string, Partial<Record<PathwayId, EpcSpec>>>();
   for (const { row, rec } of records) {
     if (rec === undefined) {
@@ -320,6 +331,11 @@ export function buildInputs(
           errors.add(
             `${row.name}: no transport well result to use; run the groundwater transport screen and send its well result here`,
           );
+          continue;
+        }
+        const wellProblem = feedProblem('transport well result', well.chemicalId, row.id);
+        if (wellProblem !== null) {
+          errors.add(`${row.name}: ${wellProblem}`);
           continue;
         }
         byPathway[pathway] = seriesEpc(
@@ -373,6 +389,11 @@ export function buildInputs(
           errors.add(
             `${row.name}: no surface water result to use; run the surface water screen and send its result here`,
           );
+          continue;
+        }
+        const surfaceProblem = feedProblem('surface water result', surface.chemicalId, row.id);
+        if (surfaceProblem !== null) {
+          errors.add(`${row.name}: ${surfaceProblem}`);
           continue;
         }
         byPathway[pathway] = surfaceWaterEpc(surface.times, surface.values, surface.origin);

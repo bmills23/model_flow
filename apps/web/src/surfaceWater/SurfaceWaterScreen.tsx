@@ -1,4 +1,5 @@
 import { StaleMark } from '../project/StaleMark';
+import { chemicalTag } from '../project/feedChemical';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { getScreen, setScreen } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
@@ -134,6 +135,8 @@ export function SurfaceWaterScreen() {
       ...(request && !computing && outcome?.ok && outcome.result === result
         ? { coefficient: surfaceWaterCoefficient(request, result, method) }
         : {}),
+      // the chemical comes from the transport run it is linked to; without that link it is untagged
+      ...(form.linked && feed !== null ? chemicalTag(feed.chemicalId) : {}),
     });
   };
   const foc = Number(form.foc);

@@ -10,6 +10,8 @@ import { createFeed } from '../vapor/feedStore';
 export interface BankFeed {
   scenario: Omit<Scenario, 'zOf'>;
   label: string;
+  /** Database id of the chemical the transport screen was set to; absent when entered by hand or untagged. */
+  chemicalId?: string;
 }
 
 const store = createFeed<BankFeed>();
