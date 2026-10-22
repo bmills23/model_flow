@@ -38,9 +38,11 @@ describe('an older project whose risk and cleanup rows differed', () => {
     const before = getStaleSlots();
     render(<RiskPage />);
     await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
+    // the row the older file lacked (ethylbenzene) joins in an effect after the database loads, so it can
+    // land a commit after the rows the file held; wait for each rather than read it synchronously
     const benzene = await screen.findByRole('group', { name: /^benzene\b/i });
-    const toluene = screen.getByRole('group', { name: /^toluene\b/i });
-    const ethyl = screen.getByRole('group', { name: /^ethylbenzene\b/i });
+    const toluene = await screen.findByRole('group', { name: /^toluene\b/i });
+    const ethyl = await screen.findByRole('group', { name: /^ethylbenzene\b/i });
     // benzene takes its groundwater from the well, so its field is not shown; the row keeps both
     expect(within(benzene).queryByLabelText(/groundwater \(mg\/L\)/i)).toBeNull();
     expect(getScreen('risk').form.chemicals.find((c) => c.id === '71-43-2')?.conc).toEqual({
@@ -59,9 +61,10 @@ describe('an older project whose risk and cleanup rows differed', () => {
   it('shows all three on the cleanup screen with its own state, and marks no feed stale', async () => {
     render(<CleanupPage />);
     await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
+    // the cleanup file lacked benzene, which joins in an effect after the database loads
     await screen.findByRole('group', { name: /^benzene\b/i });
-    expect(screen.getByRole('group', { name: /^toluene\b/i })).toBeTruthy();
-    expect(screen.getByRole('group', { name: /^ethylbenzene\b/i })).toBeTruthy();
+    await screen.findByRole('group', { name: /^toluene\b/i });
+    await screen.findByRole('group', { name: /^ethylbenzene\b/i });
     const rows = getScreen('cleanup').form.chemicals;
     expect(rows.map((c) => c.id).sort()).toEqual(['100-41-4', '108-88-3', '71-43-2']);
     expect(rows.find((c) => c.id === '108-88-3')?.conc).toEqual({ soil: '7' });
