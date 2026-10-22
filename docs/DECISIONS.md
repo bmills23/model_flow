@@ -3454,3 +3454,16 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    `packages/data/generated`); their parsed JSON is passed to `count` as a third argument, and the manifest lists
    them. Existing examples render as before, with a `Data` line only when `dataFiles` is non-empty.
 4. **Regeneration (DEFAULT).** This slice commits the regenerated `docs/VALIDATION.md` and `validation.json`.
+
+## 2026-10-22: Wave R slice R4, receptor edit notes
+
+1. **Note required to apply (DEFAULT).** The receptor editor applies an edited exposure factor only when it has a
+   number that is not negative and a non-blank source note, the same rule and wording as a toxicity edit. A value
+   typed without a note is held in the editor, not in the project, with a message tied to the note box by
+   `aria-describedby` and `aria-invalid`. Clearing a note removes the applied edit while the typed value stays in
+   the box.
+2. **Older projects (DEFAULT).** The saved note stays optional in the schema and no project version changes. An
+   edit saved without a note keeps applying and shows "No note" in the editor. Changing its value asks for a note
+   like any new edit.
+3. **Screens (DEFAULT).** The editor is shared by the exposure and cleanup receptor panels, so both change; no
+   other screen edits receptor factors. The report's printing of notes belongs to another slice.

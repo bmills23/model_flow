@@ -277,8 +277,10 @@ the preset's body weight, exposure duration and frequency, soil ingestion rate, 
 and the cancer averaging time (lifetime) for the legacy method, the same scalars for each life stage of the
 modern method (child and adult, or worker), and the averaging time for both. The preset's value is shown
 under each box; a blank box keeps it. An edited factor is marked "Edited" and has its own **Reset to
-preset**, and a **Reset to preset** under the list clears the receptor's edits. A factor needs no source
-note. A mutagen's age segments use the stage value, and the modern exposure duration (which sets the stage
+preset**, and a **Reset to preset** under the list clears the receptor's edits. Each factor has a
+**Source note (required)** box beside it: a value you type is not used until you add a note, the box says so,
+and clearing the note stops the value being used again. A project saved before notes were required opens
+unchanged; its edits stay in use and are marked "No note" until you add one. A mutagen's age segments use the stage value, and the modern exposure duration (which sets the stage
 split) is not editable. The soil skin area, adherence, water, breathing and time entries stay under
 "Site-specific factors". Changing the scenario preset of a receptor that has edited factors asks first: the
 edits belong to the old preset, and switching resets them. The exposure and cleanup screens keep their own
