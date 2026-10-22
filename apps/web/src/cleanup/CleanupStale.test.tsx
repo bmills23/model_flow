@@ -4,7 +4,7 @@ import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
-import { forgetMemory, getScreen, setScreen } from '../project/store';
+import { forgetMemory, getChemicals, getScreen, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { clearTransportFeed, setTransportFeed } from '../transport/chainFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
@@ -24,8 +24,12 @@ const MARK = 'Out of date';
 async function withBenzene() {
   render(<CleanupPage />);
   await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
-  fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
-  fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+  // a screen set to benzene put it on the project list, so the page already holds its row
+  if (!getChemicals().some((c) => c.id === '71-43-2')) {
+    fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
+    fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+  }
+  await screen.findByRole('group', { name: /benzene/i });
 }
 
 function edit(screenKey: 'household' | 'vapor' | 'surfaceWater' | 'plantsEco' | 'transport') {

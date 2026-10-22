@@ -118,6 +118,13 @@ the source "RSL table". The data carries no carcinogen weight-of-evidence class,
 per value with a source column. Values cannot be edited here; the full file loads the first time the
 screen opens, so it needs a connection that first time.
 
+The screen opens with **Project chemicals**, the one list of chemicals the project works on. **Add to project**
+beside a chemical puts it on the list (a chemical already on it reads "In the project"). **Remove** takes a
+chemical out of the whole project, after asking: the question names what goes with it, which is its row and
+everything entered on it on the exposure and risk and the cleanup levels screens, and the results held for it
+(the groundwater well result, the vapor air result and so on). A screen that is set to it keeps that choice and
+shows it as no longer in the list. Removing cannot be undone.
+
 ### Site model (`#/site`)
 
 A planning aid, not a gate. Answer six questions about the site: who is exposed (human or ecological), whether
@@ -216,6 +223,15 @@ take the groundwater concentration from the transport screen), and see the cance
 each method gives, the pathways and chemicals that drive them, and what could not be quantified. A second
 receptor can be evaluated alongside the first.
 
+The chemicals here are the project's chemical list: every chemical on it has a card, and a chemical you find
+with the search on this screen is added to the list (and so to the cleanup levels screen). A chemical this
+screen has not seen before gets a card with nothing set, which says so and adds nothing to the results until a
+concentration is typed or a result from another screen is used; it does not stop the other chemicals from
+running. **Remove** on a card asks first and then removes the chemical from the whole project. A project
+chemical that is not in the RSL tables is named under the search and has no card. A project saved before the
+screens shared the list opens with the union of both screens' chemicals, each keeping the concentrations and
+choices it had; the cards the other screen lacked start with nothing set.
+
 **Edit values** on a chemical card lists the four toxicity values (oral slope factor, inhalation unit risk,
 oral reference dose, inhalation reference concentration) with the database value and its source. Type a
 value to use for this project and a short source note; both are required, and a value without a note, or
@@ -246,6 +262,11 @@ the report lists them under "Receptor factors supplied by the user" with the pre
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and
 noncancer levels governs, and the screen says which one did.
+
+The chemicals are the same project list as on the exposure and risk screen: a chemical added here, there or on the
+chemicals screen appears on both, and **Remove** (after its question) takes it out of both and out of the project.
+Each screen keeps its own concentrations and choices per chemical; a chemical this screen has not seen starts with
+nothing set. The levels need no concentration unless the allocation is cumulative.
 
 Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits. The
 receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed

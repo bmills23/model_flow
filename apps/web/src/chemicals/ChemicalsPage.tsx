@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { DownloadCsv, type CsvTable } from '../export/DownloadCsv';
 import {
   browseCsvColumns,
@@ -9,6 +9,13 @@ import {
 } from './browse';
 import { loadBrowse } from './load';
 import { HelpLink } from '../docs/HelpLink';
+import {
+  addChemical,
+  getChemicals,
+  removeProjectChemical,
+  subscribeChemicals,
+} from '../project/store';
+import { RemoveChemicalConfirm } from '../project/RemoveChemicalConfirm';
 
 const PAGE = 25;
 
@@ -18,6 +25,8 @@ export function ChemicalsPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [shown, setShown] = useState(PAGE);
+  const project = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -67,6 +76,46 @@ export function ChemicalsPage() {
         calculations use, each with its source. Search by name or CAS number, open a chemical to see
         its values, and download them as a table.
       </p>
+      <section className="panel project-chemicals" aria-labelledby="project-chemicals-heading">
+        <h2 id="project-chemicals-heading">Project chemicals</h2>
+        <p className="muted">
+          The chemicals of this project. The exposure and risk and the cleanup levels screens take
+          every one of them as a row; the fate screens pick one of them. Add a chemical from the
+          list below, or with a search on those screens.
+        </p>
+        {project.length === 0 ? (
+          <p className="muted">
+            No chemicals in the project yet. Search below and choose Add to project.
+          </p>
+        ) : (
+          <ul className="chem-list">
+            {project.map((c) => (
+              <li key={c.id}>
+                <span>{c.name}</span> {c.name !== c.id && <span className="muted">({c.id})</span>}{' '}
+                <button
+                  type="button"
+                  className="btn remove"
+                  aria-label={`Remove ${c.name}`}
+                  onClick={() => setRemoving({ id: c.id, name: c.name })}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {removing && (
+          <RemoveChemicalConfirm
+            id={removing.id}
+            name={removing.name}
+            onCancel={() => setRemoving(null)}
+            onConfirm={() => {
+              removeProjectChemical(removing.id);
+              setRemoving(null);
+            }}
+          />
+        )}
+      </section>
       <label className="field">
         <span className="field-label">Search by name or CAS number</span>
         <input
@@ -124,6 +173,25 @@ export function ChemicalsPage() {
                 </table>
               </div>
             </details>
+            {project.some((c) => c.id === r.id) ? (
+              <button
+                type="button"
+                className="btn"
+                disabled
+                aria-label={`In the project: ${r.name}`}
+              >
+                In the project
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn"
+                aria-label={`Add to project: ${r.name}`}
+                onClick={() => addChemical({ id: r.id, name: r.name })}
+              >
+                Add to project
+              </button>
+            )}
           </li>
         ))}
       </ul>
