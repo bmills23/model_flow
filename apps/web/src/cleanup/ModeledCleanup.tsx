@@ -4,7 +4,7 @@ import { StaleMark } from '../project/StaleMark';
 import { DownloadCsv, type CsvTable } from '../export/DownloadCsv';
 import { modeledCsvTablesAll } from './csv';
 import type { ModeledRowBuild } from './modeledBuild';
-import type { ModeledProgress } from './modeledRunner';
+import { requestKey, type ModeledProgress } from './useModeled';
 import type { ModeledItem } from './modeledSolve';
 import type { ModeledRequest } from './modeledTypes';
 import { ModeledResults } from './ModeledSection';
@@ -42,14 +42,24 @@ export function ModeledRowsView(props: {
   const { rows, solved, computing, progress, solveError, feeds } = props;
   const multi = rows.length > 1;
   const anyBuilt = rows.some((r) => r.result.ok);
+  // a chemical's held solve is current while it answers the request the chemical builds now; one that
+  // does not is being solved again (or cannot be built) and is the only one greyed
+  const isCurrent = (r: ModeledRowBuild): boolean => {
+    const s = solved.get(r.id);
+    return r.result.ok && s !== undefined && requestKey(s.req) === requestKey(r.result.request);
+  };
   const csvEntries = rows.flatMap((r) => {
     const s = solved.get(r.id);
     return r.result.ok && s?.item.ok ? [{ id: r.id, name: r.name, outcome: s.item.outcome }] : [];
   });
-  const tables: CsvTable[] = modeledCsvTablesAll(csvEntries).map((t, i) => ({
-    ...t,
-    feeds: feedsOfChemical(feeds, csvEntries[Math.floor(i / 2)]!.id),
-  }));
+  // the file holds the current chemicals' tables; the ones being solved again join it once they land.
+  // With none current the buttons stay but are disabled, as before.
+  const currentIds = new Set(rows.filter(isCurrent).map((r) => r.id));
+  const allTables = modeledCsvTablesAll(csvEntries);
+  const currentTables = allTables.filter((t) => currentIds.has(t.chemicalId));
+  const tables: CsvTable[] = (currentTables.length > 0 ? currentTables : allTables).map(
+    ({ chemicalId, ...t }) => ({ ...t, feeds: feedsOfChemical(feeds, chemicalId) }),
+  );
   return (
     <>
       {rows.length === 0 && (
@@ -65,6 +75,7 @@ export function ModeledRowsView(props: {
           <progress max={progress.total} value={progress.done} aria-label="Chemicals solved" />
           <span role="status">
             {progress.done} of {progress.total} chemicals solved
+            {progress.unbuilt > 0 && ` (${progress.unbuilt} cannot be solved yet, see below)`}
           </span>
         </div>
       )}
@@ -76,7 +87,7 @@ export function ModeledRowsView(props: {
       {rows.map((row) => {
         const s = solved.get(row.id);
         const built = row.result.ok ? row.result : null;
-        const stale = computing || built === null;
+        const stale = !isCurrent(row);
         return (
           <div key={row.id} className="modeled-chemical">
             {multi && <h2>{row.name}</h2>}
@@ -113,7 +124,7 @@ export function ModeledRowsView(props: {
           </div>
         );
       })}
-      {tables.length > 0 && <DownloadCsv disabled={computing} tables={tables} />}
+      {tables.length > 0 && <DownloadCsv disabled={currentTables.length === 0} tables={tables} />}
     </>
   );
 }

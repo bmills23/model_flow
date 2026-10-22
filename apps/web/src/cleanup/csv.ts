@@ -224,16 +224,19 @@ export function modeledCsvTables(outcome: ModeledOutcome, chemicalName: string):
  */
 export function modeledCsvTablesAll(
   entries: readonly { id: string; name: string; outcome: ModeledOutcome }[],
-): CsvTable[] {
+): (CsvTable & { chemicalId: string })[] {
+  // each table carries the id of the chemical it was made for, so a caller never has to infer it
+  // from the position of the table
   if (entries.length === 1) {
     const e = entries[0]!;
-    return modeledCsvTables(e.outcome, e.name);
+    return modeledCsvTables(e.outcome, e.name).map((t) => ({ ...t, chemicalId: e.id }));
   }
   return entries.flatMap((e) =>
     modeledCsvTables(e.outcome, e.name).map((t) => ({
       ...t,
       name: `${t.name}-${e.id}`,
       label: `${t.label}, ${e.name}`,
+      chemicalId: e.id,
     })),
   );
 }

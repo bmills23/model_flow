@@ -356,9 +356,13 @@ A modeled source (groundwater, vadose or saturated soil source carried to the we
 chemicals. Each chemical is solved on its own through the groundwater, vadose or saturated run sent for it, so send
 each chemical's run from its screen. A chemical whose run is missing, was made for another chemical, or does not
 record its chemical (when the run holds two or more) gets that problem on its own row and is left out, and the
-other chemicals are still solved. With two or more chemicals each has its own heading, results, warnings, "Out of
-date" mark and CSV files, and a progress line shows how many chemicals are solved; changing one chemical's inputs
-solves only that chemical again.
+other chemicals are still solved. A chemical with no run of its own says so under Source ("no aquifer run held for
+Toluene (the run held is for Benzene)"); it does not borrow another chemical's run. With two or more chemicals each
+has its own heading, with its results, warnings and notes under it, its own "Out of date" mark and CSV files. A
+progress line counts the chemicals on screen ("2 of 3 chemicals solved"): chemicals already solved and unchanged
+count as solved, and a chemical that cannot be built yet is in the total, with a note of how many cannot be solved.
+Changing one chemical's inputs solves only that chemical again and greys only its results; the CSV download stays
+available and holds the current chemicals, and the chemical being solved again joins it once its result lands.
 
 A modeled source also has its own
 **Probabilistic cleanup level, modeled source** panel once the level above is solved. With several chemicals a
@@ -412,6 +416,7 @@ the cleanup screen in this session (levels table, iterations, seed, warnings and
 the result is out of date because an input changed since the run and asks you to run it again there, or says no
 run has been made yet. That result is not saved with the project or the browser's copy, so after a reload, a new
 project or an opened project, run it again on the cleanup screen. Leaving to the report and coming back keeps it.
+If you remove every chemical from the cleanup list after a run, the report says that result is out of date.
 With several cleanup chemicals the report prints one such block per chemical, each current, out of date or "no run
 yet" on its own.
 

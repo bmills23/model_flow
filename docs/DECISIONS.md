@@ -3374,3 +3374,32 @@ go with the other stuff".
    defining its user chemical again in each view.
 3. **Shape (DEFAULT).** One slice on branch `wave-q`, then the gate and `mobile:check:full` once. The slice's own
    rulings follow in a "Wave Q" block.
+
+## 2026-10-22: Wave Q
+
+1. **Emptied cleanup list keeps the held result as out of date (DEFAULT).** With a modeled source, no cleanup
+   chemicals and a probabilistic summary still held, the report entry is `stale` (one held summary) or `many` of
+   stale entries (several), never `none`. The summary no longer answers any chemical, so its numbers stay unprinted.
+2. **A source hint never shows another chemical's run (DEFAULT).** The plainer of the two options: a chemical whose
+   read falls back to another chemical's slot says "no aquifer run held for Toluene (the run held is for Benzene)",
+   shows no stale mark, and ignores the foreign vadose and saturated slots the same way. The chemical check on the
+   row already names both chemicals, and the stale mark stays with the chemical that owns the slot.
+3. **Only the chemical being solved again greys (DEFAULT).** A block is stale while its held solve answers a
+   different request than the chemical builds now (or it cannot be built). The CSV download holds the current
+   chemicals' tables and stays usable; chemicals being solved again are left out until their result lands, and
+   with none current the buttons are disabled. File names are fixed by the full chemical set, so they do not change
+   while a chemical re-solves.
+4. **Per-chemical heading nesting (DEFAULT).** With two or more chemicals the method sections and "Warnings and
+   notes" are h3 and Convergence is h4 under the chemical's h2; one chemical keeps the flat outline. The report's
+   per-chemical blocks are sibling sections each headed h4 with the chemical in the heading, so they needed no change.
+5. **Progress counts what is on screen (DEFAULT).** The total is every cleanup chemical; solved and unchanged
+   chemicals count as done; chemicals that cannot be built are in the total, never in done, and the line adds how
+   many cannot be solved yet.
+6. **Report blocks are keyed by chemical id (DEFAULT).** `many` entries carry the chemical id; the landmark
+   numbering for repeated names stays.
+7. **CSV tables carry their chemical (DEFAULT).** `modeledCsvTablesAll` tags each table with `chemicalId`, and the
+   stale feeds are matched by that id instead of the position of the table.
+8. **Mobile check `#/chemicals` setup is idempotent (DEFAULT).** Benzene and the user chemical are added only when
+   the project list lacks them, so each view starts the visit from the state it means to check.
+9. **Equivalence test can fail (DEFAULT).** It now compares one worker pass over all chemicals, in both orders,
+   against each chemical solved alone from its own build.

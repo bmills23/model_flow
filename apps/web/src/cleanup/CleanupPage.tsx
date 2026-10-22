@@ -165,7 +165,10 @@ export function CleanupPage() {
     const reqs = (modeledRows ?? []).flatMap((r) => (r.result.ok ? [r.result.request] : []));
     return reqs.length > 0 ? reqs : null;
   }, [modeledRows]);
-  const modeled = useModeled(modeledRequests);
+  const modeled = useModeled(
+    modeledRequests,
+    (modeledRows ?? []).filter((r) => !r.result.ok).length,
+  );
   // the solved outcome of each chemical, by chemical id; a chemical that cannot be built now shows
   // its problem instead of an earlier answer
   const modeledSolved = useMemo(() => {
@@ -393,13 +396,27 @@ export function CleanupPage() {
                   </p>
                 )}
                 {form.chemicals.map((row) => {
-                  const feeds = feedsOf(row.id);
+                  // a slot held for another chemical is not this chemical's run: say so, and mark nothing
+                  const held = feedsOf(row.id);
+                  const foreign = (f: { chemicalId?: string } | null): string | null =>
+                    f?.chemicalId && f.chemicalId !== row.id
+                      ? (form.chemicals.find((c) => c.id === f.chemicalId)?.name ??
+                        'another chemical')
+                      : null;
+                  const otherTransport = foreign(held.transport);
+                  const feeds = {
+                    transport: otherTransport === null ? held.transport : null,
+                    vadose: foreign(held.vadose) === null ? held.vadose : null,
+                    saturated: foreign(held.saturated) === null ? held.saturated : null,
+                  };
                   const who = form.chemicals.length > 1 ? `${row.name}: ` : '';
                   return (
                     <p className="muted source-hint" key={row.id}>
                       {feeds.transport
                         ? `${who}${who ? 'aquifer' : 'Aquifer'} and well: ${feeds.transport.label}.`
-                        : `${who}${who ? 'no' : 'No'} aquifer yet: use the groundwater transport screen first.`}{' '}
+                        : otherTransport !== null
+                          ? `${who}no aquifer run held for ${row.name} (the run held is for ${otherTransport}): use the groundwater transport screen first.`
+                          : `${who}${who ? 'no' : 'No'} aquifer yet: use the groundwater transport screen first.`}{' '}
                       {feeds.transport && <StaleMark feed="transportChain" chemicalId={row.id} />}{' '}
                       {form.source === 'vadose' &&
                         (feeds.vadose ? (

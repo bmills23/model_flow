@@ -87,6 +87,8 @@ export const getModeledSummary = (chemicalId?: string): ModeledUncertaintySummar
 /** The summary kept for exactly this chemical, with no fallback. */
 export const getOwnModeledSummary = (chemicalId: string): ModeledUncertaintySummary | null =>
   ownSlot(held, chemicalId);
+/** Every summary kept this session, in the order they were last kept (oldest first). */
+export const heldModeledSummaries = (): ModeledUncertaintySummary[] => [...held.values()];
 export function setModeledSummary(value: ModeledUncertaintySummary): void {
   const next = new Map(held);
   next.set(slotOf(value.chemicalId), value);

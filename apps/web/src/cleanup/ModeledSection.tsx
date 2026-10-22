@@ -31,12 +31,13 @@ const fmtTarget = (run: ModeledRun): string => {
   return String(Number(t.toPrecision(3)));
 };
 
-function Convergence({ run }: { run: ModeledRun }) {
+function Convergence({ run, nested }: { run: ModeledRun; nested: boolean }) {
+  const H = nested ? 'h4' : 'h3';
   const c = run.convergence;
   const lv = run.result.levels[0]!;
   return (
     <div>
-      <h3>Convergence</h3>
+      <H>Convergence</H>
       <dl className="converge">
         <div>
           <dt>Solved by</dt>
@@ -80,6 +81,8 @@ function MethodSection(props: {
   named?: boolean;
 }) {
   const { method, outcome, medium, name } = props;
+  // under a chemical's own heading (several chemicals) the sections sit one level lower
+  const H = props.named ? 'h3' : 'h2';
   if (!outcome.ok) {
     return (
       <div className="alert" role="alert">
@@ -96,9 +99,9 @@ function MethodSection(props: {
       className="panel"
       aria-label={`Modeled cleanup level, ${LABEL[method]}${props.named ? `, ${name}` : ''}`}
     >
-      <h2>
+      <H>
         {LABEL[method]} <small>{BASIS[method]}</small>
-      </h2>
+      </H>
       <div className="cleanup-table-wrap">
         <table className="sat cleanup-table">
           <caption className="sr-only">
@@ -145,7 +148,7 @@ function MethodSection(props: {
           report.
         </p>
       )}
-      <Convergence run={run} />
+      <Convergence run={run} nested={props.named === true} />
       <ModeledChart run={run} medium={medium} method={method} />
     </section>
   );
@@ -158,6 +161,7 @@ export function ModeledResults(props: {
   named?: boolean;
 }) {
   const { outcome } = props;
+  const H = props.named ? 'h3' : 'h2';
   const items: { key: string; method: Method; w: Warning }[] = [];
   for (const m of ['legacy', 'modern'] as const) {
     const o = outcome[m];
@@ -186,7 +190,7 @@ export function ModeledResults(props: {
         className="panel"
         aria-label={props.named ? `Warnings and notes, ${props.name}` : 'Warnings and notes'}
       >
-        <h2>Warnings and notes ({total})</h2>
+        <H>Warnings and notes ({total})</H>
         {total === 0 ? (
           <p className="muted">No warnings.</p>
         ) : (

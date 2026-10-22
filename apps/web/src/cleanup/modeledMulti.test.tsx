@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { PATHWAY_IDS, type PathwayId } from '@model-flow/engine';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
@@ -11,7 +11,8 @@ import { computeModeled } from './compute';
 import { defaultCleanupForm, type CleanupForm } from './form';
 import { modeledCsvTablesAll } from './csv';
 import { CleanupPage } from './CleanupPage';
-import { solveAll } from './modeledSolve';
+import { solveAll, type ModeledItem } from './modeledSolve';
+import type { ModeledRequest } from './modeledTypes';
 import { clearModeledSummary, modeledFingerprint, setModeledSummary } from './modeledSummary';
 import type { ModeledUncertaintySummary } from './modeledSummary';
 import { modeledReportEntry } from '../report/modeledReport';
@@ -71,12 +72,30 @@ describe('modeled cleanup for several chemicals', () => {
       expect(row.result.ok && alone.ok).toBe(true);
       if (!row.result.ok || !alone.ok) continue;
       expect(row.result.request).toEqual(alone.request);
-      const a = computeModeled({ ...row.result.request, only: 'modern' });
-      const b = computeModeled({ ...alone.request, only: 'modern' });
-      const level = (o: typeof a) => (o.modern?.ok ? o.modern.run.result.levels[0]!.level : null);
-      expect(level(a)).not.toBeNull();
-      expect(level(a)).toBe(level(b));
     }
+    // the batch the screen solves (one worker pass over every chemical) answers each chemical as a
+    // solve of that chemical alone does, whatever the order: a request that leaked state into the next
+    // one, or a solve that read another chemical's chain, would change a level
+    const level = (o: ModeledItem) =>
+      o.ok && o.outcome.modern?.ok ? o.outcome.modern.run.result.levels[0]!.level : null;
+    const modern = (req: ModeledRequest): ModeledRequest => ({ ...req, only: 'modern' });
+    const reqs = both.map((r) => {
+      if (!r.result.ok) throw new Error('row');
+      return modern(r.result.request);
+    });
+    const alone = both.map((r) => {
+      const one = buildModeled(form([r.id]), db, { transport: feeds[r.id]!, ...none });
+      if (!one.ok) throw new Error('alone');
+      return level({ ok: true, outcome: computeModeled(modern(one.request)) });
+    });
+    const forward = solveAll(reqs).map(level);
+    const backward = solveAll([...reqs].reverse())
+      .map(level)
+      .reverse();
+    expect(forward).toEqual(alone);
+    expect(backward).toEqual(alone);
+    expect(alone[0]).not.toBeNull();
+    expect(alone[0]).not.toBe(alone[1]);
     // the two chains differ, so the two requests do not share a chain
     const [a, b] = both.map((r) => (r.result.ok ? r.result.request.transport : null));
     expect(a).not.toEqual(b);
@@ -272,4 +291,110 @@ describe('modeled cleanup for several chemicals', () => {
       screen.queryByRole('region', { name: /modeled cleanup level, modern, toluene/i }),
     ).toBeNull();
   }, 90000);
+
+  it('says plainly that no run is held for a chemical when only another chemical has one', async () => {
+    act(() => {
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, chemicalId: BENZENE } });
+    });
+    setTransportFeed(transport(BENZENE, 'benzene aquifer'));
+    addChemical({ id: BENZENE, name: 'Benzene' });
+    addChemical({ id: TOLUENE, name: 'Toluene' });
+    render(<CleanupPage />);
+    await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
+    fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
+    const benzene = (
+      await screen.findByText(/benzene: aquifer and well: benzene aquifer/i)
+    ).closest('p')!;
+    const toluene = screen.getByText(/toluene: no aquifer run held/i).closest('p')!;
+    expect(toluene.textContent).toMatch(/the run held is for Benzene/);
+    expect(toluene.textContent).not.toMatch(/aquifer and well/);
+    // benzene goes stale: only benzene's own hint carries the mark, toluene shows no one else's slot
+    act(() => {
+      const s = getScreen('transport');
+      setScreen('transport', { ...s, form: { ...s.form, K: '99' } });
+    });
+    expect(within(benzene).getByText('Out of date')).toBeTruthy();
+    expect(within(toluene).queryByText('Out of date')).toBeNull();
+  }, 60000);
+});
+
+const heldSummary = (id: string, name: string, fingerprint = 'old'): ModeledUncertaintySummary => ({
+  chemicalId: id,
+  chemical: name,
+  fingerprint,
+  label: name + ' at the source, Wexler (1992) transport',
+  unit: 'mg/L',
+  fromSi: 1000,
+  deterministic: 2e-3,
+  n: 200,
+  succeeded: 198,
+  seed: 'k7',
+  forwardRuns: 12,
+  workers: 1,
+  chosen: 0.95,
+  levels: [{ p: 0.95, level: 1e-3 }],
+  warnings: [],
+  spearman: [{ label: 'Seepage velocity', rho: -0.4 }],
+});
+
+describe('modeled report entry after the cleanup list changes', () => {
+  it('stays out of date, not "no run yet", when the list is emptied after a run', () => {
+    const screens = defaultScreens();
+    screens.cleanup = { form: form([]) };
+    expect(modeledReportEntry(screens, db)).toEqual({ state: 'none' });
+    const held = heldSummary(BENZENE, 'Benzene');
+    setModeledSummary(held);
+    expect(modeledReportEntry(screens, db)).toEqual({ state: 'stale', summary: held });
+    const other = heldSummary(TOLUENE, 'Toluene');
+    setModeledSummary(other);
+    const entry = modeledReportEntry(screens, db);
+    expect(entry?.state).toBe('many');
+    if (entry?.state !== 'many') return;
+    expect(entry.entries.map((e) => [e.chemical, e.state])).toEqual([
+      ['Benzene', 'stale'],
+      ['Toluene', 'stale'],
+    ]);
+  });
+
+  it('prints a stale chemical in the several-chemicals report without its numbers', () => {
+    const entry = {
+      state: 'many' as const,
+      entries: [
+        {
+          state: 'stale' as const,
+          summary: heldSummary(BENZENE, 'Benzene'),
+          chemical: 'Benzene',
+          id: BENZENE,
+        },
+        { state: 'none' as const, chemical: 'Toluene', id: TOLUENE },
+      ],
+    };
+    render(<UncertaintyReportView runs={{ exposure: null, cleanup: null, modeled: entry }} />);
+    const block = screen.getByLabelText('Modeled source uncertainty results: Benzene');
+    expect(block.textContent).toMatch(/out of date/);
+    expect(block.textContent).not.toMatch(/iterations ran/);
+    expect(
+      screen.getByLabelText('Modeled source uncertainty results: Toluene').textContent,
+    ).toMatch(/No run yet/);
+  });
+
+  it('keys the blocks by chemical id, so two chemicals with one name do not collide', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const entry = {
+        state: 'many' as const,
+        entries: [
+          { state: 'none' as const, chemical: 'Same', id: 'user-1' },
+          { state: 'none' as const, chemical: 'Same', id: 'user-2' },
+        ],
+      };
+      render(<UncertaintyReportView runs={{ exposure: null, cleanup: null, modeled: entry }} />);
+      expect(screen.getByLabelText('Modeled source uncertainty results: Same')).toBeTruthy();
+      expect(screen.getByLabelText('Modeled source uncertainty results: Same (2)')).toBeTruthy();
+      expect(err.mock.calls.flat().join(' ')).not.toMatch(/same key/i);
+    } finally {
+      err.mockRestore();
+    }
+  });
 });

@@ -188,7 +188,7 @@ function ModeledResults({ entry }: { entry: ModeledReportEntry }) {
           const earlier = entry.entries.slice(0, i).filter((x) => x.chemical === e.chemical).length;
           return (
             <ModeledChemicalResults
-              key={`${e.chemical}-${i}`}
+              key={e.id}
               entry={e}
               landmarkSuffix={earlier > 0 ? ` (${earlier + 1})` : ''}
             />

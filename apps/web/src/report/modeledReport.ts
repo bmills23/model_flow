@@ -3,6 +3,7 @@ import type { ChemicalDb } from '../risk/chemicalDb';
 import { buildModeledRows } from '../cleanup/modeledBuild';
 import {
   getOwnModeledSummary,
+  heldModeledSummaries,
   modeledFingerprint,
   type ModeledUncertaintySummary,
 } from '../cleanup/modeledSummary';
@@ -19,13 +20,13 @@ import { getSaturatedFeed } from '../saturated/feed';
  * slice P3): the entry is then a list that names each chemical.
  */
 export type ModeledChemicalEntry =
-  | { state: 'none'; chemical?: string }
-  | { state: 'stale'; summary: ModeledUncertaintySummary; chemical?: string }
-  | { state: 'current'; summary: ModeledUncertaintySummary; chemical?: string };
+  | { state: 'none'; chemical?: string; id?: string }
+  | { state: 'stale'; summary: ModeledUncertaintySummary; chemical?: string; id?: string }
+  | { state: 'current'; summary: ModeledUncertaintySummary; chemical?: string; id?: string };
 
 export type ModeledReportEntry =
   | ModeledChemicalEntry
-  | { state: 'many'; entries: (ModeledChemicalEntry & { chemical: string })[] };
+  | { state: 'many'; entries: (ModeledChemicalEntry & { chemical: string; id: string })[] };
 
 /**
  * The entry for the project's screens (receptor edits already laid on, as `planUncertainty` does), or
@@ -43,22 +44,39 @@ export function modeledReportEntry(screens: Screens, db: ChemicalDb): ModeledRep
     vadose: getVadoseFeed(id),
     saturated: getSaturatedFeed(id),
   }));
-  const entries = rows.map((row): ModeledChemicalEntry & { chemical: string } => {
+  const entries = rows.map((row): ModeledChemicalEntry & { chemical: string; id: string } => {
     // the chemical's own summary, else one kept without a chemical; never another chemical's
     const held = getOwnModeledSummary(row.id) ?? getOwnModeledSummary('');
-    if (held === null) return { state: 'none', chemical: row.name };
-    if (!row.result.ok) return { state: 'stale', summary: held, chemical: row.name };
+    if (held === null) return { state: 'none', chemical: row.name, id: row.id };
+    if (!row.result.ok) return { state: 'stale', summary: held, chemical: row.name, id: row.id };
     const now = modeledFingerprint(row.result.request, screens.uncertainty.modeled);
     return {
       state: now === held.fingerprint ? 'current' : 'stale',
       summary: held,
       chemical: row.name,
+      id: row.id,
     };
   });
-  if (entries.length === 0) return { state: 'none' };
+  if (entries.length === 0) {
+    // the list was emptied after a run: the summaries kept still say a run existed, and it no longer
+    // answers any cleanup chemical, so it is out of date rather than absent
+    const kept = heldModeledSummaries();
+    if (kept.length === 0) return { state: 'none' };
+    if (kept.length === 1) return { state: 'stale', summary: kept[0]! };
+    return {
+      state: 'many',
+      entries: kept.map((summary) => ({
+        state: 'stale' as const,
+        summary,
+        chemical: summary.chemical,
+        id: summary.chemicalId,
+      })),
+    };
+  }
   if (entries.length === 1) {
-    const { chemical: _name, ...single } = entries[0]!;
+    const { chemical: _name, id: _id, ...single } = entries[0]!;
     void _name;
+    void _id;
     return single;
   }
   return { state: 'many', entries };

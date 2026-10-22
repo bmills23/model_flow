@@ -153,13 +153,16 @@ const FED_ROUTES = [
     tag: 'projectlist',
     noPress: true,
     viaSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
-      await u.pick('71-43-2',/^add to project: benzene/i);await u.sleep(600);
       const btn=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim())||re.test(x.getAttribute('aria-label')||''));
-      btn(/^define a new chemical/i).click();await u.sleep(500);
-      u.fill(/^name/i,'Bis(2-ethylhexyl)phthalate (copy)');
-      u.fill(/^molar mass value/i,'390.56');u.fill(/^molar mass source note/i,'supplier safety data sheet, 2026');
-      await u.sleep(300);
-      btn(/^save chemical/i).click();await u.sleep(600);
+      // the autosave carries over between views: add each chemical only when the project list lacks it
+      const listed=(re)=>[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>re.test(l.textContent));
+      if(!listed(/benzene/i)){await u.pick('71-43-2',/^add to project: benzene/i);await u.sleep(600)}
+      if(!listed(/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/)){
+        btn(/^define a new chemical/i).click();await u.sleep(500);
+        u.fill(/^name/i,'Bis(2-ethylhexyl)phthalate (copy)');
+        u.fill(/^molar mass value/i,'390.56');u.fill(/^molar mass source note/i,'supplier safety data sheet, 2026');
+        await u.sleep(300);
+        btn(/^save chemical/i).click();await u.sleep(600)}
       btn(/^edit bis/i).click();await u.sleep(500);
       btn(/^remove bis/i).click();await u.sleep(500)})()`,
   },

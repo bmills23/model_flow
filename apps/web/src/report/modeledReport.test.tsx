@@ -196,8 +196,8 @@ describe('UncertaintyReportView, modeled source', () => {
         runs={runs({
           state: 'many',
           entries: [
-            { state: 'none', chemical: 'Copy' },
-            { state: 'none', chemical: 'Copy' },
+            { state: 'none', chemical: 'Copy', id: 'user-1' },
+            { state: 'none', chemical: 'Copy', id: 'user-2' },
           ],
         })}
       />,

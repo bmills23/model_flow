@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   createModeledRunner,
   type ModeledItem,
-  type ModeledProgress,
+  type ModeledProgress as RunnerProgress,
   type ModeledRunner,
   type WorkerReply,
 } from './modeledRunner';
@@ -10,9 +10,19 @@ import type { ModeledRequest } from './modeledTypes';
 
 const DEBOUNCE_MS = 300;
 
+/** The chemicals on screen: how many are solved, how many there are, how many cannot be built yet. */
+export interface ModeledProgress {
+  done: number;
+  total: number;
+  unbuilt: number;
+}
+
 function replacer(_k: string, v: unknown): unknown {
   return v === Infinity ? 'Infinity' : v === -Infinity ? '-Infinity' : v;
 }
+
+/** The text that identifies a request: equal text means the same solve. */
+export const requestKey = (r: ModeledRequest): string => JSON.stringify(r, replacer);
 
 export interface ModeledState {
   reply: WorkerReply | null;
@@ -26,8 +36,11 @@ export interface ModeledState {
 /**
  * Debounced, latest-wins solve of one request per chemical, in the background worker one chemical after
  * another; keeps the previous reply on screen while computing and reports progress per chemical.
+ * Progress counts the chemicals on screen: `unbuilt` more chemicals than `reqs` cannot be built yet, so
+ * they are in the total and never in the done count (their problem is shown on their own row), while
+ * chemicals whose solve is unchanged and kept count as solved.
  */
-export function useModeled(reqs: readonly ModeledRequest[] | null): ModeledState {
+export function useModeled(reqs: readonly ModeledRequest[] | null, unbuilt = 0): ModeledState {
   const [done, setDone] = useState<{
     key: string;
     reply: WorkerReply;
@@ -65,9 +78,11 @@ export function useModeled(reqs: readonly ModeledRequest[] | null): ModeledState
         finish([]);
         return;
       }
-      setProgress({ key, p: { done: cached, total: reqs.length } });
+      setProgress({ key, p: { done: cached, total: reqs.length + unbuilt, unbuilt } });
       void runner.current
-        .run(todo, (p) => setProgress({ key, p: { done: cached + p.done, total: reqs.length } }))
+        .run(todo, (p: RunnerProgress) =>
+          setProgress({ key, p: { done: cached + p.done, total: reqs.length + unbuilt, unbuilt } }),
+        )
         .then((reply) => {
           if (reply === null) return;
           if (reply.ok) finish(reply.items);
