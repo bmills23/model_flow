@@ -2823,7 +2823,6 @@ records. Wave O: risk and cleanup rows follow the list and `#/chemicals` gains "
 and the surface water screen pick from the list; per-chemical feed slots with the version 2 migration. Wave P:
 user-defined chemicals and the surface water cleanup target.
 
-<<<<<<< HEAD
 ## 2026-10-21: Wave N slice N1, project chemical list
 
 1. **The list is stored and edited, not derived live (DEFAULT).** `chemicals` is a plain list the store holds
@@ -2847,7 +2846,7 @@ user-defined chemicals and the surface water cleanup target.
 5. **Accessors (DEFAULT).** `getChemicals`, `subscribeChemicals`, `addChemical`, `removeChemical` in
    `apps/web/src/project/store.ts`; `chemicalsOf` and `buildProject({ chemicals })` in `project/index.ts`;
    `deriveChemicals` and `chemicalIdsOf` in `project/chemicals.ts`. No version bump.
-=======
+
 ## 2026-10-21: Wave N slice N2, feeds tagged by chemical
 
 1. **Optional `chemicalId` on nine feeds (DEFAULT).** The well, bank, transport chain, surface water, vadose and
@@ -2879,4 +2878,3 @@ user-defined chemicals and the surface water cleanup target.
 7. **Not done here (DEFAULT).** The vapor screen and the transport screen read the tagged vadose, saturated and
    water table feeds without comparing their chemical to the screen's own; that is outside this slice's files and
    is left for wave O with the per-chemical slots.
->>>>>>> wave-n-n2
