@@ -3,6 +3,7 @@ import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, text, texts } from '../project/fields';
 import { chemicalRowSchema, receptorFrom, receptorSchema } from '../risk/project';
 import { defaultCleanupForm, type CleanupForm } from './form';
+import { newSurfaceTarget } from './surfaceWaterTarget';
 
 /** The cleanup levels screen's saved state: its form. */
 export interface CleanupState {
@@ -17,6 +18,12 @@ const ssgSchema = partialObject({
   ...texts('siteInfiltration', 'siteL', 'siteDa'),
 });
 
+const surfaceTargetSchema = partialObject({
+  chemicalId: text,
+  kind: z.enum(['none', 'nrwqc', 'user']),
+  ...texts('criterionId', 'value', 'note'),
+});
+
 const formSchema = partialObject({
   ssg: ssgSchema,
   source: z.enum(['direct', 'dissolved', 'vadose', 'saturated']),
@@ -25,6 +32,7 @@ const formSchema = partialObject({
   secantParity: flag,
   tphHeld: flag,
   chemicals: z.array(chemicalRowSchema),
+  surfaceTargets: z.array(surfaceTargetSchema),
   a: receptorSchema,
   b: receptorSchema.nullable(),
   additive: flag,
@@ -43,7 +51,7 @@ export function toProject(state: CleanupState): CleanupProject {
 
 export function fromProject(p: CleanupProject | undefined): CleanupState {
   const d = defaultCleanupForm();
-  const { a, b, ...rest } = p?.form ?? {};
+  const { a, b, surfaceTargets, ...rest } = p?.form ?? {};
   const merged = mergeDefaults(
     { ...d, a: undefined, b: undefined },
     rest,
@@ -51,6 +59,19 @@ export function fromProject(p: CleanupProject | undefined): CleanupState {
   return {
     form: {
       ...merged,
+      surfaceTargets: (surfaceTargets ?? []).flatMap((t) => {
+        if (t.chemicalId === undefined || t.chemicalId === '') return [];
+        const d = newSurfaceTarget(t.chemicalId);
+        return [
+          {
+            chemicalId: t.chemicalId,
+            kind: t.kind ?? d.kind,
+            criterionId: t.criterionId ?? d.criterionId,
+            value: t.value ?? d.value,
+            note: t.note ?? d.note,
+          },
+        ];
+      }),
       a: mergeDefaults(d.a, a),
       b: b === undefined ? d.b : receptorFrom(b),
     },

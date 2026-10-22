@@ -97,3 +97,12 @@
 .cleanup .source-hint {
   margin: 8px 0 0;
 }
+
+/* Surface water target rows: one block per chemical; the select shrinks with its column. */
+.surface-target {
+  margin-top: 0.75rem;
+}
+.surface-target select {
+  min-width: 0;
+  max-width: 100%;
+}

@@ -1,4 +1,5 @@
 import type { Allocation } from '@model-flow/engine';
+import type { SurfaceTargetRow } from './surfaceWaterTarget';
 import { defaultReceptor, type ChemicalRow, type ReceptorForm } from '../risk/form';
 
 /** Where the concentration being solved for sits: the medium the receptor contacts, or upstream of the well. */
@@ -77,6 +78,8 @@ export interface CleanupForm {
   /** Hold TPH at the entered value instead of scaling it with the chemical. */
   tphHeld: boolean;
   chemicals: ChemicalRow[];
+  /** Surface water cleanup targets, one per chemical that has one (wave P slice P2). */
+  surfaceTargets: SurfaceTargetRow[];
   a: ReceptorForm;
   b: ReceptorForm | null;
   /** Also add the two receptors' cancer risks (legacy and modern both honour it). */
@@ -107,6 +110,7 @@ export function defaultCleanupForm(): CleanupForm {
     secantParity: false,
     tphHeld: false,
     chemicals: [],
+    surfaceTargets: [],
     a: defaultReceptor('resident'),
     b: null,
     additive: false,

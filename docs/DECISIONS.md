@@ -3040,6 +3040,7 @@ scope" block. Every ruling below is DEFAULT.
     `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
     screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
 
+<<<<<<< HEAD
 ## 2026-10-21: Wave O slice O1, risk and cleanup follow the list
 
 Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
@@ -3202,3 +3203,38 @@ O2a and O2b.
 12. **Not done here (DEFAULT).** The cleanup source-level panel (`cleanup/SsgPanel.tsx`) still loads partition
     properties from the RSL file only, so a user chemical gets no soil-to-groundwater comparison there. Entering a
     user value for Kd, vapor thermo data or dermal data is a later scope row.
+=======
+## 2026-10-21: Wave P slice P2, surface water cleanup target
+
+Scope ruling 4 of the "Project chemical list, waves N to P scope" block (the linear route, Bryan's choice). Every
+ruling below is DEFAULT.
+
+1. **Where it lives.** A new form key `surfaceTargets` on the cleanup form (`cleanup/form.ts`, `cleanup/project.ts`):
+   one row per chemical `{ chemicalId, kind: 'none' | 'nrwqc' | 'user', criterionId, value, note }`. Rows of a
+   chemical no longer in the run are kept in the file and not used (`targetsOfChemicals`). The logic is
+   `cleanup/surfaceWaterTarget.ts`, the inputs `SurfaceWaterTargetInputs.tsx`, the panel `SurfaceWaterTargetPanel` in
+   `SurfaceWaterPanel.tsx`. The existing surface water source level panel (levels from the receptor's swim pathways)
+   is unchanged.
+2. **Which criterion.** The user chooses the kind; the choices are the shipped NRWQC surface water criteria that
+   hold a tabulated value (a hardness-dependent or site-specific criterion is not offered, the user enters a value
+   for it). The stated default when none is chosen is the freshwater chronic aquatic life criterion (a continuous,
+   long-term exposure matches a steady groundwater discharge), else the human health criterion for water and
+   organism consumption. A chemical with neither has no default and says so. A printed range keeps its low end, as
+   the surface water screen does.
+3. **Units.** The target is entered and shown in ug/L (the unit the tables print), the source level in mg/L, SI inside
+   (kg/m3). No unit setting is added.
+4. **User value.** A positive number and a non-blank note are required; without either the row is not quantified and
+   says what is missing. The basis reads "User value (this project)" and the note is shown and written to the CSV.
+5. **Source level.** Target over the coefficient of that chemical's own surface water slot (`pickSlot`, then the
+   wave N chemical check), with the same solubility ceiling as the existing panel. Only a dissolved groundwater
+   source: "Medium contacted" and "Groundwater source" are quantified, a soil source (vadose, saturated) is not
+   quantified with that reason. A missing result, coefficient or criterion is not quantified, naming which.
+6. **Citation.** An NRWQC row cites `epanrwqc` (aquatic life table) or `epanrwqchh` (human health table), both
+   existing entries of `references.json`, formatted by `formatReference`; the CSV and the report carry the text.
+7. **Stale mark and CSV.** The panel shows the stale mark of each chemical's surface water slot. The CSV is one table,
+   `cleanup-surface-water-targets`, one row per target, with the NRWQC edition in the file name only when a row cites
+   it; its stale feeds are the targets' surface water slots. The report adds the same table to the cleanup section
+   for a direct source (a modeled source is not computed in the report).
+8. **No fingerprint change.** The cleanup form is not the source of a feed, so `FINGERPRINT_SKIP` is unchanged.
+
+>>>>>>> wave-op-p2
