@@ -708,8 +708,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 62 reproduce, 3 are excepted (the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical, and the tetrachloroethylene groundwater level and H prime, which miss by less than the rounding of the printed inputs), 0 are unexplained.",
       "cases": 65,
@@ -730,8 +729,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5 (the Henry constant temperature correction and the target scaling)), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 55 reproduce, 10 are excepted (five pure phase vapor concentrations that the calculator leaves at their 25 deg C values, the trichloroethylene cancer level, and four outputs that miss by less than the rounding of the printed inputs), 0 are unexplained.",
       "cases": 65,
@@ -752,8 +750,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; commercial/industrial, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 64 reproduce, 1 are excepted (the tetrachloroethylene H prime, which misses by less than the rounding of the printed inputs), 0 are unexplained.",
       "cases": 65,
@@ -774,8 +771,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 69 reproduce, 1 are excepted (the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical), 0 are unexplained.",
       "cases": 70,
@@ -796,8 +792,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5 (the Henry constant temperature correction and the target scaling)), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 64 reproduce, 6 are excepted (the trichloroethylene cancer level and five outputs of the 10 deg C correction that differ because the database critical temperature (trichloroethylene) or enthalpy of vaporization (naphthalene) differs from the calculator), 0 are unexplained.",
       "cases": 70,
@@ -818,8 +813,7 @@
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
         "vapor.attenuation-factor-2015",
-        "exposure.rags-e-f-2014",
-        "shower.rsl-household"
+        "exposure.rags-e-f-2014"
       ],
       "compares": "The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; commercial/industrial, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 70 reproduce, 0 are excepted (none), 0 are unexplained.",
       "cases": 70,

@@ -239,7 +239,7 @@ function visl(c: VislCase): ExampleSpec {
     title: `VISL calculator, ${run.title}, ${how.title}`,
     files: [VISL_FIXTURE],
     referenceKey: 'epavisl',
-    methodIds: ['vapor.attenuation-factor-2015', 'exposure.rags-e-f-2014', 'shower.rsl-household'],
+    methodIds: ['vapor.attenuation-factor-2015', 'exposure.rags-e-f-2014'],
     compares: `The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; ${run.settings}), retrieved 2026-10-22: ${how.source}. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All ${c.compared} printed cells: ${c.reproduced} reproduce, ${c.excepted} are excepted (${c.excepts}), 0 are unexplained.`,
     count: (j) => (j[0].comparisons[c.comparison][c.run] as { compared: number }).compared,
     casesUnit: 'printed cells',

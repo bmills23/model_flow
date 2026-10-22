@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-22, after the wave R push)
+# HANDOFF (written from the tree, 2026-10-22, after the wave S push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -13,9 +13,15 @@ skipping a done one.
   and P (eight slices and a corrective pass, built together on branch `wave-op`; code head `d80adf6`, then the
   wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave Q (one slice on branch
   `wave-q`), pushed 2026-10-22, and wave R (seven slices and a corrective pass on branch `wave-r`; code head
-  `dedaca7`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-22. Pages deploys from main:
+  `dedaca7`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave S (one slice on
+  branch `wave-s`), pushed 2026-10-22. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-r` after its corrective pass (2026-10-22, `dedaca7`): exit 0, build
+- Last full `corepack pnpm gate` on `wave-s` (2026-10-22, `6f5b7c1`): exit 0, build included. Test counts: engine
+  1430, web 1996, data 197 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 566 s, 0 overflow and
+  0 axe violations on every route. The wave close then dropped `shower.rsl-household` from the VISL entries'
+  method ids (they exercise only its volatility criterion, not K) and regenerated the validation outputs (data
+  tests, the web report and validation tests and `docs:check` re-run).
+- Before that, on `wave-r` after its corrective pass (2026-10-22, `dedaca7`): exit 0, build
   included. Test counts: engine 1408 (87 files), web 1996 (206 files), data 197 passed and 3 skipped (9 files).
   `mobile:check:full` on that tree: exit 0 in 552 s, 0 overflow and 0 axe violations on every route at 390 light,
   390 dark and 1280. The wave close then changed two strings of the VISL entry in
@@ -44,7 +50,8 @@ skipping a done one.
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
   it shows the current result.
-- Local branches: `main` only. Deleted on 2026-10-22 after the wave R push, all merged into main (tip shas):
+- Local branches: `main` only. `wave-s` (the pushed head) was deleted after its push. Deleted on 2026-10-22 after
+  the wave R push, all merged into main (tip shas):
   `wave-r` (the pushed head), `wave-r-r1a` `f0c0449`, `wave-r-r1b` `8074aa1`, `wave-r-r1c` `2236699`, `wave-r-r2`
   `64a0f27`, `wave-r-r3a` `1bb132e`, `wave-r-r3b` `3b4a430`, `wave-r-r4` `1555759`, `wave-r-fix-a` `9c00281`,
   `wave-r-fix-b` `9572081`, `wave-r-fix-c` `7bc76ed`, and ten `worktree-wf_*` branches at `5496ec3`; their
@@ -84,6 +91,15 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave S landed (2026-10-22)
+Bryan: "do it." (compare the engine with the VISL calculator). Rulings in the DECISIONS.md "Wave S scope, VISL
+comparison" block and the "Wave S, VISL comparison" block, all DEFAULT.
+- `packages/data/scripts/fetch-visl.ts` takes the scenario, groundwater temperature, hazard quotient and target risk;
+  three dated fixtures under `packages/data/raw/visl/` (no checksum manifest covers that directory).
+- `packages/engine/test/visl-sweep.test.ts` and `vislSweepHelpers.ts` compose existing engine functions; every
+  excepted cell's class evidence is re-checked and the counts in `test/fixtures/visl-sweep/exceptions.json` are
+  recomputed. Catalog entries in `packages/data/src/validationCatalogSweep.ts` pin the counts.
 
 ## Wave R landed (2026-10-22)
 Bryan chose the evidence wave and ruled that dispersivity is a required entry and receptor edit notes are
@@ -439,10 +455,13 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   contradicts itself on Florida coastal; DECISIONS.md).
 - The outdoor box cites Hanna, Briggs and Hosker 1982; an ASTM E1739 attribution is unconfirmed and not cited.
 - DeVaull 2007: no published numeric example was verified; the oxygen balances are checked against a
-  numerical solve. The VISL calculator's output for benzene, trichloroethylene, tetrachloroethylene, naphthalene
-  and ethylbenzene (resident, form defaults, hazard quotient 0.1) was recorded in wave R
-  (`packages/data/raw/visl/visl-default-resident-2026-10-22.json`, `scripts/fetch-visl.ts`); the tests still assert
-  only the identity, and comparing the engine with that output remains open.
+  numerical solve. The engine is compared with three runs of the VISL calculator (wave S,
+  `packages/engine/test/visl-sweep.test.ts`, fixtures under `packages/data/raw/visl/`, exceptions in
+  `test/fixtures/visl-sweep/`; counts in `docs/VALIDATION.md`). Open from it: the trichloroethylene cancer level
+  needs the RSL's own equations (the engine has only its two bounds, here and in the RSL sweeps); the app's
+  trichloroethylene critical temperature (544.2 K, EPA 2004) and naphthalene enthalpy of vaporization (10373
+  cal/mol) differ from the calculator's (571 K, 10300 cal/mol), which changes their Henry constants away from
+  25 deg C.
 - RSL sweeps (wave R): the 4 Aroclor 1242, 1248, 1254 and 1260 total cancer tap water cells are unexplained
   (printed 0.0078, computed 0.007852 ug/L). Soil inhalation cells and the totals that include them (870 per soil
   table) are excepted because the RSL volatilization and particulate emission factors are not computed.
@@ -505,10 +524,11 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
   the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick,
-  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: compare the engine with the
-  recorded VISL output; source levels through nonlinear paths; RISC5 Appendix K not built (its only source is an
+  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: source levels through
+  nonlinear paths; the RSL trichloroethylene equations; RISC5 Appendix K not built (its only source is an
   unpublished draft; DeVaull 2007 covers oxygen-limited vapor); international criteria sets only for work outside
-  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The wave P remainders (a soil-to-groundwater
+  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The VISL comparison landed as wave S.
+  The wave P remainders (a soil-to-groundwater
   comparison for user chemicals, user Kd, vapor and dermal values, soil and nonlinear sources for the surface water
   target) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
