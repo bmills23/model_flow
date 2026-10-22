@@ -2,15 +2,22 @@ import { z } from 'zod';
 import { text } from './fields';
 import type { Screens } from './index';
 
+/** One value of a user-defined chemical as typed, with the note that justifies it. */
+export const userValueSchema = z.object({ value: text, note: text });
+export type UserValue = z.infer<typeof userValueSchema>;
+
 /**
  * One chemical of the project list. `id` is the key every screen's `chemicalId` points at (a
- * database id, or for a household chemical the typed id); `name` is what a screen shows. Wave P adds
- * optional keys here for a user-defined chemical (its values, each with a note); an older build strips
- * them with its usual warning.
+ * database id, or for a household chemical the typed id); `name` is what a screen shows. A
+ * user-defined chemical (`id` `user-<n>`) also has `values` (field key to typed value and note; see
+ * `overrides/userChemicals.ts`) and may have a `cas`. An older build strips those keys with its usual
+ * warning.
  */
 export const projectChemicalSchema = z.object({
   id: text.refine((s) => s.trim() !== ''),
   name: text,
+  cas: text.optional(),
+  values: z.record(z.string(), userValueSchema).optional(),
 });
 export type ProjectChemical = z.infer<typeof projectChemicalSchema>;
 

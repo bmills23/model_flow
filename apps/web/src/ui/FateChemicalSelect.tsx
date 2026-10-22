@@ -1,5 +1,6 @@
 import type { VaporChemicalRow } from '../vapor/chemicals';
 import { getChemicals } from '../project/store';
+import { isUserChemical, missingFateLabels, type FateKey } from '../overrides/userChemicals';
 import { ProjectChemicalSelect } from './ProjectChemicalSelect';
 
 /**
@@ -16,10 +17,25 @@ export function FateChemicalSelect(props: {
   onPick: (id: string, row: VaporChemicalRow | null) => void;
   /** What the database does not supply on this screen. */
   note: string;
+  /**
+   * The properties this screen reads that a user-defined chemical must carry; a missing one is named
+   * when the chemical is chosen. Defaults to all six; a screen that says so itself passes none.
+   */
+  needs?: readonly FateKey[];
 }) {
-  const { value, rows, failed, onPick, note } = props;
+  const {
+    value,
+    rows,
+    failed,
+    onPick,
+    note,
+    needs = ['mw', 's', 'hPrime', 'koc', 'dia', 'diw'],
+  } = props;
   const row = rows.find((c) => c.id === value) ?? null;
-  const name = getChemicals().find((c) => c.id === value)?.name ?? value;
+  const chosen = getChemicals().find((c) => c.id === value);
+  const name = chosen?.name ?? value;
+  const missing =
+    chosen !== undefined && isUserChemical(chosen) ? missingFateLabels(chosen, needs) : [];
   return (
     <>
       <ProjectChemicalSelect
@@ -32,6 +48,12 @@ export function FateChemicalSelect(props: {
             : `Properties are filled from the EPA RSL chemical tables and stay editable. ${note}`
         }
       />
+      {missing.length > 0 && (
+        <p className="derived">
+          {name} is a chemical you defined and has no usable {missing.join(', ')}. Add the value
+          (with its note) on the chemicals page, or enter it by hand here.
+        </p>
+      )}
       {value !== '' && !failed && rows.length > 0 && row === null && (
         <p className="derived">
           {name} is not in the fate property data (the chemicals with a temperature-correction or

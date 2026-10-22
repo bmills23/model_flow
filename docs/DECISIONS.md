@@ -3136,3 +3136,69 @@ scope" block. Every ruling below is DEFAULT.
    unlinked) were already added in O4 and are kept.
 6. **Files outside the named list.** `household/feed.ts` (the refusal text) and `household/feed.test.ts`. No
    `FINGERPRINT_SKIP` change: no new saved key.
+
+## 2026-10-21: Wave P slice P1, user-defined chemicals
+
+Scope ruling 3 of the "Project chemical list, waves N to P scope" block (a chemical that is not in the EPA
+tables, with a name and a note per value) and ruling 8 (a CAS number the database holds). Built on O4, O1,
+O2a and O2b.
+
+1. **Shape (DEFAULT).** A list entry gains optional `cas` and `values` (field key to `{ value, note }`, both
+   typed text). An entry is a user chemical when `values` is present, even if empty; its id is `user-<n>`
+   (next free number, never reused while the entry exists). The keys are in the existing version 2 file, so no
+   migration and no `FINGERPRINT_SKIP` change (no screen form key was added). An older build strips the two
+   keys with its usual warning. `store.updateChemical` replaces an entry by id; `addChemical` already kept the
+   extra keys.
+2. **Fields (DEFAULT).** Ten: the four toxicity values the overrides already edit (`sfo`, `iur`, `rfdo`,
+   `rfci`) and the six fate properties the fate screens fill (`mw`, `s`, `hPrime`, `koc`, `dia`, `diw`,
+   in the form units of the screens). Dermal, absorption, saturation, vapor thermo and Kd data are not
+   user-enterable in this slice; a user chemical has no physical row (`phys` undefined), so the dermal-water
+   control and every value that needs the RSL physical row stay absent, exactly as for an RSL chemical without
+   one. Only a name is required (scope ruling 3).
+3. **Note rule (DEFAULT).** An entered value is used only when `usableValue` accepts it (a number above zero
+   and a non-blank note), the same rule as a toxicity override. The editor refuses to save while an entered
+   value is unusable and names the problem, so a file saved by the app has no unusable entry; a hand-edited
+   file may, and the report then lists the value as "not used".
+4. **Overlay (DEFAULT).** `overrides/userChemicals.ts`: `applyUserChemicals` appends one `ChemicalRecord` per
+   user chemical (usable toxicity values with source key `user`, shown as "User value (this project)"), and
+   `effectiveDb` lays the toxicity overrides over that, so risk, cleanup, the report and the uncertainty runs see
+   the same record. A user id the database already holds is left alone. `useEffectiveDb` subscribes to the list.
+   `report/results.ts` and `uncertaintyReport.ts` build the database with `effectiveDb`.
+5. **Fate rows (DEFAULT).** `withUserFateRows` appends a row (the vapor database shape) per user chemical, with
+   only the usable fate values; `useChemicalRows` (transport, vadose, saturated), the vapor screen and the plants
+   and eco screen use it, so the screens fill what was entered and leave the rest as typed. Plants and eco
+   reads the user chemical through `useEffectiveDb` and fills only the Koc. A screen that needs a property the
+   chemical lacks says which one when the chemical is chosen: `FateChemicalSelect` names the missing ones
+   among its `needs` (all six by default; the transport screen passes none because its own note already names
+   the Koc). The vapor screen's own field checks name the empty fields.
+6. **Citation (DEFAULT).** A user value cites "User value (this project)" plus its note, never a
+   `references.json` entry (that file is for methods). The report section "Chemicals defined by the user" lists
+   every entered value with the chemical, CAS, value as typed, source `user` and the note; an unusable entry is
+   marked not used. The chemicals page CSV (all chemicals, and the matching table) appends the user chemicals,
+   one row per value, with the source text "User value (this project): <note>". No other CSV writes a chemical's
+   database values; the screens' CSVs carry the numbers the run used and are unchanged.
+7. **CAS (DEFAULT, ruling 8).** A CAS number is optional and must look like `71-43-2`. One the database or another
+   user chemical already holds is refused with its name and a pointer to Edit values (the overrides). A user
+   chemical cannot shadow a database chemical.
+8. **Copy (DEFAULT).** "Copy as a new chemical" starts the form from a database chemical's ten fields (those it
+   has). The name becomes "<name> (copy)", the CAS is not copied (it would be refused), and each copied value
+   carries the note "Copied from the EPA RSL tables, edition <edition>, for <name> (CAS <cas>); source:
+   <the source the database gives for that value>." The person may edit the note; the value is then a user value
+   like any other, not an EPA value, and is reported as one.
+9. **Removal and edit (DEFAULT).** Removing a user chemical uses the existing confirmed removal (its row, feed
+   slots and list entry go). Editing is **Edit** on the project list; the id never changes, so screens that name
+   it keep working.
+10. **Share link (DEFAULT, measured).** The list travels in the link (feeds do not). With every field filled and a
+    note of about 100 characters on each, three user chemicals made a link of 4,174 characters and six still fit
+    under the 8,000 cap; sixty were refused with the existing "too large for a share link ... Save project"
+    message. Past the cap nothing is truncated, so no change to `share.ts`. Tested in
+    `project/shareUserChemicals.test.ts`.
+11. **Files outside the named list (DEFAULT).** `project/store.ts` (`updateChemical`), `ui/FateChemicalSelect.tsx`
+    and `transport/TransportPage.tsx` (the `needs` prop), `vapor/VaporPage.tsx` and
+    `plantsEco/PlantsEcoPage.tsx` (user rows), `risk/ChemicalCard.tsx` (the no-toxicity note no longer says the
+    RSL for a user chemical), `overrides/useOverrides.ts`, `report/ReportPage.tsx`, `report/results.ts`,
+    `report/uncertaintyReport.ts`, plus the new `overrides/userChemicals.ts` and
+    `chemicals/UserChemicalEditor.tsx`.
+12. **Not done here (DEFAULT).** The cleanup source-level panel (`cleanup/SsgPanel.tsx`) still loads partition
+    properties from the RSL file only, so a user chemical gets no soil-to-groundwater comparison there. Entering a
+    user value for Kd, vapor thermo data or dermal data is a later scope row.

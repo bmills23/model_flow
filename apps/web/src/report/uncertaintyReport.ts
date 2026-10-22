@@ -1,6 +1,6 @@
 import type { UncertainInput } from '@model-flow/engine';
-import { overridesOf, screensOf, type Project } from '../project';
-import { applyToxOverrides } from '../overrides/toxicity';
+import { chemicalsOf, overridesOf, screensOf, type Project } from '../project';
+import { effectiveDb } from '../overrides/userChemicals';
 import { withProjectReceptorEdits } from './userValues';
 import { buildCleanup } from '../cleanup/build';
 import { runCleanup } from '../cleanup/compute';
@@ -95,7 +95,7 @@ export async function planUncertainty(project: Project): Promise<UncertaintyPlan
   const plan: UncertaintyPlan = { exposure: null, cleanup: null, modeled: null, notes: [] };
   let db;
   try {
-    db = applyToxOverrides(await loadChemicalDb(), overridesOf(project));
+    db = effectiveDb(await loadChemicalDb(), overridesOf(project), chemicalsOf(project));
   } catch (e) {
     plan.notes.push(
       `The chemical database did not load (${e instanceof Error ? e.message : String(e)}), so no uncertainty run was made.`,

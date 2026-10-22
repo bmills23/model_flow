@@ -1,10 +1,10 @@
 import { convert, type Warning } from '@model-flow/engine';
 import { csvHeader, type CsvCell } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
-import { overridesOf, screensOf, type Project, type Screens } from '../project';
+import { chemicalsOf, overridesOf, screensOf, type Project, type Screens } from '../project';
 import { decodeJson } from '../project/codec';
 import { screenUsed, USED_SCREENS_ORDER, type FeedsLike, type ScreenKey } from './methodsRun';
-import { applyToxOverrides } from '../overrides/toxicity';
+import { effectiveDb } from '../overrides/userChemicals';
 import { withProjectReceptorEdits } from './userValues';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { buildInputs } from '../risk/build';
@@ -488,7 +488,7 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
   let dbError = '';
   if (needsDb) {
     try {
-      db = applyToxOverrides(await loadChemicalDb(), overridesOf(project));
+      db = effectiveDb(await loadChemicalDb(), overridesOf(project), chemicalsOf(project));
     } catch (e) {
       dbError = e instanceof Error ? e.message : String(e);
     }

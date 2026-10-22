@@ -481,6 +481,15 @@ export function addChemical(entry: ProjectChemical): void {
     { ...entry, id, name: entry.name.trim() === '' ? id : entry.name },
   ]);
 }
+/** Replace the entry that has this entry's id (a user chemical edited); an id not in the list is ignored. */
+export function updateChemical(entry: ProjectChemical): void {
+  if (!chemicals.some((c) => c.id === entry.id)) return;
+  changeChemicals(
+    chemicals.map((c) =>
+      c.id === entry.id ? { ...entry, name: entry.name.trim() === '' ? entry.id : entry.name } : c,
+    ),
+  );
+}
 /** Remove the entry with this id; an id not in the list is ignored. Screens that name it keep their choice. */
 export function removeChemical(id: string): void {
   if (!chemicals.some((c) => c.id === id)) return;

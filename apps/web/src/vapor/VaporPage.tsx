@@ -5,6 +5,7 @@ import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../proje
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
+import { withUserFateRows } from '../overrides/userChemicals';
 import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './chemicals';
 import { layerBands, profileCurves } from './chartData';
 import { DownloadCsv } from '../export/DownloadCsv';
@@ -178,7 +179,10 @@ function comparisonRows(out: VaporOutcome): Row[] {
 
 export function VaporPage() {
   const [form, setForm] = useState<VaporForm>(() => getScreen('vapor').form);
-  const [chemicals, setChemicals] = useState<VaporChemicalRow[]>([]);
+  const [loaded, setChemicals] = useState<VaporChemicalRow[]>([]);
+  const projectList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  // the project's user-defined chemicals join the database rows
+  const chemicals = useMemo(() => withUserFateRows(loaded, projectList), [loaded, projectList]);
   const [loadError, setLoadError] = useState(false);
   useEffect(() => {
     let live = true;
@@ -304,8 +308,8 @@ export function VaporPage() {
     setForm((f) => ({ ...f, chemicalId: id }));
     if (id === '') return;
     void loadVaporChemicals().then(
-      (rows) => {
-        const row = rows.find((c) => c.id === id);
+      (loadedRows) => {
+        const row = withUserFateRows(loadedRows, getChemicals()).find((c) => c.id === id);
         if (row) setForm((f) => (f.chemicalId === id ? { ...f, ...chemicalFields(row) } : f));
       },
       () => undefined,

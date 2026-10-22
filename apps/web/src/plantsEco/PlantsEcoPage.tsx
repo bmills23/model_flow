@@ -15,6 +15,8 @@ import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 import { fmtHi } from '../risk/chartData';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { loadChemicalDb } from '../risk/chemicalDb';
+import { userCleanupProps } from '../overrides/userChemicals';
+import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg, TextField } from '../ui/controls';
 import { plantsEcoCsvTables } from './csv';
@@ -133,7 +135,10 @@ export function PlantsEcoPage() {
     />
   );
 
-  const { db, error: dbError } = useChemicalDb();
+  const { db: baseDb, error: dbError } = useChemicalDb();
+  const [overrides] = useOverrides();
+  // the project's user-defined chemicals are part of the database here
+  const db = useEffectiveDb(baseDb, overrides);
   const props = useLoaded<CleanupProps>(loadCleanupProps);
   const substances = useLoaded<EcosslSubstance[]>(loadEcossl);
   // the produce result this screen sent for its chemical (one slot per chemical)
@@ -166,6 +171,13 @@ export function PlantsEcoPage() {
               ? { ...f, chemicalName: rec.name, logKow: s(p?.logKow), koc: s(p?.koc), kd: s(p?.kd) }
               : f,
           );
+        } else {
+          // a user-defined chemical: only the Koc it carries, if any
+          const own = userCleanupProps(getChemicals()).get(id);
+          if (own)
+            setForm((f) =>
+              f.chemicalId === id ? { ...f, logKow: '', koc: s(own.koc), kd: '' } : f,
+            );
         }
       },
       () => undefined,

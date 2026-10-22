@@ -287,6 +287,7 @@ export function TransportPage() {
                     : {}),
                 }));
               }}
+              needs={[]}
               note="Only Kd (Koc times the organic carbon fraction below) is used here; the half-life is not in the database and stays your input."
             />
             {noKocName !== null && (

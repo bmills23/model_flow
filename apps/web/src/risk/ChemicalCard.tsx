@@ -95,8 +95,10 @@ export function ChemicalCard(props: {
       </div>
       {rows.length === 0 && (
         <p className="note">
-          The RSL gives this chemical no cancer or noncancer toxicity value, so no risk can be
-          quantified for it.
+          {rec.id.startsWith('user-')
+            ? 'No toxicity value (with its source note) has been entered for this chemical on the chemicals page'
+            : 'The RSL gives this chemical no cancer or noncancer toxicity value'}
+          , so no risk can be quantified for it.
         </p>
       )}
       {props.onEdit !== undefined && (

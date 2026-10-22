@@ -108,15 +108,16 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 
 ### Chemical database (`#/chemicals`)
 
-A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition
+A browser over the EPA Regional Screening Level chemical data the calculations use, read only (edition
 2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
 chemical properties and its toxicity values. Each row gives the value as stored, its unit and its source:
 the reference named in the property table, or for toxicity the name of the agency behind the value. Flags
 such as volatile and mutagen, and a few screening values without a per-value reference, are listed with
 the source "RSL table". The data carries no carcinogen weight-of-evidence class, so none is shown.
 **Download CSV** saves every value of every chemical, or just the chemicals that match the search, one row
-per value with a source column. Values cannot be edited here; the full file loads the first time the
-screen opens, so it needs a connection that first time.
+per value with a source column; chemicals you define are included, with the source "User value (this project)"
+and your note. The EPA values cannot be edited here (a toxicity value is edited on a chemical card, see Edit
+values); the full file loads the first time the screen opens, so it needs a connection that first time.
 
 The screen opens with **Project chemicals**, the one list of chemicals the project works on. **Add to project**
 beside a chemical puts it on the list (a chemical already on it reads "In the project"). **Remove** takes a
@@ -124,6 +125,21 @@ chemical out of the whole project, after asking: the question names what goes wi
 everything entered on it on the exposure and risk and the cleanup levels screens, and the results held for it
 (the groundwater well result, the vapor air result and so on). A screen that is set to it keeps that choice and
 shows it as no longer in the list. Removing cannot be undone.
+
+**Define a new chemical** makes a chemical that is not in the EPA tables. Only a name is required. You may add a
+CAS number (a number the database already holds is refused, with a pointer to the overrides, because that
+chemical exists: add it to the project and edit its toxicity values with Edit values instead) and any of ten values: the four
+toxicity values (oral slope factor, inhalation unit risk, oral reference dose, inhalation reference
+concentration) and molar mass, solubility, Henry's constant, Koc and the two diffusivities. Every value you
+enter needs a source note; a value without one, or not above zero, stops the save. **Copy as a new chemical**,
+beside a database chemical, starts the form from that chemical's values. Each copied value carries the note
+"Copied from the EPA RSL tables, edition ..., for <name> (CAS ...); source: <the source the database gives>", which you
+can edit; the CAS number is not copied. **Edit** on a chemical you defined reopens the form. A chemical you
+defined is on the exposure and risk and cleanup levels screens (it carries only the values you entered), and on the transport, vadose, saturated, vapor and plants and
+ecology screens, which fill what you entered and say which value is missing when it is chosen. The report lists each one
+under "Chemicals defined by the user" with every value, its source (user) and its note. The project file keeps
+them. A share link carries them too, but a link longer than 8,000 characters is refused (about six chemicals with every value
+and a note of a sentence each still fit); use Save project then.
 
 ### Site model (`#/site`)
 

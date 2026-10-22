@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { getChemicals, subscribeChemicals } from '../project/store';
+import { withUserFateRows } from '../overrides/userChemicals';
 import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 
 /** The fate properties of the form fields that an RSL record can fill, as typed strings. */
@@ -33,9 +35,14 @@ export function fateFill(row: VaporChemicalRow): FateFill {
   return out;
 }
 
-/** Loads the shared chemical database once per page; `failed` is true when it did not load. */
+/**
+ * Loads the shared chemical database once per page, with the project's user chemicals added (see
+ * `overrides/userChemicals.ts`); `failed` is true when the database did not load.
+ */
 export function useChemicalRows(): { rows: VaporChemicalRow[]; failed: boolean } {
-  const [rows, setRows] = useState<VaporChemicalRow[]>([]);
+  const [loaded, setRows] = useState<VaporChemicalRow[]>([]);
+  const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const rows = useMemo(() => withUserFateRows(loaded, chemicals), [loaded, chemicals]);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let live = true;
