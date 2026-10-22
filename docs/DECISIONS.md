@@ -3403,3 +3403,38 @@ go with the other stuff".
    the project list lacks them, so each view starts the visit from the state it means to check.
 9. **Equivalence test can fail (DEFAULT).** It now compares one worker pass over all chemicals, in both orders,
    against each chemical solved alone from its own build.
+
+## 2026-10-22: Wave R scope, evidence for regulatory use
+
+Bryan picked the evidence wave after wave Q ("Evidence wave (Recommended)"; jurisdiction "state, federal,
+whatever": EPA values now, a state's tables when a state comes up), then answered two design questions.
+
+1. **Dispersivity (BRYAN).** A new run takes dispersivity as a required entry. Two suggestions are offered beside
+   it: the EPA 1996 Soil Screening Guidance rule (longitudinal dispersivity 0.1 times the distance, saturated zone
+   only, cited to `epa1996ssg` once the passage is confirmed in that document) and the RISC5 regression, labelled
+   as having no primary source and warned whenever it is used. Saved projects keep their numbers, open with the
+   regression chosen explicitly and warned, and are not marked stale. The Table R-7 reproduction keeps running on
+   the regression.
+2. **Receptor edit notes (BRYAN).** An edited receptor value needs a source note before it applies, as toxicity
+   overrides already do. Older projects whose edits have no note open with them shown as "no note".
+3. **Run basis (DEFAULT).** The report states, per section, what the run rests on: warned defaults the run used
+   (from the validation catalog, by warning code or method id), values typed over a database value, user overrides
+   and user chemicals with their notes, and receptor edits with their notes; a section that reads a feed carries
+   its sender's rows. Method ids print beside method names with the count of published examples that check each,
+   linked to `#/validation`. One report-level "run basis" CSV; per-screen files later if wanted.
+4. **Version (DEFAULT).** The app gets a version scheme starting at 0.1.0 (pre-1.0 while the evidence gap is
+   open) and the report prints the version, the short commit and the generation date.
+5. **Household K (DEFAULT).** If the RSL tap water inhalation cells reproduce with the household factor K, its
+   warning stays and is reworded to cite that reproduction; the value is not called verified from a primary
+   source.
+6. **Fetching (DEFAULT).** The public RSL per-pathway sheets (November 2024 edition) are fetched through the
+   existing fetch script and checksum manifest. The VISL online calculator output for benzene,
+   trichloroethylene, tetrachloroethylene, naphthalene and ethylbenzene is recorded if it can be queried by a plain
+   HTTP request; otherwise that item stays open.
+7. **Sweeps (DEFAULT).** Published RSL screening levels are compared with the engine's unrounded value by the
+   existing half-unit-in-the-second-significant-figure rule; nothing is widened. A cell that cannot reproduce is a
+   named exception with its reason, and a mismatch whose reason is not found is counted and printed as unexplained,
+   never hidden.
+8. **Slices (DEFAULT).** R1a catalog ids and scopes first; then in parallel R1b (run basis function) followed by
+   R1c (report, CSV, version), R2 (dispersivity), R3a (RSL data) followed by R3b (engine sweeps), and R4 (receptor
+   notes). One gate and one full mobile check at integration, one review.
