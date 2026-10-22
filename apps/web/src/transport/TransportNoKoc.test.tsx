@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { addChemical, forgetMemory, newProject } from '../project/store';
 import { TransportPage } from './TransportPage';
 
 // A database fixture with one chemical that has no Koc (like hydrogen cyanide) and one that has a Koc.
@@ -12,6 +13,13 @@ vi.mock('../vapor/chemicals', () => ({
 
 const NOTE = /no Koc/i;
 
+beforeEach(() => {
+  forgetMemory();
+  newProject();
+  addChemical({ id: '74-90-8', name: 'Hydrogen cyanide' });
+  addChemical({ id: '71-43-2', name: 'Benzene' });
+});
+
 describe('TransportPage chemical pick without a Koc', () => {
   it('keeps the retardation mode and values and says the database has no Koc', async () => {
     render(<TransportPage />);
@@ -20,7 +28,7 @@ describe('TransportPage chemical pick without a Koc', () => {
     const retardation = screen.getByLabelText(/retardation factor r/i) as HTMLInputElement;
     fireEvent.change(retardation, { target: { value: '3.5' } });
 
-    fireEvent.change(screen.getByLabelText(/fill from the chemical database/i), {
+    fireEvent.change(screen.getByLabelText(/^chemical$/i), {
       target: { value: '74-90-8' },
     });
 
@@ -34,7 +42,7 @@ describe('TransportPage chemical pick without a Koc', () => {
   it('fills Kd from Koc for a chemical that has one and clears the note', async () => {
     render(<TransportPage />);
     await screen.findByRole('img', { name: /plume map/i }, { timeout: 15000 });
-    const picker = screen.getByLabelText(/fill from the chemical database/i);
+    const picker = screen.getByLabelText(/^chemical$/i);
     fireEvent.change(picker, { target: { value: '74-90-8' } });
     expect(await screen.findByText(NOTE)).toBeTruthy();
     fireEvent.change(picker, { target: { value: '71-43-2' } });

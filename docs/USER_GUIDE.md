@@ -97,8 +97,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
   plain text and are not affected by this setting.
 - The project now keeps a list of its chemicals, filled from the chemicals on the risk and cleanup screens
-  and the one chosen on each other screen. The surface water screen picks its chemical from it; the other
-  screens do not show it yet. An older file or link opens with
+  and the one chosen on each other screen. The surface water, groundwater transport, vadose zone and saturated source screens pick their chemical from
+  it; the other screens do not show it yet. An older file or link opens with
   the list filled in the same way, and none of its sent results turns stale because of it. An older version
   of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
@@ -154,7 +154,7 @@ Under the plume map, **Download CSV: plume grid** saves the whole map grid as a 
 with the method, the downgradient distance x (m), y (m) and the concentration (mg/L) at the time shown on the
 map. The transport table's own CSV does not carry the plume grid.
 
-The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen). It fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 
 ### Vadose leaching (`#/vadose`)
 
@@ -163,7 +163,7 @@ water table with the legacy or the modern layered model. The screen shows the so
 arrival at the water table, a mass budget, and a validation case you can load. It can feed the groundwater
 and vapor screens.
 
-The chemical select fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen) and fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 Each soil layer (the source and every layer above and below it) has a Texture preset. Choosing one of the twelve classes fills porosity, residual water content, van Genuchten n, saturated conductivity and bulk density with the class averages the vapor screen uses; thickness and organic carbon stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Saturated soil source (`#/saturated`)
@@ -172,7 +172,7 @@ Chemical in soil at or below the water table dissolves into the groundwater flow
 at a constant rate until it is gone (legacy) or in proportion to the mass left (modern). The release can
 feed the groundwater and vapor screens. A worked example is built in.
 
-The chemical select fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen) and fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input. A project chemical without fate data here is marked unavailable and nothing is filled.
 The Texture preset in the Soil group fills porosity, bulk density, residual water content and van Genuchten n from the twelve class averages the vapor screen uses. Organic carbon and the aquifer conductivity stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Vapor intrusion (`#/vapor`)
