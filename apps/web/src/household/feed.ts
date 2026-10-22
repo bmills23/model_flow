@@ -36,7 +36,7 @@ const errorsOf = (s: Section<object>): string => (s.ok ? '' : s.errors.join('; '
 export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): FeedResult {
   const reasons: string[] = [];
   if (form.chemicalId.trim() === '') {
-    reasons.push('Enter the chemical id (CAS number) the risk screen uses, for example 71-43-2');
+    reasons.push('Pick the chemical this result is for from the project list');
   }
   const out = computeHousehold(form, held);
   const notes: string[] = [];

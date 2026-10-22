@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { isFeedStaleNow } from '../project/store';
+import { addChemical, isFeedStaleNow } from '../project/store';
 import { VaporPage } from './VaporPage';
 import {
   clearSaturatedVaporFeed,
@@ -13,6 +13,17 @@ import {
 } from './feeds';
 
 const YR = 365.25 * 86400;
+
+/** Picks a chemical from the project list; the properties fill once the vapor database has loaded. */
+async function pickProjectChemical(id: string, name: string): Promise<void> {
+  act(() => addChemical({ id, name }));
+  const toList = screen.queryByRole('button', { name: /pick a project chemical/i });
+  if (toList) fireEvent.click(toList);
+  fireEvent.change(screen.getByLabelText(/^chemical$/i), { target: { value: id } });
+  await waitFor(() =>
+    expect((screen.getByLabelText(/^molar mass/i) as HTMLInputElement).value).not.toBe('78'),
+  );
+}
 
 afterEach(() => {
   clearVadoseVaporFeed();
@@ -120,10 +131,7 @@ describe('source from another screen', () => {
       'disabled',
       true,
     );
-    await screen.findByRole('option', { name: /benzene \(71-43-2\)/i });
-    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
-      target: { value: '71-43-2' },
-    });
+    await pickProjectChemical('71-43-2', 'Benzene');
     fireEvent.click(within(risk).getByRole('button', { name: /send to exposure and risk/i }));
     const feed = getVaporRiskFeed();
     expect(feed?.chemicalId).toBe('71-43-2');
@@ -158,10 +166,7 @@ describe('source for another chemical', () => {
 
   it('refuses a water table series for benzene on a toluene screen and offers nothing to send', async () => {
     render(<VaporPage />);
-    await screen.findByRole('option', { name: /toluene \(108-88-3\)/i });
-    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
-      target: { value: '108-88-3' },
-    });
+    await pickProjectChemical('108-88-3', 'Toluene');
     act(() => setWaterTableFeed(tagged('71-43-2')));
     const region = screen.getByRole('region', { name: /source from another screen/i });
     expect(within(region).getByRole('alert').textContent).toMatch(/is for .*, not /i);
@@ -171,10 +176,7 @@ describe('source for another chemical', () => {
 
   it('takes the same series on a benzene screen', async () => {
     render(<VaporPage />);
-    await screen.findByRole('option', { name: /benzene \(71-43-2\)/i });
-    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
-      target: { value: '71-43-2' },
-    });
+    await pickProjectChemical('71-43-2', 'Benzene');
     act(() => setWaterTableFeed(tagged('71-43-2')));
     const region = screen.getByRole('region', { name: /source from another screen/i });
     expect(within(region).queryByRole('alert')).toBeNull();
@@ -185,10 +187,7 @@ describe('source for another chemical', () => {
 describe('sent vapor run after an edit', () => {
   const sendBenzene = async () => {
     render(<VaporPage />);
-    await screen.findByRole('option', { name: /benzene \(71-43-2\)/i });
-    fireEvent.change(screen.getByRole('combobox', { name: /^chemical/i }), {
-      target: { value: '71-43-2' },
-    });
+    await pickProjectChemical('71-43-2', 'Benzene');
     const risk = screen.getByRole('region', { name: /exposure and risk/i });
     return { send: within(risk).getByRole('button', { name: /send to exposure and risk/i }) };
   };
@@ -215,5 +214,39 @@ describe('sent vapor run after an edit', () => {
     expect(send).toHaveProperty('disabled', true);
     fireEvent.click(send);
     expect(getVaporRiskFeed()).toBeNull();
+  }, 30000);
+});
+
+describe('chemical from the project list', () => {
+  it('opens on the Table R-3 benzene fixture beside the list and can switch to the list', () => {
+    act(() => addChemical({ id: '71-43-2', name: 'Benzene' }));
+    render(<VaporPage />);
+    expect(screen.getByText(/using the table r-3 benzene test values/i)).toBeTruthy();
+    expect(screen.queryByLabelText(/^chemical$/i)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /pick a project chemical/i }));
+    expect(screen.getByLabelText(/^chemical$/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /use the table r-3 benzene test values/i }));
+    expect(screen.getByText(/using the table r-3 benzene test values/i)).toBeTruthy();
+  });
+
+  it('offers only the project chemicals, named as the list names them', async () => {
+    render(<VaporPage />);
+    act(() => addChemical({ id: '108-88-3', name: 'Toluene' }));
+    fireEvent.click(screen.getByRole('button', { name: /pick a project chemical/i }));
+    expect(screen.getByRole('option', { name: 'Toluene' })).toBeTruthy();
+    expect(screen.queryByRole('option', { name: /benzene/i })).toBeNull();
+  });
+
+  it('says a list chemical with no vapor properties is unavailable, and does not send it', async () => {
+    render(<VaporPage />);
+    act(() => addChemical({ id: 'user-x', name: 'Own compound' }));
+    fireEvent.click(screen.getByRole('button', { name: /pick a project chemical/i }));
+    fireEvent.change(screen.getByLabelText(/^chemical$/i), { target: { value: 'user-x' } });
+    await screen.findByText(/has no vapor properties in the chemical database/i);
+    const risk = screen.getByRole('region', { name: /exposure and risk/i });
+    expect(within(risk).getByRole('button', { name: /send to exposure and risk/i })).toHaveProperty(
+      'disabled',
+      true,
+    );
   }, 30000);
 });

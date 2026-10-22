@@ -1,7 +1,7 @@
 import { StaleMark } from '../project/StaleMark';
-import { chemicalTag } from '../project/feedChemical';
+import { chemicalTag, projectNameOf } from '../project/feedChemical';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
 import { ownSlot, pickSlot } from '../project/feedSlots';
 import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 import { formatReference, references } from '@model-flow/engine';
@@ -130,9 +130,25 @@ export function SurfaceWaterScreen() {
   const river = form.bodyType === 'river';
   const last = result ? result.times.length - 1 : 0;
   const linkedOn = form.linked && feed !== null;
+  const projectList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  // while linked, the run's chemical is the transport run's: it must be in the project list, and the
+  // bank run taken must be for the chemical set here (a different one is a refused slot)
+  const linkProblem = ((): string | null => {
+    if (!linkedOn) return null;
+    const nameOf = projectNameOf(projectList);
+    const bankChem = feed.chemicalId;
+    if (bankChem !== undefined && bankChem !== '' && !projectList.some((c) => c.id === bankChem)) {
+      return `The transport run's chemical (${bankChem}) is not in the project list; add it on the chemicals screen or run the transport screen for a listed chemical, then use the run again.`;
+    }
+    if (form.chemicalId !== '' && bankChem !== undefined && bankChem !== form.chemicalId) {
+      return `The transport run held is for ${nameOf(bankChem)}, not ${nameOf(form.chemicalId)}; run the transport screen for ${nameOf(form.chemicalId)} and use it again.`;
+    }
+    return null;
+  })();
+  const sendBlocked = computing || !parsed.ok || engineError !== null || linkProblem !== null;
 
   const sendToRisk = (method: SurfaceWaterFeedMethod): void => {
-    if (!result) return;
+    if (!result || linkProblem !== null) return;
     const legacy = method === 'well-mixed';
     const values = legacy ? result.legacy.surfaceWater : result.modern.surfaceWater;
     setSurfaceWaterFeed({
@@ -361,6 +377,12 @@ export function SurfaceWaterScreen() {
                   />
                 </>
               )}
+              {linkedOn && (
+                <p className="derived">
+                  Chemical of the transport run:{' '}
+                  {feed.chemicalId ? projectNameOf(projectList)(feed.chemicalId) : 'not set'}.
+                </p>
+              )}
               <Field
                 label="Distance from the source face to the bank (m)"
                 value={form.bankX}
@@ -453,6 +475,11 @@ export function SurfaceWaterScreen() {
             </p>
           </div>
 
+          {linkProblem !== null && (
+            <div className="alert" role="alert">
+              {linkProblem}
+            </div>
+          )}
           {!parsed.ok && (
             <div className="alert" role="alert">
               <strong>Fix these inputs to update the results:</strong>
@@ -573,7 +600,7 @@ export function SurfaceWaterScreen() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok || engineError !== null}
+                    disabled={sendBlocked}
                     onClick={() => sendToRisk('well-mixed')}
                   >
                     Use legacy surface water for swimming risk
@@ -581,7 +608,7 @@ export function SurfaceWaterScreen() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok || engineError !== null}
+                    disabled={sendBlocked}
                     onClick={() => sendToRisk('mass-discharge')}
                   >
                     Use modern surface water for swimming risk

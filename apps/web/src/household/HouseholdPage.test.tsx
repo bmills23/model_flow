@@ -1,11 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { showerLegacyStall, showerLittle } from '@model-flow/engine';
 import { HouseholdPage } from './HouseholdPage';
 import { clearHouseholdFeed, getHouseholdFeed } from './feeds';
 import { clearWellFeed, setWellFeed } from '../transport/wellFeed';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
-import { forgetMemory, getScreen } from '../project/store';
+import { addChemical, forgetMemory, getScreen } from '../project/store';
 
 afterEach(() => {
   clearHouseholdFeed();
@@ -147,9 +147,10 @@ describe('HouseholdPage', () => {
 
     it('sends the shower EPC series with its origin to the risk screen feed', () => {
       setWellFeed(well);
+      act(() => addChemical({ id: '71-43-2', name: 'Benzene' }));
       render(<HouseholdPage />);
       fillShower();
-      fill(/^chemical id/i, '71-43-2');
+      fill(/^chemical$/i, '71-43-2');
       const group = screen.getByRole('group', { name: /tap water source/i });
       fireEvent.click(within(group).getByRole('radio', { name: /well series/i }));
       fireEvent.click(screen.getByRole('button', { name: /send to risk and cleanup/i }));
@@ -160,12 +161,12 @@ describe('HouseholdPage', () => {
       expect(screen.getByRole('status').textContent).toMatch(/sent/i);
     });
 
-    it('explains why it cannot send without a chemical id', () => {
+    it('explains why it cannot send without a project chemical', () => {
       render(<HouseholdPage />);
       fillShower();
       const btn = screen.getByRole('button', { name: /send to risk and cleanup/i });
       expect((btn as HTMLButtonElement).disabled).toBe(true);
-      expect(screen.getByText(/enter the chemical id/i)).toBeTruthy();
+      expect(screen.getByText(/pick the chemical .* from the project list/i)).toBeTruthy();
     });
 
     it('lists a surface water series when one is held', () => {
@@ -181,5 +182,23 @@ describe('HouseholdPage', () => {
       fireEvent.click(within(group).getByRole('radio', { name: /surface water series/i }));
       expect(screen.getAllByText(/well-mixed surface water/i).length).toBeGreaterThan(0);
     });
+  });
+});
+
+describe('HouseholdPage chemical from the project list', () => {
+  it('has a select over the project list in place of typed name and id fields', () => {
+    act(() => addChemical({ id: '108-88-3', name: 'Toluene' }));
+    render(<HouseholdPage />);
+    expect(screen.queryByLabelText(/^chemical name/i)).toBeNull();
+    expect(screen.queryByLabelText(/^chemical id/i)).toBeNull();
+    fill(/^chemical$/i, '108-88-3');
+    expect(getScreen('household').form.chemicalId).toBe('108-88-3');
+    expect(getScreen('household').form.chemicalName).toBe('Toluene');
+  });
+
+  it('points to the chemicals screen when the project list is empty', () => {
+    forgetMemory();
+    render(<HouseholdPage />);
+    expect(screen.getByRole('link', { name: /chemicals screen/i })).toBeTruthy();
   });
 });
