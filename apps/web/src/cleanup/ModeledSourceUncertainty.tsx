@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { UncertaintyError, type UncertainInput } from '@model-flow/engine';
+import { stableStringify } from '../project/hash';
 import type { FeedRef } from '../project/staleFeeds';
 import { Field } from '../ui/controls';
 import { AlertDialog } from '../ui/AlertDialog';
@@ -29,7 +30,7 @@ import {
   summarizeModeledRun,
 } from './modeledSummary';
 
-type Shown = ModeledCleanupRun & { label: string; request: ModeledRequest };
+type Shown = ModeledCleanupRun & { label: string; requestKey: string };
 
 const METHODS: Method[] = ['legacy', 'modern'];
 
@@ -80,6 +81,11 @@ export function ModeledSourceUncertainty(props: {
   );
   const [shown, setShown] = useState<Shown | null>(null);
   const abort = useRef<AbortController | null>(null);
+  // Request objects are rebuilt whenever any screen input changes, so staleness compares content.
+  const requestKey = useMemo(() => stableStringify(request), [request]);
+
+  // Leaving the panel (picking another chemical remounts it) cancels its run and frees the workers.
+  useEffect(() => () => abort.current?.abort(), []);
 
   const onSpec = useCallback((s: EditorSpec) => setSpec(s), []);
   const sampled = spec ? Object.keys(spec.distributions).length : 0;
@@ -121,7 +127,7 @@ export function ModeledSourceUncertainty(props: {
           ),
       });
       const label = `${name} at the source, ${LABELS[setup.method]}`;
-      setShown({ ...ran, label, request });
+      setShown({ ...ran, label, requestKey });
       // the report prints this summary; the fingerprint says later whether it still matches the inputs
       setModeledSummary(
         summarizeModeledRun(ran, label, modeledFingerprint(request, setup0), request.chemical),
@@ -291,7 +297,7 @@ export function ModeledSourceUncertainty(props: {
         <ProbabilisticResults
           run={shown}
           label={shown.label}
-          stale={shown.request !== request}
+          stale={shown.requestKey !== requestKey}
           runNote={`${shown.workers} worker${shown.workers === 1 ? '' : 's'}`}
           {...(props.feeds ? { feeds: props.feeds } : {})}
         />
