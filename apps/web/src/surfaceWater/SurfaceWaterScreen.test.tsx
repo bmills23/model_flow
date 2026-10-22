@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { DEFAULT_FORM as TRANSPORT_FORM, toScenario } from '../transport/form';
-import { isFeedStaleNow } from '../project/store';
+import { addChemical, isFeedStaleNow } from '../project/store';
 import { clearSurfaceWaterFeed, getSurfaceWaterFeed } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
 
@@ -147,4 +147,38 @@ describe('SurfaceWaterScreen', () => {
     expect(getSurfaceWaterFeed()).not.toBe(sent);
     expect(isFeedStaleNow('surfaceWater')).toBe(false);
   }, 40000);
+
+  it('tags an unlinked run with the chemical picked from the project list', async () => {
+    addChemical({ id: '71-43-2', name: 'Benzene' });
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
+    expect(getSurfaceWaterFeed()?.chemicalId).toBeUndefined();
+    fireEvent.change(screen.getByLabelText(/^chemical/i), { target: { value: '71-43-2' } });
+    fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
+    expect(getSurfaceWaterFeed()?.chemicalId).toBe('71-43-2');
+    fireEvent.change(screen.getByLabelText(/^chemical/i), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: /use legacy surface water for swimming/i }));
+    expect(getSurfaceWaterFeed()?.chemicalId).toBeUndefined();
+  }, 30000);
+
+  it('tags a linked run with the bank run chemical and offers no picker', async () => {
+    addChemical({ id: '108-88-3', name: 'Toluene' });
+    const s = toScenario({ ...TRANSPORT_FORM, timeYr: '5' });
+    if (!s.ok) throw new Error('scenario');
+    const { zOf: _z, ...scenario } = s.scenario;
+    void _z;
+    setBankFeed({ scenario, label: 'Test run', chemicalId: '108-88-3' });
+    render(<SurfaceWaterScreen />);
+    await screen.findByRole(
+      'img',
+      { name: /surface water concentration in mg\/L/i },
+      { timeout: 15000 },
+    );
+    fireEvent.click(screen.getByRole('checkbox', { name: /groundwater transport run/i }));
+    expect(screen.queryByLabelText(/^chemical/i)).toBeNull();
+    const send = screen.getByRole('button', { name: /use legacy surface water for swimming/i });
+    await waitFor(() => expect(send).toHaveProperty('disabled', false), { timeout: 40000 });
+    fireEvent.click(send);
+    expect(getSurfaceWaterFeed()?.chemicalId).toBe('108-88-3');
+  }, 60000);
 });

@@ -43,6 +43,7 @@ export const FINGERPRINT_SKIP: Record<
   vadose: { always: ['chemicalId', 'texture'] },
   saturated: { always: ['chemicalId', 'texture'] },
   plantsEco: { always: ['wildlifeRows'] },
+  surfaceWater: { always: ['chemicalId'] },
 };
 
 function without(value: unknown, always: readonly string[]): unknown {

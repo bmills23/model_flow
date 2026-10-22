@@ -47,4 +47,15 @@ describe('chemicalTag and feedChemicalProblem', () => {
       /does not record which chemical/,
     );
   });
+
+  it('names an action the user can take on the sending screen', () => {
+    const text = feedChemicalProblem({
+      feed: 'surface water result',
+      feedChemical: undefined,
+      rowId: 'a',
+      runCount: 2,
+      nameOf: (id) => id,
+    });
+    expect(text).toMatch(/choose the chemical on its screen and send it again/);
+  });
 });
