@@ -13,6 +13,7 @@ import * as transport from '../transport/project';
 import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
+import { deriveChemicals, type ProjectChemical } from './chemicals';
 import { fingerprintForm, hashInputs } from './hash';
 import { unknownKeyPaths } from './merge';
 import { CURRENT_VERSION, migrate } from './migrate';
@@ -21,6 +22,7 @@ import { PROJECT_FORMAT, feedShapes, projectV1Schema, type Feeds, type Project }
 export { CURRENT_VERSION } from './migrate';
 export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
 export { hashInputs } from './hash';
+export type { ProjectChemical } from './chemicals';
 
 /** The live state of the screens (and the two uncertainty panels), in the form each screen's `fromProject` hands back. */
 export interface Screens {
@@ -74,6 +76,8 @@ export interface BuildOptions {
   feeds?: Feeds;
   overrides?: OverridesState;
   site?: SiteState;
+  /** The project chemical list; the key is written when given. */
+  chemicals?: readonly ProjectChemical[];
   data?: NonNullable<Project['data']>;
   title?: string;
   /** The app version string (from package.json) the file is written with. */
@@ -108,6 +112,7 @@ export function buildProject(o: BuildOptions): Project {
   if (ov !== undefined) project.overrides = ov;
   const st = o.site === undefined ? undefined : site.toProject(o.site);
   if (st !== undefined) project.site = st;
+  if (o.chemicals !== undefined) project.chemicals = o.chemicals.map((c) => ({ ...c }));
   if (o.data !== undefined) project.data = o.data;
   return project;
 }
@@ -118,6 +123,15 @@ export const overridesOf = (project: Project): OverridesState =>
 
 /** The advisory site model choices of a loaded project; the defaults when the file has no `site` key. */
 export const siteOf = (project: Project): SiteState => site.fromProject(project.site);
+
+/**
+ * The chemical list of a loaded project: the saved one when the file carries the key (an empty list
+ * stays empty), otherwise derived from the screens the file holds (an older file).
+ */
+export const chemicalsOf = (project: Project): ProjectChemical[] =>
+  project.chemicals !== undefined
+    ? project.chemicals.map((c) => ({ ...c }))
+    : deriveChemicals(screensOf(project));
 
 /** A feed as stored: the value, the screen it came from and a fingerprint of that screen's form. */
 export function feedEntry<V>(

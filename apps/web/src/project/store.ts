@@ -56,11 +56,13 @@ import {
 import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
+import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
 import { hashInputs, stableStringify } from './hash';
 import { scrubRejected } from '../ui/decimalComma';
 import {
   buildProject,
+  chemicalsOf,
   defaultScreens,
   feedEntry,
   parseProject,
@@ -69,6 +71,7 @@ import {
   siteOf,
   type Feeds,
   type Project,
+  type ProjectChemical,
   type Screens,
 } from './index';
 
@@ -86,6 +89,13 @@ let title = '';
 let overrides: OverridesState = emptyOverrides();
 /** The advisory site model choices (see site/); they change no result. */
 let site: SiteState = defaultSite();
+/**
+ * The project chemical list. It is stored and edited, not derived live: a screen choosing a chemical
+ * that newly appears adds it (see `setScreen`), and only `removeChemical` takes one out, so removing
+ * an entry a screen still names is not undone by the next edit. Absent in an older file, it is derived
+ * once on open (see `chemicalsOf`).
+ */
+let chemicals: ProjectChemical[] = [];
 /** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
 let savedSnapshot: string | null = null;
 /**
@@ -223,6 +233,7 @@ function build(): ReturnType<typeof buildProject> {
     feeds: currentFeeds(),
     overrides,
     site,
+    chemicals,
     createdWith: APP_VERSION,
     ...(title !== '' ? { title } : {}),
   });
@@ -232,7 +243,7 @@ function build(): ReturnType<typeof buildProject> {
 export const currentProject = build;
 
 function snapshot(): string {
-  return stableStringify({ screens, title, feeds: currentFeeds(), overrides, site });
+  return stableStringify({ screens, title, feeds: currentFeeds(), overrides, site, chemicals });
 }
 
 const startSnapshot = (): string =>
@@ -242,6 +253,7 @@ const startSnapshot = (): string =>
     feeds: {},
     overrides: emptyOverrides(),
     site: defaultSite(),
+    chemicals: [],
   });
 
 /**
@@ -287,6 +299,38 @@ export function setSite(next: SiteState): void {
   notify();
 }
 
+const chemicalListeners = new Set<() => void>();
+
+/** The project chemical list. The array keeps its identity until the list changes (a snapshot for `useSyncExternalStore`). */
+export const getChemicals = (): readonly ProjectChemical[] => chemicals;
+/** Tell `fn` when the project chemical list changes; returns the unsubscribe. */
+export const subscribeChemicals = (fn: () => void): (() => void) => {
+  chemicalListeners.add(fn);
+  return () => {
+    chemicalListeners.delete(fn);
+  };
+};
+function changeChemicals(next: ProjectChemical[]): void {
+  chemicals = next;
+  schedule();
+  notify();
+  chemicalListeners.forEach((fn) => fn());
+}
+/** Add an entry; a blank id or an id already in the list is ignored. */
+export function addChemical(entry: ProjectChemical): void {
+  const id = entry.id.trim();
+  if (id === '' || chemicals.some((c) => c.id === id)) return;
+  changeChemicals([
+    ...chemicals,
+    { ...entry, id, name: entry.name.trim() === '' ? id : entry.name },
+  ]);
+}
+/** Remove the entry with this id; an id not in the list is ignored. Screens that name it keep their choice. */
+export function removeChemical(id: string): void {
+  if (!chemicals.some((c) => c.id === id)) return;
+  changeChemicals(chemicals.filter((c) => c.id !== id));
+}
+
 export const getTitle = (): string => title;
 export function setTitle(next: string): void {
   if (next === title) return;
@@ -319,9 +363,15 @@ export function flushAutosave(): void {
 /** Record a screen's live state; unchanged state is ignored so a remount does not cause a write. */
 export function setScreen<K extends keyof Screens>(key: K, value: Screens[K]): void {
   if (stableStringify(screens[key]) === stableStringify(value)) return;
+  const before = new Set(chemicalIdsOf(screens));
   screens = { ...screens, [key]: value };
+  // a chemical a screen now names that it did not before joins the list
+  const named = deriveChemicals(screens).filter(
+    (c) => !before.has(c.id) && !chemicals.some((e) => e.id === c.id),
+  );
   schedule();
   recomputeStale();
+  if (named.length > 0) changeChemicals([...chemicals, ...named]);
 }
 
 const contentKeys = new WeakMap<object, string>();
@@ -484,6 +534,7 @@ export function forgetMemory(): void {
   title = '';
   overrides = emptyOverrides();
   site = defaultSite();
+  chemicals = [];
   hashes = {};
   heldBaseline = {};
   stale = [];
@@ -508,6 +559,7 @@ export function hydrate(): void {
   if (!r.ok) return;
   seed(r.project, r.droppedFeeds ?? []);
   notify();
+  chemicalListeners.forEach((fn) => fn());
 }
 
 /**
@@ -518,6 +570,7 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
   screens = screensOf(project);
   overrides = overridesOf(project);
   site = siteOf(project);
+  chemicals = chemicalsOf(project);
   title = project.title ?? '';
   dropped = [...droppedKeys];
   const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
@@ -577,6 +630,7 @@ export function loadProject(project: Project, droppedKeys: readonly string[] = [
   epoch += 1;
   schedule();
   notify();
+  chemicalListeners.forEach((fn) => fn());
 }
 
 /** Clear the forms, the feeds and the autosave. Mounted screens remount through the epoch. */
@@ -585,6 +639,7 @@ export function newProject(): void {
   title = '';
   overrides = emptyOverrides();
   site = defaultSite();
+  chemicals = [];
   clearAllFeeds();
   hashes = {};
   heldBaseline = {};
@@ -600,6 +655,7 @@ export function newProject(): void {
   markSaved();
   epoch += 1;
   notify();
+  chemicalListeners.forEach((fn) => fn());
 }
 
 let hideWatched = false;
