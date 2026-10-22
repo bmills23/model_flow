@@ -743,12 +743,14 @@ printed values, not from these trials.
    sheet's permeability terms (S_te 0.257, k_i 1.85e-9, k_rg 0.854, k_v 1.58e-9 cm^2) are checked as
    computed values only. The printed air viscosity at 10 deg C (1.75e-4 g/(cm s)) is not asserted
    because the guide does not state the formula and the example enters Q_soil.
-7. **VISL calculator values (not obtained).** The online VISL calculator could not be run in slice V6, so the
-   fixture is the fallback: identity (8c) against the RSL resident air table values already used by M4
-   (benzene 0.36 and naphthalene 0.083 ug/m^3 at target risk 1e-6), in `test/fixtures/vapor/visl.json`, and
-   the README says so. No printed VISL figure is asserted; running the calculator for the five chemicals
-   (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; residential, 1e-6, hazard
-   quotient 1, 25 deg C) remains open.
+7. **VISL calculator values (recorded 2026-10-22, not yet compared).** The online VISL calculator could not be
+   run in slice V6, so the fixture is the fallback: identity (8c) against the RSL resident air table values already
+   used by M4 (benzene 0.36 and naphthalene 0.083 ug/m^3 at target risk 1e-6), in `test/fixtures/vapor/visl.json`,
+   and the README says so. The calculator turned out to answer a plain HTTP form post, and its output for the five
+   chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, form defaults
+   of target risk 1e-6, hazard quotient 0.1, 25 deg C) is committed as the dated fixture
+   `packages/data/raw/visl/visl-default-resident-2026-10-22.json`, fetched by `scripts/fetch-visl.ts`. The vapor
+   tests do not assert it yet; comparing the engine with it remains open.
 8. **Identities** (1e-12 relative unless stated). (a) Dominant layer with lambda = 0 equals J&E for the
    same column. (b) DeVaull with L_a = 0 equals J&E with the same foundation term; DeVaull with L_a entered
    equals the dominant layer with layer 3 = 0 (1e-10). (c) Attenuation-factor groundwater screening level

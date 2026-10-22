@@ -3454,3 +3454,32 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    `packages/data/generated`); their parsed JSON is passed to `count` as a third argument, and the manifest lists
    them. Existing examples render as before, with a `Data` line only when `dataFiles` is non-empty.
 4. **Regeneration (DEFAULT).** This slice commits the regenerated `docs/VALIDATION.md` and `validation.json`.
+
+## 2026-10-22: Wave R slice R3a, RSL screening-level data
+
+1. **Sheets fetched (DEFAULT).** The public RSL per-pathway sheets 405274 (resident soil), 405278 (industrial soil)
+   and 405282 (resident air), November 2024 edition, were fetched through `fetch-rsl.ts --add` and appended to the
+   edition's checksum manifest with their own retrieval date. Their bytes match the checksums the methods doc had
+   recorded from the earlier hand fetch. The titles in the manifest are descriptive; the EPA page titles were not
+   recorded.
+2. **Screening-level file (DEFAULT).** `generated/rsl-2024-11/screening-levels.json`, built with the other RSL files
+   and guarded by `data:check`, holds every printed screening-level cell: tap water (405290) by pathway and
+   endpoint, resident soil, industrial soil and resident air by pathway and endpoint, and the summary (405270)
+   resident and industrial soil, resident and industrial air and tap water with the summary's key. Chemical ids
+   are the existing database ids. The values are comparison data, never engine inputs.
+3. **Keys (DEFAULT).** Only the summary carries keys. They are kept as printed (the c or n endpoint with the `*`,
+   `**`, m, s and G modifiers) and the sheet's key line is stored as `keyMeanings`. The per-pathway sheets print none,
+   so a cell there is classified by its column (pathway and endpoint), not by a key.
+4. **Significant figures (DEFAULT).** Measured per column on the printed numbers: every screening-level column has
+   at most two significant figures, a test asserts it, and the histogram is stored per column. This is the premise of
+   the half-unit-in-the-second-significant-figure comparison; it is not widened.
+5. **Summary basis (DEFAULT).** The summary file is titled HQ10 but its tap water value equals the lower of the two
+   tap water totals (cancer, and noncancer at child THQ 1) in all 850 rows that carry one; a test asserts it. The
+   summary is therefore at THQ 1, and the engine comparison uses THQ 1.
+6. **VISL (DEFAULT).** The EPA VISL calculator answers a plain HTTP form post, so no browser was used. The output
+   for benzene, trichloroethylene, tetrachloroethylene, naphthalene and ethylbenzene at the form defaults (resident,
+   target risk 1e-6, THQ 0.1, 25 C groundwater) is committed as `packages/data/raw/visl/visl-default-resident-2026-10-22.json`
+   with the query fields, the input table, the VISL and chemical-property tables as printed, the page's output
+   timestamp and the newest entry of the calculator's what-is-new page (November 13, 2024). The result page prints no
+   version number, so that entry is the version text. The calculator's default THQ is 0.1, not 1; comparisons must say
+   so. `scripts/fetch-visl.ts` refuses to overwrite a fixture. The vapor tests do not assert the fixture in this slice.

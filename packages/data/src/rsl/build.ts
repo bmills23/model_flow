@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import readXlsxFile from 'read-excel-file/node';
-import { verifyManifest, type Manifest } from './checksums.js';
+import { verifyManifest, type Manifest, type ManifestRole } from './checksums.js';
 import { inorganicDermalWater } from './dermal-form.js';
 import { sourceKeys } from './source-keys.js';
 import type {
@@ -13,6 +13,11 @@ import type {
   RiskChemicalEntry,
   RiskChemicalsFile,
   RiskValueKey,
+  ScreeningChemical,
+  ScreeningColumn,
+  ScreeningEndpoint,
+  ScreeningLevelsFile,
+  ScreeningPathway,
   SpecialCase,
   TaggedValue,
   ToxEntry,
@@ -27,6 +32,8 @@ export interface RslBuild {
   /** The subset the cleanup screen reads (Koc, Kd, H', S, MW), derived here. */
   cleanup: CleanupChemicalsFile;
   tox: ToxFile;
+  /** Every published screening-level cell of the summary and per-pathway sheets, with its keys. */
+  screening: ScreeningLevelsFile;
 }
 
 type Cell = unknown;
@@ -278,7 +285,7 @@ const checkedChemicals = (chemicals: ChemicalEntry[]): ChemicalEntry[] => {
   return chemicals;
 };
 
-const roleFile = (m: Manifest, role: 'summary' | 'parameters' | 'tapwater') => {
+const roleFile = (m: Manifest, role: ManifestRole) => {
   const f = m.files.find((x) => x.role === role);
   if (!f) throw new Error(`manifest has no ${role} file`);
   return f;
@@ -338,6 +345,284 @@ export const deriveCleanupChemicals = (file: ChemicalsFile): CleanupChemicalsFil
   };
 };
 
+interface SheetSpec {
+  role: ManifestRole;
+  /** Column id prefix (`tapwater`, `soil-resident`, ...). */
+  prefix: string;
+  medium: ScreeningColumn['medium'];
+  receptor?: ScreeningColumn['receptor'];
+  units: ScreeningColumn['units'];
+  name: number;
+  cas: number;
+  /** [column, pathway, endpoint, keyColumn?]; the summary table has a key column after each value. */
+  columns: readonly (readonly [number, ScreeningPathway, ScreeningEndpoint, number?])[];
+  /** Zero based column of the sheet's group header over each endpoint, in the group header row. */
+  basis: Readonly<Record<ScreeningEndpoint, number>>;
+}
+
+const CANCER_NONCANCER_4 = (first: number) =>
+  [
+    [first, 'ingestion', 'cancer'],
+    [first + 1, 'dermal', 'cancer'],
+    [first + 2, 'inhalation', 'cancer'],
+    [first + 3, 'total', 'cancer'],
+    [first + 4, 'ingestion', 'noncancer'],
+    [first + 5, 'dermal', 'noncancer'],
+    [first + 6, 'inhalation', 'noncancer'],
+    [first + 7, 'total', 'noncancer'],
+  ] as const;
+
+/** Per-pathway sheets, column layouts read from the November 2024 header rows. */
+const PATHWAY_SHEETS: readonly SheetSpec[] = [
+  {
+    role: 'tapwater',
+    prefix: 'tapwater',
+    medium: 'tapwater',
+    units: 'ug/L',
+    name: 14,
+    cas: 15,
+    columns: CANCER_NONCANCER_4(16),
+    basis: { cancer: 16, noncancer: 20, governing: 16 },
+  },
+  {
+    role: 'soil-resident',
+    prefix: 'soil-resident',
+    medium: 'soil',
+    receptor: 'resident',
+    units: 'mg/kg',
+    name: 15,
+    cas: 16,
+    columns: CANCER_NONCANCER_4(17),
+    basis: { cancer: 17, noncancer: 21, governing: 17 },
+  },
+  {
+    role: 'soil-industrial',
+    prefix: 'soil-industrial',
+    medium: 'soil',
+    receptor: 'industrial',
+    units: 'mg/kg',
+    name: 15,
+    cas: 16,
+    columns: CANCER_NONCANCER_4(17),
+    basis: { cancer: 17, noncancer: 21, governing: 17 },
+  },
+  {
+    role: 'air-resident',
+    prefix: 'air-resident',
+    medium: 'air',
+    receptor: 'resident',
+    units: 'ug/m3',
+    name: 6,
+    cas: 7,
+    columns: [
+      [8, 'inhalation', 'cancer'],
+      [9, 'inhalation', 'noncancer'],
+    ],
+    basis: { cancer: 8, noncancer: 9, governing: 8 },
+  },
+];
+
+/** The summary table: one value and one key per medium, receptor. */
+const SUMMARY_SHEETS: readonly (Omit<SheetSpec, 'role' | 'columns' | 'basis' | 'name' | 'cas'> & {
+  value: number;
+})[] = [
+  {
+    prefix: 'summary.soil-resident',
+    medium: 'soil',
+    receptor: 'resident',
+    units: 'mg/kg',
+    value: 15,
+  },
+  {
+    prefix: 'summary.soil-industrial',
+    medium: 'soil',
+    receptor: 'industrial',
+    units: 'mg/kg',
+    value: 17,
+  },
+  {
+    prefix: 'summary.air-resident',
+    medium: 'air',
+    receptor: 'resident',
+    units: 'ug/m3',
+    value: 19,
+  },
+  {
+    prefix: 'summary.air-industrial',
+    medium: 'air',
+    receptor: 'industrial',
+    units: 'ug/m3',
+    value: 21,
+  },
+  { prefix: 'summary.tapwater', medium: 'tapwater', units: 'ug/L', value: 23 },
+];
+
+/** The summary sheet prints one group header ("Screening Levels") over all five value columns. */
+const SUMMARY_GROUP_COL = 15;
+
+const squash = (c: Cell): string =>
+  String(c ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** Significant figures of a number as JavaScript prints it (shortest round-trip form). */
+export const sigFigsOf = (v: number): number => {
+  if (v === 0) return 1;
+  const mantissa = v.toExponential().split('e')[0]!.replace(/[-.]/g, '');
+  return mantissa.replace(/0+$/, '').length || 1;
+};
+
+interface Sheet {
+  keyLine: string;
+  group: Row;
+  header: Row;
+  rows: Row[];
+}
+
+const loadSheet = async (path: string): Promise<Sheet> => {
+  const sheets = await readXlsxFile(path);
+  const first = sheets[0];
+  if (!first) throw new Error(`${path} has no sheets`);
+  const data = first.data as Row[];
+  return {
+    keyLine: squash(data[0]?.[0]),
+    group: data[1] ?? [],
+    header: data[2] ?? [],
+    rows: data.slice(FIRST_DATA_ROW),
+  };
+};
+
+/** Parses the sheets' key line ("c = cancer; n = noncancer; * = where: ...") into symbol to meaning. */
+const parseKeyLine = (line: string): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const part of line.replace(/^Key:\s*/, '').split(';')) {
+    const m = /^\s*(\S+) = (.+?)\s*$/.exec(part);
+    if (m) out[m[1]!] = m[2]!;
+  }
+  return out;
+};
+
+const buildScreening = (
+  manifest: Manifest,
+  sheets: Map<ManifestRole, Sheet>,
+  summaryRole: Sheet,
+  tox: ToxEntry[],
+  chemicals: ChemicalEntry[],
+): ScreeningLevelsFile => {
+  const columns: ScreeningColumn[] = [];
+  const out: ScreeningChemical[] = tox.map((t, n) => {
+    const c = chemicals[n]!;
+    return {
+      id: t.id,
+      ...(t.cas ? { cas: t.cas } : {}),
+      name: t.name,
+      volatile: t.volatile,
+      mutagen: t.mutagen,
+      ...(t.special ? { special: t.special } : {}),
+      ...(c.inEpd !== undefined ? { inEpd: c.inEpd } : {}),
+      values: {},
+    };
+  });
+  const addColumn = (
+    id: string,
+    spec: Pick<ScreeningColumn, 'medium' | 'units' | 'pathway' | 'endpoint'> & {
+      receptor?: ScreeningColumn['receptor'] | undefined;
+    },
+    semsId: number,
+    header: string,
+    basis: string,
+    rows: Row[],
+    valueCol: number,
+    keyCol: number | undefined,
+    where: string,
+  ): void => {
+    const histogram: Record<string, number> = {};
+    let count = 0;
+    let max = 0;
+    rows.forEach((row, n) => {
+      const value = num(row[valueCol], `${where} ${id} row ${n}`);
+      if (value === undefined) return;
+      let key: string | undefined;
+      if (keyCol !== undefined) {
+        key = text(row[keyCol]);
+        if (!key) throw new Error(`${where} ${id} row ${n}: value without a key`);
+      }
+      out[n]!.values[id] = key ? { value, key } : { value };
+      const sf = sigFigsOf(value);
+      histogram[String(sf)] = (histogram[String(sf)] ?? 0) + 1;
+      max = Math.max(max, sf);
+      count++;
+    });
+    columns.push({
+      id,
+      semsId,
+      medium: spec.medium,
+      ...(spec.receptor ? { receptor: spec.receptor } : {}),
+      pathway: spec.pathway,
+      endpoint: spec.endpoint,
+      units: spec.units,
+      header,
+      basis,
+      count,
+      sigFigs: { max, histogram },
+    });
+  };
+
+  const semsOf = (role: ManifestRole) => roleFile(manifest, role).semsId;
+  for (const spec of PATHWAY_SHEETS) {
+    const sheet = sheets.get(spec.role)!;
+    for (const [col, pathway, endpoint] of spec.columns) {
+      addColumn(
+        `${spec.prefix}.${pathway}.${endpoint}`,
+        { medium: spec.medium, receptor: spec.receptor, units: spec.units, pathway, endpoint },
+        semsOf(spec.role),
+        squash(sheet.header[col]),
+        squash(sheet.group[spec.basis[endpoint]]),
+        sheet.rows,
+        col,
+        undefined,
+        `sheet ${spec.role}`,
+      );
+    }
+  }
+  for (const spec of SUMMARY_SHEETS) {
+    addColumn(
+      `${spec.prefix}.governing`,
+      {
+        medium: spec.medium,
+        receptor: spec.receptor,
+        units: spec.units,
+        pathway: 'summary',
+        endpoint: 'governing',
+      },
+      semsOf('summary'),
+      squash(summaryRole.header[spec.value]),
+      squash(summaryRole.group[SUMMARY_GROUP_COL]),
+      summaryRole.rows,
+      spec.value,
+      spec.value + 1,
+      'summary sheet',
+    );
+  }
+  const documents = [
+    semsOf('summary'),
+    semsOf('tapwater'),
+    semsOf('soil-resident'),
+    semsOf('soil-industrial'),
+    semsOf('air-resident'),
+  ];
+  const retrieved = manifest.files
+    .map((f) => f.retrieved ?? manifest.retrieved)
+    .reduce((a, b) => (a > b ? a : b));
+  return {
+    edition: manifest.edition,
+    source: { reference: manifest.reference, documents, retrieved },
+    keyMeanings: parseKeyLine(summaryRole.keyLine),
+    columns,
+    chemicals: out,
+  };
+};
+
 /** Verifies the committed raw files against the manifest, then builds both database files. */
 export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
   const manifest = verifyManifest(rawDir);
@@ -363,6 +648,21 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
     }
   });
   const ids = assignIds(summaryIdents);
+
+  // The per-pathway sheets list the same analytes in the same order as well.
+  const sheets = new Map<ManifestRole, Sheet>();
+  for (const spec of PATHWAY_SHEETS) {
+    const sheet = await loadSheet(join(rawDir, roleFile(manifest, spec.role).file));
+    if (sheet.rows.length !== summaryRows.length)
+      throw new Error(`RSL ${spec.role} sheet differs in row count`);
+    sheet.rows.forEach((r, n) => {
+      const i = identOf(r, spec.name, spec.cas, spec.role);
+      if (rowKey(i) !== rowKey(summaryIdents[n]!))
+        throw new Error(`RSL ${spec.role} sheet disagrees at row ${n + FIRST_DATA_ROW + 1}`);
+    });
+    sheets.set(spec.role, sheet);
+  }
+  const summarySheet = await loadSheet(join(rawDir, summary.file));
 
   const source = (documents: number[]) => ({
     reference: manifest.reference,
@@ -392,8 +692,10 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
     },
     chemicals: checkedChemicals(buildChemicals(paramRows, tapRows, ids)),
   };
+  const toxEntries = buildTox(summaryRows, ids);
   return {
     chemicals,
+    screening: buildScreening(manifest, sheets, summarySheet, toxEntries, chemicals.chemicals),
     risk: deriveRiskChemicals(chemicals),
     cleanup: deriveCleanupChemicals(chemicals),
     tox: {
@@ -409,7 +711,7 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
         publishedSsl: 'mg/kg',
       },
       sourceKeys: { ...sourceKeys },
-      toxicity: buildTox(summaryRows, ids),
+      toxicity: toxEntries,
     },
   };
 };

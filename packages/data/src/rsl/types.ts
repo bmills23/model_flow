@@ -135,3 +135,58 @@ export interface CleanupChemicalsFile {
   units: Pick<ChemicalsFile['units'], CleanupValueKey>;
   chemicals: CleanupChemicalEntry[];
 }
+
+export type ScreeningMedium = 'tapwater' | 'soil' | 'air';
+export type ScreeningPathway = 'ingestion' | 'dermal' | 'inhalation' | 'total' | 'summary';
+/** `governing` is the summary table's single value: the lower of the cancer and noncancer levels, its key says which. */
+export type ScreeningEndpoint = 'cancer' | 'noncancer' | 'governing';
+
+/** One published column of one RSL sheet. */
+export interface ScreeningColumn {
+  /** `<sheet>.<pathway>.<endpoint>`, for example `tapwater.ingestion.cancer` or `summary.tapwater.governing`. */
+  id: string;
+  /** SEMS document the column was read from. */
+  semsId: number;
+  medium: ScreeningMedium;
+  /** Absent for tap water. */
+  receptor?: 'resident' | 'industrial';
+  pathway: ScreeningPathway;
+  endpoint: ScreeningEndpoint;
+  units: 'ug/L' | 'mg/kg' | 'ug/m3';
+  /** The column header exactly as the sheet prints it, whitespace collapsed to single spaces. */
+  header: string;
+  /** The sheet's group header over the endpoint (target risk or hazard index basis), collapsed likewise. */
+  basis: string;
+  /** Number of chemicals with a published value in this column. */
+  count: number;
+  /** Significant figures measured over the published values; the histogram maps figures to cell counts. */
+  sigFigs: { max: number; histogram: Record<string, number> };
+}
+
+export interface ScreeningValue {
+  value: number;
+  /** The summary table's key column as printed (`c`, `n`, `c*`, `nms`, `G`, ...). Only summary columns have one. */
+  key?: string;
+}
+
+export interface ScreeningChemical {
+  id: string;
+  cas?: string;
+  name: string;
+  volatile: boolean;
+  mutagen: boolean;
+  special?: SpecialCase;
+  /** The tap water sheet's "In EPD?" flag, absent when blank. */
+  inEpd?: boolean;
+  /** Column id to published value. Only columns with a printed value appear. */
+  values: Record<string, ScreeningValue>;
+}
+
+export interface ScreeningLevelsFile {
+  edition: string;
+  source: { reference: string; documents: number[]; retrieved: string };
+  /** The sheets' own key line, one entry per symbol, as printed. */
+  keyMeanings: Record<string, string>;
+  columns: ScreeningColumn[];
+  chemicals: ScreeningChemical[];
+}

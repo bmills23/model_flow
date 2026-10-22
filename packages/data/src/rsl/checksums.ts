@@ -6,10 +6,15 @@ export interface ManifestFile {
   file: string;
   semsId: number;
   title: string;
-  role: 'summary' | 'parameters' | 'tapwater';
+  role: ManifestRole;
   bytes: number;
   sha256: string;
+  /** Set only where a file was fetched on a different day than the edition's other files. */
+  retrieved?: string;
 }
+
+export type ManifestRole =
+  'summary' | 'parameters' | 'tapwater' | 'soil-resident' | 'soil-industrial' | 'air-resident';
 
 export interface Manifest {
   edition: string;
