@@ -3616,3 +3616,13 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    like any new edit.
 3. **Screens (DEFAULT).** The editor is shared by the exposure and cleanup receptor panels, so both change; no
    other screen edits receptor factors. The report's printing of notes belongs to another slice.
+
+### Wave R corrective, slice CC
+
+1. **Saved notes-less receptor edit (DEFAULT).** An edit saved without a note keeps applying, and the editor now says
+   only "No note: this edit was saved without a source note." for it. The "A source note is required; the value is
+   not used until you add one." message and `aria-invalid` appear only for a value typed in the editor that is held
+   as a draft, so the required-note refusal still applies to every new edit and to changing a saved one.
+2. **Household K test (DEFAULT).** The sweep test now names the missed tap water inhalation cells itself (chemical
+   and column) and expects exactly the trichloroethylene and vinyl chloride cancer cells, instead of reading the
+   exception class's chemical list.

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   CLASS_IDS,
   SWEEP_IDS,
+  engineCoef,
+  engineLevel,
   levels,
   runRslSweep,
   type ClassId,
@@ -124,9 +126,29 @@ describe('RSL screening-level sweep: the household factor K', () => {
   });
 
   it('misses only the trichloroethylene and vinyl chloride cancer cells, which are special cases', () => {
-    const missed = 265 - result.householdK.reproduced;
+    // identify the cells that did not reproduce from the cells themselves, not from a class list
+    const missed: string[] = [];
+    for (const col of levels.columns.filter((c) => c.id.startsWith('tapwater.inhalation.'))) {
+      const endpoint = col.id.split('.')[2] as 'cancer' | 'noncancer';
+      for (const ch of levels.chemicals) {
+        const cell = ch.values[col.id];
+        if (cell === undefined) continue;
+        const computed = engineLevel(
+          engineCoef('tapwater', 'inhalation', ch.id, { dermal: false, inhalation: true }),
+          endpoint,
+          col.units,
+        );
+        if (typeof computed !== 'number' || !withinHalfUnit(computed, cell.value)) {
+          missed.push(`${ch.name}|${col.id}`);
+        }
+      }
+    }
+    expect(missed.sort()).toEqual([
+      'Trichloroethylene|tapwater.inhalation.cancer',
+      'Vinyl Chloride|tapwater.inhalation.cancer',
+    ]);
+    expect(265 - result.householdK.reproduced).toBe(missed.length);
     const specials = fixture.classes.find((c) => c.id === 'special-case-equations')!;
-    expect(missed).toBe(2);
     expect(specials.chemicals).toEqual(['Trichloroethylene', 'Vinyl Chloride']);
   });
 });
