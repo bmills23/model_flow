@@ -11,7 +11,7 @@ import { buildInputs } from '../risk/build';
 import { runRisk } from '../risk/compute';
 import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
-import { buildModeled } from '../cleanup/modeledBuild';
+import { buildModeledRows } from '../cleanup/modeledBuild';
 import { runCleanup } from '../cleanup/compute';
 import { sourceLevelCsvTables } from '../cleanup/sourceLevelsCsv';
 import {
@@ -363,10 +363,20 @@ async function cleanup(
 ): Promise<SectionResults> {
   const form = s.cleanup.form;
   if (form.source !== 'direct') {
-    const modeled = buildModeled(form, db, { transport: null, vadose: null, saturated: null });
+    const none = { transport: null, vadose: null, saturated: null };
+    const rows = buildModeledRows(form, db, () => none);
+    const many = rows.length > 1;
+    const reasons: string[] = [];
+    for (const row of rows) {
+      if (row.result.ok) continue;
+      for (const e of row.result.errors) {
+        if (/groundwater screen|transport/i.test(e)) continue;
+        reasons.push(many ? `${row.name}: ${e}` : e);
+      }
+    }
     return notComputed([
       'a modeled source is solved through the groundwater chain, which holds a function and is not saved with a project; open the cleanup screen after sending the chain from the groundwater screen to see the level',
-      ...(modeled.ok ? [] : modeled.errors.filter((e) => !/groundwater screen|transport/i.test(e))),
+      ...reasons,
     ]);
   }
   const sec = empty();

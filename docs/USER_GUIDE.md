@@ -346,8 +346,17 @@ mark of the surface water result. It applies to a dissolved groundwater source o
 says so). A chemical with no criterion, no surface water result sent, or a run with no coefficient says which is missing.
 The rows are in the CSV downloads (one file) and in the report.
 
-A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
-**Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or
+A modeled source (groundwater, vadose or saturated soil source carried to the well) takes any number of
+chemicals. Each chemical is solved on its own through the groundwater, vadose or saturated run sent for it, so send
+each chemical's run from its screen. A chemical whose run is missing, was made for another chemical, or does not
+record its chemical (when the run holds two or more) gets that problem on its own row and is left out, and the
+other chemicals are still solved. With two or more chemicals each has its own heading, results, warnings, "Out of
+date" mark and CSV files, and a progress line shows how many chemicals are solved; changing one chemical's inputs
+solves only that chemical again.
+
+A modeled source also has its own
+**Probabilistic cleanup level, modeled source** panel once the level above is solved. With several chemicals a
+select above the panel chooses the chemical it samples, and each chemical keeps its own last result for the report. Choose the legacy or
 modern transport method, give some inputs a distribution and run: every draw is a full solve through the
 transport chain, so the draws run in the background, a progress bar shows them, the page stays usable and
 **Cancel run** stops the run. The inputs offered are the aquifer values of the groundwater screen (seepage
@@ -397,6 +406,8 @@ the cleanup screen in this session (levels table, iterations, seed, warnings and
 the result is out of date because an input changed since the run and asks you to run it again there, or says no
 run has been made yet. That result is not saved with the project or the browser's copy, so after a reload, a new
 project or an opened project, run it again on the cleanup screen. Leaving to the report and coming back keeps it.
+With several cleanup chemicals the report prints one such block per chemical, each current, out of date or "no run
+yet" on its own.
 
 The household, vapor and surface water source level panels of the cleanup screen print in the report's cleanup
 section when their run has been sent here, each as a table of the same rows as the panel (method ids, source,
