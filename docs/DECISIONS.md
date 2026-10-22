@@ -2768,3 +2768,57 @@ rules are in CLAUDE.md under "Wave cadence"; this block records what changed.
 4. **Gate stdin.** The `gate` script reads stdin from `/dev/null`, so a backgrounded run no longer stops in state T.
 5. **Docs and CI cost.** One docs commit per wave close. The CI cost is re-measured only when a workflow file or the
    gate's steps change; CLAUDE.md keeps the latest measurement and git history keeps the earlier ones.
+
+## 2026-10-21: Project chemical list, waves N to P scope
+
+Bryan agreed to a multi-chemical design session as the next work ("i agree"), then said "ok let's continue". A
+design proposal mapped how every screen picks, stores, sends and saves its chemical and put four decisions to him;
+he chose the recommended option on each (rulings 1 to 4, marked BRYAN). Every other ruling is DEFAULT.
+
+1. **One project chemical list (BRYAN).** The project carries one chemical list. Risk and cleanup take the whole
+   list; each fate screen (transport, vadose, saturated, vapor, household, plants and eco, surface water) picks one
+   active chemical from it. The screens' `chemicalId` keys stay and point into the list, so no saved key is renamed,
+   and no engine method changes.
+2. **Each chemical's sent result is kept (BRYAN).** Sending toluene from a fate screen no longer replaces the
+   benzene result, so risk and cleanup find a result for each row. The user runs a fate screen once per chemical.
+   Feeds move to one slot per chemical with a version 2 project file migration in wave O.
+3. **User-defined chemicals (BRYAN).** A chemical can be added to a project blank or as a copy of a database
+   chemical. Only the name is required, and every entered value needs a note. A screen that needs a missing
+   property says so when it is used. User values cite "User value (this project)" with the note, never a
+   `references.json` entry, and the report and CSV show each value with its note and the source `user`. Wave P.
+4. **Surface water as a cleanup target, linear route (BRYAN).** The target (the shipped NRWQC criterion or a user
+   value) divided by the run's surface water coefficient gives the source level. Dissolved groundwater sources
+   only. A modeled surface water chain in the engine is later engine work. Wave P.
+5. **Feeds tagged by chemical first.** Wave N adds an optional `chemicalId` to the well, bank, transport chain,
+   surface water, vadose, saturated and the three vapor input feeds, with no version bump and the stale keys
+   unchanged; the per-chemical slots and the version 2 migration follow in wave O.
+6. **Chemical identity defects are fixed in wave N.** Risk applies the well and surface water results to a row
+   without checking the chemical (`apps/web/src/risk/build.ts`, the well and surface water branches), while the
+   household, vapor and produce branches check it; modeled cleanup never checks that the transport, vadose or
+   saturated run was for the cleanup chemical and only adds a note (`apps/web/src/cleanup/modeledBuild.ts`); the
+   risk stale check marks produce stale for any flagged row (`apps/web/src/project/feedsRead.ts`). A feed for
+   another chemical, or an untagged feed where the chemical cannot be told, gives an error on that row naming the
+   two chemicals, never a silent value.
+7. **Migration in wave N.** The top-level `chemicals` key is optional and absent from older files; on open it is
+   derived from the risk and cleanup rows and each screen's non-blank `chemicalId`. No held feed turns stale on
+   open, and an older build strips the key with its usual warning. `risc4-benzene` stays a vapor screen fixture,
+   not a list entry. A household chemical id that is not in the database becomes a list entry with its typed name.
+8. **Open design questions, defaults.** Hand-typed property edits on a fate screen stay on that screen; the
+   project record does not synchronise them across screens. The fate screens keep their 112-row subset; a list
+   chemical outside it is shown as unavailable on that screen (wave O records the evidence on whether the subset
+   is a quality gate). A user chemical whose CAS number the database already holds is refused, with a pointer to
+   the overrides. Lifting the one-chemical cap on modeled cleanup (the engine solver already takes several) is
+   considered in wave P.
+9. **Unverified sources, read 2026-10-21.** A check of the unverified list on `#/validation` found four of nine
+   sources openly readable. Wave N records what was read, after re-reading each: the SSG 1996 Table 36 Henry's
+   constant for PCE against the Table A-1 fixture value; the Briggs (1982) constants against the paper, and that
+   the engine's form drops the paper's 0.82 term above log Kow 2 as HHRAP does; that EPRI EA-4190 (Gelhar and
+   others, 1985) does not print the two-branch vadose dispersivity coefficients, so they have no primary source
+   located; and the household factor K of 0.5 L/m3 in Table 1 of an archived RSL User's Guide, with the warning
+   kept until the equation form is confirmed. Foster and Chrostowski (1986), Little (1992), Trapp (2015), Trapp
+   and Matthies (1995) and Schulze-Makuch (2005) were not openly readable and stay unverified.
+
+Plan. Wave N: N1 the project list and its derivation, N2 feed tagging and the identity checks, S the source
+records. Wave O: risk and cleanup rows follow the list and `#/chemicals` gains "Add to project"; the fate screens
+and the surface water screen pick from the list; per-chemical feed slots with the version 2 migration. Wave P:
+user-defined chemicals and the surface water cleanup target.
