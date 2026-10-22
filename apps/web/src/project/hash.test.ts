@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { hashInputs, stableStringify } from './hash';
+import { fingerprintForm, hashInputs, stableStringify } from './hash';
 
 describe('stableStringify', () => {
   it('orders keys so equal content gives equal text', () => {
@@ -20,5 +20,14 @@ describe('hashInputs', () => {
   });
   it('is an eight digit hexadecimal string', () => {
     expect(hashInputs({ x: 'anything' })).toMatch(/^[0-9a-f]{8}$/);
+  });
+});
+
+describe('fingerprintForm for the surface water form', () => {
+  it('leaves the chemical out, so a file saved before the key existed is not stale', () => {
+    const older = { bodyType: 'river', koc: '59' };
+    expect(hashInputs(fingerprintForm('surfaceWater', { ...older, chemicalId: '' }))).toBe(
+      hashInputs(fingerprintForm('surfaceWater', older)),
+    );
   });
 });

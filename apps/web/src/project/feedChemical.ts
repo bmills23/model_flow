@@ -27,7 +27,7 @@ export function feedChemicalProblem(args: {
     return `the ${feed} is for ${nameOf(feedChemical)}, not ${nameOf(rowId)}; run its screen with ${nameOf(rowId)} and send the result again`;
   }
   if (runCount >= 2) {
-    return `the ${feed} does not record which chemical it was made for, and this run holds ${runCount} chemicals; send it again from its screen with the chemical set so it carries its chemical`;
+    return `the ${feed} does not record which chemical it was made for, and this run holds ${runCount} chemicals; choose the chemical on its screen and send it again so it carries its chemical`;
   }
   return null;
 }

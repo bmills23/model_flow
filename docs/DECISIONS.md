@@ -2855,14 +2855,14 @@ user-defined chemicals and the surface water cleanup target.
    hand). The five stored feeds (well, bank, vadose, saturated, surface water) allow the key in `schema.ts`; the
    vapor feeds are free JSON and keep it. No stale key, fingerprint or version changes, and a file without the
    tag opens as before.
-2. **Surface water is tagged from the linked bank run (DEFAULT).** The surface water screen has no chemical
-   picker, so a run sent while linked takes the chemical of the bank feed; unlinked, or linked to an untagged
-   bank run, it is untagged.
+2. **Surface water is tagged from the linked bank run, or the screen's own chemical (DEFAULT).** A run sent while
+   linked takes the chemical of the bank feed; an unlinked run takes the chemical set on the surface water screen
+   (slice FB below), and is untagged only while that reads "Not set" or the linked bank run is untagged.
 3. **One comparison rule for every consumer (DEFAULT).** `project/feedChemical.ts` holds it. A tagged feed for the
    row's chemical is used. A tagged feed for another chemical is an error on that row naming both chemicals
    ("the transport well result is for Benzene, not Toluene"). An untagged feed keeps today's behaviour in a run
    of one chemical and is an error naming the feed in a run of two or more ("does not record which chemical it was
-   made for"). The risk well and surface water branches, modeled cleanup and the surface water levels use it; the
+   made for"; the text says to choose the chemical on its screen and send it again). The risk well and surface water branches, modeled cleanup and the surface water levels use it; the
    household, vapor and produce branches already required a matching tag and are unchanged.
 4. **Modeled cleanup refuses another chemical's run (DEFAULT).** The groundwater transport run, and the vadose or
    saturated run when that is the source, must be for the cleanup chemical; the earlier note is kept. A vadose or
@@ -2928,3 +2928,21 @@ All rulings are DEFAULT. Each source was re-read on 2026-10-21 before any change
    vapor) feeds; deleting a tag spread now fails a test. The surface water sender is not covered here.
 4. **Files outside the named list (DEFAULT).** The shared helper gained `screenFeedProblem` and `projectNameOf`
    (`project/feedChemical.ts`, with its test), and the vapor screen gained `vapor/heldSources.ts`.
+
+## 2026-10-21: Wave N corrective pass, slice FB
+
+1. **An unlinked surface water run takes a chemical set on its screen (DEFAULT).** The surface water form holds
+   `chemicalId` (blank = not set), chosen in a native select over `getChemicals()` in the "Groundwater at the bank"
+   group, shown only while the run is not linked. The sent feed carries it through `chemicalTag`; a linked run still
+   takes the bank run's chemical. A saved id no longer in the list stays selectable. Wave O replaces the select with
+   the shared picker.
+2. **No stale mark for older files (DEFAULT).** `chemicalId` is saved as an optional text key and listed in
+   `FINGERPRINT_SKIP` for `surfaceWater`, as for the transport, vadose and saturated screens, so a file saved before
+   the key existed opens without a stale mark and picking a chemical does not mark a sent feed stale.
+3. **Error text names an action (DEFAULT).** An untagged feed in a run of two or more chemicals now reads "choose
+   the chemical on its screen and send it again so it carries its chemical", which every sending screen can follow.
+4. **One row's feed error fails the whole risk build: existing behaviour, kept (DEFAULT).** Every per-row problem in
+   `buildInputs` (missing chemical record, no well, vapor or surface water result, a wrong or untagged chemical, an
+   unreadable value) goes through the same `errors` list, and any entry returns `ok: false` for all rows
+   (`risk/build.ts`, the final `errors.list.length > 0` check). The feed chemical errors follow that and are not
+   special-cased.

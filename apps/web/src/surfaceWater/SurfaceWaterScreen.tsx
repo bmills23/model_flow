@@ -1,7 +1,7 @@
 import { StaleMark } from '../project/StaleMark';
 import { chemicalTag } from '../project/feedChemical';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { getBankFeed, subscribeBankFeed } from '../transport/bankFeed';
@@ -108,6 +108,7 @@ export function SurfaceWaterScreen() {
     getSurfaceWaterFeed,
     getSurfaceWaterFeed,
   );
+  const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const set: Setter = (key, value) => setForm((f) => ({ ...f, [key]: value }));
   const feed = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
 
@@ -135,8 +136,8 @@ export function SurfaceWaterScreen() {
       ...(request && !computing && outcome?.ok && outcome.result === result
         ? { coefficient: surfaceWaterCoefficient(request, result, method) }
         : {}),
-      // the chemical comes from the transport run it is linked to; without that link it is untagged
-      ...(form.linked && feed !== null ? chemicalTag(feed.chemicalId) : {}),
+      // a linked run is for the chemical of its transport run; an unlinked one for the chemical set here
+      ...chemicalTag(form.linked && feed !== null ? feed.chemicalId : form.chemicalId),
     });
   };
   const foc = Number(form.foc);
@@ -335,6 +336,29 @@ export function SurfaceWaterScreen() {
             <div className="fields">
               {!linkedOn && (
                 <>
+                  <label className="field">
+                    <span className="field-label">Chemical</span>
+                    <select
+                      value={form.chemicalId}
+                      onChange={(e) => set('chemicalId', e.target.value)}
+                    >
+                      <option value="">Not set</option>
+                      {form.chemicalId !== '' &&
+                        !chemicals.some((c) => c.id === form.chemicalId) && (
+                          <option value={form.chemicalId}>{form.chemicalId}</option>
+                        )}
+                      {chemicals.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <small>
+                      The chemical a result sent to risk or cleanup is for. Set it when those
+                      screens hold more than one chemical. A linked run takes the chemical of its
+                      transport run.
+                    </small>
+                  </label>
                   <Field
                     label="Groundwater concentration (mg/L)"
                     value={form.groundwaterConcentration}

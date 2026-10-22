@@ -371,13 +371,15 @@ you entered and attach the saved project file if you can; it holds your inputs a
 
 A result you send from a screen (the receptor well, the groundwater run for cleanup levels or for surface water,
 the vadose and saturated sources, the water table, vadose and saturated sources for vapor intrusion, and a surface
-water run linked to a groundwater run) remembers the chemical the screen was set to. Exposure and risk and
+water run) remembers the chemical the screen was set to. Exposure and risk and
 cleanup levels check it against each row: a row for another chemical shows an error naming both chemicals instead
 of taking the value, and the row for the matching chemical keeps it. Modeled cleanup refuses a groundwater,
 vadose or saturated run for another chemical. A result sent before this change, or from a screen with the
 chemical typed by hand, carries no chemical: it is still used when the run holds one chemical, and when the run
-holds two or more the screen says to send it again. A surface water run not linked to a groundwater run carries no
-chemical, so in a multi-chemical cleanup run its levels are not quantified until it is linked.
+holds two or more the row says to choose the chemical on the sending screen and send it again. A surface water run
+linked to a groundwater run takes that run's chemical; an unlinked one takes the chemical you pick in the
+"Chemical" list on the surface water screen (the project's chemical list), and carries none while that reads "Not
+set", in which case a run of two or more chemicals refuses it.
 
 The screens that read such a result as their own input make the same check against the chemical they are set to:
 the household screen for the receptor well and surface water series, the vapor screen for the water table, vadose

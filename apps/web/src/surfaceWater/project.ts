@@ -17,7 +17,7 @@ const formSchema = partialObject({
   ...texts('reachLength', 'sourceWidth', 'bankX', 'groundwaterConcentration', 'durationYr'),
   linked: flag,
   sedimentOn: flag,
-  ...texts('foc', 'koc', 'kd'),
+  ...texts('foc', 'koc', 'kd', 'chemicalId'),
   poreWater: z.enum(['discharge', 'centreline', 'surface']),
   ...texts('downstream', 'solubility'),
   scale: z.enum(['linear', 'log']),

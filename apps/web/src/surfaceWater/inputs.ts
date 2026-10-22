@@ -26,6 +26,8 @@ export interface SwForm {
   groundwaterConcentration: string; // mg/L
   durationYr: string;
   linked: boolean;
+  /** The project chemical a run sent to risk or cleanup is for, when not linked to a bank run; blank = untagged. */
+  chemicalId: string;
   // sediment
   sedimentOn: boolean;
   foc: string;
@@ -59,6 +61,7 @@ export const DEFAULT_FORM: SwForm = {
   groundwaterConcentration: '5',
   durationYr: '10',
   linked: false,
+  chemicalId: '',
   sedimentOn: true,
   foc: '0.01',
   koc: '59',
