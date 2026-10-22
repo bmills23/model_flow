@@ -3658,3 +3658,26 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 2. **Household K test (DEFAULT).** The sweep test now names the missed tap water inhalation cells itself (chemical
    and column) and expects exactly the trichloroethylene and vinyl chloride cancer cells, instead of reading the
    exception class's chemical list.
+
+## 2026-10-22: Wave S scope, VISL comparison
+
+Bryan, after wave R: "do it." (the recommended next wave: compare the engine with the VISL calculator output
+recorded in wave R).
+
+1. **What is compared (DEFAULT).** Every numeric VISL output the engine can compute: the cancer and noncancer
+   target indoor air levels and the governing one, the target sub-slab and near-source soil gas level, the target
+   groundwater level, the pure phase vapor concentration and the maximum groundwater vapor concentration, plus the
+   yes or no volatility and toxicity answers where the engine has the criterion.
+2. **Two comparisons (DEFAULT).** (a) From the calculator's own printed inputs (properties, toxicity values and
+   exposure inputs), which checks the engine's equations. (b) From the app's shipped database, which checks what
+   a user of the app gets; each difference is explained by the input that differs, or counted as unexplained.
+3. **Tolerance (DEFAULT).** The engine's unrounded value lies within half a unit of the last printed significant
+   figure, measured on the fixture and asserted by a test; nothing is widened. A value that cannot reproduce is a
+   named exception with its reason (trichloroethylene's cancer level uses the RSL's own equations, as in the wave R
+   sweeps); a mismatch with no reason found is counted and printed as unexplained.
+4. **More runs (DEFAULT).** Two more queries of the public calculator by plain HTTP, through the existing fetch
+   script, each a new dated fixture: residential at a groundwater temperature of 10 deg C with a target hazard
+   quotient of 1 and a target risk of 1e-5 (exercises the Henry's law temperature correction and target scaling),
+   and commercial at the form defaults.
+5. **Evidence (DEFAULT).** The results appear in `docs/VALIDATION.md` and on `#/validation` through the
+   validation catalog, replacing the pending VISL entry.
