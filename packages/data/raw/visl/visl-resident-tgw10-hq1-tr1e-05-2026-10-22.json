@@ -1,0 +1,1293 @@
+{
+  "retrieved": "2026-10-22",
+  "source": "https://epa-visl.ornl.gov/cgi-bin/visl_search",
+  "method": "HTTP POST of the calculator form, no browser; fields below are the form defaults except: hq 1, tr 1e-05, tgw 10",
+  "query": {
+    "_submitted_form": "1",
+    "tool": "visl",
+    "action": "next",
+    "extraflag": "false",
+    "select": "chem",
+    "lastRec": "false",
+    "hq": "1",
+    "tr": "1e-05",
+    "scenario": "Resident",
+    "risk": "no",
+    "valtype": "default",
+    "inputs": "db",
+    "tgw": "10",
+    "rfd": "chronic",
+    "_submit": "Retrieve",
+    "analysis": "one option per chemical, see results[].analysis"
+  },
+  "pageOutputGenerated": "22OCT2026:18:44:38",
+  "versionText": {
+    "page": "https://www.epa.gov/vaporintrusion/visl-whats-new",
+    "newestEntry": "November 13, 2024 The toxicity values and physiochemical parameters have been updated.",
+    "note": "The result page prints no version number; the calculator publishes its data edition in its what is new page."
+  },
+  "inputs": [
+    {
+      "variable": "Exposure Scenario",
+      "value": "Resident"
+    },
+    {
+      "variable": "Temperature for Groundwater Vapor Concentration C",
+      "value": "10"
+    },
+    {
+      "variable": "EDres (exposure duration) years",
+      "value": "26"
+    },
+    {
+      "variable": "TR (target risk) unitless",
+      "value": "1E-05"
+    },
+    {
+      "variable": "THQ (target hazard quotient) unitless",
+      "value": "1"
+    },
+    {
+      "variable": "LT (lifetime) years",
+      "value": "70"
+    },
+    {
+      "variable": "EFres (exposure frequency) days/year",
+      "value": "350"
+    },
+    {
+      "variable": "ED0-2 (mutagenic exposure duration first phase) years",
+      "value": "2"
+    },
+    {
+      "variable": "ED2-6 (mutagenic exposure duration second phase) years",
+      "value": "4"
+    },
+    {
+      "variable": "ED6-16 (mutagenic exposure duration third phase) years",
+      "value": "10"
+    },
+    {
+      "variable": "ED16-26 (mutagenic exposure duration fourth phase) years",
+      "value": "10"
+    },
+    {
+      "variable": "EF0-2 (mutagenic exposure frequency first phase) days/year",
+      "value": "350"
+    },
+    {
+      "variable": "EF2-6 (mutagenic exposure frequency second phase) days/year",
+      "value": "350"
+    },
+    {
+      "variable": "EF6-16 (mutagenic exposure frequency third phase) days/year",
+      "value": "350"
+    },
+    {
+      "variable": "EF16-26 (mutagenic exposure frequency fourth phase) days/year",
+      "value": "350"
+    },
+    {
+      "variable": "ETres (exposure time) hours/day",
+      "value": "24"
+    },
+    {
+      "variable": "ET0-2 (mutagenic exposure time first phase) hours/day",
+      "value": "24"
+    },
+    {
+      "variable": "ET2-6 (mutagenic exposure time second phase) hours/day",
+      "value": "24"
+    },
+    {
+      "variable": "ET6-16 (mutagenic exposure time third phase) hours/day",
+      "value": "24"
+    },
+    {
+      "variable": "ET16-26 (mutagenic exposure time fourth phase) hours/day",
+      "value": "24"
+    },
+    {
+      "variable": "AFgw (Attenuation Factor Groundwater) unitless",
+      "value": "0.001"
+    },
+    {
+      "variable": "AFss (Attenuation Factor Sub-Slab) unitless",
+      "value": "0.03"
+    }
+  ],
+  "results": [
+    {
+      "cas": "71-43-2",
+      "name": "Benzene",
+      "analysis": "000071-43-2-SWFA",
+      "visl": [
+        {
+          "column": "Chemical",
+          "cell": "Benzene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "71-43-2"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Soil Source? (Cvp > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Groundwater Source? (Chc > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Target Indoor Air Concentration (TCR=1E-05 or THQ=1) MIN(Cia,c,Cia,nc) (µg/m3)",
+          "cell": "3.60E+00",
+          "value": 3.6
+        },
+        {
+          "column": "Toxicity Basis",
+          "cell": "CA"
+        },
+        {
+          "column": "Target Sub-Slab and Near-source Soil Gas Concentration (TCR=1E-05 or THQ=1) Csg,Target (µg/m3)",
+          "cell": "1.20E+02",
+          "value": 120
+        },
+        {
+          "column": "Target Groundwater Concentration (TCR=1E-05 or THQ=1) Cgw,Target (µg/L)",
+          "cell": "3.12E+01",
+          "value": 31.2
+        },
+        {
+          "column": "Is Target Groundwater Concentration < MCL? (Cgw < MCL?)",
+          "cell": "No (5)"
+        },
+        {
+          "column": "Pure Phase Vapor Concentration Cvp (10 ℃) (µg/m3)",
+          "cell": "3.98E+08",
+          "value": 398000000
+        },
+        {
+          "column": "Maximum Groundwater Vapor Concentration Chc (µg/m3)",
+          "cell": "2.07E+08",
+          "value": 207000000
+        },
+        {
+          "column": "Temperature for Maximum Groundwater Vapor Concentration (℃)",
+          "cell": "10",
+          "value": 10
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "1.20",
+          "value": 1.2
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "IUR (ug/m3)-1",
+          "cell": "7.80E-06",
+          "value": 0.0000078
+        },
+        {
+          "column": "IUR Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Inhalation Reference Concentration (RfC) (mg/m3)",
+          "cell": "3.00E-02",
+          "value": 0.03
+        },
+        {
+          "column": "RfC Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Mutagenic Indicator",
+          "cell": "No"
+        },
+        {
+          "column": "Carcinogenic VISL TCR=1E-05 Cia,c (µg/m3)",
+          "cell": "3.60E+00",
+          "value": 3.6
+        },
+        {
+          "column": "Noncarcinogenic VISL THQ=1 Cia,nc (µg/m3)",
+          "cell": "3.13E+01",
+          "value": 31.3
+        }
+      ],
+      "properties": [
+        {
+          "column": "Chemical",
+          "cell": "Benzene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "71-43-2"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "MW",
+          "cell": "78.115",
+          "value": 78.115
+        },
+        {
+          "column": "MW Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "S (mg/L)",
+          "cell": "1.79E+03",
+          "value": 1790
+        },
+        {
+          "column": "S Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "MCL (ug/L)",
+          "cell": "5",
+          "value": 5
+        },
+        {
+          "column": "Henry's Law Constant (atm-m3/mole)",
+          "cell": "5.55E-03",
+          "value": 0.00555
+        },
+        {
+          "column": "Henry's Law Constant (unitless)",
+          "cell": "2.27E-01",
+          "value": 0.227
+        },
+        {
+          "column": "Henry's Law Constant (10 ℃) (unitless)",
+          "cell": "1.16E-01",
+          "value": 0.116
+        },
+        {
+          "column": "Henry's Law Constant Used in Calcs (unitless)",
+          "cell": "1.16E-01",
+          "value": 0.116
+        },
+        {
+          "column": "H` and HLC Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Enthalpy of vaporization @ groundwater temperature ΔHv,gw (cal/mol)",
+          "cell": "8.12E+03",
+          "value": 8120
+        },
+        {
+          "column": "Enthalpy of vaporization at the normal boiling point ΔHv,b (cal/mol)",
+          "cell": "7.34E+03",
+          "value": 7340
+        },
+        {
+          "column": "ΔHv,b Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Normal Boiling Point (Tb) (K)",
+          "cell": "353.15",
+          "value": 353.15
+        },
+        {
+          "column": "BP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Exponent for ΔHv,gw",
+          "cell": "0.3490017794",
+          "value": 0.3490017794
+        },
+        {
+          "column": "Vapor Pressure VP (mm Hg)",
+          "cell": "9.48E+01",
+          "value": 94.8
+        },
+        {
+          "column": "VP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Vapor Pressure VP (10 ℃) (mm Hg)",
+          "cell": "4.59E+01",
+          "value": 45.9
+        },
+        {
+          "column": "Critical Temperature (TC) (K)",
+          "cell": "5.62E+02",
+          "value": 562
+        },
+        {
+          "column": "TC Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "1.2",
+          "value": 1.2
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        }
+      ]
+    },
+    {
+      "cas": "79-01-6",
+      "name": "Trichloroethylene",
+      "analysis": "000079-01-6-SWFA",
+      "visl": [
+        {
+          "column": "Chemical",
+          "cell": "Trichloroethylene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "79-01-6"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Soil Source? (Cvp > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Groundwater Source? (Chc > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Target Indoor Air Concentration (TCR=1E-05 or THQ=1) MIN(Cia,c,Cia,nc) (µg/m3)",
+          "cell": "2.09E+00",
+          "value": 2.09
+        },
+        {
+          "column": "Toxicity Basis",
+          "cell": "NC"
+        },
+        {
+          "column": "Target Sub-Slab and Near-source Soil Gas Concentration (TCR=1E-05 or THQ=1) Csg,Target (µg/m3)",
+          "cell": "6.95E+01",
+          "value": 69.5
+        },
+        {
+          "column": "Target Groundwater Concentration (TCR=1E-05 or THQ=1) Cgw,Target (µg/L)",
+          "cell": "1.04E+01",
+          "value": 10.4
+        },
+        {
+          "column": "Is Target Groundwater Concentration < MCL? (Cgw < MCL?)",
+          "cell": "No (5)"
+        },
+        {
+          "column": "Pure Phase Vapor Concentration Cvp (10 ℃) (µg/m3)",
+          "cell": "4.88E+08",
+          "value": 488000000
+        },
+        {
+          "column": "Maximum Groundwater Vapor Concentration Chc (µg/m3)",
+          "cell": "2.57E+08",
+          "value": 257000000
+        },
+        {
+          "column": "Temperature for Maximum Groundwater Vapor Concentration (℃)",
+          "cell": "10",
+          "value": 10
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "8.00",
+          "value": 8
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "IUR (ug/m3)-1",
+          "cell": "4.10E-06",
+          "value": 0.0000041
+        },
+        {
+          "column": "IUR Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Inhalation Reference Concentration (RfC) (mg/m3)",
+          "cell": "2.00E-03",
+          "value": 0.002
+        },
+        {
+          "column": "RfC Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Mutagenic Indicator",
+          "cell": "Mut"
+        },
+        {
+          "column": "Carcinogenic VISL TCR=1E-05 Cia,c (µg/m3)",
+          "cell": "4.78E+00",
+          "value": 4.78
+        },
+        {
+          "column": "Noncarcinogenic VISL THQ=1 Cia,nc (µg/m3)",
+          "cell": "2.09E+00",
+          "value": 2.09
+        }
+      ],
+      "properties": [
+        {
+          "column": "Chemical",
+          "cell": "Trichloroethylene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "79-01-6"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "MW",
+          "cell": "131.39",
+          "value": 131.39
+        },
+        {
+          "column": "MW Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "S (mg/L)",
+          "cell": "1.28E+03",
+          "value": 1280
+        },
+        {
+          "column": "S Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "MCL (ug/L)",
+          "cell": "5",
+          "value": 5
+        },
+        {
+          "column": "Henry's Law Constant (atm-m3/mole)",
+          "cell": "9.85E-03",
+          "value": 0.00985
+        },
+        {
+          "column": "Henry's Law Constant (unitless)",
+          "cell": "4.03E-01",
+          "value": 0.403
+        },
+        {
+          "column": "Henry's Law Constant (10 ℃) (unitless)",
+          "cell": "2.01E-01",
+          "value": 0.201
+        },
+        {
+          "column": "Henry's Law Constant Used in Calcs (unitless)",
+          "cell": "2.01E-01",
+          "value": 0.201
+        },
+        {
+          "column": "H` and HLC Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Enthalpy of vaporization @ groundwater temperature ΔHv,gw (cal/mol)",
+          "cell": "8.37E+03",
+          "value": 8370
+        },
+        {
+          "column": "Enthalpy of vaporization at the normal boiling point ΔHv,b (cal/mol)",
+          "cell": "7.50E+03",
+          "value": 7500
+        },
+        {
+          "column": "ΔHv,b Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Normal Boiling Point (Tb) (K)",
+          "cell": "360.35",
+          "value": 360.35
+        },
+        {
+          "column": "BP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Exponent for ΔHv,gw",
+          "cell": "0.3510035026",
+          "value": 0.3510035026
+        },
+        {
+          "column": "Vapor Pressure VP (mm Hg)",
+          "cell": "6.90E+01",
+          "value": 69
+        },
+        {
+          "column": "VP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Vapor Pressure VP (10 ℃) (mm Hg)",
+          "cell": "3.26E+01",
+          "value": 32.6
+        },
+        {
+          "column": "Critical Temperature (TC) (K)",
+          "cell": "5.71E+02",
+          "value": 571
+        },
+        {
+          "column": "TC Ref",
+          "cell": "YAWS"
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "8",
+          "value": 8
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        }
+      ]
+    },
+    {
+      "cas": "127-18-4",
+      "name": "Tetrachloroethylene",
+      "analysis": "000127-18-4-SWFA",
+      "visl": [
+        {
+          "column": "Chemical",
+          "cell": "Tetrachloroethylene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "127-18-4"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Soil Source? (Cvp > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Groundwater Source? (Chc > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Target Indoor Air Concentration (TCR=1E-05 or THQ=1) MIN(Cia,c,Cia,nc) (µg/m3)",
+          "cell": "4.17E+01",
+          "value": 41.7
+        },
+        {
+          "column": "Toxicity Basis",
+          "cell": "NC"
+        },
+        {
+          "column": "Target Sub-Slab and Near-source Soil Gas Concentration (TCR=1E-05 or THQ=1) Csg,Target (µg/m3)",
+          "cell": "1.39E+03",
+          "value": 1390
+        },
+        {
+          "column": "Target Groundwater Concentration (TCR=1E-05 or THQ=1) Cgw,Target (µg/L)",
+          "cell": "1.29E+02",
+          "value": 129
+        },
+        {
+          "column": "Is Target Groundwater Concentration < MCL? (Cgw < MCL?)",
+          "cell": "No (5)"
+        },
+        {
+          "column": "Pure Phase Vapor Concentration Cvp (10 ℃) (µg/m3)",
+          "cell": "1.65E+08",
+          "value": 165000000
+        },
+        {
+          "column": "Maximum Groundwater Vapor Concentration Chc (µg/m3)",
+          "cell": "6.68E+07",
+          "value": 66800000
+        },
+        {
+          "column": "Temperature for Maximum Groundwater Vapor Concentration (℃)",
+          "cell": "10",
+          "value": 10
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "-"
+        },
+        {
+          "column": "LEL Ref",
+          "cell": ""
+        },
+        {
+          "column": "IUR (ug/m3)-1",
+          "cell": "2.60E-07",
+          "value": 2.6e-7
+        },
+        {
+          "column": "IUR Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Inhalation Reference Concentration (RfC) (mg/m3)",
+          "cell": "4.00E-02",
+          "value": 0.04
+        },
+        {
+          "column": "RfC Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Mutagenic Indicator",
+          "cell": "No"
+        },
+        {
+          "column": "Carcinogenic VISL TCR=1E-05 Cia,c (µg/m3)",
+          "cell": "1.08E+02",
+          "value": 108
+        },
+        {
+          "column": "Noncarcinogenic VISL THQ=1 Cia,nc (µg/m3)",
+          "cell": "4.17E+01",
+          "value": 41.7
+        }
+      ],
+      "properties": [
+        {
+          "column": "Chemical",
+          "cell": "Tetrachloroethylene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "127-18-4"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "MW",
+          "cell": "165.83",
+          "value": 165.83
+        },
+        {
+          "column": "MW Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "S (mg/L)",
+          "cell": "2.06E+02",
+          "value": 206
+        },
+        {
+          "column": "S Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "MCL (ug/L)",
+          "cell": "5",
+          "value": 5
+        },
+        {
+          "column": "Henry's Law Constant (atm-m3/mole)",
+          "cell": "1.77E-02",
+          "value": 0.0177
+        },
+        {
+          "column": "Henry's Law Constant (unitless)",
+          "cell": "7.24E-01",
+          "value": 0.724
+        },
+        {
+          "column": "Henry's Law Constant (10 ℃) (unitless)",
+          "cell": "3.24E-01",
+          "value": 0.324
+        },
+        {
+          "column": "Henry's Law Constant Used in Calcs (unitless)",
+          "cell": "3.24E-01",
+          "value": 0.324
+        },
+        {
+          "column": "H` and HLC Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Enthalpy of vaporization @ groundwater temperature ΔHv,gw (cal/mol)",
+          "cell": "9.56E+03",
+          "value": 9560
+        },
+        {
+          "column": "Enthalpy of vaporization at the normal boiling point ΔHv,b (cal/mol)",
+          "cell": "8.29E+03",
+          "value": 8290
+        },
+        {
+          "column": "ΔHv,b Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Normal Boiling Point (Tb) (K)",
+          "cell": "394.45",
+          "value": 394.45
+        },
+        {
+          "column": "BP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Exponent for ΔHv,gw",
+          "cell": "0.3547951613",
+          "value": 0.3547951613
+        },
+        {
+          "column": "Vapor Pressure VP (mm Hg)",
+          "cell": "1.85E+01",
+          "value": 18.5
+        },
+        {
+          "column": "VP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Vapor Pressure VP (10 ℃) (mm Hg)",
+          "cell": "7.87E+00",
+          "value": 7.87
+        },
+        {
+          "column": "Critical Temperature (TC) (K)",
+          "cell": "6.20E+02",
+          "value": 620
+        },
+        {
+          "column": "TC Ref",
+          "cell": "YAWS"
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "-"
+        },
+        {
+          "column": "LEL Ref",
+          "cell": ""
+        }
+      ]
+    },
+    {
+      "cas": "91-20-3",
+      "name": "Naphthalene",
+      "analysis": "000091-20-3-SWFA",
+      "visl": [
+        {
+          "column": "Chemical",
+          "cell": "Naphthalene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "91-20-3"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Soil Source? (Cvp > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Groundwater Source? (Chc > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Target Indoor Air Concentration (TCR=1E-05 or THQ=1) MIN(Cia,c,Cia,nc) (µg/m3)",
+          "cell": "8.26E-01",
+          "value": 0.826
+        },
+        {
+          "column": "Toxicity Basis",
+          "cell": "CA"
+        },
+        {
+          "column": "Target Sub-Slab and Near-source Soil Gas Concentration (TCR=1E-05 or THQ=1) Csg,Target (µg/m3)",
+          "cell": "2.75E+01",
+          "value": 27.5
+        },
+        {
+          "column": "Target Groundwater Concentration (TCR=1E-05 or THQ=1) Cgw,Target (µg/L)",
+          "cell": "1.38E+02",
+          "value": 138
+        },
+        {
+          "column": "Is Target Groundwater Concentration < MCL? (Cgw < MCL?)",
+          "cell": "--"
+        },
+        {
+          "column": "Pure Phase Vapor Concentration Cvp (10 ℃) (µg/m3)",
+          "cell": "5.86E+05",
+          "value": 586000
+        },
+        {
+          "column": "Maximum Groundwater Vapor Concentration Chc (µg/m3)",
+          "cell": "1.86E+05",
+          "value": 186000
+        },
+        {
+          "column": "Temperature for Maximum Groundwater Vapor Concentration (℃)",
+          "cell": "10",
+          "value": 10
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "0.90",
+          "value": 0.9
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "IUR (ug/m3)-1",
+          "cell": "3.40E-05",
+          "value": 0.000034
+        },
+        {
+          "column": "IUR Ref",
+          "cell": "C"
+        },
+        {
+          "column": "Inhalation Reference Concentration (RfC) (mg/m3)",
+          "cell": "3.00E-03",
+          "value": 0.003
+        },
+        {
+          "column": "RfC Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Mutagenic Indicator",
+          "cell": "No"
+        },
+        {
+          "column": "Carcinogenic VISL TCR=1E-05 Cia,c (µg/m3)",
+          "cell": "8.26E-01",
+          "value": 0.826
+        },
+        {
+          "column": "Noncarcinogenic VISL THQ=1 Cia,nc (µg/m3)",
+          "cell": "3.13E+00",
+          "value": 3.13
+        }
+      ],
+      "properties": [
+        {
+          "column": "Chemical",
+          "cell": "Naphthalene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "91-20-3"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "MW",
+          "cell": "128.18",
+          "value": 128.18
+        },
+        {
+          "column": "MW Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "S (mg/L)",
+          "cell": "3.10E+01",
+          "value": 31
+        },
+        {
+          "column": "S Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "MCL (ug/L)",
+          "cell": "-"
+        },
+        {
+          "column": "Henry's Law Constant (atm-m3/mole)",
+          "cell": "4.40E-04",
+          "value": 0.00044
+        },
+        {
+          "column": "Henry's Law Constant (unitless)",
+          "cell": "1.80E-02",
+          "value": 0.018
+        },
+        {
+          "column": "Henry's Law Constant (10 ℃) (unitless)",
+          "cell": "6.00E-03",
+          "value": 0.006
+        },
+        {
+          "column": "Henry's Law Constant Used in Calcs (unitless)",
+          "cell": "6.00E-03",
+          "value": 0.006
+        },
+        {
+          "column": "H` and HLC Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Enthalpy of vaporization @ groundwater temperature ΔHv,gw (cal/mol)",
+          "cell": "1.29E+04",
+          "value": 12900
+        },
+        {
+          "column": "Enthalpy of vaporization at the normal boiling point ΔHv,b (cal/mol)",
+          "cell": "1.03E+04",
+          "value": 10300
+        },
+        {
+          "column": "ΔHv,b Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Normal Boiling Point (Tb) (K)",
+          "cell": "491.05",
+          "value": 491.05
+        },
+        {
+          "column": "BP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Exponent for ΔHv,gw",
+          "cell": "0.3696033676",
+          "value": 0.3696033676
+        },
+        {
+          "column": "Vapor Pressure VP (mm Hg)",
+          "cell": "8.50E-02",
+          "value": 0.085
+        },
+        {
+          "column": "VP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Vapor Pressure VP (10 ℃) (mm Hg)",
+          "cell": "2.69E-02",
+          "value": 0.0269
+        },
+        {
+          "column": "Critical Temperature (TC) (K)",
+          "cell": "7.48E+02",
+          "value": 748
+        },
+        {
+          "column": "TC Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "0.9",
+          "value": 0.9
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        }
+      ]
+    },
+    {
+      "cas": "100-41-4",
+      "name": "Ethylbenzene",
+      "analysis": "000100-41-4-SWFA",
+      "visl": [
+        {
+          "column": "Chemical",
+          "cell": "Ethylbenzene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "100-41-4"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Soil Source? (Cvp > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Is Chemical Sufficiently Volatile and Toxic to Pose Inhalation Risk Via Vapor Intrusion from Groundwater Source? (Chc > Ci,a,Target?)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Target Indoor Air Concentration (TCR=1E-05 or THQ=1) MIN(Cia,c,Cia,nc) (µg/m3)",
+          "cell": "1.12E+01",
+          "value": 11.2
+        },
+        {
+          "column": "Toxicity Basis",
+          "cell": "CA"
+        },
+        {
+          "column": "Target Sub-Slab and Near-source Soil Gas Concentration (TCR=1E-05 or THQ=1) Csg,Target (µg/m3)",
+          "cell": "3.74E+02",
+          "value": 374
+        },
+        {
+          "column": "Target Groundwater Concentration (TCR=1E-05 or THQ=1) Cgw,Target (µg/L)",
+          "cell": "8.21E+01",
+          "value": 82.1
+        },
+        {
+          "column": "Is Target Groundwater Concentration < MCL? (Cgw < MCL?)",
+          "cell": "Yes (700)"
+        },
+        {
+          "column": "Pure Phase Vapor Concentration Cvp (10 ℃) (µg/m3)",
+          "cell": "5.48E+07",
+          "value": 54800000
+        },
+        {
+          "column": "Maximum Groundwater Vapor Concentration Chc (µg/m3)",
+          "cell": "2.31E+07",
+          "value": 23100000
+        },
+        {
+          "column": "Temperature for Maximum Groundwater Vapor Concentration (℃)",
+          "cell": "10",
+          "value": 10
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "0.80",
+          "value": 0.8
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "IUR (ug/m3)-1",
+          "cell": "2.50E-06",
+          "value": 0.0000025
+        },
+        {
+          "column": "IUR Ref",
+          "cell": "C"
+        },
+        {
+          "column": "Inhalation Reference Concentration (RfC) (mg/m3)",
+          "cell": "1.00E+00",
+          "value": 1
+        },
+        {
+          "column": "RfC Ref",
+          "cell": "I"
+        },
+        {
+          "column": "Mutagenic Indicator",
+          "cell": "No"
+        },
+        {
+          "column": "Carcinogenic VISL TCR=1E-05 Cia,c (µg/m3)",
+          "cell": "1.12E+01",
+          "value": 11.2
+        },
+        {
+          "column": "Noncarcinogenic VISL THQ=1 Cia,nc (µg/m3)",
+          "cell": "1.04E+03",
+          "value": 1040
+        }
+      ],
+      "properties": [
+        {
+          "column": "Chemical",
+          "cell": "Ethylbenzene"
+        },
+        {
+          "column": "CAS Number",
+          "cell": "100-41-4"
+        },
+        {
+          "column": "Does the chemical meet the definition for volatility? (HLC>1E-5 or VP>1)",
+          "cell": "Yes"
+        },
+        {
+          "column": "Does the chemical have inhalation toxicity data? (IUR and/or RfC)",
+          "cell": "Yes"
+        },
+        {
+          "column": "MW",
+          "cell": "106.17",
+          "value": 106.17
+        },
+        {
+          "column": "MW Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "S (mg/L)",
+          "cell": "1.69E+02",
+          "value": 169
+        },
+        {
+          "column": "S Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "MCL (ug/L)",
+          "cell": "700",
+          "value": 700
+        },
+        {
+          "column": "Henry's Law Constant (atm-m3/mole)",
+          "cell": "7.88E-03",
+          "value": 0.00788
+        },
+        {
+          "column": "Henry's Law Constant (unitless)",
+          "cell": "3.22E-01",
+          "value": 0.322
+        },
+        {
+          "column": "Henry's Law Constant (10 ℃) (unitless)",
+          "cell": "1.37E-01",
+          "value": 0.137
+        },
+        {
+          "column": "Henry's Law Constant Used in Calcs (unitless)",
+          "cell": "1.37E-01",
+          "value": 0.137
+        },
+        {
+          "column": "H` and HLC Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Enthalpy of vaporization @ groundwater temperature ΔHv,gw (cal/mol)",
+          "cell": "1.02E+04",
+          "value": 10200
+        },
+        {
+          "column": "Enthalpy of vaporization at the normal boiling point ΔHv,b (cal/mol)",
+          "cell": "8.50E+03",
+          "value": 8500
+        },
+        {
+          "column": "ΔHv,b Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Normal Boiling Point (Tb) (K)",
+          "cell": "409.25",
+          "value": 409.25
+        },
+        {
+          "column": "BP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Exponent for ΔHv,gw",
+          "cell": "0.374755145",
+          "value": 0.374755145
+        },
+        {
+          "column": "Vapor Pressure VP (mm Hg)",
+          "cell": "9.60E+00",
+          "value": 9.6
+        },
+        {
+          "column": "VP Ref",
+          "cell": "PHYSPROP"
+        },
+        {
+          "column": "Vapor Pressure VP (10 ℃) (mm Hg)",
+          "cell": "3.87E+00",
+          "value": 3.87
+        },
+        {
+          "column": "Critical Temperature (TC) (K)",
+          "cell": "6.17E+02",
+          "value": 617
+        },
+        {
+          "column": "TC Ref",
+          "cell": "CRC"
+        },
+        {
+          "column": "Lower Explosive Limit LEL (% by volume)",
+          "cell": "0.8",
+          "value": 0.8
+        },
+        {
+          "column": "LEL Ref",
+          "cell": "CRC"
+        }
+      ]
+    }
+  ]
+}

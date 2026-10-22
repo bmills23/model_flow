@@ -3681,3 +3681,42 @@ recorded in wave R).
    and commercial at the form defaults.
 5. **Evidence (DEFAULT).** The results appear in `docs/VALIDATION.md` and on `#/validation` through the
    validation catalog, replacing the pending VISL entry.
+
+### Wave S, VISL comparison
+
+1. **Fetch script options (DEFAULT).** `fetch-visl.ts` takes `--scenario`, `--tgw`, `--hq`, `--tr` and `--name`; with
+   no options it still writes `visl-default-resident-<date>.json` from the form defaults. Each fixture states in
+   its `method` field which settings differ from the defaults. `packages/data/raw/visl` has no checksum manifest
+   (wave R recorded the first fixture without one), so none was added.
+2. **Composition, no new engine function (DEFAULT).** The comparison composes existing functions: the exposure
+   kernel for the target indoor air levels (receptor built from the calculator's printed duration, frequency,
+   exposure time and lifetime), `attenuationFactorScreeningLevel` for the soil gas and groundwater levels,
+   `attenuationFactorRun` on the solubility for the maximum groundwater vapor, the vapor pressure form of
+   `sourceVapor` for the pure phase vapor, `henryAtTemperature` through both, and `rslVolatile`. No screen shows
+   the pure phase vapor or the target levels, so none was added to the engine.
+3. **Quantities (DEFAULT).** Seven numeric outputs plus H prime used in the calculations (it is the direct
+   test of the temperature correction), and the yes or no answers with an engine criterion: volatility, inhalation
+   toxicity data, sufficiently volatile and toxic from a soil source and from a groundwater source (the engine's
+   own pure phase and maximum vapor against its own target level), the toxicity basis, and in the database
+   comparison the mutagenic indicator. The "below the MCL" answer is not compared: the engine has no MCL criterion.
+4. **Database comparison basis (DEFAULT).** Properties from `vapor-chemicals.json` (the file the vapor screen
+   loads: RSL molar mass, solubility, vapor pressure, Henry constants; boiling point, critical temperature and
+   enthalpy from the EPA 2004 table), toxicity from `tox.json`. At 25 deg C the dimensionless Henry constant is the
+   database's, as the app uses it; at another temperature it is the temperature correction from the database
+   Henry constant. The database holds the vapor pressure at 25 deg C only, so the pure phase vapor is computed
+   at 25 deg C.
+5. **Exception classes, each verified by the test (DEFAULT).** `special-case-bracketed` (the printed
+   trichloroethylene cancer level lies strictly between the engine's all-mutagenic and not-mutagenic levels),
+   `pure-phase-vapor-at-25` (at 10 deg C the calculator prints the pure phase vapor under a 10 deg C header with its
+   25 deg C value; the engine reproduces the printed number from the printed 25 deg C vapor pressure),
+   `printed-input-rounding` and `database-input-differs`. The last two were not in the scope entry. Both exist
+   because the calculator prints its inputs to three or five significant figures: the first accepts a numeric cell
+   only when the printed value lies within half a unit of its last digit of an engine value for inputs that round
+   to the printed ones (corners of the rounding box); the second names the smallest set of differing database
+   inputs whose replacement by the printed ones, within their rounding, reproduces the cell. The output tolerance
+   is unchanged; it is the engine's inputs that move, and only within what the printed inputs allow. Without
+   these classes 7 cells of the first comparison and 5 of the second would be unexplained.
+6. **Validation entries (DEFAULT).** The pending `visl` entry is replaced by six reproduction entries (two
+   comparisons by three runs) in `validationCatalogSweep.ts`, each pinned to the counts in
+   `test/fixtures/visl-sweep/exceptions.json`. The fallback fixture `vapor/visl.json` is retired; identity 8c in
+   `vapor-screening.test.ts` now uses the calculator's printed Henry constants and target indoor air levels.

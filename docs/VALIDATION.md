@@ -4,7 +4,7 @@ Generated 2026-10-22 from the fixtures under `packages/engine/test/fixtures`, th
 
 Each published worked example the test suite reproduces is listed with its source, the method it checks, what is compared, the number of cases and the tolerance the test enforces. A test that passes at its tolerance shows agreement with the published value to that tolerance; it is not a statement about model accuracy. The observed largest error is not reported, only the enforced tolerance.
 
-Summary: 39 entries (33 reproduced, 3 named exception, 2 pending or deferred, 1 smoke test only).
+Summary: 44 entries (39 reproduced, 3 named exception, 1 pending or deferred, 1 smoke test only).
 
 ## Worked examples
 
@@ -355,6 +355,72 @@ Summary: 39 entries (33 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Fixture: none, the published values are typed in the test `surfacewater-criteria.test.ts`
 - Note: Extends the zinc entry above to every hardness-dependent metal of the data files.
 
+#### VISL calculator, resident at the form defaults, from the calculator's printed inputs
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 62 reproduce, 3 are excepted (the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical, and the tetrachloroethylene groundwater level and H prime, which miss by less than the rounding of the printed inputs), 0 are unexplained.
+- Cases: 65 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: The printed inputs carry three or five significant figures, so a few outputs that miss by less than the input rounding are excepted as printed-input-rounding. The trichloroethylene cancer level (printed 0.478 ug/m3) lies between the engine bounds 0.247 (all mutagenic) and 0.685 (none); its noncancer level governs, so the sub-slab and groundwater levels reproduce.
+
+#### VISL calculator, resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5, from the calculator's printed inputs
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5 (the Henry constant temperature correction and the target scaling)), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 55 reproduce, 10 are excepted (five pure phase vapor concentrations that the calculator leaves at their 25 deg C values, the trichloroethylene cancer level, and four outputs that miss by less than the rounding of the printed inputs), 0 are unexplained.
+- Cases: 65 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: The printed inputs carry three or five significant figures, so a few outputs that miss by less than the input rounding are excepted as printed-input-rounding. Under a header naming 10 deg C the calculator prints a pure phase vapor concentration equal to its 25 deg C value; the engine, given the printed vapor pressure at 10 deg C, gives a third to a half of it. The Henry constant temperature correction (H prime, the groundwater level and the maximum groundwater vapor) reproduces for all five chemicals up to the input rounding.
+
+#### VISL calculator, commercial at the form defaults, from the calculator's printed inputs
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; commercial/industrial, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 65 printed cells: 64 reproduce, 1 are excepted (the tetrachloroethylene H prime, which misses by less than the rounding of the printed inputs), 0 are unexplained.
+- Cases: 65 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: The printed inputs carry three or five significant figures, so a few outputs that miss by less than the input rounding are excepted as printed-input-rounding. The commercial receptor has no early-life segments, so the trichloroethylene cancer level reproduces as an ordinary chemical.
+
+#### VISL calculator, resident at the form defaults, from the app's shipped database
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 69 reproduce, 1 are excepted (the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical), 0 are unexplained.
+- Cases: 70 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: Each cell that differs is explained by the database input that differs (database-input-differs) or counted as unexplained. With the shipped Henry constants at 25 deg C every other cell reproduces, including the mutagenic indicator and the toxicity basis.
+
+#### VISL calculator, resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5, from the app's shipped database
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5 (the Henry constant temperature correction and the target scaling)), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 64 reproduce, 6 are excepted (the trichloroethylene cancer level and five outputs of the 10 deg C correction that differ because the database critical temperature (trichloroethylene) or enthalpy of vaporization (naphthalene) differs from the calculator), 0 are unexplained.
+- Cases: 70 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: Each cell that differs is explained by the database input that differs (database-input-differs) or counted as unexplained. The database critical temperature of trichloroethylene is 544.2 K, the calculator prints 571 K; the naphthalene enthalpy is 10373 cal/mol against 10300. The pure phase vapor concentrations reproduce here because the database holds the 25 deg C vapor pressure only, and the calculator prints that value.
+
+#### VISL calculator, commercial at the form defaults, from the app's shipped database
+
+- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
+- Method: `vapor.attenuation-factor-2015`, `exposure.rags-e-f-2014`, `shower.rsl-household`
+- Compared: The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; commercial/industrial, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6), retrieved 2026-10-22: the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All 70 printed cells: 70 reproduce, 0 are excepted (none), 0 are unexplained.
+- Cases: 70 printed cells
+- Tolerance: The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.
+- Status: reproduced
+- Fixture: `visl-sweep/exceptions.json`; test `visl-sweep.test.ts`
+- Note: Each cell that differs is explained by the database input that differs (database-input-differs) or counted as unexplained. Every cell reproduces.
+
 ### Named exception
 
 #### Table R-6, groundwater to outdoor air
@@ -391,17 +457,6 @@ Summary: 39 entries (33 reproduced, 3 named exception, 2 pending or deferred, 1 
 - Note: The closed form agrees with the printed values only to 1.5e-4 at these points.
 
 ### Pending or deferred
-
-#### VISL screening levels, identity check
-
-- Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
-- Method: `vapor.attenuation-factor-2015`
-- Compared: The VISL calculator output for five chemicals is recorded (packages/data/raw/visl, 2026-10-22) but not yet asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.
-- Cases: 2 chemicals
-- Tolerance: 1e-12 relative (an identity, not a published value).
-- Status: pending or deferred
-- Fixture: `vapor/visl.json`; test `vapor-screening.test.ts`
-- Note: Pending a comparison of the engine with the recorded VISL calculator output.
 
 #### Table R-9, Ingestion of Root Vegetables (M9)
 
@@ -461,7 +516,6 @@ What the examples above do not establish: references not yet read that a shipped
 ### Pending, deferred and smoke-test-only
 
 - Table R-2, probabilistic drinking water case (smoke test only): A comparison waits for sourced input distributions.
-- VISL screening levels, identity check (pending or deferred): Pending a comparison of the engine with the recorded VISL calculator output.
 - Table R-9, Ingestion of Root Vegetables (M9) (pending or deferred): The root vegetable ingestion row of the page-1 table is not reproduced yet.
 
 ### Published values not checked

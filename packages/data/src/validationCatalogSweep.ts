@@ -9,6 +9,11 @@ import type { ExampleSpec } from './validation.js';
  * November 2024 tables with the engine. Their fixture (`rsl-sweep/exceptions.json`) holds the counts the test
  * recomputes, the named exception classes with their reasons and every unexplained cell; the pins below make
  * the numbers stated in the text fail the build when the fixture changes.
+ *
+ * The VISL calculator comparison (`visl-sweep.test.ts`) follows the same pattern: three runs of the public
+ * calculator (`packages/data/raw/visl`), each compared with the engine twice, from the calculator's printed
+ * inputs and from the database the app ships. Its fixture (`visl-sweep/exceptions.json`) holds the counts
+ * the test recomputes, the named exception classes with their reasons and every unexplained cell.
  */
 
 const SWEEP_FIXTURE = 'rsl-sweep/exceptions.json';
@@ -167,4 +172,170 @@ export const sweepExamples: ExampleSpec[] = [
     evidence: ['expect(compared).toBe(10)'],
     note: 'Extends the zinc entry above to every hardness-dependent metal of the data files.',
   },
+];
+
+const VISL_FIXTURE = 'visl-sweep/exceptions.json';
+const VISL_TOLERANCE =
+  "The engine's unrounded value lies within half a unit of the last printed digit (three significant figures in every compared numeric cell, asserted by the test); a yes or no answer must be equal; nothing is widened.";
+const VISL_EVIDENCE = [
+  'expect(counts).toEqual(fixture.comparisons)',
+  'expect(fixture.unexplained).toEqual(unexplained.map(shown))',
+  "expect(withinPrinted(0.36051, '3.60E-01')).toBe(false)",
+];
+
+type VislComparison = 'printed-inputs' | 'database';
+type VislRun = 'resident-default' | 'resident-tgw10' | 'commercial-default';
+
+interface VislCase {
+  comparison: VislComparison;
+  run: VislRun;
+  compared: number;
+  reproduced: number;
+  excepted: number;
+  /** Class index in the fixture and the count the text states for this run. */
+  classCells: [number, number][];
+  excepts: string;
+  note: string;
+}
+
+const VISL_RUNS: Record<VislRun, { title: string; settings: string }> = {
+  'resident-default': {
+    title: 'resident at the form defaults',
+    settings: 'resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6',
+  },
+  'resident-tgw10': {
+    title: 'resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5',
+    settings:
+      'resident, groundwater at 10 deg C, hazard quotient 1, target risk 1e-5 (the Henry constant temperature correction and the target scaling)',
+  },
+  'commercial-default': {
+    title: 'commercial at the form defaults',
+    settings:
+      'commercial/industrial, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6',
+  },
+};
+
+const VISL_COMPARISONS: Record<VislComparison, { title: string; source: string; note: string }> = {
+  'printed-inputs': {
+    title: "from the calculator's printed inputs",
+    source:
+      "the engine is run from the properties, toxicity values and exposure inputs the calculator prints for the run, which checks the engine's equations",
+    note: 'The printed inputs carry three or five significant figures, so a few outputs that miss by less than the input rounding are excepted as printed-input-rounding.',
+  },
+  database: {
+    title: "from the app's shipped database",
+    source:
+      'the engine is run from the chemical file the vapor screen loads and the RSL toxicity file the exposure screens use (vapor-chemicals.json, tox.json), which checks what a user of the app gets; the database holds the vapor pressure at 25 deg C only',
+    note: 'Each cell that differs is explained by the database input that differs (database-input-differs) or counted as unexplained.',
+  },
+};
+
+function visl(c: VislCase): ExampleSpec {
+  const run = VISL_RUNS[c.run];
+  const how = VISL_COMPARISONS[c.comparison];
+  const path = `comparisons.${c.comparison}.${c.run}`;
+  return {
+    id: `visl-${c.comparison}-${c.run}`,
+    title: `VISL calculator, ${run.title}, ${how.title}`,
+    files: [VISL_FIXTURE],
+    referenceKey: 'epavisl',
+    methodIds: ['vapor.attenuation-factor-2015', 'exposure.rags-e-f-2014', 'shower.rsl-household'],
+    compares: `The calculator output for five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; ${run.settings}), retrieved 2026-10-22: ${how.source}. Compared: the cancer and noncancer target indoor air levels and the governing one, the sub-slab and near-source soil gas level, the groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used, and the yes or no answers. All ${c.compared} printed cells: ${c.reproduced} reproduce, ${c.excepted} are excepted (${c.excepts}), 0 are unexplained.`,
+    count: (j) => (j[0].comparisons[c.comparison][c.run] as { compared: number }).compared,
+    casesUnit: 'printed cells',
+    tolerance: VISL_TOLERANCE,
+    status: 'reproduced',
+    testFile: 'visl-sweep.test.ts',
+    evidence: VISL_EVIDENCE,
+    readmeNeedle: 'VISL sweep fixture',
+    pins: [
+      { path: `${path}.compared`, value: c.compared },
+      { path: `${path}.reproduced`, value: c.reproduced },
+      { path: `${path}.excepted`, value: c.excepted },
+      { path: `${path}.unexplained`, value: 0 },
+      ...c.classCells.map(([cls, n]) => ({
+        path: `classes.${cls}.cells.${c.comparison}.${c.run}`,
+        value: n,
+      })),
+    ],
+    note: `${how.note} ${c.note}`,
+  };
+}
+
+export const vislExamples: ExampleSpec[] = [
+  visl({
+    comparison: 'printed-inputs',
+    run: 'resident-default',
+    compared: 65,
+    reproduced: 62,
+    excepted: 3,
+    classCells: [
+      [0, 1],
+      [2, 2],
+    ],
+    excepts:
+      'the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical, and the tetrachloroethylene groundwater level and H prime, which miss by less than the rounding of the printed inputs',
+    note: 'The trichloroethylene cancer level (printed 0.478 ug/m3) lies between the engine bounds 0.247 (all mutagenic) and 0.685 (none); its noncancer level governs, so the sub-slab and groundwater levels reproduce.',
+  }),
+  visl({
+    comparison: 'printed-inputs',
+    run: 'resident-tgw10',
+    compared: 65,
+    reproduced: 55,
+    excepted: 10,
+    classCells: [
+      [0, 1],
+      [1, 5],
+      [2, 4],
+    ],
+    excepts:
+      'five pure phase vapor concentrations that the calculator leaves at their 25 deg C values, the trichloroethylene cancer level, and four outputs that miss by less than the rounding of the printed inputs',
+    note: 'Under a header naming 10 deg C the calculator prints a pure phase vapor concentration equal to its 25 deg C value; the engine, given the printed vapor pressure at 10 deg C, gives a third to a half of it. The Henry constant temperature correction (H prime, the groundwater level and the maximum groundwater vapor) reproduces for all five chemicals up to the input rounding.',
+  }),
+  visl({
+    comparison: 'printed-inputs',
+    run: 'commercial-default',
+    compared: 65,
+    reproduced: 64,
+    excepted: 1,
+    classCells: [[2, 1]],
+    excepts:
+      'the tetrachloroethylene H prime, which misses by less than the rounding of the printed inputs',
+    note: 'The commercial receptor has no early-life segments, so the trichloroethylene cancer level reproduces as an ordinary chemical.',
+  }),
+  visl({
+    comparison: 'database',
+    run: 'resident-default',
+    compared: 70,
+    reproduced: 69,
+    excepted: 1,
+    classCells: [[0, 1]],
+    excepts:
+      'the trichloroethylene cancer level, which the calculator takes from the RSL equations for that chemical',
+    note: 'With the shipped Henry constants at 25 deg C every other cell reproduces, including the mutagenic indicator and the toxicity basis.',
+  }),
+  visl({
+    comparison: 'database',
+    run: 'resident-tgw10',
+    compared: 70,
+    reproduced: 64,
+    excepted: 6,
+    classCells: [
+      [0, 1],
+      [3, 5],
+    ],
+    excepts:
+      'the trichloroethylene cancer level and five outputs of the 10 deg C correction that differ because the database critical temperature (trichloroethylene) or enthalpy of vaporization (naphthalene) differs from the calculator',
+    note: 'The database critical temperature of trichloroethylene is 544.2 K, the calculator prints 571 K; the naphthalene enthalpy is 10373 cal/mol against 10300. The pure phase vapor concentrations reproduce here because the database holds the 25 deg C vapor pressure only, and the calculator prints that value.',
+  }),
+  visl({
+    comparison: 'database',
+    run: 'commercial-default',
+    compared: 70,
+    reproduced: 70,
+    excepted: 0,
+    classCells: [],
+    excepts: 'none',
+    note: 'Every cell reproduces.',
+  }),
 ];

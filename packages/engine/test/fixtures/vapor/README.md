@@ -36,14 +36,13 @@ BioVapor manual prints no worked case with outputs), so slice V5 (`test/vapor-de
 identities (L_a = 0 and k_w = 0 equal Johnson and Ettinger, L_a entered equals the dominant-layer model
 with layer 3 absent) and hand cases built from independent closed forms. There is no fixture file.
 
-## visl.json: identity fallback (VISL calculator values not obtained in V6)
+## VISL calculator: no fixture file here
 
-The online VISL calculator was not run in slice V6, so `test/vapor-screening.test.ts` uses the fallback in the
-methods note: identity 8c (groundwater screening level times AF times H' times 1000 L/m^3 equals the target
-indoor air) against the RSL resident air values for benzene and naphthalene already used by M4. No printed
-VISL figure is asserted. The calculator's output for five chemicals was recorded on 2026-10-22
-(`packages/data/raw/visl/visl-default-resident-2026-10-22.json`, form defaults, hazard quotient 0.1); comparing
-the engine with it is open.
+The comparison of the engine with the VISL calculator output (retrieved 2026-10-22, three runs of five
+chemicals, `packages/data/raw/visl/`) is `test/visl-sweep.test.ts`, with its record in `../visl-sweep/`. The
+earlier fallback fixture `visl.json` (identity 8c against RSL resident air values) is gone: identity 8c in
+`test/vapor-screening.test.ts` now runs on the calculator's printed Henry constants and target indoor air levels
+of the default resident run, and the sweep checks the screening levels against the calculator.
 
 ## epa2004-sl-adv.json: EPA 2004 Appendix C worked example (`epa2004je`)
 

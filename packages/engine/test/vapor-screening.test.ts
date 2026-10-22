@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import visl from './fixtures/vapor/visl.json' with { type: 'json' };
+import visl from '../../data/raw/visl/visl-default-resident-2026-10-22.json' with { type: 'json' };
 import { references } from '../src/references/index.js';
 import {
   ATTENUATION_FACTORS,
@@ -92,9 +92,18 @@ describe('attenuation factors (EPA 2015 Table 6-1)', () => {
   });
 
   describe('identity 8c: screening level times AF times H prime times 1000 L/m^3 = target air', () => {
-    for (const c of visl.cases) {
+    // the calculator's printed H prime and target indoor air for its five chemicals (the comparison with the
+    // engine's own values is visl-sweep.test.ts); here they only supply a realistic set of numbers
+    const printed = (cells: { column: string; value?: number }[], start: string): number =>
+      cells.find((x) => x.column.startsWith(start))!.value!;
+    for (const r of visl.results) {
+      const c = {
+        chemical: r.name,
+        hPrime: printed(r.properties, "Henry's Law Constant Used in Calcs"),
+        targetAirUgM3: printed(r.visl, 'Target Indoor Air Concentration'),
+      };
       it(c.chemical, () => {
-        const target = c.residentAirCancerUgM3 * UG_M3;
+        const target = c.targetAirUgM3 * UG_M3;
         const gw = attenuationFactorScreeningLevel({
           medium: 'groundwater',
           targetIndoorAir: target,
@@ -102,7 +111,7 @@ describe('attenuation factors (EPA 2015 Table 6-1)', () => {
         });
         // ug/L: kg/m^3 over 1e-6; times AF H' and 1000 L/m^3 gives ug/m^3
         const slUgL = gw.screeningLevel / UG_L;
-        expect(rel(slUgL * 0.001 * c.hPrime * 1000, c.residentAirCancerUgM3)).toBeLessThan(1e-12);
+        expect(rel(slUgL * 0.001 * c.hPrime * 1000, c.targetAirUgM3)).toBeLessThan(1e-12);
         const sg = attenuationFactorScreeningLevel({
           medium: 'subSlabSoilGas',
           targetIndoorAir: target,

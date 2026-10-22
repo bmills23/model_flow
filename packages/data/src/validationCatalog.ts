@@ -1,5 +1,5 @@
 import type { CatalogInput, ExampleSpec, Json } from './validation.js';
-import { sweepExamples } from './validationCatalogSweep.js';
+import { sweepExamples, vislExamples } from './validationCatalogSweep.js';
 
 /**
  * The descriptive text of the validation manifest. Every statement here is checked by
@@ -464,23 +464,6 @@ const examples: ExampleSpec[] = [
     readmeNeedle: 'epa2004-sl-adv.json',
   },
   {
-    id: 'visl',
-    title: 'VISL screening levels, identity check',
-    files: ['vapor/visl.json'],
-    referenceKey: 'epavisl',
-    methodIds: ['vapor.attenuation-factor-2015'],
-    compares:
-      'The VISL calculator output for five chemicals is recorded (packages/data/raw/visl, 2026-10-22) but not yet asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.',
-    count: (j) => j[0].cases.length as number,
-    casesUnit: 'chemicals',
-    tolerance: '1e-12 relative (an identity, not a published value).',
-    status: 'pending or deferred',
-    testFile: 'vapor-screening.test.ts',
-    evidence: ['identity 8c'],
-    readmeNeedle: 'not obtained',
-    note: 'Pending a comparison of the engine with the recorded VISL calculator output.',
-  },
-  {
     id: 'eco-wildlife-ecossl',
     title: 'Eco-SSL wildlife derivation, cadmium and lead surrogate rows',
     files: [],
@@ -606,7 +589,7 @@ const examples: ExampleSpec[] = [
 ];
 
 export const validationCatalog: CatalogInput = {
-  examples: [...examples, ...sweepExamples],
+  examples: [...examples, ...sweepExamples, ...vislExamples],
   derived: (read) => {
     const out: ExampleSpec[] = [];
     const r9 = read('exposure/r9.json');

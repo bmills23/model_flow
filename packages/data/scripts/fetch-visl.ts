@@ -1,10 +1,15 @@
 // Manual use only. Never run by the gate or CI.
 //
-//   tsx scripts/fetch-visl.ts
+//   tsx scripts/fetch-visl.ts [--scenario Resident|Commercial] [--tgw <deg C>] [--hq <number>]
+//                             [--tr <number>] [--name <fixture name>]
 //
-// Queries the public EPA VISL calculator (a plain HTTP form post, no browser) for five chemicals at
-// the form's default residential settings and writes the page's own tables to a dated fixture under
-// raw/visl/. The fixture keeps the query parameters, the input table, the VISL table and the
+// Queries the public EPA VISL calculator (a plain HTTP form post, no browser) for five chemicals and
+// writes the page's own tables to a dated fixture under raw/visl/. With no options the settings are
+// the form's defaults (resident, groundwater at 25 deg C, hazard quotient 0.1, target risk 1e-6) and the
+// fixture is named visl-default-resident-<date>.json. Options change one setting each: --scenario is
+// the form's radio value (Resident or Commercial), --hq and --tr are the form's radio values (hq 0.1 or 1,
+// tr 1e-06, 1e-05 or 0.0001), --tgw is the groundwater temperature. --name sets the fixture name
+// (visl-<name>-<date>.json). The fixture keeps the query parameters, the input table, the VISL table and the
 // chemical-property table exactly as the page prints them (cells as text, plus the parsed number
 // where a cell is a number), the page's output timestamp and the "what's new" text the calculator
 // publishes about its data edition. It refuses to overwrite an existing fixture.
@@ -40,10 +45,38 @@ const tableById = (html: string, id: string): string[][] => {
   );
 };
 
+const options: Record<string, string> = {};
+const argv = process.argv.slice(2);
+for (let i = 0; i < argv.length; i += 2) {
+  const key = argv[i]?.replace(/^--/, '');
+  const value = argv[i + 1];
+  if (!key || !['scenario', 'tgw', 'hq', 'tr', 'name'].includes(key) || value === undefined) {
+    console.error('usage: fetch-visl.ts [--scenario S] [--tgw T] [--hq Q] [--tr R] [--name N]');
+    process.exit(1);
+  }
+  options[key] = value;
+}
+const scenario = options.scenario ?? 'Resident';
+if (!['Resident', 'Commercial'].includes(scenario)) throw new Error(`unknown scenario ${scenario}`);
+const defaults = { hq: '0.1', tr: '1e-06', tgw: '25' };
+const changed = (['hq', 'tr', 'tgw'] as const).filter(
+  (k) => options[k] !== undefined && options[k] !== defaults[k],
+);
+const settingsNote =
+  scenario === 'Resident' && changed.length === 0
+    ? 'fields below are the form defaults'
+    : `fields below are the form defaults except: ${[
+        ...(scenario === 'Resident' ? [] : [`scenario ${scenario}`]),
+        ...changed.map((k) => `${k} ${options[k]}`),
+      ].join(', ')}`;
+
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stamp = new Date().toISOString().slice(0, 10);
 const outDir = join(pkg, 'raw/visl');
-const outFile = join(outDir, `visl-default-resident-${stamp}.json`);
+const outFile = join(
+  outDir,
+  `visl-${options.name ?? `default-${scenario.toLowerCase()}`}-${stamp}.json`,
+);
 if (existsSync(outFile)) {
   console.error(`${outFile} already exists`);
   process.exit(1);
@@ -63,13 +96,13 @@ const query = {
   extraflag: 'false',
   select: 'chem',
   lastRec: 'false',
-  hq: '0.1',
-  tr: '1e-06',
-  scenario: 'Resident',
+  hq: options.hq ?? defaults.hq,
+  tr: options.tr ?? defaults.tr,
+  scenario,
   risk: 'no',
   valtype: 'default',
   inputs: 'db',
-  tgw: '25',
+  tgw: options.tgw ?? defaults.tgw,
   rfd: 'chronic',
   _submit: 'Retrieve',
 };
@@ -123,7 +156,7 @@ if (!newest) throw new Error("the calculator's what-is-new page has no dated ent
 const fixture = {
   retrieved: stamp,
   source: form,
-  method: 'HTTP POST of the calculator form, no browser; fields below are the form defaults',
+  method: `HTTP POST of the calculator form, no browser; ${settingsNote}`,
   query: { ...query, analysis: 'one option per chemical, see results[].analysis' },
   pageOutputGenerated: generated,
   versionText: {

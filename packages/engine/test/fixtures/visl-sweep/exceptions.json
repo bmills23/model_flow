@@ -1,0 +1,310 @@
+{
+  "edition": "EPA VISL calculator, data edition of November 13, 2024 (its what-is-new page), queried 2026-10-22: three runs of five chemicals (packages/data/raw/visl)",
+  "rule": "Each numeric cell is compared with the engine's unrounded value and reproduces when the two differ by at most half a unit of the last printed digit (three significant figures in every compared cell, asserted by the test). Each yes or no answer must be equal. Nothing is widened. A cell that does not reproduce is excepted under one of the classes below, whose own evidence the test checks, or listed as unexplained.",
+  "comparisons": {
+    "printed-inputs": {
+      "resident-default": {
+        "compared": 65,
+        "reproduced": 62,
+        "excepted": 3,
+        "unexplained": 0
+      },
+      "resident-tgw10": {
+        "compared": 65,
+        "reproduced": 55,
+        "excepted": 10,
+        "unexplained": 0
+      },
+      "commercial-default": {
+        "compared": 65,
+        "reproduced": 64,
+        "excepted": 1,
+        "unexplained": 0
+      },
+      "all": {
+        "compared": 195,
+        "reproduced": 181,
+        "excepted": 14,
+        "unexplained": 0
+      }
+    },
+    "database": {
+      "resident-default": {
+        "compared": 70,
+        "reproduced": 69,
+        "excepted": 1,
+        "unexplained": 0
+      },
+      "resident-tgw10": {
+        "compared": 70,
+        "reproduced": 64,
+        "excepted": 6,
+        "unexplained": 0
+      },
+      "commercial-default": {
+        "compared": 70,
+        "reproduced": 70,
+        "excepted": 0,
+        "unexplained": 0
+      },
+      "all": {
+        "compared": 210,
+        "reproduced": 203,
+        "excepted": 7,
+        "unexplained": 0
+      }
+    }
+  },
+  "classes": [
+    {
+      "id": "special-case-bracketed",
+      "reason": "The calculator flags trichloroethylene as mutagenic and its cancer level follows the RSL's own equations for that chemical, as in the RSL sweeps (special-case-equations there), not the generic early-life adjustment of the whole unit risk. The engine has only the two bounds, all of the unit risk treated as mutagenic and none of it. The test excepts a cell only when the printed level lies strictly between those two engine values, and checks that for every cell.",
+      "cells": {
+        "printed-inputs": {
+          "resident-default": 1,
+          "resident-tgw10": 1
+        },
+        "database": {
+          "resident-default": 1,
+          "resident-tgw10": 1
+        }
+      },
+      "chemicals": ["Trichloroethylene"]
+    },
+    {
+      "id": "pure-phase-vapor-at-25",
+      "reason": "At a groundwater temperature other than 25 deg C the calculator prints a pure phase vapor concentration under a header that names the new temperature, but the number equals its 25 deg C value. The engine, given the vapor pressure the calculator prints for the new temperature, gives a smaller value. The test excepts a cell only when the engine reproduces the printed number from the printed 25 deg C vapor pressure.",
+      "cells": {
+        "printed-inputs": {
+          "resident-tgw10": 5
+        }
+      },
+      "chemicals": [
+        "Benzene",
+        "Trichloroethylene",
+        "Tetrachloroethylene",
+        "Naphthalene",
+        "Ethylbenzene"
+      ]
+    },
+    {
+      "id": "printed-input-rounding",
+      "reason": "The calculator prints its inputs (Henry constant, critical temperature, enthalpy of vaporization, vapor pressure, solubility, molar mass, boiling point, toxicity values) to three or five significant figures, so the engine run from them is uncertain by that rounding while the printed output is rounded from unrounded inputs. The test excepts a cell only when the printed value lies within half a unit of its last digit of some engine value for inputs that round to the printed ones (the corners of the rounding box). The tolerance is not widened; the engine inputs are moved within their printed rounding.",
+      "cells": {
+        "printed-inputs": {
+          "resident-default": 2,
+          "resident-tgw10": 4,
+          "commercial-default": 1
+        }
+      },
+      "chemicals": ["Tetrachloroethylene", "Benzene", "Naphthalene"]
+    },
+    {
+      "id": "database-input-differs",
+      "reason": "The shipped database holds different values from the calculator's for some inputs of the chemical (here the critical temperature or the enthalpy of vaporization, which come from the EPA 2004 guide's table rather than the calculator's sources) and the groundwater temperature correction depends on them. The test excepts a cell only when replacing the smallest set of differing database inputs by the printed ones, moved anywhere within their printed rounding, reproduces it; the cell names those inputs.",
+      "cells": {
+        "database": {
+          "resident-tgw10": 5
+        }
+      },
+      "chemicals": ["Trichloroethylene", "Naphthalene"]
+    }
+  ],
+  "cells": [
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-default",
+      "chemical": "Trichloroethylene",
+      "quantity": "ciaC",
+      "printed": "4.78E-01",
+      "computed": 0.24729,
+      "class": "special-case-bracketed"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-default",
+      "chemical": "Tetrachloroethylene",
+      "quantity": "cgw",
+      "printed": "5.76E+00",
+      "computed": 5.7659,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-default",
+      "chemical": "Tetrachloroethylene",
+      "quantity": "hPrime",
+      "printed": "7.24E-01",
+      "computed": 0.72347,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Benzene",
+      "quantity": "cgw",
+      "printed": "3.12E+01",
+      "computed": 31.144,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Benzene",
+      "quantity": "cvp",
+      "printed": "3.98E+08",
+      "computed": 203050000,
+      "class": "pure-phase-vapor-at-25"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "ciaC",
+      "printed": "4.78E+00",
+      "computed": 2.4729,
+      "class": "special-case-bracketed"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "cvp",
+      "printed": "4.88E+08",
+      "computed": 242570000,
+      "class": "pure-phase-vapor-at-25"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Tetrachloroethylene",
+      "quantity": "cvp",
+      "printed": "1.65E+08",
+      "computed": 73908000,
+      "class": "pure-phase-vapor-at-25"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "cgw",
+      "printed": "1.38E+02",
+      "computed": 137.26,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "cvp",
+      "printed": "5.86E+05",
+      "computed": 195270,
+      "class": "pure-phase-vapor-at-25"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "chc",
+      "printed": "1.86E+05",
+      "computed": 186500,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "hPrime",
+      "printed": "6.00E-03",
+      "computed": 0.0060162,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "resident-tgw10",
+      "chemical": "Ethylbenzene",
+      "quantity": "cvp",
+      "printed": "5.48E+07",
+      "computed": 23268000,
+      "class": "pure-phase-vapor-at-25"
+    },
+    {
+      "comparison": "printed-inputs",
+      "fixture": "commercial-default",
+      "chemical": "Tetrachloroethylene",
+      "quantity": "hPrime",
+      "printed": "7.24E-01",
+      "computed": 0.72347,
+      "class": "printed-input-rounding"
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-default",
+      "chemical": "Trichloroethylene",
+      "quantity": "ciaC",
+      "printed": "4.78E-01",
+      "computed": 0.24729,
+      "class": "special-case-bracketed"
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "ciaC",
+      "printed": "4.78E+00",
+      "computed": 2.4729,
+      "class": "special-case-bracketed"
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "cgw",
+      "printed": "1.04E+01",
+      "computed": 10.574,
+      "class": "database-input-differs",
+      "inputs": ["tcK"]
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "chc",
+      "printed": "2.57E+08",
+      "computed": 252490000,
+      "class": "database-input-differs",
+      "inputs": ["tcK"]
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Trichloroethylene",
+      "quantity": "hPrime",
+      "printed": "2.01E-01",
+      "computed": 0.19726,
+      "class": "database-input-differs",
+      "inputs": ["tcK"]
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "chc",
+      "printed": "1.86E+05",
+      "computed": 185040,
+      "class": "database-input-differs",
+      "inputs": ["dhvb"]
+    },
+    {
+      "comparison": "database",
+      "fixture": "resident-tgw10",
+      "chemical": "Naphthalene",
+      "quantity": "hPrime",
+      "printed": "6.00E-03",
+      "computed": 0.005969,
+      "class": "database-input-differs",
+      "inputs": ["dhvb"]
+    }
+  ],
+  "unexplained": []
+}

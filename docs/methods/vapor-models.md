@@ -743,14 +743,30 @@ printed values, not from these trials.
    sheet's permeability terms (S_te 0.257, k_i 1.85e-9, k_rg 0.854, k_v 1.58e-9 cm^2) are checked as
    computed values only. The printed air viscosity at 10 deg C (1.75e-4 g/(cm s)) is not asserted
    because the guide does not state the formula and the example enters Q_soil.
-7. **VISL calculator values (recorded 2026-10-22, not yet compared).** The online VISL calculator could not be
-   run in slice V6, so the fixture is the fallback: identity (8c) against the RSL resident air table values already
-   used by M4 (benzene 0.36 and naphthalene 0.083 ug/m^3 at target risk 1e-6), in `test/fixtures/vapor/visl.json`,
-   and the README says so. The calculator turned out to answer a plain HTTP form post, and its output for the five
-   chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene, ethylbenzene; resident, form defaults
-   of target risk 1e-6, hazard quotient 0.1, 25 deg C) is committed as the dated fixture
-   `packages/data/raw/visl/visl-default-resident-2026-10-22.json`, fetched by `scripts/fetch-visl.ts`. The vapor
-   tests do not assert it yet; comparing the engine with it remains open.
+7. **VISL calculator comparison (recorded and compared 2026-10-22).** The online VISL calculator answers a plain
+   HTTP form post, so its output is committed as dated fixtures under `packages/data/raw/visl/`, fetched by
+   `scripts/fetch-visl.ts`: five chemicals (benzene, trichloroethylene, tetrachloroethylene, naphthalene,
+   ethylbenzene) in three runs, resident at the form defaults (25 deg C, hazard quotient 0.1, target risk 1e-6),
+   resident with groundwater at 10 deg C, hazard quotient 1 and target risk 1e-5, and commercial at the form
+   defaults. `test/visl-sweep.test.ts` compares every numeric output the engine can compute (the cancer,
+   noncancer and governing target indoor air levels, the sub-slab and near-source soil gas level, the
+   groundwater level, the pure phase and maximum groundwater vapor concentrations, H prime used) and the yes or
+   no answers it has a criterion for, twice: from the calculator's printed inputs (checks the equations) and from
+   the database the app ships (checks what a user gets). The tolerance is half a unit of the last printed digit
+   (three significant figures, asserted), against the engine's unrounded value. Result: of the 195
+   cells of the first comparison 181 reproduce, 14 are named exceptions and 0 are unexplained, and of the 210
+   cells of the second 203 reproduce, 7 are named exceptions and 0 are unexplained; the per-run counts, the exception classes
+   with their reasons and every excepted cell are in `test/fixtures/visl-sweep/exceptions.json` and
+   `docs/VALIDATION.md`. The exceptions: the trichloroethylene cancer level at the resident settings (the
+   calculator uses the RSL's own equations; the printed level lies between the engine's all-mutagenic and
+   not-mutagenic levels, as in the RSL sweeps); the pure phase vapor concentration at 10 deg C, which the
+   calculator prints equal to its 25 deg C value under a header naming 10 deg C (the engine reproduces the
+   printed number from the printed 25 deg C vapor pressure); a few outputs that miss by less than the rounding of
+   the calculator's three-figure printed inputs; and, in the database comparison, trichloroethylene (critical
+   temperature) and naphthalene (enthalpy of vaporization) at 10 deg C, where the database value differs from
+   the calculator's and the temperature correction depends on it. The "below the maximum contaminant level"
+   answer is not compared (no engine criterion). The earlier fallback fixture `visl.json` is retired; identity
+   (8c) below runs on the calculator's printed numbers in `test/vapor-screening.test.ts`.
 8. **Identities** (1e-12 relative unless stated). (a) Dominant layer with lambda = 0 equals J&E for the
    same column. (b) DeVaull with L_a = 0 equals J&E with the same foundation term; DeVaull with L_a entered
    equals the dominant layer with layer 3 = 0 (1e-10). (c) Attenuation-factor groundwater screening level
@@ -785,7 +801,7 @@ tests first, runs the engine test file alone, then the gate once.
 | V3 outdoor and Jury (built; registered by V7) | `processes/outdoorAir/{box,emissions,ssgVf,index}.ts`, `vapor/jury.ts`, `test/outdoor-air.test.ts`, `test/vapor-jury.test.ts` | Table R-6 hand value; identities 8e, 8f, 8g; SSG VF checked against the Table 3-A values printed in `epa1996ssg` (done, within 4 percent) | V1 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996`, `vapor.jury-bam` |
 | V4 modern J&E (built) | `vapor/epaJe.ts`, `vapor/textures.ts` (EPA soil class presets), `test/vapor-epa-je.test.ts`, `test/fixtures/vapor/epa2004-sl-adv.json` | EPA 2004 Appendix C example at half a unit in the third figure; foundation types; Q_soil ratio option | V1 (V0 not needed: the fixture carries its own properties) | `vapor.je-epa` (registers `vapor.je-1991` and `vapor.dominant-layer-1998` too) |
 | V5 DeVaull (built; registered) | `vapor/devaull.ts`, `test/vapor-devaull.test.ts` | identities 8b; fast-reaction hand cases; coupled against a numerical oxygen solve and the respiration-only and fast-reaction limits; overflow-safe large a | V1, V2 (for the cross-check) | `vapor.devaull-2007` (flips `devaull2007` and `api2012biovapor` to `used`) |
-| V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/fixtures/vapor/visl.json` | VISL values (or identity 8c); PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
+| V6 screening | `vapor/attenuationFactor.ts`, `vapor/pviScreen.ts`, `test/vapor-screening.test.ts`, `test/visl-sweep.test.ts`, `test/fixtures/visl-sweep/` | VISL calculator values (compared in `visl-sweep`; see item 7 of the fixture plan) and identity 8c; PVI Table 3 boundaries (5 and 5.0001 mg/L, 6 and 15 ft, 66 ft side) | V1 | `vapor.attenuation-factor-2015`, `vapor.pvi-screen-2015` |
 | V7 coupling and registration (built) | `vapor/coupling.ts` (M1 water-table series, M2 pore-water and flux series, M3 region 1), `exposure/epc.ts` (`vaporSeriesEpc`), `outdoorAir` `outdoorAirEpc`, engine `index.ts` exports, `references.json` status flips, `docs:generate` | quasi-steady warning; EPC origin is the method id; outdoor sum keeps contributions; the registry test passes with every cited key `used` | V2 to V6 | none new; flips the cited references to `used` |
 
 References each method cites (all must be `used` when registered; V7 flips them, or each registering
