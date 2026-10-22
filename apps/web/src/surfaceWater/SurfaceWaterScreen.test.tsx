@@ -184,4 +184,42 @@ describe('SurfaceWaterScreen', () => {
     fireEvent.click(send);
     expect(getSurfaceWaterFeed()?.chemicalId).toBe('108-88-3');
   }, 60000);
+
+  describe('linked run chemical', () => {
+    const bank = (chemicalId: string) => {
+      const s = toScenario({ ...TRANSPORT_FORM, timeYr: '5' });
+      if (!s.ok) throw new Error('scenario');
+      const { zOf: _z, ...scenario } = s.scenario;
+      void _z;
+      setBankFeed({ scenario, label: 'Test run', chemicalId });
+    };
+    const linkUp = async () => {
+      render(<SurfaceWaterScreen />);
+      await screen.findByRole(
+        'img',
+        { name: /surface water concentration in mg\/L/i },
+        { timeout: 15000 },
+      );
+      fireEvent.click(screen.getByRole('checkbox', { name: /groundwater transport run/i }));
+    };
+
+    it('shows the bank run chemical read-only while linked', async () => {
+      addChemical({ id: '108-88-3', name: 'Toluene' });
+      bank('108-88-3');
+      await linkUp();
+      expect(screen.queryByLabelText(/^chemical/i)).toBeNull();
+      expect(screen.getByText(/chemical of the transport run: toluene/i)).toBeTruthy();
+      expect(screen.queryByText(/is not in the project list/i)).toBeNull();
+    }, 60000);
+
+    it('errors, and will not send, when the bank run chemical is not in the project list', async () => {
+      addChemical({ id: '108-88-3', name: 'Toluene' });
+      bank('71-43-2');
+      await linkUp();
+      expect(screen.getByRole('alert').textContent).toMatch(/71-43-2.*not in the project list/i);
+      expect(
+        screen.getByRole('button', { name: /use legacy surface water for swimming/i }),
+      ).toHaveProperty('disabled', true);
+    }, 60000);
+  });
 });

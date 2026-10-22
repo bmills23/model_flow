@@ -53,6 +53,7 @@ import {
   type VaporForm,
 } from './form';
 import { HelpLink } from '../docs/HelpLink';
+import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 
 const byKey = new Map(references.map((r) => [r.key, r]));
 const sig = (v: number): string => formatConcentration(v);
@@ -289,21 +290,34 @@ export function VaporPage() {
   const r3 = isR3Case(form);
   const method = form.method;
 
+  const applyFixture = (): void =>
+    setForm((f) => ({
+      ...f,
+      chemicalId: RISC4_BENZENE_ID,
+      ...RISC4_BENZENE,
+      TB: '',
+      TC: '',
+      dHvb: '',
+    }));
+  // A project chemical is picked at once; its properties fill from the database as soon as it has loaded.
   const pickChemical = (id: string): void => {
-    if (id === RISC4_BENZENE_ID) {
-      setForm((f) => ({
-        ...f,
-        chemicalId: id,
-        ...RISC4_BENZENE,
-        TB: '',
-        TC: '',
-        dHvb: '',
-      }));
-      return;
-    }
-    const row = chemicals.find((c) => c.id === id);
-    if (row) setForm((f) => ({ ...f, ...chemicalFields(row) }));
+    setForm((f) => ({ ...f, chemicalId: id }));
+    if (id === '') return;
+    void loadVaporChemicals().then(
+      (rows) => {
+        const row = rows.find((c) => c.id === id);
+        if (row) setForm((f) => (f.chemicalId === id ? { ...f, ...chemicalFields(row) } : f));
+      },
+      () => undefined,
+    );
   };
+  const fixtureOn = form.chemicalId === RISC4_BENZENE_ID;
+  const [listOpen, setListOpen] = useState(false);
+  const noProperties =
+    !fixtureOn &&
+    form.chemicalId !== '' &&
+    chemicals.length > 0 &&
+    !chemicals.some((c) => c.id === form.chemicalId);
 
   const riskMethod = form.method;
   const riskChemical = chemicals.find((c) => c.id === form.chemicalId) ?? null;
@@ -384,26 +398,51 @@ export function VaporPage() {
       <div className="transport-grid">
         <form className="inputs" onSubmit={(e) => e.preventDefault()} aria-label="Scenario inputs">
           <Group title="Chemical">
-            <label className="field" htmlFor="vapor-chemical">
-              <span className="field-label">Chemical</span>
-              <select
-                id="vapor-chemical"
-                value={form.chemicalId}
-                onChange={(e) => pickChemical(e.target.value)}
-              >
-                <option value={RISC4_BENZENE_ID}>Benzene, RISC4 values (Table R-3)</option>
-                {chemicals.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.id})
-                  </option>
-                ))}
-              </select>
-              <small>
-                {loadError
-                  ? 'The chemical database did not load; enter the properties by hand.'
-                  : 'Picking a chemical fills the fields below from the EPA RSL tables; every value can be changed.'}
-              </small>
-            </label>
+            {fixtureOn && !listOpen ? (
+              <div className="field">
+                <p className="derived">
+                  Using the Table R-3 benzene test values, which are a test case and not a project
+                  chemical.
+                </p>
+                <button type="button" className="btn" onClick={() => setListOpen(true)}>
+                  Pick a project chemical
+                </button>
+              </div>
+            ) : (
+              <>
+                <ProjectChemicalSelect
+                  label="Chemical"
+                  value={fixtureOn ? '' : form.chemicalId}
+                  onChange={(id) => {
+                    pickChemical(id);
+                    setListOpen(false);
+                  }}
+                  hint={
+                    loadError
+                      ? 'The chemical database did not load; enter the properties by hand.'
+                      : 'Picking a chemical fills the fields below from the EPA RSL tables; every value can be changed.'
+                  }
+                />
+                <p>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => {
+                      applyFixture();
+                      setListOpen(false);
+                    }}
+                  >
+                    Use the Table R-3 benzene test values
+                  </button>
+                </p>
+              </>
+            )}
+            {noProperties && (
+              <p className="alert" role="status">
+                This chemical has no vapor properties in the chemical database, so it cannot be sent
+                to exposure and risk; enter the properties by hand.
+              </p>
+            )}
             <div className="fields">
               <Field label="Molar mass (g/mol)" value={form.M} onChange={(v) => set('M', v)} />
               <Field label="Solubility (mg/L)" value={form.S} onChange={(v) => set('S', v)} />

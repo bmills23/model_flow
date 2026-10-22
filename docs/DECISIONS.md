@@ -4,14 +4,14 @@ Append new decisions at the bottom with the date. Correct a superseded decision 
 
 ## 2026-10-15: Project scope and direction (Bryan)
 
-| Question | Decision | Consequence |
-|---|---|---|
-| Revenue vs personal | Personal, open source, free | $0 hosting (GitHub Pages), local gates before any push, minimal CI, no cloud fleets |
-| Scope | Full RISC5 parity as the long-run goal | 12 milestones (docs/ROADMAP.md section 7); each ships a usable increment |
-| Validation | Manual plus public references; no RISC5 licence | Fixtures from the Appendix R peer-review tables, USGS ANALGWST, van Genuchten & Alves 1982, EPA spreadsheets, mibitrans cross-checks |
-| Architecture | TypeScript engine plus static single-page app | All computation in the browser (Web Worker); no backend; the Python tkinter shell is retired |
-| Methods | RISC5's legacy methods by default, with a per-process switch to a modern method | The method registry is the central engine abstraction; legacy-vs-modern comparison overlays are a headline feature |
-| Attribution | Thorough scientific references for legacy and modern methods, kept separate from third-party software licences | `docs/ATTRIBUTIONS.md` (science and data provenance) and `docs/THIRD_PARTY_LICENSES.md` (software), both generated from `data/references.json` and the lockfile; in-app Methods & References page |
+| Question            | Decision                                                                                                       | Consequence                                                                                                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Revenue vs personal | Personal, open source, free                                                                                    | $0 hosting (GitHub Pages), local gates before any push, minimal CI, no cloud fleets                                                                                                               |
+| Scope               | Full RISC5 parity as the long-run goal                                                                         | 12 milestones (docs/ROADMAP.md section 7); each ships a usable increment                                                                                                                          |
+| Validation          | Manual plus public references; no RISC5 licence                                                                | Fixtures from the Appendix R peer-review tables, USGS ANALGWST, van Genuchten & Alves 1982, EPA spreadsheets, mibitrans cross-checks                                                              |
+| Architecture        | TypeScript engine plus static single-page app                                                                  | All computation in the browser (Web Worker); no backend; the Python tkinter shell is retired                                                                                                      |
+| Methods             | RISC5's legacy methods by default, with a per-process switch to a modern method                                | The method registry is the central engine abstraction; legacy-vs-modern comparison overlays are a headline feature                                                                                |
+| Attribution         | Thorough scientific references for legacy and modern methods, kept separate from third-party software licences | `docs/ATTRIBUTIONS.md` (science and data provenance) and `docs/THIRD_PARTY_LICENSES.md` (software), both generated from `data/references.json` and the lockfile; in-app Methods & References page |
 
 ## 2026-10-15: Standing assumptions
 
@@ -34,16 +34,16 @@ entry here.
 
 ## 2026-10-15: M1 groundwater screen, chart library and design (wave 2)
 
-| Question | Decision | Why |
-|---|---|---|
-| Chart library | d3-contour and d3-scale (both ISC) drawing React-rendered SVG. Observable Plot and ECharts not used | The initial plan named Plot plus d3. Plot builds its SVG imperatively and, for a filled-and-isolined plan map, would still need d3-contour plus `Plot.geo`; it also brings its own colour handling that cannot follow the page theme tokens. Rendering the SVG in React keeps both themes on CSS custom properties (the plume ramp is a CSS `color-mix` between two theme tokens), keeps the test render in jsdom simple, and costs about 21 kB gzip on the main bundle (119.6 to 140.9 kB). ECharts was unnecessary because the contour map renders acceptably this way |
-| Where the engine runs | Module Web Worker (`compute.worker.ts`); a newer request terminates the worker and starts a fresh one; without Worker support (tests) it computes on a timer tick | A 100 by 60 map plus three curves never blocks input; input is debounced 300 ms (first compute is immediate). The worker chunk duplicates the engine (about 273 kB, loaded only for the screen) |
-| Pulse and stepped loading for Wexler and Domenico | The engine applies it: the screen passes `ConcentrationStep` lists (c0 times the step factor, zero-length steps dropped) to `patchiConcentration`, `patchfConcentration`, `patchiGrid`, `patchfGrid`, `domenicoConcentration` and `domenicoWarnings`, which superpose F(t - start) minus F(t - end) | Both solutions are linear in the source; the engine rejects overlapping, unordered, negative or NaN steps with RangeError, which the screen shows as an input error beside the last good result. The screen's earlier own superposition and its `ui.superposition` note are removed; `loadingParity.test.ts` pins pulse and stepped values recorded from that code to 1e-9 relative. The AT123D kernel takes the loading steps directly |
-| Source strength | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source |
-| Geometry | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width | One coordinate story for the three methods; Domenico already measures depth down from the top |
-| Screen average on the map | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout | Keeps the worker time bounded; the readout uses the finer average |
-| Finite thickness without a width | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table) |
-| Domenico | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed | Not a recommended method (see docs/methods/groundwater-transport.md) |
+| Question                                          | Decision                                                                                                                                                                                                                                                                                            | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Chart library                                     | d3-contour and d3-scale (both ISC) drawing React-rendered SVG. Observable Plot and ECharts not used                                                                                                                                                                                                 | The initial plan named Plot plus d3. Plot builds its SVG imperatively and, for a filled-and-isolined plan map, would still need d3-contour plus `Plot.geo`; it also brings its own colour handling that cannot follow the page theme tokens. Rendering the SVG in React keeps both themes on CSS custom properties (the plume ramp is a CSS `color-mix` between two theme tokens), keeps the test render in jsdom simple, and costs about 21 kB gzip on the main bundle (119.6 to 140.9 kB). ECharts was unnecessary because the contour map renders acceptably this way |
+| Where the engine runs                             | Module Web Worker (`compute.worker.ts`); a newer request terminates the worker and starts a fresh one; without Worker support (tests) it computes on a timer tick                                                                                                                                   | A 100 by 60 map plus three curves never blocks input; input is debounced 300 ms (first compute is immediate). The worker chunk duplicates the engine (about 273 kB, loaded only for the screen)                                                                                                                                                                                                                                                                                                                                                                          |
+| Pulse and stepped loading for Wexler and Domenico | The engine applies it: the screen passes `ConcentrationStep` lists (c0 times the step factor, zero-length steps dropped) to `patchiConcentration`, `patchfConcentration`, `patchiGrid`, `patchfGrid`, `domenicoConcentration` and `domenicoWarnings`, which superpose F(t - start) minus F(t - end) | Both solutions are linear in the source; the engine rejects overlapping, unordered, negative or NaN steps with RangeError, which the screen shows as an input error beside the last good result. The screen's earlier own superposition and its `ui.superposition` note are removed; `loadingParity.test.ts` pins pulse and stepped values recorded from that code to 1e-9 relative. The AT123D kernel takes the loading steps directly                                                                                                                                  |
+| Source strength                                   | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way         | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Geometry                                          | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width                                                            | One coordinate story for the three methods; Domenico already measures depth down from the top                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Screen average on the map                         | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout                                                                                                                                                                              | Keeps the worker time bounded; the readout uses the finer average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Finite thickness without a width                  | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF                                                                                                                               | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Domenico                                          | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed                                                                                                                                                                                  | Not a recommended method (see docs/methods/groundwater-transport.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## 2026-10-15: Schulze-Makuch 2005 dispersivity coefficients (M1)
 
@@ -752,6 +752,7 @@ screening choices, not rulings, as in M2 and M3.
 
 M8 slice D2 (sediment benchmark data build, 2026-10-17) implementation choices, none overturning a ruling
 above:
+
 - **Region 4 PDF.** Fetched 2026-10-17; the bytes match the checksum recorded on 2026-10-16
   (SHA-256 `7c89bc7c...2d0889`, 1,284,613 bytes). Tables 2a, 2b and 2c are on PDF pages 81 to 89. The CSVs
   are written by `scripts/extract-r4-sediment.ts` from `pdftotext -layout`, with blank cells placed by the
@@ -921,7 +922,7 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
 11. **Linearity.** Every M7 method is linear in its source concentration and returns its coefficient, so
     M5 cleanup levels are the target over the coefficient (no root find); M5 wrappers land in slice E4.
 12. **M9 interface.** M7 exposes `IrrigationSource { origin, waterConcentration(t), applicationRate,
-    season?, chemical }`; uptake, interception and soil accumulation belong to M9.
+season?, chemical }`; uptake, interception and soil accumulation belong to M9.
 13. **Tolerances.** Identities 1e-12 (1e-9 for limits), hand cases 1e-9, published Little 1992, RSL and
     SSG values at half a unit in the last printed figure, Table R-9 shower rows at 3 percent (or a named
     exception if the review lacks the shower inputs).
@@ -1331,7 +1332,7 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
 3. **Pore water from the M2 and M3 partitioning (DEFAULT).** C_pw = C_s rho_b / (theta_w + rho_b K_d), with
    the same chemical record, so a soil gives the same pore water in every milestone.
 4. **Irrigation as a plain interface (DEFAULT).** `PlantIrrigationInput { concentration_mg_per_L,
-   applicationRate_L_per_m2_per_d, source }` (renamed from `IrrigationInput`, which is the M7 sprinkler
+applicationRate_L_per_m2_per_d, source }` (renamed from `IrrigationInput`, which is the M7 sprinkler
    input), typed in or converted from the M7 `IrrigationSource` since slice E2; used only as an optional
    root-zone water concentration and a foliar interception term. Every user-entered run raises
    `IRRIGATION_USER_ENTERED`.
@@ -1744,7 +1745,7 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
 3. **Fix (DEFAULT).** The idle status line faded its text with `opacity: 0.6`, which pushed the muted
    token below 4.5:1. The fade is removed; the active state is shown with the full text token and a
    heavier weight instead. A test reads the rule so opacity cannot return.
-3a. **Late finding on `#/report` (DEFAULT).** The wave's final mobile check found one serious
+   3a. **Late finding on `#/report` (DEFAULT).** The wave's final mobile check found one serious
    `scrollable-region-focusable` violation (3 nodes) on `#/report`: the opened chart data tables scroll
    but were not keyboard reachable. The three `table-scroll` containers (vadose `DataTable`, transport
    breakthrough chart, cleanup modeled chart) are now focusable regions with a label.
@@ -1779,7 +1780,6 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
 3. **The site model screen is advisory** (Bryan: "Advisory (as planned)"). `#/site` builds a checklist of the
    screens to visit; no step is locked.
 4. **Scope: all ten slices**, U1 to U10, including the optional decimal comma entry (U10).
-
 
 ## 2026-10-19: Wave H slice U8, fill chemical properties from the database
 
@@ -1872,7 +1872,6 @@ Scope: the site-specific wildlife hazard quotient panel on `#/plants-eco` (inven
    with a round-trip case in `project/screens.test.ts`. CSV table `wildlife-dose` is added to the screen's
    downloads. No new route, so the mobile check route list and keyboard-order tests are unchanged.
 
-
 ## 2026-10-19: Wave H slice U7, soil texture presets on vadose and saturated
 
 Scope: a texture select on each vadose layer and on the saturated soil group (inventory C8, F4), filled from the
@@ -1928,7 +1927,6 @@ Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the ma
    pattern. The store, autosave, file and report plumbing already carry the whole `overrides` object.
 9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
    disclosure inside an existing card.
-
 
 ## 2026-10-19: Wave H slice U5, editable exposure factors and receptor names
 
@@ -2040,7 +2038,6 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
 5. **No project file change.** Format version 1 is untouched; there is no new route, so the mobile check and keyboard
    lists are unchanged.
 
-
 ## 2026-10-19: Wave I scope and the wave H open questions (Bryan delegated)
 
 Asked to answer the wave H open questions and pick the next wave, Bryan replied "whatever you recommend". The
@@ -2094,7 +2091,7 @@ their own blocks.
    and the CSV cell is blank; the "out of range" cell carries the distinct meaning. Chosen over a new "could not
    back-calculate" text (ruling). Test added, red first.
 7. **Corrected after review (F1).** The new `.repro-flag` rule had been spliced into the shared `table.compare th,
-   table.compare td` list, so `th` lost its alignment, padding, rule and wrapping. `plantsEco.css` restores the
+table.compare td` list, so `th` lost its alignment, padding, rule and wrapping. `plantsEco.css` restores the
    shared declarations, `th` keeps `font-weight: 600` in its own rule, and `.repro-flag` has its own rule. Regression
    test `plantsEco.css.test.ts` failed before the fix.
 
@@ -2195,7 +2192,6 @@ their own blocks.
 13. **Deviations.** `docs/methods/uncertainty.md` status paragraph edited (it named modeled sources as open). The
     component is `ModeledSourceUncertainty.tsx` because the case-insensitive filesystem resolves
     `./ModeledUncertainty` to `modeledUncertainty.ts`.
-
 
 ## 2026-10-19: Wave J scope
 
@@ -2313,7 +2309,7 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
    screen. The shared `afterEach` in `test-setup.ts` now resets the hash (red-first test in `testIsolation.test.tsx`).
    The conditional cleanup stays: a temporary diagnostic over the full suite found no mounted nodes left behind
    where the testing library was not loaded.
-7a. **Test helper naming (corrective pass).** Test-only helpers carry a `.testkit.` infix
+   7a. **Test helper naming (corrective pass).** Test-only helpers carry a `.testkit.` infix
    (`surfaceWater/linkedRun.testkit.ts`, `a11y/screenKeyboard.testkit.tsx`, formerly `computeLinked.ts` and
    `screenKeyboardOrder.tsx`), and `testIsolation.test.tsx` fails if any file in `src` that is neither a test nor
    a testkit imports vitest or the testing library.
@@ -2328,6 +2324,7 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 ## 2026-10-19: Wave J slice J5, local branches
 
 Both branches were checked against main and deleted. Restore either with `git branch <name> <tip>`.
+
 1. **`m1-groundwater-ui` (tip `5d6c6c7b42c10568b0a190a02808fe84c5d215bc`), deleted.** 10 commits, none
    patch-equivalent. The branch-only hunks in `apps/web/src/App.tsx` (lazy `TransportPage` import, `#/transport`
    route, shell-wide class, step link, transport button) and `apps/web/package.json` (d3-contour, d3-scale and
@@ -2746,6 +2743,7 @@ on `wave-lm`. Every ruling is DEFAULT.
 12. **Transport vadose read (DEFAULT).** The transport screen reads the vadose feed only when the saturated feed is not on.
 13. **Conflict-marker guard (DEFAULT).** Exact `=======` counts as a marker in markdown outside fences, so a setext
     underline of exactly seven `=` would be flagged.
+
 ## 2026-10-21: Check cadence between waves
 
 Bryan directed, verbatim: "yes, do all five", in reply to a proposal made after wave K was timed (about 20 of its
@@ -3042,7 +3040,6 @@ scope" block. Every ruling below is DEFAULT.
     `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
     screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
 
-<<<<<<< HEAD
 ## 2026-10-21: Wave O slice O1, risk and cleanup follow the list
 
 Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
@@ -3085,7 +3082,7 @@ Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every r
 8. **Fixture (DEFAULT).** `project/fixtures/project-rows-differ.json` (risk rows benzene and toluene, cleanup rows
    toluene and ethylbenzene, no list key) opens with the union on both screens, each row keeping its state and no
    feed marked stale (`project/rowsDiffer.test.tsx`).
-=======
+
 ## 2026-10-21: Wave O slice O2a, transport, vadose and saturated pick from the list
 
 Scope rulings 1 and 8 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
@@ -3111,4 +3108,31 @@ Scope rulings 1 and 8 of the "Project chemical list, waves N to P scope" block. 
    by these screens and is left for integration to delete.
 5. **Sending** needed no change: the senders tag their value with the screen chemical, and the O4 stores write
    that chemical's slot.
->>>>>>> wave-op-o2a
+
+## 2026-10-21: Wave O slice O2b, vapor, household, plants and surface water pick from the list
+
+Scope rulings 1 and 7 of the "Project chemical list, waves N to P scope" block and ruling 1 of the "Waves O and P
+scope" block. Every ruling below is DEFAULT.
+
+1. **Vapor.** The "Chemical" control is the shared project select. The saved `chemicalId` stays the pointer. The
+   Table R-3 benzene fixture (`risc4-benzene`) is a button beside the list ("Use the Table R-3 benzene test
+   values" and "Pick a project chemical"), not a list entry, so the list stays the project's chemicals. A pick
+   sets the id at once and fills the properties from the vapor database as soon as it has loaded.
+2. **Unavailable chemicals.** A list chemical with no row in the vapor database keeps its id, leaves the
+   properties as typed, shows the reason ("no vapor properties in the chemical database") and cannot be sent
+   (the sender needs a database row). The same holds for plants and eco with the RSL (log Kow, Koc and Kd stay
+   as typed and the produce send still works from typed values).
+3. **Household.** The typed name and CAS boxes retire; the select replaces both. The pick copies the list name
+   into `chemicalName` (kept as a saved key for labels and the older files), and a pick of "Not set" clears it.
+   A household chemical that is not in the database is already a list entry (wave N). The Henry constant and
+   molecular weight stay typed, since the household engine takes no database values. The send refusal now reads
+   "Pick the chemical this result is for from the project list" (`household/feed.ts`).
+4. **Plants and eco.** The RSL search picker gives way to the select; the TPH composition is unaffected. The RSL
+   properties fill on pick, once the RSL database and the cleanup properties have loaded.
+5. **Surface water, linked.** While linked, the chemical is the transport run's, shown read-only (the select is
+   hidden as before). It is an error, shown above the results and blocking both sends, when that chemical is not
+   in the project list, or when the screen's own chemical is set and the bank run held is for another chemical
+   (the fallback slot the read rule returns). Unlinked keeps the select. The sender tag tests (linked and
+   unlinked) were already added in O4 and are kept.
+6. **Files outside the named list.** `household/feed.ts` (the refusal text) and `household/feed.test.ts`. No
+   `FINGERPRINT_SKIP` change: no new saved key.

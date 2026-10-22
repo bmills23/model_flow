@@ -97,8 +97,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
   plain text and are not affected by this setting.
 - The project now keeps a list of its chemicals, filled from the chemicals on the risk and cleanup screens
-  and the one chosen on each other screen. The surface water, groundwater transport, vadose zone and saturated source screens pick their chemical from
-  it; the other screens do not show it yet. An older file or link opens with
+  and the one chosen on each other screen. The surface water, groundwater transport, vadose zone, saturated source, vapor intrusion, household and
+  plants screens pick their chemical from it. An older file or link opens with
   the list filled in the same way, and none of its sent results turns stale because of it. An older version
   of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
@@ -179,7 +179,10 @@ The Texture preset in the Soil group fills porosity, bulk density, residual wate
 
 Vapors from soil, soil gas or groundwater diffuse through the soil and enter a building. The legacy and
 modern Johnson and Ettinger methods run on one set of inputs, with indoor air results, the vapor profile
-through the soil and a check against a published case.
+through the soil and a check against a published case. Its "Chemical" list is the project's chemical list, and
+picking one fills the properties from the EPA tables; the Table R-3 benzene test values stay available beside the list
+as a test case, not a project chemical. A project chemical with no vapor properties in the database is marked as
+unavailable, you can enter its properties by hand, and it cannot be sent on.
 
 ### Surface water and sediment (`#/surface-water`)
 
@@ -193,13 +196,16 @@ section compares the result with water quality and sediment criteria.
 Household exposure from tap and irrigation water and from surface soil: shower air, sprinkler spray and
 irrigation contact, and windblown particulates, each with a legacy and a modern method. Values that no
 primary source supplied are left blank for you to enter; values taken as RISC5 choices carry a warning. The
-result can be sent to the risk and cleanup screens.
+result can be sent to the risk and cleanup screens. The chemical is picked from the project list (the old typed
+name and CAS number boxes are gone); the Henry constant and molecular weight stay boxes you fill in. A project that
+has no chemicals yet shows a link to the chemicals screen in their place.
 
 ### Plants, ecology and TPH (`#/plants-eco`)
 
 Homegrown produce plant factors for the risk screen, screening ecological hazard quotients, and total
 petroleum hydrocarbon levels from a fraction composition. Nothing is defaulted from memory: a value without
-a primary source is yours to enter, and the button that sends a result on stays disabled until the inputs are
+a primary source is yours to enter, the chemical is picked from the project list (an RSL chemical fills log Kow, Koc
+and Kd; a chemical the RSL does not list is marked and left for you to enter), and the button that sends a result on stays disabled until the inputs are
 usable. The produce button sends the plant factors, the intake and the plant engine's warnings; the total
 TPH button sends the total level, the fraction table and the warnings, and the cleanup screen shows them.
 
@@ -410,7 +416,8 @@ chemicals instead of taking another chemical's value, and the row for the matchi
 cleanup refuses a groundwater, vadose or saturated run for another chemical. A result sent from a screen with the
 chemical typed by hand carries no chemical: it is still used when the run holds one chemical, and when the run
 holds two or more the row says to choose the chemical on the sending screen and send it again. A surface water run
-linked to a groundwater run takes that run's chemical; an unlinked one takes the chemical you pick in the
+linked to a groundwater run takes that run's chemical, shown read-only, and shows an error (and sends nothing) when
+that chemical is not in the project list or the run held is for another chemical than the one set; an unlinked one takes the chemical you pick in the
 "Chemical" list on the surface water screen (the project's chemical list), and carries none while that reads "Not
 set", in which case a run of two or more chemicals refuses it. While the project list is empty, the surface water
 screen shows a link to the chemicals screen in place of the list. A chemical chosen earlier that has since been

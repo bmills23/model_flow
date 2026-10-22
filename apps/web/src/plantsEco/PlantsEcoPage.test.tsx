@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { TPH_SURROGATE_IDS } from '@model-flow/engine';
 import { PlantsEcoPage } from './PlantsEcoPage';
 import { clearProduceFeed, clearTphFeed, getProduceFeed, getTphFeed } from './feeds';
-import { forgetMemory, getScreen } from '../project/store';
+import { act } from '@testing-library/react';
+import { addChemical, forgetMemory, getScreen } from '../project/store';
 
 afterEach(() => {
   clearProduceFeed();
@@ -15,9 +16,10 @@ function fill(label: RegExp, value: string) {
 }
 
 async function pickLead() {
-  fireEvent.change(await screen.findByLabelText(/find a chemical/i), { target: { value: 'lead' } });
-  const buttons = await screen.findAllByRole('button', { name: /^add lead and compounds/i });
-  fireEvent.click(buttons[0]!);
+  act(() => addChemical({ id: '7439-92-1-lead-and-compounds', name: 'Lead and Compounds' }));
+  fireEvent.change(await screen.findByLabelText(/^chemical$/i), {
+    target: { value: '7439-92-1-lead-and-compounds' },
+  });
 }
 
 describe('PlantsEcoPage in the project', () => {
@@ -87,7 +89,7 @@ describe('PlantsEcoPage', () => {
     await waitFor(() => expect((send as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(send);
     const feed = getProduceFeed();
-    expect(feed?.chemicalId).toContain('7439-92-1');
+    expect(feed?.chemicalId).toContain('7439-92-1-lead-and-compounds');
     expect(feed?.method).toBe('plantUptake.hhrap-2005');
     expect(Object.keys(feed!.factors).length).toBeGreaterThan(0);
   }, 30000);
@@ -131,5 +133,31 @@ describe('PlantsEcoPage', () => {
       target: { value: '0.5' },
     });
     expect(getScreen('plantsEco').form.wildlifeRows[0]!.auf).toBe('0.5');
+  }, 30000);
+});
+
+describe('PlantsEcoPage chemical from the project list', () => {
+  it('offers the project chemicals, not a database search', () => {
+    act(() => addChemical({ id: '108-88-3', name: 'Toluene' }));
+    render(<PlantsEcoPage />);
+    expect(screen.queryByLabelText(/find a chemical/i)).toBeNull();
+    expect(screen.getByRole('option', { name: 'Toluene' })).toBeTruthy();
+  });
+
+  it('fills the properties from the RSL once the list chemical is picked', async () => {
+    render(<PlantsEcoPage />);
+    await pickLead();
+    expect(getScreen('plantsEco').form.chemicalId).toBe('7439-92-1-lead-and-compounds');
+    expect(getScreen('plantsEco').form.chemicalName).toBe('Lead and Compounds');
+    await waitFor(() =>
+      expect((screen.getByLabelText(/^kd \(l\/kg\)/i) as HTMLInputElement).value).not.toBe(''),
+    );
+  }, 30000);
+
+  it('says a list chemical with no RSL properties is unavailable for the fill, and still allows entry', async () => {
+    act(() => addChemical({ id: 'user-x', name: 'Own compound' }));
+    render(<PlantsEcoPage />);
+    fireEvent.change(await screen.findByLabelText(/^chemical$/i), { target: { value: 'user-x' } });
+    await screen.findByText(/has no RSL properties/i);
   }, 30000);
 });
