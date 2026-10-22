@@ -43,7 +43,7 @@ describe('screenUsed on a project saved before wave R', () => {
   it('reads an edited old screen as used', () => {
     const s = old();
     s.transport = { ...s.transport, form: { ...s.transport.form, rx: '150' } };
-    s.vadose = { ...s.vadose, form: { ...s.vadose.form, foc: '0.02' } };
+    s.vadose = { ...s.vadose, form: { ...s.vadose.form, durationYr: '77' } };
     expect(screenUsed('transport', s)).toBe(true);
     expect(screenUsed('vadose', s)).toBe(true);
   });
