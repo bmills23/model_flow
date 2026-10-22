@@ -139,8 +139,8 @@ const FED_ROUTES = [
     tag: 'seeded',
     viaSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);await u.sleep(800);
       u.fill(/^receptor name/i,'North lot worker');
-      u.fill(/^your value for oral slope factor/i,'0.5');u.fill(/^source note/i,'site toxicologist memo');
-      u.fill(/^body weight \\(kg\\)/i,'60');
+      u.fill(/^your value for oral slope factor/i,'0.5');u.fill(/^source note \\(required\\)/i,'site toxicologist memo');
+      u.fill(/^body weight \\(kg\\)/i,'60');u.fill(/^source note for body weight/i,'site survey');
       await u.sleep(300);
       document.querySelectorAll('main details.override-panel').forEach(d=>{d.open=true});
       await u.sleep(500)})()`,
