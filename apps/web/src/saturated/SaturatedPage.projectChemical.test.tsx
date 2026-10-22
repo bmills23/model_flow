@@ -86,4 +86,21 @@ describe('SaturatedPage chemical from the project list', () => {
     expect(getSaturatedFeed(BENZENE)?.chemicalId).toBe(BENZENE);
     expect(getSaturatedFeed(TOLUENE)?.chemicalId).toBe(TOLUENE);
   }, 90000);
+
+  it('a user chemical without air or water diffusivity is not told so, and no Da or Dw is saved', async () => {
+    const v = (value: string) => ({ value, note: 'lab' });
+    addChemical({
+      id: 'user-1',
+      name: 'Mine',
+      values: { mw: v('100'), s: v('50'), hPrime: v('0.1'), koc: v('80'), dia: v('0.08') },
+    });
+    render(<SaturatedPage />);
+    await loaded();
+    fireEvent.change(picker(), { target: { value: 'user-1' } });
+    expect(screen.queryByText(/no usable/i)).toBeNull();
+    const form = getScreen('saturated').form as unknown as Record<string, unknown>;
+    expect(form.chemicalId).toBe('user-1');
+    expect('Da' in form).toBe(false);
+    expect('Dw' in form).toBe(false);
+  }, 60000);
 });

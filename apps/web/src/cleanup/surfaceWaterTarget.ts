@@ -124,6 +124,8 @@ export function surfaceTargetLevels(args: {
   slots: SurfaceWaterFeed | FeedSlots<SurfaceWaterFeed> | null | undefined;
   names: Record<string, string>;
   source: SourceKind;
+  /** How many chemicals the cleanup run holds (not how many have a target). */
+  runCount: number;
 }): SurfaceTargetLevel[] {
   const { db, slots, names, source } = args;
   const active = args.targets.filter((t) => t.kind !== 'none');
@@ -198,7 +200,7 @@ export function surfaceTargetLevels(args: {
       feed: 'surface water result',
       feedChemical: feed.chemicalId,
       rowId: t.chemicalId,
-      runCount: args.targets.length,
+      runCount: args.runCount,
       nameOf,
     });
     if (problem !== null) return none(`${chemical}: ${problem}.`);

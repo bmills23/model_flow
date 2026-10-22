@@ -213,6 +213,7 @@ export function CleanupPage() {
         slots: surfaceSlots,
         names,
         source: form.source,
+        runCount: form.chemicals.length,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [form.surfaceTargets, form.chemicals, form.source, criteriaDb, surfaceSlots, names],
