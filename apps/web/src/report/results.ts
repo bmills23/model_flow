@@ -15,6 +15,12 @@ import { buildModeled } from '../cleanup/modeledBuild';
 import { runCleanup } from '../cleanup/compute';
 import { sourceLevelCsvTables } from '../cleanup/sourceLevelsCsv';
 import {
+  surfaceTargetLevels,
+  surfaceTargetTables,
+  targetsOfChemicals,
+} from '../cleanup/surfaceWaterTarget';
+import { loadCriteriaDb } from '../surfaceWater/criteriaDb';
+import {
   cleanupCsvTables,
   CLEANUP_METHOD_IDS,
   ssgCsvTables,
@@ -390,6 +396,23 @@ async function cleanup(
         surface: feed.slots<SurfaceWaterFeed>('surfaceWater'),
       }),
     );
+    const targets = targetsOfChemicals(
+      form.surfaceTargets,
+      form.chemicals.map((c) => c.id),
+    );
+    if (targets.some((t) => t.kind !== 'none')) {
+      sec.tables.push(
+        ...surfaceTargetTables(
+          surfaceTargetLevels({
+            targets,
+            db: await loadCriteriaDb(),
+            slots: feed.slots<SurfaceWaterFeed>('surfaceWater'),
+            names,
+            source: form.source,
+          }),
+        ),
+      );
+    }
   } else if (!form.ssg.on && tphHeld === null) {
     return notComputed(built.errors);
   } else {

@@ -281,9 +281,8 @@ Surface water source levels: when the surface water screen has sent a result (th
 and a swimming pathway is on, a **Surface water source levels** panel lists the dissolved groundwater
 concentration that gives each surface water level, in mg/L. It divides the surface water level by the run's
 coefficient (the peak surface water concentration per unit of groundwater source, taken from the run you sent,
-for the series you sent), so a groundwater source at that level alone just meets the target. The run is not tied
-to a chemical, so the panel quantifies a level only when the cleanup run holds one chemical (the one the surface
-water run was made for); with two or more, every row reads "not quantified" and says why. The send buttons are off
+for the series you sent), so a groundwater source at that level alone just meets the target. Each surface water run is kept for the chemical it was sent for, so the panel quantifies a level only for the cleanup row of that
+chemical; a row of another chemical reads "not quantified" and says why. The send buttons are off
 while the surface water screen shows an engine error, so only a current result is sent. The level reads "not quantified", with the reason, when
 the run has an upstream background (the peak is then not proportional to the source), when the plume is fed by a
 vadose or saturated source screen (the run holds no groundwater source concentration), when nothing transfers
@@ -291,6 +290,18 @@ to the surface water, when the source level would exceed the solubility entered 
 when the result was sent before this panel existed (send it again). When the surface water inputs change after the
 send, the note at the top of the page marks the sent series as out of date, and the panel keeps using what was sent
 until you send again.
+
+Surface water target: the cleanup screen has a **Surface water target** section with one choice per cleanup chemical: none,
+an **NRWQC criterion**, or **My value**. An NRWQC criterion is read from the shipped EPA National Recommended Water Quality
+Criteria tables; pick the kind of criterion from the list (the default is the freshwater chronic aquatic life criterion, else
+the human health criterion for water and organism consumption; a criterion that needs hardness, pH or other site inputs is not
+listed). My value is a concentration in ug/L and needs a note saying where it comes from. A **Surface water target source
+levels** panel then gives, for each chemical, the dissolved groundwater source level (mg/L) that just meets the target: the
+target divided by the peak surface water concentration per unit of source from that chemical's own surface water run. The row
+shows the target in ug/L, its basis, the citation of the table or "User value (this project)" with your note, and the stale
+mark of the surface water result. It applies to a dissolved groundwater source only (a soil source reads "not quantified" and
+says so). A chemical with no criterion, no surface water result sent, or a run with no coefficient says which is missing.
+The rows are in the CSV downloads (one file) and in the report.
 
 A modeled source (groundwater, vadose or saturated soil source carried to the well) has its own
 **Probabilistic cleanup level, modeled source** panel once the level above is solved. Choose the legacy or

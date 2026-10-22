@@ -17,7 +17,10 @@ import { HouseholdPanel } from './HouseholdPanel';
 import { VaporPanel } from './VaporPanel';
 import { getVaporRiskFeedSlots, subscribeVaporRiskFeed } from '../vapor/feeds';
 import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
-import { SurfaceWaterPanel } from './SurfaceWaterPanel';
+import { SurfaceWaterPanel, SurfaceWaterTargetPanel } from './SurfaceWaterPanel';
+import { SurfaceWaterTargetInputs } from './SurfaceWaterTargetInputs';
+import { surfaceTargetLevels, surfaceTargetTables, targetsOfChemicals } from './surfaceWaterTarget';
+import { useCriteriaDb } from './useCriteriaDb';
 import { TphPanel } from './TphPanel';
 import {
   getProduceFeedSlots,
@@ -112,6 +115,7 @@ export function CleanupPage() {
   const modeledFeeds = feedsUsed.filter((k) => k.feed !== 'produce');
   const directFeeds = produceSlots.size > 0 ? feedsUsed.filter((k) => k.feed === 'produce') : [];
   const rowIds = form.chemicals.map((c) => c.id);
+  const criteriaDb = useCriteriaDb();
   // the form with the project's receptor names and factor edits laid on, for every build below
   const buildForm = useMemo(() => withReceptorEdits(form, overrides, 'cleanup'), [form, overrides]);
 
@@ -158,6 +162,19 @@ export function CleanupPage() {
     }
     return out;
   }, [form.chemicals, lastGood, db]);
+
+  const targetRows = useMemo(
+    () =>
+      surfaceTargetLevels({
+        targets: targetsOfChemicals(form.surfaceTargets, rowIds),
+        db: criteriaDb,
+        slots: surfaceSlots,
+        names,
+        source: form.source,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form.surfaceTargets, form.chemicals, form.source, criteriaDb, surfaceSlots, names],
+  );
 
   const addChemical = (id: string): void => {
     const rec = db?.byId.get(id);
@@ -451,6 +468,13 @@ export function CleanupPage() {
             onChange={(next) => patch({ ssg: { ...form.ssg, ...next } })}
           />
 
+          <SurfaceWaterTargetInputs
+            chemicals={form.chemicals}
+            targets={form.surfaceTargets}
+            db={criteriaDb}
+            onChange={(surfaceTargets) => patch({ surfaceTargets })}
+          />
+
           <section className="panel" aria-label="Receptors">
             <h2>Receptors</h2>
             <ReceptorPanel
@@ -630,6 +654,8 @@ export function CleanupPage() {
               feeds={modeledFeeds}
             />
           )}
+          <SurfaceWaterTargetPanel rows={targetRows} />
+          {targetRows.length > 0 && <DownloadCsv tables={surfaceTargetTables(targetRows)} />}
           <SsgResults form={buildForm} db={db} />
         </div>
       </div>
