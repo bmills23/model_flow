@@ -137,7 +137,7 @@ const FED_ROUTES = [
   {
     route: '#/risk',
     tag: 'seeded',
-    viaSetup: `(async()=>{const u=window.__ui;await X
+    viaSetup: `(async()=>{const u=window.__ui;await u.pick('71-43-2',/^add benzene/i);await u.sleep(800);
       u.fill(/^receptor name/i,'North lot worker');
       u.fill(/^your value for oral slope factor/i,'0.5');u.fill(/^source note/i,'site toxicologist memo');
       u.fill(/^body weight \\(kg\\)/i,'60');
