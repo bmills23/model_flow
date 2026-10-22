@@ -2823,6 +2823,7 @@ records. Wave O: risk and cleanup rows follow the list and `#/chemicals` gains "
 and the surface water screen pick from the list; per-chemical feed slots with the version 2 migration. Wave P:
 user-defined chemicals and the surface water cleanup target.
 
+<<<<<<< HEAD
 ## 2026-10-21: Wave N slice N1, project chemical list
 
 1. **The list is stored and edited, not derived live (DEFAULT).** `chemicals` is a plain list the store holds
@@ -2846,3 +2847,36 @@ user-defined chemicals and the surface water cleanup target.
 5. **Accessors (DEFAULT).** `getChemicals`, `subscribeChemicals`, `addChemical`, `removeChemical` in
    `apps/web/src/project/store.ts`; `chemicalsOf` and `buildProject({ chemicals })` in `project/index.ts`;
    `deriveChemicals` and `chemicalIdsOf` in `project/chemicals.ts`. No version bump.
+=======
+## 2026-10-21: Wave N slice N2, feeds tagged by chemical
+
+1. **Optional `chemicalId` on nine feeds (DEFAULT).** The well, bank, transport chain, surface water, vadose and
+   saturated feeds and the three vapor input feeds (vadose, water table, saturated; type `SourceSeries`) carry an
+   optional `chemicalId`, set by the sender from the screen's chemical and left off where that is blank (typed by
+   hand). The five stored feeds (well, bank, vadose, saturated, surface water) allow the key in `schema.ts`; the
+   vapor feeds are free JSON and keep it. No stale key, fingerprint or version changes, and a file without the
+   tag opens as before.
+2. **Surface water is tagged from the linked bank run (DEFAULT).** The surface water screen has no chemical
+   picker, so a run sent while linked takes the chemical of the bank feed; unlinked, or linked to an untagged
+   bank run, it is untagged.
+3. **One comparison rule for every consumer (DEFAULT).** `project/feedChemical.ts` holds it. A tagged feed for the
+   row's chemical is used. A tagged feed for another chemical is an error on that row naming both chemicals
+   ("the transport well result is for Benzene, not Toluene"). An untagged feed keeps today's behaviour in a run
+   of one chemical and is an error naming the feed in a run of two or more ("does not record which chemical it was
+   made for"). The risk well and surface water branches, modeled cleanup and the surface water levels use it; the
+   household, vapor and produce branches already required a matching tag and are unchanged.
+4. **Modeled cleanup refuses another chemical's run (DEFAULT).** The groundwater transport run, and the vadose or
+   saturated run when that is the source, must be for the cleanup chemical; the earlier note is kept. A vadose or
+   saturated run the source does not use is not checked. The one-chemical cap (`ONE_CHEMICAL`) stays, so the
+   untagged multi-chemical case never reaches these checks there.
+5. **Surface water levels for a multi-chemical cleanup run (DEFAULT).** A feed tagged with one of the run's
+   chemicals is quantified for that chemical's row and not quantified, with a reason naming both chemicals, for the
+   others; this replaces the blanket refusal of two or more chemicals. `surfaceWaterSourceLevels` takes an optional
+   names map for the reason text.
+6. **Produce stale check follows the chemical (DEFAULT).** A held produce feed for another chemical is not read by
+   risk or cleanup rows of a different chemical, so editing it does not mark them stale. With no produce feed held,
+   or an untagged one, the check is unchanged.
+7. **Not done here (DEFAULT).** The vapor screen and the transport screen read the tagged vadose, saturated and
+   water table feeds without comparing their chemical to the screen's own; that is outside this slice's files and
+   is left for wave O with the per-chemical slots.
+>>>>>>> wave-n-n2

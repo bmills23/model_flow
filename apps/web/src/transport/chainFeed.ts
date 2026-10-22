@@ -10,6 +10,8 @@ import { createFeed } from '../vapor/feedStore';
 export interface TransportFeed {
   scenario: Scenario;
   label: string;
+  /** Database id of the chemical the screen was set to; absent when entered by hand. */
+  chemicalId?: string;
 }
 
 const store = createFeed<TransportFeed>();

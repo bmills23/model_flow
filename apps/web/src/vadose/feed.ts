@@ -11,6 +11,8 @@ export interface VadoseFeed {
   scenario: VadoseScenario;
   method: VadoseMethod;
   label: string;
+  /** Database id of the chemical the screen was set to; absent when entered by hand or untagged. */
+  chemicalId?: string;
 }
 
 const store = createFeed<VadoseFeed>();

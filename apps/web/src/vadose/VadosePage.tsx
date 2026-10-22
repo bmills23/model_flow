@@ -12,6 +12,7 @@ import { DepthProfileChart } from './DepthProfileChart';
 import { getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
 import { getVadoseVaporFeed, setVadoseVaporFeed, subscribeVadoseVaporFeed } from '../vapor/feeds';
 import { vadoseVaporSource } from './vaporFeed';
+import { chemicalTag } from '../project/feedChemical';
 import {
   DEFAULT_FORM,
   R7_PUBLISHED,
@@ -194,17 +195,19 @@ export function VadosePage() {
       scenario,
       method: run.method,
       label: `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}`,
+      ...chemicalTag(form.chemicalId),
     });
   };
 
   const useAsVaporSource = (): void => {
     if (!run) return;
-    setVadoseVaporFeed(
-      vadoseVaporSource(
+    setVadoseVaporFeed({
+      ...vadoseVaporSource(
         run,
         `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}, source pore water`,
       ),
-    );
+      ...chemicalTag(form.chemicalId),
+    });
   };
 
   const sourceStats = (r: RunSummary) => {

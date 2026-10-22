@@ -25,6 +25,16 @@ function heldFor(held: HeldFeeds, k: string, id: string | undefined): boolean {
 }
 
 /**
+ * True when a row for chemical `id` that takes the produce factors reads the held produce feed. The
+ * feed is for one chemical, so a held feed for another chemical is not read by this row; with no feed
+ * held (or `held` not given) the row is taken to read it, as before.
+ */
+function readsProduce(held: HeldFeeds, id: string | undefined): boolean {
+  if (held === undefined || held.produce === undefined || held.produce === null) return true;
+  return heldFor(held, 'produce', id);
+}
+
+/**
  * The feeds a risk screen's chemical rows take their values from. A vapor or household feed is for
  * one chemical, so with `held` given it counts only for a flagged row of that chemical; without
  * `held` any flagged row counts.
@@ -49,7 +59,7 @@ export function riskFeedsRead(rows: readonly ChemicalFlags[], held?: HeldFeeds):
   ) {
     out.push('household');
   }
-  if (rows.some((r) => r.produceFromPlantsEco)) out.push('produce');
+  if (rows.some((r) => r.produceFromPlantsEco && readsProduce(held, r.id))) out.push('produce');
   return out;
 }
 
@@ -66,7 +76,9 @@ export function cleanupFeedsRead(
   if (form.source !== 'direct') out.push('transportChain');
   if (form.source === 'vadose') out.push('vadose');
   if (form.source === 'saturated') out.push('saturated');
-  if (form.chemicals.some((r) => r.produceFromPlantsEco)) out.push('produce');
+  if (form.chemicals.some((r) => r.produceFromPlantsEco && readsProduce(held, r.id))) {
+    out.push('produce');
+  }
   for (const k of ['household', 'vaporRisk', 'surfaceWater', 'tph'] as const) {
     if (held?.[k] === undefined || held[k] === null) continue;
     // a household or vapor feed is for one chemical: it matters only when that chemical is a row

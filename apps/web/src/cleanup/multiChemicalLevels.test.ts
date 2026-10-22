@@ -97,7 +97,7 @@ describe('source levels with two chemicals in the cleanup run', () => {
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) {
       expect(r.level).toBeNull();
-      expect(r.reason).toMatch(/more than one chemical/i);
+      expect(r.reason).toMatch(/does not record which chemical it was made for/i);
     }
     expect(new Set(rows.map((r) => r.chemical))).toEqual(new Set(BOTH));
   });

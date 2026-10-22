@@ -12,6 +12,8 @@ export interface WellFeed {
   label: string;
   times: number[];
   values: number[];
+  /** Database id of the chemical the screen was set to; absent when entered by hand or sent before the tag existed. */
+  chemicalId?: string;
 }
 
 const store = createFeed<WellFeed>();

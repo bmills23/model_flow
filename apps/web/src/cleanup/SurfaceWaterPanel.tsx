@@ -16,7 +16,7 @@ export function SurfaceWaterPanel(props: {
   names: Record<string, string>;
 }) {
   const { outcome, feed, names } = props;
-  const rows = surfaceWaterSourceLevels(outcome, feed);
+  const rows = surfaceWaterSourceLevels(outcome, feed, names);
   if (rows.length === 0) return null;
   const reasons = [...new Set(rows.flatMap((r) => (r.reason ? [r.reason] : [])))];
   const warnings = [...new Set(rows.flatMap((r) => r.warnings))];

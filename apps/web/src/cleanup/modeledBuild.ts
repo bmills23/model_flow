@@ -5,6 +5,7 @@ import type { ChemicalDb } from '../risk/chemicalDb';
 import type { SaturatedFeed } from '../saturated/feed';
 import type { TransportFeed } from '../transport/chainFeed';
 import type { VadoseFeed } from '../vadose/feed';
+import { feedChemicalProblem } from '../project/feedChemical';
 import { buildCleanup } from './build';
 import type { CleanupForm } from './form';
 import type { ModeledRequest, ModeledSource, ModeledTarget } from './modeledTypes';
@@ -52,6 +53,39 @@ export function buildModeled(form: CleanupForm, db: ChemicalDb, feeds: Feeds): M
   if (feeds.transport === null) errors.push(NEEDS_TRANSPORT);
   if (form.source === 'vadose' && feeds.vadose === null) errors.push(NEEDS_VADOSE);
   if (form.source === 'saturated' && feeds.saturated === null) errors.push(NEEDS_SATURATED);
+
+  // Each upstream run is for one chemical and must be for the chemical of this run. A tagged run for
+  // another chemical is refused; an untagged one is taken (the run holds one chemical, or ONE_CHEMICAL
+  // has already said so).
+  if (form.chemicals.length === 1) {
+    const row = form.chemicals[0]!;
+    const nameOf = (id: string): string =>
+      id === row.id ? row.name : (db.byId.get(id)?.name ?? id);
+    const upstream: [string, string | undefined, boolean][] = [
+      ['groundwater transport run', feeds.transport?.chemicalId, feeds.transport !== null],
+      [
+        'vadose zone run',
+        feeds.vadose?.chemicalId,
+        form.source === 'vadose' && feeds.vadose !== null,
+      ],
+      [
+        'saturated soil source run',
+        feeds.saturated?.chemicalId,
+        form.source === 'saturated' && feeds.saturated !== null,
+      ],
+    ];
+    for (const [feed, feedChemical, held] of upstream) {
+      if (!held) continue;
+      const problem = feedChemicalProblem({
+        feed,
+        feedChemical,
+        rowId: row.id,
+        runCount: 1,
+        nameOf,
+      });
+      if (problem !== null) errors.push(`${row.name}: ${problem}`);
+    }
+  }
 
   const base = buildCleanup({ ...form, allocation: 'individual' }, db);
   if (!base.ok) errors.push(...base.errors);

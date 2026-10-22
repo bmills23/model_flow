@@ -110,7 +110,7 @@ export function sourceLevelCsvTables(
       editions: ['rsl'],
       label: 'surface water source levels',
       feeds: ['surfaceWater'],
-      rows: surfaceWaterSourceLevels(outcome, feeds.surface).map((r) => ({
+      rows: surfaceWaterSourceLevels(outcome, feeds.surface, names).map((r) => ({
         ...rowOf(
           { ...r, sourceMethod: r.surfaceMethod, what: 'Groundwater source (surface water)' },
           name(r.chemical),

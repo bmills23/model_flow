@@ -1,4 +1,5 @@
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import { feedChemicalProblem } from '../project/feedChemical';
 import { sourceLevelOfChemical } from './chemicalLevel';
 import type { CleanupOutcome } from './compute';
 
@@ -28,15 +29,18 @@ const UNIT = { unit: 'mg/L', fromSi: 1e3 } as const;
  * The dissolved groundwater source level behind the cleanup screen's surface water level, for the
  * surface water run the screen sent: the surface water level over the run's coefficient (peak surface
  * water per unit of the groundwater source), with no root find. The coefficient is the run's own, so it
- * applies to the chemical the run was made for; the run does not record which chemical that is (it takes
- * typed properties, not a database id), so with more than one chemical in the cleanup run every row is
- * not quantified, with the reason. A level is not quantified, with the reason, where the
+ * applies to the chemical the run was made for. A run tagged with its chemical (taken from the transport
+ * run it is linked to) is quantified for the cleanup row of that chemical, and every other row is not
+ * quantified, with a reason naming both chemicals. An untagged run (sent before the tag existed, or not
+ * linked) is taken for a cleanup run of one chemical; with two or more every row is not quantified, with
+ * the reason. A level is not quantified, with the reason, where the
  * run recorded no coefficient, the chain is not proportional to its source, nothing transfers, or the
  * source level exceeds the solubility entered on the run; it is never printed as zero.
  */
 export function surfaceWaterSourceLevels(
   outcome: CleanupOutcome,
   feed: SurfaceWaterFeed,
+  names: Record<string, string> = {},
 ): SurfaceWaterLevelRow[] {
   const rows: SurfaceWaterLevelRow[] = [];
   const c = feed.coefficient;
@@ -61,12 +65,15 @@ export function surfaceWaterSourceLevels(
       });
     };
     for (const lv of medium.levels) {
-      if (medium.levels.length > 1) {
-        none(
-          lv.chemical,
-          "The cleanup run holds more than one chemical and the surface water run does not record which chemical it was made for, so its coefficient (that chemical's Koc, decay and solubility) cannot be applied to this one. Run the cleanup screen with the one chemical the surface water run was made for.",
-          lv.level,
-        );
+      const problem = feedChemicalProblem({
+        feed: 'surface water result',
+        feedChemical: feed.chemicalId,
+        rowId: lv.chemical,
+        runCount: medium.levels.length,
+        nameOf: (id) => names[id] ?? id,
+      });
+      if (problem !== null) {
+        none(lv.chemical, `${names[lv.chemical] ?? lv.chemical}: ${problem}.`, lv.level);
         continue;
       }
       if (c === undefined) {

@@ -19,6 +19,11 @@ export interface SurfaceWaterFeed {
    * source levels. Absent on a feed saved before it existed (the cleanup panel then says so).
    */
   coefficient?: SurfaceWaterCoefficient;
+  /**
+   * Database id of the chemical the run was made for, taken from the transport bank run it is linked
+   * to; absent when the run is not linked or the bank run was untagged.
+   */
+  chemicalId?: string;
 }
 
 const store = createFeed<SurfaceWaterFeed>();
