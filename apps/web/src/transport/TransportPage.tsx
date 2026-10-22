@@ -11,7 +11,7 @@ import type { ComputeRequest, MethodKey } from './compute';
 import { toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { useChemicalRows } from '../ui/chemicalFill';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { plumeCsvTable, transportCsvTables } from './csv';
@@ -271,18 +271,17 @@ export function TransportPage() {
                 />
               </div>
             )}
-            <ChemicalPicker
-              id="transport-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) => {
+              onPick={(id, row) => {
                 // A record without a Koc cannot give Kd, so retardation stays as the user left it
                 const hasKoc = row !== null && row.rsl.koc?.value !== undefined;
                 setNoKocName(row !== null && !hasKoc ? row.name : null);
                 setForm((f) => ({
                   ...f,
-                  chemicalId: row?.id ?? '',
+                  chemicalId: id,
                   ...(row && hasKoc
                     ? { retardMode: 'kd' as const, kd: kdFor(row.id, f.foc, f.kd) }
                     : {}),

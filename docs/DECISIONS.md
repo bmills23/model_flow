@@ -3041,3 +3041,29 @@ scope" block. Every ruling below is DEFAULT.
     when a slot came from it), `report/modeledReport.ts`, `report/uncertaintyReport.ts`, `cleanup/build.ts`,
     `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
     screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
+
+## 2026-10-21: Wave O slice O2a, transport, vadose and saturated pick from the list
+
+Scope rulings 1 and 8 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
+
+1. **The fate subset is a data coverage limit, not a quality gate.** `packages/data/src/vapor/build.ts` keeps an
+   RSL row when it has EPA 2004 temperature-correction data or a biodegradation class, and copies the RSL values
+   unchanged; the quality screen (`screenLookupRow`) only drops the implausible `epa2004je` block of a row that
+   is kept, never the row. Transport, vadose and saturated use only the RSL properties (molar mass, solubility,
+   Henry constant, Koc, diffusivities), so the 112 rows are the chemicals whose record this file holds, not the
+   chemicals whose RSL values are trustworthy. Widening the fate data to every RSL row is a later data change;
+   until then a project chemical outside the 112 is unavailable on these screens.
+2. **A chemical outside the subset.** `ui/FateChemicalSelect.tsx` wraps `ProjectChemicalSelect` (label
+   "Chemical"). Choosing a list chemical outside the fate data still saves its id in the screen's `chemicalId`
+   (so feeds are tagged and the chemical check works), fills nothing, and shows a note naming the chemical and the
+   reason. Typed properties are left as they are (scope ruling 8). With an empty list the select's own empty
+   state (a link to `#/chemicals`) shows.
+3. **No new saved key.** `chemicalId` stays the pointer on each screen, so no `FINGERPRINT_SKIP` change and no new
+   stale mark on older files. A value picked on the old 112-row select is a list chemical id like any other; if
+   it is not in the project list it stays selectable, marked as not in the list.
+4. **Property fill is unchanged.** Picking a chemical with fate data fills the same fields as before
+   (`fateFill`; on transport Kd from Koc times the organic carbon fraction, with the no-Koc note). A re-pick is
+   the only trigger, so opening a screen never overwrites typed values. `ui/ChemicalPicker.tsx` is no longer used
+   by these screens and is left for integration to delete.
+5. **Sending** needed no change: the senders tag their value with the screen chemical, and the O4 stores write
+   that chemical's slot.

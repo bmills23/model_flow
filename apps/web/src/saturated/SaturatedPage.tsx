@@ -3,7 +3,7 @@ import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { fedStepLength } from '../transport/compute';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { TimeLineChart, type TimeSeries } from '../vadose/TimeLineChart';
 import { fmt, regionRows, releaseRows, type Row } from './chartData';
@@ -365,13 +365,12 @@ export function SaturatedPage() {
           </Group>
 
           <Group title="Chemical">
-            <ChemicalPicker
-              id="saturated-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) =>
-                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              onPick={(id, row) =>
+                setForm((f) => ({ ...f, chemicalId: id, ...(row ? fateFill(row) : {}) }))
               }
               note="The source decay rate is not in the database and stays your input."
             />

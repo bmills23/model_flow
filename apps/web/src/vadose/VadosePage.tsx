@@ -4,7 +4,7 @@ import { convert, formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Marker } from '../transport/Marker';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { budgetRows, massRateKgPerDay } from './chartData';
 import { lastYearMean, type RunSummary, type VadoseMethod } from './compute';
@@ -309,13 +309,12 @@ export function VadosePage() {
           </Group>
 
           <Group title="Chemical">
-            <ChemicalPicker
-              id="vadose-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) =>
-                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              onPick={(id, row) =>
+                setForm((f) => ({ ...f, chemicalId: id, ...(row ? fateFill(row) : {}) }))
               }
               note="Decay in the leachate is not in the database and stays your input."
             />
