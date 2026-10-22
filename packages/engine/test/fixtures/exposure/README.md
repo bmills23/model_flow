@@ -52,7 +52,8 @@ tap water ingestion and dermal values are included) and `rba` 0.6 for arsenic. A
 blank cell in the table, and the test asserts the engine has no coefficient for that endpoint. The test
 requires the engine's screening level to round to the published value (half a unit in its second
 significant figure). Tap-water inhalation, soil inhalation and the noncancer worker air value are not
-checked (M7 and M6). The benzo(a)pyrene tap-water dermal value is omitted by the RSL (outside the
+checked by these cases; the sweep of the published tables (`fixtures/rsl-sweep`) covers tap-water
+inhalation and the industrial air levels, and soil inhalation is still not checked. The benzo(a)pyrene tap-water dermal value is omitted by the RSL (outside the
 prediction domain), so it has no case.
 
 ## rsl-2024-11-default-parameters.json: RSL default exposure parameters

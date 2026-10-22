@@ -2,9 +2,28 @@ import { describe, expect, it } from 'vitest';
 import {
   compareToCriteria,
   hardnessCriterion,
+  type HardnessEquation,
   withUserValue,
   type Criterion,
 } from '../src/index.js';
+import aquaticJson from '../../data/generated/nrwqc-2026-10-16/aquatic.json' with { type: 'json' };
+import hardnessJson from '../../data/generated/nrwqc-2026-10-16/hardness.json' with { type: 'json' };
+
+type PrintedCriterion = { status: string; value?: number };
+const aquatic = aquaticJson as unknown as {
+  rows: {
+    id: string;
+    hardnessDependent: boolean;
+    freshwater: { cmc: PrintedCriterion; ccc: PrintedCriterion };
+  }[];
+};
+const hardness = hardnessJson as unknown as {
+  metals: {
+    id: string;
+    name: string;
+    freshwater: { acute?: HardnessEquation; chronic?: HardnessEquation };
+  }[];
+};
 
 const water = (over: Partial<Criterion> & Pick<Criterion, 'id'>): Criterion => ({
   chemicalId: '7440-66-6',
@@ -88,6 +107,39 @@ describe('hardness-dependent criteria from a parameter record', () => {
     expect(hardnessCriterion(zinc.acute, 100)).toBeCloseTo(117.2, 0);
     expect(hardnessCriterion(zinc.chronic, 100)).toBeCloseTo(118.1, 0);
     expect(Number(hardnessCriterion(zinc.acute, 100).toPrecision(2))).toBe(120);
+  });
+
+  // published-reproduction: nrwqc-hardness-metals
+  it('reproduces the printed criteria of all six hardness-dependent metals at 100 mg/L', () => {
+    const rows = new Map(aquatic.rows.map((r) => [r.id, r]));
+    let compared = 0;
+    for (const metal of hardness.metals) {
+      const row = rows.get(metal.id)!;
+      expect(row.hardnessDependent, metal.name).toBe(true);
+      for (const [duration, printed] of [
+        ['acute', row.freshwater.cmc],
+        ['chronic', row.freshwater.ccc],
+      ] as const) {
+        const eq = metal.freshwater[duration];
+        if (printed.status !== 'value' || printed.value === undefined) {
+          // cadmium chronic is vacated and silver has no chronic criterion: nothing printed to compare
+          expect(eq === undefined || printed.status !== 'value', `${metal.name} ${duration}`).toBe(
+            true,
+          );
+          continue;
+        }
+        expect(eq, `${metal.name} ${duration}`).toBeDefined();
+        const sl = hardnessCriterion(eq!, 100);
+        // half a unit of the second significant figure of the printed value, as the RSL sweep
+        const unit = 10 ** (Math.floor(Math.log10(printed.value)) - 1);
+        expect(
+          Math.abs(sl - printed.value),
+          `${metal.name} ${duration}: ${sl} vs ${printed.value}`,
+        ).toBeLessThanOrEqual(0.5 * unit * (1 + 1e-9));
+        compared += 1;
+      }
+    }
+    expect(compared).toBe(10);
   });
 
   it('a conversion factor may depend on hardness (intercept + slope ln h)', () => {

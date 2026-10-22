@@ -3535,3 +3535,71 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
    a finite base value, so `vadose.alphaL` appears only when one was entered. A test pins this.
 10. **Tests (DEFAULT).** Tests about something else than the dispersivity choice run on `REGRESSION_FORM`
     (`transport/regression.testkit.ts`) and `R7_FORM`, chosen on purpose, rather than on the new blank default.
+
+## 2026-10-22: Wave R slice R3a, RSL screening-level data
+
+1. **Sheets fetched (DEFAULT).** The public RSL per-pathway sheets 405274 (resident soil), 405278 (industrial soil)
+   and 405282 (resident air), November 2024 edition, were fetched through `fetch-rsl.ts --add` and appended to the
+   edition's checksum manifest with their own retrieval date. Their bytes match the checksums the methods doc had
+   recorded from the earlier hand fetch. The titles in the manifest are descriptive; the EPA page titles were not
+   recorded.
+2. **Screening-level file (DEFAULT).** `generated/rsl-2024-11/screening-levels.json`, built with the other RSL files
+   and guarded by `data:check`, holds every printed screening-level cell: tap water (405290) by pathway and
+   endpoint, resident soil, industrial soil and resident air by pathway and endpoint, and the summary (405270)
+   resident and industrial soil, resident and industrial air and tap water with the summary's key. Chemical ids
+   are the existing database ids. The values are comparison data, never engine inputs.
+3. **Keys (DEFAULT).** Only the summary carries keys. They are kept as printed (the c or n endpoint with the `*`,
+   `**`, m, s and G modifiers) and the sheet's key line is stored as `keyMeanings`. The per-pathway sheets print none,
+   so a cell there is classified by its column (pathway and endpoint), not by a key.
+4. **Significant figures (DEFAULT).** Measured per column on the printed numbers: every screening-level column has
+   at most two significant figures, a test asserts it, and the histogram is stored per column. This is the premise of
+   the half-unit-in-the-second-significant-figure comparison; it is not widened.
+5. **Summary basis (DEFAULT).** The summary file is titled HQ10 but its tap water value equals the lower of the two
+   tap water totals (cancer, and noncancer at child THQ 1) in all 850 rows that carry one; a test asserts it. The
+   summary is therefore at THQ 1, and the engine comparison uses THQ 1.
+6. **VISL (DEFAULT).** The EPA VISL calculator answers a plain HTTP form post, so no browser was used. The output
+   for benzene, trichloroethylene, tetrachloroethylene, naphthalene and ethylbenzene at the form defaults (resident,
+   target risk 1e-6, THQ 0.1, 25 C groundwater) is committed as `packages/data/raw/visl/visl-default-resident-2026-10-22.json`
+   with the query fields, the input table, the VISL and chemical-property tables as printed, the page's output
+   timestamp and the newest entry of the calculator's what-is-new page (November 13, 2024). The result page prints no
+   version number, so that entry is the version text. The calculator's default THQ is 0.1, not 1; comparisons must say
+   so. `scripts/fetch-visl.ts` refuses to overwrite a fixture. The vapor tests do not assert the fixture in this slice.
+
+## 2026-10-22: Wave R slice R3b, RSL sweeps
+
+1. **Sweep scope (DEFAULT).** `rsl-tables-sweep.test.ts` compares every printed cell of 27 columns with the
+   engine: tap water, resident soil and industrial soil (ingestion, dermal, inhalation, total; cancer and
+   noncancer), resident air (cancer, noncancer) and the summary's industrial air governing level. The other summary
+   columns are not swept: tap water summary is the lower of the two tap water totals already compared, resident air
+   summary is the lower of the two resident air cells (the test asserts it for all 367 rows), and the soil summary
+   rests on the soil inhalation terms and the m and s caps. Tolerance is the existing `withinHalfUnit` rule on the
+   engine's unrounded value; nothing was widened.
+2. **Engine side (DEFAULT).** The modern resident and composite worker presets with the committed RSL chemical
+   values (`rslSweepHelpers.ts`). Tap water inhalation is the resident indoor air level (24 h) over the household
+   factor K entered as 0.5 L/m3 through `showerHouseholdAir`. A total adds the pathways whose cells the table
+   prints (soil inhalation excluded, see 4). Industrial air is the lower of the worker cancer and noncancer
+   levels, and the summary key letter is checked against the governing endpoint (365 of 365 reproduced cells agree).
+3. **Result (DEFAULT).** Compared, reproduced, excepted, unexplained: tap water 3053, 3040, 9, 4; resident soil
+   3012, 2138, 874, 0; industrial soil 3011, 2140, 871, 0; air 812, 807, 5, 0. A cell that reproduces is counted as
+   reproduced whatever its chemical or class; a class only excepts a cell that does not reproduce.
+4. **Exception classes (DEFAULT).** Five, each with its reason in `fixtures/rsl-sweep/exceptions.json`: soil
+   inhalation (435 cells each for resident and industrial soil) and the soil totals that include it (another 435
+   each), because the sweep does not compute the volatilization and particulate emission factors; key G entries with
+   no toxicity value in the database (lead and compounds, 5 cells); key G refractory ceramic fibers (2 cells, whose
+   database value is in fibers while the engine reads mass units); and the trichloroethylene and vinyl chloride
+   special-case cancer cells (12 cells), which the engine computes as ordinary chemicals and warns.
+5. **Unexplained (DEFAULT).** Four cells: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260,
+   printed 0.0078 ug/L, computed 0.007852 ug/L. Their ingestion and inhalation cells reproduce; adding a dermal
+   term from the database permeability values would give 0.0020, so a missing dermal term does not explain it. They
+   are counted, printed in the catalog and the fixture README, and not given a reason. No engine numerics changed.
+6. **Household K (DEFAULT).** 263 of the 265 tap water inhalation cells reproduce with K = 0.5 L/m3; the two that do
+   not are the trichloroethylene and vinyl chloride cancer cells. Per wave R ruling 5 the warning stays and its
+   message, the catalog entry and `docs/methods/shower-irrigation-particulates.md` now cite the reproduction. K is
+   still entered, not defaulted, and not called verified from a primary source.
+7. **NRWQC (DEFAULT).** The hardness-100 acute and chronic criteria of the six metals in `hardness.json` reproduce
+   the printed `aquatic.json` values. There are ten printed values, not nine: cadmium chronic is vacated and silver
+   has no chronic value, so 12 minus 2.
+8. **Catalog (DEFAULT).** Five examples are appended in `validationCatalogSweep.ts` (the four RSL sweeps and the
+   NRWQC metals), each with its numbers pinned to the fixture. The old "RSL inhalation cells" not-checked item now
+   names only soil inhalation, and a new item lists the cells that do not reproduce. Regenerated validation outputs
+   are not committed; integration regenerates them.

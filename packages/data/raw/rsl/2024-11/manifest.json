@@ -27,6 +27,33 @@
       "role": "tapwater",
       "bytes": 162375,
       "sha256": "46d533bc73579516012a4713d93bc64d5daa0d704d8dffa69f3a9cde3abdcc10"
+    },
+    {
+      "file": "sems-405274.xlsx",
+      "semsId": 405274,
+      "title": "Resident Soil RSL November 2024 XLS (sheet Res Soil; title as listed on the EPA page not recorded)",
+      "role": "soil-resident",
+      "bytes": 158370,
+      "sha256": "72c34ac76cfa77fc2cfa741ec89dda518b4c374ddd1507bdbbe2854d84bda1ac",
+      "retrieved": "2026-10-22"
+    },
+    {
+      "file": "sems-405278.xlsx",
+      "semsId": 405278,
+      "title": "Industrial Soil RSL November 2024 XLS (sheet Ind Soil; title as listed on the EPA page not recorded)",
+      "role": "soil-industrial",
+      "bytes": 158428,
+      "sha256": "892e940134f4e48d0a4c983d18479024583e24f6edc147c382c630de4c5aed38",
+      "retrieved": "2026-10-22"
+    },
+    {
+      "file": "sems-405282.xlsx",
+      "semsId": 405282,
+      "title": "Resident Air RSL November 2024 XLS (sheet Res Air; title as listed on the EPA page not recorded)",
+      "role": "air-resident",
+      "bytes": 85186,
+      "sha256": "1f6e7c509ba37181d938512c64c23c5ac378a2ab62b9ead3d2e1ffcc0a331fba",
+      "retrieved": "2026-10-22"
     }
   ]
 }

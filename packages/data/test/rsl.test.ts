@@ -1,4 +1,4 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -408,5 +408,165 @@ describe('MCL and published soil-to-groundwater SSL columns (slice D2)', () => {
     expect(built.cleanup.chemicals.find((c) => c.id === '71-43-2')!.values.koc!.value).toBe(
       byId.get('71-43-2')!.values.koc!.value,
     );
+  });
+});
+
+describe('published screening levels (slice R3a)', () => {
+  const sl = () => built.screening;
+  const col = (id: string) => {
+    const c = sl().columns.find((x) => x.id === id);
+    if (!c) throw new Error(`no column ${id}`);
+    return c;
+  };
+
+  it('verifies the three per-pathway sheets in the manifest', () => {
+    const m = verifyManifest(rawDir);
+    const ids = m.files.map((f) => f.semsId).sort();
+    expect(ids).toEqual([405270, 405274, 405278, 405282, 405290, 405302]);
+    expect(sl().source.documents).toEqual([405270, 405290, 405274, 405278, 405282]);
+    expect(sl().source.reference).toBe('epa2024rsl');
+  });
+
+  it('counts the published cells per column as printed in the sheets', () => {
+    const counts: Record<string, number> = {
+      'tapwater.ingestion.cancer': 247,
+      'tapwater.dermal.cancer': 194,
+      'tapwater.inhalation.cancer': 93,
+      'tapwater.total.cancer': 263,
+      'tapwater.ingestion.noncancer': 707,
+      'tapwater.dermal.noncancer': 616,
+      'tapwater.inhalation.noncancer': 172,
+      'tapwater.total.noncancer': 761,
+      'soil-resident.ingestion.cancer': 247,
+      'soil-resident.dermal.cancer': 170,
+      'soil-resident.inhalation.cancer': 185,
+      'soil-resident.total.cancer': 273,
+      'soil-resident.ingestion.noncancer': 707,
+      'soil-resident.dermal.noncancer': 404,
+      'soil-resident.inhalation.noncancer': 250,
+      'soil-resident.total.noncancer': 776,
+      'soil-industrial.total.cancer': 273,
+      'soil-industrial.total.noncancer': 775,
+      'air-resident.inhalation.cancer': 190,
+      'air-resident.inhalation.noncancer': 256,
+      'summary.soil-resident.governing': 864,
+      'summary.soil-industrial.governing': 863,
+      'summary.air-resident.governing': 367,
+      'summary.air-industrial.governing': 366,
+      'summary.tapwater.governing': 850,
+    };
+    for (const [id, n] of Object.entries(counts)) {
+      expect(col(id).count, id).toBe(n);
+      const present = sl().chemicals.filter((c) => c.values[id] !== undefined).length;
+      expect(present, id).toBe(n);
+    }
+  });
+
+  it('describes every column with medium, pathway, endpoint, units and its printed header', () => {
+    for (const c of sl().columns) {
+      expect(['tapwater', 'soil', 'air']).toContain(c.medium);
+      expect(['ingestion', 'dermal', 'inhalation', 'total', 'summary']).toContain(c.pathway);
+      expect(['cancer', 'noncancer', 'governing']).toContain(c.endpoint);
+      expect(['ug/L', 'mg/kg', 'ug/m3']).toContain(c.units);
+      expect(c.header.length).toBeGreaterThan(3);
+      expect(c.sigFigs.max).toBeGreaterThanOrEqual(1);
+    }
+    expect(col('tapwater.inhalation.cancer').units).toBe('ug/L');
+    expect(col('soil-industrial.total.noncancer').units).toBe('mg/kg');
+    expect(col('air-resident.inhalation.noncancer').units).toBe('ug/m3');
+  });
+
+  it('measures the significant figures of each column rather than assuming them', () => {
+    for (const c of sl().columns) {
+      const total = Object.values(c.sigFigs.histogram).reduce((a, b) => a + b, 0);
+      expect(total, c.id).toBe(c.count);
+    }
+    // The screening-level columns print at most two significant figures (measured, not assumed).
+    expect(Math.max(...sl().columns.map((c) => c.sigFigs.max))).toBeLessThanOrEqual(2);
+  });
+
+  it('carries benzene with the summary key and the per-pathway cells', () => {
+    const b = sl().chemicals.find((c) => c.id === '71-43-2')!;
+    expect(b.volatile).toBe(true);
+    expect(b.values['summary.tapwater.governing']).toEqual({ value: 0.46, key: 'c*' });
+    expect(b.values['tapwater.total.cancer']!.value).toBe(0.46);
+    expect(b.values['summary.air-resident.governing']!.value).toBe(0.36);
+    expect(b.values['air-resident.inhalation.cancer']!.value).toBe(0.36);
+  });
+
+  it('keeps the table key flags, the special rows and the volatility and mutagen flags', () => {
+    const keys = new Set<string>();
+    for (const c of sl().chemicals)
+      for (const [id, v] of Object.entries(c.values))
+        if (id.startsWith('summary.') && v.key) keys.add(v.key);
+    expect([...keys].sort()).toEqual(
+      ['G', 'c', 'c*', 'c**', 'c*G', 'cG', 'n', 'nm', 'nms', 'ns'].sort(),
+    );
+    expect(sl().keyMeanings['G']).toMatch(/user's guide/i);
+    expect(sl().keyMeanings['s']).toMatch(/Csat/);
+    expect(sl().chemicals.find((c) => c.id === '79-01-6')!.special).toBe('trichloroethylene');
+    expect(sl().chemicals.find((c) => c.id === '75-01-4')!.special).toBe('vinyl-chloride');
+    expect(sl().chemicals.some((c) => c.mutagen)).toBe(true);
+    expect(sl().chemicals.some((c) => c.inEpd === false)).toBe(true);
+  });
+
+  it('has the summary tap water level equal to the lower of the two per-pathway totals, so the summary is at THQ 1', () => {
+    let checked = 0;
+    for (const c of sl().chemicals) {
+      const s = c.values['summary.tapwater.governing'];
+      if (!s) continue;
+      const cancer = c.values['tapwater.total.cancer']?.value ?? Infinity;
+      const non = c.values['tapwater.total.noncancer']?.value ?? Infinity;
+      expect(s.value, c.id).toBeCloseTo(Math.min(cancer, non), 10);
+      checked++;
+    }
+    expect(checked).toBe(850);
+    expect(col('summary.tapwater.governing').basis).toBe('Screening Levels');
+  });
+
+  it('records the VISL calculator output for five chemicals as a dated fixture', () => {
+    const dir = resolve(here, '../raw/visl');
+    const files = readdirSync(dir).filter((f) =>
+      /^visl-default-resident-\d{4}-\d{2}-\d{2}\.json$/.test(f),
+    );
+    expect(files).toHaveLength(1);
+    const fx = JSON.parse(readFileSync(join(dir, files[0]!), 'utf8')) as {
+      retrieved: string;
+      query: Record<string, string>;
+      versionText: { newestEntry: string };
+      inputs: { variable: string; value: string }[];
+      results: {
+        cas: string;
+        visl: { column: string; cell: string; value?: number }[];
+      }[];
+    };
+    expect(fx.query.scenario).toBe('Resident');
+    expect(fx.query.hq).toBe('0.1');
+    expect(fx.query.tr).toBe('1e-06');
+    expect(fx.versionText.newestEntry).toMatch(/November 13, 2024/);
+    expect(fx.inputs.find((i) => /^THQ/.test(i.variable))?.value).toBe('0.1');
+    expect(fx.results.map((r) => r.cas)).toEqual([
+      '71-43-2',
+      '79-01-6',
+      '127-18-4',
+      '91-20-3',
+      '100-41-4',
+    ]);
+    const benzene = fx.results[0]!;
+    const cell = (re: RegExp) => benzene.visl.find((v) => re.test(v.column))!;
+    expect(cell(/^Carcinogenic VISL/).value).toBeCloseTo(0.36, 10);
+    expect(cell(/^Noncarcinogenic VISL/).value).toBeCloseTo(3.13, 10);
+    for (const r of fx.results) {
+      expect(
+        r.visl.some(
+          (v) => /^Carcinogenic VISL/.test(v.column) || /^Noncarcinogenic VISL/.test(v.column),
+        ),
+      ).toBe(true);
+    }
+  });
+
+  it('is written to generated/rsl-2024-11/screening-levels.json byte for byte', () => {
+    const file = readFileSync(join(generatedDir, 'screening-levels.json'), 'utf8');
+    expect(file).toBe(JSON.stringify(built.screening, null, 2) + '\n');
   });
 });
