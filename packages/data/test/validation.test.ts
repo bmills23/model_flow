@@ -12,8 +12,10 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { references, registry } from '@model-flow/engine';
 import { describe, expect, it } from 'vitest';
+import { sweepExamples } from '../src/validationCatalogSweep.js';
 import {
   buildValidationManifest,
+  type CatalogInput,
   markersIn,
   type ExampleSpec,
   renderValidationJson,
@@ -193,6 +195,109 @@ describe('validation documents', () => {
     expect(readFileSync(committedJson, 'utf8')).toBe(json);
     const date = /^Generated (\d{4}-\d{2}-\d{2}) /m.exec(readFileSync(committedMd, 'utf8'))![1]!;
     expect(readFileSync(committedMd, 'utf8')).toBe(renderValidationMarkdown(manifest, date));
+  });
+});
+
+describe('warned default ids and scopes', () => {
+  const defaults = manifest.unverified.defaults;
+
+  it('gives every default a unique id and a known scope', () => {
+    const ids = defaults.map((d) => d.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const d of defaults) {
+      expect(d.id, d.subject).toMatch(/^[a-z0-9]+(-[a-z0-9.]+)*$/);
+      expect(['warning', 'method']).toContain(d.scope);
+    }
+  });
+
+  it('scopes a default by warning code only when it has one', () => {
+    for (const d of defaults) {
+      if (d.scope === 'warning') expect(d.warningCode, d.id).not.toBeNull();
+      else expect(d.methodIds.length, d.id).toBeGreaterThan(0);
+    }
+    const byCode = defaults.filter((d) => d.warningCode !== null);
+    expect(byCode.map((d) => d.scope)).toEqual(byCode.map(() => 'warning'));
+  });
+
+  it('lists the saturated Gelhar log-quadratic as a method-scoped default', () => {
+    const d = defaults.find((x) => x.methodIds.includes('dispersivity.gelhar1985-api1987'));
+    expect(d?.scope).toBe('method');
+    expect(d?.referenceKey).toBe('gelhar1985');
+    expect(d?.note).toContain('EA-4190');
+    expect(d?.note).toContain('no primary source');
+  });
+
+  it('lists vadose.layered on the vadose regression', () => {
+    const d = defaults.find((x) => x.id === 'gelhar-vadose-regression');
+    expect(d?.methodIds).toEqual(['vadose.vadsat', 'vadose.layered']);
+  });
+
+  it('rejects duplicate ids, a warning scope without a code and a method scope without methods', () => {
+    const base = {
+      subject: 's',
+      methodIds: ['m.a'],
+      warningCode: null,
+      referenceKey: null,
+      note: 'n',
+      where: { file: 'README.md', needle: 'model' },
+    };
+    const run = (defs: CatalogInput['defaults']) =>
+      buildValidationManifest({
+        root,
+        references: [],
+        methodIds: ['m.a'],
+        methods: [],
+        catalog: { examples: [], derived: () => [], defaults: defs, notChecked: [] },
+      });
+    expect(() =>
+      run([
+        { ...base, id: 'a', scope: 'method' },
+        { ...base, id: 'a', scope: 'method' },
+      ]),
+    ).toThrow(/duplicate/i);
+    expect(() => run([{ ...base, id: 'a', scope: 'warning' }])).toThrow(/warning code/);
+    expect(() => run([{ ...base, id: 'a', scope: 'method', methodIds: [] }])).toThrow(/method/);
+  });
+
+  it('starts the sweep extension point empty and reads data file counts', () => {
+    expect(sweepExamples).toEqual([]);
+    const dir = mkdtempSync(join(tmpdir(), 'validation-data-'));
+    mkdirSync(join(dir, 'packages/engine/test'), { recursive: true });
+    mkdirSync(join(dir, 'packages/data/generated/q'), { recursive: true });
+    writeFileSync(join(dir, 'packages/data/generated/q/d.json'), '{"rows":[1,2,3]}\n');
+    writeFileSync(join(dir, 'packages/engine/test/x.test.ts'), '// published-reproduction: dx\n');
+    const m = buildValidationManifest({
+      root: dir,
+      references: [],
+      methodIds: [],
+      methods: [],
+      catalog: {
+        examples: [
+          {
+            id: 'dx',
+            title: 'DX',
+            files: [],
+            dataFiles: ['q/d.json'],
+            referenceKey: null,
+            sourceText: 's',
+            methodIds: [],
+            compares: 'c',
+            count: (_j, _t, data) => (data[0].rows as unknown[]).length,
+            casesUnit: 'u',
+            tolerance: 't',
+            status: 'reproduced',
+            testFile: 'x.test.ts',
+            evidence: [],
+          },
+        ],
+        derived: () => [],
+        defaults: [],
+        notChecked: [],
+      },
+    });
+    expect(m.examples[0]?.cases).toBe(3);
+    expect(m.examples[0]?.dataFiles).toEqual(['q/d.json']);
+    expect(manifest.examples.every((e) => Array.isArray(e.dataFiles))).toBe(true);
   });
 });
 

@@ -20,7 +20,9 @@ dispersivity laws in `processes/dispersivity` (`dispersionCoefficients`). Soluti
 dimensional kernels in x, y and z, which is why a single time integral suffices.
 
 Three dispersivity laws are offered. The legacy law is the Gelhar et al. 1985 regression with API 1987
-ratios (transverse one third, vertical 1/87 of transverse). The modern laws are the Xu and Eckstein 1995
+ratios (transverse one third, vertical 1/87 of transverse). The saturated-zone log-quadratic of the legacy law has no primary source
+that could be read: the EPRI report (EA-4190) prints field data and a plot against scale, not the regression equation, so its coefficients
+come from RISC5's statement of its choice and the validation document lists them as unverified. The modern laws are the Xu and Eckstein 1995
 regression and a power law after Schulze-Makuch 2005 (`schulzemakuch2005`), alpha_L = 0.20 L^0.44 for
 unconsolidated media, both paired with the BIOSCREEN ratios alpha_T = alpha_L/10 and alpha_V = alpha_L/100.
 The Schulze-Makuch compilation reports exponents of 0.44 to 0.94 for unconsolidated media with the most

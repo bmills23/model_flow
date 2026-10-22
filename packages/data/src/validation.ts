@@ -19,6 +19,8 @@ export interface ValidationExample {
   title: string;
   /** Fixture files, relative to `packages/engine/test/fixtures`. */
   files: string[];
+  /** Generated data files the case count is read from, relative to `packages/data/generated`. */
+  dataFiles: string[];
   /** A key in references.json, or null when the source is not a references.json record. */
   referenceKey: string | null;
   /** The reference's title (or the plain source text when there is no key). */
@@ -34,7 +36,16 @@ export interface ValidationExample {
   note: string;
 }
 
+/**
+ * `warning`: listed when its warning code appears in a section's warnings. `method`: listed when any of its
+ * method ids ran.
+ */
+export type DefaultScope = 'warning' | 'method';
+
 export interface WarnedDefault {
+  /** Unique and stable. */
+  id: string;
+  scope: DefaultScope;
   subject: string;
   methodIds: string[];
   warningCode: string | null;
@@ -93,7 +104,9 @@ export interface ExampleSpec {
   methodIds: string[];
   compares: string;
   /** Case count read from the parsed fixture files (in the order of `files`) and the test source. */
-  count: (json: Json[], testSource: string) => number;
+  /** Generated data files (relative to `packages/data/generated`) the count may read; unused by most specs. */
+  dataFiles?: string[];
+  count: (json: Json[], testSource: string, data: Json[]) => number;
   casesUnit: string;
   tolerance: string;
   status: ValidationStatus;
@@ -120,6 +133,8 @@ export interface ExampleSpec {
 }
 
 export interface DefaultSpec {
+  id: string;
+  scope: DefaultScope;
   subject: string;
   methodIds: string[];
   warningCode: string | null;
@@ -149,6 +164,7 @@ export interface BuildInput {
 
 const FIXTURES = 'packages/engine/test/fixtures';
 const TESTS = 'packages/engine/test';
+const GENERATED = 'packages/data/generated';
 
 function methodText(m: MethodDescriptor<unknown, unknown>): string {
   return [m.name, m.summary, m.risc5Choice ?? '', ...m.assumptions].join('\n');
@@ -167,6 +183,11 @@ export function buildValidationManifest(input: BuildInput): ValidationManifest {
     return v;
   };
   const fileText = (path: string): string => readFileSync(resolve(input.root, path), 'utf8');
+  const readData = (file: string): Json => {
+    const path = resolve(input.root, GENERATED, file);
+    if (!existsSync(path)) throw new Error(`Validation data file ${file} does not exist`);
+    return JSON.parse(readFileSync(path, 'utf8')) as Json;
+  };
 
   const specs = [...catalog.examples, ...catalog.derived(read)];
   const examples: ValidationExample[] = specs.map((s) => {
@@ -234,11 +255,12 @@ export function buildValidationManifest(input: BuildInput): ValidationManifest {
       id: s.id,
       title: s.title,
       files: s.files,
+      dataFiles: s.dataFiles ?? [],
       referenceKey: s.referenceKey,
       source,
       methodIds: s.methodIds,
       compares: s.compares,
-      cases: s.count(s.files.map(read), testSource),
+      cases: s.count(s.files.map(read), testSource, (s.dataFiles ?? []).map(readData)),
       casesUnit: s.casesUnit,
       tolerance: s.tolerance,
       status: s.status,
@@ -247,7 +269,17 @@ export function buildValidationManifest(input: BuildInput): ValidationManifest {
     };
   });
 
+  const seenIds = new Set<string>();
   const defaults: WarnedDefault[] = catalog.defaults.map((d) => {
+    if (seenIds.has(d.id))
+      throw new Error(`Unverified default "${d.subject}": duplicate id ${d.id}`);
+    seenIds.add(d.id);
+    if (d.scope === 'warning' && d.warningCode === null) {
+      throw new Error(`Unverified default "${d.subject}": scope warning needs a warning code`);
+    }
+    if (d.scope === 'method' && d.methodIds.length === 0) {
+      throw new Error(`Unverified default "${d.subject}": scope method needs a method id`);
+    }
     if (!fileText(d.where.file).includes(d.where.needle)) {
       throw new Error(
         `Unverified default "${d.subject}": "${d.where.needle}" is not in ${d.where.file}`,
@@ -270,6 +302,8 @@ export function buildValidationManifest(input: BuildInput): ValidationManifest {
       referenceStatus = ref.status;
     }
     return {
+      id: d.id,
+      scope: d.scope,
       subject: d.subject,
       methodIds: d.methodIds,
       warningCode: d.warningCode,
@@ -364,6 +398,11 @@ export function renderValidationMarkdown(
           ? `- Fixture: ${e.files.map((f) => `\`${f}\``).join(', ')}; test \`${e.testFile}\``
           : `- Fixture: none, the published values are typed in the test \`${e.testFile}\``,
       );
+      if (e.dataFiles.length > 0) {
+        out.push(
+          `- Data: ${e.dataFiles.map((f) => `\`packages/data/generated/${f}\``).join(', ')}`,
+        );
+      }
       if (e.note) out.push(`- Note: ${e.note}`);
       out.push('');
     }

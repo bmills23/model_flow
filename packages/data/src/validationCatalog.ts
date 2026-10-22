@@ -1,4 +1,5 @@
 import type { CatalogInput, ExampleSpec, Json } from './validation.js';
+import { sweepExamples } from './validationCatalogSweep.js';
 
 /**
  * The descriptive text of the validation manifest. Every statement here is checked by
@@ -605,7 +606,7 @@ const examples: ExampleSpec[] = [
 ];
 
 export const validationCatalog: CatalogInput = {
-  examples,
+  examples: [...examples, ...sweepExamples],
   derived: (read) => {
     const out: ExampleSpec[] = [];
     const r9 = read('exposure/r9.json');
@@ -667,6 +668,8 @@ export const validationCatalog: CatalogInput = {
   },
   defaults: [
     {
+      id: 'shower-film-reference',
+      scope: 'warning',
       subject: 'Foster and Chrostowski film reference coefficients (3000 cm/h gas, 20 cm/h liquid)',
       methodIds: ['shower.fc-1986'],
       warningCode: 'shower.film-reference-unverified',
@@ -678,6 +681,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'shower-little-1992-balance',
+      scope: 'method',
       subject: 'Little (1992) two-resistance stall mass balance',
       methodIds: ['shower.little-1992'],
       warningCode: null,
@@ -689,6 +694,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'shower-household-k',
+      scope: 'warning',
       subject: 'Household transfer factor K (RSL whole-house water-to-air term)',
       methodIds: ['shower.rsl-household'],
       warningCode: 'shower.household-factor-unverified',
@@ -700,6 +707,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'plant-hhrap-fallback',
+      scope: 'method',
       subject: 'HHRAP fallback standing in for Trapp (2015)',
       methodIds: ['plantUptake.hhrap-2005'],
       warningCode: null,
@@ -711,6 +720,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'plant-tscf-leaf-air',
+      scope: 'method',
       subject:
         'Transpiration stream concentration factor (TSCF) and leaf-air partition coefficient',
       methodIds: ['plantUptake.trapp-matthies-1995'],
@@ -723,6 +734,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'plant-briggs-rcf',
+      scope: 'method',
       subject: 'Briggs root concentration factor constants',
       methodIds: ['plantUptake.trapp-matthies-1995', 'plantUptake.hhrap-2005'],
       warningCode: null,
@@ -734,6 +747,8 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'dispersivity-schulze-makuch',
+      scope: 'method',
       subject: 'Schulze-Makuch (2005) dispersivity coefficients',
       methodIds: ['dispersivity.schulze-makuch2005'],
       warningCode: null,
@@ -745,8 +760,10 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'gelhar-vadose-regression',
+      scope: 'method',
       subject: 'Gelhar et al. (1985) two-branch vadose dispersivity regression',
-      methodIds: ['vadose.vadsat'],
+      methodIds: ['vadose.vadsat', 'vadose.layered'],
       warningCode: null,
       referenceKey: 'gelhar1985',
       note: 'The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain.',
@@ -756,6 +773,21 @@ export const validationCatalog: CatalogInput = {
       },
     },
     {
+      id: 'gelhar-saturated-log-quadratic',
+      scope: 'method',
+      subject: 'Gelhar et al. (1985) saturated-zone log-quadratic dispersivity regression',
+      methodIds: ['dispersivity.gelhar1985-api1987'],
+      warningCode: null,
+      referenceKey: 'gelhar1985',
+      note: 'The coefficients of ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2 have no primary source located: the EPRI report (EA-4190) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain.',
+      where: {
+        file: 'docs/methods/groundwater-transport.md',
+        needle: 'The saturated-zone log-quadratic of the legacy law has no primary source',
+      },
+    },
+    {
+      id: 'ssg-table-a1-koc-h',
+      scope: 'method',
       subject: 'Organic Koc and H of the SSG 1996 Table A-1 fixture',
       methodIds: ['cleanup.ssg-leaching'],
       warningCode: null,

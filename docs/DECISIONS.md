@@ -3438,3 +3438,19 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 8. **Slices (DEFAULT).** R1a catalog ids and scopes first; then in parallel R1b (run basis function) followed by
    R1c (report, CSV, version), R2 (dispersivity), R3a (RSL data) followed by R3b (engine sweeps), and R4 (receptor
    notes). One gate and one full mobile check at integration, one review.
+
+## 2026-10-22: Wave R slice R1a, catalog ids and scopes
+
+1. **Ids and scopes (DEFAULT).** Each warned default in the validation catalog carries a unique, stable `id` and a
+   `scope`. `warning` defaults are listed for a section when their `warningCode` appears in its warnings, and must
+   have a code. `method` defaults are listed when any of their method ids ran, and must have at least one. The
+   manifest builder throws on a duplicate id or a scope without its key.
+2. **Saturated log-quadratic (DEFAULT).** `dispersivity.gelhar1985-api1987` gets its own default entry
+   (`gelhar-saturated-log-quadratic`, reference `gelhar1985`). No primary source could be read: EPRI EA-4190 prints
+   field data and a plot, not the regression. Its needle is a sentence added to
+   `docs/methods/groundwater-transport.md`. The vadose regression entry now also lists `vadose.layered`.
+3. **Sweep extension point and data files (DEFAULT).** `validationCatalogSweep.ts` exports an empty
+   `sweepExamples` array that the catalog appends to `examples`. An example spec may name `dataFiles` (relative to
+   `packages/data/generated`); their parsed JSON is passed to `count` as a third argument, and the manifest lists
+   them. Existing examples render as before, with a `Data` line only when `dataFiles` is non-empty.
+4. **Regeneration (DEFAULT).** This slice commits the regenerated `docs/VALIDATION.md` and `validation.json`.

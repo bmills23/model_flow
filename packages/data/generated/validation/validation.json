@@ -7,6 +7,7 @@
         "analgwst/point3-nodecay.json",
         "analgwst/point3-decay.json"
       ],
+      "dataFiles": [],
       "referenceKey": "analgwst",
       "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
       "methodIds": [
@@ -27,6 +28,7 @@
         "analgwst/patchi-nodecay.json",
         "analgwst/patchi-decay.json"
       ],
+      "dataFiles": [],
       "referenceKey": "analgwst",
       "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
       "methodIds": [
@@ -47,6 +49,7 @@
         "analgwst/patchf-nodecay.json",
         "analgwst/patchf-decay.json"
       ],
+      "dataFiles": [],
       "referenceKey": "analgwst",
       "source": "ANALGWST (analytical groundwater solute transport code), version 1.1",
       "methodIds": [
@@ -66,6 +69,7 @@
       "files": [
         "mibitrans/cases.json"
       ],
+      "dataFiles": [],
       "referenceKey": "mibitrans",
       "source": "mibitrans",
       "methodIds": [
@@ -85,6 +89,7 @@
       "files": [
         "mibitrans/cases.json"
       ],
+      "dataFiles": [],
       "referenceKey": "mibitrans",
       "source": "mibitrans",
       "methodIds": [
@@ -104,6 +109,7 @@
       "files": [
         "cleanup/ssg1996-table-a1.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa1996ssg",
       "source": "Soil Screening Guidance: Technical Background Document",
       "methodIds": [
@@ -123,6 +129,7 @@
       "files": [
         "cleanup/rsl-2024-11-cleanup.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa2024rsl",
       "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
       "methodIds": [
@@ -142,6 +149,7 @@
       "files": [
         "cleanup/rsl-2024-11-cleanup.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa2024rsl",
       "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
       "methodIds": [
@@ -162,6 +170,7 @@
       "files": [
         "exposure/r9.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -181,6 +190,7 @@
       "files": [
         "exposure/rsl-2024-11.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa2024rsl",
       "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
       "methodIds": [
@@ -200,6 +210,7 @@
       "files": [
         "exposure/rsl-2024-11-default-parameters.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa2024rsl",
       "source": "Regional Screening Levels (RSLs), Generic Tables, November 2024",
       "methodIds": [
@@ -219,6 +230,7 @@
       "files": [
         "saturatedSource/ssg1996-csat.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa1996ssg",
       "source": "Soil Screening Guidance: Technical Background Document",
       "methodIds": [
@@ -238,6 +250,7 @@
       "files": [
         "saturatedSource/bioscreen-mass.json"
       ],
+      "dataFiles": [],
       "referenceKey": "newell1996",
       "source": "BIOSCREEN natural attenuation decision support system, user's manual",
       "methodIds": [
@@ -257,6 +270,7 @@
       "files": [
         "saturatedSource/hand-cases.json"
       ],
+      "dataFiles": [],
       "referenceKey": null,
       "source": "Constructed cases computed by an independent script from the equations of the methods note; not a published example.",
       "methodIds": [
@@ -277,6 +291,7 @@
       "files": [
         "surfaceWater/r8.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -297,6 +312,7 @@
       "files": [
         "surfaceWater/manual-l4.json"
       ],
+      "dataFiles": [],
       "referenceKey": null,
       "source": "RISC5 user’s guide, Appendix L (not a references.json record).",
       "methodIds": [
@@ -316,6 +332,7 @@
       "files": [
         "uncertainty/table-r2.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -335,6 +352,7 @@
       "files": [
         "vadose/r7.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -354,6 +372,7 @@
       "files": [
         "vadose/vga1982-a1.json"
       ],
+      "dataFiles": [],
       "referenceKey": "vangenuchten1982",
       "source": "Analytical solutions of the one-dimensional convective-dispersive solute transport equation",
       "methodIds": [
@@ -374,6 +393,7 @@
       "files": [
         "vapor/risc-r3-r5.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -394,6 +414,7 @@
       "files": [
         "vapor/risc-r3-r5.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -413,6 +434,7 @@
       "files": [
         "vapor/appendix-j.json"
       ],
+      "dataFiles": [],
       "referenceKey": null,
       "source": "RISC5 user’s guide, Appendix J (not a references.json record).",
       "methodIds": [
@@ -432,6 +454,7 @@
       "files": [
         "vapor/epa2004-sl-adv.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epa2004je",
       "source": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings",
       "methodIds": [
@@ -451,6 +474,7 @@
       "files": [
         "vapor/visl.json"
       ],
+      "dataFiles": [],
       "referenceKey": "epavisl",
       "source": "Vapor Intrusion Screening Level User's Guide",
       "methodIds": [
@@ -468,6 +492,7 @@
       "id": "eco-wildlife-ecossl",
       "title": "Eco-SSL wildlife derivation, cadmium and lead surrogate rows",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epaecossl",
       "source": "Ecological Soil Screening Levels (Eco-SSLs)",
       "methodIds": [
@@ -485,6 +510,7 @@
       "id": "eco-wildlife-guild",
       "title": "Eco-SSL wildlife guild values, cadmium mammalian and lead avian",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epaecossl",
       "source": "Ecological Soil Screening Levels (Eco-SSLs)",
       "methodIds": [
@@ -502,6 +528,7 @@
       "id": "ssg1996-default-pef",
       "title": "SSG 1996 default particulate emission factor",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epa1996ssg",
       "source": "Soil Screening Guidance: Technical Background Document",
       "methodIds": [
@@ -519,6 +546,7 @@
       "id": "ssg2002-default-pef",
       "title": "SSG 2002 default particulate emission factor",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epa2002ssg",
       "source": "Supplemental Guidance for Developing Soil Screening Levels for Superfund Sites",
       "methodIds": [
@@ -536,6 +564,7 @@
       "id": "nrwqc-zinc-hardness",
       "title": "NRWQC zinc criteria at a hardness of 100 mg/L",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epanrwqc",
       "source": "National Recommended Water Quality Criteria - Aquatic Life Criteria Table",
       "methodIds": [],
@@ -551,6 +580,7 @@
       "id": "r7-theta",
       "title": "Table R-7, unit-gradient moisture content",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -568,6 +598,7 @@
       "id": "epa2004-henry-temperature",
       "title": "EPA 2004 Appendix C, benzene Henry constant at the system temperature",
       "files": [],
+      "dataFiles": [],
       "referenceKey": "epa2004je",
       "source": "User's Guide for Evaluating Subsurface Vapor Intrusion into Buildings",
       "methodIds": [
@@ -587,6 +618,7 @@
       "files": [
         "exposure/r9.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -606,6 +638,7 @@
       "files": [
         "exposure/r9.json"
       ],
+      "dataFiles": [],
       "referenceKey": "arcadis2001",
       "source": "Review of Risk Integrated Software for Cleanups (RISC) v4.0",
       "methodIds": [
@@ -625,6 +658,7 @@
       "files": [
         "vadose/vga1982-a1.json"
       ],
+      "dataFiles": [],
       "referenceKey": "vangenuchten1982",
       "source": "Analytical solutions of the one-dimensional convective-dispersive solute transport equation",
       "methodIds": [
@@ -754,6 +788,8 @@
     ],
     "defaults": [
       {
+        "id": "shower-film-reference",
+        "scope": "warning",
         "subject": "Foster and Chrostowski film reference coefficients (3000 cm/h gas, 20 cm/h liquid)",
         "methodIds": [
           "shower.fc-1986"
@@ -764,6 +800,8 @@
         "note": "RISC5 choices that could not be verified against the primary paper; they are inputs and the defaults are warned. The stagnant stall source is a planned, unverified record and is not cited."
       },
       {
+        "id": "shower-little-1992-balance",
+        "scope": "method",
         "subject": "Little (1992) two-resistance stall mass balance",
         "methodIds": [
           "shower.little-1992"
@@ -774,6 +812,8 @@
         "note": "The mass balance is our statement of the two-resistance theory, checked by limit identities; it is not a transcription of the paper."
       },
       {
+        "id": "shower-household-k",
+        "scope": "warning",
         "subject": "Household transfer factor K (RSL whole-house water-to-air term)",
         "methodIds": [
           "shower.rsl-household"
@@ -784,6 +824,8 @@
         "note": "An entered value that could not be verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The equation form (C_a = C_w K) is not confirmed, because the page prints its equations as images, so the warning stays."
       },
       {
+        "id": "plant-hhrap-fallback",
+        "scope": "method",
         "subject": "HHRAP fallback standing in for Trapp (2015)",
         "methodIds": [
           "plantUptake.hhrap-2005"
@@ -794,6 +836,8 @@
         "note": "The modern plant model is the EPA HHRAP 2005 produce equations until the Trapp (2015) models are read."
       },
       {
+        "id": "plant-tscf-leaf-air",
+        "scope": "method",
         "subject": "Transpiration stream concentration factor (TSCF) and leaf-air partition coefficient",
         "methodIds": [
           "plantUptake.trapp-matthies-1995"
@@ -804,6 +848,8 @@
         "note": "User inputs, because their published regressions were not read."
       },
       {
+        "id": "plant-briggs-rcf",
+        "scope": "method",
         "subject": "Briggs root concentration factor constants",
         "methodIds": [
           "plantUptake.trapp-matthies-1995",
@@ -815,6 +861,8 @@
         "note": "The constants 0.77 and -1.52 were read in the paper itself on 2026-10-21 (Pestic. Sci. 13, 495-504, open copy in the Rothamsted repository, page 500, Equations 1 and 2; the TSCF equation is on page 502). The engine's form drops the paper's 0.82 term above log Kow 2, as the HHRAP appendix does: Equation 1 is the macerated-root line, and Equation 2 adds 0.82 to the root concentration factor at every log Kow."
       },
       {
+        "id": "dispersivity-schulze-makuch",
+        "scope": "method",
         "subject": "Schulze-Makuch (2005) dispersivity coefficients",
         "methodIds": [
           "dispersivity.schulze-makuch2005"
@@ -825,9 +873,12 @@
         "note": "The unconsolidated-media pair c = 0.20, m = 0.44 is quoted from lecture notes that cite the paper, not from the paper’s own tables."
       },
       {
+        "id": "gelhar-vadose-regression",
+        "scope": "method",
         "subject": "Gelhar et al. (1985) two-branch vadose dispersivity regression",
         "methodIds": [
-          "vadose.vadsat"
+          "vadose.vadsat",
+          "vadose.layered"
         ],
         "warningCode": null,
         "referenceKey": "gelhar1985",
@@ -835,6 +886,20 @@
         "note": "The coefficients have no primary source located: the EPRI report (EA-4190, full text read 2026-10-21) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain."
       },
       {
+        "id": "gelhar-saturated-log-quadratic",
+        "scope": "method",
+        "subject": "Gelhar et al. (1985) saturated-zone log-quadratic dispersivity regression",
+        "methodIds": [
+          "dispersivity.gelhar1985-api1987"
+        ],
+        "warningCode": null,
+        "referenceKey": "gelhar1985",
+        "referenceStatus": "used",
+        "note": "The coefficients of ln(aL) = -3.795 + 1.774 ln x - 0.093 (ln x)^2 have no primary source located: the EPRI report (EA-4190) prints no regression equation, only field data and a plot against scale. They come from RISC5’s statement of its choice. The reference stays cited for the field data compilation it does contain."
+      },
+      {
+        "id": "ssg-table-a1-koc-h",
+        "scope": "method",
         "subject": "Organic Koc and H of the SSG 1996 Table A-1 fixture",
         "methodIds": [
           "cleanup.ssg-leaching"
