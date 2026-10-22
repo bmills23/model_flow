@@ -1,5 +1,5 @@
 import type { ProduceBoundary, ProduceFactors } from '@model-flow/engine';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed, createFeed } from '../vapor/feedStore';
 
 /**
  * The plants and ecology screen's homegrown produce inputs offered to the exposure and risk screen for
@@ -25,8 +25,10 @@ export interface ProduceRiskFeed {
   warnings?: { code: string; message: string }[];
 }
 
-const produce = createFeed<ProduceRiskFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`). */
+const produce = createChemicalFeed<ProduceRiskFeed>();
 export const getProduceFeed = produce.get;
+export const getProduceFeedSlots = produce.slots;
 export const setProduceFeed = produce.set;
 export const clearProduceFeed = produce.clear;
 export const subscribeProduceFeed = produce.subscribe;
@@ -55,6 +57,7 @@ export interface TphRiskFeed {
   warnings: { code: string; message: string }[];
 }
 
+/** A composition, not one chemical: a single slot. */
 const tph = createFeed<TphRiskFeed>();
 export const getTphFeed = tph.get;
 export const setTphFeed = tph.set;

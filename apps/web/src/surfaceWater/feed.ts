@@ -1,4 +1,4 @@
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 import type { SurfaceWaterCoefficient } from './coefficient';
 export type SurfaceWaterFeedMethod = 'well-mixed' | 'mass-discharge';
 
@@ -26,9 +26,11 @@ export interface SurfaceWaterFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<SurfaceWaterFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getSurfaceWaterFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<SurfaceWaterFeed>();
 
 export const getSurfaceWaterFeed = store.get;
+export const getSurfaceWaterFeedSlots = store.slots;
 export const setSurfaceWaterFeed = store.set;
 export const clearSurfaceWaterFeed = store.clear;
 export const subscribeSurfaceWaterFeed = store.subscribe;

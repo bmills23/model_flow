@@ -1,9 +1,10 @@
-import { overridesOf, screensOf, type Project, type Screens } from '../project';
+import { chemicalsOf, overridesOf, screensOf, type Project, type Screens } from '../project';
 import { receptorKey, withReceptorEdits } from '../overrides/receptors';
 import { editableRows, shownValue } from '../risk/receptorRows';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { overrideRows, type OverrideRow } from '../overrides/toxicity';
 import type { OverridesState } from '../overrides/model';
+import { userChemicalRows, type UserChemicalRow } from '../overrides/userChemicals';
 
 /** The project's toxicity overrides as report rows, with the database value beside each. */
 export async function loadOverrideRows(project: Project): Promise<OverrideRow[]> {
@@ -11,6 +12,10 @@ export async function loadOverrideRows(project: Project): Promise<OverrideRow[]>
   if (Object.keys(state.toxicity).length === 0) return [];
   return overrideRows(await loadChemicalDb(), state);
 }
+
+/** Every value of every chemical the user defined, with its note (source `user`). */
+export const userChemicalRowsOf = (project: Project): UserChemicalRow[] =>
+  userChemicalRows(chemicalsOf(project));
 
 /** The screens with the project's receptor names and factor edits laid on the receptors, for a build. */
 export function withProjectReceptorEdits(screens: Screens, state: OverridesState): Screens {

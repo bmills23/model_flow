@@ -1,5 +1,5 @@
 import type { EpcSpec } from '@model-flow/engine';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 
 /**
  * The household screen's air concentrations offered to the exposure and risk screen (and its model
@@ -41,8 +41,10 @@ export interface HouseholdRiskFeed {
   };
 }
 
-const household = createFeed<HouseholdRiskFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`). */
+const household = createChemicalFeed<HouseholdRiskFeed>();
 export const getHouseholdFeed = household.get;
+export const getHouseholdFeedSlots = household.slots;
 export const setHouseholdFeed = household.set;
 export const clearHouseholdFeed = household.clear;
 export const subscribeHouseholdFeed = household.subscribe;

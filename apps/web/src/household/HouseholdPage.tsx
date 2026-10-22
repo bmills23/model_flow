@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { registry, type Warning } from '@model-flow/engine';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
+import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 import { projectNameOf } from '../project/feedChemical';
 import { formatConcentration } from '../transport/chartData';
-import { Field, Group, Seg, TextField } from '../ui/controls';
-import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
-import { getWellFeed, subscribeWellFeed } from '../transport/wellFeed';
+import { Field, Group, Seg } from '../ui/controls';
+import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getWellFeedSlots, subscribeWellFeed } from '../transport/wellFeed';
+import { pickSlot } from '../project/feedSlots';
 import { computeHousehold, volatileVerdict, type Section } from './compute';
 import { householdCsvTables } from './csv';
 import { buildHouseholdFeed } from './feed';
@@ -84,11 +86,18 @@ export function HouseholdPage() {
     />
   );
 
-  const well = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
-  const surface = useSyncExternalStore(
-    subscribeSurfaceWaterFeed,
-    getSurfaceWaterFeed,
-    getSurfaceWaterFeed,
+  // the well and surface water results sent for this screen's chemical (one slot per chemical)
+  const well = pickSlot(
+    useSyncExternalStore(subscribeWellFeed, getWellFeedSlots, getWellFeedSlots),
+    form.chemicalId,
+  );
+  const surface = pickSlot(
+    useSyncExternalStore(
+      subscribeSurfaceWaterFeed,
+      getSurfaceWaterFeedSlots,
+      getSurfaceWaterFeedSlots,
+    ),
+    form.chemicalId,
   );
   const [sent, setSent] = useState<string | null>(null);
 
@@ -169,16 +178,18 @@ export function HouseholdPage() {
         <form className="inputs" onSubmit={(e) => e.preventDefault()} aria-label="Scenario inputs">
           <Group title="Water, soil and chemical">
             <div className="fields">
-              <TextField
-                label="Chemical name"
-                value={form.chemicalName}
-                onChange={(v) => set('chemicalName', v)}
+              <ProjectChemicalSelect
+                label="Chemical"
+                value={form.chemicalId}
+                onChange={(id) =>
+                  setForm((f) => ({
+                    ...f,
+                    chemicalId: id,
+                    chemicalName: chemicals.find((c) => c.id === id)?.name ?? '',
+                  }))
+                }
+                hint="Picked from the project list; the risk and cleanup screens read the result for this chemical. The Henry constant and molecular weight below are entered by hand."
               />
-              {text(
-                'chemicalId',
-                'Chemical id (CAS number)',
-                'Only to send results to the risk and cleanup screens, for example 71-43-2',
-              )}
               {text('waterConcentration', 'Tap and irrigation water concentration (mg/L)')}
               {text('soilConcentration', 'Surface soil concentration (mg/kg)')}
               {text('henry', 'Henry constant (dimensionless, air over water)')}

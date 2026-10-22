@@ -9,17 +9,21 @@ import {
 } from '@model-flow/engine';
 import { loadCleanupProps, type CleanupProps } from '../cleanup/ssg';
 import { DownloadCsv } from '../export/DownloadCsv';
-import { getScreen, setScreen } from '../project/store';
-import { ChemicalPicker } from '../risk/ChemicalPicker';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
+import { ownSlot } from '../project/feedSlots';
+import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 import { fmtHi } from '../risk/chartData';
 import { useChemicalDb } from '../risk/useChemicalDb';
+import { loadChemicalDb } from '../risk/chemicalDb';
+import { userCleanupProps } from '../overrides/userChemicals';
+import { useEffectiveDb, useOverrides } from '../overrides/useOverrides';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg, TextField } from '../ui/controls';
 import { plantsEcoCsvTables } from './csv';
 import { computeBenchmarks, computeEcossl, ECO_LEGACY_ID, ECO_MODERN_ID } from './eco';
 import { loadEcossl, substanceFor, type EcosslSubstance } from './ecossl';
 import {
-  getProduceFeed,
+  getProduceFeedSlots,
   getTphFeed,
   setProduceFeed,
   setTphFeed,
@@ -131,29 +135,56 @@ export function PlantsEcoPage() {
     />
   );
 
-  const { db, error: dbError } = useChemicalDb();
+  const { db: baseDb, error: dbError } = useChemicalDb();
+  const [overrides] = useOverrides();
+  // the project's user-defined chemicals are part of the database here
+  const db = useEffectiveDb(baseDb, overrides);
   const props = useLoaded<CleanupProps>(loadCleanupProps);
   const substances = useLoaded<EcosslSubstance[]>(loadEcossl);
-  const held = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  // the produce result this screen sent for its chemical (one slot per chemical)
+  const held = ownSlot(
+    useSyncExternalStore(subscribeProduceFeed, getProduceFeedSlots, getProduceFeedSlots),
+    form.chemicalId,
+  );
   const heldTph = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
   const [sent, setSent] = useState<string | null>(null);
   const [sentTph, setSentTph] = useState<string | null>(null);
 
+  // A list chemical is set at once; its RSL properties fill as soon as the database has loaded.
+  const projectList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const choose = (id: string): void => {
-    const rec = db?.byId.get(id);
-    if (!rec) return;
-    const p = props?.get(id);
-    const s = (v: number | undefined): string => (v === undefined ? '' : String(v));
     setForm((f) => ({
       ...f,
       chemicalId: id,
-      chemicalName: rec.name,
-      logKow: s(p?.logKow),
-      koc: s(p?.koc),
-      kd: s(p?.kd),
+      chemicalName: projectList.find((c) => c.id === id)?.name ?? '',
     }));
     setSent(null);
+    if (id === '') return;
+    void Promise.all([loadChemicalDb(), loadCleanupProps()]).then(
+      ([database, properties]) => {
+        const rec = database.byId.get(id);
+        const p = properties.get(id);
+        const s = (v: number | undefined): string => (v === undefined ? '' : String(v));
+        if (rec) {
+          setForm((f) =>
+            f.chemicalId === id
+              ? { ...f, chemicalName: rec.name, logKow: s(p?.logKow), koc: s(p?.koc), kd: s(p?.kd) }
+              : f,
+          );
+        } else {
+          // a user-defined chemical: only the Koc it carries, if any
+          const own = userCleanupProps(getChemicals()).get(id);
+          if (own)
+            setForm((f) =>
+              f.chemicalId === id ? { ...f, logKow: '', koc: s(own.koc), kd: '' } : f,
+            );
+        }
+      },
+      () => undefined,
+    );
   };
+  const noRsl =
+    form.chemicalId !== '' && db !== null && props !== null && !db.byId.has(form.chemicalId);
 
   const produce = useMemo(() => computeProduce(form), [form]);
   const feedResult = useMemo(() => buildProduceFeed(form, produce), [form, produce]);
@@ -228,16 +259,22 @@ export function PlantsEcoPage() {
       <div className="transport-grid">
         <form className="inputs" onSubmit={(e) => e.preventDefault()} aria-label="Scenario inputs">
           <Group title="Chemical and soil">
-            <ChemicalPicker
-              db={db}
-              error={dbError}
-              selected={new Set(form.chemicalId ? [form.chemicalId] : [])}
-              onAdd={choose}
+            <ProjectChemicalSelect
+              label="Chemical"
+              value={form.chemicalId}
+              onChange={choose}
+              hint={
+                dbError
+                  ? `The RSL list could not be loaded: ${dbError}`
+                  : 'Picked from the project list; each chemical keeps its own sent produce result.'
+              }
             />
             <p className="muted" role="status">
-              {form.chemicalId
-                ? `Chemical: ${form.chemicalName}. Log Kow, Koc and Kd are filled from the RSL where it gives them; edit any of them.`
-                : 'Choose a chemical to fill its RSL properties, or type them in.'}
+              {noRsl
+                ? `${form.chemicalName || form.chemicalId} has no RSL properties, so nothing is filled; enter log Kow, Koc and Kd by hand.`
+                : form.chemicalId
+                  ? `Chemical: ${form.chemicalName}. Log Kow, Koc and Kd are filled from the RSL where it gives them; edit any of them.`
+                  : 'Choose a chemical to fill its RSL properties, or type them in.'}
             </p>
             <div className="fields">
               {text('soilConcentration', 'Soil concentration (mg/kg dry weight)')}

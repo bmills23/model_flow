@@ -237,6 +237,9 @@ describe('project store', () => {
   });
 
   it('flags a household feed whose source form changed after it was built', () => {
+    // a slot is checked while its screen is on the slot's chemical
+    const h0 = getScreen('household');
+    setScreen('household', { form: { ...h0.form, chemicalId: 'x' } });
     setHouseholdFeed({ chemicalId: 'x', label: 'x', coefficients: {}, methods: {} });
     const h = getScreen('household');
     setScreen('household', { form: { ...h.form, waterConcentration: '9' } });
@@ -278,8 +281,13 @@ describe('project store', () => {
       const file = saved() as unknown as { screens: Record<string, { form: Obj }>; feeds: Obj };
       const form = file.screens[screen]!.form;
       strip(form, keys);
-      for (const k of feedKeys)
-        (file.feeds[k] as { inputsHash: string }).inputsHash = hashInputs(form);
+      // one slot per chemical: every slot of the feed carries the fingerprint (TPH has one slot)
+      for (const k of feedKeys) {
+        const entry = file.feeds[k] as
+          Record<string, { inputsHash: string }> | { inputsHash: string };
+        const slots = 'inputsHash' in entry ? [entry] : Object.values(entry);
+        for (const slot of slots as { inputsHash: string }[]) slot.inputsHash = hashInputs(form);
+      }
       localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(file));
       reload();
     }
@@ -512,7 +520,7 @@ describe('project store', () => {
     setVaporRiskFeed({ chemicalId: '71-43-2', label: 'benzene' });
     flushAutosave();
     const doc = JSON.parse(localStorage.getItem(AUTOSAVE_KEY)!);
-    doc.feeds.well.value.values = [0, null, 2e-6];
+    doc.feeds.well[''].value.values = [0, null, 2e-6];
     localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(doc));
     reload();
     expect(getScreen('vadose').form.infiltration).toBe('0.3');

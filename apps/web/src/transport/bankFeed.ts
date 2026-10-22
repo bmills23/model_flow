@@ -1,5 +1,5 @@
 import type { Scenario } from './form';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 
 /**
  * The groundwater run of the transport screen, offered to the surface water screen as the plume that
@@ -14,9 +14,11 @@ export interface BankFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<BankFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getBankFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<BankFeed>();
 
 export const getBankFeed = store.get;
+export const getBankFeedSlots = store.slots;
 export const setBankFeed = store.set;
 export const clearBankFeed = store.clear;
 export const subscribeBankFeed = store.subscribe;

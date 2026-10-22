@@ -4,7 +4,7 @@ import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
-import { forgetMemory, getScreen, setScreen } from '../project/store';
+import { forgetMemory, getChemicals, getScreen, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
 import { clearTransportFeed, setTransportFeed } from '../transport/chainFeed';
 import { DEFAULT_FORM, toScenario } from '../transport/form';
@@ -24,8 +24,12 @@ const MARK = 'Out of date';
 async function withBenzene() {
   render(<CleanupPage />);
   await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
-  fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
-  fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+  // a screen set to benzene put it on the project list, so the page already holds its row
+  if (!getChemicals().some((c) => c.id === '71-43-2')) {
+    fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
+    fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
+  }
+  await screen.findByRole('group', { name: /benzene/i });
 }
 
 function edit(screenKey: 'household' | 'vapor' | 'surfaceWater' | 'plantsEco' | 'transport') {
@@ -52,6 +56,12 @@ function edit(screenKey: 'household' | 'vapor' | 'surfaceWater' | 'plantsEco' | 
 describe('cleanup stale marks', () => {
   it('marks each source level panel, the produce choice and the TPH panel only while its feed is stale', async () => {
     const epc = { kind: 'constant' as const, value: 1e-6, origin: 'vapor.je-1991' };
+    // the sending screens are on benzene, as when these results were sent (a slot is checked while
+    // its screen is on the slot's chemical)
+    for (const key of ['household', 'vapor', 'plantsEco'] as const) {
+      const s = getScreen(key);
+      setScreen(key, { ...s, form: { ...s.form, chemicalId: '71-43-2' } } as never);
+    }
     setHouseholdFeed({
       chemicalId: '71-43-2',
       label: 'Benzene, household run',
@@ -123,7 +133,10 @@ describe('cleanup stale marks', () => {
     expect(within(household).getByText(/send again from household/i)).toBeTruthy();
     expect(within(vapor).queryByText(MARK)).toBeNull();
     expect(within(surface).queryByText(MARK)).toBeNull();
-    expect(screen.getByRole('note').textContent).toMatch(/Household exposure values \(Household\)/);
+    expect(screen.getByRole('note').textContent).toMatch(
+      // the note names the chemical of the stale slot
+      /Household exposure values for 71-43-2 \(Household\)/,
+    );
 
     edit('vapor');
     expect(within(vapor).getByText(MARK)).toBeTruthy();

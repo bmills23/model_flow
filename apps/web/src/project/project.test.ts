@@ -22,12 +22,15 @@ function sample() {
   return buildProject({
     screens,
     feeds: {
-      well: feedEntry('transport', screens.transport.form, {
-        method: 'modern',
-        label: 'Well at 100 m',
-        times: [0, 1, 2],
-        values: [0, 0.5, 1],
-      }),
+      // one slot per chemical; the empty key is a run typed by hand
+      well: {
+        '': feedEntry('transport', screens.transport.form, {
+          method: 'modern' as const,
+          label: 'Well at 100 m',
+          times: [0, 1, 2],
+          values: [0, 0.5, 1],
+        }),
+      },
     },
     data: { rsl: 'rsl-2024-11', nrwqc: 'nrwqc-2026-10-16', sediment: 'sediment-2026-10-16' },
     title: 'Site A',
@@ -147,7 +150,7 @@ describe('parseProject', () => {
 
   it('drops a feed whose series arrays differ in length, keeps the screens and warns', () => {
     const doc = JSON.parse(JSON.stringify(sample()));
-    doc.feeds.well.value.values = [1];
+    doc.feeds.well[''].value.values = [1];
     const r = parseProject(doc);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -159,11 +162,13 @@ describe('parseProject', () => {
 
   it('drops a non-finite series value the same way and keeps the other feeds', () => {
     const doc = JSON.parse(JSON.stringify(sample()));
-    doc.feeds.well.value.values = [0, null, 1];
+    doc.feeds.well[''].value.values = [0, null, 1];
     doc.feeds.vaporRisk = {
-      source: 'vapor',
-      inputsHash: 'h',
-      value: { chemicalId: '71-43-2', label: 'benzene' },
+      '71-43-2': {
+        source: 'vapor',
+        inputsHash: 'h',
+        value: { chemicalId: '71-43-2', label: 'benzene' },
+      },
     };
     const r = parseProject(doc);
     expect(r.ok).toBe(true);
@@ -186,12 +191,12 @@ describe('parseProject', () => {
 describe('feeds', () => {
   it('records the source and a hash of the form it was built from', () => {
     const p = sample();
-    const e = p.feeds?.well;
+    const e = p.feeds?.well?.[''];
     expect(e?.source).toBe('transport');
     expect(e?.inputsHash).toMatch(/^[0-9a-f]{8}$/);
   });
   it('reports a feed stale only when the source form changed', () => {
-    const e = sample().feeds?.well;
+    const e = sample().feeds?.well?.[''];
     if (!e) throw new Error('no feed');
     const same = { ...TRANSPORT_DEFAULT, K: '3.5', loading: 'pulse' as const };
     expect(isFeedStale(e, same)).toBe(false);

@@ -4,13 +4,18 @@ import { convert, formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Marker } from '../transport/Marker';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { budgetRows, massRateKgPerDay } from './chartData';
 import { lastYearMean, type RunSummary, type VadoseMethod } from './compute';
 import { DepthProfileChart } from './DepthProfileChart';
-import { getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from './feed';
-import { getVadoseVaporFeed, setVadoseVaporFeed, subscribeVadoseVaporFeed } from '../vapor/feeds';
+import { getVadoseFeedSlots, setVadoseFeed, subscribeVadoseFeed } from './feed';
+import {
+  getVadoseVaporFeedSlots,
+  setVadoseVaporFeed,
+  subscribeVadoseVaporFeed,
+} from '../vapor/feeds';
+import { ownSlot } from '../project/feedSlots';
 import { vadoseVaporSource } from './vaporFeed';
 import { chemicalTag } from '../project/feedChemical';
 import {
@@ -163,11 +168,18 @@ export function VadosePage() {
   const parsed = useMemo(() => toScenario(form), [form]);
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
   const { outcome, lastGood, computing } = useVadoseResult(request);
-  const feed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const vaporHeld = useSyncExternalStore(
-    subscribeVadoseVaporFeed,
-    getVadoseVaporFeed,
-    getVadoseVaporFeed,
+  // what this screen sent for its chemical (one slot per chemical)
+  const feed = ownSlot(
+    useSyncExternalStore(subscribeVadoseFeed, getVadoseFeedSlots, getVadoseFeedSlots),
+    form.chemicalId,
+  );
+  const vaporHeld = ownSlot(
+    useSyncExternalStore(
+      subscribeVadoseVaporFeed,
+      getVadoseVaporFeedSlots,
+      getVadoseVaporFeedSlots,
+    ),
+    form.chemicalId,
   );
 
   // An engine input error keeps the last good result (and the scenario it belongs to) on screen.
@@ -297,13 +309,12 @@ export function VadosePage() {
           </Group>
 
           <Group title="Chemical">
-            <ChemicalPicker
-              id="vadose-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) =>
-                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              onPick={(id, row) =>
+                setForm((f) => ({ ...f, chemicalId: id, ...(row ? fateFill(row) : {}) }))
               }
               note="Decay in the leachate is not in the database and stays your input."
             />

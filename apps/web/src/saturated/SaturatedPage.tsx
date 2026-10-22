@@ -3,25 +3,26 @@ import { getScreen, setScreen } from '../project/store';
 import { convert } from '@model-flow/engine';
 import { fedStepLength } from '../transport/compute';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { fateFill, useChemicalRows } from '../ui/chemicalFill';
 import { TimeLineChart, type TimeSeries } from '../vadose/TimeLineChart';
 import { fmt, regionRows, releaseRows, type Row } from './chartData';
 import type { RunSummary, TaggedWarning } from './compute';
 import { CrossSection } from './CrossSection';
 import {
-  getSaturatedFeed,
+  getSaturatedFeedSlots,
   setSaturatedFeed,
   subscribeSaturatedFeed,
   type SaturatedMethod,
 } from './feed';
 import {
-  getSaturatedVaporFeed,
+  getSaturatedVaporFeedSlots,
   setSaturatedVaporFeed,
   subscribeSaturatedVaporFeed,
 } from '../vapor/feeds';
 import { saturatedVaporSource } from './vaporFeed';
 import { chemicalTag } from '../project/feedChemical';
+import { ownSlot } from '../project/feedSlots';
 import { TEXTURE_OPTIONS, type TextureChoice } from '../vapor/form';
 import {
   CASE_A,
@@ -125,11 +126,18 @@ export function SaturatedPage() {
   const parsed = useMemo(() => toScenario(form), [form]);
   const request = useMemo(() => (parsed.ok ? { scenario: parsed.scenario } : null), [parsed]);
   const { outcome, lastGood, computing } = useSaturatedResult(request);
-  const feed = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
-  const vaporHeld = useSyncExternalStore(
-    subscribeSaturatedVaporFeed,
-    getSaturatedVaporFeed,
-    getSaturatedVaporFeed,
+  // what this screen sent for its chemical (one slot per chemical)
+  const feed = ownSlot(
+    useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeedSlots, getSaturatedFeedSlots),
+    form.chemicalId,
+  );
+  const vaporHeld = ownSlot(
+    useSyncExternalStore(
+      subscribeSaturatedVaporFeed,
+      getSaturatedVaporFeedSlots,
+      getSaturatedVaporFeedSlots,
+    ),
+    form.chemicalId,
   );
 
   // An engine input error keeps the last good result (and the scenario it belongs to) on screen.
@@ -357,13 +365,12 @@ export function SaturatedPage() {
           </Group>
 
           <Group title="Chemical">
-            <ChemicalPicker
-              id="saturated-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) =>
-                setForm((f) => ({ ...f, chemicalId: row?.id ?? '', ...(row ? fateFill(row) : {}) }))
+              onPick={(id, row) =>
+                setForm((f) => ({ ...f, chemicalId: id, ...(row ? fateFill(row) : {}) }))
               }
               note="The source decay rate is not in the database and stays your input."
             />

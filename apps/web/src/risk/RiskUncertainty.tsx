@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { LegacyScenarioInput } from '@model-flow/engine';
-import type { StaleFeedKey } from '../project/store';
+import type { FeedRef } from '../project/staleFeeds';
 import { UncertaintyPanel } from '../uncertainty/UncertaintyPanel';
 import {
   EXPOSURE_DISPLAYS,
@@ -13,7 +13,7 @@ import {
 export function RiskUncertainty(props: {
   base: LegacyScenarioInput;
   /** Feeds from other screens the base inputs were taken from. */
-  feeds?: readonly StaleFeedKey[];
+  feeds?: readonly FeedRef[];
 }) {
   const { base } = props;
   const model = useMemo(() => exposureUncertainty(base), [base]);

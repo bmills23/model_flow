@@ -1,8 +1,14 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { currentProject, type StaleFeedKey } from '../project/store';
-import { staleAmong, staleSentence, useStaleFeeds } from '../project/staleFeeds';
+import { currentProject, type StaleFeedKey, type StaleSlot } from '../project/store';
+import { staleAmong, staleSentence, useStaleSlots } from '../project/staleFeeds';
 import { overridesOf } from '../project';
-import { loadOverrideRows, receptorEditRows, type ReceptorEditRow } from './userValues';
+import {
+  loadOverrideRows,
+  receptorEditRows,
+  userChemicalRowsOf,
+  type ReceptorEditRow,
+} from './userValues';
+import type { UserChemicalRow } from '../overrides/userChemicals';
 import type { OverrideRow } from '../overrides/toxicity';
 import { fmtTox } from '../risk/format';
 import { buildReport, type Report } from './buildReport';
@@ -94,6 +100,7 @@ export function ReportView({
   uncertainty = null,
   userValues = [],
   receptorEdits = [],
+  userChemicals = [],
   staleFeeds = [],
 }: {
   report: Report;
@@ -106,8 +113,13 @@ export function ReportView({
   userValues?: readonly OverrideRow[];
   /** Exposure factors the user edited in place of a receptor preset's. */
   receptorEdits?: readonly ReceptorEditRow[];
-  /** Feeds from other screens whose inputs changed after they were sent; sections computed from them say so. */
-  staleFeeds?: readonly StaleFeedKey[];
+  /** Every value of the chemicals the user defined, each with its note. */
+  userChemicals?: readonly UserChemicalRow[];
+  /**
+   * Feed slots (a feed for a chemical) whose sending inputs changed after they were sent; sections
+   * computed from them say so, naming the chemical. A bare feed key stands for its untagged slot.
+   */
+  staleFeeds?: readonly (StaleSlot | StaleFeedKey)[];
 }) {
   const { statement } = report;
   return (
@@ -257,6 +269,44 @@ export function ReportView({
           </table>
         </section>
       )}
+      {userChemicals.length > 0 && (
+        <section className="report-section" aria-labelledby="rep-user-chemicals">
+          <h2 id="rep-user-chemicals">Chemicals defined by the user</h2>
+          <p className="muted">
+            These chemicals are not in the EPA tables. Every value is the user's own entry (source:
+            user, User value (this project)) with the note given for it; none is a published value.
+            A value with no usable number or no note is not used.
+          </p>
+          <table className="report-table report-user-values">
+            <caption className="sr-only">Values of the chemicals defined by the user</caption>
+            <thead>
+              <tr>
+                <th scope="col">Chemical</th>
+                <th scope="col">Value</th>
+                <th scope="col">Entered</th>
+                <th scope="col">Source</th>
+                <th scope="col">Source note</th>
+              </tr>
+            </thead>
+            <tbody>
+              {userChemicals.map((r) => (
+                <tr key={`${r.chemical}:${r.cas}:${r.label}`}>
+                  <th scope="row">
+                    {r.chemical}
+                    {r.cas !== '' ? ` (${r.cas})` : ''}
+                  </th>
+                  <td>
+                    {r.label} ({r.unit})
+                  </td>
+                  <td>{r.applied ? r.text : `${r.text} (not used, incomplete entry)`}</td>
+                  <td>{r.source}</td>
+                  <td>{r.note === '' ? '(none)' : r.note}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
       {receptorEdits.length > 0 && (
         <section className="report-section" aria-labelledby="rep-receptor-edits">
           <h2 id="rep-receptor-edits">Receptor factors supplied by the user</h2>
@@ -368,10 +418,11 @@ export function ReportPage() {
   const id = useId();
   const project = useMemo(() => currentProject(), []);
   const report = useMemo(() => buildReport(project), [project]);
-  const staleFeeds = useStaleFeeds();
+  const staleFeeds = useStaleSlots();
   const [results, setResults] = useState<ProjectResults | null>(null);
   const [userValues, setUserValues] = useState<OverrideRow[]>([]);
   const receptorEdits = useMemo(() => receptorEditRows(project), [project]);
+  const userChemicals = useMemo(() => userChemicalRowsOf(project), [project]);
   useEffect(() => {
     let live = true;
     if (Object.keys(overridesOf(project).toxicity).length === 0) return;
@@ -419,6 +470,7 @@ export function ReportPage() {
         preparedBy={preparedBy}
         results={results}
         userValues={userValues}
+        userChemicals={userChemicals}
         receptorEdits={receptorEdits}
         staleFeeds={staleFeeds}
         uncertainty={<ReportUncertainty project={project} />}

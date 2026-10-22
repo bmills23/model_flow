@@ -4,14 +4,14 @@ Append new decisions at the bottom with the date. Correct a superseded decision 
 
 ## 2026-10-15: Project scope and direction (Bryan)
 
-| Question | Decision | Consequence |
-|---|---|---|
-| Revenue vs personal | Personal, open source, free | $0 hosting (GitHub Pages), local gates before any push, minimal CI, no cloud fleets |
-| Scope | Full RISC5 parity as the long-run goal | 12 milestones (docs/ROADMAP.md section 7); each ships a usable increment |
-| Validation | Manual plus public references; no RISC5 licence | Fixtures from the Appendix R peer-review tables, USGS ANALGWST, van Genuchten & Alves 1982, EPA spreadsheets, mibitrans cross-checks |
-| Architecture | TypeScript engine plus static single-page app | All computation in the browser (Web Worker); no backend; the Python tkinter shell is retired |
-| Methods | RISC5's legacy methods by default, with a per-process switch to a modern method | The method registry is the central engine abstraction; legacy-vs-modern comparison overlays are a headline feature |
-| Attribution | Thorough scientific references for legacy and modern methods, kept separate from third-party software licences | `docs/ATTRIBUTIONS.md` (science and data provenance) and `docs/THIRD_PARTY_LICENSES.md` (software), both generated from `data/references.json` and the lockfile; in-app Methods & References page |
+| Question            | Decision                                                                                                       | Consequence                                                                                                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Revenue vs personal | Personal, open source, free                                                                                    | $0 hosting (GitHub Pages), local gates before any push, minimal CI, no cloud fleets                                                                                                               |
+| Scope               | Full RISC5 parity as the long-run goal                                                                         | 12 milestones (docs/ROADMAP.md section 7); each ships a usable increment                                                                                                                          |
+| Validation          | Manual plus public references; no RISC5 licence                                                                | Fixtures from the Appendix R peer-review tables, USGS ANALGWST, van Genuchten & Alves 1982, EPA spreadsheets, mibitrans cross-checks                                                              |
+| Architecture        | TypeScript engine plus static single-page app                                                                  | All computation in the browser (Web Worker); no backend; the Python tkinter shell is retired                                                                                                      |
+| Methods             | RISC5's legacy methods by default, with a per-process switch to a modern method                                | The method registry is the central engine abstraction; legacy-vs-modern comparison overlays are a headline feature                                                                                |
+| Attribution         | Thorough scientific references for legacy and modern methods, kept separate from third-party software licences | `docs/ATTRIBUTIONS.md` (science and data provenance) and `docs/THIRD_PARTY_LICENSES.md` (software), both generated from `data/references.json` and the lockfile; in-app Methods & References page |
 
 ## 2026-10-15: Standing assumptions
 
@@ -34,16 +34,16 @@ entry here.
 
 ## 2026-10-15: M1 groundwater screen, chart library and design (wave 2)
 
-| Question | Decision | Why |
-|---|---|---|
-| Chart library | d3-contour and d3-scale (both ISC) drawing React-rendered SVG. Observable Plot and ECharts not used | The initial plan named Plot plus d3. Plot builds its SVG imperatively and, for a filled-and-isolined plan map, would still need d3-contour plus `Plot.geo`; it also brings its own colour handling that cannot follow the page theme tokens. Rendering the SVG in React keeps both themes on CSS custom properties (the plume ramp is a CSS `color-mix` between two theme tokens), keeps the test render in jsdom simple, and costs about 21 kB gzip on the main bundle (119.6 to 140.9 kB). ECharts was unnecessary because the contour map renders acceptably this way |
-| Where the engine runs | Module Web Worker (`compute.worker.ts`); a newer request terminates the worker and starts a fresh one; without Worker support (tests) it computes on a timer tick | A 100 by 60 map plus three curves never blocks input; input is debounced 300 ms (first compute is immediate). The worker chunk duplicates the engine (about 273 kB, loaded only for the screen) |
-| Pulse and stepped loading for Wexler and Domenico | The engine applies it: the screen passes `ConcentrationStep` lists (c0 times the step factor, zero-length steps dropped) to `patchiConcentration`, `patchfConcentration`, `patchiGrid`, `patchfGrid`, `domenicoConcentration` and `domenicoWarnings`, which superpose F(t - start) minus F(t - end) | Both solutions are linear in the source; the engine rejects overlapping, unordered, negative or NaN steps with RangeError, which the screen shows as an input error beside the last good result. The screen's earlier own superposition and its `ui.superposition` note are removed; `loadingParity.test.ts` pins pulse and stepped values recorded from that code to 1e-9 relative. The AT123D kernel takes the loading steps directly |
-| Source strength | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source |
-| Geometry | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width | One coordinate story for the three methods; Domenico already measures depth down from the top |
-| Screen average on the map | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout | Keeps the worker time bounded; the readout uses the finer average |
-| Finite thickness without a width | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table) |
-| Domenico | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed | Not a recommended method (see docs/methods/groundwater-transport.md) |
+| Question                                          | Decision                                                                                                                                                                                                                                                                                            | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Chart library                                     | d3-contour and d3-scale (both ISC) drawing React-rendered SVG. Observable Plot and ECharts not used                                                                                                                                                                                                 | The initial plan named Plot plus d3. Plot builds its SVG imperatively and, for a filled-and-isolined plan map, would still need d3-contour plus `Plot.geo`; it also brings its own colour handling that cannot follow the page theme tokens. Rendering the SVG in React keeps both themes on CSS custom properties (the plume ramp is a CSS `color-mix` between two theme tokens), keeps the test render in jsdom simple, and costs about 21 kB gzip on the main bundle (119.6 to 140.9 kB). ECharts was unnecessary because the contour map renders acceptably this way |
+| Where the engine runs                             | Module Web Worker (`compute.worker.ts`); a newer request terminates the worker and starts a fresh one; without Worker support (tests) it computes on a timer tick                                                                                                                                   | A 100 by 60 map plus three curves never blocks input; input is debounced 300 ms (first compute is immediate). The worker chunk duplicates the engine (about 273 kB, loaded only for the screen)                                                                                                                                                                                                                                                                                                                                                                          |
+| Pulse and stepped loading for Wexler and Domenico | The engine applies it: the screen passes `ConcentrationStep` lists (c0 times the step factor, zero-length steps dropped) to `patchiConcentration`, `patchfConcentration`, `patchiGrid`, `patchfGrid`, `domenicoConcentration` and `domenicoWarnings`, which superpose F(t - start) minus F(t - end) | Both solutions are linear in the source; the engine rejects overlapping, unordered, negative or NaN steps with RangeError, which the screen shows as an input error beside the last good result. The screen's earlier own superposition and its `ui.superposition` note are removed; `loadingParity.test.ts` pins pulse and stepped values recorded from that code to 1e-9 relative. The AT123D kernel takes the loading steps directly                                                                                                                                  |
+| Source strength                                   | The UI source concentration is the held concentration for Wexler and Domenico; for AT123D the mass rate is concentration times Darcy flux (K i, equal to seepage velocity times porosity) times source cross-section. A mass-rate input back-calculates the held concentration the same way         | The two methods are therefore comparable from one set of inputs; the screen warns (`ui.source-basis`) that they differ near the source                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Geometry                                          | x measured from the downgradient source face (source occupies x in [-L, 0]), y centred on the source, depth positive down from the water table; finite aquifers map to engine z from the base; PATCHF shifts y by half the aquifer width                                                            | One coordinate story for the three methods; Domenico already measures depth down from the top                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Screen average on the map                         | Trapezoid over 5 depths for the map (cost is five grids), 4 intervals for curve points and 10 for the receptor readout                                                                                                                                                                              | Keeps the worker time bounded; the readout uses the finer average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Finite thickness without a width                  | Wexler uses PATCHI with the layer's no-flux top and bottom (`VerticalBounds { thickness }`) and the screen warns (`ui.wexler-infinite-width`); a width selects PATCHF                                                                                                                               | The engine's PATCHF needs both; the unbounded PATCHI it used first ignored both boundaries (see 2026-10-16, Wexler no-flux water table)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Domenico                                          | Optional overlay only, labelled a BIOSCREEN/RBCA-compatible comparison, with the engine's validity warnings listed                                                                                                                                                                                  | Not a recommended method (see docs/methods/groundwater-transport.md)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ## 2026-10-15: Schulze-Makuch 2005 dispersivity coefficients (M1)
 
@@ -752,6 +752,7 @@ screening choices, not rulings, as in M2 and M3.
 
 M8 slice D2 (sediment benchmark data build, 2026-10-17) implementation choices, none overturning a ruling
 above:
+
 - **Region 4 PDF.** Fetched 2026-10-17; the bytes match the checksum recorded on 2026-10-16
   (SHA-256 `7c89bc7c...2d0889`, 1,284,613 bytes). Tables 2a, 2b and 2c are on PDF pages 81 to 89. The CSVs
   are written by `scripts/extract-r4-sediment.ts` from `pdftotext -layout`, with blank cells placed by the
@@ -921,7 +922,7 @@ Rulings, each DEFAULT (Bryan's to overturn) unless marked as forced by a source:
 11. **Linearity.** Every M7 method is linear in its source concentration and returns its coefficient, so
     M5 cleanup levels are the target over the coefficient (no root find); M5 wrappers land in slice E4.
 12. **M9 interface.** M7 exposes `IrrigationSource { origin, waterConcentration(t), applicationRate,
-    season?, chemical }`; uptake, interception and soil accumulation belong to M9.
+season?, chemical }`; uptake, interception and soil accumulation belong to M9.
 13. **Tolerances.** Identities 1e-12 (1e-9 for limits), hand cases 1e-9, published Little 1992, RSL and
     SSG values at half a unit in the last printed figure, Table R-9 shower rows at 3 percent (or a named
     exception if the review lacks the shower inputs).
@@ -1331,7 +1332,7 @@ DEFAULT (open for Bryan to overturn) unless marked forced by a source:
 3. **Pore water from the M2 and M3 partitioning (DEFAULT).** C_pw = C_s rho_b / (theta_w + rho_b K_d), with
    the same chemical record, so a soil gives the same pore water in every milestone.
 4. **Irrigation as a plain interface (DEFAULT).** `PlantIrrigationInput { concentration_mg_per_L,
-   applicationRate_L_per_m2_per_d, source }` (renamed from `IrrigationInput`, which is the M7 sprinkler
+applicationRate_L_per_m2_per_d, source }` (renamed from `IrrigationInput`, which is the M7 sprinkler
    input), typed in or converted from the M7 `IrrigationSource` since slice E2; used only as an optional
    root-zone water concentration and a foliar interception term. Every user-entered run raises
    `IRRIGATION_USER_ENTERED`.
@@ -1744,7 +1745,7 @@ Measured with a profile (`node --cpu-prof`), call counts and per-call timings of
 3. **Fix (DEFAULT).** The idle status line faded its text with `opacity: 0.6`, which pushed the muted
    token below 4.5:1. The fade is removed; the active state is shown with the full text token and a
    heavier weight instead. A test reads the rule so opacity cannot return.
-3a. **Late finding on `#/report` (DEFAULT).** The wave's final mobile check found one serious
+   3a. **Late finding on `#/report` (DEFAULT).** The wave's final mobile check found one serious
    `scrollable-region-focusable` violation (3 nodes) on `#/report`: the opened chart data tables scroll
    but were not keyboard reachable. The three `table-scroll` containers (vadose `DataTable`, transport
    breakthrough chart, cleanup modeled chart) are now focusable regions with a label.
@@ -1779,7 +1780,6 @@ Plan of record: `docs/UI_PARITY.md` (gap table and slices U1 to U10), built on t
 3. **The site model screen is advisory** (Bryan: "Advisory (as planned)"). `#/site` builds a checklist of the
    screens to visit; no step is locked.
 4. **Scope: all ten slices**, U1 to U10, including the optional decimal comma entry (U10).
-
 
 ## 2026-10-19: Wave H slice U8, fill chemical properties from the database
 
@@ -1872,7 +1872,6 @@ Scope: the site-specific wildlife hazard quotient panel on `#/plants-eco` (inven
    with a round-trip case in `project/screens.test.ts`. CSV table `wildlife-dose` is added to the screen's
    downloads. No new route, so the mobile check route list and keyboard-order tests are unchanged.
 
-
 ## 2026-10-19: Wave H slice U7, soil texture presets on vadose and saturated
 
 Scope: a texture select on each vadose layer and on the saturated soil group (inventory C8, F4), filled from the
@@ -1928,7 +1927,6 @@ Features D3, D4, G9 and J8 (per project only, as Bryan ruled: no edits to the ma
    pattern. The store, autosave, file and report plumbing already carry the whole `overrides` object.
 9. **No new route.** The mobile check route list and keyboard-order tests are unchanged; the panel is a
    disclosure inside an existing card.
-
 
 ## 2026-10-19: Wave H slice U5, editable exposure factors and receptor names
 
@@ -2040,7 +2038,6 @@ Features E1 to E8. Advisory only, nothing locked (Bryan): the screen changes no 
 5. **No project file change.** Format version 1 is untouched; there is no new route, so the mobile check and keyboard
    lists are unchanged.
 
-
 ## 2026-10-19: Wave I scope and the wave H open questions (Bryan delegated)
 
 Asked to answer the wave H open questions and pick the next wave, Bryan replied "whatever you recommend". The
@@ -2094,7 +2091,7 @@ their own blocks.
    and the CSV cell is blank; the "out of range" cell carries the distinct meaning. Chosen over a new "could not
    back-calculate" text (ruling). Test added, red first.
 7. **Corrected after review (F1).** The new `.repro-flag` rule had been spliced into the shared `table.compare th,
-   table.compare td` list, so `th` lost its alignment, padding, rule and wrapping. `plantsEco.css` restores the
+table.compare td` list, so `th` lost its alignment, padding, rule and wrapping. `plantsEco.css` restores the
    shared declarations, `th` keeps `font-weight: 600` in its own rule, and `.repro-flag` has its own rule. Regression
    test `plantsEco.css.test.ts` failed before the fix.
 
@@ -2195,7 +2192,6 @@ their own blocks.
 13. **Deviations.** `docs/methods/uncertainty.md` status paragraph edited (it named modeled sources as open). The
     component is `ModeledSourceUncertainty.tsx` because the case-insensitive filesystem resolves
     `./ModeledUncertainty` to `modeledUncertainty.ts`.
-
 
 ## 2026-10-19: Wave J scope
 
@@ -2313,7 +2309,7 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
    screen. The shared `afterEach` in `test-setup.ts` now resets the hash (red-first test in `testIsolation.test.tsx`).
    The conditional cleanup stays: a temporary diagnostic over the full suite found no mounted nodes left behind
    where the testing library was not loaded.
-7a. **Test helper naming (corrective pass).** Test-only helpers carry a `.testkit.` infix
+   7a. **Test helper naming (corrective pass).** Test-only helpers carry a `.testkit.` infix
    (`surfaceWater/linkedRun.testkit.ts`, `a11y/screenKeyboard.testkit.tsx`, formerly `computeLinked.ts` and
    `screenKeyboardOrder.tsx`), and `testIsolation.test.tsx` fails if any file in `src` that is neither a test nor
    a testkit imports vitest or the testing library.
@@ -2328,6 +2324,7 @@ Per-slice rulings follow in their own blocks. Rulings a slice made on its own ar
 ## 2026-10-19: Wave J slice J5, local branches
 
 Both branches were checked against main and deleted. Restore either with `git branch <name> <tip>`.
+
 1. **`m1-groundwater-ui` (tip `5d6c6c7b42c10568b0a190a02808fe84c5d215bc`), deleted.** 10 commits, none
    patch-equivalent. The branch-only hunks in `apps/web/src/App.tsx` (lazy `TransportPage` import, `#/transport`
    route, shell-wide class, step link, transport button) and `apps/web/package.json` (d3-contour, d3-scale and
@@ -2746,6 +2743,7 @@ on `wave-lm`. Every ruling is DEFAULT.
 12. **Transport vadose read (DEFAULT).** The transport screen reads the vadose feed only when the saturated feed is not on.
 13. **Conflict-marker guard (DEFAULT).** Exact `=======` counts as a marker in markdown outside fences, so a setext
     underline of exactly seven `=` would be flagged.
+
 ## 2026-10-21: Check cadence between waves
 
 Bryan directed, verbatim: "yes, do all five", in reply to a proposal made after wave K was timed (about 20 of its
@@ -2965,3 +2963,242 @@ DEFAULT.
    screen's new `chemicalId` (O4).
 3. **Multi-chemical modeled cleanup stays capped at one chemical in these waves.** The engine solver already takes
    several chemicals; lifting the web cap is a later slice.
+
+## 2026-10-21: Wave O slice O4, feeds per chemical and version 2
+
+Scope rulings 2 and 5 of the "Project chemical list, waves N to P scope" block and ruling 2 of the "Waves O and P
+scope" block. Every ruling below is DEFAULT.
+
+1. **Which feeds are per chemical.** Every feed that carries a `chemicalId`: the well, bank, groundwater run for
+   cleanup (`transportChain`, session only), surface water, vadose, saturated, the three vapor input feeds
+   (vadose, water table, saturated), vapor air (`vaporRisk`), household and produce feeds. The TPH feed is about a
+   composition, not one chemical, and keeps one slot (`project/schema.ts`, `CHEMICAL_FEEDS`).
+2. **Slot shape.** A per-chemical feed holds a `Map` from slot key to value (`project/feedSlots.ts`, `FeedSlots`),
+   kept in send order. The slot key is the value's own `chemicalId`, or the empty text for a value sent while its
+   screen's chemical was typed by hand. `createChemicalFeed` (`vapor/feedStore.ts`) writes the slot of the value
+   it is given, so the senders, which already tag their value with the screen's chemical, write their own slot
+   unchanged and leave the other chemicals' slots alone; a re-send moves the slot to the end.
+3. **How a consumer reads.** `getXFeed(chemicalId)` and `pickSlot(slots, chemicalId)` return the consumer's own
+   chemical's slot; when there is none, the untagged slot; when neither is held, the most recently sent slot of
+   another chemical, so the wave N chemical check still names the chemical it was made for and the row errors. A
+   consumer with no chemical reads the untagged slot, else the most recent. Screens that read many chemicals (risk,
+   cleanup, the report) take the whole map (`getXFeedSlots()`, `feedSlotsOf`) and pick per row; a sender shows only
+   its own chemical's slot as sent (`ownSlot`, no fallback).
+4. **Staleness per feed and chemical.** Fingerprints and held-input baselines are kept per slot. A slot is checked
+   while its source screen is set to the slot's chemical (a linked surface water run: the chemical of the bank run
+   it reads); while the screen is on another chemical the slot keeps the mark it had, because the screen no longer
+   shows that chemical's inputs, and it is checked again when the screen is set back. Held inputs (the vadose or
+   saturated source of the transport screen, the vapor source series, the household well and surface water) are
+   read for the slot's chemical. Limit: a mark kept this way is not saved; an opened file checks only the slots of
+   each screen's current chemical, the others open current. A change to an input shared by every chemical (the
+   aquifer, say) made while the screen is on another chemical shows on a slot once the screen is set back to it.
+5. **Marks name the chemical.** `getStaleSlots`, `useStaleSlots` and `isFeedStaleNow(key, chemicalId)` are per
+   slot; `getStaleFeeds` and `useStaleFeeds` stay as the feeds with any stale slot. A consumer's read (`FeedRead`,
+   from `feedsRead.ts`) matches its own chemical's stale slot or the untagged one (it errs on the side of the mark
+   when both are held), and a read with no chemical matches any slot of the feed. The page note, the `StaleMark`
+   text, the report and the CSV note and column name the chemical from the project list ("Receptor well
+   concentration for Benzene (Transport)").
+6. **Version 2 migration.** `CURRENT_VERSION` is 2 (`project/migrate.ts`, `v1ToV2`). A version 1 feed becomes an
+   object of one slot. A tagged value keeps its tag; an untagged one takes its source screen's `chemicalId` (the
+   vapor screen's `risc4-benzene` fixture counts as none), and a linked surface water run with none set takes its
+   bank run's chemical; the value is tagged with the chemical it was given, so every consumer accepts it. A feed
+   whose chemical cannot be told is left out and reported through `droppedFeeds` with its own message. A version 2
+   slot whose key differs from its value's chemical is dropped and reported. Files, share links and the autosave
+   all go through `parseProject`. The autosave key keeps its `.v1` suffix: it names the storage slot, not the
+   format. Fixtures: `project/fixtures/project-v1.json` and `share-v1.txt` were written by the version 1 code
+   before the schema changed; `project-v2-expected.json` was derived from the first by a separate script.
+7. **Version check.** `versionProblem(version, readsUpTo)` (`project/index.ts`) holds the existing newer-version
+   message; a build that reads up to version 1 refuses a version 2 file with it. Risk, not changed here: a tab
+   still running a version 1 build refuses a version 2 autosave and starts empty, and its next edit writes its own
+   autosave over the version 2 copy (the existing behaviour for a newer save).
+8. **Cleanup source level panels.** One household, vapor or surface water panel per held slot whose chemical is a
+   cleanup row or untagged; when none is, the most recent slot, so a result for another chemical still shows why it
+   gives no level (`panelFeeds` in `cleanup/sourceLevelsCsv.ts`). With two or more panels of one kind, each CSV file
+   name ends with its chemical id. A modeled source reads the chain, vadose and saturated slots of its one chemical.
+9. **Produce on risk and cleanup.** Each row's plant factors come from its own chemical's produce slot. The
+   receptor's homegrown produce intake comes from the first row that uses produce, and the plant warnings are those
+   of every slot in use.
+10. **Shared select.** `ui/ProjectChemicalSelect.tsx` takes `label`, `value`, `onChange(id)` and an optional `hint`,
+    lists `getChemicals()` with "Not set" first, keeps a saved id no longer in the list as an option marked "not in
+    the project list", and with an empty list shows a link to `#/chemicals` in place of the select. The surface
+    water screen uses it; its select is styled by `.project-chemical-select` in `transport/transport.css`
+    (`min-width: 0`, the text field tokens).
+11. **Carried from wave N.** `setScreen` compares the chemicals the edited screen names before and after the edit,
+    so a chemical removed from the list comes back when a screen newly names it even if another screen named it all
+    along, and not when a screen that still names it is edited. `deriveChemicals` includes the surface water
+    screen's `chemicalId`, after plants and eco.
+12. **No fingerprint change.** No form key was added, so `FINGERPRINT_SKIP` is unchanged.
+13. **Tests changed where they asserted one slot per feed.** `liveStale.test.ts` (the vapor, household and plants
+    screens are set to the chemical of the feeds they send), `store.test.ts` (the household chemical, the saved slot
+    shape), `open.test.ts`, `project.test.ts`, `chemicalsStore.test.ts` (an older file is marked version 1),
+    `staleMarks.test.tsx` and `feedsReadChemical.test.ts` (reads carry a chemical), `report/results.test.ts` and
+    `report/uncertaintyReport.test.ts` (slot shape), `CleanupStale.test.tsx` and `RiskStale.test.tsx` (sender
+    chemicals; the CSV note names the chemical), `SurfaceWaterScreen.test.tsx` (two slots kept),
+    `overrides/receptors.test.ts` (the current version) and `chemicals.test.ts` (schema renamed `projectSchema`).
+14. **Files outside the named list.** `App.tsx` (the page note per slot), `report/methodsRun.ts` (a screen is used
+    when a slot came from it), `report/modeledReport.ts`, `report/uncertaintyReport.ts`, `cleanup/build.ts`,
+    `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
+    screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
+
+## 2026-10-21: Wave O slice O1, risk and cleanup follow the list
+
+Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
+
+1. **Rows follow the list through the screens (DEFAULT).** `useFollowList` (`project/useFollowList.ts`, rule in
+   `project/chemicalRows.ts`) runs on the risk and cleanup pages. A chemical that joins the list gets a row of that
+   screen's defaults (`newChemicalRow`), appended in list order; a chemical that leaves the list loses its row; a row
+   the list never held joins the list (so a project saved before the list followed rows loses no row state). Per-row
+   state stays in each screen's form, keyed by chemical id, and no saved key is added (`FINGERPRINT_SKIP` is not
+   touched). The sync happens while the screen is mounted, so a screen not opened since the list changed holds its
+   old rows in the store until it is opened (the report and the saved file see them as they were).
+2. **A chemical outside the RSL tables has no row (DEFAULT).** A list chemical the risk database does not know (a
+   household chemical typed by hand) cannot make a row, since a row needs its toxicity record. The screen names it
+   under the search ("is on the project list but not in the RSL tables") and makes no card. Wave P (user chemicals)
+   revisits this.
+3. **A row with nothing set computes nothing and says so (DEFAULT).** Checked, not changed: `buildInputs` gives a row
+   with no concentration and no feed switch no pathway and the run goes on for the other chemicals (only a run with
+   no value at all is the `ENTER_CONCENTRATION` message); `buildCleanup` gives individual levels from the toxicity
+   alone and, under cumulative allocation, does not fail the run for a row with no entered concentration. Tests in
+   `risk/emptyRow.test.ts`. The risk card (and the cleanup card when concentrations are shown) carries a note,
+   "Nothing set for this chemical", while `rowIsEmpty` holds. A row that switches on a feed with none held is still
+   an error for the whole run (slice FB ruling 4 stands).
+4. **Adding (DEFAULT).** The search picker on either screen, its example button and the new **Add to project** on
+   `#/chemicals` all add to the one list (`addChemical`); the other screen's row follows when that screen is opened.
+   `#/chemicals` shows the project list above the search; a chemical already on it reads "In the project".
+5. **Removing is one store call after a question (DEFAULT).** `removeProjectChemical(id)` (`project/store.ts`)
+   removes the row from both screens' saved forms, clears the chemical's slot in every per-chemical feed
+   (`clearChemicalSlots` in `vapor/feedStore.ts`, a registry over the feeds `createChemicalFeed` makes), and takes it
+   off the list. Fate screens set to it keep their choice (the shared select already shows it as not in the list).
+   Every remove control (a row's Remove on either screen, and Remove in the `#/chemicals` list) first shows
+   `RemoveChemicalConfirm`, which names the rows on both screens and the feeds the chemical holds
+   (`getHeldSlots`); nothing changes until "Remove from the project" is chosen. Mounted pages drop the row when the
+   list changes.
+6. **Buttons name the chemical and contain their visible text (DEFAULT).** "Add to project: Benzene" and "In the
+   project: Benzene" (axe `label-content-name-mismatch` flagged the first wording at 390 px).
+7. **Files outside the named list (DEFAULT).** `project/store.ts` (`removeProjectChemical`, `getHeldSlots`),
+   `vapor/feedStore.ts` (`clearSlot`, `clearChemicalSlots`) and `risk/ChemicalCard.tsx` (the note). Tests that added
+   benzene through the picker after a sending screen was set to it (`RiskStale`, `CleanupStale`, `RiskPage`) were
+   changed to expect the card already there, and the remove test to confirm.
+8. **Fixture (DEFAULT).** `project/fixtures/project-rows-differ.json` (risk rows benzene and toluene, cleanup rows
+   toluene and ethylbenzene, no list key) opens with the union on both screens, each row keeping its state and no
+   feed marked stale (`project/rowsDiffer.test.tsx`).
+
+## 2026-10-21: Wave O slice O2a, transport, vadose and saturated pick from the list
+
+Scope rulings 1 and 8 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
+
+1. **The fate subset is a data coverage limit, not a quality gate.** `packages/data/src/vapor/build.ts` keeps an
+   RSL row when it has EPA 2004 temperature-correction data or a biodegradation class, and copies the RSL values
+   unchanged; the quality screen (`screenLookupRow`) only drops the implausible `epa2004je` block of a row that
+   is kept, never the row. Transport, vadose and saturated use only the RSL properties (molar mass, solubility,
+   Henry constant, Koc, diffusivities), so the 112 rows are the chemicals whose record this file holds, not the
+   chemicals whose RSL values are trustworthy. Widening the fate data to every RSL row is a later data change;
+   until then a project chemical outside the 112 is unavailable on these screens.
+2. **A chemical outside the subset.** `ui/FateChemicalSelect.tsx` wraps `ProjectChemicalSelect` (label
+   "Chemical"). Choosing a list chemical outside the fate data still saves its id in the screen's `chemicalId`
+   (so feeds are tagged and the chemical check works), fills nothing, and shows a note naming the chemical and the
+   reason. Typed properties are left as they are (scope ruling 8). With an empty list the select's own empty
+   state (a link to `#/chemicals`) shows.
+3. **No new saved key.** `chemicalId` stays the pointer on each screen, so no `FINGERPRINT_SKIP` change and no new
+   stale mark on older files. A value picked on the old 112-row select is a list chemical id like any other; if
+   it is not in the project list it stays selectable, marked as not in the list.
+4. **Property fill is unchanged.** Picking a chemical with fate data fills the same fields as before
+   (`fateFill`; on transport Kd from Koc times the organic carbon fraction, with the no-Koc note). A re-pick is
+   the only trigger, so opening a screen never overwrites typed values. `ui/ChemicalPicker.tsx` is no longer used
+   by these screens and is left for integration to delete.
+5. **Sending** needed no change: the senders tag their value with the screen chemical, and the O4 stores write
+   that chemical's slot.
+
+## 2026-10-21: Wave O slice O2b, vapor, household, plants and surface water pick from the list
+
+Scope rulings 1 and 7 of the "Project chemical list, waves N to P scope" block and ruling 1 of the "Waves O and P
+scope" block. Every ruling below is DEFAULT.
+
+1. **Vapor.** The "Chemical" control is the shared project select. The saved `chemicalId` stays the pointer. The
+   Table R-3 benzene fixture (`risc4-benzene`) is a button beside the list ("Use the Table R-3 benzene test
+   values" and "Pick a project chemical"), not a list entry, so the list stays the project's chemicals. A pick
+   sets the id at once and fills the properties from the vapor database as soon as it has loaded.
+2. **Unavailable chemicals.** A list chemical with no row in the vapor database keeps its id, leaves the
+   properties as typed, shows the reason ("no vapor properties in the chemical database") and cannot be sent
+   (the sender needs a database row). The same holds for plants and eco with the RSL (log Kow, Koc and Kd stay
+   as typed and the produce send still works from typed values).
+3. **Household.** The typed name and CAS boxes retire; the select replaces both. The pick copies the list name
+   into `chemicalName` (kept as a saved key for labels and the older files), and a pick of "Not set" clears it.
+   A household chemical that is not in the database is already a list entry (wave N). The Henry constant and
+   molecular weight stay typed, since the household engine takes no database values. The send refusal now reads
+   "Pick the chemical this result is for from the project list" (`household/feed.ts`).
+4. **Plants and eco.** The RSL search picker gives way to the select; the TPH composition is unaffected. The RSL
+   properties fill on pick, once the RSL database and the cleanup properties have loaded.
+5. **Surface water, linked.** While linked, the chemical is the transport run's, shown read-only (the select is
+   hidden as before). It is an error, shown above the results and blocking both sends, when that chemical is not
+   in the project list, or when the screen's own chemical is set and the bank run held is for another chemical
+   (the fallback slot the read rule returns). Unlinked keeps the select. The sender tag tests (linked and
+   unlinked) were already added in O4 and are kept.
+6. **Files outside the named list.** `household/feed.ts` (the refusal text) and `household/feed.test.ts`. No
+   `FINGERPRINT_SKIP` change: no new saved key.
+
+## 2026-10-21: Wave P slice P1, user-defined chemicals
+
+Scope ruling 3 of the "Project chemical list, waves N to P scope" block (a chemical that is not in the EPA
+tables, with a name and a note per value) and ruling 8 (a CAS number the database holds). Built on O4, O1,
+O2a and O2b.
+
+1. **Shape (DEFAULT).** A list entry gains optional `cas` and `values` (field key to `{ value, note }`, both
+   typed text). An entry is a user chemical when `values` is present, even if empty; its id is `user-<n>`
+   (next free number, never reused while the entry exists). The keys are in the existing version 2 file, so no
+   migration and no `FINGERPRINT_SKIP` change (no screen form key was added). An older build strips the two
+   keys with its usual warning. `store.updateChemical` replaces an entry by id; `addChemical` already kept the
+   extra keys.
+2. **Fields (DEFAULT).** Ten: the four toxicity values the overrides already edit (`sfo`, `iur`, `rfdo`,
+   `rfci`) and the six fate properties the fate screens fill (`mw`, `s`, `hPrime`, `koc`, `dia`, `diw`,
+   in the form units of the screens). Dermal, absorption, saturation, vapor thermo and Kd data are not
+   user-enterable in this slice; a user chemical has no physical row (`phys` undefined), so the dermal-water
+   control and every value that needs the RSL physical row stay absent, exactly as for an RSL chemical without
+   one. Only a name is required (scope ruling 3).
+3. **Note rule (DEFAULT).** An entered value is used only when `usableValue` accepts it (a number above zero
+   and a non-blank note), the same rule as a toxicity override. The editor refuses to save while an entered
+   value is unusable and names the problem, so a file saved by the app has no unusable entry; a hand-edited
+   file may, and the report then lists the value as "not used".
+4. **Overlay (DEFAULT).** `overrides/userChemicals.ts`: `applyUserChemicals` appends one `ChemicalRecord` per
+   user chemical (usable toxicity values with source key `user`, shown as "User value (this project)"), and
+   `effectiveDb` lays the toxicity overrides over that, so risk, cleanup, the report and the uncertainty runs see
+   the same record. A user id the database already holds is left alone. `useEffectiveDb` subscribes to the list.
+   `report/results.ts` and `uncertaintyReport.ts` build the database with `effectiveDb`.
+5. **Fate rows (DEFAULT).** `withUserFateRows` appends a row (the vapor database shape) per user chemical, with
+   only the usable fate values; `useChemicalRows` (transport, vadose, saturated), the vapor screen and the plants
+   and eco screen use it, so the screens fill what was entered and leave the rest as typed. Plants and eco
+   reads the user chemical through `useEffectiveDb` and fills only the Koc. A screen that needs a property the
+   chemical lacks says which one when the chemical is chosen: `FateChemicalSelect` names the missing ones
+   among its `needs` (all six by default; the transport screen passes none because its own note already names
+   the Koc). The vapor screen's own field checks name the empty fields.
+6. **Citation (DEFAULT).** A user value cites "User value (this project)" plus its note, never a
+   `references.json` entry (that file is for methods). The report section "Chemicals defined by the user" lists
+   every entered value with the chemical, CAS, value as typed, source `user` and the note; an unusable entry is
+   marked not used. The chemicals page CSV (all chemicals, and the matching table) appends the user chemicals,
+   one row per value, with the source text "User value (this project): <note>". No other CSV writes a chemical's
+   database values; the screens' CSVs carry the numbers the run used and are unchanged.
+7. **CAS (DEFAULT, ruling 8).** A CAS number is optional and must look like `71-43-2`. One the database or another
+   user chemical already holds is refused with its name and a pointer to Edit values (the overrides). A user
+   chemical cannot shadow a database chemical.
+8. **Copy (DEFAULT).** "Copy as a new chemical" starts the form from a database chemical's ten fields (those it
+   has). The name becomes "<name> (copy)", the CAS is not copied (it would be refused), and each copied value
+   carries the note "Copied from the EPA RSL tables, edition <edition>, for <name> (CAS <cas>); source:
+   <the source the database gives for that value>." The person may edit the note; the value is then a user value
+   like any other, not an EPA value, and is reported as one.
+9. **Removal and edit (DEFAULT).** Removing a user chemical uses the existing confirmed removal (its row, feed
+   slots and list entry go). Editing is **Edit** on the project list; the id never changes, so screens that name
+   it keep working.
+10. **Share link (DEFAULT, measured).** The list travels in the link (feeds do not). With every field filled and a
+    note of about 100 characters on each, three user chemicals made a link of 4,174 characters and six still fit
+    under the 8,000 cap; sixty were refused with the existing "too large for a share link ... Save project"
+    message. Past the cap nothing is truncated, so no change to `share.ts`. Tested in
+    `project/shareUserChemicals.test.ts`.
+11. **Files outside the named list (DEFAULT).** `project/store.ts` (`updateChemical`), `ui/FateChemicalSelect.tsx`
+    and `transport/TransportPage.tsx` (the `needs` prop), `vapor/VaporPage.tsx` and
+    `plantsEco/PlantsEcoPage.tsx` (user rows), `risk/ChemicalCard.tsx` (the no-toxicity note no longer says the
+    RSL for a user chemical), `overrides/useOverrides.ts`, `report/ReportPage.tsx`, `report/results.ts`,
+    `report/uncertaintyReport.ts`, plus the new `overrides/userChemicals.ts` and
+    `chemicals/UserChemicalEditor.tsx`.
+12. **Not done here (DEFAULT).** The cleanup source-level panel (`cleanup/SsgPanel.tsx`) still loads partition
+    properties from the RSL file only, so a user chemical gets no soil-to-groundwater comparison there. Entering a
+    user value for Kd, vapor thermo data or dermal data is a later scope row.

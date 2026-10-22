@@ -17,7 +17,15 @@ import { deriveChemicals, type ProjectChemical } from './chemicals';
 import { fingerprintForm, hashInputs } from './hash';
 import { unknownKeyPaths } from './merge';
 import { CURRENT_VERSION, migrate } from './migrate';
-import { PROJECT_FORMAT, feedShapes, projectV1Schema, type Feeds, type Project } from './schema';
+import { slotOfValue } from './feedSlots';
+import {
+  PROJECT_FORMAT,
+  feedShapes,
+  isChemicalFeed,
+  projectSchema,
+  type Feeds,
+  type Project,
+} from './schema';
 
 export { CURRENT_VERSION } from './migrate';
 export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
@@ -85,7 +93,7 @@ export interface BuildOptions {
   now?: Date;
 }
 
-/** Assemble the version 1 document from the live state. Pure apart from the clock default. */
+/** Assemble the current version document from the live state. Pure apart from the clock default. */
 export function buildProject(o: BuildOptions): Project {
   const { screens } = o;
   const project: Project = {
@@ -171,9 +179,31 @@ function pathText(path: readonly PropertyKey[]): string {
 }
 
 /**
+ * Why a file of `version` cannot be read by a build that reads up to `readsUpTo`, or null when it can.
+ * A file from a newer build is refused with a message naming both versions (a version 2 file opened
+ * in a tab still running a version 1 build gets this message from that build).
+ */
+export function versionProblem(
+  version: unknown,
+  readsUpTo: number = CURRENT_VERSION,
+): string | null {
+  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
+    return 'The project file has no valid version number.';
+  }
+  if (version > readsUpTo) {
+    return `This project was saved by a newer version of the app (file format ${version}; this app reads up to ${readsUpTo}). Update the app to open it.`;
+  }
+  return null;
+}
+
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/**
  * Read a project from file text or an already parsed value: check it is a project, refuse a newer
  * version than this build knows, migrate older ones in order, validate against the current schema,
  * and drop unknown keys with a warning. Never half loads: any failure returns an error and no project.
+ * Files, share links and the autosave all come through here.
  */
 export function parseProject(input: unknown): LoadResult {
   let doc: unknown = input;
@@ -190,22 +220,15 @@ export function parseProject(input: unknown): LoadResult {
   const raw = doc as Record<string, unknown>;
   if (raw['format'] !== PROJECT_FORMAT) return { ok: false, error: NOT_A_PROJECT };
   const version = raw['version'];
-  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
-    return { ok: false, error: 'The project file has no valid version number.' };
-  }
-  if (version > CURRENT_VERSION) {
-    return {
-      ok: false,
-      error: `This project was saved by a newer version of the app (file format ${version}; this app reads up to ${CURRENT_VERSION}). Update the app to open it.`,
-    };
-  }
+  const tooNew = versionProblem(version);
+  if (tooNew !== null) return { ok: false, error: tooNew };
   let migrated: Record<string, unknown>;
   try {
     migrated = migrate(raw, CURRENT_VERSION);
   } catch (e) {
     return { ok: false, error: `The project could not be upgraded: ${(e as Error).message}.` };
   }
-  const parsed = projectV1Schema.safeParse(migrated);
+  const parsed = projectSchema.safeParse(migrated);
   if (!parsed.success) {
     const shown = parsed.error.issues
       .slice(0, 5)
@@ -221,6 +244,24 @@ export function parseProject(input: unknown): LoadResult {
     return { path, message: `Ignored the unknown field "${path}".` };
   });
   const droppedFeeds: string[] = [];
+  const drop = (key: string, message: string): void => {
+    if (!droppedFeeds.includes(key)) droppedFeeds.push(key);
+    warnings.push({ path: `feeds.${key}`, message });
+  };
+  const unusable = (key: string): string =>
+    `Dropped the value passed between screens "${key}" because it was not usable; send it again from its source screen.`;
+  // a version 1 feed sent before the chemical tag existed, from a screen typed by hand: the version 2
+  // step could not tell its chemical and left it out (see `v1ToV2`)
+  const oldFeeds = (version as number) < 2 && isPlainObject(raw['feeds']) ? raw['feeds'] : {};
+  const migratedFeeds = isPlainObject(migrated['feeds']) ? migrated['feeds'] : {};
+  for (const key of Object.keys(oldFeeds)) {
+    if (isChemicalFeed(key) && !(key in migratedFeeds)) {
+      drop(
+        key,
+        `Dropped the value passed between screens "${key}" because it does not record which chemical it was made for and its screen names none; send it again from its source screen.`,
+      );
+    }
+  }
   const { feeds: rawFeeds, ...rest } = parsed.data;
   const project: Project = rest;
   if (rawFeeds !== undefined) {
@@ -236,19 +277,37 @@ export function parseProject(input: unknown): LoadResult {
         });
         continue;
       }
-      const r = shape.safeParse(entry);
-      if (!r.success) {
-        droppedFeeds.push(key);
-        warnings.push({
-          path: `feeds.${key}`,
-          message: `Dropped the value passed between screens "${key}" because it was not usable; send it again from its source screen.`,
-        });
+      if (!isChemicalFeed(key)) {
+        const r = shape.safeParse(entry);
+        if (!r.success) {
+          drop(key, unusable(key));
+          continue;
+        }
+        for (const p of unknownKeyPaths(entry, r.data, `feeds.${key}`)) {
+          warnings.push({ path: p, message: `Ignored the unknown field "${p}".` });
+        }
+        kept[key] = r.data;
         continue;
       }
-      for (const p of unknownKeyPaths(entry, r.data, `feeds.${key}`)) {
-        warnings.push({ path: p, message: `Ignored the unknown field "${p}".` });
+      // one slot per chemical: each slot stands on its own, and a slot must hold its own chemical
+      if (!isPlainObject(entry)) {
+        drop(key, unusable(key));
+        continue;
       }
-      kept[key] = r.data;
+      const slots: Record<string, unknown> = {};
+      for (const [slot, slotEntry] of Object.entries(entry)) {
+        const r = shape.safeParse(slotEntry);
+        const data = r.success ? (r.data as { value?: unknown } | undefined) : undefined;
+        if (data === undefined || slotOfValue(data.value) !== slot) {
+          drop(key, unusable(key));
+          continue;
+        }
+        for (const p of unknownKeyPaths(slotEntry, data, `feeds.${key}.${slot}`)) {
+          warnings.push({ path: p, message: `Ignored the unknown field "${p}".` });
+        }
+        slots[slot] = data;
+      }
+      if (Object.keys(slots).length > 0) kept[key] = slots;
     }
     project.feeds = kept as Feeds;
   }

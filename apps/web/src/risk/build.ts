@@ -40,6 +40,7 @@ import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { PATHWAY_LABELS } from './chartData';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { feedChemicalProblem } from '../project/feedChemical';
+import { pickSlot, type FeedSlots } from '../project/feedSlots';
 import {
   LEGACY_FIELDS,
   LIFETIME_KEY,
@@ -292,16 +293,17 @@ export function modernBoundary(
 /**
  * Turns the form into one scenario input per method: the same chemicals, concentrations and receptors,
  * so the two methods are compared on equal footing. A pathway is switched on only when the receptor has
- * it on and some chemical has a concentration for its medium; the rest are listed in `notes`.
+ * it on and some chemical has a concentration for its medium; the rest are listed in `notes`. A feed is
+ * passed as its slots (one per chemical, wave O slice O4), and each row reads its own chemical's slot.
  */
 export function buildInputs(
   form: RiskForm,
   db: ChemicalDb,
-  well: WellFeed | null,
-  vapor: VaporRiskFeed | null = null,
-  surface: SurfaceWaterFeed | null = null,
-  household: HouseholdRiskFeed | null = null,
-  produce: ProduceRiskFeed | null = null,
+  well: WellFeed | FeedSlots<WellFeed> | null,
+  vapor: VaporRiskFeed | FeedSlots<VaporRiskFeed> | null = null,
+  surface: SurfaceWaterFeed | FeedSlots<SurfaceWaterFeed> | null = null,
+  household: HouseholdRiskFeed | FeedSlots<HouseholdRiskFeed> | null = null,
+  produceHeld: ProduceRiskFeed | FeedSlots<ProduceRiskFeed> | null = null,
 ): BuildResult {
   const errors = new Errors();
   if (form.chemicals.length === 0) errors.add('Add at least one chemical.');
@@ -324,38 +326,44 @@ export function buildInputs(
       continue;
     }
     const byPathway: Partial<Record<PathwayId, EpcSpec>> = {};
+    // the slot of each feed this row reads: its own chemical's (see feedSlots.pickSlot)
+    const rowWell = pickSlot(well, row.id);
+    const rowVapor = pickSlot(vapor, row.id);
+    const rowSurface = pickSlot(surface, row.id);
+    const rowHousehold = pickSlot(household, row.id);
+    const produce = pickSlot(produceHeld, row.id);
     for (const pathway of DIRECT_PATHWAY_IDS) {
       const medium = PATHWAYS[pathway].medium;
       if (medium === 'groundwater' && row.groundwaterFromWell) {
-        if (well === null) {
+        if (rowWell === null) {
           errors.add(
             `${row.name}: no transport well result to use; run the groundwater transport screen and send its well result here`,
           );
           continue;
         }
-        const wellProblem = feedProblem('transport well result', well.chemicalId, row.id);
+        const wellProblem = feedProblem('transport well result', rowWell.chemicalId, row.id);
         if (wellProblem !== null) {
           errors.add(`${row.name}: ${wellProblem}`);
           continue;
         }
         byPathway[pathway] = seriesEpc(
-          { times: well.times, values: well.values },
-          `transport.${well.method}`,
+          { times: rowWell.times, values: rowWell.values },
+          `transport.${rowWell.method}`,
         );
         continue;
       }
       const householdSpec =
         medium === 'bathroomAir' && row.bathroomFromHousehold
-          ? { spec: household?.bathroomAir, what: 'shower air' }
+          ? { spec: rowHousehold?.bathroomAir, what: 'shower air' }
           : medium === 'indoorAir' && row.indoorFromHousehold
-            ? { spec: household?.indoorAir, what: 'household (whole-house) air' }
+            ? { spec: rowHousehold?.indoorAir, what: 'household (whole-house) air' }
             : medium === 'outdoorAir' && row.outdoorFromHousehold === 'sprinkler'
-              ? { spec: household?.outdoorSprinkler, what: 'sprinkler spray air' }
+              ? { spec: rowHousehold?.outdoorSprinkler, what: 'sprinkler spray air' }
               : medium === 'outdoorAir' && row.outdoorFromHousehold === 'particulate'
-                ? { spec: household?.outdoorParticulate, what: 'windblown particulate air' }
+                ? { spec: rowHousehold?.outdoorParticulate, what: 'windblown particulate air' }
                 : null;
       if (householdSpec) {
-        if (household === null || household.chemicalId !== row.id) {
+        if (rowHousehold === null || rowHousehold.chemicalId !== row.id) {
           errors.add(
             `${row.name}: no household screen result for this chemical to use; run the shower, irrigation and particulates screen with it and send its result here`,
           );
@@ -368,12 +376,12 @@ export function buildInputs(
       }
       const vaporSpec =
         medium === 'indoorAir' && row.indoorFromVapor
-          ? { spec: vapor?.indoor, what: 'indoor air' }
+          ? { spec: rowVapor?.indoor, what: 'indoor air' }
           : medium === 'outdoorAir' && row.outdoorFromVapor
-            ? { spec: vapor?.outdoor, what: 'outdoor air' }
+            ? { spec: rowVapor?.outdoor, what: 'outdoor air' }
             : null;
       if (vaporSpec) {
-        if (vapor === null || vapor.chemicalId !== row.id) {
+        if (rowVapor === null || rowVapor.chemicalId !== row.id) {
           errors.add(
             `${row.name}: no vapor screen result for this chemical to use; run the vapor intrusion screen with it and send its result here`,
           );
@@ -385,18 +393,22 @@ export function buildInputs(
         continue;
       }
       if (medium === 'surfaceWater' && row.surfaceWaterFromModel) {
-        if (surface === null) {
+        if (rowSurface === null) {
           errors.add(
             `${row.name}: no surface water result to use; run the surface water screen and send its result here`,
           );
           continue;
         }
-        const surfaceProblem = feedProblem('surface water result', surface.chemicalId, row.id);
+        const surfaceProblem = feedProblem('surface water result', rowSurface.chemicalId, row.id);
         if (surfaceProblem !== null) {
           errors.add(`${row.name}: ${surfaceProblem}`);
           continue;
         }
-        byPathway[pathway] = surfaceWaterEpc(surface.times, surface.values, surface.origin);
+        byPathway[pathway] = surfaceWaterEpc(
+          rowSurface.times,
+          rowSurface.values,
+          rowSurface.origin,
+        );
         continue;
       }
       const v = parse(
@@ -427,8 +439,20 @@ export function buildInputs(
   }
 
   const notes: string[] = [];
+  // the produce result made for this chemical, or null (one slot per chemical)
+  const ownProduce = (id: string): ProduceRiskFeed | null => {
+    const f = pickSlot(produceHeld, id);
+    return f !== null && f.chemicalId === id ? f : null;
+  };
   const factorsFor = (row: { id: string; produceFromPlantsEco: boolean }) =>
-    row.produceFromPlantsEco && produce?.chemicalId === row.id ? produce.factors : undefined;
+    row.produceFromPlantsEco ? ownProduce(row.id)?.factors : undefined;
+  // the receptor's homegrown produce intake: from the produce result of the first row that uses it
+  // (each chemical's plant factors come from its own result)
+  const produce: ProduceRiskFeed | null =
+    form.chemicals
+      .filter((r) => r.produceFromPlantsEco)
+      .map((r) => ownProduce(r.id))
+      .find((f) => f !== null) ?? null;
   const hasAnyEpc = [...epcs.values()].some((e) => Object.keys(e).length > 0);
   if (form.chemicals.length > 0 && errors.list.length === 0 && !hasAnyEpc) {
     errors.add(ENTER_CONCENTRATION);

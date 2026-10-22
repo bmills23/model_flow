@@ -136,3 +136,36 @@ describe('surface water result tagged by chemical', () => {
     if (!r.ok) expect(r.errors.join(' ')).toMatch(/surface water result does not record/i);
   });
 });
+
+describe('one well and surface water slot per chemical (wave O slice O4)', () => {
+  it('each row reads its own chemical slot, so two chemicals both compute', () => {
+    const f = formWith([
+      { id: BENZENE, well: true, surface: true },
+      { id: TOLUENE, well: true, surface: true },
+    ]);
+    const wells = new Map([
+      [BENZENE, well(BENZENE)],
+      [TOLUENE, { ...well(TOLUENE), values: [0, 2e-6, 8e-6] }],
+    ]);
+    const surfaces = new Map([
+      [BENZENE, surf(BENZENE)],
+      [TOLUENE, surf(TOLUENE)],
+    ]);
+    const r = buildInputs(f, db, wells, null, surfaces);
+    expect(r.ok).toBe(true);
+  });
+
+  it('a row with no slot of its own is refused, naming the chemical the held slot is for', () => {
+    const f = formWith([
+      { id: BENZENE, well: true },
+      { id: TOLUENE, well: true },
+    ]);
+    const r = buildInputs(f, db, new Map([[BENZENE, well(BENZENE)]]));
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errors).toHaveLength(1);
+      expect(r.errors[0]).toMatch(/toluene/i);
+      expect(r.errors[0]).toMatch(/benzene/i);
+    }
+  });
+});

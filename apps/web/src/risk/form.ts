@@ -119,6 +119,25 @@ export function defaultForm(): RiskForm {
   };
 }
 
+/**
+ * True when a row holds no state: no concentration, no feed switched on, no produce switch. It is the
+ * state a project chemical gets on a screen that has not seen it before. Such a row adds nothing to a
+ * risk run (it has no pathway with a value) and its card says so; it never fails the other rows.
+ */
+export function rowIsEmpty(row: ChemicalRow): boolean {
+  return (
+    Object.values(row.conc).every((v) => (v ?? '').trim() === '') &&
+    !row.groundwaterFromWell &&
+    !row.indoorFromVapor &&
+    !row.outdoorFromVapor &&
+    !row.surfaceWaterFromModel &&
+    !row.bathroomFromHousehold &&
+    !row.indoorFromHousehold &&
+    row.outdoorFromHousehold === '' &&
+    !row.produceFromPlantsEco
+  );
+}
+
 export function newChemicalRow(rec: ChemicalRecord): ChemicalRow {
   return {
     id: rec.id,

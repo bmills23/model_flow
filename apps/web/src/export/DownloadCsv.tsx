@@ -1,8 +1,7 @@
 import { csvFileName } from './csvFileName';
 import type { CURRENT_EDITIONS } from '../report/methodsRun';
 import { downloadCsv, exportCsv, type CsvColumn, type CsvRow } from './csv';
-import type { StaleFeedKey } from '../project/store';
-import { staleAmong, staleSentence, useStaleFeeds } from '../project/staleFeeds';
+import { staleAmong, staleSentence, useStaleSlots, type FeedRef } from '../project/staleFeeds';
 import { markStaleTable } from './staleCsv';
 
 /** One downloadable table: the rows and columns of an exportCsv call plus the file stem. */
@@ -16,10 +15,11 @@ export interface CsvTable {
   rows: readonly CsvRow[];
   columns: readonly CsvColumn[];
   /**
-   * Feeds from other screens the table's numbers read. While any is stale the file gains a
-   * `stale inputs` column and a `-stale-inputs` name suffix (see `markStaleTable`).
+   * Feeds from other screens the table's numbers read, each for the chemical it is read for (see
+   * `project/feedsRead.ts`). While any is stale the file gains a `stale inputs` column and a
+   * `-stale-inputs` name suffix (see `markStaleTable`).
    */
-  feeds?: readonly StaleFeedKey[];
+  feeds?: readonly FeedRef[];
 }
 
 /** "Download CSV" controls, one button per table. Renders nothing when there are no tables. */
@@ -29,7 +29,7 @@ export function DownloadCsv(props: {
   /** Name the table in the button even when it is the only one. */
   showLabel?: boolean;
 }) {
-  const staleNow = useStaleFeeds();
+  const staleNow = useStaleSlots();
   if (props.tables.length === 0) return null;
   const staleOf = props.tables.map((t) => staleAmong(t.feeds ?? [], staleNow));
   const allStale = [...new Set(staleOf.flat())];

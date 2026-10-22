@@ -1,4 +1,4 @@
-import type { StaleFeedKey } from '../project/store';
+import type { StaleFeedKey, StaleSlot } from '../project/store';
 import { staleSentence } from '../project/staleFeeds';
 import type { CsvTable } from './DownloadCsv';
 
@@ -10,9 +10,12 @@ export const STALE_NAME_SUFFIX = '-stale-inputs';
  * The table as it should be written now. A table that reads no stale feed is returned unchanged, so a
  * current file is exactly what it always was. A stale one gains a last column `stale inputs`, the same
  * text on every row, and a `-stale-inputs` file name suffix, so the mark survives being opened in a
- * spreadsheet or renamed.
+ * spreadsheet or renamed. The text names the chemical of each stale value (one slot per chemical).
  */
-export function markStaleTable(t: CsvTable, stale: readonly StaleFeedKey[]): CsvTable {
+export function markStaleTable(
+  t: CsvTable,
+  stale: readonly (StaleSlot | StaleFeedKey)[],
+): CsvTable {
   if (stale.length === 0) return t;
   const text = staleSentence(stale).replace(/^Out of date/, 'out of date');
   return {

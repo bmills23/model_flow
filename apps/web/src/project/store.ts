@@ -1,14 +1,14 @@
 import pkg from '../../package.json';
 import {
   clearHouseholdFeed,
-  getHouseholdFeed,
+  getHouseholdFeedSlots,
   setHouseholdFeed,
   subscribeHouseholdFeed,
 } from '../household/feeds';
 import {
   clearProduceFeed,
   clearTphFeed,
-  getProduceFeed,
+  getProduceFeedSlots,
   getTphFeed,
   setProduceFeed,
   setTphFeed,
@@ -17,33 +17,49 @@ import {
 } from '../plantsEco/feeds';
 import {
   clearSaturatedFeed,
-  getSaturatedFeed,
+  getSaturatedFeedSlots,
   setSaturatedFeed,
   subscribeSaturatedFeed,
 } from '../saturated/feed';
 import {
   clearSurfaceWaterFeed,
-  getSurfaceWaterFeed,
+  getSurfaceWaterFeedSlots,
   setSurfaceWaterFeed,
   subscribeSurfaceWaterFeed,
 } from '../surfaceWater/feed';
-import { clearBankFeed, getBankFeed, setBankFeed, subscribeBankFeed } from '../transport/bankFeed';
+import {
+  clearBankFeed,
+  getBankFeedSlots,
+  setBankFeed,
+  subscribeBankFeed,
+} from '../transport/bankFeed';
 import {
   clearTransportFeed,
-  getTransportFeed,
+  getTransportFeedSlots,
+  setTransportFeed,
   subscribeTransportFeed,
 } from '../transport/chainFeed';
-import { clearWellFeed, getWellFeed, setWellFeed, subscribeWellFeed } from '../transport/wellFeed';
-import { clearVadoseFeed, getVadoseFeed, setVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
+import {
+  clearWellFeed,
+  getWellFeedSlots,
+  setWellFeed,
+  subscribeWellFeed,
+} from '../transport/wellFeed';
+import {
+  clearVadoseFeed,
+  getVadoseFeedSlots,
+  setVadoseFeed,
+  subscribeVadoseFeed,
+} from '../vadose/feed';
 import {
   clearSaturatedVaporFeed,
   clearVadoseVaporFeed,
   clearVaporRiskFeed,
   clearWaterTableFeed,
-  getSaturatedVaporFeed,
-  getVadoseVaporFeed,
-  getVaporRiskFeed,
-  getWaterTableFeed,
+  getSaturatedVaporFeedSlots,
+  getVadoseVaporFeedSlots,
+  getVaporRiskFeedSlots,
+  getWaterTableFeedSlots,
   setSaturatedVaporFeed,
   setVadoseVaporFeed,
   setVaporRiskFeed,
@@ -53,12 +69,15 @@ import {
   subscribeVaporRiskFeed,
   subscribeWaterTableFeed,
 } from '../vapor/feeds';
+import { clearChemicalSlots } from '../vapor/feedStore';
 import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
+import { pickSlot, slotOf, slotOfValue, type FeedSlots } from './feedSlots';
 import { hashInputs, stableStringify } from './hash';
+import { isChemicalFeed } from './schema';
 import { scrubRejected } from '../ui/decimalComma';
 import {
   buildProject,
@@ -82,6 +101,7 @@ const APP_VERSION: string = pkg.version;
 
 type FeedKey = keyof Feeds;
 type Entry = { source: string; inputsHash: string; value: unknown };
+type Hash = { source: string; inputsHash: string };
 
 let screens: Screens = defaultScreens();
 let title = '';
@@ -107,15 +127,17 @@ let savedSnapshot: string | null = null;
 let warnedSnapshot: string | null = null;
 let epoch = 0;
 let timer: ReturnType<typeof setTimeout> | null = null;
-/** Source form fingerprint recorded when each feed was last sent (or restored). */
-let hashes: Partial<Record<StaleFeedKey, { source: string; inputsHash: string }>> = {};
+/** Source form fingerprint recorded when each slot of each feed was last sent (or restored). */
+let hashes: Partial<Record<StaleFeedKey, Record<string, Hash>>> = {};
 /**
- * What each sent feed also depended on at send, besides its source form (see `heldInputs`). Kept in the
- * session only: it is not written to the file, so the file format and the fingerprints are unchanged.
+ * What each sent slot also depended on at send, besides its source form (see `heldInputs`). Kept in
+ * the session only: it is not written to the file, so the file format and the fingerprints are unchanged.
  */
-let heldBaseline: Partial<Record<StaleFeedKey, string>> = {};
-/** The feeds whose sending inputs differ now from those recorded at send (see `recomputeStale`). */
-let stale: StaleFeedKey[] = [];
+let heldBaseline: Partial<Record<StaleFeedKey, Record<string, string>>> = {};
+/** The slots whose sending inputs differ now from those recorded at send (see `recomputeStale`). */
+let stale: readonly StaleSlot[] = [];
+/** The feeds with at least one stale slot, in feed order (see `getStaleFeeds`). */
+let staleKeys: readonly StaleFeedKey[] = [];
 /** True while a project is being put back, so the feed setters it runs do not notify half a state. */
 let seeding = false;
 /** Feeds a restored or opened project carried that could not be used and were dropped. */
@@ -139,15 +161,53 @@ export const getScreen = <K extends keyof Screens>(key: K): Screens[K] => screen
 export type StaleFeedKey = FeedKey | 'transportChain';
 
 /**
- * Live feed staleness. A held feed is stale while the inputs of the screen that sent it differ from
- * the inputs recorded when it was sent, or when a project was opened or restored. Editing the inputs
- * back, or sending again, clears it. The list keeps its identity until the set changes, so it can be
- * a `useSyncExternalStore` snapshot (see `useStaleFeeds`).
+ * One held slot of a feed: the feed and the chemical it was sent for (the empty text for a value sent
+ * while its screen's chemical was typed by hand, and for the TPH feed, which has one slot).
  */
-export const getStaleFeeds = (): readonly StaleFeedKey[] => stale;
-/** True when the held feed `key` is stale now (false when nothing is held under it). */
-export const isFeedStaleNow = (key: StaleFeedKey): boolean => stale.includes(key);
-/** Tell `fn` when the set of stale feeds changes; returns the unsubscribe. */
+export interface StaleSlot {
+  feed: StaleFeedKey;
+  chemicalId: string;
+}
+
+/**
+ * What a consumer reads: a feed, for a chemical. A blank or absent chemical (a screen typed by hand,
+ * the TPH feed) reads whichever slot it is given (see `feedSlots.resolveSlot`).
+ */
+export interface FeedRead {
+  feed: StaleFeedKey;
+  chemicalId?: string | undefined;
+}
+
+/**
+ * True when the stale `slot` is one the consumer `read` takes values from: its own chemical's slot,
+ * or the untagged slot (read when its own is not held; it errs on the side of the mark when both are),
+ * or any slot of the feed for a read with no chemical.
+ */
+export function readMatches(read: FeedRead, slot: StaleSlot): boolean {
+  if (read.feed !== slot.feed) return false;
+  const own = slotOf(read.chemicalId);
+  return own === '' || slot.chemicalId === own || slot.chemicalId === '';
+}
+
+/**
+ * Live staleness, per slot (feed and chemical). A held slot is stale while the inputs of the screen
+ * that sent it differ from the inputs recorded when it was sent, or when a project was opened or
+ * restored. Editing the inputs back, or sending again, clears it. A slot is checked while its screen is
+ * set to the slot's chemical; while the screen is on another chemical the slot keeps the mark it had
+ * (the screen no longer shows that chemical's inputs), and it is checked again once the screen is set
+ * back. The list keeps its identity until the set changes, so it can be a `useSyncExternalStore`
+ * snapshot (see `useStaleSlots`).
+ */
+export const getStaleSlots = (): readonly StaleSlot[] => stale;
+/** The feeds with at least one stale slot (a stable array until the set changes). */
+export const getStaleFeeds = (): readonly StaleFeedKey[] => staleKeys;
+/**
+ * True when the held feed `key` is stale now for a consumer of `chemicalId` (see `readMatches`); with
+ * no chemical, when any slot of it is stale. False when nothing is held under it.
+ */
+export const isFeedStaleNow = (key: StaleFeedKey, chemicalId?: string): boolean =>
+  stale.some((s) => readMatches({ feed: key, chemicalId }, s));
+/** Tell `fn` when the set of stale slots changes; returns the unsubscribe. */
 export const subscribeStale = (fn: () => void): (() => void) => {
   staleListeners.add(fn);
   return () => {
@@ -189,42 +249,138 @@ const SOURCE: Record<StaleFeedKey, string> = {
   tph: 'plantsEco',
 };
 
-const readers: Record<StaleFeedKey, () => unknown> = {
-  transportChain: getTransportFeed,
-  well: getWellFeed,
-  surfaceWater: getSurfaceWaterFeed,
-  vadose: getVadoseFeed,
-  saturated: getSaturatedFeed,
-  bank: getBankFeed,
-  vaporVadose: getVadoseVaporFeed,
-  vaporWaterTable: getWaterTableFeed,
-  vaporSaturated: getSaturatedVaporFeed,
-  vaporRisk: getVaporRiskFeed,
-  household: getHouseholdFeed,
-  produce: getProduceFeed,
-  tph: getTphFeed,
+interface FeedAccess {
+  slots: () => FeedSlots<unknown>;
+  set: (value: never) => void;
+  clear: () => void;
+  /** A chemical feed tells the slot a send wrote; the TPH feed tells nothing (it has one slot). */
+  subscribe: (fn: (slot?: string) => void) => () => void;
+}
+
+/** The TPH feed holds one value; seen as slots, it is one untagged slot (the same Map until it changes). */
+function singleSlots(get: () => unknown): () => FeedSlots<unknown> {
+  let last: unknown = null;
+  let map: FeedSlots<unknown> = new Map();
+  return () => {
+    const v = get();
+    if (v !== last) {
+      last = v;
+      map = v === null ? new Map() : new Map([['', v]]);
+    }
+    return map;
+  };
+}
+
+const FEEDS: Record<StaleFeedKey, FeedAccess> = {
+  transportChain: {
+    slots: getTransportFeedSlots,
+    set: setTransportFeed,
+    clear: clearTransportFeed,
+    subscribe: subscribeTransportFeed,
+  },
+  well: {
+    slots: getWellFeedSlots,
+    set: setWellFeed,
+    clear: clearWellFeed,
+    subscribe: subscribeWellFeed,
+  },
+  surfaceWater: {
+    slots: getSurfaceWaterFeedSlots,
+    set: setSurfaceWaterFeed,
+    clear: clearSurfaceWaterFeed,
+    subscribe: subscribeSurfaceWaterFeed,
+  },
+  vadose: {
+    slots: getVadoseFeedSlots,
+    set: setVadoseFeed,
+    clear: clearVadoseFeed,
+    subscribe: subscribeVadoseFeed,
+  },
+  saturated: {
+    slots: getSaturatedFeedSlots,
+    set: setSaturatedFeed,
+    clear: clearSaturatedFeed,
+    subscribe: subscribeSaturatedFeed,
+  },
+  bank: {
+    slots: getBankFeedSlots,
+    set: setBankFeed,
+    clear: clearBankFeed,
+    subscribe: subscribeBankFeed,
+  },
+  vaporVadose: {
+    slots: getVadoseVaporFeedSlots,
+    set: setVadoseVaporFeed,
+    clear: clearVadoseVaporFeed,
+    subscribe: subscribeVadoseVaporFeed,
+  },
+  vaporWaterTable: {
+    slots: getWaterTableFeedSlots,
+    set: setWaterTableFeed,
+    clear: clearWaterTableFeed,
+    subscribe: subscribeWaterTableFeed,
+  },
+  vaporSaturated: {
+    slots: getSaturatedVaporFeedSlots,
+    set: setSaturatedVaporFeed,
+    clear: clearSaturatedVaporFeed,
+    subscribe: subscribeSaturatedVaporFeed,
+  },
+  vaporRisk: {
+    slots: getVaporRiskFeedSlots,
+    set: setVaporRiskFeed,
+    clear: clearVaporRiskFeed,
+    subscribe: subscribeVaporRiskFeed,
+  },
+  household: {
+    slots: getHouseholdFeedSlots,
+    set: setHouseholdFeed,
+    clear: clearHouseholdFeed,
+    subscribe: subscribeHouseholdFeed,
+  },
+  produce: {
+    slots: getProduceFeedSlots,
+    set: setProduceFeed,
+    clear: clearProduceFeed,
+    subscribe: subscribeProduceFeed,
+  },
+  tph: {
+    slots: singleSlots(getTphFeed),
+    set: setTphFeed,
+    clear: clearTphFeed,
+    subscribe: subscribeTphFeed,
+  },
 };
 
 /** The feeds the project file carries (every feed but the session-only groundwater run). */
-const PERSISTED = (Object.keys(readers) as StaleFeedKey[]).filter(
+const PERSISTED = (Object.keys(FEEDS) as StaleFeedKey[]).filter(
   (k): k is FeedKey => k !== 'transportChain',
 );
-const STALE_KEYS = Object.keys(readers) as StaleFeedKey[];
+const STALE_KEYS = Object.keys(FEEDS) as StaleFeedKey[];
+
+const hashOf = (key: StaleFeedKey, chemical: string): Hash | undefined => hashes[key]?.[chemical];
 
 function currentFeeds(): Feeds {
   const forms = sourceForms(screens);
-  const feeds: Record<string, Entry> = {};
+  const feeds: Record<string, unknown> = {};
+  const entry = (key: FeedKey, chemical: string, value: unknown): Entry => {
+    const h = hashOf(key, chemical);
+    return h !== undefined
+      ? { source: h.source, inputsHash: h.inputsHash, value: encodeJson(value) }
+      : feedEntry(SOURCE[key] as keyof Screens, forms[key], encodeJson(value));
+  };
   for (const key of PERSISTED) {
-    const value = readers[key]();
-    if (value === null) continue;
-    const h = hashes[key];
-    const entry =
-      h !== undefined
-        ? { source: h.source, inputsHash: h.inputsHash, value: encodeJson(value) }
-        : feedEntry(SOURCE[key] as keyof Screens, forms[key], encodeJson(value));
-    feeds[key] = entry;
+    const slots = FEEDS[key].slots();
+    if (slots.size === 0) continue;
+    if (!isChemicalFeed(key)) {
+      feeds[key] = entry(key, '', slots.get(''));
+      continue;
+    }
+    const out: Record<string, Entry> = {};
+    for (const [chemical, value] of slots) out[chemical] = entry(key, chemical, value);
+    feeds[key] = out;
   }
-  return feeds as unknown as Feeds;
+  return feeds as Feeds;
 }
 
 function build(): ReturnType<typeof buildProject> {
@@ -325,10 +481,49 @@ export function addChemical(entry: ProjectChemical): void {
     { ...entry, id, name: entry.name.trim() === '' ? id : entry.name },
   ]);
 }
+/** Replace the entry that has this entry's id (a user chemical edited); an id not in the list is ignored. */
+export function updateChemical(entry: ProjectChemical): void {
+  if (!chemicals.some((c) => c.id === entry.id)) return;
+  changeChemicals(
+    chemicals.map((c) =>
+      c.id === entry.id ? { ...entry, name: entry.name.trim() === '' ? entry.id : entry.name } : c,
+    ),
+  );
+}
 /** Remove the entry with this id; an id not in the list is ignored. Screens that name it keep their choice. */
 export function removeChemical(id: string): void {
   if (!chemicals.some((c) => c.id === id)) return;
   changeChemicals(chemicals.filter((c) => c.id !== id));
+}
+
+/** The feeds that hold a slot sent for this chemical, in feed order (what removing it from the project clears). */
+export function getHeldSlots(chemicalId: string): StaleFeedKey[] {
+  if (chemicalId.trim() === '') return [];
+  return STALE_KEYS.filter((k) => k !== 'tph' && FEEDS[k].slots().has(chemicalId));
+}
+
+/**
+ * Take a chemical out of the whole project: the list, its row on the risk and cleanup screens (with the
+ * state in it) and every feed slot sent for it. The other chemicals are untouched. A fate screen set
+ * to it keeps its choice (it then shows as no longer in the list).
+ */
+export function removeProjectChemical(id: string): void {
+  const risk = getScreen('risk');
+  if (risk.form.chemicals.some((c) => c.id === id)) {
+    setScreen('risk', {
+      ...risk,
+      form: { ...risk.form, chemicals: risk.form.chemicals.filter((c) => c.id !== id) },
+    });
+  }
+  const cleanup = getScreen('cleanup');
+  if (cleanup.form.chemicals.some((c) => c.id === id)) {
+    setScreen('cleanup', {
+      ...cleanup,
+      form: { ...cleanup.form, chemicals: cleanup.form.chemicals.filter((c) => c.id !== id) },
+    });
+  }
+  clearChemicalSlots(id);
+  removeChemical(id);
 }
 
 export const getTitle = (): string => title;
@@ -360,13 +555,17 @@ export function flushAutosave(): void {
   write();
 }
 
-/** Record a screen's live state; unchanged state is ignored so a remount does not cause a write. */
+/**
+ * Record a screen's live state; unchanged state is ignored so a remount does not cause a write. A
+ * chemical this screen names now that it did not name before joins the list when it is not in it,
+ * whether or not another screen named it before the edit (so a chemical removed from the list comes
+ * back when a screen is set to it afresh, but not when a screen that still names it is edited).
+ */
 export function setScreen<K extends keyof Screens>(key: K, value: Screens[K]): void {
   if (stableStringify(screens[key]) === stableStringify(value)) return;
-  const before = new Set(chemicalIdsOf(screens));
+  const before = new Set(chemicalIdsOf(screens, key));
   screens = { ...screens, [key]: value };
-  // a chemical a screen now names that it did not before joins the list
-  const named = deriveChemicals(screens).filter(
+  const named = deriveChemicals(screens, key).filter(
     (c) => !before.has(c.id) && !chemicals.some((e) => e.id === c.id),
   );
   schedule();
@@ -397,21 +596,57 @@ function contentKey(value: unknown): string {
   return key;
 }
 
+/** The slot a consumer for `chemical` reads from feed `key` (see `feedSlots.pickSlot`). */
+const read = (key: StaleFeedKey, chemical: string): unknown =>
+  pickSlot(FEEDS[key].slots(), chemical);
+
 /**
- * Inputs a sent feed was built from that are not in its source form: a setting kept beside the form
- * (the well method, the outdoor box, the source choice) and the feeds the sending screen reads from
- * other screens. A change here makes the feed stale just as a form edit does. Only the ones the
- * sending screen really reads are listed, so an unrelated edit does not mark a feed.
+ * The chemical a feed's source screen sends for now, as a slot key: the screen's chemical (a linked
+ * surface water run takes the chemical of the bank run it reads). The TPH feed has one slot.
  */
-function heldInputs(key: StaleFeedKey): unknown {
+function activeChemical(key: StaleFeedKey): string {
+  const s = screens;
+  if (key === 'tph') return '';
+  switch (SOURCE[key]) {
+    case 'transport':
+      return slotOf(s.transport.form.chemicalId);
+    case 'vadose':
+      return slotOf(s.vadose.form.chemicalId);
+    case 'saturated':
+      return slotOf(s.saturated.form.chemicalId);
+    case 'vapor':
+      return slotOf(s.vapor.form.chemicalId);
+    case 'household':
+      return slotOf(s.household.form.chemicalId);
+    case 'plantsEco':
+      return slotOf(s.plantsEco.form.chemicalId);
+    case 'surfaceWater': {
+      const f = s.surfaceWater.form;
+      if (!f.linked) return slotOf(f.chemicalId);
+      return slotOfValue(read('bank', slotOf(f.chemicalId)));
+    }
+    default:
+      return '';
+  }
+}
+
+/**
+ * Inputs a sent slot was built from that are not in its source form: a setting kept beside the form
+ * (the well method, the outdoor box, the source choice) and the feeds the sending screen reads from
+ * other screens, each read for the slot's chemical. A change here makes the slot stale just as a form
+ * edit does. Only the ones the sending screen really reads are listed, so an unrelated edit does not
+ * mark a feed.
+ */
+function heldInputs(key: StaleFeedKey, chemical: string): unknown {
   const { transport, surfaceWater, saturated, vapor, household } = screens;
   const received = (): unknown => {
     // the transport screen reads the saturated source when it is on and held, and the vadose one
     // only when it is not
-    const satOn = transport.form.feedFromSaturated && getSaturatedFeed() !== null;
+    const sat = read('saturated', chemical);
+    const satOn = transport.form.feedFromSaturated && sat !== null;
     return {
-      vadose: transport.form.feedFromVadose && !satOn ? contentKey(getVadoseFeed()) : null,
-      saturated: transport.form.feedFromSaturated ? contentKey(getSaturatedFeed()) : null,
+      vadose: transport.form.feedFromVadose && !satOn ? contentKey(read('vadose', chemical)) : null,
+      saturated: transport.form.feedFromSaturated ? contentKey(sat) : null,
     };
   };
   switch (key) {
@@ -425,15 +660,19 @@ function heldInputs(key: StaleFeedKey): unknown {
     case 'vaporSaturated':
       return { method: saturated.method };
     case 'surfaceWater':
-      return { bank: surfaceWater.form.linked ? contentKey(getBankFeed()) : null };
+      return {
+        bank: surfaceWater.form.linked
+          ? contentKey(read('bank', slotOf(surfaceWater.form.chemicalId)))
+          : null,
+      };
     case 'vaporRisk': {
       const series =
         vapor.choice === 'waterTable'
-          ? getWaterTableFeed()
+          ? read('vaporWaterTable', chemical)
           : vapor.choice === 'vadose'
-            ? getVadoseVaporFeed()
+            ? read('vaporVadose', chemical)
             : vapor.choice === 'saturated'
-              ? getSaturatedVaporFeed()
+              ? read('vaporSaturated', chemical)
               : null;
       return { outdoor: vapor.outdoor, choice: vapor.choice, series: contentKey(series) };
     }
@@ -441,50 +680,91 @@ function heldInputs(key: StaleFeedKey): unknown {
       const f = household.form;
       const usesWell = f.showerWaterSource === 'well' || f.irrigationWaterSource === 'well';
       return {
-        well: usesWell ? contentKey(getWellFeed()) : null,
-        surface: f.irrigationWaterSource === 'surface' ? contentKey(getSurfaceWaterFeed()) : null,
+        well: usesWell ? contentKey(read('well', chemical)) : null,
+        surface:
+          f.irrigationWaterSource === 'surface' ? contentKey(read('surfaceWater', chemical)) : null,
       };
     }
     default:
       return null;
   }
 }
-const heldKey = (key: StaleFeedKey): string => stableStringify(heldInputs(key));
+const heldKey = (key: StaleFeedKey, chemical: string): string =>
+  stableStringify(heldInputs(key, chemical));
 
-/** True while the sending inputs of the held feed `key` differ from those recorded at send. */
-function isStaleNow(key: StaleFeedKey, forms: Record<StaleFeedKey, unknown>): boolean {
-  if (readers[key]() === null) return false;
-  const h = hashes[key];
+const wasStale = (key: StaleFeedKey, chemical: string): boolean =>
+  stale.some((s) => s.feed === key && s.chemicalId === chemical);
+
+/** True while the sending inputs of the held slot differ from those recorded at send. */
+function isStaleNow(
+  key: StaleFeedKey,
+  chemical: string,
+  forms: Record<StaleFeedKey, unknown>,
+): boolean {
+  const h = hashOf(key, chemical);
   if (h === undefined) return false;
+  // the screen is on another chemical: its inputs are not this slot's, so the slot keeps its mark
+  if (chemical !== activeChemical(key)) return wasStale(key, chemical);
   if (h.inputsHash !== feedEntry(SOURCE[key] as keyof Screens, forms[key], 0).inputsHash) {
     return true;
   }
-  const base = heldBaseline[key];
-  return base !== undefined && base !== heldKey(key);
+  const base = heldBaseline[key]?.[chemical];
+  return base !== undefined && base !== heldKey(key, chemical);
 }
 
 /** Work the stale list out again; tell subscribers only when the set changed. */
 function recomputeStale(): void {
   if (seeding) return;
   const forms = sourceForms(screens);
-  const next = STALE_KEYS.filter((k) => isStaleNow(k, forms));
-  if (next.length === stale.length && next.every((k, i) => k === stale[i])) return;
+  const next: StaleSlot[] = [];
+  for (const key of STALE_KEYS) {
+    for (const chemical of FEEDS[key].slots().keys()) {
+      if (isStaleNow(key, chemical, forms)) next.push({ feed: key, chemicalId: chemical });
+    }
+  }
+  const same =
+    next.length === stale.length &&
+    next.every((s, i) => s.feed === stale[i]!.feed && s.chemicalId === stale[i]!.chemicalId);
+  if (same) return;
   stale = next;
+  const keys = [...new Set(next.map((s) => s.feed))];
+  if (keys.length !== staleKeys.length || keys.some((k, i) => k !== staleKeys[i])) {
+    staleKeys = keys;
+  }
   staleListeners.forEach((fn) => fn());
 }
 
-function recordHash(key: StaleFeedKey): void {
-  if (readers[key]() === null) {
-    delete hashes[key];
-    delete heldBaseline[key];
+function recordHash(key: StaleFeedKey, chemical: string): void {
+  const held = FEEDS[key].slots().has(chemical);
+  if (!held) {
+    if (hashes[key]) delete hashes[key][chemical];
+    if (heldBaseline[key]) delete heldBaseline[key][chemical];
   } else {
     hashes[key] = {
-      source: SOURCE[key],
-      inputsHash: feedEntry(SOURCE[key] as keyof Screens, sourceForms(screens)[key], 0).inputsHash,
+      ...hashes[key],
+      [chemical]: {
+        source: SOURCE[key],
+        inputsHash: feedEntry(SOURCE[key] as keyof Screens, sourceForms(screens)[key], 0)
+          .inputsHash,
+      },
     };
-    heldBaseline[key] = heldKey(key);
+    heldBaseline[key] = { ...heldBaseline[key], [chemical]: heldKey(key, chemical) };
   }
   if (PERSISTED.includes(key as FeedKey)) schedule();
+}
+
+/** The slots each feed held when last seen, so a change tells which slots were sent or cleared. */
+const seen: Partial<Record<StaleFeedKey, FeedSlots<unknown>>> = {};
+function onFeedChange(key: StaleFeedKey, slot?: string): void {
+  const before = seen[key] ?? new Map<string, unknown>();
+  const now = FEEDS[key].slots();
+  seen[key] = now;
+  // the slot a send wrote counts even when the same value was sent again (a re-send clears the mark);
+  // every change of the single TPH feed is a send or a clear of its one slot
+  const changed = new Set<string>(slot !== undefined ? [slot] : key === 'tph' ? [''] : []);
+  for (const [chemical, v] of now) if (before.get(chemical) !== v) changed.add(chemical);
+  for (const chemical of before.keys()) if (!now.has(chemical)) changed.add(chemical);
+  for (const chemical of changed) recordHash(key, chemical);
   recomputeStale();
 }
 
@@ -492,36 +772,12 @@ let watching = false;
 function watchFeeds(): void {
   if (watching) return;
   watching = true;
-  subscribeWellFeed(() => recordHash('well'));
-  subscribeBankFeed(() => recordHash('bank'));
-  subscribeTransportFeed(() => recordHash('transportChain'));
-  subscribeSurfaceWaterFeed(() => recordHash('surfaceWater'));
-  subscribeVadoseFeed(() => recordHash('vadose'));
-  subscribeSaturatedFeed(() => recordHash('saturated'));
-  subscribeVadoseVaporFeed(() => recordHash('vaporVadose'));
-  subscribeWaterTableFeed(() => recordHash('vaporWaterTable'));
-  subscribeSaturatedVaporFeed(() => recordHash('vaporSaturated'));
-  subscribeVaporRiskFeed(() => recordHash('vaporRisk'));
-  subscribeHouseholdFeed(() => recordHash('household'));
-  subscribeProduceFeed(() => recordHash('produce'));
-  subscribeTphFeed(() => recordHash('tph'));
+  for (const key of STALE_KEYS) FEEDS[key].subscribe((slot) => onFeedChange(key, slot));
 }
 watchFeeds();
 
 function clearAllFeeds(): void {
-  clearWellFeed();
-  clearBankFeed();
-  clearSurfaceWaterFeed();
-  clearVadoseFeed();
-  clearSaturatedFeed();
-  clearVadoseVaporFeed();
-  clearWaterTableFeed();
-  clearSaturatedVaporFeed();
-  clearVaporRiskFeed();
-  clearHouseholdFeed();
-  clearProduceFeed();
-  clearTphFeed();
-  clearTransportFeed();
+  for (const key of STALE_KEYS) FEEDS[key].clear();
   // a kept modeled-source uncertainty summary belongs to the project it was computed in
   clearModeledSummary();
 }
@@ -538,6 +794,7 @@ export function forgetMemory(): void {
   hashes = {};
   heldBaseline = {};
   stale = [];
+  staleKeys = [];
   dropped = [];
   savedSnapshot = null;
   warnedSnapshot = null;
@@ -563,8 +820,8 @@ export function hydrate(): void {
 }
 
 /**
- * Put a parsed project into the screens and feeds. The screens always seed; a feed that cannot be
- * put back is dropped on its own (and listed) without touching the others.
+ * Put a parsed project into the screens and feeds. The screens always seed; a feed slot that cannot
+ * be put back is dropped on its own (and its feed listed) without touching the others.
  */
 function seed(project: Project, droppedKeys: readonly string[] = []): void {
   screens = screensOf(project);
@@ -573,46 +830,48 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
   chemicals = chemicalsOf(project);
   title = project.title ?? '';
   dropped = [...droppedKeys];
-  const feeds = (project.feeds ?? {}) as Record<string, Entry | undefined>;
-  const restored: Partial<Record<FeedKey, { source: string; inputsHash: string }>> = {};
-  const val = (k: FeedKey): never => decodeJson(feeds[k]?.value) as never;
-  const setters: Record<FeedKey, (v: never) => void> = {
-    well: setWellFeed,
-    bank: setBankFeed,
-    surfaceWater: setSurfaceWaterFeed,
-    vadose: setVadoseFeed,
-    saturated: setSaturatedFeed,
-    vaporVadose: setVadoseVaporFeed,
-    vaporWaterTable: setWaterTableFeed,
-    vaporSaturated: setSaturatedVaporFeed,
-    vaporRisk: setVaporRiskFeed,
-    household: setHouseholdFeed,
-    produce: setProduceFeed,
-    tph: setTphFeed,
-  };
+  const feeds = (project.feeds ?? {}) as Record<string, unknown>;
+  const restored: Partial<Record<StaleFeedKey, Record<string, Hash>>> = {};
   seeding = true;
   try {
-    for (const k of Object.keys(setters) as FeedKey[]) {
-      const e = feeds[k];
-      if (!e) continue;
-      try {
-        setters[k](val(k));
-        restored[k] = { source: e.source, inputsHash: e.inputsHash };
-      } catch {
-        dropped.push(k);
+    for (const key of PERSISTED) {
+      const stored = feeds[key];
+      if (stored === undefined || stored === null) continue;
+      const entries: [string, Entry][] = isChemicalFeed(key)
+        ? Object.entries(stored as Record<string, Entry>)
+        : [['', stored as Entry]];
+      for (const [, e] of entries) {
+        try {
+          const value = decodeJson(e.value);
+          FEEDS[key].set(value as never);
+          const chemical = isChemicalFeed(key) ? slotOfValue(value) : '';
+          restored[key] = {
+            ...restored[key],
+            [chemical]: { source: e.source, inputsHash: e.inputsHash },
+          };
+        } catch {
+          if (!dropped.includes(key)) dropped.push(key);
+        }
       }
     }
     // the setters above recorded fresh hashes; put back the ones the file carried
     hashes = restored;
-    // a file records only the source form of each feed, so what else a feed read (held feeds, the
+    // a file records only the source form of each slot, so what else a slot read (held feeds, the
     // well method) is taken as it is now: an opened file reports exactly the form changes it always
     // did, and an edit after the open is what the live mark follows
     heldBaseline = {};
-    for (const k of Object.keys(restored) as FeedKey[]) heldBaseline[k] = heldKey(k);
+    for (const key of Object.keys(restored) as StaleFeedKey[]) {
+      const base: Record<string, string> = {};
+      for (const chemical of Object.keys(restored[key] ?? {})) {
+        base[chemical] = heldKey(key, chemical);
+      }
+      heldBaseline[key] = base;
+    }
   } finally {
     seeding = false;
   }
   stale = [];
+  staleKeys = [];
   recomputeStale();
   if (timer !== null) clearTimeout(timer);
   timer = null;

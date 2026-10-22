@@ -46,9 +46,19 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that was made by a newer version of the app, is refused with a message and nothing is changed. If a file
   has an unknown key it is ignored and listed. If a value passed between screens in the file is unusable
   it is dropped and named, and your inputs still load.
+- Project files are now format version 2, which keeps one sent value per chemical (see "Results sent between
+  screens carry their chemical" below). A file, link or browser copy from the earlier format opens as before:
+  each sent value moves to the chemical it was made for, or, when it records none, to the chemical its
+  sending screen was set to. A value whose chemical cannot be told (its screen had the chemical typed by
+  hand) is dropped and named, and your inputs still load. A value that was current when the file was saved is
+  still current after it opens. A version of the app from before this change refuses a version 2 file with
+  its newer-version message.
 - A value passed between screens records which inputs it was built from. The moment those inputs differ
-  from what was sent, a note at the top of the page names the value and the screen that sends it, and says
-  it was built from inputs that have since changed. This holds while you work, for every value passed
+  from what was sent, a note at the top of the page names the value, the chemical it was sent for and the
+  screen that sends it, and says it was built from inputs that have since changed. Each chemical's value is
+  marked on its own: changing the inputs while a screen is set to toluene marks its toluene value and not the
+  benzene value it sent before. While a screen is set to another chemical, a value it sent keeps the mark it
+  had, and is checked again when the screen is set back to that chemical. This holds while you work, for every value passed
   between screens (including the groundwater run offered to the cleanup screen, the well method you chose
   and the vapor source series). In a project you open, the mark follows edits to the form that sent each
   value; the extras above (the well method, the vapor source series, the groundwater run for cleanup) are not
@@ -66,7 +76,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   values stay visible. The report puts the same label under the heading of each section that reads such a
   value and again in that section's notes. A CSV download that holds such values gains a last column,
   `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a
-  current file is unchanged. A note beside the download says which values are out of date.
+  current file is unchanged. A note beside the download says which values are out of date, and for which
+  chemical.
 - **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
   server, so the link carries the project without anyone hosting it. The link does not include the values
   passed between screens; whoever opens it sends those again from their source screens.
@@ -86,7 +97,8 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   that text is never saved: a saved file or link holds that box as empty. Name and citation boxes are
   plain text and are not affected by this setting.
 - The project now keeps a list of its chemicals, filled from the chemicals on the risk and cleanup screens
-  and the one chosen on each other screen. Nothing on screen shows it yet. An older file or link opens with
+  and the one chosen on each other screen. The surface water, groundwater transport, vadose zone, saturated source, vapor intrusion, household and
+  plants screens pick their chemical from it. An older file or link opens with
   the list filled in the same way, and none of its sent results turns stale because of it. An older version
   of the app opens a file that has the list and ignores it, with its usual warning about an unknown field.
 - Private windows or a full browser store can stop the automatic copy. The app then works as usual and only
@@ -96,15 +108,38 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 
 ### Chemical database (`#/chemicals`)
 
-A read-only browser over the EPA Regional Screening Level chemical data the calculations use (edition
+A browser over the EPA Regional Screening Level chemical data the calculations use, read only (edition
 2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
 chemical properties and its toxicity values. Each row gives the value as stored, its unit and its source:
 the reference named in the property table, or for toxicity the name of the agency behind the value. Flags
 such as volatile and mutagen, and a few screening values without a per-value reference, are listed with
 the source "RSL table". The data carries no carcinogen weight-of-evidence class, so none is shown.
 **Download CSV** saves every value of every chemical, or just the chemicals that match the search, one row
-per value with a source column. Values cannot be edited here; the full file loads the first time the
-screen opens, so it needs a connection that first time.
+per value with a source column; chemicals you define are included, with the source "User value (this project)"
+and your note. The EPA values cannot be edited here (a toxicity value is edited on a chemical card, see Edit
+values); the full file loads the first time the screen opens, so it needs a connection that first time.
+
+The screen opens with **Project chemicals**, the one list of chemicals the project works on. **Add to project**
+beside a chemical puts it on the list (a chemical already on it reads "In the project"). **Remove** takes a
+chemical out of the whole project, after asking: the question names what goes with it, which is its row and
+everything entered on it on the exposure and risk and the cleanup levels screens, and the results held for it
+(the groundwater well result, the vapor air result and so on). A screen that is set to it keeps that choice and
+shows it as no longer in the list. Removing cannot be undone.
+
+**Define a new chemical** makes a chemical that is not in the EPA tables. Only a name is required. You may add a
+CAS number (a number the database already holds is refused, with a pointer to the overrides, because that
+chemical exists: add it to the project and edit its toxicity values with Edit values instead) and any of ten values: the four
+toxicity values (oral slope factor, inhalation unit risk, oral reference dose, inhalation reference
+concentration) and molar mass, solubility, Henry's constant, Koc and the two diffusivities. Every value you
+enter needs a source note; a value without one, or not above zero, stops the save. **Copy as a new chemical**,
+beside a database chemical, starts the form from that chemical's values. Each copied value carries the note
+"Copied from the EPA RSL tables, edition ..., for <name> (CAS ...); source: <the source the database gives>", which you
+can edit; the CAS number is not copied. **Edit** on a chemical you defined reopens the form. A chemical you
+defined is on the exposure and risk and cleanup levels screens (it carries only the values you entered), and on the transport, vadose, saturated, vapor and plants and
+ecology screens, which fill what you entered and say which value is missing when it is chosen. The report lists each one
+under "Chemicals defined by the user" with every value, its source (user) and its note. The project file keeps
+them. A share link carries them too, but a link longer than 8,000 characters is refused (about six chemicals with every value
+and a note of a sentence each still fit); use Save project then.
 
 ### Site model (`#/site`)
 
@@ -135,7 +170,7 @@ Under the plume map, **Download CSV: plume grid** saves the whole map grid as a 
 with the method, the downgradient distance x (m), y (m) and the concentration (mg/L) at the time shown on the
 map. The transport table's own CSV does not carry the plume grid.
 
-The chemical select fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen). It fills Kd from the database Koc times the organic carbon fraction you enter; the half-life is not in the database and stays your input. If the database has no Koc for the chemical (hydrogen cyanide and mercury), the retardation settings stay as they are and a note says so. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 
 ### Vadose leaching (`#/vadose`)
 
@@ -144,7 +179,7 @@ water table with the legacy or the modern layered model. The screen shows the so
 arrival at the water table, a mass budget, and a validation case you can load. It can feed the groundwater
 and vapor screens.
 
-The chemical select fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen) and fills molar mass, solubility, Henry constant, Koc and both diffusivities from the EPA RSL tables; every value stays editable, and the leachate decay rate stays your input. A project chemical without fate data here (the data covers the chemicals of the vapor screen) is marked unavailable and nothing is filled.
 Each soil layer (the source and every layer above and below it) has a Texture preset. Choosing one of the twelve classes fills porosity, residual water content, van Genuchten n, saturated conductivity and bulk density with the class averages the vapor screen uses; thickness and organic carbon stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Saturated soil source (`#/saturated`)
@@ -153,14 +188,17 @@ Chemical in soil at or below the water table dissolves into the groundwater flow
 at a constant rate until it is gone (legacy) or in proportion to the mass left (modern). The release can
 feed the groundwater and vapor screens. A worked example is built in.
 
-The chemical select fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input.
+The Chemical select lists the chemicals of the project (add them on the chemicals screen) and fills molar mass, solubility, Henry constant and Koc from the EPA RSL tables; every value stays editable, and the source decay rate stays your input. A project chemical without fate data here is marked unavailable and nothing is filled.
 The Texture preset in the Soil group fills porosity, bulk density, residual water content and van Genuchten n from the twelve class averages the vapor screen uses. Organic carbon and the aquifer conductivity stay yours. Every filled value can be edited afterwards, and Custom values leaves the numbers as they are.
 
 ### Vapor intrusion (`#/vapor`)
 
 Vapors from soil, soil gas or groundwater diffuse through the soil and enter a building. The legacy and
 modern Johnson and Ettinger methods run on one set of inputs, with indoor air results, the vapor profile
-through the soil and a check against a published case.
+through the soil and a check against a published case. Its "Chemical" list is the project's chemical list, and
+picking one fills the properties from the EPA tables; the Table R-3 benzene test values stay available beside the list
+as a test case, not a project chemical. A project chemical with no vapor properties in the database is marked as
+unavailable, you can enter its properties by hand, and it cannot be sent on.
 
 ### Surface water and sediment (`#/surface-water`)
 
@@ -174,13 +212,16 @@ section compares the result with water quality and sediment criteria.
 Household exposure from tap and irrigation water and from surface soil: shower air, sprinkler spray and
 irrigation contact, and windblown particulates, each with a legacy and a modern method. Values that no
 primary source supplied are left blank for you to enter; values taken as RISC5 choices carry a warning. The
-result can be sent to the risk and cleanup screens.
+result can be sent to the risk and cleanup screens. The chemical is picked from the project list (the old typed
+name and CAS number boxes are gone); the Henry constant and molecular weight stay boxes you fill in. A project that
+has no chemicals yet shows a link to the chemicals screen in their place.
 
 ### Plants, ecology and TPH (`#/plants-eco`)
 
 Homegrown produce plant factors for the risk screen, screening ecological hazard quotients, and total
 petroleum hydrocarbon levels from a fraction composition. Nothing is defaulted from memory: a value without
-a primary source is yours to enter, and the button that sends a result on stays disabled until the inputs are
+a primary source is yours to enter, the chemical is picked from the project list (an RSL chemical fills log Kow, Koc
+and Kd; a chemical the RSL does not list is marked and left for you to enter), and the button that sends a result on stays disabled until the inputs are
 usable. The produce button sends the plant factors, the intake and the plant engine's warnings; the total
 TPH button sends the total level, the fraction table and the warnings, and the cleanup screen shows them.
 
@@ -203,6 +244,15 @@ Pick chemicals from the EPA Regional Screening Level tables, enter concentration
 take the groundwater concentration from the transport screen), and see the cancer risk and hazard index
 each method gives, the pathways and chemicals that drive them, and what could not be quantified. A second
 receptor can be evaluated alongside the first.
+
+The chemicals here are the project's chemical list: every chemical on it has a card, and a chemical you find
+with the search on this screen is added to the list (and so to the cleanup levels screen). A chemical this
+screen has not seen before gets a card with nothing set, which says so and adds nothing to the results until a
+concentration is typed or a result from another screen is used; it does not stop the other chemicals from
+running. **Remove** on a card asks first and then removes the chemical from the whole project. A project
+chemical that is not in the RSL tables is named under the search and has no card. A project saved before the
+screens shared the list opens with the union of both screens' chemicals, each keeping the concentrations and
+choices it had; the cards the other screen lacked start with nothing set.
 
 **Edit values** on a chemical card lists the four toxicity values (oral slope factor, inhalation unit risk,
 oral reference dose, inhalation reference concentration) with the database value and its source. Type a
@@ -234,6 +284,11 @@ the report lists them under "Receptor factors supplied by the user" with the pre
 The reverse calculation: choose chemicals, receptors and pathways, set a target cancer risk and hazard
 quotient, and see the concentration in soil, water or air that just meets them. The lower of the cancer and
 noncancer levels governs, and the screen says which one did.
+
+The chemicals are the same project list as on the exposure and risk screen: a chemical added here, there or on the
+chemicals screen appears on both, and **Remove** (after its question) takes it out of both and out of the project.
+Each screen keeps its own concentrations and choices per chemical; a chemical this screen has not seen starts with
+nothing set. The levels need no concentration unless the allocation is cumulative.
 
 Chemical cards carry the same **Edit values** panel as the exposure screen, and share its edits. The
 receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed
@@ -372,14 +427,23 @@ you entered and attach the saved project file if you can; it holds your inputs a
 A result you send from a screen (the receptor well, the groundwater run for cleanup levels or for surface water,
 the vadose and saturated sources, the water table, vadose and saturated sources for vapor intrusion, and a surface
 water run) remembers the chemical the screen was set to. Exposure and risk and
-cleanup levels check it against each row: a row for another chemical shows an error naming both chemicals instead
-of taking the value, and the row for the matching chemical keeps it. Modeled cleanup refuses a groundwater,
-vadose or saturated run for another chemical. A result sent before this change, or from a screen with the
-chemical typed by hand, carries no chemical: it is still used when the run holds one chemical, and when the run
+cleanup levels check it against each row: a row with no result of its own chemical shows an error naming both
+chemicals instead of taking another chemical's value, and the row for the matching chemical keeps it. Modeled
+cleanup refuses a groundwater, vadose or saturated run for another chemical. A result sent from a screen with the
+chemical typed by hand carries no chemical: it is still used when the run holds one chemical, and when the run
 holds two or more the row says to choose the chemical on the sending screen and send it again. A surface water run
-linked to a groundwater run takes that run's chemical; an unlinked one takes the chemical you pick in the
+linked to a groundwater run takes that run's chemical, shown read-only, and shows an error (and sends nothing) when
+that chemical is not in the project list or the run held is for another chemical than the one set; an unlinked one takes the chemical you pick in the
 "Chemical" list on the surface water screen (the project's chemical list), and carries none while that reads "Not
-set", in which case a run of two or more chemicals refuses it.
+set", in which case a run of two or more chemicals refuses it. While the project list is empty, the surface water
+screen shows a link to the chemicals screen in place of the list. A chemical chosen earlier that has since been
+removed from the project list stays chosen, marked as not in the list.
+
+Each chemical keeps its own sent result. Sending toluene from a screen leaves the benzene result it sent before
+in place, so run a screen once per chemical and send each result: exposure and risk and cleanup levels then find a
+result for each row, and each row, panel and screen reads the result of its own chemical. Sending again for the
+same chemical replaces only that chemical's result. A result from a file saved before this change was given the
+chemical its sending screen was set to when it opened (see the project section above).
 
 The screens that read such a result as their own input make the same check against the chemical they are set to:
 the household screen for the receptor well and surface water series, the vapor screen for the water table, vadose

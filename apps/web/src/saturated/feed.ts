@@ -1,5 +1,5 @@
 import type { SaturatedSourceInput } from '@model-flow/engine';
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 
 export type SaturatedMethod = 'legacy' | 'modern';
 
@@ -16,9 +16,11 @@ export interface SaturatedFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<SaturatedFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getSaturatedFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<SaturatedFeed>();
 
 export const getSaturatedFeed = store.get;
+export const getSaturatedFeedSlots = store.slots;
 export const setSaturatedFeed = store.set;
 export const clearSaturatedFeed = store.clear;
 export const subscribeSaturatedFeed = store.subscribe;

@@ -26,9 +26,9 @@ export function HouseholdPanel(props: {
         </small>
       </h2>
       <p className="muted">
-        <StaleMark feed="household" /> Each level is the shower, sprinkler or particulate air level
-        above divided by the model coefficient of the household run, so a source at this level alone
-        just meets the target.
+        <StaleMark feed="household" chemicalId={feed.chemicalId} /> Each level is the shower,
+        sprinkler or particulate air level above divided by the model coefficient of the household
+        run, so a source at this level alone just meets the target.
       </p>
       <div className="cleanup-table-wrap">
         <table className="sat cleanup-table">

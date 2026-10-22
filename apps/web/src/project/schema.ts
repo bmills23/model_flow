@@ -16,7 +16,7 @@ import { text } from './fields';
 
 export const PROJECT_FORMAT = 'model_flow.project';
 
-/** Every screen key of format version 1. An absent key means that screen's defaults. */
+/** Every screen key of the project file. An absent key means that screen's defaults. */
 export const screensSchema = z.object({
   transport: transportProjectSchema.optional(),
   vadose: vadoseProjectSchema.optional(),
@@ -36,7 +36,7 @@ const sameLengthMessage = { message: 'times and values must have the same length
 const numbers = z.array(z.number().finite());
 
 /**
- * A feed is stored as the values the user chose to send, with the screen it came from and a hash of
+ * A feed slot is stored as the values the user chose to send, with the screen it came from and a hash of
  * that screen's form at the time (see `feedEntry`). A series feed (well, surface water) is checked
  * in full; feeds that carry a whole scenario (vadose, saturated, bank, vapor) are checked for their
  * top-level keys, with the scenario itself a JSON object (non-finite numbers are tagged, see
@@ -112,8 +112,48 @@ export const feedShapes = {
   tph: feedEnvelope(jsonObject).optional(),
 };
 
-/** Every feed key of format version 1. Each entry is validated on its own (see `parseProject`). */
-export const feedsSchema = z.object(feedShapes);
+type SlotShapes = typeof feedShapes;
+
+/**
+ * The feeds about one chemical (every feed that carries a `chemicalId`): from format version 2 each is
+ * stored as an object of slots by chemical id (the empty key for a value sent while its screen's
+ * chemical was typed by hand), each slot an envelope as above. The TPH feed is about a composition and
+ * stays a single envelope.
+ */
+export const CHEMICAL_FEEDS = [
+  'well',
+  'surfaceWater',
+  'vadose',
+  'saturated',
+  'bank',
+  'vaporVadose',
+  'vaporWaterTable',
+  'vaporSaturated',
+  'vaporRisk',
+  'household',
+  'produce',
+] as const satisfies readonly (keyof SlotShapes)[];
+export type ChemicalFeedKey = (typeof CHEMICAL_FEEDS)[number];
+export const isChemicalFeed = (key: string): key is ChemicalFeedKey =>
+  (CHEMICAL_FEEDS as readonly string[]).includes(key);
+
+const slotRecord = <S extends z.ZodType>(slot: S) => z.record(z.string(), slot);
+
+/** Every feed key of format version 2. Each slot is validated on its own (see `parseProject`). */
+export const feedsSchema = z.object({
+  well: slotRecord(feedShapes.well.unwrap()).optional(),
+  surfaceWater: slotRecord(feedShapes.surfaceWater.unwrap()).optional(),
+  vadose: slotRecord(feedShapes.vadose.unwrap()).optional(),
+  saturated: slotRecord(feedShapes.saturated.unwrap()).optional(),
+  bank: slotRecord(feedShapes.bank.unwrap()).optional(),
+  vaporVadose: slotRecord(feedShapes.vaporVadose.unwrap()).optional(),
+  vaporWaterTable: slotRecord(feedShapes.vaporWaterTable.unwrap()).optional(),
+  vaporSaturated: slotRecord(feedShapes.vaporSaturated.unwrap()).optional(),
+  vaporRisk: slotRecord(feedShapes.vaporRisk.unwrap()).optional(),
+  household: slotRecord(feedShapes.household.unwrap()).optional(),
+  produce: slotRecord(feedShapes.produce.unwrap()).optional(),
+  tph: feedShapes.tph,
+});
 
 /** The data editions the project was made against (directory names under packages/data/generated). */
 export const dataSchema = z.object({
@@ -122,9 +162,9 @@ export const dataSchema = z.object({
   sediment: text.optional(),
 });
 
-export const projectV1Schema = z.object({
+export const projectSchema = z.object({
   format: z.literal(PROJECT_FORMAT),
-  version: z.literal(1),
+  version: z.literal(2),
   createdWith: text,
   savedAt: z.iso.datetime({ offset: true }),
   title: text.optional(),
@@ -140,4 +180,4 @@ export const projectV1Schema = z.object({
   data: dataSchema.optional(),
 });
 export type Feeds = z.infer<typeof feedsSchema>;
-export type Project = Omit<z.infer<typeof projectV1Schema>, 'feeds'> & { feeds?: Feeds };
+export type Project = Omit<z.infer<typeof projectSchema>, 'feeds'> & { feeds?: Feeds };

@@ -1,4 +1,4 @@
-import type { StaleFeedKey } from '../project/store';
+import type { FeedRef } from '../project/staleFeeds';
 import { useCallback, useMemo, useState } from 'react';
 import { DEFAULT_N, type UncertainInput } from '@model-flow/engine';
 import { Field } from '../ui/controls';
@@ -28,7 +28,7 @@ export function CleanupUncertainty(props: {
   input: CleanupLegacyInput;
   names: Readonly<Record<string, string>>;
   /** Feeds from other screens the input was taken from. */
-  feeds?: readonly StaleFeedKey[];
+  feeds?: readonly FeedRef[];
   /** Clock in milliseconds, replaceable in tests. */
   now?: () => number;
 }) {

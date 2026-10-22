@@ -4,7 +4,7 @@ import { usableValue, type OverridesState } from './model';
 
 /** The source key an overridden value carries; `db.sourceKeys` names it. */
 export const USER_SOURCE = 'user';
-const USER_SOURCE_NAME = 'User value (this project)';
+export const USER_SOURCE_NAME = 'User value (this project)';
 
 export type ToxField = ToxRow['key'];
 

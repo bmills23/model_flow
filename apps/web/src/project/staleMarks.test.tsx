@@ -8,7 +8,7 @@ import { exportCsv } from '../export/csv';
 import { csvFileName } from '../export/csvFileName';
 import { forgetMemory, getScreen, setScreen } from './store';
 import { cleanupFeedsRead, feedsReadBy, riskFeedsRead, transportFeedsRead } from './feedsRead';
-import { staleSentence } from './staleFeeds';
+import { staleAmong, staleSentence } from './staleFeeds';
 import { StaleMark } from './StaleMark';
 
 const wellFeed = {
@@ -38,6 +38,13 @@ describe('staleSentence', () => {
     expect(s).toContain('Receptor well concentration (Transport)');
     expect(s).toContain('Surface water concentration (Surface water)');
   });
+
+  it('names the chemical of a stale slot', () => {
+    const s = staleSentence([{ feed: 'well', chemicalId: '71-43-2' }], (id) =>
+      id === '71-43-2' ? 'Benzene' : id,
+    );
+    expect(s).toBe('Out of date: Receptor well concentration for Benzene (Transport)');
+  });
 });
 
 describe('feedsReadBy', () => {
@@ -49,10 +56,12 @@ describe('feedsReadBy', () => {
     s.vapor = { ...s.vapor, choice: 'waterTable' };
     s.surfaceWater.form = { ...s.surfaceWater.form, linked: true };
     const r = feedsReadBy(s);
-    expect(r.transport).toEqual(['vadose']);
-    expect(r.household).toEqual(['well']);
-    expect(r.vapor).toEqual(['vaporWaterTable']);
-    expect(r.surfaceWater).toEqual(['bank']);
+    // each read is for the reading screen's chemical; a screen typed by hand reads any slot
+    expect(r.transport).toEqual([{ feed: 'vadose' }]);
+    expect(r.household).toEqual([{ feed: 'well' }]);
+    // the vapor screen starts on its Table R-3 fixture, which is not a project chemical
+    expect(r.vapor).toEqual([{ feed: 'vaporWaterTable', chemicalId: 'risc4-benzene' }]);
+    expect(r.surfaceWater).toEqual([{ feed: 'bank' }]);
   });
 
   it('adds the feeds a risk or cleanup chemical row takes', () => {
@@ -65,46 +74,62 @@ describe('feedsReadBy', () => {
       indoorFromVapor: true,
     };
     s.risk.form = { ...s.risk.form, chemicals: [base as never] };
-    expect(feedsReadBy(s).risk).toEqual(expect.arrayContaining(['well', 'vaporRisk']));
+    const b = (feed: string) => ({ feed, chemicalId: '71-43-2' });
+    expect(feedsReadBy(s).risk).toEqual(expect.arrayContaining([b('well'), b('vaporRisk')]));
     s.cleanup.form = { ...s.cleanup.form, source: 'vadose' };
-    expect(feedsReadBy(s).cleanup).toEqual(expect.arrayContaining(['transportChain', 'vadose']));
+    expect(feedsReadBy(s).cleanup).toEqual(
+      expect.arrayContaining([{ feed: 'transportChain' }, { feed: 'vadose' }]),
+    );
     s.cleanup.form = { ...s.cleanup.form, chemicals: [base as never] };
-    expect(feedsReadBy(s, { household: { chemicalId: '71-43-2' } }).cleanup).toContain('household');
+    expect(feedsReadBy(s, { household: { '71-43-2': {} } }).cleanup).toContainEqual(b('household'));
   });
 });
 
 describe('feeds read for one chemical', () => {
   const row = (id: string, flags: Record<string, unknown>) => ({ id, name: id, ...flags }) as never;
-  it('marks the household and vapor feeds on the risk screen only when they are for a flagged row', () => {
+  const slot = (feed: string, chemicalId: string) => ({ feed, chemicalId }) as never;
+  it('marks the household and vapor feeds on the risk screen only for the slot of a flagged row', () => {
     const rows = [
       row('108-88-3', { bathroomFromHousehold: true, indoorFromVapor: true }),
       row('71-43-2', {}),
     ];
-    expect(riskFeedsRead([...rows])).toEqual(['vaporRisk', 'household']);
-    const other = { household: { chemicalId: '71-43-2' }, vaporRisk: { chemicalId: '71-43-2' } };
-    expect(riskFeedsRead([...rows], other)).toEqual([]);
-    const mine = { household: { chemicalId: '108-88-3' }, vaporRisk: { chemicalId: '108-88-3' } };
-    expect(riskFeedsRead([...rows], mine)).toEqual(['vaporRisk', 'household']);
+    const reads = riskFeedsRead([...rows]);
+    expect(reads).toEqual([
+      { feed: 'vaporRisk', chemicalId: '108-88-3' },
+      { feed: 'household', chemicalId: '108-88-3' },
+    ]);
+    const other = [slot('household', '71-43-2'), slot('vaporRisk', '71-43-2')];
+    expect(staleAmong(reads, other)).toEqual([]);
+    const mine = [slot('household', '108-88-3'), slot('vaporRisk', '108-88-3')];
+    expect(staleAmong(reads, mine)).toEqual(mine);
   });
 
-  it('marks a cleanup section for a held household or vapor feed only when its chemical is a row', () => {
+  it('marks a cleanup section for a held household or vapor slot only when its chemical is a row', () => {
     const form = { source: 'direct', chemicals: [row('108-88-3', {})] };
     const held = {
-      household: { chemicalId: '71-43-2' },
-      vaporRisk: { chemicalId: '108-88-3' },
-      surfaceWater: { times: [1] },
+      household: { '71-43-2': {} },
+      vaporRisk: { '108-88-3': {} },
+      surfaceWater: { '': {} },
       tph: { label: 'x' },
     };
-    expect(cleanupFeedsRead(form, held)).toEqual(['vaporRisk', 'surfaceWater', 'tph']);
+    const reads = cleanupFeedsRead(form, held);
+    expect(
+      staleAmong(reads, [
+        slot('household', '71-43-2'),
+        slot('vaporRisk', '108-88-3'),
+        slot('surfaceWater', ''),
+        slot('tph', ''),
+      ]),
+    ).toEqual([slot('vaporRisk', '108-88-3'), slot('surfaceWater', ''), slot('tph', '')]);
   });
 
   it('reads the vadose feed on the transport screen only while the saturated feed is not on', () => {
     expect(transportFeedsRead({ feedFromVadose: true, feedFromSaturated: true })).toEqual([
-      'saturated',
+      { feed: 'saturated' },
     ]);
-    expect(transportFeedsRead({ feedFromVadose: true, feedFromSaturated: false })).toEqual([
-      'vadose',
-    ]);
+    expect(
+      transportFeedsRead({ feedFromVadose: true, feedFromSaturated: false, chemicalId: 'x' }),
+    ).toEqual([{ feed: 'vadose', chemicalId: 'x' }]);
   });
 });
 
@@ -120,7 +145,11 @@ describe('uncertainty reads feeds', () => {
     s.uncertainty.risk = { ...s.uncertainty.risk, sobol: true };
     s.uncertainty.cleanup = { ...s.uncertainty.cleanup, protection: '90' };
     expect(feedsReadBy(s).uncertainty).toEqual(
-      expect.arrayContaining(['well', 'transportChain', 'vadose']),
+      expect.arrayContaining([
+        { feed: 'well', chemicalId: '71-43-2' },
+        { feed: 'transportChain' },
+        { feed: 'vadose' },
+      ]),
     );
   });
 });
@@ -128,7 +157,7 @@ describe('uncertainty reads feeds', () => {
 describe('StaleMark', () => {
   it('shows text when the feed is stale and nothing when it is fresh', () => {
     sendWell();
-    render(<StaleMark feed="well" />);
+    render(<StaleMark feed="well" chemicalId={undefined} />);
     expect(screen.queryByText(/out of date/i)).toBeNull();
     editTransport();
     expect(screen.getByText(/out of date/i)).toBeTruthy();

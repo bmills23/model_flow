@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  addChemical as addProjectChemical,
+  getScreen,
+  removeProjectChemical,
+  setScreen,
+} from '../project/store';
+import { useFollowList } from '../project/useFollowList';
+import { RemoveChemicalConfirm } from '../project/RemoveChemicalConfirm';
 import { Field, Seg } from '../ui/controls';
 import { ChemicalCard } from '../risk/ChemicalCard';
 import { ChemicalPicker } from '../risk/ChemicalPicker';
@@ -11,22 +18,23 @@ import { withReceptorEdits } from '../overrides/receptors';
 import { useChemicalDb } from '../risk/useChemicalDb';
 import { ADD_CHEMICAL, buildCleanup, ENTER_CONCENTRATION, type CleanupBuildResult } from './build';
 import { runCleanup, type CleanupOutcome } from './compute';
-import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
-import { getHouseholdFeed, subscribeHouseholdFeed } from '../household/feeds';
+import { getSaturatedFeedSlots, subscribeSaturatedFeed } from '../saturated/feed';
+import { getHouseholdFeedSlots, subscribeHouseholdFeed } from '../household/feeds';
 import { HouseholdPanel } from './HouseholdPanel';
 import { VaporPanel } from './VaporPanel';
-import { getVaporRiskFeed, subscribeVaporRiskFeed } from '../vapor/feeds';
-import { getSurfaceWaterFeed, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
+import { getVaporRiskFeedSlots, subscribeVaporRiskFeed } from '../vapor/feeds';
+import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceWater/feed';
 import { SurfaceWaterPanel } from './SurfaceWaterPanel';
 import { TphPanel } from './TphPanel';
 import {
-  getProduceFeed,
+  getProduceFeedSlots,
   getTphFeed,
   subscribeProduceFeed,
   subscribeTphFeed,
 } from '../plantsEco/feeds';
-import { getTransportFeed, subscribeTransportFeed } from '../transport/chainFeed';
-import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
+import { getTransportFeedSlots, subscribeTransportFeed } from '../transport/chainFeed';
+import { getVadoseFeedSlots, subscribeVadoseFeed } from '../vadose/feed';
+import { pickSlot } from '../project/feedSlots';
 import { ALLOCATIONS, SOURCES, TARGET_KINDS, type CleanupForm } from './form';
 import { buildModeled } from './modeledBuild';
 import { ModeledResults } from './ModeledSection';
@@ -38,7 +46,7 @@ import { StaleMark } from '../project/StaleMark';
 import { cleanupFeedsRead } from '../project/feedsRead';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupCsvTables, modeledCsvTables } from './csv';
-import { sourceLevelCsvTables } from './sourceLevelsCsv';
+import { panelFeeds, sourceLevelCsvTables } from './sourceLevelsCsv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 import { HelpLink } from '../docs/HelpLink';
 
@@ -62,46 +70,81 @@ export function CleanupPage() {
   const patch = (next: Partial<CleanupForm>): void => setForm((f) => ({ ...f, ...next }));
   const setRow = (id: string, next: ChemicalRow): void =>
     setForm((f) => ({ ...f, chemicals: f.chemicals.map((c) => (c.id === id ? next : c)) }));
+  // the rows are the project chemical list; a chemical this screen holds no state for gets defaults
+  const setRows = useCallback(
+    (update: (rows: readonly ChemicalRow[]) => readonly ChemicalRow[]): void =>
+      setForm((f) => {
+        const next = update(f.chemicals);
+        return next === f.chemicals ? f : { ...f, chemicals: [...next] };
+      }),
+    [],
+  );
+  const list = useFollowList(
+    form.chemicals,
+    setRows,
+    (id) => {
+      const rec = db?.byId.get(id);
+      return rec ? newChemicalRow(rec) : null;
+    },
+    db !== null,
+  );
+  const outside = db ? list.filter((c) => !db.byId.has(c.id)) : [];
+  const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null);
 
-  const transportFeed = useSyncExternalStore(
+  // every slot of each feed (one per chemical); the screen reads the slot of each cleanup chemical
+  const transportSlots = useSyncExternalStore(
     subscribeTransportFeed,
-    getTransportFeed,
-    getTransportFeed,
+    getTransportFeedSlots,
+    getTransportFeedSlots,
   );
-  const vadoseFeed = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const saturatedFeed = useSyncExternalStore(
+  const vadoseSlots = useSyncExternalStore(
+    subscribeVadoseFeed,
+    getVadoseFeedSlots,
+    getVadoseFeedSlots,
+  );
+  const saturatedSlots = useSyncExternalStore(
     subscribeSaturatedFeed,
-    getSaturatedFeed,
-    getSaturatedFeed,
+    getSaturatedFeedSlots,
+    getSaturatedFeedSlots,
   );
-  const householdFeed = useSyncExternalStore(
+  const householdSlots = useSyncExternalStore(
     subscribeHouseholdFeed,
-    getHouseholdFeed,
-    getHouseholdFeed,
+    getHouseholdFeedSlots,
+    getHouseholdFeedSlots,
   );
-  const vaporFeed = useSyncExternalStore(
+  const vaporSlots = useSyncExternalStore(
     subscribeVaporRiskFeed,
-    getVaporRiskFeed,
-    getVaporRiskFeed,
+    getVaporRiskFeedSlots,
+    getVaporRiskFeedSlots,
   );
-  const surfaceFeed = useSyncExternalStore(
+  const surfaceSlots = useSyncExternalStore(
     subscribeSurfaceWaterFeed,
-    getSurfaceWaterFeed,
-    getSurfaceWaterFeed,
+    getSurfaceWaterFeedSlots,
+    getSurfaceWaterFeedSlots,
   );
-  const produceFeed = useSyncExternalStore(subscribeProduceFeed, getProduceFeed, getProduceFeed);
+  const produceSlots = useSyncExternalStore(
+    subscribeProduceFeed,
+    getProduceFeedSlots,
+    getProduceFeedSlots,
+  );
   const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
+  // a modeled source takes one chemical (ONE_CHEMICAL): the chain runs are read for it
+  const modeledChemical = form.chemicals[0]?.id;
+  const transportFeed = pickSlot(transportSlots, modeledChemical);
+  const vadoseFeed = pickSlot(vadoseSlots, modeledChemical);
+  const saturatedFeed = pickSlot(saturatedSlots, modeledChemical);
   const modeledOn = form.source !== 'direct';
   // the feeds the levels shown are computed from; a stale one is marked beside them and in the CSV
   const feedsUsed = cleanupFeedsRead(form, {});
-  const modeledFeeds = feedsUsed.filter((k) => k !== 'produce');
-  const directFeeds = produceFeed ? feedsUsed.filter((k) => k === 'produce') : [];
+  const modeledFeeds = feedsUsed.filter((k) => k.feed !== 'produce');
+  const directFeeds = produceSlots.size > 0 ? feedsUsed.filter((k) => k.feed === 'produce') : [];
+  const rowIds = form.chemicals.map((c) => c.id);
   // the form with the project's receptor names and factor edits laid on, for every build below
   const buildForm = useMemo(() => withReceptorEdits(form, overrides, 'cleanup'), [form, overrides]);
 
   const built = useMemo(
-    () => (db && !modeledOn ? buildCleanup(buildForm, db, { produce: produceFeed }) : null),
-    [buildForm, db, modeledOn, produceFeed],
+    () => (db && !modeledOn ? buildCleanup(buildForm, db, { produce: produceSlots }) : null),
+    [buildForm, db, modeledOn, produceSlots],
   );
   const outcome = useMemo(() => (built?.ok ? runCleanup(built) : null), [built]);
   const modeledBuilt = useMemo(
@@ -146,6 +189,7 @@ export function CleanupPage() {
   const addChemical = (id: string): void => {
     const rec = db?.byId.get(id);
     if (!rec) return;
+    addProjectChemical({ id, name: rec.name });
     setForm((f) =>
       f.chemicals.some((c) => c.id === id)
         ? f
@@ -155,6 +199,7 @@ export function CleanupPage() {
   const loadExample = (): void => {
     const rec = db?.byId.get(EXAMPLE_ID);
     if (!rec) return;
+    addProjectChemical({ id: EXAMPLE_ID, name: rec.name });
     setForm((f) => ({
       ...f,
       chemicals: [newChemicalRow(rec), ...f.chemicals.filter((c) => c.id !== EXAMPLE_ID)],
@@ -219,6 +264,23 @@ export function CleanupPage() {
             {form.chemicals.length === 0 && (
               <p className="muted">Add a chemical to start. Levels appear as soon as one is in.</p>
             )}
+            {removing && (
+              <RemoveChemicalConfirm
+                id={removing.id}
+                name={removing.name}
+                onCancel={() => setRemoving(null)}
+                onConfirm={() => {
+                  removeProjectChemical(removing.id);
+                  setRemoving(null);
+                }}
+              />
+            )}
+            {outside.map((c) => (
+              <p className="muted" key={c.id}>
+                {c.name} is on the project list but not in the RSL tables, so this screen has no
+                card for it.
+              </p>
+            ))}
             {db &&
               form.chemicals.map((row) => {
                 const rec = db.byId.get(row.id);
@@ -233,7 +295,7 @@ export function CleanupPage() {
                     vapor={null}
                     household={null}
                     surface={null}
-                    produce={produceFeed}
+                    produce={pickSlot(produceSlots, row.id)}
                     showProduce
                     produceNote="Use the plants and ecology plant factors for homegrown produce (adds the produce pathway to this chemical's soil level; receptors switch the pathway on)"
                     concentrationNote="These concentrations set only the ratios between chemicals. The levels keep those ratios and are scaled together."
@@ -248,9 +310,7 @@ export function CleanupPage() {
                       })
                     }
                     onChange={(next) => setRow(row.id, next)}
-                    onRemove={() =>
-                      patch({ chemicals: form.chemicals.filter((c) => c.id !== row.id) })
-                    }
+                    onRemove={() => setRemoving({ id: row.id, name: row.name })}
                   />
                 ) : null;
               })}
@@ -296,11 +356,14 @@ export function CleanupPage() {
                   {transportFeed
                     ? `Aquifer and well: ${transportFeed.label}.`
                     : 'No aquifer yet: use the groundwater transport screen first.'}{' '}
-                  {transportFeed && <StaleMark feed="transportChain" />}{' '}
+                  {transportFeed && (
+                    <StaleMark feed="transportChain" chemicalId={modeledChemical} />
+                  )}{' '}
                   {form.source === 'vadose' &&
                     (vadoseFeed ? (
                       <>
-                        {`Vadose source: ${vadoseFeed.label}.`} <StaleMark feed="vadose" />
+                        {`Vadose source: ${vadoseFeed.label}.`}{' '}
+                        <StaleMark feed="vadose" chemicalId={modeledChemical} />
                       </>
                     ) : (
                       'No vadose source held.'
@@ -308,7 +371,8 @@ export function CleanupPage() {
                   {form.source === 'saturated' &&
                     (saturatedFeed ? (
                       <>
-                        {`Saturated source: ${saturatedFeed.label}.`} <StaleMark feed="saturated" />
+                        {`Saturated source: ${saturatedFeed.label}.`}{' '}
+                        <StaleMark feed="saturated" chemicalId={modeledChemical} />
                       </>
                     ) : (
                       'No saturated source held.'
@@ -562,13 +626,20 @@ export function CleanupPage() {
               <StaleMark feed={directFeeds} />
               <LevelsSection method="modern" outcome={shown.outcome.modern} names={names} />
               <LevelsSection method="legacy" outcome={shown.outcome.legacy} names={names} />
-              {householdFeed && (
-                <HouseholdPanel outcome={shown.outcome} feed={householdFeed} names={names} />
-              )}
-              {vaporFeed && <VaporPanel outcome={shown.outcome} feed={vaporFeed} names={names} />}
-              {surfaceFeed && (
-                <SurfaceWaterPanel outcome={shown.outcome} feed={surfaceFeed} names={names} />
-              )}
+              {panelFeeds(householdSlots, rowIds).map((f) => (
+                <HouseholdPanel key={f.chemicalId} outcome={shown.outcome} feed={f} names={names} />
+              ))}
+              {panelFeeds(vaporSlots, rowIds).map((f) => (
+                <VaporPanel key={f.chemicalId} outcome={shown.outcome} feed={f} names={names} />
+              ))}
+              {panelFeeds(surfaceSlots, rowIds).map((f) => (
+                <SurfaceWaterPanel
+                  key={f.chemicalId ?? ''}
+                  outcome={shown.outcome}
+                  feed={f}
+                  names={names}
+                />
+              ))}
               <DownloadCsv
                 disabled={stale}
                 tables={[
@@ -577,9 +648,9 @@ export function CleanupPage() {
                     feeds: directFeeds,
                   })),
                   ...sourceLevelCsvTables(shown.outcome, names, {
-                    household: householdFeed,
-                    vapor: vaporFeed,
-                    surface: surfaceFeed,
+                    household: householdSlots,
+                    vapor: vaporSlots,
+                    surface: surfaceSlots,
                   }),
                 ]}
               />

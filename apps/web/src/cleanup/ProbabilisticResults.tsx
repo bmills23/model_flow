@@ -1,4 +1,4 @@
-import type { StaleFeedKey } from '../project/store';
+import type { FeedRef } from '../project/staleFeeds';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { cleanupUncertaintyTables } from '../uncertainty/csv';
 import type { CleanupRun } from '../uncertainty/headless';
@@ -18,7 +18,7 @@ export function ProbabilisticResults(props: {
   /** Extra words for the run line, for example the pool size. */
   runNote?: string;
   /** Feeds from other screens the run's inputs were taken from; a stale one marks the CSV. */
-  feeds?: readonly StaleFeedKey[];
+  feeds?: readonly FeedRef[];
 }) {
   const { run, label, stale } = props;
   const conv = (x: number): number => x * run.fromSi;

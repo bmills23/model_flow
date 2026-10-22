@@ -11,17 +11,18 @@ import type { ComputeRequest, MethodKey } from './compute';
 import { toScenario, type StepRow, type TransportForm } from './form';
 import { PlumeMap } from './PlumeMap';
 import { Field, Group, Seg } from '../ui/controls';
-import { ChemicalPicker } from '../ui/ChemicalPicker';
+import { FateChemicalSelect } from '../ui/FateChemicalSelect';
 import { useChemicalRows } from '../ui/chemicalFill';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { plumeCsvTable, transportCsvTables } from './csv';
 import { useTransportResult } from './useTransportResult';
-import { getSaturatedFeed, subscribeSaturatedFeed } from '../saturated/feed';
-import { getVadoseFeed, subscribeVadoseFeed } from '../vadose/feed';
-import { getBankFeed, setBankFeed, subscribeBankFeed } from './bankFeed';
-import { getWellFeed, setWellFeed, subscribeWellFeed } from './wellFeed';
-import { getTransportFeed, setTransportFeed, subscribeTransportFeed } from './chainFeed';
-import { getWaterTableFeed, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
+import { getSaturatedFeedSlots, subscribeSaturatedFeed } from '../saturated/feed';
+import { getVadoseFeedSlots, subscribeVadoseFeed } from '../vadose/feed';
+import { getBankFeedSlots, setBankFeed, subscribeBankFeed } from './bankFeed';
+import { getWellFeedSlots, setWellFeed, subscribeWellFeed } from './wellFeed';
+import { getTransportFeedSlots, setTransportFeed, subscribeTransportFeed } from './chainFeed';
+import { getWaterTableFeedSlots, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
+import { ownSlot, pickSlot } from '../project/feedSlots';
 import { waterTableSource } from './vaporFeed';
 import { chemicalTag, projectNameOf, screenFeedProblem } from '../project/feedChemical';
 import { HelpLink } from '../docs/HelpLink';
@@ -93,21 +94,39 @@ export function TransportPage() {
   };
   const [wellMethod, setWellMethod] = useState<MethodKey>(() => getScreen('transport').method);
   useEffect(() => setScreen('transport', { form, method: wellMethod }), [form, wellMethod]);
-  const wellHeld = useSyncExternalStore(subscribeWellFeed, getWellFeed, getWellFeed);
-  const chainHeld = useSyncExternalStore(
-    subscribeTransportFeed,
-    getTransportFeed,
-    getTransportFeed,
+  // what this screen sent for its chemical (one slot per chemical), and the sources it reads for it
+  const wellHeld = ownSlot(
+    useSyncExternalStore(subscribeWellFeed, getWellFeedSlots, getWellFeedSlots),
+    form.chemicalId,
   );
-  const tableHeld = useSyncExternalStore(
-    subscribeWaterTableFeed,
-    getWaterTableFeed,
-    getWaterTableFeed,
+  const chainHeld = ownSlot(
+    useSyncExternalStore(subscribeTransportFeed, getTransportFeedSlots, getTransportFeedSlots),
+    form.chemicalId,
+  );
+  const tableHeld = ownSlot(
+    useSyncExternalStore(subscribeWaterTableFeed, getWaterTableFeedSlots, getWaterTableFeedSlots),
+    form.chemicalId,
   );
 
-  const bankHeld = useSyncExternalStore(subscribeBankFeed, getBankFeed, getBankFeed);
-  const vadoseHeld = useSyncExternalStore(subscribeVadoseFeed, getVadoseFeed, getVadoseFeed);
-  const satHeld = useSyncExternalStore(subscribeSaturatedFeed, getSaturatedFeed, getSaturatedFeed);
+  const bankHeld = ownSlot(
+    useSyncExternalStore(subscribeBankFeed, getBankFeedSlots, getBankFeedSlots),
+    form.chemicalId,
+  );
+  const vadoseSlots = useSyncExternalStore(
+    subscribeVadoseFeed,
+    getVadoseFeedSlots,
+    getVadoseFeedSlots,
+  );
+  const satSlots = useSyncExternalStore(
+    subscribeSaturatedFeed,
+    getSaturatedFeedSlots,
+    getSaturatedFeedSlots,
+  );
+  const vadoseHeld = useMemo(
+    () => pickSlot(vadoseSlots, form.chemicalId),
+    [vadoseSlots, form.chemicalId],
+  );
+  const satHeld = useMemo(() => pickSlot(satSlots, form.chemicalId), [satSlots, form.chemicalId]);
   const chemicalList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   // a vadose or saturated result for another chemical (or untagged in a multi-chemical project) is not
   // offered and computes nothing; the problem is shown in its place
@@ -130,6 +149,7 @@ export function TransportPage() {
   const feedsUsed = transportFeedsRead({
     feedFromVadose: form.feedFromVadose && feed !== null && !satOn,
     feedFromSaturated: satOn,
+    chemicalId: form.chemicalId,
   });
   const fedOn = (form.feedFromVadose && feed !== null) || satOn;
   const parsed = useMemo(() => toScenario(form, feed, satFeed), [form, feed, satFeed]);
@@ -251,23 +271,23 @@ export function TransportPage() {
                 />
               </div>
             )}
-            <ChemicalPicker
-              id="transport-chemical"
+            <FateChemicalSelect
               rows={chemicals}
               failed={chemicalsFailed}
               value={form.chemicalId}
-              onPick={(row) => {
+              onPick={(id, row) => {
                 // A record without a Koc cannot give Kd, so retardation stays as the user left it
                 const hasKoc = row !== null && row.rsl.koc?.value !== undefined;
                 setNoKocName(row !== null && !hasKoc ? row.name : null);
                 setForm((f) => ({
                   ...f,
-                  chemicalId: row?.id ?? '',
+                  chemicalId: id,
                   ...(row && hasKoc
                     ? { retardMode: 'kd' as const, kd: kdFor(row.id, f.foc, f.kd) }
                     : {}),
                 }));
               }}
+              needs={[]}
               note="Only Kd (Koc times the organic carbon fraction below) is used here; the half-life is not in the database and stays your input."
             />
             {noKocName !== null && (
@@ -374,21 +394,22 @@ export function TransportPage() {
             )}
             {satOn && satFeed && (
               <p className="derived">
-                <StaleMark feed="saturated" /> The release of the {satFeed.input.source.length} m by{' '}
-                {satFeed.input.source.width} m saturated source sets the loading schedule. Length,
-                width, strength and loading come from it, and so do the porosity, conductivity,
-                gradient and retardation of the aquifer. The box is as deep as the high-water
-                saturated thickness when the source reaches below the water table; otherwise the
-                thickness below is the mixing depth.{' '}
+                <StaleMark feed="saturated" chemicalId={form.chemicalId} /> The release of the{' '}
+                {satFeed.input.source.length} m by {satFeed.input.source.width} m saturated source
+                sets the loading schedule. Length, width, strength and loading come from it, and so
+                do the porosity, conductivity, gradient and retardation of the aquifer. The box is
+                as deep as the high-water saturated thickness when the source reaches below the
+                water table; otherwise the thickness below is the mixing depth.{' '}
                 <a href="#/saturated">Open saturated soil source</a>
               </p>
             )}
             {fedOn && !satOn && feed && (
               <p className="derived">
-                <StaleMark feed="vadose" /> The mass reaching the water table over the{' '}
-                {feed.scenario.source.length} m by {feed.scenario.source.width} m vadose source sets
-                the release schedule. Length, width, strength and loading come from it; the
-                thickness below is the mixing depth. <a href="#/vadose">Open vadose leaching</a>
+                <StaleMark feed="vadose" chemicalId={form.chemicalId} /> The mass reaching the water
+                table over the {feed.scenario.source.length} m by {feed.scenario.source.width} m
+                vadose source sets the release schedule. Length, width, strength and loading come
+                from it; the thickness below is the mixing depth.{' '}
+                <a href="#/vadose">Open vadose leaching</a>
               </p>
             )}
             <div className="fields">

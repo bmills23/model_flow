@@ -195,15 +195,17 @@ describe('computeResults', () => {
           };
         },
         (s) => ({
-          produce: feedEntry('plantsEco', s.plantsEco.form, {
-            chemicalId: '71-43-2',
-            label: 'Benzene',
-            method: 'plantUptake.hhrap-2005',
-            factors: { root: 0.02 },
-            intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
-            intakeLabel: 'user entered',
-            warnings: [{ code: 'PLANT_TEST_WARNING', message: 'outside the fitted range' }],
-          }),
+          produce: {
+            '71-43-2': feedEntry('plantsEco', s.plantsEco.form, {
+              chemicalId: '71-43-2',
+              label: 'Benzene',
+              method: 'plantUptake.hhrap-2005',
+              factors: { root: 0.02 },
+              intakes: { root: { gPerKgDay: 1.5, fractionHomegrown: 0.4 } },
+              intakeLabel: 'user entered',
+              warnings: [{ code: 'PLANT_TEST_WARNING', message: 'outside the fitted range' }],
+            }),
+          },
           tph: feedEntry('plantsEco', s.plantsEco.form, {
             methodId: 'tph.tphcwg',
             label: 'Total TPH, tph.tphcwg',
@@ -245,38 +247,44 @@ describe('computeResults', () => {
           };
         },
         (s) => ({
-          household: feedEntry('household', s.household.form, {
-            chemicalId: '71-43-2',
-            label: 'Benzene, household run',
-            coefficients: { bathroomAir: 0.002 },
-            methods: { bathroomAir: 'shower.little-1992' },
-          }),
-          vaporRisk: feedEntry('vapor', s.vapor.form, {
-            chemicalId: '71-43-2',
-            label: 'Benzene, vapor run',
-            indoor: epc,
-            outdoor: epc,
-            coefficients: {
-              indoor: {
-                quantified: true,
-                methodId: 'vapor.je-1991',
-                value: 2e-4,
-                source: 'groundwater',
+          household: {
+            '71-43-2': feedEntry('household', s.household.form, {
+              chemicalId: '71-43-2',
+              label: 'Benzene, household run',
+              coefficients: { bathroomAir: 0.002 },
+              methods: { bathroomAir: 'shower.little-1992' },
+            }),
+          },
+          vaporRisk: {
+            '71-43-2': feedEntry('vapor', s.vapor.form, {
+              chemicalId: '71-43-2',
+              label: 'Benzene, vapor run',
+              indoor: epc,
+              outdoor: epc,
+              coefficients: {
+                indoor: {
+                  quantified: true,
+                  methodId: 'vapor.je-1991',
+                  value: 2e-4,
+                  source: 'groundwater',
+                },
+                outdoor: {
+                  quantified: false,
+                  methodId: 'outdoorAir.box',
+                  reason: 'TPH mixture in the soil',
+                },
               },
-              outdoor: {
-                quantified: false,
-                methodId: 'outdoorAir.box',
-                reason: 'TPH mixture in the soil',
-              },
-            },
-          }),
-          surfaceWater: feedEntry('surfaceWater', s.surfaceWater.form, {
-            method: 'mass-discharge',
-            origin: 'surfaceWater.mass-discharge',
-            label: 'Modern mass-discharge surface water',
-            times: [1],
-            values: [1e-6],
-          }),
+            }),
+          },
+          surfaceWater: {
+            '': feedEntry('surfaceWater', s.surfaceWater.form, {
+              method: 'mass-discharge',
+              origin: 'surfaceWater.mass-discharge',
+              label: 'Modern mass-discharge surface water',
+              times: [1],
+              values: [1e-6],
+            }),
+          },
         }),
       ),
     );

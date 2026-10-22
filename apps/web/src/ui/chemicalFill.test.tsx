@@ -1,6 +1,7 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
-import type { VaporChemicalRow } from '../vapor/chemicals';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { addChemical, forgetMemory, newProject } from '../project/store';
+import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import { fateFill } from './chemicalFill';
 import { VadosePage } from '../vadose/VadosePage';
 import { SaturatedPage } from '../saturated/SaturatedPage';
@@ -27,8 +28,15 @@ const fixture: VaporChemicalRow = {
   },
 };
 
+beforeEach(() => {
+  forgetMemory();
+  newProject();
+  addChemical({ id: '71-43-2', name: 'Benzene' });
+});
+
 afterEach(() => {
   cleanup();
+  forgetMemory();
   clearVadoseFeed();
   clearSaturatedFeed();
 });
@@ -76,7 +84,9 @@ describe('project round trip', () => {
 const BENZENE = { M: '78.115', Koc: '145.8', S: '1790' };
 
 async function pick(label: RegExp) {
-  await screen.findByRole('option', { name: /benzene \(71-43-2\)/i }, { timeout: 15000 });
+  await act(async () => {
+    await loadVaporChemicals();
+  });
   fireEvent.change(screen.getByRole('combobox', { name: label }), { target: { value: '71-43-2' } });
 }
 
@@ -85,7 +95,7 @@ const value = (label: RegExp) => (screen.getByLabelText(label) as HTMLInputEleme
 describe('fill from the database', () => {
   it('fills the vadose chemical, keeps the decay input and stays editable', async () => {
     render(<VadosePage />);
-    await pick(/fill from the chemical database/i);
+    await pick(/^chemical$/i);
     expect(value(/^molar mass/i)).toBe(BENZENE.M);
     expect(value(/^koc/i)).toBe(BENZENE.Koc);
     expect(value(/^solubility/i)).toBe(BENZENE.S);
@@ -98,7 +108,7 @@ describe('fill from the database', () => {
 
   it('fills the saturated chemical and leaves the source decay alone', async () => {
     render(<SaturatedPage />);
-    await pick(/fill from the chemical database/i);
+    await pick(/^chemical$/i);
     expect(value(/^molar mass/i)).toBe(BENZENE.M);
     expect(value(/^koc/i)).toBe(BENZENE.Koc);
     expect(value(/^source decay rate/i)).toBe(SATURATED.srcDecay);
@@ -106,7 +116,7 @@ describe('fill from the database', () => {
 
   it('fills Kd from Koc times the organic carbon fraction on the groundwater screen', async () => {
     render(<TransportPage />);
-    await pick(/fill from the chemical database/i);
+    await pick(/^chemical$/i);
     expect(value(/^kd/i)).toBe(String(145.8 * Number(TRANSPORT.foc)));
     expect(value(/^decay half-life/i)).toBe(TRANSPORT.halfLifeYr);
   }, 30000);

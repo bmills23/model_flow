@@ -1,4 +1,4 @@
-import { createFeed } from '../vapor/feedStore';
+import { createChemicalFeed } from '../vapor/feedStore';
 export type WellMethod = 'legacy' | 'modern' | 'domenico';
 
 /**
@@ -16,9 +16,11 @@ export interface WellFeed {
   chemicalId?: string;
 }
 
-const store = createFeed<WellFeed>();
+/** One slot per chemical (see `project/feedSlots.ts`); `getWellFeed(chemicalId)` reads a consumer's slot. */
+const store = createChemicalFeed<WellFeed>();
 
 export const getWellFeed = store.get;
+export const getWellFeedSlots = store.slots;
 export const setWellFeed = store.set;
 export const clearWellFeed = store.clear;
 export const subscribeWellFeed = store.subscribe;

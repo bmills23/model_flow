@@ -187,10 +187,10 @@ describe('buildHouseholdFeed', () => {
     expect(Math.abs(v - direct.concentration)).toBeLessThanOrEqual(1e-12 * direct.concentration);
   });
 
-  it('refuses without a chemical id, naming what is missing', () => {
+  it('refuses without a project chemical, naming what is missing', () => {
     const r = buildHouseholdFeed({ ...FORM, chemicalId: '' }, NONE);
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.reasons.join(' ')).toMatch(/chemical id/i);
+    if (!r.ok) expect(r.reasons.join(' ')).toMatch(/project list/i);
   });
 
   it('refuses when a chosen series source is not held', () => {

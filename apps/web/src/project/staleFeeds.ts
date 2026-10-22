@@ -1,35 +1,73 @@
 import { useSyncExternalStore } from 'react';
-import { getStaleFeeds, subscribeStale, type StaleFeedKey } from './store';
+import { projectNameOf } from './feedChemical';
+import {
+  getChemicals,
+  getStaleFeeds,
+  getStaleSlots,
+  readMatches,
+  subscribeStale,
+  type FeedRead,
+  type StaleFeedKey,
+  type StaleSlot,
+} from './store';
 
 /**
- * How a screen asks whether a value passed from another screen is out of date. The mark is live: a
- * feed is stale from the moment the sending screen's inputs differ from those recorded at send until
- * they are edited back or the value is sent again. The values stay on the feed; a consumer shows them
- * with the mark and does not hide or recompute them.
+ * How a screen asks whether a value passed from another screen is out of date. Feeds about one
+ * chemical hold one slot per chemical (wave O slice O4), and the mark is per slot: a stale benzene
+ * slot does not mark the toluene one. The mark is live: a slot is stale from the moment the sending
+ * screen's inputs differ from those recorded at send until they are edited back or the value is sent
+ * again. The values stay on the feed; a consumer shows them with the mark and does not hide or
+ * recompute them.
  *
- * - `useStaleFeeds()` is the list of stale feed keys (a stable array until the set changes).
- * - `useFeedStale(key)` is true while that one feed is stale.
- * - Outside a component, `getStaleFeeds`, `isFeedStaleNow` and `subscribeStale` in `./store` do the same.
+ * - `useStaleSlots()` is the list of stale slots (a stable array until the set changes).
+ * - `useFeedStale(key, chemicalId)` is true while the slot a consumer of that chemical reads is stale.
+ * - `useStaleFeeds()` is the list of feeds with any stale slot.
+ * - Outside a component, `getStaleSlots`, `isFeedStaleNow` and `subscribeStale` in `./store` do the same.
  */
+export function useStaleSlots(): readonly StaleSlot[] {
+  return useSyncExternalStore(subscribeStale, getStaleSlots, getStaleSlots);
+}
+
 export function useStaleFeeds(): readonly StaleFeedKey[] {
   return useSyncExternalStore(subscribeStale, getStaleFeeds, getStaleFeeds);
 }
 
-export function useFeedStale(key: StaleFeedKey): boolean {
-  return useStaleFeeds().includes(key);
+export function useFeedStale(key: StaleFeedKey, chemicalId?: string): boolean {
+  return useStaleSlots().some((s) => readMatches({ feed: key, chemicalId }, s));
 }
 
-/** The keys of `wanted` that are in `stale`, in `wanted` order and without repeats. */
+/** A feed a consumer reads: a feed key alone (any slot), or a feed for a chemical. */
+export type FeedRef = StaleFeedKey | FeedRead;
+export const toRead = (r: FeedRef): FeedRead => (typeof r === 'string' ? { feed: r } : r);
+const toSlot = (s: StaleSlot | StaleFeedKey): StaleSlot =>
+  typeof s === 'string' ? { feed: s, chemicalId: '' } : s;
+
+/** The stale slots that one of `wanted` reads (see `readMatches`), in stale order and without repeats. */
 export function staleAmong(
-  wanted: readonly StaleFeedKey[],
-  stale: readonly StaleFeedKey[],
-): StaleFeedKey[] {
-  return [...new Set(wanted)].filter((k) => stale.includes(k));
+  wanted: readonly FeedRef[],
+  stale: readonly (StaleSlot | StaleFeedKey)[],
+): StaleSlot[] {
+  const reads = wanted.map(toRead);
+  return stale.map(toSlot).filter((s) => reads.some((r) => readMatches(r, s)));
 }
 
-/** One sentence naming each stale value and the screen that sends it; the text every consumer shows. */
-export function staleSentence(keys: readonly StaleFeedKey[]): string {
-  const names = keys.map((k) => `${FEED_INFO[k].label} (${FEED_INFO[k].source})`).join(', ');
+/** What one stale slot is called to a person: the value, the chemical it is for, the sending screen. */
+export function slotLabel(
+  slot: StaleSlot | StaleFeedKey,
+  nameOf: (id: string) => string = projectNameOf(getChemicals()),
+): string {
+  const s = toSlot(slot);
+  const info = FEED_INFO[s.feed];
+  const chemical = s.chemicalId === '' ? '' : ` for ${nameOf(s.chemicalId)}`;
+  return `${info.label}${chemical} (${info.source})`;
+}
+
+/** One sentence naming each stale value, its chemical and the screen that sends it; the text every consumer shows. */
+export function staleSentence(
+  slots: readonly (StaleSlot | StaleFeedKey)[],
+  nameOf?: (id: string) => string,
+): string {
+  const names = slots.map((s) => slotLabel(s, nameOf)).join(', ');
   return `Out of date: ${names}`;
 }
 
