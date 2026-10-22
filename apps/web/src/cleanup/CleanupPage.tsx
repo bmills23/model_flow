@@ -29,16 +29,15 @@ import { getTransportFeedSlots, subscribeTransportFeed } from '../transport/chai
 import { getVadoseFeedSlots, subscribeVadoseFeed } from '../vadose/feed';
 import { pickSlot } from '../project/feedSlots';
 import { ALLOCATIONS, SOURCES, TARGET_KINDS, type CleanupForm } from './form';
-import { buildModeled } from './modeledBuild';
-import { ModeledResults } from './ModeledSection';
+import { buildModeledRows } from './modeledBuild';
+import { ModeledRowsView, ModeledUncertaintyView, type ModeledSolved } from './ModeledCleanup';
 import { useModeled } from './useModeled';
 import { SsgInputs, SsgResults } from './SsgPanel';
 import { CleanupUncertainty } from './CleanupUncertainty';
-import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
 import { StaleMark } from '../project/StaleMark';
 import { cleanupFeedsRead } from '../project/feedsRead';
 import { DownloadCsv } from '../export/DownloadCsv';
-import { cleanupCsvTables, modeledCsvTables } from './csv';
+import { cleanupCsvTables } from './csv';
 import { panelFeeds, sourceLevelCsvTables } from './sourceLevelsCsv';
 import { LevelsSection, NotQuantified, WarningsList } from './Results';
 import { HelpLink } from '../docs/HelpLink';
@@ -101,11 +100,12 @@ export function CleanupPage() {
     getProduceFeedSlots,
   );
   const tphFeed = useSyncExternalStore(subscribeTphFeed, getTphFeed, getTphFeed);
-  // a modeled source takes one chemical (ONE_CHEMICAL): the chain runs are read for it
-  const modeledChemical = form.chemicals[0]?.id;
-  const transportFeed = pickSlot(transportSlots, modeledChemical);
-  const vadoseFeed = pickSlot(vadoseSlots, modeledChemical);
-  const saturatedFeed = pickSlot(saturatedSlots, modeledChemical);
+  // a modeled source is solved per chemical: each chemical reads the chain runs of its own slots
+  const feedsOf = (id: string) => ({
+    transport: pickSlot(transportSlots, id),
+    vadose: pickSlot(vadoseSlots, id),
+    saturated: pickSlot(saturatedSlots, id),
+  });
   const modeledOn = form.source !== 'direct';
   // the feeds the levels shown are computed from; a stale one is marked beside them and in the CSV
   const feedsUsed = cleanupFeedsRead(form, {});
@@ -120,19 +120,34 @@ export function CleanupPage() {
     [buildForm, db, modeledOn, produceSlots],
   );
   const outcome = useMemo(() => (built?.ok ? runCleanup(built) : null), [built]);
-  const modeledBuilt = useMemo(
+  const modeledRows = useMemo(
     () =>
-      db && modeledOn && form.chemicals.length > 0
-        ? buildModeled(buildForm, db, {
-            transport: transportFeed,
-            vadose: vadoseFeed,
-            saturated: saturatedFeed,
-          })
+      db && modeledOn && buildForm.chemicals.length > 0
+        ? buildModeledRows(buildForm, db, feedsOf)
         : null,
-    [form, buildForm, db, modeledOn, transportFeed, vadoseFeed, saturatedFeed],
+    // feedsOf reads only these slots
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [buildForm, db, modeledOn, transportSlots, vadoseSlots, saturatedSlots],
   );
-  const modeled = useModeled(modeledBuilt?.ok ? modeledBuilt.request : null);
-  const modeledReply = modeled.reply?.ok ? modeled.reply.outcome : null;
+  // the chemicals that could be built are solved; the others keep their problem on their own row
+  const modeledRequests = useMemo(() => {
+    const reqs = (modeledRows ?? []).flatMap((r) => (r.result.ok ? [r.result.request] : []));
+    return reqs.length > 0 ? reqs : null;
+  }, [modeledRows]);
+  const modeled = useModeled(modeledRequests);
+  // the solved outcome of each chemical, by chemical id; a chemical that cannot be built now shows
+  // its problem instead of an earlier answer
+  const modeledSolved = useMemo(() => {
+    const out = new Map<string, ModeledSolved>();
+    const reply = modeled.reply;
+    if (reply?.ok && modeled.answered) {
+      modeled.answered.forEach((req, i) =>
+        out.set(req.chemical.id, { req, item: reply.items[i]! }),
+      );
+    }
+    return out;
+  }, [modeled.reply, modeled.answered]);
+  const modeledSolveError = modeled.reply && !modeled.reply.ok ? modeled.reply.error : null;
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
   const needsInput =
     form.chemicals.length === 0 ||
@@ -187,11 +202,13 @@ export function CleanupPage() {
     : [];
   const mclRec = form.chemicals[0] ? db?.byId.get(form.chemicals[0].id) : undefined;
   const mclHint =
-    mclRec?.tox.mclUnit !== undefined
-      ? `The MCL of ${mclRec.name} is ${mclRec.tox.mcl} ${mclRec.tox.mclUnit}, not a mass per volume, so a blank has no target; enter one.`
-      : mclRec?.tox.mcl !== undefined
-        ? `Blank uses the MCL of ${mclRec.name}: ${mclRec.tox.mcl} ug/L${mclRec.tox.mclGroup ? ' (a group value)' : ''}.`
-        : 'Blank uses the database MCL, which this chemical does not have.';
+    modeledOn && form.chemicals.length > 1
+      ? 'Blank uses the database MCL of each chemical; a typed value applies to every chemical.'
+      : mclRec?.tox.mclUnit !== undefined
+        ? `The MCL of ${mclRec.name} is ${mclRec.tox.mcl} ${mclRec.tox.mclUnit}, not a mass per volume, so a blank has no target; enter one.`
+        : mclRec?.tox.mcl !== undefined
+          ? `Blank uses the MCL of ${mclRec.name}: ${mclRec.tox.mcl} ug/L${mclRec.tox.mclGroup ? ' (a group value)' : ''}.`
+          : 'Blank uses the database MCL, which this chemical does not have.';
   const cumulative = !modeledOn && form.allocation === 'cumulative';
 
   return (
@@ -308,32 +325,41 @@ export function CleanupPage() {
             )}
             {modeledOn && (
               <>
-                <p className="muted source-hint">
-                  {transportFeed
-                    ? `Aquifer and well: ${transportFeed.label}.`
-                    : 'No aquifer yet: use the groundwater transport screen first.'}{' '}
-                  {transportFeed && (
-                    <StaleMark feed="transportChain" chemicalId={modeledChemical} />
-                  )}{' '}
-                  {form.source === 'vadose' &&
-                    (vadoseFeed ? (
-                      <>
-                        {`Vadose source: ${vadoseFeed.label}.`}{' '}
-                        <StaleMark feed="vadose" chemicalId={modeledChemical} />
-                      </>
-                    ) : (
-                      'No vadose source held.'
-                    ))}
-                  {form.source === 'saturated' &&
-                    (saturatedFeed ? (
-                      <>
-                        {`Saturated source: ${saturatedFeed.label}.`}{' '}
-                        <StaleMark feed="saturated" chemicalId={modeledChemical} />
-                      </>
-                    ) : (
-                      'No saturated source held.'
-                    ))}
-                </p>
+                {form.chemicals.length === 0 && (
+                  <p className="muted source-hint">
+                    No aquifer yet: use the groundwater transport screen first.
+                  </p>
+                )}
+                {form.chemicals.map((row) => {
+                  const feeds = feedsOf(row.id);
+                  const who = form.chemicals.length > 1 ? `${row.name}: ` : '';
+                  return (
+                    <p className="muted source-hint" key={row.id}>
+                      {feeds.transport
+                        ? `${who}${who ? 'aquifer' : 'Aquifer'} and well: ${feeds.transport.label}.`
+                        : `${who}${who ? 'no' : 'No'} aquifer yet: use the groundwater transport screen first.`}{' '}
+                      {feeds.transport && <StaleMark feed="transportChain" chemicalId={row.id} />}{' '}
+                      {form.source === 'vadose' &&
+                        (feeds.vadose ? (
+                          <>
+                            {`Vadose source: ${feeds.vadose.label}.`}{' '}
+                            <StaleMark feed="vadose" chemicalId={row.id} />
+                          </>
+                        ) : (
+                          'No vadose source held.'
+                        ))}
+                      {form.source === 'saturated' &&
+                        (feeds.saturated ? (
+                          <>
+                            {`Saturated source: ${feeds.saturated.label}.`}{' '}
+                            <StaleMark feed="saturated" chemicalId={row.id} />
+                          </>
+                        ) : (
+                          'No saturated source held.'
+                        ))}
+                    </p>
+                  );
+                })}
                 <div className="fields">
                   <Field
                     label={`Starting concentration (${form.source === 'dissolved' ? 'mg/L' : 'mg/kg'})`}
@@ -422,8 +448,8 @@ export function CleanupPage() {
             </div>
             {modeledOn ? (
               <p className="muted">
-                A modeled source is solved for one chemical alone, so allocation among chemicals
-                does not apply.
+                Each chemical of a modeled source is solved alone, through the chain sent for it, so
+                allocation among chemicals does not apply.
               </p>
             ) : (
               <>
@@ -511,47 +537,14 @@ export function CleanupPage() {
         <div className="results" ref={resultsRef}>
           {tphFeed && <TphPanel feed={tphFeed} />}
           {modeledOn && (
-            <>
-              {form.chemicals.length === 0 && (
-                <p className="muted">The cleanup level appears here once a chemical is added.</p>
-              )}
-              {modeledBuilt && !modeledBuilt.ok && (
-                <div className="alert" role="alert">
-                  <strong>Needed before the level can be solved:</strong>
-                  <ul>
-                    {modeledBuilt.errors.map((e) => (
-                      <li key={e}>{e}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {modeled.computing && modeledBuilt?.ok && (
-                <p className="muted" role="status">
-                  Solving through the transport chain...
-                </p>
-              )}
-              {modeled.reply && !modeled.reply.ok && (
-                <div className="alert" role="alert">
-                  The solve failed: {modeled.reply.error}
-                </div>
-              )}
-              {modeledReply && modeled.answered && (
-                <div className={modeled.computing || !modeledBuilt?.ok ? 'stale' : undefined}>
-                  <StaleMark feed={modeledFeeds} />
-                  <ModeledResults
-                    outcome={modeledReply}
-                    name={modeled.answered.chemical.name}
-                    notes={modeledBuilt?.ok ? modeledBuilt.notes : []}
-                  />
-                  <DownloadCsv
-                    disabled={modeled.computing || !modeledBuilt?.ok}
-                    tables={modeledCsvTables(modeledReply, modeled.answered.chemical.name).map(
-                      (t) => ({ ...t, feeds: modeledFeeds }),
-                    )}
-                  />
-                </div>
-              )}
-            </>
+            <ModeledRowsView
+              rows={modeledRows ?? []}
+              solved={modeledSolved}
+              computing={modeled.computing}
+              progress={modeled.progress}
+              solveError={modeledSolveError}
+              feeds={modeledFeeds}
+            />
           )}
           {!modeledOn && built && !built.ok && !needsInput && (
             <div className="alert" role="alert">
@@ -621,11 +614,10 @@ export function CleanupPage() {
           {!modeledOn && shown && shown.outcome.legacy.ok && (
             <CleanupUncertainty input={shown.built.legacy} names={names} feeds={directFeeds} />
           )}
-          {modeledOn && modeledReply && modeled.answered && modeledBuilt?.ok && (
-            <ModeledSourceUncertainty
-              request={modeled.answered}
-              outcome={modeledReply}
-              name={modeled.answered.chemical.name}
+          {modeledOn && (
+            <ModeledUncertaintyView
+              rows={modeledRows ?? []}
+              solved={modeledSolved}
               pending={modeled.computing}
               feeds={modeledFeeds}
             />

@@ -73,6 +73,8 @@ function fingerprintOf(project: ReturnType<typeof projectOf>): string {
 }
 
 const summary = (fingerprint: string): ModeledUncertaintySummary => ({
+  chemicalId: '71-43-2',
+  chemical: 'Benzene',
   fingerprint,
   label: 'Benzene at the source, Wexler (1992)',
   unit: 'mg/L',

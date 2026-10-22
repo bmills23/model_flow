@@ -144,6 +144,7 @@ function modeledCurveColumns(medium: ModeledOutcome['medium']): CsvColumn[] {
   return [
     { key: 'method', header: 'method' },
     { key: 'basis', header: 'factor set' },
+    { key: 'chemical', header: 'chemical' },
     { key: 'conc', header: 'source concentration', unit: MEDIUM_UNIT(medium) },
     { key: 'cancer', header: 'cancer risk', unit: '-' },
     { key: 'hi', header: 'hazard index', unit: '-' },
@@ -182,12 +183,13 @@ export function modeledResultRows(outcome: ModeledOutcome, chemicalName: string)
   });
 }
 
-export function modeledCurveRows(outcome: ModeledOutcome): CsvRow[] {
+export function modeledCurveRows(outcome: ModeledOutcome, chemicalName = ''): CsvRow[] {
   const medium = outcome.medium;
   return modeledRuns(outcome).flatMap(({ m, run }) =>
     run.curve.conc.map((c, i) => ({
       method: MODELED_METHOD_ID,
       basis: m,
+      chemical: chemicalName,
       conc: c * FROM_SI(medium),
       cancer: run.curve.cancer[i],
       hi: run.curve.hi[i],
@@ -209,10 +211,31 @@ export function modeledCsvTables(outcome: ModeledOutcome, chemicalName: string):
       name: 'cleanup-modeled-curve',
       editions: ['rsl'],
       label: 'metric curve',
-      rows: modeledCurveRows(outcome),
+      rows: modeledCurveRows(outcome, chemicalName),
       columns: modeledCurveColumns(outcome.medium),
     },
   ];
+}
+
+/**
+ * The tables of a modeled run over several chemicals: the two tables of each chemical, solved and
+ * named on its own (a file per chemical, so each carries only its own stale marks). One chemical gives
+ * the plain tables; with several, each table name carries the chemical id and its label the chemical name.
+ */
+export function modeledCsvTablesAll(
+  entries: readonly { id: string; name: string; outcome: ModeledOutcome }[],
+): CsvTable[] {
+  if (entries.length === 1) {
+    const e = entries[0]!;
+    return modeledCsvTables(e.outcome, e.name);
+  }
+  return entries.flatMap((e) =>
+    modeledCsvTables(e.outcome, e.name).map((t) => ({
+      ...t,
+      name: `${t.name}-${e.id}`,
+      label: `${t.label}, ${e.name}`,
+    })),
+  );
 }
 
 /* ---------------------------------------------------------------- soil screening leaching */

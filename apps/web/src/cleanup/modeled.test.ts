@@ -6,7 +6,7 @@ import { toScenario, DEFAULT_FORM } from '../transport/form';
 import { toScenario as vadoseScenario, DEFAULT_FORM as VADOSE_FORM } from '../vadose/form';
 import type { TransportFeed } from '../transport/chainFeed';
 import type { VadoseFeed } from '../vadose/feed';
-import { buildModeled, NEEDS_TRANSPORT, ONE_CHEMICAL } from './modeledBuild';
+import { buildModeled, NEEDS_TRANSPORT } from './modeledBuild';
 import { chainChemicalFor, computeModeled } from './compute';
 import { defaultCleanupForm, type CleanupForm } from './form';
 
@@ -56,12 +56,16 @@ describe('buildModeled', () => {
     if (!r.ok) expect(r.errors).toContain(NEEDS_TRANSPORT);
   });
 
-  it('takes one chemical only', () => {
+  it('builds the first chemical row of a form that holds several (wave P slice P3)', () => {
     const f = form();
     f.chemicals.push(newChemicalRow(db.byId.get('108-88-3')!));
-    const r = buildModeled(f, db, { transport: transportFeed(), vadose: null, saturated: null });
-    expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.errors).toContain(ONE_CHEMICAL);
+    const tagged = { ...transportFeed(), chemicalId: BENZENE };
+    const r = buildModeled(f, db, { transport: tagged, vadose: null, saturated: null });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.request.chemical.id).toBe(BENZENE);
+    // an untagged run cannot be told apart in a run of two chemicals
+    const u = buildModeled(f, db, { transport: transportFeed(), vadose: null, saturated: null });
+    expect(u.ok).toBe(false);
   });
 
   it('converts the database MCL from ug/L to kg/m3 and the window from years to s', () => {

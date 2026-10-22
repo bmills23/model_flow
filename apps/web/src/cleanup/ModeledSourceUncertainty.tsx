@@ -93,7 +93,7 @@ export function ModeledSourceUncertainty(props: {
     setShown(null);
     // The report reads the session summary, so it must lose the earlier run with the screen's result:
     // a re-run that is cancelled or fails leaves neither on screen nor in the report.
-    clearModeledSummary();
+    clearModeledSummary(request.chemical.id);
     const settings = cleanupSettings(setup0, MODELED_DEFAULT_N);
     if (!settings.ok) {
       setError(settings.error);
@@ -123,7 +123,9 @@ export function ModeledSourceUncertainty(props: {
       const label = `${name} at the source, ${LABELS[setup.method]}`;
       setShown({ ...ran, label, request });
       // the report prints this summary; the fingerprint says later whether it still matches the inputs
-      setModeledSummary(summarizeModeledRun(ran, label, modeledFingerprint(request, setup0)));
+      setModeledSummary(
+        summarizeModeledRun(ran, label, modeledFingerprint(request, setup0), request.chemical),
+      );
     } catch (e) {
       if (e instanceof RunCancelledError) setError('The run was cancelled.');
       else setError(e instanceof UncertaintyError || e instanceof Error ? e.message : String(e));
