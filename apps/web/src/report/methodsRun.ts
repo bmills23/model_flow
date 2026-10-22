@@ -73,7 +73,24 @@ function sentFrom(entry: unknown, key: string): boolean {
 export function screenUsed(key: ScreenKey, screens: Screens, feeds?: FeedsLike): boolean {
   if (feeds !== undefined && Object.values(feeds).some((e) => sentFrom(e, key))) return true;
   const project = PROJECTORS[key] as (s: Screens[ScreenKey]) => unknown;
-  return stableStringify(project(screens[key])) !== stableStringify(project(defaultScreens()[key]));
+  const now = stableStringify(project(screens[key]));
+  if (now === stableStringify(project(defaultScreens()[key]))) return false;
+  // a file saved before wave R holds the old defaults (the regression for dispersivity), which load
+  // as a form unlike the new defaults: an untouched old screen is still unused
+  const old = preWaveRDefaults(key);
+  return old === undefined || now !== stableStringify(project(old));
+}
+
+/** The screen a project saved before wave R holds when it was never edited, for the two that changed. */
+function preWaveRDefaults(key: ScreenKey): Screens[ScreenKey] | undefined {
+  const fresh = defaultScreens();
+  if (key === 'transport') {
+    return { ...fresh.transport, form: { ...fresh.transport.form, dispLaw: 'legacy' } };
+  }
+  if (key === 'vadose') {
+    return { ...fresh.vadose, form: { ...fresh.vadose.form, dispersivityBasis: 'regression' } };
+  }
+  return undefined;
 }
 
 /**

@@ -231,6 +231,20 @@ describe('toScenario: dispersivity is a required entry', () => {
     expect(s.notes).toEqual([]);
   });
 
+  it('refuses the SSG rule when the receptor is not downgradient of the source', () => {
+    for (const rx of ['0', '-5']) {
+      const errors = fail({
+        ...FRESH_FORM,
+        dispLaw: 'ssg',
+        rx,
+        xMax: '250',
+        alphaTOverride: '0.7',
+        alphaVOverride: '0.04',
+      });
+      expect(errors.join(' ')).toMatch(/SSG.*receptor x.*greater than zero/i);
+    }
+  });
+
   it('asks for transverse and vertical values beside the SSG rule, which gives no ratio', () => {
     const errors = fail({ ...FRESH_FORM, dispLaw: 'ssg' });
     expect(errors.some((e) => /Longitudinal dispersivity is required/.test(e))).toBe(false);
