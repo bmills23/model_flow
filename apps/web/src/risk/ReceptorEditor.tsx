@@ -63,7 +63,7 @@ export function ReceptorEditor(props: {
     const stored = edits[r.key];
     const entry = drafts[r.key] ?? stored;
     const problem =
-      entry === undefined
+      entry === undefined || drafts[r.key] === undefined
         ? null
         : (problemOf(entry.value) ?? (entry.value.trim() === '' ? null : noteProblem(entry)));
     const id = `rf-${subject}-${r.key}`;

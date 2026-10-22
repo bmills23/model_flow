@@ -284,7 +284,7 @@ under each box; a blank box keeps it. An edited factor is marked "Edited" and ha
 preset**, and a **Reset to preset** under the list clears the receptor's edits. Each factor has a
 **Source note (required)** box beside it: a value you type is not used until you add a note, the box says so,
 and clearing the note stops the value being used again. A project saved before notes were required opens
-unchanged; its edits stay in use and are marked "No note" until you add one. A mutagen's age segments use the stage value, and the modern exposure duration (which sets the stage
+unchanged; its edits stay in use and are marked "No note" (with no warning that the value is unused) until you add one; typing a new value over one asks for a note like any new edit. A mutagen's age segments use the stage value, and the modern exposure duration (which sets the stage
 split) is not editable. The soil skin area, adherence, water, breathing and time entries stay under
 "Site-specific factors". Changing the scenario preset of a receptor that has edited factors asks first: the
 edits belong to the old preset, and switching resets them. The exposure and cleanup screens keep their own

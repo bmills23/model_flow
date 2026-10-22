@@ -105,6 +105,11 @@ describe('receptor exposure factors panel', () => {
     await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
     const ed = openEditor(screen.getByRole('group', { name: /receptor a/i }));
     expect(within(ed).getByText(/no note/i)).toBeTruthy();
+    // the editor must not claim the applied value is unused
+    const row = noteOf(ed).closest('.override-row')!;
+    expect(row.querySelector('.override-problem')).toBeNull();
+    expect(noteOf(ed).getAttribute('aria-invalid')).toBeNull();
+    expect(within(ed).queryByText(/value is not used/i)).toBeNull();
     expect(getOverrides().receptors[receptorKey('risk', 'a')]?.['legacy.bwKg']?.value).toBe('60');
   }, 40000);
 

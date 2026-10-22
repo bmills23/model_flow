@@ -3617,6 +3617,16 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 3. **Screens (DEFAULT).** The editor is shared by the exposure and cleanup receptor panels, so both change; no
    other screen edits receptor factors. The report's printing of notes belongs to another slice.
 
+### Wave R corrective, slice CA
+
+1. **Untouched old screens read as unused (DEFAULT).** The report's "screen used" test now also compares the
+   transport and vadose screens with the defaults a pre-wave-R project carried (dispersivity law `legacy`,
+   basis `regression`), so an old project whose screen was never edited reads as unused in the report
+   sections, the methods run list and the rests-on list. An edited old screen still counts as used.
+2. **SSG 1996 needs a positive receptor distance (DEFAULT).** The SSG 1996 dispersivity choice is refused with
+   a form message when the receptor x is zero or negative. There is no fallback to the map extent, so only the
+   stated definition is used.
+
 ### Wave R corrective, slice CB
 
 1. **Comparison source per screen (DEFAULT).** The basis compares each screen's typed values with the source
@@ -3638,3 +3648,13 @@ whatever": EPA values now, a state's tables when a state comes up), then answere
 5. **User guide (DEFAULT).** The "until the dispersivity change lands" sentence is replaced by the landed
    behavior (listed only when the regression warning fires), and the commit line, the comparison sources and
    the basis states are described.
+
+### Wave R corrective, slice CC
+
+1. **Saved notes-less receptor edit (DEFAULT).** An edit saved without a note keeps applying, and the editor now says
+   only "No note: this edit was saved without a source note." for it. The "A source note is required; the value is
+   not used until you add one." message and `aria-invalid` appear only for a value typed in the editor that is held
+   as a draft, so the required-note refusal still applies to every new edit and to changing a saved one.
+2. **Household K test (DEFAULT).** The sweep test now names the missed tap water inhalation cells itself (chemical
+   and column) and expects exactly the trichloroethylene and vinyl chloride cancer cells, instead of reading the
+   exception class's chemical list.
