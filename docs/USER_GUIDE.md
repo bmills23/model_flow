@@ -378,3 +378,10 @@ vadose or saturated run for another chemical. A result sent before this change, 
 chemical typed by hand, carries no chemical: it is still used when the run holds one chemical, and when the run
 holds two or more the screen says to send it again. A surface water run not linked to a groundwater run carries no
 chemical, so in a multi-chemical cleanup run its levels are not quantified until it is linked.
+
+The screens that read such a result as their own input make the same check against the chemical they are set to:
+the household screen for the receptor well and surface water series, the vapor screen for the water table, vadose
+and saturated sources, and groundwater transport for the vadose and saturated sources. A result for another
+chemical is not offered and shows an error naming both chemicals; nothing is computed or sent from it. A result
+without a recorded chemical is used while the project holds one chemical, and refused when it holds two or more,
+and a screen whose chemical you typed by hand takes any result.

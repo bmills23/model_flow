@@ -1,7 +1,7 @@
 import { StaleMark } from '../project/StaleMark';
 import { vaporFeedsRead } from '../project/feedsRead';
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
 import { formatReference, references } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import { Field, Group, Seg } from '../ui/controls';
@@ -25,7 +25,9 @@ import {
 import { runOutdoor, type OutdoorForm } from './outdoor';
 import { ProfileChart } from './ProfileChart';
 import { afMediaFor, runAttenuation, runPvi, type AfOptions, type PviForm } from './screening';
-import { constantEpcs, vaporEpcs, type SourceSeries, type VaporEpcs } from './series';
+import { heldSources } from './heldSources';
+import { projectNameOf } from '../project/feedChemical';
+import { constantEpcs, vaporEpcs, type VaporEpcs } from './series';
 import {
   AttenuationPanel,
   OutdoorPanel,
@@ -233,13 +235,21 @@ export function VaporPage() {
   );
   const riskHeld = useSyncExternalStore(subscribeVaporRiskFeed, getVaporRiskFeed, getVaporRiskFeed);
 
-  const held = useMemo(() => {
-    const out: { choice: Exclude<SourceChoice, 'entered'>; source: SourceSeries }[] = [];
-    if (tableFeed) out.push({ choice: 'waterTable', source: tableFeed });
-    if (vadoseFeed) out.push({ choice: 'vadose', source: vadoseFeed });
-    if (satFeed) out.push({ choice: 'saturated', source: satFeed });
-    return out;
-  }, [tableFeed, vadoseFeed, satFeed]);
+  const chemicalList = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const { held, problems } = useMemo(
+    () =>
+      heldSources({
+        waterTable: tableFeed,
+        vadose: vadoseFeed,
+        saturated: satFeed,
+        screenChemical: form.chemicalId,
+        projectCount: chemicalList.length,
+        nameOf: projectNameOf(chemicalList),
+      }),
+    [tableFeed, vadoseFeed, satFeed, form.chemicalId, chemicalList],
+  );
+  // a source the screen refuses computes nothing and sends nothing, even if it was the one chosen
+  const refusedChoice = problems.some((p) => p.choice === choice);
   const active = held.find((h) => h.choice === choice)?.source ?? null;
   const feedEpcs = useMemo<VaporEpcs | null>(
     () => (active && shownParsed ? vaporEpcs(form, shownParsed, active, outdoorForm) : null),
@@ -293,7 +303,7 @@ export function VaporPage() {
       : null;
   const sendToRisk = (): void => {
     // an invalid form leaves the last good run on screen, which the live fields no longer describe
-    if (!parsed.ok || !shownParsed || !shown || riskChemical === null) return;
+    if (!parsed.ok || !shownParsed || !shown || riskChemical === null || refusedChoice) return;
     const r: Pick<VaporEpcs, 'indoor' | 'outdoor'> =
       feedEpcs ?? constantEpcs(form, shownParsed, shown, outdoorForm, riskMethod);
     const indoor = r.indoor[riskMethod];
@@ -314,11 +324,13 @@ export function VaporPage() {
   };
   const riskReason = !parsed.ok
     ? 'The inputs above have an error; fix it to send the air concentrations.'
-    : riskChemical === null
-      ? 'Pick a chemical from the database above to send its air concentrations; the Table R-3 test values are not a chemical.'
-      : feedEpcs && !feedEpcs.indoor[riskMethod]
-        ? `The ${riskMethod} method did not run on this source series.`
-        : null;
+    : refusedChoice
+      ? 'The chosen source is for another chemical; choose a source for this chemical or the entered source.'
+      : riskChemical === null
+        ? 'Pick a chemical from the database above to send its air concentrations; the Table R-3 test values are not a chemical.'
+        : feedEpcs && !feedEpcs.indoor[riskMethod]
+          ? `The ${riskMethod} method did not run on this source series.`
+          : null;
 
   const warnings = shown
     ? (['legacy', 'modern'] as const).flatMap((m) => {
@@ -834,6 +846,7 @@ export function VaporPage() {
                 choice={active ? choice : 'entered'}
                 onChoice={setChoice}
                 held={held}
+                problems={problems}
                 epcs={feedEpcs}
                 active={active}
               />
