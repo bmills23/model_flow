@@ -69,6 +69,7 @@ import {
   subscribeVaporRiskFeed,
   subscribeWaterTableFeed,
 } from '../vapor/feeds';
+import { clearChemicalSlots } from '../vapor/feedStore';
 import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
@@ -484,6 +485,36 @@ export function addChemical(entry: ProjectChemical): void {
 export function removeChemical(id: string): void {
   if (!chemicals.some((c) => c.id === id)) return;
   changeChemicals(chemicals.filter((c) => c.id !== id));
+}
+
+/** The feeds that hold a slot sent for this chemical, in feed order (what removing it from the project clears). */
+export function getHeldSlots(chemicalId: string): StaleFeedKey[] {
+  if (chemicalId.trim() === '') return [];
+  return STALE_KEYS.filter((k) => k !== 'tph' && FEEDS[k].slots().has(chemicalId));
+}
+
+/**
+ * Take a chemical out of the whole project: the list, its row on the risk and cleanup screens (with the
+ * state in it) and every feed slot sent for it. The other chemicals are untouched. A fate screen set
+ * to it keeps its choice (it then shows as no longer in the list).
+ */
+export function removeProjectChemical(id: string): void {
+  const risk = getScreen('risk');
+  if (risk.form.chemicals.some((c) => c.id === id)) {
+    setScreen('risk', {
+      ...risk,
+      form: { ...risk.form, chemicals: risk.form.chemicals.filter((c) => c.id !== id) },
+    });
+  }
+  const cleanup = getScreen('cleanup');
+  if (cleanup.form.chemicals.some((c) => c.id === id)) {
+    setScreen('cleanup', {
+      ...cleanup,
+      form: { ...cleanup.form, chemicals: cleanup.form.chemicals.filter((c) => c.id !== id) },
+    });
+  }
+  clearChemicalSlots(id);
+  removeChemical(id);
 }
 
 export const getTitle = (): string => title;

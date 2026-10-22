@@ -36,9 +36,8 @@ describe('exposure and risk stale marks', () => {
     });
     render(<RiskPage />);
     await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
-    fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: '71-43-2' } });
-    fireEvent.click(await screen.findByRole('button', { name: /add benzene/i }));
-    const card = screen.getByRole('group', { name: /benzene/i });
+    // the vapor screen set to benzene put it on the project list, so the page already holds its row
+    const card = await screen.findByRole('group', { name: /benzene/i });
     fireEvent.click(within(card).getByRole('checkbox', { name: /transport well result/i }));
     fireEvent.click(within(card).getByRole('checkbox', { name: /vapor screen indoor air/i }));
     await screen.findByRole('table', { name: /exposure point concentrations/i });

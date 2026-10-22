@@ -7,7 +7,7 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { toxRows, type ChemicalDb, type ChemicalRecord } from './chemicalDb';
-import { MEDIA, type ChemicalRow, type HouseholdOutdoor } from './form';
+import { MEDIA, rowIsEmpty, type ChemicalRow, type HouseholdOutdoor } from './form';
 import { fmtTox } from './format';
 import { StaleMark } from '../project/StaleMark';
 import { OverridesPanel } from '../overrides/OverridesPanel';
@@ -290,6 +290,12 @@ export function ChemicalCard(props: {
               : `Set from the RSL's published dermal water values (${rec.phys.dermalForm}).`}
           </small>
         </div>
+      )}
+      {showConc && rowIsEmpty(row) && (
+        <p className="muted">
+          Nothing set for this chemical: it adds nothing to the results until a concentration is
+          typed or a result from another screen is used.
+        </p>
       )}
       <div className="card-actions">
         <button

@@ -3041,3 +3041,46 @@ scope" block. Every ruling below is DEFAULT.
     when a slot came from it), `report/modeledReport.ts`, `report/uncertaintyReport.ts`, `cleanup/build.ts`,
     `cleanup/sourceLevelsCsv.ts`, the cleanup panels, `export/DownloadCsv.tsx`, the feed modules, the sending
     screens (own slot shown as sent) and the uncertainty components' `feeds` prop type.
+
+## 2026-10-21: Wave O slice O1, risk and cleanup follow the list
+
+Scope ruling 1 of the "Project chemical list, waves N to P scope" block. Every ruling below is DEFAULT.
+
+1. **Rows follow the list through the screens (DEFAULT).** `useFollowList` (`project/useFollowList.ts`, rule in
+   `project/chemicalRows.ts`) runs on the risk and cleanup pages. A chemical that joins the list gets a row of that
+   screen's defaults (`newChemicalRow`), appended in list order; a chemical that leaves the list loses its row; a row
+   the list never held joins the list (so a project saved before the list followed rows loses no row state). Per-row
+   state stays in each screen's form, keyed by chemical id, and no saved key is added (`FINGERPRINT_SKIP` is not
+   touched). The sync happens while the screen is mounted, so a screen not opened since the list changed holds its
+   old rows in the store until it is opened (the report and the saved file see them as they were).
+2. **A chemical outside the RSL tables has no row (DEFAULT).** A list chemical the risk database does not know (a
+   household chemical typed by hand) cannot make a row, since a row needs its toxicity record. The screen names it
+   under the search ("is on the project list but not in the RSL tables") and makes no card. Wave P (user chemicals)
+   revisits this.
+3. **A row with nothing set computes nothing and says so (DEFAULT).** Checked, not changed: `buildInputs` gives a row
+   with no concentration and no feed switch no pathway and the run goes on for the other chemicals (only a run with
+   no value at all is the `ENTER_CONCENTRATION` message); `buildCleanup` gives individual levels from the toxicity
+   alone and, under cumulative allocation, does not fail the run for a row with no entered concentration. Tests in
+   `risk/emptyRow.test.ts`. The risk card (and the cleanup card when concentrations are shown) carries a note,
+   "Nothing set for this chemical", while `rowIsEmpty` holds. A row that switches on a feed with none held is still
+   an error for the whole run (slice FB ruling 4 stands).
+4. **Adding (DEFAULT).** The search picker on either screen, its example button and the new **Add to project** on
+   `#/chemicals` all add to the one list (`addChemical`); the other screen's row follows when that screen is opened.
+   `#/chemicals` shows the project list above the search; a chemical already on it reads "In the project".
+5. **Removing is one store call after a question (DEFAULT).** `removeProjectChemical(id)` (`project/store.ts`)
+   removes the row from both screens' saved forms, clears the chemical's slot in every per-chemical feed
+   (`clearChemicalSlots` in `vapor/feedStore.ts`, a registry over the feeds `createChemicalFeed` makes), and takes it
+   off the list. Fate screens set to it keep their choice (the shared select already shows it as not in the list).
+   Every remove control (a row's Remove on either screen, and Remove in the `#/chemicals` list) first shows
+   `RemoveChemicalConfirm`, which names the rows on both screens and the feeds the chemical holds
+   (`getHeldSlots`); nothing changes until "Remove from the project" is chosen. Mounted pages drop the row when the
+   list changes.
+6. **Buttons name the chemical and contain their visible text (DEFAULT).** "Add to project: Benzene" and "In the
+   project: Benzene" (axe `label-content-name-mismatch` flagged the first wording at 390 px).
+7. **Files outside the named list (DEFAULT).** `project/store.ts` (`removeProjectChemical`, `getHeldSlots`),
+   `vapor/feedStore.ts` (`clearSlot`, `clearChemicalSlots`) and `risk/ChemicalCard.tsx` (the note). Tests that added
+   benzene through the picker after a sending screen was set to it (`RiskStale`, `CleanupStale`, `RiskPage`) were
+   changed to expect the card already there, and the remove test to confirm.
+8. **Fixture (DEFAULT).** `project/fixtures/project-rows-differ.json` (risk rows benzene and toluene, cleanup rows
+   toluene and ethylbenzene, no list key) opens with the union on both screens, each row keeping its state and no
+   feed marked stale (`project/rowsDiffer.test.tsx`).

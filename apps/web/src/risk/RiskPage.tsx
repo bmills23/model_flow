@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { getScreen, setScreen } from '../project/store';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  addChemical as addProjectChemical,
+  getScreen,
+  removeProjectChemical,
+  setScreen,
+} from '../project/store';
+import { useFollowList } from '../project/useFollowList';
+import { RemoveChemicalConfirm } from '../project/RemoveChemicalConfirm';
 import { Seg, Field } from '../ui/controls';
 import { StaleMark } from '../project/StaleMark';
 import { riskFeedsRead } from '../project/feedsRead';
@@ -67,6 +74,26 @@ export function RiskPage() {
   );
 
   const patch = (next: Partial<RiskForm>): void => setForm((f) => ({ ...f, ...next }));
+  // the rows are the project chemical list; a chemical this screen holds no state for gets defaults
+  const setRows = useCallback(
+    (update: (rows: readonly ChemicalRow[]) => readonly ChemicalRow[]): void =>
+      setForm((f) => {
+        const next = update(f.chemicals);
+        return next === f.chemicals ? f : { ...f, chemicals: [...next] };
+      }),
+    [],
+  );
+  const list = useFollowList(
+    form.chemicals,
+    setRows,
+    (id) => {
+      const rec = db?.byId.get(id);
+      return rec ? newChemicalRow(rec) : null;
+    },
+    db !== null,
+  );
+  const outside = db ? list.filter((c) => !db.byId.has(c.id)) : [];
+  const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null);
   const setRow = (id: string, next: ChemicalRow): void =>
     setForm((f) => ({ ...f, chemicals: f.chemicals.map((c) => (c.id === id ? next : c)) }));
 
@@ -110,6 +137,7 @@ export function RiskPage() {
   const addChemical = (id: string): void => {
     const rec = db?.byId.get(id);
     if (!rec) return;
+    addProjectChemical({ id, name: rec.name });
     setForm((f) =>
       f.chemicals.some((c) => c.id === id)
         ? f
@@ -119,6 +147,7 @@ export function RiskPage() {
   const loadExample = (): void => {
     const rec = db?.byId.get(EXAMPLE_ID);
     if (!rec) return;
+    addProjectChemical({ id: EXAMPLE_ID, name: rec.name });
     setForm((f) => ({
       ...f,
       chemicals: [
@@ -178,6 +207,23 @@ export function RiskPage() {
             {form.chemicals.length === 0 && (
               <p className="muted">Add a chemical to start. Concentrations go on its card.</p>
             )}
+            {removing && (
+              <RemoveChemicalConfirm
+                id={removing.id}
+                name={removing.name}
+                onCancel={() => setRemoving(null)}
+                onConfirm={() => {
+                  removeProjectChemical(removing.id);
+                  setRemoving(null);
+                }}
+              />
+            )}
+            {outside.map((c) => (
+              <p className="muted" key={c.id}>
+                {c.name} is on the project list but not in the RSL tables, so this screen has no
+                card for it.
+              </p>
+            ))}
             {db &&
               form.chemicals.map((row) => {
                 const rec = db.byId.get(row.id);
@@ -203,9 +249,7 @@ export function RiskPage() {
                       })
                     }
                     onChange={(next) => setRow(row.id, next)}
-                    onRemove={() =>
-                      patch({ chemicals: form.chemicals.filter((c) => c.id !== row.id) })
-                    }
+                    onRemove={() => setRemoving({ id: row.id, name: row.name })}
                   />
                 ) : null;
               })}

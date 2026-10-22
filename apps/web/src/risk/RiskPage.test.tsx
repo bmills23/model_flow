@@ -240,6 +240,8 @@ describe('RiskPage', () => {
     const card = await screen.findByRole('group', { name: /benzene/i });
     expect(await screen.findByRole('region', { name: /legacy versus modern/i })).toBeTruthy();
     fireEvent.click(within(card).getByRole('button', { name: /remove benzene/i }));
+    // removing asks first, then takes the chemical out of the project
+    fireEvent.click(screen.getByRole('button', { name: /remove from the project/i }));
     expect(screen.queryByRole('group', { name: /benzene/i })).toBeNull();
   }, 30000);
 

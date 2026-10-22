@@ -1,4 +1,4 @@
-import { pickSlot, slotOfValue, type FeedSlots } from '../project/feedSlots';
+import { pickSlot, slotOf, slotOfValue, type FeedSlots } from '../project/feedSlots';
 
 /**
  * A held value shared between screens. It starts empty unless an `initial` value is given; the
@@ -33,6 +33,14 @@ export function createFeed<T>(initial: T | null = null): {
   };
 }
 
+/** Every per-chemical feed made, so a chemical removed from the project can be cleared from all of them. */
+const chemicalFeeds = new Set<{ clearSlot: (chemicalId: string) => void }>();
+
+/** Clear the slot of `chemicalId` from every per-chemical feed (the other chemicals' slots stay). */
+export function clearChemicalSlots(chemicalId: string): void {
+  chemicalFeeds.forEach((feed) => feed.clearSlot(chemicalId));
+}
+
 /**
  * A held value about one chemical, kept per chemical (wave O slice O4, see `project/feedSlots.ts`).
  * `set` writes the slot of the value's own `chemicalId` (the sending screen's chemical) and leaves the
@@ -46,15 +54,16 @@ export function createChemicalFeed<T extends { chemicalId?: string }>(): {
   slots: () => FeedSlots<T>;
   set: (value: T) => void;
   clear: () => void;
+  clearSlot: (chemicalId: string) => void;
   subscribe: (fn: (slot?: string) => void) => () => void;
 } {
   let current: FeedSlots<T> = new Map();
   const listeners = new Set<(slot?: string) => void>();
   const emit = (slot?: string): void => listeners.forEach((fn) => fn(slot));
-  return {
-    get: (chemicalId) => pickSlot(current, chemicalId),
+  const feed = {
+    get: (chemicalId?: string) => pickSlot(current, chemicalId),
     slots: () => current,
-    set: (value) => {
+    set: (value: T) => {
       const key = slotOfValue(value);
       const next = new Map(current);
       // a re-send moves the slot to the end: the order is the order of the last sends
@@ -68,6 +77,14 @@ export function createChemicalFeed<T extends { chemicalId?: string }>(): {
       current = new Map();
       emit();
     },
+    clearSlot: (chemicalId: string) => {
+      const key = slotOf(chemicalId);
+      if (key === '' || !current.has(key)) return;
+      const next = new Map(current);
+      next.delete(key);
+      current = next;
+      emit(key);
+    },
     subscribe: (fn: (slot?: string) => void) => {
       listeners.add(fn);
       return () => {
@@ -75,4 +92,6 @@ export function createChemicalFeed<T extends { chemicalId?: string }>(): {
       };
     },
   };
+  chemicalFeeds.add(feed);
+  return feed;
 }
