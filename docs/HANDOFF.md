@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-21, after the waves L and M push)
+# HANDOFF (written from the tree, 2026-10-21, after the wave N push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -8,10 +8,14 @@ skipping a done one.
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`), wave H (UI near-parity, built on
   branch `wave-ui`), wave I (built on branch `wave-i`), all pushed 2026-10-19, and wave J (five slices, built on
   branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`), and wave K (four slices and a corrective pass,
-  built on branch `wave-k`) and waves L and M (built together on branch `wave-lm` with a corrective pass), each
-  fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
+  built on branch `wave-k`) and waves L and M (built together on branch `wave-lm` with a corrective pass) and wave N (three slices and a
+  corrective pass, built on branch `wave-n`; head `6c186e7`), each fast-forwarded to main and pushed 2026-10-21. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-speed` rebased onto main (2026-10-21, the check cadence change): exit 0,
+- Last full `corepack pnpm gate` on `wave-n` after its corrective pass (2026-10-21): exit 0, build included. Test
+  counts: engine 1388 (86 files), web 1763 (176 files), data 180 passed and 3 skipped. The mobile check on that
+  tree covered `#/household`, `#/vapor`, `#/transport`, `#/surface-water` and `#/risk` in every view (0 overflow, 0
+  axe violations, exit 0); `mobile:check:full` on the tree before the corrective pass: exit 0 on every route.
+- Previous full gate, on `wave-speed` rebased onto main (2026-10-21, the check cadence change): exit 0,
   build included, run backgrounded with no stdin redirect. Test counts: engine 1387 (86 files), web 1697 (166
   files), data 179 passed and 3 skipped (the skipped three are the Eco-SSL `pdftotext` cross-checks, which need
   the fetched PDFs); the same counts as `wave-lm` after its corrective pass. The gate starts with `check:markers`
@@ -26,7 +30,8 @@ skipping a done one.
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
   it shows the current result.
-- Local branches: `main` only. `wave-speed` (the check cadence change, started outside the waves) was rebased onto
+- Local branches: `main`, plus wave N's `wave-n`, `wave-n-n1`, `wave-n-n2`, `wave-n-s`, `wave-n-fix-a` and
+  `wave-n-fix-b` and their worktrees, kept until waves O and P land (all merged into main). `wave-speed` (the check cadence change, started outside the waves) was rebased onto
   main, fast-forwarded and pushed 2026-10-21, and its worktree removed. Deleted on 2026-10-21 after the waves
   L and M push, all merged into main: `wave-lm` (the pushed head), `wave-l-l1` `9bcff74`, `wave-l-l2` `cb73519`,
   `wave-m-m1` `132ff58`, `wave-m-m2` `869502d`, `wave-d-parity` `659bcfb`, `wave-lm-fix-a` `e478373`,
@@ -56,6 +61,22 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave N landed (2026-10-21)
+Bryan chose the recommended option on all four project chemical list decisions (one list, fate screens pick one;
+each chemical's sent result kept; user chemicals with a name and a note per value; surface water cleanup target by
+the linear route), then said "after that, go ahead with waves O and P". Rulings in the DECISIONS.md "Project
+chemical list, waves N to P scope" block and the N1, N2, S, FA and FB blocks after it.
+- N1: an optional top-level `chemicals` list in the project file, derived on open when absent; store API
+  `getChemicals`, `subscribeChemicals`, `addChemical`, `removeChemical` (`project/store.ts`, `project/chemicals.ts`).
+  No UI yet.
+- N2 and FA: nine feeds carry an optional `chemicalId` (`project/feedChemical.ts`); risk, cleanup (modeled
+  source, surface water levels), household, vapor and the transport feed toggles refuse a feed for another
+  chemical with an error naming both, and an untagged feed once two or more chemicals are in play. FB: the
+  surface water screen has a chemical select for unlinked runs.
+- S: the source check of 2026-10-21 recorded on `#/validation` (SSG PCE H' corrected to 0.754 per Table 36;
+  Briggs constants read in the paper; EPRI EA-4190 prints no vadose dispersivity coefficients; RSL K = 0.5 L/m3).
+- Left for wave O: the surface water sender tag test, and `setScreen` re-adding a chemical after `removeChemical`.
 
 ## Waves L and M landed (2026-10-21)
 Bryan: "go ahead with waves L and M in parallel". Rulings DEFAULT in the DECISIONS.md "Waves L and M scope" block,
@@ -408,12 +429,11 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21: waves J, K, L and M merged to main and pushed (CI cost in CLAUDE.md), their worktrees and
-  branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
-- Open, Bryan's calls: multi-chemical runs (a design session; the parity audit of 2026-10-21 ranks the missing
-  project-wide chemical list as the top workflow gap), a chemical on the surface water screen, surface water as a
-  cleanup target medium, adding a chemical per project.
-- Then the open items above: read the unverified sources (now listed on `#/validation`).
+- Done 2026-10-21: waves J, K, L, M and N merged to main and pushed (CI cost in CLAUDE.md); the J to M worktrees
+  and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
+- In progress: waves O and P (the plan is in the DECISIONS.md "Project chemical list, waves N to P scope" block).
+- Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
+  2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a
   backgrounded prettier step used to sit stopped in state T), and `mobile:check` stops its preview server's and
   Chrome's process groups on exit, SIGINT and SIGTERM (it used to leave `vite preview` holding port 5178). A
