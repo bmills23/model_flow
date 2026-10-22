@@ -155,7 +155,7 @@ S0: the volatility criterion is verified (RSL user's guide web page, section 4.9
 Henry's law constant greater than 1E-5 atm-m3/mol or a vapor pressure greater than 1 mm Hg, and a chemical
 must be volatile to be included in tapwater inhalation). The factor K itself could not be verified: the
 user's guide web page carries the tapwater equations as images, and only secondary sources state 0.5
-L/m3. K stays unstated until read from the equations page or the calculator documentation: E1's
+L/m3. K stays unverified until read from the equations page or the calculator documentation: E1's
 `showerHouseholdAir` takes it as a required input (L/m^3) and always warns. The term is a whole-house
 concentration applied for 24 h/day (RSL User's Guide, Table 1, read 2026-10-18), so the web feed sends it
 to the indoor air pathway, never to the shower stall pathway. Fixture 3 (Little published

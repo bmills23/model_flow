@@ -396,12 +396,12 @@ Summary: 39 entries (33 reproduced, 3 named exception, 2 pending or deferred, 1 
 
 - Source: `epavisl`, Vapor Intrusion Screening Level User's Guide
 - Method: `vapor.attenuation-factor-2015`
-- Compared: The online VISL calculator was not run, so no printed VISL value is asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.
+- Compared: The VISL calculator output for five chemicals is recorded (packages/data/raw/visl, 2026-10-22) but not yet asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.
 - Cases: 2 chemicals
 - Tolerance: 1e-12 relative (an identity, not a published value).
 - Status: pending or deferred
 - Fixture: `vapor/visl.json`; test `vapor-screening.test.ts`
-- Note: Pending a run of the VISL calculator.
+- Note: Pending a comparison of the engine with the recorded VISL calculator output.
 
 #### Table R-9, Ingestion of Root Vegetables (M9)
 
@@ -461,7 +461,7 @@ What the examples above do not establish: references not yet read that a shipped
 ### Pending, deferred and smoke-test-only
 
 - Table R-2, probabilistic drinking water case (smoke test only): A comparison waits for sourced input distributions.
-- VISL screening levels, identity check (pending or deferred): Pending a run of the VISL calculator.
+- VISL screening levels, identity check (pending or deferred): Pending a comparison of the engine with the recorded VISL calculator output.
 - Table R-9, Ingestion of Root Vegetables (M9) (pending or deferred): The root vegetable ingestion row of the page-1 table is not reproduced yet.
 
 ### Published values not checked

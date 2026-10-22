@@ -26,7 +26,8 @@ sources are offered beside it, and the report names whichever was used.
 - **EPA SSG 1996 rule** (`epa1996ssg`): the longitudinal dispersivity is 0.1 times the distance to the
   receptor, alpha_L = 0.1 x_r (Technical Background Document, printed page 45, equation 39 and the
   definitions under it, read 2026-10-22). The passage gives no transverse ratio, so the transverse and
-  vertical values stay entered. The screen evaluates the rule at the receptor distance.
+  vertical values stay entered. The screen evaluates the rule at the receptor distance, and refuses the
+  choice when the receptor x is zero or negative.
 - **RISC5 regression (no primary source)**: the legacy law, the Gelhar et al. 1985 regression with API 1987
   ratios (transverse one third, vertical 1/87 of transverse). The saturated-zone log-quadratic has no primary
   source that could be read: the EPRI report (EA-4190) prints field data and a plot against scale, not the

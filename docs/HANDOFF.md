@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-22, after the wave Q push)
+# HANDOFF (written from the tree, 2026-10-22, after the wave R push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -12,11 +12,17 @@ skipping a done one.
   corrective pass, built on branch `wave-n`; head `6c186e7`), each fast-forwarded to main and pushed 2026-10-21, and waves O
   and P (eight slices and a corrective pass, built together on branch `wave-op`; code head `d80adf6`, then the
   wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave Q (one slice on branch
-  `wave-q`), pushed 2026-10-22. Pages deploys from main:
+  `wave-q`), pushed 2026-10-22, and wave R (seven slices and a corrective pass on branch `wave-r`; code head
+  `dedaca7`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-22. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-q` (2026-10-22): exit 0, build included. Test counts: engine 1388, web
-  1912, data 180 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 632 s, 0 overflow and 0 axe
-  violations on every route at 390 light, 390 dark and 1280.
+- Last full `corepack pnpm gate` on `wave-r` after its corrective pass (2026-10-22, `dedaca7`): exit 0, build
+  included. Test counts: engine 1408 (87 files), web 1996 (206 files), data 197 passed and 3 skipped (9 files).
+  `mobile:check:full` on that tree: exit 0 in 552 s, 0 overflow and 0 axe violations on every route at 390 light,
+  390 dark and 1280. The wave close then changed two strings of the VISL entry in
+  `packages/data/src/validationCatalog.ts` and regenerated the validation outputs (data tests and `docs:check`
+  re-run).
+- Before that, on `wave-q` (2026-10-22): gate exit 0 (engine 1388, web 1912, data 180 passed and 3 skipped),
+  `mobile:check:full` exit 0 in 632 s.
 - Previous full `corepack pnpm gate` on `wave-op` after its corrective pass (2026-10-22): exit 0, build included. Test
   counts: engine 1388 (86 files), web 1899 (197 files), data 180 passed and 3 skipped. `mobile:check:full` on that
   tree: exit 0 in 578 s, 0 overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, including
@@ -38,8 +44,12 @@ skipping a done one.
   overflow and axe counts (the script neither looks for it by name nor clicks it). Since wave K (K4) the check
   also performs an in-browser modeled cleanup run and renders the report's modeled-source block, and fails unless
   it shows the current result.
-- Local branches: `main` only. Deleted on 2026-10-22 after the waves O and P push, all merged into main (tip
-  shas): `wave-op` (the pushed head), `wave-op-o4` `293c5f5`, `wave-op-o1` `da69d71`, `wave-op-o2a` `dc84691`,
+- Local branches: `main` only. Deleted on 2026-10-22 after the wave R push, all merged into main (tip shas):
+  `wave-r` (the pushed head), `wave-r-r1a` `f0c0449`, `wave-r-r1b` `8074aa1`, `wave-r-r1c` `2236699`, `wave-r-r2`
+  `64a0f27`, `wave-r-r3a` `1bb132e`, `wave-r-r3b` `3b4a430`, `wave-r-r4` `1555759`, `wave-r-fix-a` `9c00281`,
+  `wave-r-fix-b` `9572081`, `wave-r-fix-c` `7bc76ed`, and ten `worktree-wf_*` branches at `5496ec3`; their
+  worktrees were removed. `wave-q` was deleted after its push. Deleted on 2026-10-22 after the waves O and P push,
+  all merged into main (tip shas): `wave-op` (the pushed head), `wave-op-o4` `293c5f5`, `wave-op-o1` `da69d71`, `wave-op-o2a` `dc84691`,
   `wave-op-o2b` `82fb010`, `wave-op-p1` `011d559`, `wave-op-p2` `379b359`, `wave-op-p3` `a9cd87f`,
   `wave-op-p3-merge` `5f90574`, `wave-op-p3f` `8a552a2`, `wave-op-fix-a` `d65c797`, `wave-op-fix-b` `3c379ae`; wave
   N's `wave-n` `6c186e7`, `wave-n-n1` `7051934`, `wave-n-n2` `64e1334`, `wave-n-s` `0cf7862`, `wave-n-fix-a`
@@ -74,6 +84,23 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave R landed (2026-10-22)
+Bryan chose the evidence wave and ruled that dispersivity is a required entry and receptor edit notes are
+required. Rulings in the DECISIONS.md "Wave R scope, evidence for regulatory use" block (rulings 1 and 2 BRYAN),
+the R1a, R1b, R1c, R2, R3a, R3b and R4 blocks, and the corrective CA, CB and CC blocks.
+- R1a: each warned default in `packages/data/src/validationCatalog.ts` has an `id` and a `scope` (`warning`: listed
+  when its code is in the section's warnings; `method`: listed when its method ran); sweep examples live in
+  `validationCatalogSweep.ts`. R1b and R1c: `report/basis.ts` `runBasis` (each screen compared with the source it
+  fills from), `report/basisView.ts`, the "What this run rests on" tables, summary and run-basis CSV; version and
+  commit from `buildInfo.ts` and `buildCommit.ts` (`-dirty` for changed tracked files).
+- R2: `dispLaw` `entered` and `ssg` on the transport form, `dispersivityBasis` on the vadose form; old forms read
+  as the law they used and, untouched, as unused (`report/methodsRun.ts`).
+- R3a and R3b: RSL sheets 405274, 405278 and 405282 in the raw manifest, `generated/rsl-2024-11/screening-levels.json`,
+  the VISL output under `raw/visl/`; `packages/engine/test/rsl-tables-sweep.test.ts` with
+  `test/fixtures/rsl-sweep/exceptions.json` (counts in `docs/VALIDATION.md`).
+- R4: `risk/ReceptorEditor.tsx` holds a value without a note in the editor only; a saved notes-less edit applies
+  and shows "No note".
 
 ## Waves O and P landed (2026-10-22)
 Bryan: "after that, go ahead with waves O and P", then mid-wave "include the multi-chemical modeled cleanup too".
@@ -231,8 +258,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   named exception.
 - Not verified: `foster1986` has no confirmed published record (film coefficients 3000 and 20 cm/h ship as
   warned defaults, `shower.film-reference-unverified`); the full text of `little1992` was not read, so its
-  equations are checked by limit identities only; the household factor K could not be verified (required,
-  always warned, `shower.household-factor-unverified`), so no RSL tap water level is reproduced. No
+  equations are checked by limit identities only; the household factor K could not be verified from a primary
+  page (required, always warned, `shower.household-factor-unverified`); since wave R, K = 0.5 L/m3 reproduces
+  263 of the 265 RSL November 2024 tap water inhalation cells (consistency, not verification). No
   Walden and Spence or EFH irrigation factors were read, so every irrigation factor is an input.
 - Deferred: see the ROADMAP M7 row.
 
@@ -398,7 +426,10 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Schulze-Makuch 2005 coefficients (0.20, 0.44) come from lecture notes quoting the paper, not from the
   paper's own table; per-medium coefficients and the data range are not encoded. Open until someone supplies
   the paper's PDF.
-- The Gelhar et al. 1985 vadose dispersivity regression coefficients come from the manual's account only.
+- The Gelhar et al. 1985 vadose and saturated dispersivity regression coefficients come from the manual's account
+  only. Since wave R dispersivity is an entry; the regressions stay as a choice labelled "no primary source" and
+  warned (`dispersivity.regression-unsourced`, `vadose.dispersivity-regression-unsourced`), and the groundwater
+  screen also offers the EPA SSG 1996 rule. No open primary source for a vadose dispersivity regression was found.
 - Galya 1987 is a horizontal plane-source paper; the box source derives from Yeh 1981 (the methods note
   says so; the ROADMAP section 3 row is annotated).
 - Six references still carry square-bracketed descriptor titles (all `planned`, listed above); replace each
@@ -408,8 +439,15 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   contradicts itself on Florida coastal; DECISIONS.md).
 - The outdoor box cites Hanna, Briggs and Hosker 1982; an ASTM E1739 attribution is unconfirmed and not cited.
 - DeVaull 2007: no published numeric example was verified; the oxygen balances are checked against a
-  numerical solve. VISL calculator values were not obtained (the identity covers benzene and naphthalene);
-  running it for benzene, trichloroethylene, tetrachloroethylene, naphthalene and ethylbenzene remains open.
+  numerical solve. The VISL calculator's output for benzene, trichloroethylene, tetrachloroethylene, naphthalene
+  and ethylbenzene (resident, form defaults, hazard quotient 0.1) was recorded in wave R
+  (`packages/data/raw/visl/visl-default-resident-2026-10-22.json`, `scripts/fetch-visl.ts`); the tests still assert
+  only the identity, and comparing the engine with that output remains open.
+- RSL sweeps (wave R): the 4 Aroclor 1242, 1248, 1254 and 1260 total cancer tap water cells are unexplained
+  (printed 0.0078, computed 0.007852 ug/L). Soil inhalation cells and the totals that include them (870 per soil
+  table) are excepted because the RSL volatilization and particulate emission factors are not computed.
+- Run basis (wave R): rows inherited from the vadose or saturated screen show that screen's current chemical only,
+  so in a multi-chemical modeled cleanup the report says the table covers one chemical (DECISIONS R1b.3, CB.3).
 - The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not used.
 - RISC5 Appendix K (oxygen-limited, degradation) is not implemented: its only source is an unpublished
   draft. DeVaull 2007 is the modern alternative.
@@ -463,16 +501,16 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 and 2026-10-22: waves J to Q merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 and 2026-10-22: waves J to R merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
-  the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). Next, his
-  pick: the evidence wave (the report lists the unverified and user-entered values a run uses; the two dispersivity
-  regressions without a primary source get a sourced replacement or become required inputs; cross-checks against
-  EPA's RSL and VISL calculators). Not ruled on, recommended: source levels through nonlinear paths after the
-  evidence wave; RISC5 Appendix K not built (its only source is an unpublished draft; DeVaull 2007 covers
-  oxygen-limited vapor); international criteria sets only for work outside the US; MacDonald et al. 2000 TEC and
-  PEC values once the paper is read.
+  the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick,
+  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: compare the engine with the
+  recorded VISL output; source levels through nonlinear paths; RISC5 Appendix K not built (its only source is an
+  unpublished draft; DeVaull 2007 covers oxygen-limited vapor); international criteria sets only for work outside
+  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The wave P remainders (a soil-to-groundwater
+  comparison for user chemicals, user Kd, vapor and dermal values, soil and nonlinear sources for the surface water
+  target) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
   2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a

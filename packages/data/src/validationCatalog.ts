@@ -470,7 +470,7 @@ const examples: ExampleSpec[] = [
     referenceKey: 'epavisl',
     methodIds: ['vapor.attenuation-factor-2015'],
     compares:
-      'The online VISL calculator was not run, so no printed VISL value is asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.',
+      'The VISL calculator output for five chemicals is recorded (packages/data/raw/visl, 2026-10-22) but not yet asserted. The test checks identity 8c (groundwater screening level times AF times H times 1000 L/m^3 equals the target indoor air) against the RSL resident air values.',
     count: (j) => j[0].cases.length as number,
     casesUnit: 'chemicals',
     tolerance: '1e-12 relative (an identity, not a published value).',
@@ -478,7 +478,7 @@ const examples: ExampleSpec[] = [
     testFile: 'vapor-screening.test.ts',
     evidence: ['identity 8c'],
     readmeNeedle: 'not obtained',
-    note: 'Pending a run of the VISL calculator.',
+    note: 'Pending a comparison of the engine with the recorded VISL calculator output.',
   },
   {
     id: 'eco-wildlife-ecossl',
