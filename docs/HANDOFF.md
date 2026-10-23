@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave T push)
+# HANDOFF (written from the tree, 2026-10-23, after the wave U push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -15,9 +15,14 @@ skipping a done one.
   `wave-q`), pushed 2026-10-22, and wave R (seven slices and a corrective pass on branch `wave-r`; code head
   `dedaca7`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave S (one slice on
   branch `wave-s`), pushed 2026-10-22, and wave T (one slice and a corrective pass on branch `wave-t`; code head
-  `ecad1cd`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
+  `ecad1cd`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave U (one slice on
+  branch `wave-u`; code head `901ca8e`), pushed 2026-10-23. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-t` after its corrective pass (2026-10-23, `ecad1cd`): exit 0, build
+- Last full `corepack pnpm gate` on `wave-u` (2026-10-23, `901ca8e`): exit 0, build included. Test counts: engine
+  1477, web 1998, data 197 passed and 3 skipped. Nothing under `apps/web` changed, so `mobile:check:full` was not
+  re-run; the `#/validation` route (whose generated data changed) passed at m390-light and m390-dark with 0
+  overflow and 0 axe violations.
+- Before that, on `wave-t` after its corrective pass (2026-10-23, `ecad1cd`): exit 0, build
   included. Test counts: engine 1468, web 1998, data 197 passed and 3 skipped. `mobile:check:full` ran on the
   slice commit `c19db2a`: exit 0 in 575 s, 0 overflow and 0 axe violations on every route. After the corrective
   pass a narrowed check (`--modeled --routes '#/cleanup,#/risk' --views m390-light,m390-dark`) exited 0 in 78 s;
@@ -98,6 +103,15 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
   `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave U landed (2026-10-23)
+Bryan: "ok do it" (the RSL soil inhalation comparison). Rulings in the DECISIONS.md "Wave U scope, RSL soil
+inhalation comparison" block and the "Wave U, RSL soil inhalation comparison" block, all DEFAULT.
+- `packages/engine/test/rslSweepHelpers.ts`: `RSL_SOIL` (inputs from SEMS 404323), `rslPef`, `rslVfStatus`,
+  `soilToAirFactor`; soil inhalation is the receptor's air coefficient times 1/VF + 1/PEF and a total adds it.
+  Counts per soil table in `test/fixtures/rsl-sweep/exceptions.json` (`soilInhalation`). No engine change: the
+  test passes the RSL inputs as options the engine methods already take and scales the infinite-source factor
+  by sqrt(3.14 / pi).
 
 ## Wave T landed (2026-10-23)
 Bryan: "do the TCE equations wave". Rulings in the DECISIONS.md "Wave T scope, RSL special-case cancer equations"
@@ -487,9 +501,16 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   Bryan's ruling.
 - Mobile check (wave T): one run of m390-dark `#/risk` (seeded) reported `openPanels=0` and `charts=0` and passed
   on a re-run; not diagnosed. Watch for a repeat before treating it as a check flake.
-- RSL sweeps (wave R): the 4 Aroclor 1242, 1248, 1254 and 1260 total cancer tap water cells are unexplained
-  (printed 0.0078, computed 0.007852 ug/L). Soil inhalation cells and the totals that include them (870 per soil
-  table) are excepted because the RSL volatilization and particulate emission factors are not computed.
+- RSL sweeps (waves R and U): 6 of 9888 cells are unexplained: the 4 Aroclor 1242, 1248, 1254 and 1260 total
+  cancer tap water cells (printed 0.0078, computed 0.007852 ug/L), PCB 105 resident noncancer soil inhalation
+  (printed 840, computed 833.3) and n-nonane industrial noncancer soil total (printed 72, computed 72.5012). 12
+  volatile chemicals with neither Koc nor Kd in the RSL parameter sheet have their soil inhalation cells excepted
+  where the particulate-only level reproduces (a rule inferred from the data, not stated in the guide).
+- `packages/data/generated/validation/validation.json` is at 59,792 bytes against the 60,000 byte cap in
+  `packages/data/test/validation.test.ts`; the next catalog addition needs shorter notes or a raised cap.
+- Mobile check (wave U): a run against a build made with `BASE_PATH=/model_flow/` served a blank app and still
+  reported `ok` (tables=0, axe moderate landmark-one-main and page-has-heading-one on `html`). The check does not
+  fail when the app shell never mounts; build without `BASE_PATH` for it, and consider making a blank page fail.
 - Run basis (wave R): rows inherited from the vadose or saturated screen show that screen's current chemical only,
   so in a multi-chemical modeled cleanup the report says the table covers one chemical (DECISIONS R1b.3, CB.3).
 - The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not used.
@@ -545,15 +566,14 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to T merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-23: waves J to U merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
   the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick,
-  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: the RSL soil volatilization
-  factor and the soil inhalation comparison (about 870 excepted cells per soil table, the largest unchecked block
-  of RSL cells); source levels through nonlinear paths; RISC5 Appendix K not built (its only source is an
+  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: source levels through
+  nonlinear paths; RISC5 Appendix K not built (its only source is an
   unpublished draft; DeVaull 2007 covers oxygen-limited vapor); international criteria sets only for work outside
-  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The VISL comparison landed as wave S and the RSL trichloroethylene and vinyl chloride equations as wave T.
+  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The VISL comparison landed as wave S, the RSL trichloroethylene and vinyl chloride equations as wave T and the RSL soil inhalation comparison as wave U.
   The wave P remainders (a soil-to-groundwater
   comparison for user chemicals, user Kd, vapor and dermal values, soil and nonlinear sources for the surface water
   target) are listed under the Wave P entry in ROADMAP section 7.
