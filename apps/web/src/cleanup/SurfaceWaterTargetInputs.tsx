@@ -42,9 +42,11 @@ export function SurfaceWaterTargetInputs(props: {
     <section className="panel" aria-label="Surface water targets">
       <h2>Surface water target</h2>
       <p className="muted">
-        Optional. A target for the surface water concentration of a chemical gives the dissolved
-        groundwater source level that just meets it, from the surface water run you sent for that
-        chemical. It applies to a dissolved groundwater source only.
+        Optional. A target for the surface water concentration of a chemical gives the source level
+        that just meets it, from the surface water run you sent for that chemical: a dissolved
+        groundwater concentration, the soil concentration of the screen feeding the plume, or, for a
+        soil source of this cleanup, the soil concentration carried through that run&apos;s aquifer
+        and bank.
       </p>
       {chemicals.map((c) => {
         const t = rowOf(c.id);

@@ -8,6 +8,7 @@ import {
   setModeledSummary,
   type ModeledUncertaintySummary,
 } from '../cleanup/modeledSummary';
+import { linkedRequest, unlinkedRequest } from '../cleanup/surfaceSolve.testkit';
 import { clearBankFeed, getBankFeed, setBankFeed } from '../transport/bankFeed';
 import { clearWellFeed, getWellFeed, setWellFeed } from '../transport/wellFeed';
 import { toScenario } from '../transport/form';
@@ -266,6 +267,42 @@ describe('project store', () => {
     expect(back).toEqual(indoor);
     if (!back || back.quantified || !back.solve) throw new Error('lost on reload');
     expect(forwardAir(back.solve, 0.02)).toBe(air);
+    expect(getStaleFeeds()).toEqual([]);
+  });
+
+  it('restores the surface water solve state and path (wave V), non-finite numbers included', () => {
+    const request = unlinkedRequest({ background: '0.5' });
+    const sc = linkedRequest().link!.scenario;
+    const withLink = { ...request, link: { scenario: sc, label: 'run' } };
+    expect(sc.terms.some((t) => t.end === Infinity)).toBe(true);
+    const feed = {
+      method: 'mass-discharge' as const,
+      origin: 'surfaceWater.mass-discharge',
+      label: 'Modern mass-discharge surface water',
+      times: [1, 2],
+      values: [1e-6, 2e-6],
+      coefficient: {
+        value: null,
+        reason: 'The run has an upstream background concentration.',
+        method: 'surfaceWater.mass-discharge',
+        sourceMedium: 'groundwater' as const,
+        sourceUnit: 'mg/L' as const,
+        path: 'background' as const,
+      },
+      solve: { request: withLink },
+    };
+    setSurfaceWaterFeed(feed);
+    flushAutosave();
+    reload();
+    const back = getSurfaceWaterFeed();
+    expect(back?.coefficient?.path).toBe('background');
+    expect(back?.solve?.request.background).toBe(request.background);
+    expect(back?.solve?.request.link?.scenario.terms[0]?.end).toBe(Infinity);
+    const sent = back?.solve?.request.link?.scenario;
+    expect(sent?.c0).toBe(sc.c0);
+    expect(sent?.massRate).toBe(sc.massRate);
+    expect(sent?.receptor).toEqual(sc.receptor);
+    expect(back?.solve?.request.link?.label).toBe('run');
     expect(getStaleFeeds()).toEqual([]);
   });
 

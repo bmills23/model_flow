@@ -54,7 +54,7 @@ concentration is also an exposure point concentration for the M4 swimming pathwa
 | Human contact with sediment (ingestion, dermal) | No; after M8 and M5 merge | RISC5 routes sediment through its soil equations; adding pathways to M4's pathway list in M8 would collide with the parallel M5 track. Meanwhile the sediment value can be typed into the M4 soil pathways as a constant |
 | Fish ingestion by people | No | Not a RISC5 pathway and M4 has none; it needs a bioaccumulation factor source. The human health "organism only" criterion, which already embeds fish consumption, is the screen offered instead |
 | Sediment processes beyond partitioning (burial, resuspension, sediment-water diffusion, biodegradation in the bed) and surface runoff, erosion or point discharges | No | Not modelled by RISC5 either |
-| Back-calculation of a groundwater or soil cleanup level from a surface water target | No; M5 | Every M8 model is linear (or affine with a background), so M5 needs no solver beyond a scale factor |
+| Back-calculation of a groundwater or soil cleanup level from a surface water target | Yes (cleanup screen) | The target over the run's unit-source response where the run is linear in a dissolved groundwater source; otherwise (an upstream background, a plume fed by a vadose or saturated source screen, a soil source carried to the bank) the source concentration whose forward run meets the target, found with the cleanup solve ("Source levels on paths that are not linear", below) |
 
 ## Units
 
@@ -257,9 +257,46 @@ Each model is exposed as a forward function from source to receptor concentratio
 | `plugFlowDownstream` | C(t) to C_down(t) | Linear |
 | `compareToCriteria` | concentration to ratio against each criterion | Linear |
 
-So the surface water or sediment concentration at any time, and its maximum over time, scale with the
-source strength; with a background they are affine. An M5 cleanup level for a surface water target is the
-target (less the background part) over the unit-source response, with no root finder.
+So the surface water or sediment concentration at any time scales with the source strength; with a
+background it is affine in it. Its maximum over time is the coefficient times the source only without a
+background, and only while the source is a dissolved groundwater concentration or a loading proportional
+to one.
+
+### Source levels on paths that are not linear
+
+The cleanup screen's surface water source level is the source concentration whose surface water peak
+equals the target. Where the run is linear in a dissolved groundwater source it is the target over the
+run's coefficient (peak over source), with no root find. The paths that are not linear are solved against
+the forward run itself (wave V slice V2b), with the root find of the modeled cleanup (`cleanup.modeled-chains`,
+`solveSourceLevel`: the verified linear shortcut, otherwise a bracket and Brent's method in the logarithm of
+the source, `brent1973`), never from a table or an extrapolation:
+
+- **Upstream background.** The source is the groundwater concentration (typed, or the held concentration c0
+  of a linked transport run). The peak is the larger of the affine series, so the shortcut's check fails and
+  Brent solves it. A target at or below what the background alone gives has no source level, and says so.
+- **Plume fed by a vadose or saturated source screen.** The source is that screen's soil concentration F
+  (kg/kg, printed in mg/kg). The screen's own run (VADSAT or layered; two-region or exponential) is repeated
+  for each trial F, its loading steps feed the same aquifer, bank plane and surface water model, and the
+  TPH rule of the screen is kept (scaled with the chemical, or held when the cleanup form holds it).
+- **Soil source of the cleanup.** A vadose or saturated source sent to the cleanup screen is carried through
+  the linked aquifer and bank of the surface water run (the same loading steps, the run's own transport,
+  background and receptor); the method pair follows the surface water method (well-mixed with VADSAT and
+  two-region, mass-discharge with the layered and exponential). A surface water run that is not linked has no
+  aquifer to carry it and is not quantified.
+
+The search ceiling is the solubility entered on the surface water run for a dissolved source, and the pure
+substance (1 kg/kg, or the bound the TPH sets) for soil. A target the surface water does not reach at the
+ceiling is shown as not reached, with the ceiling and the most the surface water gets to there; a source that
+moves nothing to the surface water stays not quantified; a soil level above the soil saturation concentration
+carries the free product warning.
+
+Cost and exactness. A linked run costs seconds (the bank plane quadrature) and a fed one tens of seconds,
+too dear to repeat in a root find. The aquifer response is exactly linear in the loading, so it is computed
+once and a trial source is that response times the trial loading (for a fed chain, the sum of the responses
+of the single loading steps, each computed once), sent through the same mixing, decay and sediment model.
+The test suite holds this to the screen's full run (a forward run of each solved level through the screen's own `compute`) within 1e-8 of the target. Only when the step boundaries of
+a trial differ from the reference (a depletion time that moves with F) is the trial a full run. The solves
+run in the cleanup worker.
 
 ## Criteria comparison
 

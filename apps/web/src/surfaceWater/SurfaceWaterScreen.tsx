@@ -10,7 +10,7 @@ import { getBankFeedSlots, subscribeBankFeed } from '../transport/bankFeed';
 import { Field, Group, Seg } from '../ui/controls';
 import { CriteriaPanel } from './CriteriaPanel';
 import { SedimentChart, SurfaceWaterChart } from './charts';
-import { surfaceWaterCoefficient } from './coefficient';
+import { surfaceWaterCoefficient, surfaceWaterSolveState } from './coefficient';
 import {
   getSurfaceWaterFeedSlots,
   setSurfaceWaterFeed,
@@ -158,7 +158,10 @@ export function SurfaceWaterScreen() {
       times: [...result.times],
       values: [...values],
       ...(request && !computing && outcome?.ok && outcome.result === result
-        ? { coefficient: surfaceWaterCoefficient(request, result, method) }
+        ? {
+            coefficient: surfaceWaterCoefficient(request, result, method),
+            solve: surfaceWaterSolveState(request),
+          }
         : {}),
       ...chemicalTag(runChemical),
     });

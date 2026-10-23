@@ -8,6 +8,8 @@ import { buildCleanup } from './build';
 import { runCleanup } from './compute';
 import { defaultCleanupForm } from './form';
 import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
+import { solveSurfaceJob } from './surfaceSolve';
+import { run, unlinkedRequest, vadoseScenario } from './surfaceSolve.testkit';
 import {
   DEFAULT_CRITERION_ENDPOINTS,
   defaultCriterion,
@@ -205,7 +207,7 @@ describe('surfaceTargetLevels', () => {
     expect(ok.note).toBe('State standard, 2025');
   });
 
-  it('is not quantified for a soil source, with the reason', () => {
+  it('a soil source with no vadose or saturated run sent says which screen to send from', () => {
     for (const source of ['vadose', 'saturated'] as const) {
       const [r] = surfaceTargetLevels({
         targets: [user(XYLENE, '10', 'n')],
@@ -216,8 +218,89 @@ describe('surfaceTargetLevels', () => {
         source,
       });
       expect(r!.level).toBeNull();
-      expect(r!.reason).toMatch(/dissolved groundwater source only/i);
+      expect(r!.pending).toBe(false);
+      expect(r!.reason).toMatch(
+        source === 'vadose' ? /vadose zone screen/i : /saturated soil source screen/i,
+      );
     }
+  });
+
+  it('a soil source needs a surface water run that holds its request and is linked', () => {
+    const soil = {
+      vadose: new Map([
+        ['', { scenario: vadoseScenario, method: 'legacy' as const, label: 'R-7' }],
+      ]),
+      saturated: undefined,
+      tphHeld: false,
+    };
+    const run = (f: SurfaceWaterFeed) =>
+      surfaceTargetLevels({
+        targets: [user(XYLENE, '10', 'n')],
+        db: crit,
+        slots: slots(f),
+        runCount: 1,
+        names: NAMES,
+        source: 'vadose',
+        soil,
+      })[0]!;
+    expect(run(feed(XYLENE)).reason).toMatch(/send the surface water result again/i);
+    const unlinked = run({ ...feed(XYLENE), solve: { request: unlinkedRequest() } });
+    expect(unlinked.reason).toMatch(/not linked to a groundwater transport run/i);
+  });
+
+  it('a run with an upstream background is solved, pending until the worker answers', () => {
+    const request = unlinkedRequest({ background: '0.001' });
+    const f: SurfaceWaterFeed = {
+      ...feed(XYLENE, null, { path: 'background' }),
+      solve: { request },
+    };
+    const args = {
+      targets: [user(XYLENE, '10', 'n')],
+      db: crit,
+      slots: slots(f),
+      runCount: 1,
+      names: NAMES,
+      source: 'dissolved' as const,
+    };
+    const [wait] = surfaceTargetLevels(args);
+    expect(wait!.pending).toBe(true);
+    expect(wait!.level).toBeNull();
+    expect(wait!.reason).toBeNull();
+    const job = wait!.job!;
+    const solves = new Map([[job.key, solveSurfaceJob(job)]]);
+    const [r] = surfaceTargetLevels({ ...args, solves });
+    expect(r!.pending).toBe(false);
+    expect(r!.path).toBe('solved');
+    expect(r!.sourceMedium).toBe('groundwater');
+    const forward = Math.max(
+      ...run({ ...request, groundwaterConcentration: r!.level! }).modern.surfaceWater,
+    );
+    expect(Math.abs(forward / 10e-6 - 1)).toBeLessThan(1e-9);
+    // the CSV says solved
+    const [t] = surfaceTargetTables([r!]);
+    expect(t!.rows[0]).toMatchObject({ path: 'solved', unit: 'mg/L' });
+  });
+
+  it('a target the background run cannot reach below the solubility is not reached, with the limit', () => {
+    const request = unlinkedRequest({ background: '0.001', solubility: '0.001' });
+    const f: SurfaceWaterFeed = {
+      ...feed(XYLENE, null, { path: 'background', solubility: 1e-6 }),
+      solve: { request },
+    };
+    const args = {
+      targets: [user(XYLENE, '100000', 'n')],
+      db: crit,
+      slots: slots(f),
+      runCount: 1,
+      names: NAMES,
+      source: 'dissolved' as const,
+    };
+    const job = surfaceTargetLevels(args)[0]!.job!;
+    const solves = new Map([[job.key, solveSurfaceJob(job)]]);
+    const [r] = surfaceTargetLevels({ ...args, solves });
+    expect(r!.level).toBeNull();
+    expect(r!.reason).toMatch(/not reached/i);
+    expect(r!.reason).toMatch(/solubility/i);
   });
 
   it('names a missing surface water run, a missing coefficient and a chemical mismatch', () => {

@@ -1,5 +1,5 @@
 import { createChemicalFeed } from '../vapor/feedStore';
-import type { SurfaceWaterCoefficient } from './coefficient';
+import type { SurfaceWaterCoefficient, SurfaceWaterSolveState } from './coefficient';
 export type SurfaceWaterFeedMethod = 'well-mixed' | 'mass-discharge';
 
 /**
@@ -19,6 +19,13 @@ export interface SurfaceWaterFeed {
    * source levels. Absent on a feed saved before it existed (the cleanup panel then says so).
    */
   coefficient?: SurfaceWaterCoefficient;
+  /**
+   * The run's own request, for the cleanup screen to solve a source level on a path that is not linear in
+   * the source (an upstream background, a plume fed by a vadose or saturated source screen) and to carry a
+   * soil source to this surface water (wave V slice V2b). Optional state inside the current format version;
+   * a feed saved without it asks to be sent again.
+   */
+  solve?: SurfaceWaterSolveState;
   /**
    * Database id of the chemical the run was made for, taken from the transport bank run it is linked
    * to; absent when the run is not linked or the bank run was untagged.

@@ -8,6 +8,9 @@ import { buildCleanup } from './build';
 import { runCleanup } from './compute';
 import { defaultCleanupForm } from './form';
 import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
+import { solveSurfaceJob } from './surfaceSolve';
+import { jobsOf } from './surfaceSolved';
+import { run, unlinkedRequest } from './surfaceSolve.testkit';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -82,8 +85,103 @@ describe('surfaceWaterSourceLevels', () => {
     );
     for (const r of rows) {
       expect(r.level).toBeNull();
-      expect(r.reason).toBe('has an upstream background concentration');
+      // a result sent before the path was recorded cannot be solved and says to send it again
+      expect(r.reason).toMatch(/^has an upstream background concentration\./);
+      expect(r.reason).toMatch(/send the surface water result again/i);
+      expect(r.path).toBeNull();
     }
+  });
+
+  it('a linear level says so and is unchanged by the solve machinery', () => {
+    const rows = surfaceWaterSourceLevels(outcome(), feed(coef({ path: 'linear' })));
+    for (const r of rows) {
+      expect(r.path).toBe('linear');
+      expect(r.pending).toBe(false);
+      expect(r.job).toBeNull();
+      expect(r.sourceMedium).toBe('groundwater');
+      expect(r.unit).toBe('mg/L');
+    }
+  });
+
+  it('zero transfer stays not quantified, with the reason, even when the run holds its request', () => {
+    const request = unlinkedRequest();
+    const f = {
+      ...feed(
+        coef({
+          value: null,
+          reason: 'The run transfers nothing to the surface water.',
+          path: 'none',
+        }),
+      ),
+      solve: { request },
+    };
+    for (const r of surfaceWaterSourceLevels(outcome(), f)) {
+      expect(r.level).toBeNull();
+      expect(r.pending).toBe(false);
+      expect(r.reason).toBe('The run transfers nothing to the surface water.');
+    }
+  });
+
+  describe('a run with an upstream background is solved against the forward run', () => {
+    const request = unlinkedRequest({ background: '0.01' });
+    const f: SurfaceWaterFeed = {
+      ...feed(
+        coef({
+          value: null,
+          reason: 'The run has an upstream background concentration.',
+          path: 'background',
+          method: 'surfaceWater.mass-discharge',
+        }),
+      ),
+      solve: { request },
+    };
+
+    it('is pending until the worker has the result, with the job to run', () => {
+      const rows = surfaceWaterSourceLevels(outcome(), f);
+      expect(rows.length).toBeGreaterThan(0);
+      for (const r of rows) {
+        expect(r.pending).toBe(true);
+        expect(r.level).toBeNull();
+        expect(r.reason).toBeNull();
+        expect(r.job).not.toBeNull();
+      }
+      // legacy and modern receptors of one chemical share one job (one forward model)
+      expect(new Set(rows.map((r) => r.job!.key)).size).toBe(1);
+      expect(jobsOf(rows)).toHaveLength(1);
+    });
+
+    it('with the result: the solved source level reproduces the surface water level', () => {
+      const out = outcome();
+      const jobs = jobsOf(surfaceWaterSourceLevels(out, f));
+      const solves = new Map(jobs.map((j) => [j.key, solveSurfaceJob(j)]));
+      const rows = surfaceWaterSourceLevels(out, f, {}, solves);
+      for (const r of rows) {
+        expect(r.pending).toBe(false);
+        expect(r.reason).toBeNull();
+        expect(r.path).toBe('solved');
+        expect(r.solver).toBeTruthy();
+        expect(r.sourceMedium).toBe('groundwater');
+        expect(r.unit).toBe('mg/L');
+        const forward = run({ ...request, groundwaterConcentration: r.level! });
+        const peak = Math.max(...forward.modern.surfaceWater);
+        expect(Math.abs(peak / r.mediumLevel! - 1)).toBeLessThan(1e-9);
+        // the linear estimate (level over the no-background coefficient) would miss
+        expect(r.cancerLevel === null || r.cancerLevel > 0).toBe(true);
+      }
+    });
+
+    it('a level the background alone exceeds is not quantified and says so', () => {
+      const high = unlinkedRequest({ background: '1000' });
+      const out = outcome();
+      const fh: SurfaceWaterFeed = { ...f, solve: { request: high } };
+      const jobs = jobsOf(surfaceWaterSourceLevels(out, fh));
+      const solves = new Map(jobs.map((j) => [j.key, solveSurfaceJob(j)]));
+      for (const r of surfaceWaterSourceLevels(out, fh, {}, solves)) {
+        expect(r.level).toBeNull();
+        expect(r.reason).toMatch(/background/i);
+        expect(r.path).toBeNull();
+      }
+    });
   });
 
   it('is not quantified where the source level exceeds the solubility', () => {

@@ -5,13 +5,29 @@ import { feedChemicalProblem } from '../project/feedChemical';
 import { pickSlot, type FeedSlots } from '../project/feedSlots';
 import { criteriaFor, type CriteriaDb } from '../surfaceWater/criteriaDb';
 import type { SurfaceWaterFeed } from '../surfaceWater/feed';
+import type { SaturatedFeed } from '../saturated/feed';
+import type { VadoseFeed } from '../vadose/feed';
 import type { SourceKind } from './form';
+import { NEEDS_SATURATED, NEEDS_VADOSE } from './modeledBuild';
+import { makeSurfaceJob, type SurfaceSolveJob, type SurfaceSolves } from './surfaceSolve';
+import {
+  interpretSolved,
+  LEVEL_PATH_TEXT,
+  SEND_AGAIN,
+  SOURCE_UNITS,
+  sendAgain,
+  solvedFor,
+  type LevelPath,
+} from './surfaceSolved';
 
 /**
  * A surface water cleanup target for one chemical (wave P slice P2): the concentration the surface water
  * must meet, from a shipped NRWQC criterion or a value the user enters with a note. The source level is
  * the target over the surface water run's coefficient for that chemical (peak surface water per unit of
  * the dissolved groundwater source), the same linear route as the surface water source level panel.
+ * Wave V slice V2b adds the paths that are not linear in the source: an upstream background and a plume
+ * fed by a vadose or saturated source screen are solved against the run's forward model, and a soil
+ * source of the cleanup is carried through the run's linked aquifer and bank to the surface water.
  */
 export type SurfaceTargetKind = 'none' | 'nrwqc' | 'user';
 
@@ -101,22 +117,49 @@ export interface SurfaceTargetLevel {
   citation: string;
   /** The user's note; blank for an NRWQC target. */
   note: string;
-  /** Groundwater source level in SI (kg/m3); null when not quantified. */
+  /** Source level in SI (kg/m3 groundwater, kg/kg soil); null when not quantified or still being solved. */
   level: number | null;
   /** The surface water method id behind the coefficient. */
   surfaceMethod: string | null;
   reason: string | null;
-  unit: 'mg/L';
-  fromSi: 1e3;
+  /** The medium of the source level: dissolved groundwater, or the soil of a source screen. */
+  sourceMedium: 'groundwater' | 'soil';
+  unit: 'mg/L' | 'mg/kg';
+  fromSi: 1e3 | 1e6;
+  /** Whether the level is the linear estimate or the inverted forward run; null where there is no level. */
+  path: LevelPath | null;
+  /** How a solved level ended; null for a linear level. */
+  solver: string | null;
+  /** The forward-run solve this level waits for or came from; null for a linear level. */
+  job: SurfaceSolveJob | null;
+  /** True while the level waits for its solve in the worker. */
+  pending: boolean;
+  warnings: string[];
 }
 
-const OUT = { targetUnit: 'ug/L', targetFromSi: 1e6, unit: 'mg/L', fromSi: 1e3 } as const;
+const OUT = { targetUnit: 'ug/L', targetFromSi: 1e6 } as const;
+const TARGET_UNIT = { fromSi: 1e6, unit: 'ug/L' } as const;
+
+/** The soil sources the cleanup holds, read for a soil source of the surface water target. */
+export interface SurfaceTargetSoil {
+  vadose: VadoseFeed | FeedSlots<VadoseFeed> | null | undefined;
+  saturated: SaturatedFeed | FeedSlots<SaturatedFeed> | null | undefined;
+  /** TPH mode of the search (the cleanup form's setting). */
+  tphHeld: boolean;
+  /** Soil saturation concentration of each chemical, kg/kg, for the free product warning. */
+  csat?: Record<string, number>;
+}
 
 /**
  * One row per chemical with a target. Each is the target over the coefficient of that chemical's own
- * surface water slot. A level is not quantified, with the reason, where the source is not a dissolved
- * groundwater source, the criterion or value is missing, no surface water result was sent for the
- * chemical, the run recorded no coefficient, or the source level would exceed the run's solubility.
+ * surface water slot, or, where that run is not linear in its source, the solve of its forward model
+ * (see `surfaceSolve.ts`). A dissolved groundwater source is quantified on the linear route, the
+ * background route and, for a plume fed by a source screen, as the soil concentration of that screen. A
+ * soil source of the cleanup (vadose, saturated) is carried through the linked aquifer and bank of the
+ * surface water run. A level is not quantified, with the reason, where the criterion or value is missing,
+ * no surface water result was sent for the chemical, the run recorded no way to solve it, nothing
+ * transfers, or the source cannot reach the target up to its limit (the linear route's solubility check
+ * included). Until `solves` holds the result of a solved row's job the row is pending.
  */
 export function surfaceTargetLevels(args: {
   targets: readonly SurfaceTargetRow[];
@@ -126,8 +169,12 @@ export function surfaceTargetLevels(args: {
   source: SourceKind;
   /** How many chemicals the cleanup run holds (not how many have a target). */
   runCount: number;
+  /** The soil sources, for a soil cleanup source. */
+  soil?: SurfaceTargetSoil;
+  /** The results of the forward-run solves, by job key. */
+  solves?: SurfaceSolves;
 }): SurfaceTargetLevel[] {
-  const { db, slots, names, source } = args;
+  const { db, slots, names, source, solves } = args;
   const active = args.targets.filter((t) => t.kind !== 'none');
   const nameOf = (id: string): string => names[id] ?? id;
   return active.map((t): SurfaceTargetLevel => {
@@ -166,6 +213,7 @@ export function surfaceTargetLevels(args: {
         citation = citationText(citationKey);
       }
     }
+    const groundwater = SOURCE_UNITS.groundwater;
     const base = {
       chemicalId: t.chemicalId,
       chemical,
@@ -175,21 +223,28 @@ export function surfaceTargetLevels(args: {
       citationKey,
       citation,
       note,
-      surfaceMethod: null as string | null,
       ...OUT,
+    };
+    const blank = {
+      level: null,
+      surfaceMethod: null as string | null,
+      sourceMedium: 'groundwater' as 'groundwater' | 'soil',
+      unit: groundwater.unit as 'mg/L' | 'mg/kg',
+      fromSi: groundwater.fromSi as 1e3 | 1e6,
+      path: null as LevelPath | null,
+      solver: null as string | null,
+      job: null as SurfaceSolveJob | null,
+      pending: false,
+      warnings: [] as string[],
     };
     const none = (why: string, surfaceMethod: string | null = null): SurfaceTargetLevel => ({
       ...base,
+      ...blank,
       surfaceMethod,
-      level: null,
       reason: why,
     });
     if (reason !== null) return none(reason);
-    if (source === 'vadose' || source === 'saturated') {
-      return none(
-        `${chemical}: a surface water target applies to a dissolved groundwater source only; this cleanup source is soil.`,
-      );
-    }
+    const soilSource = source === 'vadose' || source === 'saturated';
     const feed = pickSlot(slots, t.chemicalId);
     if (feed === null) {
       return none(
@@ -205,13 +260,106 @@ export function surfaceTargetLevels(args: {
     });
     if (problem !== null) return none(`${chemical}: ${problem}.`);
     const c = feed.coefficient;
+
+    /** A solved level from a job: pending until its result is in. */
+    const solved = (
+      job: SurfaceSolveJob,
+      surfaceMethod: string | null,
+      csat?: number,
+    ): SurfaceTargetLevel => {
+      const medium: 'groundwater' | 'soil' = job.route === 'groundwater' ? 'groundwater' : 'soil';
+      const unit = SOURCE_UNITS[medium];
+      const part = {
+        ...base,
+        ...blank,
+        surfaceMethod,
+        sourceMedium: medium,
+        unit: unit.unit,
+        fromSi: unit.fromSi,
+        job,
+      };
+      const got = solvedFor(job, solves, target);
+      if (got.pending) return { ...part, reason: null, pending: true };
+      if (got.error !== null) return { ...part, reason: got.error };
+      if (got.solved === undefined) return { ...part, reason: 'The level was not solved.' };
+      const read = interpretSolved(got.solved, medium, TARGET_UNIT, csat);
+      return read.level === null
+        ? { ...part, reason: read.reason, warnings: read.warnings }
+        : {
+            ...part,
+            level: read.level,
+            reason: null,
+            path: 'solved',
+            solver: read.detail,
+            warnings: read.warnings,
+          };
+    };
+
+    if (soilSource) {
+      const kind = source === 'vadose' ? 'vadose' : 'saturated';
+      const held = kind === 'vadose' ? args.soil?.vadose : args.soil?.saturated;
+      const soilFeed = pickSlot<VadoseFeed | SaturatedFeed>(held, t.chemicalId);
+      if (soilFeed === null) {
+        return none(
+          `${chemical}: ${kind === 'vadose' ? NEEDS_VADOSE : NEEDS_SATURATED}`,
+          feed.coefficient?.method ?? null,
+        );
+      }
+      const soilProblem = feedChemicalProblem({
+        feed: kind === 'vadose' ? 'vadose zone run' : 'saturated soil source run',
+        feedChemical: soilFeed.chemicalId,
+        rowId: t.chemicalId,
+        runCount: args.runCount,
+        nameOf,
+      });
+      if (soilProblem !== null) return none(`${chemical}: ${soilProblem}.`);
+      const method = `surfaceWater.${feed.method}`;
+      if (feed.solve === undefined) {
+        return none(
+          `The surface water run held no request to carry a soil source to the surface water (it was sent before this panel could). ${SEND_AGAIN}`,
+          method,
+        );
+      }
+      if (feed.solve.request.link === null) {
+        return none(
+          'The surface water run is not linked to a groundwater transport run, so it has no aquifer to carry a soil source to the bank; link it to the transport run on the surface water screen and send it again.',
+          method,
+        );
+      }
+      const job = makeSurfaceJob({
+        request: feed.solve.request,
+        method: feed.method,
+        route: 'soil',
+        soil: {
+          ...('scenario' in soilFeed
+            ? { vadose: soilFeed.scenario }
+            : { saturated: soilFeed.input }),
+          tphHeld: args.soil?.tphHeld ?? false,
+          label: soilFeed.label,
+        },
+        targets: target === null ? [] : [target],
+      });
+      return solved(job, method, args.soil?.csat?.[t.chemicalId]);
+    }
+
     if (c === undefined) {
       return none(
         'The surface water run held no source coefficient (it was sent before this panel existed); send the surface water result again from the surface water screen.',
       );
     }
     if (c.value === null) {
-      return none(c.reason ?? 'The run did not quantify a source coefficient.', c.method);
+      const route = c.path === 'background' ? 'groundwater' : c.path === 'fed' ? 'fed' : null;
+      if (route === null || feed.solve === undefined) {
+        const why = c.reason ?? 'The run did not quantify a source coefficient.';
+        return none(route === null && c.path !== undefined ? why : sendAgain(why), c.method);
+      }
+      const job = makeSurfaceJob({
+        request: feed.solve.request,
+        method: feed.method,
+        route,
+        targets: target === null ? [] : [target],
+      });
+      return solved(job, c.method);
     }
     if (!(c.value > 0)) {
       return none('There is no surface water concentration per unit of source to trace.', c.method);
@@ -223,7 +371,7 @@ export function surfaceTargetLevels(args: {
         c.method,
       );
     }
-    return { ...base, surfaceMethod: c.method, level, reason: null };
+    return { ...base, ...blank, surfaceMethod: c.method, level, reason: null, path: 'linear' };
   });
 }
 
@@ -246,6 +394,8 @@ const COLUMNS: CsvColumn[] = [
   { key: 'source', header: 'source' },
   { key: 'unit', header: 'unit' },
   { key: 'level', header: 'source level' },
+  { key: 'path', header: 'level path' },
+  { key: 'solver', header: 'solve detail' },
   { key: 'reason', header: 'not quantified because' },
 ];
 
@@ -266,9 +416,11 @@ export function surfaceTargetTables(rows: readonly SurfaceTargetLevel[]): CsvTab
         citation: r.citation,
         note: r.note,
         sourceMethod: r.surfaceMethod,
-        source: 'Groundwater source (surface water target)',
+        source: `${r.sourceMedium === 'soil' ? 'Soil source' : 'Groundwater source'} (surface water target)`,
         unit: r.unit,
         level: r.level === null ? null : r.level * r.fromSi,
+        path: r.path === null ? null : r.path,
+        solver: r.solver ?? (r.path === 'linear' ? LEVEL_PATH_TEXT.linear : null),
         reason: r.reason,
       })),
       columns: COLUMNS,

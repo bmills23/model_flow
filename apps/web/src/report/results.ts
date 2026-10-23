@@ -13,7 +13,9 @@ import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
 import { buildModeledRows } from '../cleanup/modeledBuild';
 import { runCleanup } from '../cleanup/compute';
-import { sourceLevelCsvTables } from '../cleanup/sourceLevelsCsv';
+import { sourceLevelCsvTables, surfaceSolveJobs } from '../cleanup/sourceLevelsCsv';
+import { jobsOf } from '../cleanup/surfaceSolved';
+import { solveSurfaceJobsAsync } from '../cleanup/surfaceSolveRunner';
 import {
   surfaceTargetLevels,
   surfaceTargetTables,
@@ -404,30 +406,33 @@ async function cleanup(
       if (o.ok) addWarnings(sec, CLEANUP_METHOD_IDS[m], o.result.warnings);
       else sec.notes.push(`The ${METHOD_NAME[m]} did not run: ${o.error}`);
     }
-    sec.tables.push(
-      ...sourceLevelCsvTables(outcome, names, {
-        household: feed.slots<HouseholdRiskFeed>('household'),
-        vapor: feed.slots<VaporRiskFeed>('vaporRisk'),
-        surface: feed.slots<SurfaceWaterFeed>('surfaceWater'),
-      }),
-    );
+    const levelFeeds = {
+      household: feed.slots<HouseholdRiskFeed>('household'),
+      vapor: feed.slots<VaporRiskFeed>('vaporRisk'),
+      surface: feed.slots<SurfaceWaterFeed>('surfaceWater'),
+    };
     const targets = targetsOfChemicals(
       form.surfaceTargets,
       form.chemicals.map((c) => c.id),
     );
+    const targetArgs = {
+      targets,
+      db: targets.some((t) => t.kind !== 'none') ? await loadCriteriaDb() : null,
+      slots: feed.slots<SurfaceWaterFeed>('surfaceWater'),
+      names,
+      source: form.source,
+      runCount: form.chemicals.length,
+    };
+    // the surface water levels that are not linear in the source are solved in the worker
+    const solves = await solveSurfaceJobsAsync(
+      jobsOf([
+        ...surfaceSolveJobs(outcome, names, levelFeeds).map((job) => ({ job })),
+        ...surfaceTargetLevels(targetArgs),
+      ]),
+    );
+    sec.tables.push(...sourceLevelCsvTables(outcome, names, levelFeeds, { solves }));
     if (targets.some((t) => t.kind !== 'none')) {
-      sec.tables.push(
-        ...surfaceTargetTables(
-          surfaceTargetLevels({
-            targets,
-            db: await loadCriteriaDb(),
-            slots: feed.slots<SurfaceWaterFeed>('surfaceWater'),
-            names,
-            source: form.source,
-            runCount: form.chemicals.length,
-          }),
-        ),
-      );
+      sec.tables.push(...surfaceTargetTables(surfaceTargetLevels({ ...targetArgs, solves })));
     }
   } else if (!form.ssg.on && tphHeld === null) {
     return notComputed(built.errors);
