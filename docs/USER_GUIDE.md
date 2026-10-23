@@ -343,23 +343,30 @@ hazard index level held from that screen, so change the composition there and se
 
 Vapor source levels: send the indoor and outdoor air from the vapor screen ("Send to exposure and risk"),
 add the chemical here, and a **Vapor source levels** panel lists the groundwater, soil gas, soil pore water
-or soil concentration that gives each indoor and outdoor air level above. Each is the air level divided by
-the vapor run's air-over-source coefficient (shown beside it as the vapor method id), so a source at that
-level alone just meets the target; the legacy and modern receptor methods each get a row. This holds where
-the vapor run's air is proportional to its source, which it is for the legacy and modern Johnson and
-Ettinger methods, the legacy box, the Soil Screening Guidance factor and the oxygen-limited method with an entered
-aerobic layer depth (or with the total hydrocarbon vapor entered, which fixes the oxygen demand). A path that is not
-is listed as **not quantified** with the reason and no level, never as zero: the oxygen-limited fast reaction front or
-coupled option when its oxygen demand comes from the source vapor itself (the aerobic layer then moves with the
-source), a soil source with a TPH mixture, a soil
-level above the residual-phase limit (where the model's vapor stops rising, so no soil level reaches that
-air level), a Soil Screening Guidance factor for a source series, and a model that transfers nothing from
-the source. A source series sent from another screen gives the same coefficient as a single value, because
-the steady method is applied at each time. Change the vapor inputs and the note at the top of the page marks the sent vapor air as out of date; the panel keeps
-the values you sent until you send again. A project saved before this panel existed carries no coefficient, and the panel
-says to send the vapor air again. The send button is off while the vapor inputs have an error.
+or soil concentration that gives each indoor and outdoor air level above; the legacy and modern receptor
+methods each get a row, with the vapor method id beside it. The **Level from** column says how each level was
+found. Where the vapor run showed the air proportional to its source (the legacy and modern Johnson and Ettinger
+methods, the legacy box, the Soil Screening Guidance factor and the oxygen-limited method with an entered aerobic
+layer depth, or with the total hydrocarbon vapor entered, which fixes the oxygen demand) the level is the air level
+divided by the run's air-over-source coefficient, marked **Linear coefficient**. Where it is not, the level is
+**Solved**: the source whose forward air, run through the same vapor model you sent, equals the air level, found
+with the same root solve as the modeled cleanup. That covers a soil source with a TPH mixture, the oxygen-limited
+fast reaction front or coupled option when its oxygen demand comes from the source vapor itself (the aerobic layer
+then moves with the source), the legacy box over such a source, and any other path the vapor run could not confirm
+as proportional. The solve searches up to the solubility (groundwater and pore water), the vapor in equilibrium with
+the solubility (soil gas), the residual-phase limit (soil, where the model's vapor stops rising) or, with a TPH
+mixture, the point where the chemical would be the whole mixture. An air level the model does not reach by that
+limit is listed with the limit and the most air the model gives there, and no level, never zero; the same holds
+for a soil level above the residual-phase limit. A cancer or noncancer level the model does not reach is left out
+with a warning that names the limit. A path that is not quantified for another reason (a model input missing, a
+Soil Screening Guidance factor for a source series, a model that transfers nothing from the source) keeps its reason
+and no level. A source series sent from another screen gives the same result as a single value, because the steady
+method is applied at each time. Change the vapor inputs and the note at the top of the page marks the sent vapor air as
+out of date; the panel keeps the values you sent until you send again. A project saved before this panel existed carries
+no coefficient, and the panel says to send the vapor air again; one saved before the solve existed does the same for
+a row that is not proportional to its source. The send button is off while the vapor inputs have an error.
 
-The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file.
+The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file, and the vapor table has a `level from` column (linear coefficient or solve).
 
 Surface water source levels: when the surface water screen has sent a result (the "use ... for swimming" buttons),
 and a swimming pathway is on, a **Surface water source levels** panel lists the dissolved groundwater

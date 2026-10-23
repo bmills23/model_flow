@@ -2390,7 +2390,8 @@ source and checks the air doubles) and `apps/web/src/vapor/coefficients.test.ts`
    (`oxygenDepth` root-finds a depth that depends on the source) and is not on the web vapor screen, so it never
    reaches the feed; a future screen offering it must publish `quantified: false` for those modes. (Since wave V
    slice V1 the vapor screen offers it and its feed origin is in the set; see that slice's ruling 6: the modes are
-   linear when the total hydrocarbon vapor is entered, and not quantified, naming the mode, when it is not.)
+   linear when the total hydrocarbon vapor is entered, and not quantified, naming the mode, when it is not. Since slice V2a the not-quantified
+   cases that are nonlinearities carry the forward model and the cleanup screen solves them; see that slice.)
 3. **Two limits inside the linear methods.** A soil source stops giving more vapor once the equilibrium pore water
    passes the solubility (the residual phase, `sourceVapor` fixed at H S). The soil coefficient is measured below
    that point (a probe divided by ten from 1000 mg/kg until no separate phase shows) and carries `maxSource`, the soil
@@ -3972,3 +3973,59 @@ Every ruling below is DEFAULT and open to Bryan's overturn. Evidence: `apps/web/
    diffusion coefficients and Henry's constant, the source forms (soil gas, soil with TPH and its molecular
    weight, solubility, organic carbon, bulk density), and the building and soil gas entry terms. The degradation
    rate is entered in 1/h (the BioVapor unit) where RISC5 lists 1/day.
+
+### Wave V slice V2a, vapor source levels on paths not linear in the source
+
+Every ruling below is DEFAULT and open to Bryan's overturn. Evidence: `apps/web/src/cleanup/vaporSolve.test.ts` (each
+solved path runs the forward model at the solved source and the air meets the target to 1e-9),
+`apps/web/src/vapor/forward.test.ts`, `coefficients.test.ts`, `oxygenLimitedFeeds.test.ts` and
+`cleanup/vaporLevels.test.ts` (linear rows unchanged).
+
+1. **The solve is the engine's.** The source whose forward air equals the direct back-calculated air level is found
+   with `solveSourceLevel` of `cleanup.modeled-chains` (verified linear shortcut, else bracket and Brent in the
+   logarithm of the source, `brent1973`), called from `cleanup/vaporSolve.ts` with the vapor forward model as the
+   metric. No second root finder. It runs on the cleanup screen, not in `modeled.worker.ts`: one forward run is
+   milliseconds (the whole solved-path test file runs in about 150 ms), and the result is memoized per feed and
+   cleanup outcome so a re-render, the CSV and the report do not repeat it.
+2. **What the feed carries (new optional state, same format version).** `VaporCoefficient` gains an optional `solve`
+   (`vapor/forward.ts`): the engine input of the method that produced the air with the source left out, in SI as
+   JSON (`Infinity` for a dirt floor and `NaN` are written as strings and read back), a template that turns one source
+   number into the engine's source (the template, the field that carries the source, and a scale: the Henry constant
+   for a pore water source given as soil gas), the source's medium, and the ceiling of the search. The forward model
+   calls the same engine functions the vapor screen ran (`jeLegacyIndoor`, `jeEpaIndoor`, `devaullRun`, and for the
+   legacy box `sourceVapor`, `steadyDiffusionFlux`, `boxConcentrationFromFlux`). The not-quantified variant also gains
+   `nonlinear: true` when the reason is a nonlinearity rather than a missing input. No form key was added, so
+   `FINGERPRINT_SKIP` is unchanged and an older project neither fails to load nor reads stale.
+3. **Which paths are solved.** Every not-quantified case of K1 that is a nonlinearity: the soil source with a TPH
+   mixture (indoor, for the legacy, modern and oxygen-limited methods, and the legacy box over it), the oxygen-limited
+   fast reaction front and coupled options when the demand is taken from the source vapor, and a failed doubling
+   check on any method or the box. A missing input (the oxygen method not run, an invalid box, an engine error) stays
+   not quantified with its reason and no solve. The Soil Screening Guidance factor stays linear (`F / VF`). A linear
+   soil coefficient carries the same state with the residual-phase limit as its ceiling, used only to confirm that a
+   level past `maxSource` is not reached (the vapor is flat there, so the answer is no source).
+4. **TPH finding, recorded.** K1 ruled a TPH mixture not quantified because the mole fraction is set from the source.
+   The mole fraction is x = (F / M) / (F_T / M_T), proportional to F, and the equilibrium pore water is too, so the
+   residual-phase test is independent of F and the source vapor is proportional to F up to x = 1. The solve confirms
+   it with its shortcut in two runs. The ceiling is x = 1, F = min(F_T, F_T M / M_T), above which the engine refuses
+   the mole fraction.
+5. **Ceilings.** Solubility for a groundwater or pore water source; the Henry constant (the modern method's H' at the
+   soil temperature) times the solubility for soil gas (the screen has no vapor pressure input, so this is the vapor
+   in equilibrium with the solution at the solubility); the residual-phase limit for soil (`maxSource` for a linear
+   coefficient, a bisection on the model's own residual-phase warning for a nonlinear one); x = 1 for a TPH mixture.
+   Start of the search: 1 mg/kg for soil, 1 mg/L for the others, never above a tenth of the ceiling.
+6. **Not reached.** A target above the air the model gives at the ceiling is reported as not reached, with the
+   ceiling and its value and the most air the model gives there; the row has no level. A governing level not reached
+   empties the whole row (as the residual-phase case did); a cancer or noncancer level not reached while the governing
+   one is reached is left out with a warning that names the limit.
+7. **Which basis is shown.** `VaporLevelRow.basis` is `linear` (coefficient), `solve`, or null (no level tried), and
+   names the source of the governing level. The panel has a "Level from" column; the CSV has a `level from` column
+   (`linear coefficient`, `solve`, empty), so the report (which prints the CSV tables) carries it. A linear level
+   inside its limit is identical to before (the same division).
+8. **Older feeds.** A feed with no coefficient at all keeps the existing ask-to-resend row. A coefficient saved before
+   this slice that was not quantified for a nonlinearity has no forward model, so its row says the feed was sent before
+   nonlinear levels were solved and asks to send it again; the reasons that mean this are matched by stem
+   (`OLD_NONLINEAR_STEMS` in `cleanup/vaporLevels.ts`, the K1 and V1 texts), and a new coefficient flagged `nonlinear`
+   without state keeps its own reason. A quantified older coefficient keeps its residual-phase text.
+9. **Small refactor.** `outdoor.ts` exports `parseBox` (the box fields in SI, or every fault), which `runOutdoor` and the
+   box forward model share; the messages are unchanged.
+10. **Left open.** The surface water panel and target (the surface water part of scope ruling 2). The oxygen-limited method still has no outdoor path.

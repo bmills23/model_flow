@@ -89,7 +89,30 @@ describe('vapor air-over-source coefficients', () => {
     const { form, p } = setup({ source: 'soil', tphOn: true, tph: '5000', tphMolarMass: '100' });
     const ind = vaporCoefficients(form, p, null, DEFAULT_OUTDOOR, 'legacy').indoor;
     expect(ind?.quantified).toBe(false);
-    if (ind && !ind.quantified) expect(ind.reason).toMatch(/TPH/);
+    if (ind && !ind.quantified) {
+      expect(ind.reason).toMatch(/TPH/);
+      // the forward model rides along, so the cleanup screen can solve the level
+      expect(ind.nonlinear).toBe(true);
+      expect(ind.solve?.sourceKind).toBe('soil');
+      expect(ind.solve?.cap?.label).toMatch(/pure-substance/);
+    }
+    const out = vaporCoefficients(form, p, null, DEFAULT_OUTDOOR, 'legacy').outdoor;
+    expect(out && !out.quantified && out.solve?.forward.kind).toBe('box');
+  });
+
+  it('a soil coefficient carries the forward model with the residual-phase limit as its ceiling', () => {
+    const { form, p } = setup({ source: 'soil', soilConc: '10' });
+    for (const method of ['legacy', 'modern'] as const) {
+      const ind = quantified(vaporCoefficients(form, p, null, DEFAULT_OUTDOOR, method).indoor);
+      expect(ind.solve?.cap).toEqual({ value: ind.maxSource, label: 'residual-phase limit' });
+    }
+  });
+
+  it('a groundwater coefficient is linear and carries no forward model', () => {
+    const { form, p } = setup(GW);
+    expect(
+      quantified(vaporCoefficients(form, p, null, DEFAULT_OUTDOOR, 'legacy').indoor).solve,
+    ).toBe(undefined);
   });
 
   it('outdoor legacy box: linear in the source vapor; modern SSG factor is 1 over the volatilization factor', () => {

@@ -403,7 +403,8 @@ Air over source for the cleanup screen: the coefficient is published where the a
 source, which is option (1), and options (2) and (3) when a total hydrocarbon vapor concentration is entered
 (the oxygen demand is then fixed, so L_a does not move with the source). With the demand taken from the source
 vapor, the aerobic depth moves with the source and the coefficient is published as not quantified, naming the
-option.
+option, together with the forward model so the cleanup screen solves the source level (see "Source levels on the
+cleanup screen" below).
 
 ## Modern screening: empirical attenuation factors (`vapor.attenuation-factor-2015`)
 
@@ -534,7 +535,7 @@ SI, with its kind) to a receptor air concentration, plus the profile and diagnos
 | `vapor.je-1991`, `vapor.je-epa` (infinite source) | Yes for groundwater and soil gas. For soil, yes below the residual-phase point; above it C_vs is fixed at x S H and the output stops responding to F (M5 must report that no soil cleanup level exists above saturation, not root-find through a flat function) |
 | `vapor.je-epa` finite source | Yes below saturation: C_vs is proportional to F, so psi and beta do not depend on F and the time-averaged C_in scales with F; the mass-limit branch is also proportional to F |
 | `vapor.dominant-layer-1998` | Yes (linear equations in C_vs), with the same soil saturation caveat |
-| `vapor.devaull-2007` | Only with the aerobic depth entered (option 1), or when the layer is wholly aerobic or wholly anaerobic. Options 2 and 3 are nonlinear when the oxygen demand is taken from the source vapor: the aerobic depth then depends on it, so M5 needs the root find. With a total hydrocarbon vapor concentration entered the demand is fixed and the air is proportional to the source (the vapor screen publishes the coefficient in that case and for option 1, and not quantified otherwise) |
+| `vapor.devaull-2007` | Only with the aerobic depth entered (option 1), or when the layer is wholly aerobic or wholly anaerobic. Options 2 and 3 are nonlinear when the oxygen demand is taken from the source vapor: the aerobic depth then depends on it, so M5 needs the root find. With a total hydrocarbon vapor concentration entered the demand is fixed and the air is proportional to the source (the vapor screen publishes the coefficient in that case and for option 1, and otherwise publishes it as not quantified with the forward model, which the cleanup screen solves) |
 | `vapor.attenuation-factor-2015` | Yes |
 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996` | Yes (the mass-limit VF too) |
 | `vapor.jury-bam` | Yes (linear equation, linear initial condition) |
@@ -543,6 +544,30 @@ SI, with its kind) to a receptor air concentration, plus the profile and diagnos
 For each linear method the engine also returns the coefficient (receptor air concentration per unit source
 concentration), so M5's cleanup level for a linear chain is the target over the product of coefficients,
 as M4 already does for direct pathways.
+
+### Source levels on the cleanup screen
+
+The vapor screen's risk feed carries, per air path, either the coefficient (air per unit source, SI) or, for a
+path that is not proportional to the source, the state of the forward model: the engine input of the method
+that produced the air with the source left out (JSON-safe SI, `Infinity` written as a string), a template that
+turns one source number into the engine's source, the medium the source is measured in, and the ceiling of the
+search. The forward model is not a second implementation: `vapor/forward.ts` calls `jeLegacyIndoor`, `jeEpaIndoor`,
+`devaullRun` or, for the legacy box, `sourceVapor`, `steadyDiffusionFlux` and `boxConcentrationFromFlux` on that
+input. The cleanup screen finds the source whose forward air equals each back-calculated air level (the governing
+level and the cancer and noncancer endpoints) with `solveSourceLevel` of `cleanup.modeled-chains`: the verified
+linear shortcut (two forward runs) where the model proves linear, else a bracket and Brent's method in the
+logarithm of the source (`brent1973`), accepted to 1e-9 of the target. Nothing is read from a tabulated curve or
+extrapolated.
+
+The solved paths are the soil source with a TPH mixture (the mole fraction is the chemical's moles over the
+mixture's, so the source vapor is in fact proportional to the soil level up to the point where the chemical is the
+whole mixture, which is the ceiling; the shortcut confirms it in two runs), the oxygen-limited options (2) and (3)
+with the demand from the source vapor, the legacy box over any of these sources, and any path whose doubling check
+fails. The ceiling is the solubility for a groundwater or pore water source, the Henry constant times the solubility
+for soil gas, and the residual-phase limit for soil (found by bisection on the model's own residual-phase flag for a
+nonlinear model, or `maxSource` for a linear one). A target above the air the model gives at the ceiling is not
+reached, and the row reports the ceiling and the most air the model gives. For a linear soil coefficient the same
+state is carried only to confirm a level past `maxSource` is not reached, where the vapor no longer rises.
 
 ## Coupling
 

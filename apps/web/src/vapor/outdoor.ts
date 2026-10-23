@@ -53,6 +53,23 @@ export interface OutdoorOutcome {
 const reading = (raw: string): number => (raw.trim() === '' ? NaN : Number(raw));
 const message = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
+/** The box of the outdoor form in SI, or every field that fails. */
+export function parseBox(
+  o: OutdoorForm,
+): { ok: true; box: OutdoorLegacy['box'] } | { ok: false; errors: string[] } {
+  const wind = reading(o.windSpeed);
+  const height = reading(o.mixingHeight);
+  const length = reading(o.boxLength);
+  const width = reading(o.boxWidth);
+  const errors: string[] = [];
+  if (!(wind > 0)) errors.push('Wind speed must be a number above 0');
+  if (!(height > 0)) errors.push('Mixing height must be a number above 0');
+  if (!(length > 0)) errors.push('Box length must be a number above 0');
+  if (!(width > 0)) errors.push('Box width must be a number above 0');
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, box: { length, width, height, windSpeed: wind } };
+}
+
 /** The full soil column to the ground surface, listed from the source upward (the legacy order). */
 export function columnToGrade(parsed: Extract<Parsed, { ok: true }>): SoilLayer[] {
   let column: SoilLayer[] = [];
@@ -77,18 +94,10 @@ export function runOutdoor(
   indoor: VaporOutcome,
   o: OutdoorForm,
 ): OutdoorOutcome {
-  const wind = reading(o.windSpeed);
-  const height = reading(o.mixingHeight);
-  const length = reading(o.boxLength);
-  const width = reading(o.boxWidth);
-  const boxErrors: string[] = [];
-  if (!(wind > 0)) boxErrors.push('Wind speed must be a number above 0');
-  if (!(height > 0)) boxErrors.push('Mixing height must be a number above 0');
-  if (!(length > 0)) boxErrors.push('Box length must be a number above 0');
-  if (!(width > 0)) boxErrors.push('Box width must be a number above 0');
+  const parsedBox = parseBox(o);
 
   let legacy: OutdoorOutcome['legacy'];
-  if (boxErrors.length > 0) legacy = { ok: false, error: boxErrors.join('; ') };
+  if (!parsedBox.ok) legacy = { ok: false, error: parsedBox.errors.join('; ') };
   else if (!indoor.legacy.ok) {
     legacy = {
       ok: false,
@@ -101,7 +110,7 @@ export function runOutdoor(
         parsed.legacy.chemical,
         indoor.legacy.result.sourceVapor,
       );
-      const box = { length, width, height, windSpeed: wind };
+      const box = parsedBox.box;
       legacy = { ok: true, concentration: boxConcentrationFromFlux(box, flux), flux, box };
     } catch (e) {
       legacy = { ok: false, error: message(e) };

@@ -121,6 +121,10 @@ describe('source level CSV tables', () => {
     expect(none.cancerLevel).toBeNull();
     expect(none.reason).toBe('TPH mixture in the soil');
     expect(none.level).not.toBe(0);
+    // each row says where its level came from: the linear coefficient, the solve, or neither
+    expect(quant.basis).toBe('linear coefficient');
+    expect(none.basis).toBeNull();
+    expect(exportCsv(rows, tables[0]!.columns)).toContain('level from');
   });
 
   it('surface water rows give the source level in mg/L and the surface water level it reproduces', () => {

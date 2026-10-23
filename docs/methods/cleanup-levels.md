@@ -233,7 +233,11 @@ bracketed root).
    cleanup levels always come from Brent (standing assumption in `docs/DECISIONS.md`, 2026-10-15).
 
 For direct pathways none of this runs: the inversion is the closed form above (one division per chemical
-and medium).
+and medium). The vapor source levels of the cleanup screen reuse this solve unchanged for the vapor paths that
+are not proportional to their source (the metric is the vapor model's forward air, the target the direct air
+level, the cap the solubility, saturation or residual-phase limit; see `docs/methods/vapor-models.md`, "Source
+levels on the cleanup screen"), run on the screen rather than in the worker because one forward run is
+milliseconds.
 
 ## Individual, cumulative and equal allocation
 

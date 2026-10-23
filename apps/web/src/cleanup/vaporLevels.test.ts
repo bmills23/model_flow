@@ -193,7 +193,7 @@ describe('vaporSourceLevels', () => {
       'the fast reaction front oxygen option takes the oxygen demand from the source vapor';
     const not = vaporSourceLevels(
       out,
-      indoorOnly({ quantified: false, methodId: 'vapor.devaull-2007', reason }),
+      indoorOnly({ quantified: false, nonlinear: true, methodId: 'vapor.devaull-2007', reason }),
     ).find((r) => r.method === 'modern')!;
     expect(not.level).toBeNull();
     expect(not.reason).toBe(reason);

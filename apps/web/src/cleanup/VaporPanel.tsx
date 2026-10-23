@@ -13,10 +13,13 @@ const fmt = (si: number | null, fromSi: number): string => {
   return String(Number(x.toPrecision(3)));
 };
 
+const BASIS = { linear: 'Linear coefficient', solve: 'Solved' } as const;
+
 /**
  * The groundwater, soil gas, pore water or soil levels that give each indoor and outdoor air level above,
  * for the chemical the vapor screen was run for: the air level over the vapor run's air-over-source
- * coefficient. A path that is not linear in its source is listed with the reason, not solved.
+ * coefficient where the air is proportional to the source, and the source whose forward air equals the
+ * air level (a solve) where it is not. Each row says which.
  */
 export function VaporPanel(props: {
   outcome: CleanupOutcome;
@@ -36,10 +39,15 @@ export function VaporPanel(props: {
         </small>
       </h2>
       <p className="muted">
-        <StaleMark feed="vaporRisk" chemicalId={feed.chemicalId} /> Each level is the indoor or
-        outdoor air level above divided by the air-over-source coefficient of the vapor run, so a
-        source at this level alone just meets the target. It holds where the air is proportional to
-        the source; a path that is not is listed with the reason and no level.
+        <StaleMark feed="vaporRisk" chemicalId={feed.chemicalId} /> Each level is the source that
+        alone just meets the indoor or outdoor air level above. Where the vapor run showed the air
+        proportional to the source, it is that air level divided by the run's air-over-source
+        coefficient. Where it is not (a TPH mixture in the soil, an oxygen option that sets the
+        aerobic depth from the source, a soil source past the residual-phase limit), it is solved:
+        the source whose forward air equals the air level, found with the same root solve as the
+        modeled cleanup, up to the solubility, saturation or residual-phase limit. A level the model
+        does not reach by then is listed with that limit and no level. The last column says which
+        way each level was found.
       </p>
       <div className="cleanup-table-wrap">
         <table className="sat cleanup-table">
@@ -55,6 +63,7 @@ export function VaporPanel(props: {
               <th scope="col">Limiting</th>
               <th scope="col">Cancer level</th>
               <th scope="col">Noncancer level</th>
+              <th scope="col">Level from</th>
             </tr>
           </thead>
           <tbody>
@@ -74,6 +83,7 @@ export function VaporPanel(props: {
                 <td data-label="Limiting">{r.limiting ?? 'none'}</td>
                 <td data-label="Cancer level">{fmt(r.cancerLevel, r.fromSi)}</td>
                 <td data-label="Noncancer level">{fmt(r.noncancerLevel, r.fromSi)}</td>
+                <td data-label="Level from">{r.basis === null ? 'none' : BASIS[r.basis]}</td>
               </tr>
             ))}
           </tbody>

@@ -38,6 +38,9 @@ export function panelFeeds<T extends { chemicalId?: string }>(
 export const sourceLevelsHeld = (f: SourceLevelFeeds): boolean =>
   slotValues(f.household).length + slotValues(f.vapor).length + slotValues(f.surface).length > 0;
 
+/** Where a vapor source level came from, as the table words it (empty when no level was tried). */
+const VAPOR_BASIS = { linear: 'linear coefficient', solve: 'solve', none: null } as const;
+
 const scaled = (si: number | null, fromSi: number): number | null =>
   si === null ? null : si * fromSi;
 
@@ -121,10 +124,11 @@ export function sourceLevelCsvTables(
       editions: ['rsl'],
       label: `vapor source levels${vapor.length > 1 ? `, ${name(f.chemicalId)}` : ''}`,
       feeds: [{ feed: 'vaporRisk', chemicalId: f.chemicalId }],
-      rows: vaporSourceLevels(outcome, f).map((r) =>
-        rowOf({ ...r, sourceMethod: r.vaporMethod }, name(f.chemicalId)),
-      ),
-      columns: columns('vapor method'),
+      rows: vaporSourceLevels(outcome, f).map((r) => ({
+        ...rowOf({ ...r, sourceMethod: r.vaporMethod }, name(f.chemicalId)),
+        basis: VAPOR_BASIS[r.basis ?? 'none'],
+      })),
+      columns: columns('vapor method', [{ key: 'basis', header: 'level from' }]),
     });
   }
   const surface = panelFeeds(feeds.surface, ids);

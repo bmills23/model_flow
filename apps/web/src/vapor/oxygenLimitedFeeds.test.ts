@@ -76,6 +76,9 @@ describe('coefficients of the oxygen-limited method', () => {
       expect(c.methodId).toBe('vapor.devaull-2007');
       expect(c.reason).toMatch(mode === 'fastReaction' ? /fast.reaction/i : /coupled/i);
       expect(c.reason).toMatch(/not proportional/i);
+      expect(c.nonlinear).toBe(true);
+      expect(c.solve?.forward.kind).toBe('devaull');
+      expect(c.solve?.sourceKind).toBe('soilGas');
     });
   }
 

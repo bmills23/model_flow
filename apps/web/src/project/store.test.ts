@@ -27,6 +27,10 @@ import {
   getSurfaceWaterFeed,
   setSurfaceWaterFeed,
 } from '../surfaceWater/feed';
+import { vaporCoefficients } from '../vapor/coefficients';
+import { DEFAULT_FORM as VAPOR_FORM, toInputs as vaporInputs } from '../vapor/form';
+import { forwardAir } from '../vapor/forward';
+import { DEFAULT_OUTDOOR } from '../vapor/outdoor';
 import { clearHouseholdFeed, getHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import {
   clearProduceFeed,
@@ -234,6 +238,34 @@ describe('project store', () => {
     flushAutosave();
     reload();
     expect(getSurfaceWaterFeed()?.coefficient).toBeUndefined();
+    expect(getStaleFeeds()).toEqual([]);
+  });
+
+  it('restores a vapor feed with the forward model of a nonlinear path, a dirt floor included', () => {
+    const form = {
+      ...VAPOR_FORM,
+      method: 'devaull' as const,
+      foundation: 'basementDirt' as const,
+      source: 'soilGas' as const,
+      soilGas: '20000',
+      dvOxMode: 'coupled' as const,
+      dvDa: '0.18',
+      dvDw: '2.1e-5',
+      dvH: '32',
+    };
+    const parsed = vaporInputs(form);
+    if (!parsed.ok) throw new Error(parsed.errors.join('; '));
+    const coefficients = vaporCoefficients(form, parsed, null, DEFAULT_OUTDOOR, 'devaull');
+    const indoor = coefficients.indoor;
+    if (!indoor || indoor.quantified || !indoor.solve) throw new Error('no forward model');
+    const air = forwardAir(indoor.solve, 0.02);
+    setVaporRiskFeed({ chemicalId: '71-43-2', label: 'benzene', coefficients });
+    flushAutosave();
+    reload();
+    const back = getVaporRiskFeed()?.coefficients?.indoor;
+    expect(back).toEqual(indoor);
+    if (!back || back.quantified || !back.solve) throw new Error('lost on reload');
+    expect(forwardAir(back.solve, 0.02)).toBe(air);
     expect(getStaleFeeds()).toEqual([]);
   });
 
