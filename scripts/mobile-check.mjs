@@ -145,6 +145,21 @@ const FED_ROUTES = [
       document.querySelectorAll('main details.override-panel').forEach(d=>{d.open=true});
       await u.sleep(500)})()`,
   },
+  // "criteria" route: #/surface-water with the comparison panel open on the union of all criteria sets and zinc
+  // compared, so the set selector, the basis and source lines under each criterion and the wide result tables
+  // are on screen (the panel is closed by default, and the other visits never reach it).
+  {
+    route: '#/surface-water',
+    tag: 'criteria',
+    viaSetup: `(async()=>{const u=window.__ui;await u.sleep(1500);
+      const open=[...document.querySelectorAll('main button')].find(x=>/^compare with water quality criteria/i.test(x.textContent.trim()));
+      if(open)open.click();
+      await u.sleep(800);
+      u.choose(/^criteria set/i,/^all of the sets/i);
+      await u.sleep(1500);
+      await u.pick('7440-66-6',/^compare zinc/i);
+      await u.sleep(1200)})()`,
+  },
   // "projectlist" route: #/chemicals with a database chemical added and a user chemical with a long name
   // defined, so the project list rows (name, id, "defined by you", Edit and Remove), the chemical editor
   // and the remove confirmation are all on screen at once.
@@ -395,7 +410,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{
@@ -500,10 +515,11 @@ for (const view of VIEWS) {
           m.projectList.editor &&
           m.projectList.confirm
         )) ||
-      (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2));
+      (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2)) ||
+      (tag === 'criteria' && !(m.critSet === 'all' && m.critTables >= 2 && m.critRows >= 10));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
