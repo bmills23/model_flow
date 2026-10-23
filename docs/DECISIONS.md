@@ -4100,3 +4100,176 @@ ruling below is DEFAULT.
    `surfaceWater/SurfaceWaterScreen.tsx` (writes the two new keys), `project/schema.ts`, `report/results.ts`,
    `cleanup/sourceLevelsCsv.ts`, `cleanup/CleanupPage.tsx`, `cleanup/modeled.worker.ts`, and the methods notes
    `surface-water.md` and `cleanup-levels.md` (rows that said a surface water target needs no solver).
+
+### Wave V slice c-ccme
+
+All rulings DEFAULT and open to Bryan's overturn.
+
+1. **Source.** The current official CCME replacement for the PDF summary tables is the online summary table
+   (https://ccme.ca/en/summary-table), which exports CSV. The CSV for all 207 chemicals was fetched 2026-10-23
+   (SHA-256 in `packages/data/raw/ccme/manifest.json`) and transcribed by `packages/data/scripts/extract-ccme.ts`
+   to `raw/ccme/ccme.csv`. An independent re-parse of the fetched file found every one of the 274 numeric values
+   equal to its source cell.
+2. **Terms.** CCME states no reuse licence (footer: all rights reserved), so the fetched file is not committed; the
+   values ship as facts with the citation, per ruling 4.
+3. **Rows.** Rows exist for water (freshwater and marine, long-term and short-term, ug/L) and sediment (freshwater
+   and marine, ISQG and PEL, ug/kg dry weight). Cells reading No data, Insufficient data, NRG or Not assessed produce
+   no row. Cells holding a word (Equation, Variable, Table, Narrative, No PEL derived) or a non-single-value text
+   produce a row with an empty value and the printed text in the note, so the comparison shows them as site-specific
+   (ruling 5). No equation is transcribed. Dioxin and furan cells in ng TEQ/kg dry weight keep that unit.
+4. **Chemical-group and non-chemical entries** (pH, dissolved oxygen, nutrients, narrative guidelines) stay in the CSV
+   as valueless rows without a unit; a consumer matching by CAS ignores them.
+5. **Printed oddities.** Phenanthrene's CAS is printed as the spreadsheet date 1985-01-08 and is decoded to 85-01-8
+   only because the check digit holds; the note says so (2,4,6-trichlorophenol has the same defect but no guideline
+   value, so it has no row). Imidacloprid's printed CAS 13826-41-3 fails its check digit; it is kept as printed
+   with a note, not corrected from outside knowledge. Metribuzin
+   freshwater long-term is printed "1,0" and nitrite "60 NO2-N"; both are left as valueless rows with the printed
+   text rather than interpreted.
+6. **Dates.** The page prints no edition date; each guideline carries its own year in the note, and the reference year
+   is the site copyright year, 2026.
+### Wave V slice C-euuk
+
+Slice C-euuk acquired the European Union and United Kingdom aquatic criteria sets for rulings 3 to 5. Every ruling
+below is DEFAULT and open to Bryan's overturn.
+
+1. **European Union text.** The set is the Publications Office consolidated text of Directive 2008/105/EC, version
+   13.09.2013 (the Directive as amended by 2013/39/EU), Annex I Part A, fetched 2026-10-23 by content negotiation on
+   the `publications.europa.eu` CELEX address because the `eur-lex.europa.eu` addresses answer with a bot challenge. A
+   2026 revision of the priority substances framework is reported by a secondary source; it was not fetched or read, so
+   the set is the 2013 annex the scope names and the revision stays an open item for a later wave.
+2. **Medium mapping.** "Inland surface waters" is freshwater and "Other surface waters" is marine. The annex does not
+   define "other"; the set follows the column name and the data build keeps the printed basis beside it.
+3. **United Kingdom instrument.** The England and Wales standards live in the Water Framework Directive (Standards and
+   Classification) Directions 2015, an associated document of S.I. 2015/1623 on legislation.gov.uk, as made. They are
+   not a statutory instrument and no revised version is served; no replacement was found by search, which does not
+   rule one out. Part 2 (specific pollutants, with fresh water and salt water, long-term mean and short-term 95
+   percentile) and Part 3 (priority substances, annual average and maximum allowable concentration) are both
+   transcribed. Part 3 repeats the European values; the data test checks that, so the UK set adds no second authority
+   for them.
+4. **Not transcribed.** Biota standards (the medium list is water and sediment), cells printed "not applicable", "see
+   footnote" or blank, and the dioxin water cells. The English text prints the cadmium maximum allowable concentration
+   class values under column 3 only; the marine column 4 cell is not printed there, so the UK set has no marine cadmium
+   maximum and the European set (which prints both) does.
+5. **Site-specific values.** Cadmium is one row per hardness class with the class range in the note. Copper (saltwater
+   equation on dissolved organic carbon), zinc (a bioavailable or dissolved fraction plus an ambient background
+   concentration, the catchment table in `zinc-abc.csv`) and manganese (bioavailable, tool not transcribed) keep the
+   printed value with the condition in the note. Lead and nickel carry the bioavailable footnote.
+6. **Value form.** Values are copied from the printed cells, normalised only for the decimal comma and the printed
+   power of ten; the printed form stays in the note. The United Kingdom text prints two cadmium class values with a
+   comma (0,25 and 1,5); they are read as 0.25 and 1.5 and the note says so.
+7. **Raw files.** Both source files are committed: the European text under Commission Decision 2011/833/EU and the
+   United Kingdom PDF under the Open Government Licence v3.0, each with its SHA-256 in `manifest.json`. The EUR-Lex
+   legal notice page could not be read; the decision text was. The European source file keeps its own printed dashes.
+
+### Wave V slice anzg
+
+Criteria data acquisition for the Australia and New Zealand set (ruling 3). All rulings DEFAULT and open to Bryan's overturn.
+
+1. **Source.** The official master table of toxicant default guideline values, `toxicants-dgvs-mastertable.xlsx`, linked
+   from the Water Quality Australia page "Toxicant default guideline values for protecting aquatic ecosystems" (page last
+   modified 10 September 2026), retrieved 2026-10-23. One worksheet holds every freshwater and marine water toxicant, so
+   no per-toxicant pages were needed. The sediment DGVs are a separate ANZG document and are not in this set.
+2. **Redistribution (ruling 4).** The page carries no Creative Commons mark, so the department's default terms apply
+   (personal or in-organisation use, no onward copying). The workbook is not committed. The values ship as facts in
+   `packages/data/raw/anzg/anzg-2018-dgv.csv` with the citation; the manifest records the URL, the date and the
+   workbook SHA-256.
+3. **Which document each value comes from.** The workbook's own `Publish date` is kept as `publish_year`. A year of 2000
+   marks a value the workbook says is carried forward from ANZECC and ARMCANZ (2000) with the reliability reclassified under
+   Warne et al. (2018) (286 of the 326 source rows); later years are values derived and published under ANZG.
+4. **Basis column.** The protection level as printed: 99, 95, 90 and 80 percent species protection, and "unknown level of
+   protection" for the single value the workbook gives where marine data were insufficient and the freshwater value is
+   suggested with caution. The reliability the source assigns is its own column. Where the source prints a comma list in
+   one cell (zinc and nickel in fresh water: Australia, New Zealand; nitrate: soft, moderately hard, hard water) the list
+   is split into one row per entry, labelled by the sentence the row itself prints. These are site-chemistry dependent
+   values; the equations are not in the table, so ruling 5 applies to every other hardness or pH dependence (the
+   comments are carried in `note`, for example aluminium is two separate rows by pH).
+5. **Source defects handled, never corrected from memory.** Eight distinct CAS numbers (15 rows) were stored by the workbook as date-like
+   text (for example `0107-06-02`); they are restored by a fixed rule and kept only when the CAS check digit verifies.
+   Vanadium's printed number fails the check and is kept as printed with a flag in `note` for slice V3 to treat as
+   unverified. One reliability word is misspelled in the source and read as "Very High". 77 source rows (marine rows
+   with insufficient data) print no value and produce no row.
+6. **References.** `references.proposed.json` holds the ANZG 2018 entry as the copyright notice prints it, plus
+   Warne et al. (2018) and ANZECC and ARMCANZ (2000) as the workbook cites them (authors, year, and for Warne the title only).
+   The full references of those two are not printed in the fetched documents, so their identifier and URL fields are empty
+   for the integrator to confirm.
+
+### Wave V slice macdonald2000
+
+All DEFAULT, open to Bryan's overturn.
+
+1. **Source.** The consensus TEC and PEC are transcribed from a complete text-layer copy of the article hosted by Oak Ridge National Laboratory (Tables 2 and 3, journal pages 23 and 24) and cross-checked value by value against a second complete copy in the EPA Superfund records, read from page images. No differences. The article itself, not a reproduction, is the source, so `macdonald2000` stays the only value citation; the two copies are proposed as locator references.
+2. **Not redistributed.** Neither copy is committed (Springer copyright notice, no redistribution licence found). Only the values ship, as facts, with the manifest recording URLs, retrieval date and SHA-256.
+3. **Row counts.** Table 2 prints 29 TEC values and Table 3 prints 28 PEC values (Dibenz[a,h]anthracene has a TEC only). Both are kept as printed; the "28 chemicals" of the abstract counts the PEC list.
+4. **CAS.** The article prints no CAS numbers, so the column is empty; slice V3 joins by name against the chemical database.
+5. **Values.** Kept as printed (thousands separators removed), in the printed units (mg/kg DW for the eight metals, ug/kg DW for the rest). Only the consensus column is taken, not the individual source guidelines printed beside it.
+
+### Wave V slice V3
+
+Slice V3 built the five acquired international sets into the data package and put the choice of set on the surface
+water screen (scope rulings 3 to 5). Every ruling below is DEFAULT and open to Bryan's overturn.
+
+1. **Reference status.** The new entries are datasets, so they take status `data`, as `epanrwqc` and
+   `epa2018r4era` do; `used` is the status of a reference a registered method cites, and the test that enforces
+   citations applies to methods. `macdonald2000` moves from `planned` to `data` because its values landed. The
+   acquisition reports proposed `type: guideline`, which the schema does not have, so `anzg2018` is `data`.
+   `anzecc2000` is not entered: the ANZG table prints the authors and year but no title or identifier, and none
+   is supplied from outside knowledge. `warne2018` is entered with only what the table prints (authors, year,
+   title), type `guidance`, status `data`, and no venue or URL.
+2. **Where the build reads.** `packages/data/raw/criteria-sets.manifest.json` pins the transcribed CSV of each
+   set by size and SHA-256 (and, for the EU and UK, the committed source file), and carries the source block
+   (title, URL, edition date, retrieval date, terms, reference keys, SHA-256 of the fetched source file). For the
+   CCME, ANZG and MacDonald sets, whose source files are not committed, that SHA-256 is the provenance. The build
+   (`build-criteria.ts`, in `data:generate`) fails on a mismatch. The five `references.proposed.json` files are
+   deleted, and the ANZG extractor no longer writes one.
+3. **Generated files and the bundle limit.** `generated/criteria-2026-10-23/` holds `ccme`, `eu`, `uk`,
+   `macdonald2000`, `anzg-fresh` and `anzg-salt`. ANZG as one file is about 535 kB as a web chunk, over the
+   500 kB chunk limit of M11 ruling 12, so it is two files, one per water type, each a complete set file with its
+   own notes. Each set loads on first use; the default loads none of them.
+4. **Chemical identity across sets.** A CAS number is used when well formed. Two ANZG numbers with a leading zero
+   (0120-12-7, 0131-11-3) read as 120-12-7 and 131-11-3 with the printed form kept, because the digits and check
+   digit are those numbers. The two numbers that fail the check digit (13826-41-3, 7440-62-3) are kept as
+   printed and flagged, as the acquisition slices ruled. A group standard that prints several CAS numbers has no
+   single CAS number and takes a slug of its name. A row with no CAS number is joined by name to a US-file
+   chemical when the normalized name matches and the match is unique, else to another set the same way, else it
+   keeps a slug. MacDonald prints no CAS numbers; its names join to Region 4 by this rule, and six names that
+   Region 4 prints differently (Chromium, Lindane, Sum DDD, Sum DDE, Sum DDT, Total DDTs) go through an alias
+   table that the build checks against the name the Region 4 file itself prints for that id.
+5. **Rows left out or valueless.** A CCME cell that prints no number (Narrative, Guidance Framework, See table,
+   No PEL derived, a pH range, and the two oddly printed cells, metribuzin "1,0" and nitrite "60 NO2-N") produces
+   no row: 29 cells, counted in the file and reported, not interpreted. A CCME cell printed Equation, Variable
+   or Table is a site-specific row with no value (ruling 5 of the scope: no equation is transcribed with the
+   set).
+6. **Units.** Converted only at the build and kept beside the printed value: ng/L to ug/L by exact decimal shift
+   (ANZG dioxins in water), ug Sn/L as ug/L with the note that it is expressed as tin, ng TEQ/kg to ug/kg with
+   the note that it is expressed as toxic equivalents (CCME dioxins and furans, the only group-of-congeners
+   guideline in the sets). The TEQ rows stay in the set: the comparison is against whatever series the user
+   chooses, and the note says what the guideline is of.
+7. **Values with a condition.** A UK or EU value printed with a condition (copper, zinc plus an ambient
+   background, manganese bioavailable) is compared at the printed value with the condition shown, which is the
+   conservative direction because the standard that applies is not lower. Cadmium has one row per hardness class
+   and is shown with all five classes; the ANZG split rows (zinc and nickel by country, nitrate by hardness) are
+   one row each with their label.
+8. **The choice.** Seven choices: the US pair (default), the five international sets, and all sets side by side.
+   One selector and not one per medium: the sets that hold one medium only (EU, UK, ANZG water; MacDonald
+   sediment) say so and are not compared with the other medium. The choice is saved as `criteriaSet` inside the
+   surface water screen state, optional inside the current format version and not written when it is the default,
+   so an unchanged project is byte for byte what it was. It sits beside the form and not inside it, so it does
+   not enter the stale-feed fingerprint, which it does not affect. A project saved with another set opens the
+   comparison panel.
+9. **What is shown.** Each criterion shows its basis in words, the set, the water type and the source table,
+   and a Note disclosure for the condition. US criteria get the same treatment, derived from their endpoint and
+   Region 4 table and page, so the default view also shows basis and source. The older label "aquatic freshwater
+   acute" became "acute (criterion maximum concentration, CMC), freshwater", and the UI test was changed with it.
+10. **CSV and report.** The comparison is a CSV table (`surface-water-criteria-<set>`) with the set, basis,
+    medium, water type, source table, status, values, ratio and note, from the panel state on the screen. The
+    report has no panel state, so it prints the comparison for the chemical of the run (the bank run's chemical
+    while linked), freshwater and saltwater together, at the default hardness, with the foc of the screen when
+    sediment is on, and says so in a note. A new optional `criteria` data edition (`criteria-2026-10-23`) names the
+    sets in the file name and the methods statement; the statement cites the references of the sets read and
+    cites the US criteria only while the US pair is among them. Before this slice the screen CSV and the report
+    held no criteria comparison at all, so the default report now gains one table when the run has a chemical
+    with criteria.
+11. **Left open.** The EU set is the 2013 annex; a 2026 revision a secondary source reports was not read. The UK
+    Directions are as made. The Springer terms page was not fetched. The 2026 CCME summary prints no edition
+    date. `warne2018` has no venue or URL. None of the UK zinc ambient background catchment values
+    (`zinc-abc.csv`) is used by the comparison.

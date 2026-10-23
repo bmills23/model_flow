@@ -162,6 +162,8 @@ export const dataSchema = z.object({
   rsl: text.optional(),
   nrwqc: text.optional(),
   sediment: text.optional(),
+  /** The international criteria sets (directory name under packages/data/generated); absent in older files. */
+  criteria: text.optional(),
 });
 
 export const projectSchema = z.object({

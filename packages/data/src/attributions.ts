@@ -11,8 +11,8 @@ export interface AttributionInput {
 
 export interface DataEdition {
   label: string;
-  /** The page's own "last updated" date, ISO 8601. */
-  pageDate: string;
+  /** The page's own "last updated" date, ISO 8601; absent where the source prints none. */
+  pageDate?: string | undefined;
   /** Date the committed copy was fetched, ISO 8601. */
   retrieved: string;
   licence: string;
@@ -109,7 +109,7 @@ export function renderAttributions({
           '',
           ...dataEditions.map(
             (e) =>
-              `- ${e.label} (page dated ${e.pageDate}; retrieved ${e.retrieved}). ${e.licence}`,
+              `- ${e.label} (${e.pageDate === undefined ? 'no edition date printed' : `page dated ${e.pageDate}`}; retrieved ${e.retrieved}). ${e.licence}`,
           ),
         ],
   );

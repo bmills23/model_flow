@@ -135,6 +135,24 @@ describe('renderAttributions', () => {
     expect(md).not.toContain('retrieved 2026');
   });
 
+  it('says so when a data source prints no edition date', () => {
+    const out = renderAttributions({
+      methods,
+      references: refs,
+      generatedOn: '2026-10-23',
+      dataEditions: [
+        {
+          label: 'A table with no edition date',
+          retrieved: '2026-10-23',
+          licence: 'Values only.',
+        },
+      ],
+    });
+    expect(out).toContain(
+      'A table with no edition date (no edition date printed; retrieved 2026-10-23). Values only.',
+    );
+  });
+
   it('separates software licences: they are not part of this document', () => {
     expect(md).not.toMatch(/MIT License|Apache-2\.0/);
     expect(md).toContain('THIRD_PARTY_LICENSES.md');

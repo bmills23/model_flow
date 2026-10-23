@@ -51,3 +51,56 @@ describe('surface water CSV', () => {
     expect(lines[3]).toBe('surfaceWater.mass-discharge,1,4,2,0.5,,');
   });
 });
+
+describe('surface water CSV: the criteria comparison', () => {
+  const rows = [
+    {
+      chemicalId: '71-43-2',
+      chemical: 'Benzene',
+      method: 'surfaceWater.well-mixed',
+      medium: 'surface water',
+      set: 'Canada (CCME)',
+      basis: 'long-term exposure guideline',
+      waterType: 'freshwater',
+      criterion: 'ccme-fresh-long-term',
+      source: 'CCME summary table, aquatic life columns',
+      status: 'compared',
+      criterionValue: 370,
+      peak: 2907,
+      unit: 'ug/L',
+      ratio: 7.86,
+      exceeds: true,
+      note: '',
+    },
+  ];
+
+  it('is a table of its own, only once a comparison has been made', () => {
+    expect(surfaceWaterCsvTables(result).map((t) => t.name)).toEqual([
+      'surface-water-results',
+      'surface-water-time-series',
+    ]);
+    expect(surfaceWaterCsvTables(result, { set: 'ccme', rows: [] })).toHaveLength(2);
+    const t = surfaceWaterCsvTables(result, { set: 'ccme', rows })[2]!;
+    expect(t.name).toBe('surface-water-criteria-ccme');
+    expect(t.editions).toEqual(['criteria']);
+  });
+
+  it('carries the set, basis, medium, water type and source of each criterion', () => {
+    const t = surfaceWaterCsvTables(result, { set: 'ccme', rows })[2]!;
+    const lines = exportCsv(t.rows, t.columns).trimEnd().split('\r\n');
+    expect(lines[0]).toBe(
+      'chemical id,chemical,method,medium,criteria set,basis,water type,criterion,source table,status,criterion value,peak concentration,concentration unit,ratio of peak to criterion,exceeds,condition or note',
+    );
+    expect(lines[1]).toBe(
+      '71-43-2,Benzene,surfaceWater.well-mixed,surface water,Canada (CCME),long-term exposure guideline,freshwater,ccme-fresh-long-term,"CCME summary table, aquatic life columns",compared,370,2907,ug/L,7.86,true,',
+    );
+  });
+
+  it('names the editions of the data it reads: the US pair, the international sets, or both', () => {
+    const edition = (set: 'us' | 'all' | 'uk') =>
+      surfaceWaterCsvTables(result, { set, rows })[2]!.editions;
+    expect(edition('us')).toEqual(['nrwqc', 'sediment']);
+    expect(edition('uk')).toEqual(['criteria']);
+    expect(edition('all')).toEqual(['nrwqc', 'sediment', 'criteria']);
+  });
+});

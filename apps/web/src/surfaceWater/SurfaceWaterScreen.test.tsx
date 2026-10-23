@@ -1,8 +1,8 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearBankFeed, setBankFeed } from '../transport/bankFeed';
 import { toScenario } from '../transport/form';
-import { addChemical, isFeedStaleNow } from '../project/store';
+import { addChemical, getScreen, isFeedStaleNow, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, getSurfaceWaterFeed, getSurfaceWaterFeedSlots } from './feed';
 import { SurfaceWaterScreen } from './SurfaceWaterScreen';
 import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
@@ -10,6 +10,8 @@ import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testk
 afterEach(() => {
   clearBankFeed();
   clearSurfaceWaterFeed();
+  cleanup();
+  setScreen('surfaceWater', { form: getScreen('surfaceWater').form });
 });
 
 async function loaded() {
@@ -105,17 +107,74 @@ describe('SurfaceWaterScreen', () => {
     });
     // 2.91 mg/L of zinc against a 120 ug/L criterion is far above 1
     expect(within(table).getAllByText('exceeds').length).toBeGreaterThan(0);
-    expect(within(table).getByText(/aquatic freshwater acute/i)).toBeTruthy();
+    expect(
+      within(table).getByText(/acute \(criterion maximum concentration, CMC\), freshwater/i),
+    ).toBeTruthy();
     const before = within(table)
-      .getByText(/aquatic freshwater acute/i)
+      .getByText(/acute \(criterion maximum concentration, CMC\), freshwater/i)
       .closest('tr')!.textContent;
     fireEvent.change(within(panel).getByLabelText(/^hardness/i), { target: { value: '200' } });
     await waitFor(() => {
       const after = within(panel)
-        .getAllByText(/aquatic freshwater acute/i)[0]!
+        .getAllByText(/acute \(criterion maximum concentration, CMC\), freshwater/i)[0]!
         .closest('tr')!.textContent;
       expect(after).not.toBe(before);
     });
+  }, 60000);
+
+  it('offers the sets, keeps the US pair as the default, and shows basis, medium and source with each value', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /compare with water quality criteria/i }));
+    const panel = await screen.findByRole('region', { name: /comparison with criteria/i });
+    const select = within(panel).getByLabelText(/^criteria set/i) as HTMLSelectElement;
+    expect(select.value).toBe('us');
+    expect([...select.options].map((o) => o.value)).toEqual([
+      'us',
+      'ccme',
+      'eu',
+      'uk',
+      'anzg',
+      'macdonald2000',
+      'all',
+    ]);
+    fireEvent.change(select, { target: { value: 'ccme' } });
+    expect(getScreen('surfaceWater').criteriaSet).toBe('ccme');
+    const search = await within(panel).findByLabelText(/find a chemical for the criteria/i);
+    await waitFor(() => expect((search as HTMLInputElement).disabled).toBe(false), {
+      timeout: 15000,
+    });
+    fireEvent.change(search, { target: { value: '71-43-2' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare benzene/i }));
+    const table = await within(panel).findByRole('table', {
+      name: /legacy surface water, ratio of the peak/i,
+    });
+    // 2.91 mg/L of benzene against the 370 ug/L long-term guideline
+    const row = within(table)
+      .getByText(/long-term exposure guideline/i)
+      .closest('tr')!;
+    expect(row.textContent).toMatch(/Canada \(CCME\)/);
+    expect(row.textContent).toMatch(/freshwater/);
+    expect(row.textContent).toMatch(/CCME summary table/);
+    expect(row.textContent).toMatch(/370 ug\/L/);
+    expect(within(row).getByText('exceeds')).toBeTruthy();
+  }, 60000);
+
+  it('opens with the saved set and puts the set and basis in the CSV of the comparison', async () => {
+    setScreen('surfaceWater', { form: getScreen('surfaceWater').form, criteriaSet: 'eu' });
+    await loaded();
+    const panel = await screen.findByRole('region', { name: /comparison with criteria/i });
+    expect((within(panel).getByLabelText(/^criteria set/i) as HTMLSelectElement).value).toBe('eu');
+    expect(screen.queryByRole('button', { name: /download csv: criteria comparison/i })).toBeNull();
+    const search = await within(panel).findByLabelText(/find a chemical for the criteria/i);
+    await waitFor(() => expect((search as HTMLInputElement).disabled).toBe(false), {
+      timeout: 15000,
+    });
+    fireEvent.change(search, { target: { value: '15972-60-8' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare alachlor/i }));
+    await within(panel).findByRole('table', { name: /legacy surface water, ratio of the peak/i });
+    expect(
+      await screen.findByRole('button', { name: /download csv: criteria comparison/i }),
+    ).toBeTruthy();
   }, 60000);
 
   it('sends the surface water series to the risk screen with its method origin', async () => {
