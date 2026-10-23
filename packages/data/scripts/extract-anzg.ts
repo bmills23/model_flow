@@ -5,8 +5,8 @@
 //
 // The master table is one worksheet, one row per toxicant and medium, with columns for the 99, 95, 90
 // and 80 percent species protection values and one for a value of unknown protection level. This
-// script writes raw/anzg/anzg-2018-dgv.csv (one row per printed value), raw/anzg/manifest.json and
-// raw/anzg/references.proposed.json. Every value is read from the worksheet cells; nothing is typed in.
+// script writes raw/anzg/anzg-2018-dgv.csv (one row per printed value) and raw/anzg/manifest.json. The
+// references live in packages/engine/src/references/references.json. Every value is read from the worksheet cells; nothing is typed in.
 //
 // The workbook is NOT committed (the department's default terms of use do not allow redistribution of
 // material that carries no open licence mark, see the manifest), so only the values ship, as facts with
@@ -341,46 +341,6 @@ const main = (): void => {
     rowsWithoutValues: skipped,
   };
   writeFileSync(join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-  const refs = [
-    {
-      key: 'anzg2018',
-      type: 'guideline',
-      authors:
-        'Australian and New Zealand Governments and Australian state and territory governments',
-      year: 2018,
-      title: 'Australian and New Zealand Guidelines for Fresh and Marine Water Quality',
-      venue: 'Canberra, ACT, Australia',
-      identifier: 'ANZG 2018',
-      url: PAGE_URL,
-      accessed: RETRIEVED,
-    },
-    {
-      key: 'warne2018',
-      type: 'method',
-      authors: 'Warne et al.',
-      year: 2018,
-      title:
-        'Revised method for deriving Australian and New Zealand water quality guideline values for toxicants',
-      venue: '',
-      identifier: '',
-      url: '',
-      accessed: '',
-      note: 'Cited in the master table by authors, year and the title above only; the full reference and URL are not printed there and must be confirmed before use.',
-    },
-    {
-      key: 'anzecc2000',
-      type: 'guideline',
-      authors: 'ANZECC & ARMCANZ',
-      year: 2000,
-      title: '',
-      venue: '',
-      identifier: '',
-      url: '',
-      accessed: '',
-      note: 'Cited in the master table comments as ANZECC/ARMCANZ (2000), source of the values with publish_year 2000; the full reference is not printed there.',
-    },
-  ];
-  writeFileSync(join(outDir, 'references.proposed.json'), JSON.stringify(refs, null, 2) + '\n');
   console.log(
     `${rows.length} values from ${sourceRows} source rows; ${skipped.length} rows without values`,
   );

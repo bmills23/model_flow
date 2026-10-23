@@ -54,6 +54,30 @@ const sediment = JSON.parse(
 const ecossl = JSON.parse(
   readFileSync(resolve(root, 'packages/data/generated/ecossl-2026-10-18/ecossl.json'), 'utf8'),
 ) as { source: { listingPageDate: string; retrieved: string; licence: string } };
+interface CriteriaSetHeader {
+  label: string;
+  source: {
+    title: string;
+    pageDate?: string;
+    retrieved: string;
+    redistributed: boolean;
+    terms: string;
+  };
+}
+const criteriaDir = resolve(root, 'packages/data/generated/criteria-2026-10-23');
+const criteriaEdition = (set: string): DataEdition => {
+  const f = JSON.parse(
+    readFileSync(resolve(criteriaDir, `${set}.json`), 'utf8'),
+  ) as CriteriaSetHeader;
+  return {
+    label: `${f.label}, ${f.source.title}`,
+    pageDate: f.source.pageDate,
+    retrieved: f.source.retrieved,
+    licence: f.source.redistributed
+      ? `Source file committed under its reuse terms. ${f.source.terms}`
+      : `Source file not committed, values only. ${f.source.terms}`,
+  };
+};
 const dataEditions = [
   nrwqcEdition(
     'aquatic.json',
@@ -77,6 +101,7 @@ const dataEditions = [
     retrieved: ecossl.source.retrieved,
     licence: ecossl.source.licence,
   },
+  ...['ccme', 'eu', 'uk', 'anzg', 'macdonald2000'].map(criteriaEdition),
 ];
 
 write('ATTRIBUTIONS.md', (generatedOn) =>

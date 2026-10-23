@@ -545,7 +545,6 @@ Planned references no shipped method relies on yet. They are listed in `referenc
 - `abreu2006`: Simulating the effect of aerobic biodegradation on soil vapor intrusion into buildings: influence of degradation rate, source concentration, and depth
 - `sobol1993`: [Sensitivity estimates for nonlinear mathematical models]
 - `morris1991`: Factorial sampling plans for preliminary computational experiments
-- `macdonald2000`: Development and evaluation of consensus-based sediment quality guidelines for freshwater ecosystems
 - `noaasquirts`: Screening Quick Reference Tables (SQuiRTs)
 - `long1995`: Incidence of adverse biological effects within ranges of chemical concentrations in marine and estuarine sediments
 - `stephan1985`: Guidelines for Deriving Numerical National Water Quality Criteria for the Protection of Aquatic Organisms and Their Uses

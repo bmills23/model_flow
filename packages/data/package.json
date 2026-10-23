@@ -17,6 +17,7 @@
     "build:nrwqc": "tsx scripts/build-nrwqc.ts",
     "fetch:nrwqc": "tsx scripts/fetch-nrwqc.ts",
     "build:sediment": "tsx scripts/build-sediment.ts",
+    "build:criteria": "tsx scripts/build-criteria.ts",
     "build:ecossl": "tsx scripts/build-ecossl.ts",
     "fetch:ecossl": "tsx scripts/fetch-ecossl.ts verify 2026-10-18",
     "extract:r4-sediment": "tsx scripts/extract-r4-sediment.ts",
@@ -36,6 +37,7 @@
     "./rsl-types": "./src/rsl/types.ts",
     "./nrwqc-types": "./src/nrwqc/types.ts",
     "./sediment-types": "./src/sediment/types.ts",
+    "./criteria-types": "./src/criteria/types.ts",
     "./generated/*": "./generated/*"
   }
 }
