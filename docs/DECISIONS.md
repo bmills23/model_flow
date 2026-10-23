@@ -3913,3 +3913,13 @@ criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and
    Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
 7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
    place with what landed, and the 102-item count is restated from those rows.
+
+### Wave V slice macdonald2000
+
+All DEFAULT, open to Bryan's overturn.
+
+1. **Source.** The consensus TEC and PEC are transcribed from a complete text-layer copy of the article hosted by Oak Ridge National Laboratory (Tables 2 and 3, journal pages 23 and 24) and cross-checked value by value against a second complete copy in the EPA Superfund records, read from page images. No differences. The article itself, not a reproduction, is the source, so `macdonald2000` stays the only value citation; the two copies are proposed as locator references.
+2. **Not redistributed.** Neither copy is committed (Springer copyright notice, no redistribution licence found). Only the values ship, as facts, with the manifest recording URLs, retrieval date and SHA-256.
+3. **Row counts.** Table 2 prints 29 TEC values and Table 3 prints 28 PEC values (Dibenz[a,h]anthracene has a TEC only). Both are kept as printed; the "28 chemicals" of the abstract counts the PEC list.
+4. **CAS.** The article prints no CAS numbers, so the column is empty; slice V3 joins by name against the chemical database.
+5. **Values.** Kept as printed (thousands separators removed), in the printed units (mg/kg DW for the eight metals, ug/kg DW for the rest). Only the consensus column is taken, not the individual source guidelines printed beside it.
