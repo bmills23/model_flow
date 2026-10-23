@@ -3720,3 +3720,32 @@ recorded in wave R).
    comparisons by three runs) in `validationCatalogSweep.ts`, each pinned to the counts in
    `test/fixtures/visl-sweep/exceptions.json`. The fallback fixture `vapor/visl.json` is retired; identity 8c in
    `vapor-screening.test.ts` now uses the calculator's printed Henry constants and target indoor air levels.
+
+## 2026-10-23: Wave T scope, RSL special-case cancer equations
+
+Bryan, after wave S: "do the TCE equations wave" (the recommended next wave: build the RSL User's Guide's own
+trichloroethylene cancer equations, which both the RSL sweep and the VISL comparison excepted).
+
+1. **Chemicals (DEFAULT).** Trichloroethylene and vinyl chloride. Both carry the same `special` flag, the same
+   warning (`exposure.special-case-not-modelled`) and the same RSL sweep exception class (`special-case-equations`),
+   and the exposure methods note defers them together; building one leaves the class and the warning half in place.
+2. **Source (DEFAULT).** The RSL User's Guide (`epa2024rslug`) sections for the two chemicals, read again in this
+   wave with the read date and section numbers recorded in the reference notes, and the assessments those sections
+   name for any component toxicity value. Every number comes from a page read in this wave. A value that cannot be
+   read from a primary page is not entered, and that part of the wave stops and is reported.
+3. **Where (DEFAULT).** The modern exposure method, for every receptor it computes (the RSL presets and per-project
+   edited receptors) and every pathway, so the cleanup levels, the vapor and household paths and the uncertainty
+   runs that use its coefficients follow without their own copy of the equations. The legacy method is unchanged:
+   it has no age-dependent adjustment, as RISC5. The warning is removed for a chemical whose equations are applied;
+   a receptor or pathway the equations do not cover keeps a warning that names what is not covered.
+4. **Overridden toxicity values (DEFAULT).** When a project overrides the cancer value of a special-case chemical,
+   the engine applies the guide's equations to the given value in the guide's own proportions, and a warning says
+   so.
+5. **Checks (DEFAULT).** The trichloroethylene and vinyl chloride cells excepted in the RSL sweep and the
+   trichloroethylene cells excepted in the VISL comparison become ordinary comparisons at the unchanged tolerance
+   (half a unit of the last printed figure). Their exception classes are removed; a cell that still does not
+   reproduce is unexplained unless an existing checked class applies, and is reported with its numbers. The counts
+   in the fixtures and the validation entries are recomputed from the test data.
+6. **Docs (DEFAULT).** The methods notes that describe the deferral (exposure and risk, chemical database, shower
+   and vapor models) are corrected in place with the slice, and VALIDATION is regenerated. The roadmap and the
+   handoff move at the wave close.
