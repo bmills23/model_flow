@@ -784,16 +784,8 @@ export const validationCatalog: CatalogInput = {
   ],
   notChecked: [
     {
-      subject: 'RSL soil inhalation cells',
-      note: 'The soil inhalation levels of the RSL tables (435 cells each for resident and industrial soil) and the soil totals that include them (another 435 each) are not checked: they rest on the RSL volatilization and particulate emission factors, which the November 2024 sweep does not compute. The sweeps check tap water inhalation and the industrial air levels; the 30-case independent check does not. The benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.',
-      where: {
-        file: 'packages/engine/test/fixtures/exposure/README.md',
-        needle: 'Tap-water inhalation, soil inhalation',
-      },
-    },
-    {
       subject: 'RSL sweep cells that do not reproduce',
-      note: 'Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.',
+      note: 'Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852; no reason found); the resident soil noncancer inhalation level of PCB 105 (printed 840 mg/kg, computed 833.3); the industrial soil noncancer total of n-nonane (printed 72, computed 72.5012, 0.002 percent above the limit). Excepted with a reason: twelve volatile chemicals with neither Koc nor Kd in the parameter sheet (soil inhalation cells and totals print the particulate-only level, so they are not counted as reproduced); lead (key G, no toxicity value); refractory ceramic fibers (key G, database value in fibers). Counts are in the sweep entries above.',
       where: {
         file: 'packages/engine/test/fixtures/rsl-sweep/README.md',
         needle: 'Aroclor 1242, 1248, 1254 and 1260',

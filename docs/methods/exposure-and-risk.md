@@ -41,7 +41,7 @@ Not in M4, and where it goes:
 | Item | Where | M4 handling meanwhile |
 |---|---|---|
 | Shower and sprinkler volatilization models (Foster and Chrostowski; Little); the RSL tap-water inhalation term with the Andelman factor | M7 | Pathway 5 takes a user-entered bathroom air concentration; nothing estimates it from the water concentration |
-| Indoor air from soil, soil gas or groundwater (vapour intrusion), outdoor air box and volatilization factors, particulate emission factors | M6 and M7 | Pathways 6 and 7 take user-entered air concentrations. Soil inhalation as the RSL tables compute it (soil times 1/VF plus 1/PEF) is not offered |
+| Indoor air from soil, soil gas or groundwater (vapour intrusion), outdoor air box and volatilization factors, particulate emission factors | M6 and M7 | Pathways 6 and 7 take user-entered air concentrations. Soil inhalation as the RSL tables compute it (soil times 1/VF plus 1/PEF) is not offered as a pathway; the sweep composes it from the receptor's air coefficient and the volatilization and particulate emission factor methods and compares the printed cells (below) |
 | Surface-water mixing and sediment | M8 | Pathways 8 and 9 take a user-entered concentration |
 | Irrigation water pathways | M7 | See `docs/methods/shower-irrigation-particulates.md` |
 | Homegrown vegetables | M9 | Added as a tenth pathway, `produce` (soil medium, fresh-weight plant factor per class on the chemical, user-entered homegrown fraction), in slice M9-E2; see `docs/methods/plants-and-eco.md`. `DIRECT_PATHWAY_IDS` is the nine above |
@@ -251,8 +251,37 @@ the same two special-case warnings as the risk screen.
 **Checks.** `packages/engine/test/exposure-special-cases.test.ts` writes each equation out from the guide in its
 own units; the RSL sweep reproduces every trichloroethylene and vinyl chloride cell the engine computes (tap water
 including the household inhalation term, resident soil ingestion, resident air) and the VISL comparison
-reproduces the resident trichloroethylene cancer level, both at the unchanged tolerance. Not compared: the soil
-inhalation cells, which need the volatilization factor the sweep does not compute.
+reproduces the resident trichloroethylene cancer level, both at the unchanged tolerance. The soil inhalation
+cancer cells and totals of the two chemicals reproduce as well (wave U, below).
+
+### Soil inhalation as the RSL tables compute it (the wave U comparison)
+
+The RSL soil inhalation level of a receptor is its air level times the air concentration per unit soil
+concentration, 1/VF + 1/PEF (user's guide sections 4.1.1 and 4.2.1, equation images read 2026-10-23): the
+resident at 350 d per year and 24 h per day, with the child and adult noncancer forms and the life-stage and
+special-case cancer forms as for air, and the composite worker at 250 d and 8 h. The soil total is the harmonic sum
+of the ingestion, dermal and inhalation levels. The exposure method already gives the air coefficient
+(`indoorInhalation`, the same exposure terms), so no pathway is added: `rslSweepHelpers.ts` multiplies it by
+1/VF + 1/PEF and compares the printed cells at half a unit of the second figure.
+
+The factors are `outdoorAir.ssg-vf-1996` (infinite source) and `particulate.ssg-pef-2002`, with the RSL inputs of the
+default parameter file the guide links (SEMS 404323, sheets "Chronic VF, Csat" and "PEF Wind"): dispersion factor
+for volatiles 68.18 g/(m^2 s) per kg/m^3 (0.5 acre), exposure interval 26 years (8.2e8 s), dry bulk density 1.5,
+particle density 2.65 (porosity 1 - 1.5/2.65), water-filled porosity 0.15, organic carbon 0.006, Kd = Koc f_oc,
+pi printed as 3.14, and the wind factor with Q/C 93.77 (PEF 1.36E9 m^3/kg). A chemical the tables call volatile takes
+both terms and the others take the particulate term. These differ from the engine's soil screening guidance defaults
+only in values the VF method already takes as options (Q/C, interval, soil), so the engine is unchanged; the test
+rescales the factor by sqrt(3.14 / pi). The porosity is the computed 0.434, not the rounded 0.43 the guide prints
+beside it: with 0.43, 38 of 84 resident volatile cancer cells reproduce, with 0.434, 83 do.
+
+Result: of 435 inhalation cells and 435 totals that include one in each soil table, 421 and 422 (resident) and 422
+and 421 (industrial) reproduce. Twelve volatile chemicals with neither a Koc nor a Kd in the parameter sheet print
+the particulate-only level, so the VF method has no input for them and the sweep excepts their 13 inhalation cells
+and 13 totals per table (it checks that the particulate-only level matches the printed cell). The vinyl chloride
+equation image prints the volatilization factor term only; the sweep adds the particulate term (under one part in
+100000 of the sum). Unexplained: the resident noncancer inhalation level of PCB 105 (840 printed, 833.3 computed) and
+the industrial noncancer total of n-nonane (72 printed, 72.5012 computed, 0.002 percent above the limit). The counts
+are in `docs/VALIDATION.md`, recomputed from the test data.
 
 ### Dermal absorbed dose (`ragse2004`)
 

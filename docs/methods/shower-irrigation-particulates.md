@@ -242,6 +242,14 @@ E3 to put into `processes/particulate/qOverC2002.ts`. A_s is in acres (valid 0.5
 at 0.5 acre gives 16.2302 exp[(ln 0.5 - 18.7762)^2 / 216.1080] = 93.77, matching the printed default 93.77.
 Exhibits D-3 and D-4 (volatile and off-site columns) are not transcribed.
 
+RSL soil inhalation comparison (wave U, 2026-10-23): with Q/C 93.77, V 0.5, U_m 4.69, U_t 11.32 and F(x) 0.194 this
+method gives the PEF of 1.36E9 m^3/kg that the RSL user's guide (sections 4.1.1, 4.2.1 and 4.9.1) uses in its soil
+inhalation levels. The particulate-only soil inhalation levels of the non-volatile chemicals reproduce the printed
+cells of the resident and composite worker tables (no non-volatile soil inhalation cell or total misses), which
+checks this method at the default Q/C. The guide prints the wind function F(x) as a function of U_t/U_m (the second
+branch gives 0.1931 at the default speeds); the default parameter file lists 0.194, which is what the method and the
+comparison use.
+
 | Zone | Station | A | B | C |
 |---|---|---|---|---|
 | 1 | Salem, OR | 12.3783 | 18.9683 | 218.2086 |

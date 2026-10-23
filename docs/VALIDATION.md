@@ -311,26 +311,26 @@ Summary: 44 entries (39 reproduced, 3 named exception, 1 pending or deferred, 1 
 #### RSL November 2024 sweep, resident soil
 
 - Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
-- Method: `exposure.rags-e-f-2014`
-- Compared: Resident soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1): all 3012 printed cells against the engine. 2140 reproduce, 872 are excepted (870 soil inhalation cells and totals that include them, and two lead cells with no toxicity value in the database), 0 are unexplained.
+- Method: `exposure.rags-e-f-2014`, `outdoorAir.ssg-vf-1996`, `particulate.ssg-pef-2002`
+- Compared: Resident soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1): all 3012 printed cells against the engine. 2983 reproduce, 28 are excepted (26 soil inhalation cells and totals of twelve chemicals that have no volatilization factor, and two lead cells with no toxicity value in the database), 1 is unexplained.
 - Cases: 3012 published screening levels
 - Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
 - Status: reproduced
 - Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
 - Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
-- Note: The soil inhalation level rests on the RSL volatilization and particulate emission factors, which the sweep does not compute, so the 435 inhalation cells and the 435 totals that include them are excepted, not compared.
+- Note: The soil inhalation level is the receptor's air level times 1/VF + 1/PEF, composed in the test from the volatilization factor (RSL inputs: Q/C 68.18, 26 years, the guide's soil) and the wind-erosion PEF (1.36E9 m3/kg); the engine gets no new option. A hand calculation of benzene checks the factors and all four levels. Twelve volatile chemicals have neither Koc nor Kd in the parameter sheet; their cells print the particulate-only level and are excepted, not counted as reproduced. Soil inhalation cells: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained; soil totals that include one: 435, of which 422 reproduce and 13 are excepted. Unexplained: the noncancer inhalation level of PCB 105 is printed 840 mg/kg and computed 833.3 mg/kg (0.8 percent below; the other PCB cells reproduce and no input difference was found).
 
 #### RSL November 2024 sweep, composite worker soil
 
 - Source: `epa2024rsl`, Regional Screening Levels (RSLs), Generic Tables, November 2024
-- Method: `exposure.rags-e-f-2014`
-- Compared: Industrial soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (hazard quotient 1): all 3011 printed cells against the engine. 2140 reproduce, 871 are excepted (870 soil inhalation cells and totals that include them, and one lead cell with no toxicity value in the database), 0 are unexplained.
+- Method: `exposure.rags-e-f-2014`, `outdoorAir.ssg-vf-1996`, `particulate.ssg-pef-2002`
+- Compared: Industrial soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (hazard quotient 1): all 3011 printed cells against the engine. 2983 reproduce, 27 are excepted (26 soil inhalation cells and totals of twelve chemicals that have no volatilization factor, and one lead cell with no toxicity value in the database), 1 is unexplained.
 - Cases: 3011 published screening levels
 - Tolerance: The engine's unrounded value lies within half a unit of the second significant figure of the printed value; the data holds at most two significant figures in every column, and nothing is widened.
 - Status: reproduced
 - Fixture: `rsl-sweep/exceptions.json`; test `rsl-tables-sweep.test.ts`
 - Data: `packages/data/generated/rsl-2024-11/screening-levels.json`
-- Note: The soil inhalation level rests on the RSL volatilization and particulate emission factors, which the sweep does not compute, so the 435 inhalation cells and the 435 totals that include them are excepted, not compared.
+- Note: The soil inhalation level is the receptor's air level times 1/VF + 1/PEF, composed in the test from the volatilization factor (RSL inputs: Q/C 68.18, 26 years, the guide's soil) and the wind-erosion PEF (1.36E9 m3/kg); the engine gets no new option. A hand calculation of benzene checks the factors and all four levels. Twelve volatile chemicals have neither Koc nor Kd in the parameter sheet; their cells print the particulate-only level and are excepted, not counted as reproduced. Soil inhalation cells: 435, of which 422 reproduce and 13 are excepted; soil totals that include one: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained. Unexplained: the noncancer total of n-nonane is printed 72 mg/kg and computed 72.5012 mg/kg, 0.002 percent above the half-unit limit of 72.5.
 
 #### RSL November 2024 sweep, resident and industrial air
 
@@ -520,8 +520,7 @@ What the examples above do not establish: references not yet read that a shipped
 
 ### Published values not checked
 
-- RSL soil inhalation cells: The soil inhalation levels of the RSL tables (435 cells each for resident and industrial soil) and the soil totals that include them (another 435 each) are not checked: they rest on the RSL volatilization and particulate emission factors, which the November 2024 sweep does not compute. The sweeps check tap water inhalation and the industrial air levels; the 30-case independent check does not. The benzo(a)pyrene tap water dermal value is omitted by the RSL and has no case.
-- RSL sweep cells that do not reproduce: Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.
+- RSL sweep cells that do not reproduce: Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852; no reason found); the resident soil noncancer inhalation level of PCB 105 (printed 840 mg/kg, computed 833.3); the industrial soil noncancer total of n-nonane (printed 72, computed 72.5012, 0.002 percent above the limit). Excepted with a reason: twelve volatile chemicals with neither Koc nor Kd in the parameter sheet (soil inhalation cells and totals print the particulate-only level, so they are not counted as reproduced); lead (key G, no toxicity value); refractory ceramic fibers (key G, database value in fibers). Counts are in the sweep entries above.
 - DeVaull (2007) vapor model: No published numeric example could be verified, so the model rests on identities and hand cases built from independent closed forms. There is no fixture file.
 - Table R-9 pages 2 and 3: The RISC5 guide reproduces only page 1 of the three pages, so the other rows cannot be checked.
 

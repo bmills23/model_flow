@@ -1,5 +1,8 @@
 import {
   modernChemical,
+  particulatePef2002,
+  qOverCToSi,
+  ssgVolatilizationFactor,
   modernPathway,
   modernResident,
   modernWorker,
@@ -52,6 +55,7 @@ interface PhysRecord {
   inEpd?: boolean;
   dermalForm?: string;
 }
+type PhysValues = Record<string, { value: number }>;
 interface ToxRecord {
   id: string;
   cas?: string;
@@ -117,6 +121,79 @@ function sweeperOf(id: string): Sweeper {
     cache.set(id, s);
   }
   return s;
+}
+
+/**
+ * Soil inhalation inputs of the RSL (user's guide sections 4.1.1 and 4.2.1 for the levels, 4.9.1 for the particulate
+ * emission factor, 4.9.4 for the chronic volatilization factor, read 2026-10-23; the values of the default exposure
+ * parameter file, SEMS 404323, sheets "Chronic VF, Csat" and "PEF Wind"). The test composes them from the engine's
+ * volatilization factor (`outdoorAir.ssg-vf-1996`) and wind-erosion particulate emission factor
+ * (`particulate.ssg-pef-2002`); the RSL form differs from the engine's defaults in the dispersion factor for
+ * volatiles, the exposure interval and the soil, which are passed as the options those methods already take.
+ */
+export const RSL_SOIL = {
+  /** Q/C for volatiles, 0.5 acre, g/(m^2 s) per kg/m^3. */
+  qOverCVolatile: 68.18,
+  /** Exposure interval of the unlimited-source model, 26 years in s. */
+  exposureS: 8.2e8,
+  /** The value of pi the guide prints in the volatilization factor. */
+  pi: 3.14,
+  /** Dry bulk density (kg/m^3), particle density (kg/m^3), water-filled porosity and organic carbon fraction. */
+  bulkDensity: 1500,
+  particleDensity: 2650,
+  moisture: 0.15,
+  foc: 0.006,
+} as const;
+
+/** The RSL particulate emission factor, m^3/kg: Q/C 93.77 with the wind-erosion defaults (the guide's 1.36E9). */
+export function rslPef(): number {
+  return particulatePef2002({ soilConcentration: 1 }).pef;
+}
+
+export type VfStatus =
+  | { kind: 'not-volatile' }
+  | { kind: 'missing-input'; missing: string[] }
+  | { kind: 'vf'; vf: number };
+
+/**
+ * The RSL volatilization factor of one chemical, m^3/kg. A chemical the tables do not call volatile has none (its
+ * soil inhalation term is the particulate part alone). A volatile chemical whose parameter-sheet row lacks an input of
+ * the engine's factor (H', a diffusivity, or both Koc and Kd) is reported as missing that input.
+ */
+export function rslVfStatus(id: string): VfStatus {
+  const t = tox.get(id);
+  const p = phys.get(id);
+  if (t === undefined || p === undefined || !t.volatile) return { kind: 'not-volatile' };
+  const v = p.values as PhysValues;
+  const missing = [
+    ...(v.hPrime === undefined ? ["H'"] : []),
+    ...(v.dia === undefined ? ['Dia'] : []),
+    ...(v.diw === undefined ? ['Diw'] : []),
+    ...(v.kd === undefined && v.koc === undefined ? ['Koc and Kd'] : []),
+  ];
+  if (missing.length > 0) return { kind: 'missing-input', missing };
+  const kd = v.kd !== undefined ? v.kd.value : v.koc!.value * RSL_SOIL.foc;
+  const result = ssgVolatilizationFactor({
+    chemical: { Da: v.dia!.value * 1e-4, Dw: v.diw!.value * 1e-4, H: v.hPrime!.value },
+    soil: {
+      porosity: 1 - RSL_SOIL.bulkDensity / RSL_SOIL.particleDensity,
+      moisture: RSL_SOIL.moisture,
+      bulkDensity: RSL_SOIL.bulkDensity,
+      kd: kd * 1e-3,
+    },
+    qOverC: qOverCToSi(RSL_SOIL.qOverCVolatile),
+    exposureTime: RSL_SOIL.exposureS,
+  });
+  // the guide prints pi as 3.14 in the volatilization factor; the engine uses Math.PI, so the test scales the
+  // infinite-source factor by sqrt(3.14 / pi) (0.02 percent), which decides a few cells at a rounding edge
+  return { kind: 'vf', vf: result.vf * Math.sqrt(RSL_SOIL.pi / Math.PI) };
+}
+
+/** Air concentration per unit soil concentration of the soil inhalation term, kg/m^3 per kg/kg: 1/VF + 1/PEF. */
+export function soilToAirFactor(id: string, particulateOnly = false): number | null {
+  const s = rslVfStatus(id);
+  if (s.kind === 'missing-input' && !particulateOnly) return null;
+  return (s.kind === 'vf' && !particulateOnly ? 1 / s.vf : 0) + 1 / rslPef();
 }
 
 const resident = modernResident();
@@ -186,14 +263,14 @@ export type PathwayName = 'ingestion' | 'dermal' | 'inhalation' | 'total';
 
 /**
  * The engine's coefficient set for one pathway of one medium and receptor. `inhalation` is the
- * resident indoor air level for tap water (divided by K) and for air, and is not computed for soil
- * (the soil inhalation terms need the volatilization and particulate emission factors, which are not shipped).
+ * resident indoor air level for tap water (divided by K) and for air, and for soil it is
+ * the RSL soil inhalation term: the receptor's air coefficient times 1/VF + 1/PEF (`soilToAirFactor`).
  */
 export function engineCoef(
   medium: string,
   pathway: PathwayName,
   id: string,
-  include: { dermal: boolean; inhalation: boolean },
+  include: { dermal: boolean; inhalation: boolean; particulateOnly?: boolean },
 ): Coef | 'missing' | 'not-computed' {
   const { chemical } = sweeperOf(id);
   const soil = medium.startsWith('soil');
@@ -210,18 +287,34 @@ export function engineCoef(
         c.hq === null ? null : Object.fromEntries(Object.entries(c.hq).map(([g, v]) => [g, v * k])),
     };
   };
+  // the soil inhalation term: the receptor's air coefficient (24 h, 350 d for the resident; 8 h, 250 d for the
+  // worker) times the air concentration per unit soil concentration, 1/VF + 1/PEF
+  const soilInhalation = (): Coef | 'missing' | 'not-computed' => {
+    const c = coefOf('indoorInhalation', receptor, chemical);
+    if (c === 'missing') return c;
+    const f = soilToAirFactor(id, include.particulateOnly === true);
+    if (f === null) return 'not-computed';
+    return {
+      risk: c.risk === null ? null : c.risk * f,
+      hq:
+        c.hq === null ? null : Object.fromEntries(Object.entries(c.hq).map(([g, v]) => [g, v * f])),
+    };
+  };
   switch (pathway) {
     case 'ingestion':
       return coefOf(ing, receptor, chemical);
     case 'dermal':
       return coefOf(derm, receptor, chemical);
     case 'inhalation':
-      return soil ? 'not-computed' : inhalation();
+      return soil ? soilInhalation() : inhalation();
     case 'total': {
-      if (soil && include.inhalation) return 'not-computed';
       const parts = [coefOf(ing, receptor, chemical)];
       if (include.dermal) parts.push(coefOf(derm, receptor, chemical));
-      if (!soil && include.inhalation) parts.push(inhalation());
+      if (include.inhalation) {
+        const part = soil ? soilInhalation() : inhalation();
+        if (part === 'not-computed') return part;
+        parts.push(part);
+      }
       return addCoefs(parts);
     }
   }
@@ -260,8 +353,8 @@ export const SWEEP_IDS: SweepId[] = ['tapwater', 'soil-resident', 'soil-industri
 
 /** The class ids a cell can be excepted under, in the order they are tried. */
 export const CLASS_IDS = [
-  'soil-inhalation-not-computed',
-  'soil-total-with-inhalation-not-computed',
+  'soil-inhalation-vf-input-missing',
+  'soil-total-vf-input-missing',
   'key-g-no-toxicity-value',
   'key-g-fiber-units',
 ] as const;
@@ -273,6 +366,18 @@ export interface SweepCounts {
   excepted: number;
   unexplained: number;
 }
+
+export interface SoilInhalationPart {
+  compared: number;
+  reproduced: number;
+  excepted: number;
+  unexplained: number;
+}
+/** The soil inhalation cells and the soil totals that include one, per soil sweep. */
+export type SoilInhalationCounts = Record<
+  'soil-resident' | 'soil-industrial',
+  { inhalation: SoilInhalationPart; totalWithInhalation: SoilInhalationPart }
+>;
 
 export interface UnexplainedCell {
   sweep: SweepId;
@@ -287,6 +392,7 @@ export interface SweepResult {
   sweeps: Record<SweepId, SweepCounts>;
   classes: Record<ClassId, { cells: Partial<Record<SweepId, number>>; chemicals: string[] }>;
   unexplained: UnexplainedCell[];
+  soilInhalation: SoilInhalationCounts;
   /** The tap water inhalation cells, which test the household factor K. */
   householdK: { cells: number; reproduced: number };
   /** Reproduced cells of the industrial air sweep whose key letter names the endpoint the engine finds governing. */
@@ -312,6 +418,16 @@ export function runRslSweep(): SweepResult {
   ) as SweepResult['classes'];
   const unexplained: UnexplainedCell[] = [];
   const householdK = { cells: 0, reproduced: 0 };
+  const emptyPart = (): SoilInhalationPart => ({
+    compared: 0,
+    reproduced: 0,
+    excepted: 0,
+    unexplained: 0,
+  });
+  const soilInhalation: SoilInhalationCounts = {
+    'soil-resident': { inhalation: emptyPart(), totalWithInhalation: emptyPart() },
+    'soil-industrial': { inhalation: emptyPart(), totalWithInhalation: emptyPart() },
+  };
   const keyLetters = { checked: 0, agree: 0 };
 
   for (const col of levels.columns) {
@@ -351,10 +467,23 @@ export function runRslSweep(): SweepResult {
       }
       const counts = sweeps[sweep];
       counts.compared += 1;
+      let part: SoilInhalationPart | null = null;
+      if (medium === 'soil-resident' || medium === 'soil-industrial') {
+        if (pathway === 'inhalation') part = soilInhalation[medium].inhalation;
+        else if (
+          pathway === 'total' &&
+          endpoint !== null &&
+          ch.values[`${medium}.inhalation.${endpoint}`] !== undefined
+        ) {
+          part = soilInhalation[medium].totalWithInhalation;
+        }
+      }
+      if (part !== null) part.compared += 1;
       const isHousehold = medium === 'tapwater' && pathway === 'inhalation';
       if (isHousehold) householdK.cells += 1;
       if (typeof computed === 'number' && withinHalfUnit(computed, cell.value)) {
         counts.reproduced += 1;
+        if (part !== null) part.reproduced += 1;
         if (isHousehold) householdK.reproduced += 1;
         if (governingLetter !== null) {
           keyLetters.checked += 1;
@@ -368,25 +497,36 @@ export function runRslSweep(): SweepResult {
         .map(([, v]) => v.key ?? '');
       const keyG = summaryKeys.some((k) => k.includes('G'));
       let cls: ClassId | null = null;
-      if (medium.startsWith('soil') && pathway === 'inhalation') {
-        cls = 'soil-inhalation-not-computed';
-      } else if (
-        medium.startsWith('soil') &&
-        pathway === 'total' &&
-        endpoint !== null &&
-        ch.values[`${medium}.inhalation.${endpoint}`] !== undefined
-      ) {
-        cls = 'soil-total-with-inhalation-not-computed';
+      if (computed === 'not-computed' && part !== null) {
+        // the engine's volatilization factor has no input for this chemical; the class stands only when the
+        // particulate-only level reproduces the printed cell (the tables then applied no volatilization factor)
+        const alt = engineLevel(
+          engineCoef(medium, pathway as PathwayName, ch.id, {
+            dermal: ch.values[`${medium}.dermal.${endpoint}`] !== undefined,
+            inhalation: true,
+            particulateOnly: true,
+          }),
+          endpoint!,
+          col.units,
+        );
+        if (typeof alt === 'number' && withinHalfUnit(alt, cell.value)) {
+          cls =
+            pathway === 'inhalation'
+              ? 'soil-inhalation-vf-input-missing'
+              : 'soil-total-vf-input-missing';
+        }
       } else if (keyG && computed === null) cls = 'key-g-no-toxicity-value';
       else if (keyG) cls = 'key-g-fiber-units';
 
       if (cls !== null) {
         counts.excepted += 1;
+        if (part !== null) part.excepted += 1;
         const entry = classes[cls];
         entry.cells[sweep] = (entry.cells[sweep] ?? 0) + 1;
         if (!entry.chemicals.includes(ch.name)) entry.chemicals.push(ch.name);
       } else {
         counts.unexplained += 1;
+        if (part !== null) part.unexplained += 1;
         unexplained.push({
           sweep,
           column: col.id,
@@ -398,5 +538,5 @@ export function runRslSweep(): SweepResult {
       }
     }
   }
-  return { sweeps, classes, unexplained, householdK, keyLetters };
+  return { sweeps, classes, unexplained, soilInhalation, householdK, keyLetters };
 }

@@ -6,10 +6,14 @@ import {
   engineCoef,
   engineLevel,
   levels,
+  rslPef,
+  rslVfStatus,
   runRslSweep,
+  soilToAirFactor,
   type ClassId,
   type PathwayName,
   type SweepCounts,
+  type SoilInhalationCounts,
   type SweepId,
   type UnexplainedCell,
   withinHalfUnit,
@@ -43,6 +47,7 @@ interface Fixture {
   }[];
   unexplained: UnexplainedCell[];
   householdK: { lPerM3: number; cells: number; reproduced: number };
+  soilInhalation: SoilInhalationCounts;
 }
 const fixture = exceptions as unknown as Fixture;
 
@@ -156,13 +161,16 @@ describe('RSL screening-level sweep: the special-case cancer equations', () => {
   );
 
   it('reproduces every trichloroethylene and vinyl chloride cell the engine computes, with no exception class', () => {
-    // the cancer cells the equations change: tap water (four pathways), resident soil ingestion, resident air
+    // the cancer cells the equations change: tap water (four pathways), resident soil ingestion, inhalation and
+    // total, resident air
     const columns = [
       'tapwater.ingestion.cancer',
       'tapwater.dermal.cancer',
       'tapwater.inhalation.cancer',
       'tapwater.total.cancer',
       'soil-resident.ingestion.cancer',
+      'soil-resident.inhalation.cancer',
+      'soil-resident.total.cancer',
       'air-resident.inhalation.cancer',
     ];
     for (const ch of special) {
@@ -189,12 +197,210 @@ describe('RSL screening-level sweep: the special-case cancer equations', () => {
   });
 
   it('keeps no exception class for the two chemicals', () => {
-    // the only cells of the two chemicals still excepted are the soil inhalation cells and the soil totals
-    // that include them (the volatilization factor is not computed here), under their own classes
+    // the soil inhalation cells and the soil totals that include them reproduce as well (wave U)
     expect(fixture.classes.map((c) => c.id)).not.toContain('special-case-equations');
     expect(CLASS_IDS as readonly string[]).not.toContain('special-case-equations');
     for (const u of result.unexplained) {
       expect(['Trichloroethylene', 'Vinyl Chloride'], u.name).not.toContain(u.name);
+    }
+  });
+});
+
+describe('RSL screening-level sweep: soil inhalation and the totals that include it', () => {
+  const soilSweeps = ['soil-resident', 'soil-industrial'] as const;
+
+  it('keeps no exception class for soil inhalation', () => {
+    expect(CLASS_IDS as readonly string[]).not.toContain('soil-inhalation-not-computed');
+    expect(CLASS_IDS as readonly string[]).not.toContain('soil-total-with-inhalation-not-computed');
+    expect(fixture.classes.map((c) => c.id)).not.toContain('soil-inhalation-not-computed');
+  });
+
+  it('compares every printed soil inhalation cell and every soil total that includes one', () => {
+    // the counts come from the published data, not from a typed number
+    for (const sweep of soilSweeps) {
+      const inhalationCols = levels.columns.filter((c) => c.id.startsWith(`${sweep}.inhalation.`));
+      const inhalation = inhalationCols.reduce((n, c) => n + c.count, 0);
+      let totals = 0;
+      for (const ch of levels.chemicals) {
+        for (const e of ['cancer', 'noncancer']) {
+          if (
+            ch.values[`${sweep}.total.${e}`] !== undefined &&
+            ch.values[`${sweep}.inhalation.${e}`] !== undefined
+          ) {
+            totals += 1;
+          }
+        }
+      }
+      expect(inhalation, sweep).toBeGreaterThan(0);
+      expect(result.soilInhalation[sweep].inhalation.compared, sweep).toBe(inhalation);
+      expect(result.soilInhalation[sweep].totalWithInhalation.compared, sweep).toBe(totals);
+    }
+  });
+
+  it('records the reproduced counts of the soil inhalation cells in the fixture', () => {
+    expect(result.soilInhalation).toEqual(fixture.soilInhalation);
+    for (const sweep of soilSweeps) {
+      for (const part of ['inhalation', 'totalWithInhalation'] as const) {
+        const c = result.soilInhalation[sweep][part];
+        expect(c.reproduced + c.excepted + c.unexplained, `${sweep} ${part}`).toBe(c.compared);
+      }
+    }
+  });
+});
+
+describe('RSL screening-level sweep: soil inhalation classes and the factors', () => {
+  const soilSweeps = ['soil-resident', 'soil-industrial'] as const;
+  const missingChemicals = (): string[] =>
+    levels.chemicals.filter((c) => rslVfStatus(c.id).kind === 'missing-input').map((c) => c.id);
+
+  it('names a volatile chemical with neither Koc nor Kd the only reason the volatilization factor is missing', () => {
+    // every chemical the class holds lacks both partition inputs, and every such chemical with a printed soil
+    // inhalation cell is in the class (identified from the data, not from a list)
+    const inClass = new Set<string>();
+    for (const sweep of soilSweeps) {
+      for (const id of [
+        'soil-inhalation-vf-input-missing',
+        'soil-total-vf-input-missing',
+      ] as const) {
+        const cells = result.classes[id].cells[sweep] ?? 0;
+        expect(cells, `${sweep} ${id}`).toBeGreaterThan(0);
+      }
+    }
+    for (const ch of levels.chemicals) {
+      const st = rslVfStatus(ch.id);
+      if (st.kind !== 'missing-input') continue;
+      const printed = soilSweeps.some(
+        (m) =>
+          ch.values[`${m}.inhalation.cancer`] !== undefined ||
+          ch.values[`${m}.inhalation.noncancer`] !== undefined,
+      );
+      if (!printed) continue;
+      expect(st.missing, ch.name).toContain('Koc and Kd');
+      inClass.add(ch.name);
+    }
+    expect([...inClass].sort()).toEqual(
+      [
+        ...new Set([
+          ...result.classes['soil-inhalation-vf-input-missing'].chemicals,
+          ...result.classes['soil-total-vf-input-missing'].chemicals,
+        ]),
+      ].sort(),
+    );
+    expect(missingChemicals().length).toBeGreaterThanOrEqual(inClass.size);
+  });
+
+  it('counts the class cells from the data, one per printed cell of those chemicals', () => {
+    const missing = new Set(missingChemicals());
+    for (const sweep of soilSweeps) {
+      let inhalation = 0;
+      let totals = 0;
+      for (const ch of levels.chemicals) {
+        if (!missing.has(ch.id)) continue;
+        for (const e of ['cancer', 'noncancer']) {
+          if (ch.values[`${sweep}.inhalation.${e}`] === undefined) continue;
+          inhalation += 1;
+          if (ch.values[`${sweep}.total.${e}`] !== undefined) totals += 1;
+        }
+      }
+      expect(result.classes['soil-inhalation-vf-input-missing'].cells[sweep], sweep).toBe(
+        inhalation,
+      );
+      expect(result.classes['soil-total-vf-input-missing'].cells[sweep], sweep).toBe(totals);
+    }
+  });
+
+  it('reproduces every class cell with the particulate-only level, which is what the sweep checks before classing it', () => {
+    for (const ch of levels.chemicals.filter((c) => rslVfStatus(c.id).kind === 'missing-input')) {
+      for (const sweep of soilSweeps) {
+        for (const e of ['cancer', 'noncancer'] as const) {
+          const cell = ch.values[`${sweep}.inhalation.${e}`];
+          if (cell === undefined) continue;
+          const col = levels.columns.find((c) => c.id === `${sweep}.inhalation.${e}`)!;
+          const level = engineLevel(
+            engineCoef(sweep, 'inhalation', ch.id, {
+              dermal: false,
+              inhalation: true,
+              particulateOnly: true,
+            }),
+            e,
+            col.units,
+          );
+          expect(typeof level, `${ch.name} ${sweep} ${e}`).toBe('number');
+          expect(withinHalfUnit(level as number, cell.value), `${ch.name} ${sweep} ${e}`).toBe(
+            true,
+          );
+        }
+      }
+    }
+  });
+
+  it('reproduces the particulate emission factor of the guide, 1.36E9 m3/kg', () => {
+    expect(Number(rslPef().toPrecision(3))).toBe(1.36e9);
+  });
+
+  it('leaves the particulate share of the vinyl chloride term, which the guide equation omits, below one part in 1e5', () => {
+    const vc = levels.chemicals.find((c) => c.name === 'Vinyl Chloride')!;
+    const st = rslVfStatus(vc.id);
+    expect(st.kind).toBe('vf');
+    const f = soilToAirFactor(vc.id)!;
+    const pefShare = 1 / rslPef() / f;
+    expect(pefShare).toBeLessThan(1e-5);
+  });
+
+  it('matches a hand calculation of benzene: the apparent diffusivity, the volatilization factor and the levels', () => {
+    // benzene (RSL parameter sheet values as shipped) with the guide equations written out by hand
+    const H = 0.22690106295994;
+    const Dia = 0.08953403951206; // cm2/s
+    const Diw = 1.026318746e-5; // cm2/s
+    const koc = 145.8; // L/kg
+    const iur = 7.8e-6; // per ug/m3
+    const rfc = 0.03; // mg/m3
+    const rhoB = 1.5;
+    const n = 1 - rhoB / 2.65;
+    const thetaW = 0.15;
+    const thetaA = n - thetaW;
+    const kd = koc * 0.006; // cm3/g, equal to L/kg
+    const da =
+      (thetaA ** (10 / 3) * Dia * H + thetaW ** (10 / 3) * Diw) /
+      n ** 2 /
+      (rhoB * kd + thetaW + thetaA * H);
+    const vf = (68.18 * Math.sqrt(3.14 * da * 8.2e8) * 1e-4) / (2 * rhoB * da);
+    const xx = (0.886 * 11.32) / 4.69;
+    expect(xx).toBeGreaterThan(2);
+    const pef = (93.77 * 3600) / (0.036 * 0.5 * (4.69 / 11.32) ** 3 * 0.194);
+    const f = 1 / vf + 1 / pef;
+
+    const benzene = levels.chemicals.find((c) => c.name === 'Benzene')!;
+    expect(soilToAirFactor(benzene.id)! / f).toBeCloseTo(1, 12);
+    const st = rslVfStatus(benzene.id);
+    expect(st.kind).toBe('vf');
+    if (st.kind === 'vf') expect(st.vf / vf).toBeCloseTo(1, 12);
+    expect(vf).toBeGreaterThan(1e3);
+    expect(vf).toBeLessThan(1e4);
+
+    const hand = {
+      residentCancer: (1e-6 * 365 * 70) / (iur * 1000 * 350 * 26 * f),
+      residentNoncancer: (1 * 365 * 6) / ((1 / rfc) * 350 * 6 * f),
+      industrialCancer: (1e-6 * 365 * 70) / (iur * 1000 * 250 * 25 * (8 / 24) * f),
+      industrialNoncancer: (1 * 365 * 25) / ((1 / rfc) * 250 * 25 * (8 / 24) * f),
+    };
+    const columns = {
+      residentCancer: ['soil-resident', 'cancer'],
+      residentNoncancer: ['soil-resident', 'noncancer'],
+      industrialCancer: ['soil-industrial', 'cancer'],
+      industrialNoncancer: ['soil-industrial', 'noncancer'],
+    } as const;
+    for (const [key, [medium, endpoint]] of Object.entries(columns)) {
+      const col = levels.columns.find((c) => c.id === `${medium}.inhalation.${endpoint}`)!;
+      const engine = engineLevel(
+        engineCoef(medium, 'inhalation', benzene.id, { dermal: false, inhalation: true }),
+        endpoint,
+        col.units,
+      ) as number;
+      const h = hand[key as keyof typeof hand];
+      expect(engine / h, key).toBeCloseTo(1, 9);
+      // the hand value reproduces the printed cell by the sweep's rule
+      expect(withinHalfUnit(h, benzene.values[col.id]!.value), key).toBe(true);
     }
   });
 });

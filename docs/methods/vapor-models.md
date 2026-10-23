@@ -453,6 +453,14 @@ is the rounding of the printed inputs and values. Appendix H's benzene compariso
 diffusion 5.82e-4 cm^2/s, VF 1.82e3 m^3/kg) was not reproduced from its printed inputs (they give 2.1e-3
 cm^2/s) and is not used.
 
+RSL soil inhalation comparison (wave U, 2026-10-23): the RSL tables compute the volatilization factor with the same
+equation, with the RSL's inputs in place of the guidance defaults (Q/C 68.18 for a 0.5 acre source, T 26 years, soil
+porosity 1 - 1.5/2.65, water-filled porosity 0.15, f_oc 0.006, pi printed as 3.14; user's guide section 4.9.4 and the
+default parameter file, read 2026-10-23). With those options this method reproduces the volatile chemicals' printed
+soil inhalation levels of the resident and composite worker tables (421 and 422 of 435 cells, with the rest
+excepted or unexplained as `docs/methods/exposure-and-risk.md` states). It is a check of the infinite-source factor
+at those inputs; the mass-limit form and other dispersion factors are not checked by it.
+
 ## Modern emission source: Jury behaviour-assessment volatilization (`vapor.jury-bam`)
 
 Citations: `jury1983`, `jury1990`, `millingtonquirk1961`.

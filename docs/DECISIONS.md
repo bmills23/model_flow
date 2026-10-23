@@ -3830,3 +3830,40 @@ the RSL soil inhalation levels, the largest block of RSL cells not yet compared)
    volatilization and particulate methods name the comparison as evidence where it checks them; the methods notes
    that describe the comparison are corrected in place with the slice, and VALIDATION is regenerated. The roadmap
    and the handoff move at the wave close.
+
+### Wave U, RSL soil inhalation comparison
+
+Rulings taken while building (2026-10-23), each marked DEFAULT and open to Bryan's overturn. Source: the RSL User's
+Guide (`epa2024rslug`) equation images of sections 4.1.1.1 to 4.1.1.6, 4.2.1.1, 4.2.1.2, 4.9.1 and 4.9.4, and the
+default parameter file it links in section 6 (SEMS 404323, the file the engine's modern presets are already tested
+against), read 2026-10-23.
+
+1. **Composition, no engine change (DEFAULT).** The soil inhalation level is the receptor's air coefficient (the
+   `indoorInhalation` terms, which carry the same 350 d, 24 h resident and 250 d, 8 h worker exposure) times 1/VF +
+   1/PEF, and a soil total is the harmonic sum of its pathway levels. The test composes these from
+   `outdoorAir.ssg-vf-1996` and `particulate.ssg-pef-2002`. The differences from the engine's guidance defaults are
+   all values those methods already take as options (Q/C, exposure interval, soil), so neither method changed.
+2. **RSL inputs (DEFAULT).** Q/C for volatiles 68.18 g/(m^2 s) per kg/m^3, an exposure interval of 8.2e8 s (26
+   years), dry bulk density 1.5 and particle density 2.65 g/cm^3, water-filled porosity 0.15, organic carbon 0.006,
+   Kd = Koc f_oc (the shipped Kd where the sheet gives one), wind Q/C 93.77 and the wind-erosion defaults (PEF
+   1.36E9 m^3/kg). The 68.18, the interval, 93.77 and F(x) 0.194 are printed in the parameter file, not in the
+   guide's text; the guide's equation images give the structure and the soil values.
+3. **Porosity (DEFAULT).** The total porosity is 1 - 1.5/2.65 = 0.434, the form the guide's equation prints, not the
+   0.43 printed beside it. With 0.43, 38 of 84 resident volatile cancer inhalation cells reproduce, with 0.434, 83.
+4. **Pi (DEFAULT).** The guide prints pi as 3.14 in the volatilization factor. The engine keeps Math.PI; the test
+   rescales the factor by sqrt(3.14 / pi) (0.02 percent), which decides a few cells at a rounding edge. No engine
+   option was added.
+5. **Which chemicals get a volatilization factor (DEFAULT).** The tables' volatile flag decides: volatile chemicals
+   take 1/VF + 1/PEF, the others 1/PEF. Twelve volatile chemicals have neither a Koc nor a Kd in the parameter sheet
+   (some also lack H' or the diffusivities), so the engine's factor has no input and the test does not compute one.
+   Their printed cells equal the particulate-only level; the guide text read does not state this rule, so the cells
+   are excepted under two classes whose evidence the sweep checks cell by cell, not counted as reproduced. Cells:
+   13 inhalation and 13 totals per soil table.
+6. **Vinyl chloride (DEFAULT).** The guide's soil inhalation image for vinyl chloride prints the volatilization
+   factor term only. The sweep adds the particulate term as for every chemical; it is under one part in 100000 of
+   the sum (a test asserts it), so the printed cells cannot tell the two forms apart.
+7. **Unexplained cells (DEFAULT).** Two remain and are not widened: the resident noncancer inhalation level of PCB 105
+   (840 printed, 833.3 computed) and the industrial noncancer total of n-nonane (72 printed, 72.5012 computed, 0.002
+   percent above the half-unit limit).
+8. **No saturation or ceiling substitution (DEFAULT).** The tables apply neither (guide sections 5.12 and 5.13), and
+   no printed soil inhalation cell needed one.

@@ -38,10 +38,24 @@ interface SweepCounts {
   classCells: [number, number][];
   methodIds: string[];
   note: string;
+  /** Extra pins (soil inhalation counts) and the evidence the soil sweeps add. */
+  extraPins?: { path: string; value: unknown }[];
+  extraEvidence?: string[];
 }
 
+const SOIL_METHODS = [
+  'exposure.rags-e-f-2014',
+  'outdoorAir.ssg-vf-1996',
+  'particulate.ssg-pef-2002',
+];
+
+const SOIL_EXTRA_EVIDENCE = [
+  'expect(result.soilInhalation).toEqual(fixture.soilInhalation)',
+  'expect(st.vf / vf).toBeCloseTo(1, 12)',
+];
+
 const SOIL_NOTE =
-  'The soil inhalation level rests on the RSL volatilization and particulate emission factors, which the sweep does not compute, so the 435 inhalation cells and the 435 totals that include them are excepted, not compared.';
+  "The soil inhalation level is the receptor's air level times 1/VF + 1/PEF, composed in the test from the volatilization factor (RSL inputs: Q/C 68.18, 26 years, the guide's soil) and the wind-erosion PEF (1.36E9 m3/kg); the engine gets no new option. A hand calculation of benzene checks the factors and all four levels. Twelve volatile chemicals have neither Koc nor Kd in the parameter sheet; their cells print the particulate-only level and are excepted, not counted as reproduced.";
 
 function sweep(s: SweepCounts): ExampleSpec {
   return {
@@ -57,7 +71,7 @@ function sweep(s: SweepCounts): ExampleSpec {
     tolerance: RSL_TOLERANCE,
     status: 'reproduced',
     testFile: 'rsl-tables-sweep.test.ts',
-    evidence: SWEEP_EVIDENCE,
+    evidence: [...SWEEP_EVIDENCE, ...(s.extraEvidence ?? [])],
     readmeNeedle: 'RSL sweep fixture',
     pins: [
       { path: `sweeps.${s.id}.compared`, value: s.cells },
@@ -65,6 +79,7 @@ function sweep(s: SweepCounts): ExampleSpec {
       { path: `sweeps.${s.id}.excepted`, value: s.excepted },
       { path: `sweeps.${s.id}.unexplained`, value: s.unexplained },
       ...s.classCells.map(([cls, n]) => ({ path: `classes.${cls}.cells.${s.id}`, value: n })),
+      ...(s.extraPins ?? []),
       // the household factor K note of the tap water entry (and the catalog entry for K) states these
       ...(s.id === 'tapwater'
         ? [
@@ -97,39 +112,61 @@ export const sweepExamples: ExampleSpec[] = [
     id: 'soil-resident',
     title: 'resident soil',
     cells: 3012,
-    reproduced: 2140,
-    excepted: 872,
-    unexplained: 0,
+    reproduced: 2983,
+    excepted: 28,
+    unexplained: 1,
     columns:
       'Resident soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1)',
     excepts:
-      '870 soil inhalation cells and totals that include them, and two lead cells with no toxicity value in the database',
+      '26 soil inhalation cells and totals of twelve chemicals that have no volatilization factor, and two lead cells with no toxicity value in the database',
     classCells: [
-      [0, 435],
-      [1, 435],
+      [0, 13],
+      [1, 13],
       [2, 2],
     ],
-    methodIds: ['exposure.rags-e-f-2014'],
-    note: SOIL_NOTE,
+    methodIds: SOIL_METHODS,
+    extraEvidence: SOIL_EXTRA_EVIDENCE,
+    extraPins: [
+      { path: 'soilInhalation.soil-resident.inhalation.compared', value: 435 },
+      { path: 'soilInhalation.soil-resident.inhalation.reproduced', value: 421 },
+      { path: 'soilInhalation.soil-resident.inhalation.excepted', value: 13 },
+      { path: 'soilInhalation.soil-resident.inhalation.unexplained', value: 1 },
+      { path: 'soilInhalation.soil-resident.totalWithInhalation.compared', value: 435 },
+      { path: 'soilInhalation.soil-resident.totalWithInhalation.reproduced', value: 422 },
+      { path: 'soilInhalation.soil-resident.totalWithInhalation.excepted', value: 13 },
+      { path: 'soilInhalation.soil-resident.totalWithInhalation.unexplained', value: 0 },
+    ],
+    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained; soil totals that include one: 435, of which 422 reproduce and 13 are excepted. Unexplained: the noncancer inhalation level of PCB 105 is printed 840 mg/kg and computed 833.3 mg/kg (0.8 percent below; the other PCB cells reproduce and no input difference was found).`,
   }),
   sweep({
     id: 'soil-industrial',
     title: 'composite worker soil',
     cells: 3011,
-    reproduced: 2140,
-    excepted: 871,
-    unexplained: 0,
+    reproduced: 2983,
+    excepted: 27,
+    unexplained: 1,
     columns:
       'Industrial soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (hazard quotient 1)',
     excepts:
-      '870 soil inhalation cells and totals that include them, and one lead cell with no toxicity value in the database',
+      '26 soil inhalation cells and totals of twelve chemicals that have no volatilization factor, and one lead cell with no toxicity value in the database',
     classCells: [
-      [0, 435],
-      [1, 435],
+      [0, 13],
+      [1, 13],
       [2, 1],
     ],
-    methodIds: ['exposure.rags-e-f-2014'],
-    note: SOIL_NOTE,
+    methodIds: SOIL_METHODS,
+    extraEvidence: SOIL_EXTRA_EVIDENCE,
+    extraPins: [
+      { path: 'soilInhalation.soil-industrial.inhalation.compared', value: 435 },
+      { path: 'soilInhalation.soil-industrial.inhalation.reproduced', value: 422 },
+      { path: 'soilInhalation.soil-industrial.inhalation.excepted', value: 13 },
+      { path: 'soilInhalation.soil-industrial.inhalation.unexplained', value: 0 },
+      { path: 'soilInhalation.soil-industrial.totalWithInhalation.compared', value: 435 },
+      { path: 'soilInhalation.soil-industrial.totalWithInhalation.reproduced', value: 421 },
+      { path: 'soilInhalation.soil-industrial.totalWithInhalation.excepted', value: 13 },
+      { path: 'soilInhalation.soil-industrial.totalWithInhalation.unexplained', value: 1 },
+    ],
+    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 422 reproduce and 13 are excepted; soil totals that include one: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained. Unexplained: the noncancer total of n-nonane is printed 72 mg/kg and computed 72.5012 mg/kg, 0.002 percent above the half-unit limit of 72.5.`,
   }),
   sweep({
     id: 'air',
