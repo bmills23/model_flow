@@ -1,0 +1,43 @@
+{
+  "set": "eu-eqs",
+  "retrieved": "2026-10-23",
+  "instrument": "Directive 2008/105/EC of the European Parliament and of the Council of 16 December 2008 on environmental quality standards in the field of water policy, as amended by Directive 2013/39/EU of 12 August 2013",
+  "version": "Consolidated text 2008L0105, EN, 13.09.2013 (header '2008L0105 - EN - 13.09.2013 - 001.001'), Annex I Part A (environmental quality standards). The EUR-Lex consolidation list was not reachable (bot challenge). A secondary source reports a 2026 revision of the priority substances framework (Directive (EU) 2026/805); it was neither fetched nor read, so this set is the 2013 amended annex that the wave scope names, not the 2026 revision.",
+  "files": [
+    {
+      "file": "consolidated-02008L0105-20130913.xhtml",
+      "role": "source",
+      "url": "http://publications.europa.eu/resource/celex/02008L0105-20130913",
+      "fetch": "curl with request headers 'Accept: application/xhtml+xml' and 'Accept-Language: eng' (Publications Office content negotiation); the eur-lex.europa.eu HTML and PDF addresses answered with a bot challenge and no document",
+      "retrieved": "2026-10-23",
+      "bytes": 150806,
+      "sha256": "2ed233725970fbba328d509afb90dbe2bbbc04a19d5757960172bdd1c2eaa79a",
+      "redistribution": "committed under the Commission reuse decision below"
+    },
+    {
+      "file": "eqs.csv",
+      "role": "table",
+      "generator": "packages/data/scripts/extract-eu-eqs.ts",
+      "bytes": 28358,
+      "sha256": "45a5730adb75f1ab9af761e393943ae4f3415e11f96728296a268e8709d6bb33"
+    }
+  ],
+  "terms": {
+    "statement": "Reuse of documents of the EU institutions published by the Publications Office, including EUR-Lex legal acts, is authorised under Commission Decision 2011/833/EU of 12 December 2011 on the reuse of Commission documents, which permits reuse for commercial and non-commercial purposes without charge and without individual application (Articles 1 to 6), except for documents covered by Article 2(2) (third-party intellectual property, logos, software).",
+    "url": "http://publications.europa.eu/resource/celex/32011D0833",
+    "urlFetched": "2026-10-23",
+    "urlSha256": "2d5bc877b9a5aad948af21c680aca1d3409f41df5dd0dcc57ef9b1b225f60982",
+    "note": "The EUR-Lex legal notice page (eur-lex.europa.eu/content/legal-notice/legal-notice.html) answered with a bot challenge and could not be read; the decision text itself was read."
+  },
+  "mapping": {
+    "freshwater": "'Inland surface waters' (rivers and lakes and related artificial or heavily modified water bodies, footnote 3)",
+    "marine": "'Other surface waters' (the annex does not define the term further; the set treats it as the marine and transitional column)",
+    "basis": "AA-EQS = annual average; MAC-EQS = maximum allowable concentration; unit as printed, 'μg/l' for columns 4 to 7"
+  },
+  "omitted": {
+    "biota": "Column 8 (EQS biota, μg/kg wet weight) is not transcribed; the medium list is water and sediment only",
+    "notApplicableOrBlank": "56 water cells printed 'not applicable', 'see footnote' or left blank (including the AA-EQS water cells of brominated diphenylethers, hexachlorobenzene, hexachlorobutadiene and mercury, which the annex gives for biota only, and all dioxin water cells) produce no row",
+    "sediment": "Annex I Part A prints no sediment standard"
+  },
+  "counts": { "rows": 180, "distinctNames": 53 }
+}

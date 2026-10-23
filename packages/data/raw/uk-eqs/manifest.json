@@ -1,0 +1,56 @@
+{
+  "set": "uk-eqs",
+  "retrieved": "2026-10-23",
+  "instrument": "The Water Framework Directive (Standards and Classification) Directions (England and Wales) 2015, Schedule 3 Part 2 (specific pollutants) Table 1 and Table 2, and Part 3 (priority substances) Table 1",
+  "version": "As made (Schedule 3 Part 3 Table 1 in force 14 September 2015, the remainder 22 December 2015), the associated document of S.I. 2015 No. 1623 on legislation.gov.uk. The Directions are not a statutory instrument and legislation.gov.uk serves no revised version of them. A web search on 2026-10-23 found no replacement or amendment, which does not rule one out. The Water Environment (Water Framework Directive) (England and Wales) Regulations 2017 (S.I. 2017/407) contents list shows no standards table.",
+  "files": [
+    {
+      "file": "directions-2015.pdf",
+      "role": "source",
+      "url": "https://www.legislation.gov.uk/uksi/2015/1623/pdfs/uksiod_20151623_en_003.pdf",
+      "listedAt": "https://www.legislation.gov.uk/uksi/2015/1623/resources (as 'The Water Framework Directive (Standards and Classification) Directions')",
+      "retrieved": "2026-10-23",
+      "bytes": 395767,
+      "sha256": "2001ea4047dc3da3a5c21e5276ba3cbd6ef0e1b8f17637fa9f2591399760e6bb",
+      "redistribution": "committed under the Open Government Licence v3.0"
+    },
+    {
+      "file": "eqs.csv",
+      "role": "table",
+      "generator": "packages/data/scripts/extract-uk-eqs.ts",
+      "bytes": 58566,
+      "sha256": "ee37a46a2e0ebf3cf1e88fceb0ab58c052caf4765245781feadefbeacdb71026"
+    },
+    {
+      "file": "zinc-abc.csv",
+      "role": "table",
+      "generator": "packages/data/scripts/extract-uk-eqs.ts",
+      "bytes": 1488,
+      "sha256": "287cd8cabedb64f823e0ebe0db3414c2cf0a945dfcd8aafc57743d8f081b9e87"
+    }
+  ],
+  "terms": {
+    "statement": "legislation.gov.uk states 'All content is available under the Open Government Licence v3.0 except where otherwise stated', which permits copying, publishing, distributing and adapting the information, including commercially, on condition of attribution (Crown copyright, source and licence link).",
+    "url": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+    "statementPage": "https://www.legislation.gov.uk/uksi/2015/1623/contents",
+    "urlFetched": "2026-10-23"
+  },
+  "mapping": {
+    "freshwater": "Part 2 'Fresh water' columns 1 and 2; Part 3 'Inland surface waters' columns 1 and 3",
+    "marine": "Part 2 'Salt water' columns 3 and 4; Part 3 'Other surface waters' columns 2 and 4",
+    "basis": "Part 2: long-term (mean) and short-term (95 percentile); Part 3: AA-EQS and MAC-EQS. Unit as printed, 'µg/l'",
+    "cas": "Part 2 prints no CAS numbers, so cas is blank on its rows"
+  },
+  "siteSpecific": {
+    "copper": "freshwater 1 µg/l bioavailable; saltwater 3.76 µg/l dissolved at DOC <= 1 mg/l and an equation above 1 mg/l, transcribed in the note",
+    "zinc": "freshwater 10.9 µg/l bioavailable plus the ambient background concentration, saltwater 6.8 µg/l dissolved plus 1.1 µg/l recommended background; the catchment values are in zinc-abc.csv",
+    "manganese": "123 µg/l bioavailable (UKTAG Metal Bioavailability Assessment Tool, not transcribed)",
+    "cadmium": "five hardness classes; the MAC-EQS class values sit under column 3 (inland) only, the column 4 cell is not printed",
+    "leadNickel": "bioavailable concentrations (Part 3 footnote 11)"
+  },
+  "omitted": {
+    "biota": "Column 5 (EQS biota) is not transcribed",
+    "notApplicableOrBlank": "56 Part 3 water cells printed 'not applicable', 'see footnote' or blank produce no row; Part 2 cells left blank produce no row"
+  },
+  "counts": { "eqsRows": 263, "part2Substances": 29, "part3Rows": 56, "zincCatchments": 33 }
+}
