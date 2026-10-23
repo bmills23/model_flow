@@ -3940,3 +3940,38 @@ All rulings DEFAULT and open to Bryan's overturn.
    text rather than interpreted.
 6. **Dates.** The page prints no edition date; each guideline carries its own year in the note, and the reference year
    is the site copyright year, 2026.
+=======
+### Wave V slice C-euuk
+
+Slice C-euuk acquired the European Union and United Kingdom aquatic criteria sets for rulings 3 to 5. Every ruling
+below is DEFAULT and open to Bryan's overturn.
+
+1. **European Union text.** The set is the Publications Office consolidated text of Directive 2008/105/EC, version
+   13.09.2013 (the Directive as amended by 2013/39/EU), Annex I Part A, fetched 2026-10-23 by content negotiation on
+   the `publications.europa.eu` CELEX address because the `eur-lex.europa.eu` addresses answer with a bot challenge. A
+   2026 revision of the priority substances framework is reported by a secondary source; it was not fetched or read, so
+   the set is the 2013 annex the scope names and the revision stays an open item for a later wave.
+2. **Medium mapping.** "Inland surface waters" is freshwater and "Other surface waters" is marine. The annex does not
+   define "other"; the set follows the column name and the data build keeps the printed basis beside it.
+3. **United Kingdom instrument.** The England and Wales standards live in the Water Framework Directive (Standards and
+   Classification) Directions 2015, an associated document of S.I. 2015/1623 on legislation.gov.uk, as made. They are
+   not a statutory instrument and no revised version is served; no replacement was found by search, which does not
+   rule one out. Part 2 (specific pollutants, with fresh water and salt water, long-term mean and short-term 95
+   percentile) and Part 3 (priority substances, annual average and maximum allowable concentration) are both
+   transcribed. Part 3 repeats the European values; the data test checks that, so the UK set adds no second authority
+   for them.
+4. **Not transcribed.** Biota standards (the medium list is water and sediment), cells printed "not applicable", "see
+   footnote" or blank, and the dioxin water cells. The English text prints the cadmium maximum allowable concentration
+   class values under column 3 only; the marine column 4 cell is not printed there, so the UK set has no marine cadmium
+   maximum and the European set (which prints both) does.
+5. **Site-specific values.** Cadmium is one row per hardness class with the class range in the note. Copper (saltwater
+   equation on dissolved organic carbon), zinc (a bioavailable or dissolved fraction plus an ambient background
+   concentration, the catchment table in `zinc-abc.csv`) and manganese (bioavailable, tool not transcribed) keep the
+   printed value with the condition in the note. Lead and nickel carry the bioavailable footnote.
+6. **Value form.** Values are copied from the printed cells, normalised only for the decimal comma and the printed
+   power of ten; the printed form stays in the note. The United Kingdom text prints two cadmium class values with a
+   comma (0,25 and 1,5); they are read as 0.25 and 1.5 and the note says so.
+7. **Raw files.** Both source files are committed: the European text under Commission Decision 2011/833/EU and the
+   United Kingdom PDF under the Open Government Licence v3.0, each with its SHA-256 in `manifest.json`. The EUR-Lex
+   legal notice page could not be read; the decision text was. The European source file keeps its own printed dashes.
+>>>>>>> wave-v-c-euuk
