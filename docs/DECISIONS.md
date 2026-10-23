@@ -3940,7 +3940,6 @@ All rulings DEFAULT and open to Bryan's overturn.
    text rather than interpreted.
 6. **Dates.** The page prints no edition date; each guideline carries its own year in the note, and the reference year
    is the site copyright year, 2026.
-=======
 ### Wave V slice C-euuk
 
 Slice C-euuk acquired the European Union and United Kingdom aquatic criteria sets for rulings 3 to 5. Every ruling
@@ -3974,4 +3973,3 @@ below is DEFAULT and open to Bryan's overturn.
 7. **Raw files.** Both source files are committed: the European text under Commission Decision 2011/833/EU and the
    United Kingdom PDF under the Open Government Licence v3.0, each with its SHA-256 in `manifest.json`. The EUR-Lex
    legal notice page could not be read; the decision text was. The European source file keeps its own printed dashes.
->>>>>>> wave-v-c-euuk
