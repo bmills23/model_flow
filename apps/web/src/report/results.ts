@@ -20,6 +20,8 @@ import {
   targetsOfChemicals,
 } from '../cleanup/surfaceWaterTarget';
 import { loadCriteriaDb } from '../surfaceWater/criteriaDb';
+import { DEFAULT_CRITERIA_SET } from '../surfaceWater/criteriaSetChoice';
+import { reportCriteria } from '../surfaceWater/reportCriteria';
 import {
   cleanupCsvTables,
   CLEANUP_METHOD_IDS,
@@ -307,17 +309,25 @@ function vapor(s: Screens, feed: Feed): SectionResults {
   return sec;
 }
 
-function surfaceWater(s: Screens, feed: Feed): SectionResults {
-  const parsed = surfaceWaterRequest(
-    s.surfaceWater.form,
-    feed<BankFeed>('bank', s.surfaceWater.form.chemicalId),
-  );
+async function surfaceWater(s: Screens, feed: Feed): Promise<SectionResults> {
+  const form = s.surfaceWater.form;
+  const bank = feed<BankFeed>('bank', form.chemicalId);
+  const parsed = surfaceWaterRequest(form, bank);
   if (!parsed.ok) return notComputed(parsed.errors);
   const out = computeSurfaceWater(parsed.request);
   if (!out.ok) return notComputed(out.error);
   const sec = empty();
-  sec.tables = surfaceWaterCsvTables(out.result);
-  const swScale = s.surfaceWater.form.scale;
+  // the comparison with the criteria set saved in the project, for the chemical of the run
+  const foc = form.sedimentOn && form.foc.trim() !== '' ? Number(form.foc) : undefined;
+  const comparison = await reportCriteria(
+    s.surfaceWater.criteriaSet ?? DEFAULT_CRITERIA_SET,
+    form.linked && bank !== null ? (bank.chemicalId ?? '') : form.chemicalId,
+    out.result,
+    foc !== undefined && Number.isFinite(foc) ? foc : undefined,
+  );
+  sec.tables = surfaceWaterCsvTables(out.result, comparison ?? undefined);
+  if (comparison !== null) sec.notes.push(comparison.note);
+  const swScale = form.scale;
   sec.charts = [
     { kind: 'surfaceWater', result: out.result, scale: swScale },
     { kind: 'sediment', result: out.result, scale: swScale },

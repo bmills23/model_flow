@@ -6,7 +6,9 @@ import type {
   HardnessFile,
   HumanHealthFile,
 } from '@model-flow/data/nrwqc-types';
-import type { BenchmarkFile } from '@model-flow/data/sediment-types';
+import type { BenchmarkFile, BenchmarkRow } from '@model-flow/data/sediment-types';
+import type { CriteriaSetId } from '@model-flow/data/criteria-types';
+import type { CriteriaSetChoice } from './criteriaSetChoice';
 
 export interface CriteriaChemical {
   /** Hyphenated CAS number, or the table's slug for a parameter. */
@@ -16,12 +18,45 @@ export interface CriteriaChemical {
   hasSediment: boolean;
 }
 
+/** What the screen shows beside a criterion: its set, basis, medium and the table it was read from. */
+export interface CriterionInfo {
+  set: 'us' | CriteriaSetId;
+  setLabel: string;
+  /** The basis in words: acute or chronic, annual average, protection level, TEC and so on. */
+  basis: string;
+  medium: Criterion['medium'];
+  waterType?: 'fresh' | 'salt';
+  /** The table, page or worksheet cell the value was read from. */
+  source: string;
+  /** A condition or note the source prints with the value (a hardness class, a bioavailable fraction). */
+  condition?: string;
+  /** The value and unit as printed, when the unit was converted. */
+  printed?: string;
+  year?: number;
+  reliability?: string;
+}
+
+/** One source line for the note under the selector. */
+export interface CriteriaSourceNote {
+  set: 'us' | CriteriaSetId;
+  label: string;
+  /** The edition or retrieval date as a short phrase. */
+  edition: string;
+}
+
 export interface CriteriaDb {
+  /** The choice this database was assembled for. */
+  set: CriteriaSetChoice;
   nrwqcEdition: string;
   sedimentEdition: string;
   criteria: Criterion[];
   chemicals: CriteriaChemical[];
   byChemical: Map<string, Criterion[]>;
+  /** Basis, medium and source of every criterion, by criterion id. */
+  info: Map<string, CriterionInfo>;
+  /** Media the chosen sets have values for. */
+  media: Criterion['medium'][];
+  sources: CriteriaSourceNote[];
 }
 
 const WATER_UNITS = new Set(['ug/L', 'mg/L']);
@@ -113,61 +148,188 @@ function sediment(file: BenchmarkFile): Criterion[] {
   }));
 }
 
+const US_LABEL = 'United States (EPA)';
+
+const AQUATIC_BASIS: Record<string, string> = {
+  acute: 'acute (criterion maximum concentration, CMC)',
+  chronic: 'chronic (criterion continuous concentration, CCC)',
+};
+
+const R4_BASIS: Record<string, string> = {
+  'region4-freshwater-screening': 'screening value, freshwater',
+  'region4-freshwater-refinement': 'refinement value, freshwater',
+  'region4-marine-screening': 'screening value, marine',
+  'region4-marine-refinement': 'refinement value, marine',
+  'region4-pah-toxic-unit-refinement': 'PAH toxic unit refinement value',
+};
+
+/** Basis, medium and source of each US criterion, read from its id and endpoint and from its source row. */
+function usInfo(
+  criteria: readonly Criterion[],
+  aq: AquaticFile,
+  hh: HumanHealthFile,
+  bench: BenchmarkFile,
+): Map<string, CriterionInfo> {
+  const rows = new Map<string, BenchmarkRow>(bench.rows.map((r) => [`sediment:${r.id}`, r]));
+  const out = new Map<string, CriterionInfo>();
+  for (const c of criteria) {
+    const waterType = c.waterType;
+    const wt = waterType === undefined ? {} : { waterType };
+    if (c.id.startsWith('aquatic:')) {
+      const kind = c.endpoint.endsWith('acute') ? 'acute' : 'chronic';
+      out.set(c.id, {
+        set: 'us',
+        setLabel: US_LABEL,
+        basis: `${AQUATIC_BASIS[kind]!}, ${waterType === 'salt' ? 'saltwater' : 'freshwater'}`,
+        medium: c.medium,
+        ...wt,
+        source: `National Recommended Water Quality Criteria, aquatic life table (page of ${aq.source.pageDate})`,
+        ...(c.hardness !== undefined
+          ? { condition: 'Computed from the hardness equation at the hardness entered.' }
+          : {}),
+      });
+    } else if (c.id.startsWith('hh:')) {
+      out.set(c.id, {
+        set: 'us',
+        setLabel: US_LABEL,
+        basis:
+          c.endpoint === 'human-health-organism-only'
+            ? 'human health, consumption of organisms only'
+            : 'human health, consumption of water and organisms',
+        medium: c.medium,
+        source: `National Recommended Water Quality Criteria, human health table (page of ${hh.source.pageDate})`,
+      });
+    } else {
+      const r = rows.get(c.id);
+      out.set(c.id, {
+        set: 'us',
+        setLabel: US_LABEL,
+        basis: `${R4_BASIS[r?.endpoint ?? ''] ?? c.endpoint}${r?.variant ? ` (${r.variant})` : ''}${r?.ocBasis !== undefined ? ', at 1 percent organic carbon' : ''}`,
+        medium: c.medium,
+        ...wt,
+        source: `Region 4 Ecological Risk Assessment Supplemental Guidance (2018), Table ${r?.table ?? ''}${r?.page !== undefined ? `, p. ${r.page}` : ''}`,
+      });
+    }
+  }
+  return out;
+}
+
+/** Everything a database is made of: the criteria and their info, and the names for the chemical list. */
+export interface DbParts {
+  criteria: Criterion[];
+  info: Map<string, CriterionInfo>;
+  /** Chemical id to name; the first name given for an id is kept. */
+  names: Map<string, string>;
+  sources: CriteriaSourceNote[];
+  nrwqcEdition: string;
+  sedimentEdition: string;
+}
+
+export function assembleDb(set: CriteriaSetChoice, parts: DbParts): CriteriaDb {
+  const byChemical = new Map<string, Criterion[]>();
+  for (const c of parts.criteria) {
+    const list = byChemical.get(c.chemicalId);
+    if (list) list.push(c);
+    else byChemical.set(c.chemicalId, [c]);
+  }
+  const chemicals = [...byChemical.entries()]
+    .map(([id, list]): CriteriaChemical => ({
+      id,
+      name: parts.names.get(id) ?? id,
+      hasSurfaceWater: list.some((c) => c.medium === 'surfaceWater'),
+      hasSediment: list.some((c) => c.medium === 'sediment'),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const media = (['surfaceWater', 'sediment'] as const).filter((m) =>
+    parts.criteria.some((c) => c.medium === m),
+  );
+  return {
+    set,
+    nrwqcEdition: parts.nrwqcEdition,
+    sedimentEdition: parts.sedimentEdition,
+    criteria: parts.criteria,
+    chemicals,
+    byChemical,
+    info: parts.info,
+    media,
+    sources: parts.sources,
+  };
+}
+
+/** The US parts: the NRWQC aquatic life and human health criteria and the Region 4 sediment benchmarks. */
+export function usParts(
+  aq: AquaticFile,
+  hh: HumanHealthFile,
+  hardness: HardnessFile,
+  bench: BenchmarkFile,
+): DbParts {
+  const equations = new Map(hardness.metals.map((m) => [m.id, m.freshwater]));
+  const criteria = [...aquatic(aq.rows, equations), ...humanHealth(hh), ...sediment(bench)];
+  const names = new Map<string, string>();
+  for (const r of [...aq.rows, ...hh.rows]) if (!names.has(r.id)) names.set(r.id, r.name);
+  for (const r of bench.rows) if (!names.has(r.chemicalId)) names.set(r.chemicalId, r.name);
+  return {
+    criteria,
+    info: usInfo(criteria, aq, hh, bench),
+    names,
+    sources: [
+      {
+        set: 'us',
+        label: 'EPA national recommended water quality criteria',
+        edition: `page of ${aq.source.pageDate}`,
+      },
+      {
+        set: 'us',
+        label: 'EPA Region 4 sediment benchmarks',
+        edition: `edition of ${bench.edition}`,
+      },
+    ],
+    nrwqcEdition: aq.source.pageDate,
+    sedimentEdition: bench.edition,
+  };
+}
+
 export function buildCriteriaDb(
   aq: AquaticFile,
   hh: HumanHealthFile,
   hardness: HardnessFile,
   bench: BenchmarkFile,
 ): CriteriaDb {
-  const equations = new Map(hardness.metals.map((m) => [m.id, m.freshwater]));
-  const criteria = [...aquatic(aq.rows, equations), ...humanHealth(hh), ...sediment(bench)];
-  const byChemical = new Map<string, Criterion[]>();
-  for (const c of criteria) {
-    const list = byChemical.get(c.chemicalId);
-    if (list) list.push(c);
-    else byChemical.set(c.chemicalId, [c]);
-  }
-  const names = new Map<string, string>();
-  for (const r of [...aq.rows, ...hh.rows]) if (!names.has(r.id)) names.set(r.id, r.name);
-  for (const r of bench.rows) if (!names.has(r.chemicalId)) names.set(r.chemicalId, r.name);
-  const chemicals = [...byChemical.entries()]
-    .map(([id, list]): CriteriaChemical => ({
-      id,
-      name: names.get(id) ?? id,
-      hasSurfaceWater: list.some((c) => c.medium === 'surfaceWater'),
-      hasSediment: list.some((c) => c.medium === 'sediment'),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  return {
-    nrwqcEdition: aq.source.pageDate,
-    sedimentEdition: bench.edition,
-    criteria,
-    chemicals,
-    byChemical,
-  };
+  return assembleDb('us', usParts(aq, hh, hardness, bench));
 }
 
-let loading: Promise<CriteriaDb> | null = null;
+let usLoading: Promise<DbParts> | null = null;
 
 /**
- * Loads the generated criteria files on first use. They are dynamic imports, so the bundler puts each
+ * Loads the generated US criteria files on first use. They are dynamic imports, so the bundler puts each
  * JSON file in a chunk of its own and neither the main bundle nor the surface water screen carries them
  * until a chemical is chosen.
  */
-export function loadCriteriaDb(): Promise<CriteriaDb> {
-  loading ??= Promise.all([
+export function loadUsParts(): Promise<DbParts> {
+  usLoading ??= Promise.all([
     import('@model-flow/data/generated/nrwqc-2026-10-16/aquatic.json'),
     import('@model-flow/data/generated/nrwqc-2026-10-16/human-health.json'),
     import('@model-flow/data/generated/nrwqc-2026-10-16/hardness.json'),
     import('@model-flow/data/generated/sediment-2026-10-16/benchmarks.json'),
   ]).then(([a, h, w, s]) =>
-    buildCriteriaDb(
+    usParts(
       a.default as unknown as AquaticFile,
       h.default as unknown as HumanHealthFile,
       w.default as unknown as HardnessFile,
       s.default as unknown as BenchmarkFile,
     ),
   );
+  usLoading.catch(() => {
+    usLoading = null;
+  });
+  return usLoading;
+}
+
+let loading: Promise<CriteriaDb> | null = null;
+
+/** The US criteria database: the default set, and the one the cleanup screens read. */
+export function loadCriteriaDb(): Promise<CriteriaDb> {
+  loading ??= loadUsParts().then((p) => assembleDb('us', p));
   loading.catch(() => {
     loading = null;
   });

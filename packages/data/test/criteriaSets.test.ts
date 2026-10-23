@@ -3,7 +3,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildCriteria, serializeSet, type CriteriaBuild } from '../src/criteria/build.js';
+import {
+  buildCriteria,
+  generatedParts,
+  serializeSet,
+  type CriteriaBuild,
+} from '../src/criteria/build.js';
 import { verifyCriteriaManifest } from '../src/criteria/manifest.js';
 import type { CriteriaRow, CriteriaSetFile } from '../src/criteria/types.js';
 import { references } from '@model-flow/engine';
@@ -298,13 +303,40 @@ describe('MacDonald et al. 2000 consensus guidelines', () => {
 });
 
 describe('generated files', () => {
+  const partsOf = () => (Object.values(built.sets) as CriteriaSetFile[]).flatMap(generatedParts);
+
   it('match the build byte for byte', () => {
-    for (const [set, file] of Object.entries(built.sets) as [string, CriteriaSetFile][]) {
+    for (const part of partsOf()) {
       const onDisk = readFileSync(
-        join(generatedDir, `criteria-${built.edition}`, `${set}.json`),
+        join(generatedDir, `criteria-${built.edition}`, `${part.name}.json`),
         'utf8',
       );
-      expect(onDisk, set).toBe(serializeSet(file));
+      expect(onDisk, part.name).toBe(serializeSet(part.file));
     }
+  });
+
+  it('keep every file under 450 kB, so the web bundle test (no chunk over 500 kB) holds', () => {
+    for (const part of partsOf()) {
+      expect(JSON.stringify(part.file).length, part.name).toBeLessThan(450_000);
+    }
+  });
+
+  it('split ANZG by water type without losing or changing a row', () => {
+    const anzg = partsOf().filter((p) => p.file.set === 'anzg');
+    expect(anzg.map((p) => p.name)).toEqual(['anzg-fresh', 'anzg-salt']);
+    const rows = anzg.flatMap((p) =>
+      p.file.rows.map((r) => ({
+        ...r,
+        note: r.note === undefined ? undefined : p.file.notes[r.note],
+      })),
+    );
+    expect(rows).toHaveLength(built.sets.anzg.rows.length);
+    const whole = new Map(
+      built.sets.anzg.rows.map((r) => [
+        r.id,
+        { ...r, note: r.note === undefined ? undefined : built.sets.anzg.notes[r.note] },
+      ]),
+    );
+    for (const r of rows) expect(r).toEqual(whole.get(r.id));
   });
 });

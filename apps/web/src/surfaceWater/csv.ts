@@ -2,6 +2,8 @@ import { convert } from '@model-flow/engine';
 import type { CsvColumn, CsvRow } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import type { SwResult } from './compute';
+import { CRITERIA_COLUMNS } from './criteriaCompare';
+import type { CriteriaSetChoice } from './criteriaSetChoice';
 
 export const LEGACY_ID = 'surfaceWater.well-mixed';
 export const MODERN_ID = 'surfaceWater.mass-discharge';
@@ -98,8 +100,22 @@ export function surfaceWaterSeriesRows(r: SwResult): CsvRow[] {
   return rows;
 }
 
-export function surfaceWaterCsvTables(r: SwResult): CsvTable[] {
-  return [
+/** The data editions a criteria comparison reads, for the file name: the US pair, the international sets, or both. */
+export function criteriaEditions(set: CriteriaSetChoice): NonNullable<CsvTable['editions']> {
+  if (set === 'us') return ['nrwqc', 'sediment'];
+  if (set === 'all') return ['nrwqc', 'sediment', 'criteria'];
+  return ['criteria'];
+}
+
+/**
+ * The CSV tables of the screen. When a comparison with criteria has been made, its rows (each with the set,
+ * basis, medium and source of the criterion) are a table of their own.
+ */
+export function surfaceWaterCsvTables(
+  r: SwResult,
+  criteria?: { set: CriteriaSetChoice; rows: readonly CsvRow[] },
+): CsvTable[] {
+  const tables: CsvTable[] = [
     {
       name: 'surface-water-results',
       editions: ['nrwqc', 'sediment'],
@@ -115,4 +131,14 @@ export function surfaceWaterCsvTables(r: SwResult): CsvTable[] {
       columns: SERIES_COLUMNS,
     },
   ];
+  if (criteria !== undefined && criteria.rows.length > 0) {
+    tables.push({
+      name: `surface-water-criteria-${criteria.set}`,
+      editions: criteriaEditions(criteria.set),
+      label: 'criteria comparison',
+      rows: criteria.rows,
+      columns: CRITERIA_COLUMNS,
+    });
+  }
+  return tables;
 }

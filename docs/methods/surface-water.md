@@ -14,7 +14,7 @@ fixtures 1, 2, H3 and H4) and slice E2 (modern kernels: `bankPlaneDischarge`, th
 downstream, the selectable-pore-water sediment; fixtures 3 H1 and H2, 4a to 4d, 5a to 5d) are implemented,
 and so is slice E3 (coupling to M1 and M4, criteria comparison, registration of `surfaceWater.well-mixed`
 and `surfaceWater.mass-discharge`; fixtures 5e, 6b and 6c; the two runs live in `surfaceWater/scenario.ts`).
-Slice D1 (the NRWQC criteria build: raw pages with a checksum manifest, reader, generated JSON, `data:check`) is implemented, so fixture 6a no longer waits on it, and so is slice D2 (the sediment benchmark build: Region 4 Tables 2a, 2b and 2c, generated `benchmarks.json`; the MacDonald et al. TEC and PEC are not shipped, see the open item under "Sediment benchmark data as built"); slice W1 (the screen at `#/surface-water`, `apps/web/src/surfaceWater/`, and the transport screen's "Use as surface water source" feed) is implemented, and so is slice W2 (the criteria panel, `CriteriaPanel.tsx` and `criteriaDb.ts`, which loads the four generated criteria files on demand as separate chunks and compares the peak of each method's series with the aquatic life, human health and sediment criteria of a chosen chemical at a user hardness, and the surface water feed to the risk screen, `surfaceWater/feed.ts`, which sets the swimming EPC as a series with origin `surfaceWater.well-mixed` or `surfaceWater.mass-discharge`). The criteria panel shows a hardness-dependent freshwater metal from the Appendix B equation, an aluminum-type criterion as site-specific, and drops a table cell whose unit is not a water concentration (pH in standard units; a fiber count). When a transport run is linked the screen reads the legacy AT123D-class solution at the bank for both methods (a Wexler or Domenico map selection does not change the feed), and the bank plane integral uses a relative tolerance of 1e-3 with one panel per axis, held within 1 percent of the engine's tight default by a test, to keep a 24-point curve near 4 s in the browser. The scope calls below are the rulings recorded in
+Slice D1 (the NRWQC criteria build: raw pages with a checksum manifest, reader, generated JSON, `data:check`) is implemented, so fixture 6a no longer waits on it, and so is slice D2 (the sediment benchmark build: Region 4 Tables 2a, 2b and 2c, generated `benchmarks.json`; the MacDonald et al. TEC and PEC landed in wave V, see "International criteria sets (wave V)"); slice W1 (the screen at `#/surface-water`, `apps/web/src/surfaceWater/`, and the transport screen's "Use as surface water source" feed) is implemented, and so is slice W2 (the criteria panel, `CriteriaPanel.tsx` and `criteriaDb.ts`, which loads the four generated criteria files on demand as separate chunks and compares the peak of each method's series with the aquatic life, human health and sediment criteria of a chosen chemical at a user hardness, and the surface water feed to the risk screen, `surfaceWater/feed.ts`, which sets the swimming EPC as a series with origin `surfaceWater.well-mixed` or `surfaceWater.mass-discharge`). The criteria panel shows a hardness-dependent freshwater metal from the Appendix B equation, an aluminum-type criterion as site-specific, and drops a table cell whose unit is not a water concentration (pH in standard units; a fiber count). When a transport run is linked the screen reads the legacy AT123D-class solution at the bank for both methods (a Wexler or Domenico map selection does not change the feed), and the bank plane integral uses a relative tolerance of 1e-3 with one panel per axis, held within 1 percent of the engine's tight default by a test, to keep a 24-point curve near 4 s in the browser. The scope calls below are the rulings recorded in
 `docs/DECISIONS.md` (2026-10-16, M8 stage 1 block); those marked DEFAULT are open to Bryan's overturn.
 
 ## What the process is
@@ -45,11 +45,11 @@ concentration is also an exposure point concentration for the M4 swimming pathwa
 | Modern: first-order decay downstream of the reach for a river receptor (plug flow) | Yes | Named by the ROADMAP row L ("add first-order in-stream decay") |
 | Modern: equilibrium-partitioning sediment with a selectable pore water (discharging groundwater or the mixed surface water) and an organic-carbon-normalized output | Yes | The equilibrium partitioning framework of `ditoro1991`, which sediment benchmarks normalized to organic carbon assume |
 | Comparison with EPA national recommended water quality criteria (aquatic life, freshwater and saltwater, acute and chronic; human health, water plus organism and organism only), with the hardness-dependent metals computed at a user hardness | Yes | Named by the ROADMAP row L ("EPA NRWQC comparison") and rows M, N |
-| Comparison with sediment benchmarks: EPA Region 4 (2018) freshwater and marine screening and refinement values (the MacDonald et al. (2000) consensus TEC and PEC are deferred until their values can be verified) | Yes | Public sources; NOAA SQuiRTs replaced, see "Criteria data" |
+| Comparison with sediment benchmarks: EPA Region 4 (2018) freshwater and marine screening and refinement values, and from wave V the MacDonald et al. (2000) consensus TEC and PEC and the CCME sediment guidelines | Yes | Public sources; NOAA SQuiRTs replaced, see "Criteria data" |
 | Incomplete lateral mixing in a river (a two-dimensional bank-source mixing zone with a transverse mixing coefficient) | No; later | The mixing fraction stays the user's control of partial mixing, as in RISC5 |
 | Estuaries and tidal exchange; stratified lakes | No; later | Not in RISC5; needs tidal or layered mass balances |
 | Site-chemistry criteria: copper by the biotic ligand model, aluminum by the multiple linear regression, ammonia by pH and temperature, selenium as fish tissue | No | Reported as "site-specific criterion, not computed"; the user may enter a value |
-| International criteria (RISC5 Appendices M, N) | No | Only redistributable public sources; added later where a source permits |
+| International criteria: the current successors of the sets RISC5 Appendix M lists (Canada CCME, European Union, United Kingdom, Australia and New Zealand ANZG) and, for sediment, the CCME guidelines and the MacDonald et al. (2000) consensus TEC and PEC beside Region 4 (RISC5 Appendices M, N were read as a map of which sets matter, never for values) | Yes, from wave V | See "International criteria sets (wave V)"; the 1990s sediment sets that later sets superseded are not rebuilt |
 | EPA equilibrium partitioning sediment benchmarks (ESBs) and the marine ERL and ERM of `long1995` | No; later | The organic-carbon-normalized output makes them a data addition, not a model change |
 | Human contact with sediment (ingestion, dermal) | No; after M8 and M5 merge | RISC5 routes sediment through its soil equations; adding pathways to M4's pathway list in M8 would collide with the parallel M5 track. Meanwhile the sediment value can be typed into the M4 soil pathways as a constant |
 | Fish ingestion by people | No | Not a RISC5 pathway and M4 has none; it needs a bioaccumulation factor source. The human health "organism only" criterion, which already embeds fish consumption, is the screen offered instead |
@@ -312,7 +312,7 @@ on 2026-10-16.
 | EPA National Recommended Water Quality Criteria, Aquatic Life Criteria Table (`epanrwqc`) | Web page last updated June 9, 2026: https://www.epa.gov/wqc/national-recommended-water-quality-criteria-aquatic-life-criteria-table. Columns: pollutant, CAS number (printed without hyphens, for example 7440666), freshwater CMC and CCC, saltwater CMC and CCC (ug/L), publication year (latest 2024), notes. Appendix A (conversion factors) and Appendix B (hardness parameters mA, bA, mC, bC) are tables on the same page | HTML only (no CSV, XLSX or PDF of the table); 85,901 bytes served on 2026-10-16 | U.S. government work, public domain in the United States; the page states no restriction |
 | EPA National Recommended Water Quality Criteria, Human Health Criteria Table (`epanrwqchh`) | Web page last updated December 18, 2025: https://www.epa.gov/wqc/national-recommended-water-quality-criteria-human-health-criteria-table. Columns: pollutant, CAS number, water plus organism and organism only (ug/L; a few rows in other units, such as methylmercury in mg/kg fish tissue and asbestos in million fibres/L), publication year (latest 2019), notes. About 128 rows | HTML only; 113,915 bytes served on 2026-10-16 | Public domain, as above |
 | EPA Region 4 Ecological Risk Assessment Supplemental Guidance, March 2018 Update (`epa2018r4era`) | Linked from https://www.epa.gov/risk/regional-ecological-risk-assessment-era-supplemental-guidance (page last updated March 3, 2026; no newer version listed): https://www.epa.gov/sites/default/files/2018-03/documents/era_regional_supplemental_guidance_report-march-2018_update.pdf. Table 2a (non-narcotic sediment values) and Table 2b (narcotic, many at 1 percent organic carbon), each with freshwater and marine/estuarine screening values (ESV) and refinement values (RSV); Table 2c (PAH Step 3a values). Units differ by section (ug/kg for organics, mg/kg for inorganics) | PDF, 98 pages, 1,284,613 bytes, SHA-256 `7c89bc7c5022595c9c09a79fc6726c173c3d2e7d2607186676e5dd52a42d0889` as served on 2026-10-16 (EPA's SEMS copy has different bytes and the same 98 pages) | U.S. government work, public domain |
-| MacDonald, Ingersoll and Berger (2000) consensus-based TEC and PEC for 28 freshwater sediment chemicals (`macdonald2000`) | Archives of Environmental Contamination and Toxicology 39(1):20-31, doi 10.1007/s002440010075. Full-text copies are filed on EPA's SEMS site as site-record attachments | Journal article | **Not shipped.** Copyrighted and paywalled; the values were first typed from recall, which is not a source, so they were removed (slice D2b). The public-domain EPA GLNPO report EPA 905/R-00/007 (June 2000, Ingersoll et al.) reproduces only the consensus PEC column (its Table 1), no TEC, and the USGS fact sheet 068-01 table covers trace metals only. Open item: enter the 28 TEC and PEC pairs, each with a page, when a copy of the article or a complete public reproduction is available |
+| MacDonald, Ingersoll and Berger (2000) consensus-based TEC and PEC for freshwater sediment (`macdonald2000`) | Archives of Environmental Contamination and Toxicology 39(1):20-31, doi 10.1007/s002440010075. Tables 2 and 3 (journal pages 23 and 24) read from a complete copy of the article hosted at rais.ornl.gov and cross-checked value by value against a second complete copy in the EPA Superfund records (document 40168746) | Journal article, copies as PDF | **Shipped in wave V** (29 TEC and 28 PEC values; dibenz[a,h]anthracene has a TEC and no PEC). The article is Springer copyright and no redistribution licence was found, so the copies are not committed; only the values ship, as facts, with the citation. The earlier removal of values typed from recall (slice D2b) stands: none of these values is from recall |
 | NOAA Screening Quick Reference Tables (`noaasquirts`) | Buchman 2008, NOAA OR&R Report 08-1; NOAA repository record https://repository.library.noaa.gov/view/noaa/9327 (rights "Public Domain") | PDF | **Not used as a data source.** NOAA's Office of Response and Restoration removed the cards from its site on April 4, 2024 as out of date, and the document allows redistribution only "in their entirety, without modification". Its TEC and PEC columns reproduce MacDonald et al. 2000 and may serve as a transcription cross-check |
 
 Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model):
@@ -323,7 +323,7 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
   are not numbered editions, and the manifest records the actual fetch date of the committed bytes
   (2026-10-17, same sizes as the first check); each page's last-updated date is its edition (DEFAULT ruling 15).
   `packages/data/raw/sediment/epa-r4-2018/` holds the Region 4 PDF and the transcribed CSVs of Tables 2a,
-  2b and 2c. There is no MacDonald directory (see the references table). The build never touches the network and fails on a checksum mismatch.
+  2b and 2c. The international sets and MacDonald are under `packages/data/raw/` in their own directories (see "International criteria sets (wave V)"). The build never touches the network and fails on a checksum mismatch.
 - **Reader**: the HTML tables (`id="datatable"` and the two appendix tables) are read in TypeScript at build
   time, with no new dependency if the markup allows (it is regular: one row per `<tr>`); if a parser is
   needed it is an exact-pinned, build-time-only devDependency recorded in DECISIONS.md as in slice D1 of
@@ -343,6 +343,75 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
   table, page dated December 18, 2025; retrieved 2026-10-17), a work of the U.S. federal government in the
   public domain in the United States. Their use does not imply endorsement by EPA." and the equivalent for
   the Region 4 values.
+
+## International criteria sets (wave V)
+
+The criteria comparison on `#/surface-water` has a choice of set (DECISIONS, "Wave V scope", rulings 3 to 5).
+The United States pair (EPA national recommended criteria and Region 4 sediment benchmarks) stays the default.
+The choice is one of: the US pair, Canada (CCME), the European Union, the United Kingdom, Australia and New
+Zealand (ANZG), the MacDonald et al. (2000) consensus guidelines, or all of them side by side. The choice is
+saved with the project as optional state (`criteriaSet`, written only when it is not the default), inside
+the current format version.
+
+| Set (reference key) | What it holds | Source and terms |
+|---|---|---|
+| Canada (`ccme2026summary`) | Aquatic life guidelines for freshwater and marine water, long-term and short-term (ug/L), and sediment guidelines for freshwater and marine sediment, the interim sediment quality guideline (ISQG) and the probable effect level (PEL) (ug/kg dry weight). 286 rows | The CCME online summary table, exported as CSV on 2026-10-23. No reuse licence is stated (all rights reserved), so the export is not committed; the transcribed CSV is |
+| European Union (`eudir2008105`, `eudir201339`) | Annex I Part A environmental quality standards: annual average (AA-EQS) and maximum allowable concentration (MAC-EQS) for inland and other surface waters (ug/L). 180 rows | The consolidated text of Directive 2008/105/EC as amended by Directive 2013/39/EU (version of 2013-09-13), committed under Commission Decision 2011/833/EU. A 2026 revision of the framework that a secondary source reports was not read |
+| United Kingdom (`ukwfdstandards2015`) | The England and Wales standards directions of 2015: specific pollutants (long-term mean and short-term 95 percentile, fresh and salt water) and priority substances (AA-EQS and MAC-EQS). 263 rows | The Directions as made, committed under the Open Government Licence v3.0. No later version is served; none was found |
+| Australia and New Zealand (`anzg2018`, `warne2018`) | Toxicant default guideline values for fresh and marine water at 99, 95, 90 and 80 percent species protection and a value of unknown protection level, with the reliability class and the year of origin. 841 rows | The department's master table workbook, retrieved 2026-10-23. No open licence mark, so the workbook is not committed; the transcribed CSV is. Sediment values are a separate ANZG document and are not in the set |
+| MacDonald et al. (`macdonald2000`) | Consensus threshold effect concentration (TEC, 29 values) and probable effect concentration (PEC, 28 values) for freshwater sediment (mg/kg or ug/kg dry weight). 57 rows | Tables 2 and 3 of the article, from two complete copies compared value by value; Springer copyright, so only the values ship |
+
+**Build** (`packages/data/src/criteria/`, `scripts/build-criteria.ts`; `data:check` regenerates it). The build
+reads only committed files: the transcribed CSV of each set, pinned by size and SHA-256 in
+`packages/data/raw/criteria-sets.manifest.json`, and the generated US files it joins to. It fails on a
+mismatch and never touches the network. For a set whose source file is not committed the manifest records the
+fetched file's SHA-256 as provenance. Output: `generated/criteria-2026-10-23/{ccme,eu,uk,macdonald2000}.json`
+and `anzg-fresh.json` and `anzg-salt.json` (the ANZG set is one file per water type so that no web chunk
+passes 500 kB). A row keeps the value as printed (`printedValue`, `printedUnit`), the value in the engine's unit,
+its basis (as printed and in words), the table, page or worksheet cell it was read from, and a shared note.
+
+**Rules of the build.**
+
+- Each source medium maps to the engine's: freshwater (EU and UK "inland surface waters") is `fresh`, marine
+  (EU and UK "other surface waters", a term the annex does not define further) is `salt`; sediment rows carry
+  the water type of their source column.
+- Units are converted only at the build: ug/L and mg/L stay; ng/L becomes ug/L by exact decimal shift (ANZG
+  dioxins); ug Sn/L (tributyltin) is ug/L with the note "expressed as tin"; ng TEQ/kg (CCME dioxins and furans)
+  becomes ug/kg with the note "expressed as toxic equivalents". Sediment values are dry weight; none is organic
+  carbon normalized.
+- A value the source gives only as an equation or a site-chemistry rule (CCME cells printed Equation, Variable or
+  Table: cadmium, copper, lead, nickel, zinc, manganese, aluminium, ammonia) is a row with no value, shown as
+  "site-specific, not computed", because no equation is transcribed with the set. A cell with no number (a
+  narrative guideline, a guidance framework, a range, a printed "No PEL derived") produces no row and is
+  counted in the file's `omitted` block; two cells the source prints oddly (metribuzin "1,0", nitrite
+  "60 NO2-N") are left out the same way and are reported, not interpreted.
+- A value printed with a condition is compared at the value printed. For the UK copper (bioavailable), zinc
+  (plus an ambient background) and manganese (bioavailable) that value is never higher than the standard that
+  applies, so the comparison is conservative; the condition is shown with the value. Cadmium has one row per
+  hardness class (EU and UK), and the ANZG zinc, nickel and nitrate values one row per labelled condition.
+- Chemical identity: a printed CAS number is used when it is well formed (two ANZG numbers that a spreadsheet
+  stored with a leading zero are restored, with the printed form kept); two printed numbers that fail the check
+  digit (CCME imidacloprid, ANZG vanadium) are kept as printed and flagged. A group standard that prints several
+  CAS numbers (the cyclodiene pesticides, heptachlor with its epoxide) has no single CAS number and takes a slug
+  of its name. A row with no CAS number is joined by name to a chemical of the US files when the name matches
+  exactly and the match is unique (then to the other sets), so one search finds a chemical in every set; six
+  MacDonald names that the Region 4 file prints differently are tied to the Region 4 row by an alias table that
+  the build checks against the name Region 4 itself prints. A name with no unique match keeps a slug of its name.
+
+**Comparison.** The engine comparison is unchanged: the peak of each series against every criterion of the
+chemical, one ratio per criterion, never summed, with the dissolved, hardness, pH, site-specific and organic
+carbon rules above. The panel shows with each value its basis in words, the set, the water type and the
+table it was read from, with the set's note in a disclosure. A set with no water values is not compared with
+water; a chemical a set does not name says so. Choosing a set loads that set only, in a chunk of its own; the
+default loads none of them.
+
+**CSV and report.** The comparison is a CSV table of its own (`surface-water-criteria-<set>`), one row per
+criterion and method with the criteria set, basis, medium, water type, source table, status, criterion value,
+peak, ratio and note; the file name carries the data edition (`criteria-2026-10-23`, and the US editions when the
+US pair is read). The report prints the same table for the chemical of the run, freshwater and saltwater alike
+at the default hardness of 100 mg/L as CaCO3 (the report has no hardness or water type state), lists the chosen
+set among the screen's inputs, and cites the references of the sets read in its methods statement; the US
+criteria are cited only while the US pair is among the sets chosen.
 
 ## Where the manual is ambiguous, and what we chose
 
@@ -487,7 +556,7 @@ section, source letter, `basis`). Endpoints: `region4-{freshwater,marine}-{scree
 the report prints in the CAS column (DDD, DDE, DDT, DDTR) become `code-<code>`, and a row with neither is a
 slug of its name. Aquatic life and wildlife based values of one chemical are separate rows with a `variant`.
 
-**Open item (D2b).** The MacDonald et al. 2000 consensus TEC and PEC are not in the build. The 28 pairs were first typed from recall because the article is paywalled; recalled values must not ship, so every MacDonald value, CSV and generated row was removed. The EPA GLNPO report EPA 905/R-00/007 lists only the PEC column and the USGS fact sheet table only trace metals, so neither verifies the set. Enter the values, with a page each, when a copy of the article or a complete public reproduction is available; the Region 4 rows that cite the Florida TEC and PEC (source letter b) carry the same information for now.
+**Closed in wave V (was open item D2b).** The MacDonald et al. 2000 consensus TEC and PEC are built with the international sets (`packages/data/generated/criteria-2026-10-23/macdonald2000.json`), from the article itself and not from recall; see "International criteria sets (wave V)". The Region 4 rows that cite the Florida TEC and PEC (source letter b) stay as they are.
 
 The unit of a Region 4 value is decided by the fill of its cell, the report's own unit marker: the notes
 under Tables 2a and 2b (PDF pages 84 and 87) say a gray shaded cell is ug/kg dry weight, and the organic
@@ -508,7 +577,7 @@ implementation. Method ids to register: `surfaceWater.well-mixed` (legacy, citat
 `domenico1987`, `ditoro1991`) and `surfaceWater.mass-discharge` (modern, citations `chapra1997`,
 `ditoro1991`). The registering slice marks those references `used` (they are `planned` now; titles are
 already verified, a test enforces both). The data references (`epanrwqc`, `epanrwqchh`, `epa2018r4era`,
-`macdonald2000`) move to status `data` when their build lands (`epanrwqc`, `epanrwqchh` and `epa2018r4era` have, with D1 and D2; `macdonald2000` stays `planned` because no value ships); `stephan1985` is cited by this note only and
+`macdonald2000`) move to status `data` when their build lands (`epanrwqc`, `epanrwqchh` and `epa2018r4era` have, with D1 and D2; `macdonald2000` moved to `data` in wave V when its values landed); `stephan1985` is cited by this note only and
 stays `planned`.
 
 | Slice | Stage | Files to create or touch | Failing tests first | Depends on |
@@ -534,7 +603,9 @@ slices.
 | `stephan1985` | EPA copy (cover: PB85-227049; the 2010 electronic version's cover prints the first author as "Stephen") | Cover and contents |
 | `epanrwqc`, `epanrwqchh` | The two EPA pages (titles, last-updated dates, columns, appendices) | Yes, the pages |
 | `epa2018r4era` | The EPA PDF (cover and table list) and the Regional ERA supplemental guidance page | Cover, table list, section 6.2 headings |
-| `macdonald2000` | Crossref (authors, title, volume, pages, doi) | No. The article is paywalled and no complete public reproduction was found (EPA 905/R-00/007 lists the PEC column only), so no value ships and the reference stays `planned`. Open: enter the values when a copy or reproduction is available |
+| `macdonald2000` | Crossref (authors, title, volume, pages, doi), and the two complete copies of the article read in wave V (Tables 2 and 3) | Yes, the tables (wave V); the reference is `data` |
+| `macdonald2000copy`, `macdonald2000epacopy` | The two copies of the article (rais.ornl.gov and EPA Superfund record 40168746) | Yes, Tables 2 and 3 |
+| `ccme2026summary`, `eudir2008105`, `eudir201339`, `ukwfdstandards2015`, `anzg2018`, `warne2018` | The documents named by each entry, fetched 2026-10-23 (`warne2018` only by the title the ANZG table prints; its venue and URL are not recorded) | Yes, the tables; see "International criteria sets (wave V)" |
 | `long1995` | Crossref (Environmental Management 19(1):81-97, doi 10.1007/BF02472006) | No; deferred benchmark source |
 | `noaasquirts` | NOAA repository record (Buchman 2008, OR&R Report 08-1, public domain) and the OR&R page recording the removal on April 4, 2024 | Yes (introduction and terms of use) |
 | `arcadis2001`, `spence2001` | As in the vadose note; Table R-8 read in the RISC5 guide | Fixture use only |

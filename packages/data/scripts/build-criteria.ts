@@ -8,7 +8,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildCriteria, serializeSet } from '../src/criteria/build.js';
+import { buildCriteria, generatedParts, serializeSet } from '../src/criteria/build.js';
 import {
   MANIFEST_FILE,
   sha256,
@@ -132,7 +132,9 @@ const outDir = join(generatedDir, `criteria-${built.edition}`);
 mkdirSync(outDir, { recursive: true });
 const counts: string[] = [];
 for (const [set, file] of Object.entries(built.sets)) {
-  writeFileSync(join(outDir, `${set}.json`), serializeSet(file));
+  for (const part of generatedParts(file)) {
+    writeFileSync(join(outDir, `${part.name}.json`), serializeSet(part.file));
+  }
   counts.push(`${set} ${file.rows.length}`);
 }
 console.log(`criteria ${built.edition}: ${counts.join(', ')} rows`);

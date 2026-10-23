@@ -231,6 +231,23 @@ describe('dataEditionsFor', () => {
     expect(e.nrwqc).toBeUndefined();
   });
 
+  it('names the criteria sets edition, and no US criteria, when the surface water screen compares with an international set', () => {
+    const s = base();
+    s.surfaceWater = { ...s.surfaceWater, form: { ...s.surfaceWater.form, volume: '3.3' } };
+    const run = methodsRun(s).byScreen;
+    const us = dataEditionsFor(run);
+    expect(us.nrwqc).toBeDefined();
+    expect(us.sediment).toBeDefined();
+    expect(us.criteria).toBeUndefined();
+    const eu = dataEditionsFor(run, undefined, 'eu');
+    expect(eu.criteria).toBe('criteria-2026-10-23');
+    expect(eu.nrwqc).toBeUndefined();
+    expect(eu.sediment).toBeUndefined();
+    const all = dataEditionsFor(run, undefined, 'all');
+    expect(all.criteria).toBe('criteria-2026-10-23');
+    expect(all.nrwqc).toBeDefined();
+  });
+
   it('a recorded edition in the project wins over the current one', () => {
     const s = base();
     s.risk = { form: { ...s.risk.form, routeExtrapolation: true } } as Screens['risk'];

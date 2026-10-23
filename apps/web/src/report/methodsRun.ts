@@ -13,6 +13,7 @@ import * as transport from '../transport/project';
 import * as uncertainty from '../uncertainty/project';
 import * as vadose from '../vadose/project';
 import * as vapor from '../vapor/project';
+import type { CriteriaSetChoice } from '../surfaceWater/criteriaSetChoice';
 import type { DataEditions } from './methodsStatement';
 
 export type ScreenKey = keyof Screens;
@@ -36,6 +37,7 @@ export const CURRENT_EDITIONS = {
   rsl: 'rsl-2024-11',
   nrwqc: 'nrwqc-2026-10-16',
   sediment: 'sediment-2026-10-16',
+  criteria: 'criteria-2026-10-23',
 } as const satisfies Required<DataEditions>;
 
 const PROJECTORS: { [K in ScreenKey]: (s: Screens[K]) => unknown } = {
@@ -208,16 +210,31 @@ const READS: Record<keyof DataEditions, readonly ScreenKey[]> = {
   rsl: ['risk', 'cleanup', 'plantsEco', 'uncertainty'],
   nrwqc: ['surfaceWater'],
   sediment: ['surfaceWater'],
+  // read only when the surface water screen compares with an international set (see dataEditionsFor)
+  criteria: [],
 };
 
-/** Editions of the datasets the used screens read; an edition the project recorded wins. */
+/**
+ * Editions of the datasets the used screens read; an edition the project recorded wins. The criteria set
+ * chosen on the surface water screen decides which criteria data it read: the US pair (`us`, the default),
+ * an international set, or all of them (`all`, which reads both).
+ */
 export function dataEditionsFor(
   byScreen: MethodsRun['byScreen'],
   recorded?: DataEditions,
+  criteriaSet: CriteriaSetChoice = 'us',
 ): DataEditions {
   const out: DataEditions = {};
+  const readsUs = criteriaSet === 'us' || criteriaSet === 'all';
+  const readsIntl = criteriaSet !== 'us';
   for (const kind of Object.keys(READS) as (keyof DataEditions)[]) {
-    if (!READS[kind].some((k) => byScreen[k] !== undefined)) continue;
+    if (kind === 'criteria') {
+      if (!readsIntl || byScreen.surfaceWater === undefined) continue;
+    } else {
+      if (!READS[kind].some((k) => byScreen[k] !== undefined)) continue;
+      // the US criteria and sediment benchmarks are read only while the US pair is among the sets chosen
+      if ((kind === 'nrwqc' || kind === 'sediment') && !readsUs) continue;
+    }
     out[kind] = recorded?.[kind] ?? CURRENT_EDITIONS[kind];
   }
   return out;

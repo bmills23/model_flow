@@ -42,6 +42,25 @@
   overflow-wrap: anywhere;
 }
 
+.surface-water .criteria select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--tap);
+  font: inherit;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.surface-water .criteria select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .surface-water .criteria h3 {
   font-size: 0.95rem;
   margin: 14px 0 4px;
@@ -50,6 +69,36 @@
 .surface-water table.crit th,
 .surface-water table.crit td {
   min-width: 0;
+}
+
+.surface-water .crit-basis {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.surface-water .crit-src {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.surface-water .crit-note {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.surface-water .crit-note summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .surface-water table.crit tr.exceeds th,

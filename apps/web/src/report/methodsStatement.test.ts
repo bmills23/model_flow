@@ -97,6 +97,22 @@ describe('buildMethodsStatement', () => {
     expect(s.references.length).toBeGreaterThan(statement.references.length);
   });
 
+  it('cites the references of the criteria sets chosen, and nothing for the criteria kind without them', () => {
+    const none = buildMethodsStatement({
+      methodIds: [],
+      dataEditions: { criteria: 'criteria-2026-10-23' },
+    });
+    expect(none.data).toEqual([]);
+    const s = buildMethodsStatement({
+      methodIds: [],
+      dataEditions: { criteria: 'criteria-2026-10-23' },
+      criteriaKeys: ['eudir2008105', 'eudir201339'],
+    });
+    expect(s.data.map((d) => d.kind)).toEqual(['criteria']);
+    expect(s.data[0]!.edition).toBe('criteria-2026-10-23');
+    expect(s.references.map((r) => r.key)).toEqual(['eudir2008105', 'eudir201339']);
+  });
+
   it('only cites data references that exist in the reference list', () => {
     const keys = new Set(references.map((r) => r.key));
     for (const src of Object.values(DATA_SOURCES))

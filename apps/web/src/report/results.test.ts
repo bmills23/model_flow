@@ -159,6 +159,53 @@ describe('computeResults', () => {
     }
   });
 
+  it('adds the comparison with the saved criteria set to the surface water section, with the set and basis of every row', async () => {
+    const make = (set: Screens['surfaceWater']['criteriaSet']) =>
+      project((s) => {
+        s.surfaceWater = {
+          form: { ...s.surfaceWater.form, volume: '3.3', chemicalId: '71-43-2' },
+          criteriaSet: set,
+        } as Screens['surfaceWater'];
+      });
+    const us = (await computeResults(make('us')))['surfaceWater']!;
+    const usTable = us.tables.find((t) => t.name === 'surface-water-criteria-us')!;
+    expect(usTable.rows.length).toBeGreaterThan(0);
+    expect(usTable.rows.every((r) => String(r['set']).includes('EPA'))).toBe(true);
+
+    const ccme = (await computeResults(make('ccme')))['surfaceWater']!;
+    const table = ccme.tables.find((t) => t.name === 'surface-water-criteria-ccme')!;
+    expect(table.editions).toEqual(['criteria']);
+    const text = tableText(table);
+    expect(text.headers).toContain('criteria set');
+    expect(text.headers).toContain('basis');
+    expect(text.headers).toContain('source table');
+    const row = table.rows.find(
+      (r) => r['medium'] === 'surface water' && r['waterType'] === 'freshwater',
+    )!;
+    expect(row['set']).toMatch(/Canada \(CCME\)/);
+    expect(row['basis']).toBe('long-term exposure guideline');
+    expect(row['criterionValue']).toBeCloseTo(370, 6);
+    expect(ccme.notes.join(' ')).toMatch(/Canada: CCME/);
+    expect(ccme.tables.map((t) => t.name)).not.toContain('surface-water-criteria-us');
+  }, 60000);
+
+  it('leaves the surface water section as it was when the run has no chemical or the set has none for it', async () => {
+    const r = (
+      await computeResults(
+        project((s) => {
+          s.surfaceWater = {
+            form: { ...s.surfaceWater.form, volume: '3.3' },
+            criteriaSet: 'eu',
+          } as Screens['surfaceWater'];
+        }),
+      )
+    )['surfaceWater']!;
+    expect(r.tables.map((t) => t.name)).toEqual([
+      'surface-water-results',
+      'surface-water-time-series',
+    ]);
+  });
+
   it('says so when a used screen has no result yet', async () => {
     const r = await computeResults(
       project((s) => {

@@ -11,6 +11,7 @@ import {
   type FeedsLike,
 } from './methodsRun';
 import { buildMethodsStatement, type MethodsStatement } from './methodsStatement';
+import { DEFAULT_CRITERIA_SET, criteriaReferenceKeys } from '../surfaceWater/criteriaSetChoice';
 import * as cleanup from '../cleanup/project';
 import * as household from '../household/project';
 import * as plantsEco from '../plantsEco/project';
@@ -139,9 +140,11 @@ export function buildReport(project: Project): Report {
       reads: reads[key] ?? [],
     });
   }
+  const criteriaSet = screens.surfaceWater.criteriaSet ?? DEFAULT_CRITERIA_SET;
   const statement = buildMethodsStatement({
     methodIds: run.ids,
-    dataEditions: dataEditionsFor(run.byScreen, project.data),
+    dataEditions: dataEditionsFor(run.byScreen, project.data, criteriaSet),
+    criteriaKeys: criteriaReferenceKeys(criteriaSet),
   });
   return {
     title: project.title ?? '',

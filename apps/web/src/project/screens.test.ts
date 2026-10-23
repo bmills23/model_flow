@@ -142,7 +142,12 @@ const cases: Case<unknown>[] = [
     schema: surfaceWater.surfaceWaterProjectSchema,
     toProject: surfaceWater.toProject as never,
     fromProject: surfaceWater.fromProject as never,
-    states: [{ form: SW_DEFAULT }, { form: LAKE_FORM }],
+    states: [
+      { form: SW_DEFAULT, criteriaSet: 'us' },
+      { form: LAKE_FORM, criteriaSet: 'us' },
+      { form: SW_DEFAULT, criteriaSet: 'ccme' },
+      { form: LAKE_FORM, criteriaSet: 'all' },
+    ],
   },
   {
     name: 'risk',

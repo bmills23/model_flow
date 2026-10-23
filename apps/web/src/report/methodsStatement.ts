@@ -13,6 +13,8 @@ export interface DataEditions {
   rsl?: string | undefined;
   nrwqc?: string | undefined;
   sediment?: string | undefined;
+  /** The international criteria sets of the surface water screen; present only when one was chosen. */
+  criteria?: string | undefined;
 }
 export type DataKind = keyof DataEditions;
 
@@ -24,6 +26,8 @@ export const DATA_SOURCES: Record<DataKind, { label: string; keys: readonly stri
     keys: ['epanrwqc', 'epanrwqchh'],
   },
   sediment: { label: 'Sediment screening benchmarks', keys: ['epa2018r4era'] },
+  // the keys are those of the set chosen (see StatementOptions.criteriaKeys)
+  criteria: { label: 'International aquatic life and sediment criteria sets', keys: [] },
 };
 
 export interface StatementMethod {
@@ -61,11 +65,13 @@ export interface StatementOptions {
   /** Ids of the methods that were run; repeats are ignored. */
   methodIds: readonly string[];
   dataEditions?: DataEditions;
+  /** Reference keys of the international criteria set(s) chosen; the `criteria` data source cites these. */
+  criteriaKeys?: readonly string[];
   registry?: MethodRegistry;
   references?: readonly Reference[];
 }
 
-const DATA_ORDER: readonly DataKind[] = ['rsl', 'nrwqc', 'sediment'];
+const DATA_ORDER: readonly DataKind[] = ['rsl', 'nrwqc', 'sediment', 'criteria'];
 
 /**
  * The methods statement, generated from the registry and the reference list and never hand written:
@@ -112,7 +118,9 @@ export function buildMethodsStatement(o: StatementOptions): MethodsStatement {
     const edition = o.dataEditions?.[kind];
     if (edition === undefined || edition === '') continue;
     const src = DATA_SOURCES[kind];
-    data.push({ kind, label: src.label, edition, refs: src.keys.map(cite) });
+    const keys = kind === 'criteria' ? (o.criteriaKeys ?? []) : src.keys;
+    if (kind === 'criteria' && keys.length === 0) continue;
+    data.push({ kind, label: src.label, edition, refs: keys.map(cite) });
   }
   return { methods, references: printed, data };
 }

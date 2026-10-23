@@ -9,6 +9,8 @@ import { formatConcentration } from '../transport/chartData';
 import { getBankFeedSlots, subscribeBankFeed } from '../transport/bankFeed';
 import { Field, Group, Seg } from '../ui/controls';
 import { CriteriaPanel } from './CriteriaPanel';
+import { DEFAULT_CRITERIA_SET, type CriteriaSetChoice } from './criteriaSetChoice';
+import type { CsvRow } from '../export/csv';
 import { SedimentChart, SurfaceWaterChart } from './charts';
 import { surfaceWaterCoefficient } from './coefficient';
 import {
@@ -102,9 +104,15 @@ function R8Check({ form, result }: { form: SwForm; result: SwResult }) {
 
 export function SurfaceWaterScreen() {
   const [form, setForm] = useState<SwForm>(() => getScreen('surfaceWater').form);
-  useEffect(() => setScreen('surfaceWater', { form }), [form]);
+  // the criteria set chosen for the comparison is saved with the project; the US pair is the default
+  const [criteriaSet, setCriteriaSet] = useState<CriteriaSetChoice>(
+    () => getScreen('surfaceWater').criteriaSet ?? DEFAULT_CRITERIA_SET,
+  );
+  useEffect(() => setScreen('surfaceWater', { form, criteriaSet }), [form, criteriaSet]);
   const resultsRef = useRef<HTMLDivElement | null>(null);
-  const [showCriteria, setShowCriteria] = useState(false);
+  // a project saved with another set opens the comparison, so the choice is in view
+  const [showCriteria, setShowCriteria] = useState(criteriaSet !== DEFAULT_CRITERIA_SET);
+  const [criteriaRows, setCriteriaRows] = useState<CsvRow[]>([]);
   const sentSlots = useSyncExternalStore(
     subscribeSurfaceWaterFeed,
     getSurfaceWaterFeedSlots,
@@ -562,7 +570,10 @@ export function SurfaceWaterScreen() {
                 )}
                 <DownloadCsv
                   disabled={computing || !parsed.ok || engineError !== null}
-                  tables={surfaceWaterCsvTables(result).map((t) => ({
+                  tables={surfaceWaterCsvTables(result, {
+                    set: criteriaSet,
+                    rows: showCriteria ? criteriaRows : [],
+                  }).map((t) => ({
                     ...t,
                     feeds: linkedOn ? ['bank' as const] : [],
                   }))}
@@ -579,6 +590,9 @@ export function SurfaceWaterScreen() {
                 {showCriteria ? (
                   <CriteriaPanel
                     result={result}
+                    set={criteriaSet}
+                    onSetChange={setCriteriaSet}
+                    onRows={setCriteriaRows}
                     foc={
                       form.sedimentOn && form.foc.trim() !== '' && Number.isFinite(foc)
                         ? foc

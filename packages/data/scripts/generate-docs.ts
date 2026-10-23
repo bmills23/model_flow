@@ -67,7 +67,7 @@ interface CriteriaSetHeader {
 const criteriaDir = resolve(root, 'packages/data/generated/criteria-2026-10-23');
 const criteriaEdition = (set: string): DataEdition => {
   const f = JSON.parse(
-    readFileSync(resolve(criteriaDir, `${set}.json`), 'utf8'),
+    readFileSync(resolve(criteriaDir, `${set === 'anzg' ? 'anzg-fresh' : set}.json`), 'utf8'),
   ) as CriteriaSetHeader;
   return {
     label: `${f.label}, ${f.source.title}`,

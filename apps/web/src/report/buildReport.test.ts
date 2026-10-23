@@ -87,6 +87,24 @@ describe('buildReport', () => {
     expect(r.statement.data.map((d) => d.kind)).toEqual(['nrwqc', 'sediment']);
   });
 
+  it('cites the criteria set chosen on the surface water screen, and not the US criteria it did not read', () => {
+    const r = buildReport(
+      project((s) => {
+        s.surfaceWater = {
+          form: { ...s.surfaceWater.form, volume: '3.3' },
+          criteriaSet: 'anzg',
+        } as Screens['surfaceWater'];
+      }),
+    );
+    expect(r.statement.data.map((d) => d.kind)).toEqual(['criteria']);
+    const keys = r.statement.references.map((x) => x.key);
+    expect(keys).toContain('anzg2018');
+    expect(keys).toContain('warne2018');
+    expect(keys).not.toContain('epanrwqc');
+    const sec = r.sections.find((x) => x.key === 'surfaceWater')!;
+    expect(sec.inputs.find((i) => i.path === 'criteriaSet')?.value).toBe('anzg');
+  });
+
   it('adds sections for the household, plants and uncertainty screens with their methods', () => {
     const r = buildReport(
       project((s) => {

@@ -19,6 +19,40 @@ export interface CriteriaBuild {
 
 export const serializeSet = (value: unknown): string => JSON.stringify(value, null, 2) + '\n';
 
+/**
+ * Sets written as one generated file per water type. The web bundle test allows no chunk over 500 kB, and
+ * the ANZG set (841 values with their notes) is about 530 kB as one file. Each part is a complete set file
+ * (header, source, its own notes) holding the rows of one water type.
+ */
+export const SPLIT_SETS: ReadonlySet<CriteriaSetId> = new Set<CriteriaSetId>(['anzg']);
+
+export interface GeneratedPart {
+  /** File stem under generated/criteria-<edition>/. */
+  name: string;
+  file: CriteriaSetFile;
+}
+
+/** The generated files of a set: the set itself, or one part per water type for a split set. */
+export const generatedParts = (file: CriteriaSetFile): GeneratedPart[] => {
+  if (!SPLIT_SETS.has(file.set)) return [{ name: file.set, file }];
+  return (['fresh', 'salt'] as const).map((waterType) => {
+    const rows = file.rows.filter((r) => r.waterType === waterType);
+    const notes: string[] = [];
+    const remap = new Map<number, number>();
+    const kept = rows.map((r) => {
+      if (r.note === undefined) return r;
+      let n = remap.get(r.note);
+      if (n === undefined) {
+        n = notes.length;
+        notes.push(file.notes[r.note]!);
+        remap.set(r.note, n);
+      }
+      return { ...r, note: n };
+    });
+    return { name: `${file.set}-${waterType}`, file: { ...file, notes, rows: kept } };
+  });
+};
+
 /** The generated US files whose chemical ids the international sets join to (committed, never fetched). */
 const NRWQC_DIR = 'nrwqc-2026-10-16';
 const SEDIMENT_DIR = 'sediment-2026-10-16';
