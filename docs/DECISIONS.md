@@ -2388,7 +2388,9 @@ source and checks the air doubles) and `apps/web/src/vapor/coefficients.test.ts`
    on the web. `vapor.pvi-screen-2015` returns a verdict, not an air concentration, so it has no
    coefficient and is never quantified. `vapor.devaull-2007` is nonlinear in its fast-reaction and coupled modes
    (`oxygenDepth` root-finds a depth that depends on the source) and is not on the web vapor screen, so it never
-   reaches the feed; a future screen offering it must publish `quantified: false` for those modes.
+   reaches the feed; a future screen offering it must publish `quantified: false` for those modes. (Since wave V
+   slice V1 the vapor screen offers it and its feed origin is in the set; see that slice's ruling 6: the modes are
+   linear when the total hydrocarbon vapor is entered, and not quantified, naming the mode, when it is not.)
 3. **Two limits inside the linear methods.** A soil source stops giving more vapor once the equilibrium pore water
    passes the solubility (the residual phase, `sourceVapor` fixed at H S). The soil coefficient is measured below
    that point (a probe divided by ten from 1000 mg/kg until no separate phase shows) and carries `maxSource`, the soil
@@ -3913,3 +3915,60 @@ criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and
    Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
 7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
    place with what landed, and the 102-item count is restated from those rows.
+
+### Wave V slice V1, oxygen-limited vapor on the vapor screen
+
+Every ruling below is DEFAULT and open to Bryan's overturn. Evidence: `apps/web/src/vapor/oxygenLimited.test.ts`,
+`oxygenLimitedFeeds.test.ts`, `OxygenPage.test.tsx` and `cleanup/vaporLevels.test.ts`.
+
+1. **A third indoor method, computed only when chosen.** `vapor.devaull-2007` is the third choice of "Method shown in
+   detail" on `#/vapor` (`form.method` gains `devaull`). The engine runs only when it is chosen, so the Table R-3
+   case and every older project are unchanged; the comparison table, details panel, profile curve, CSV tables,
+   warnings and report section add it only then. Its input group is always on the page, closed until the method
+   is chosen, with a button that chooses it. A fault in its own inputs (the required oxygen properties blank, an
+   aerobic depth past the column) fails that method alone: the parse of the other two does not depend on it.
+2. **One homogeneous layer.** The engine takes one layer between the source and the foundation. The screen builds it
+   from the column below the floor (the strata the floor leaves, plus the entered capillary zone) with
+   thickness-weighted porosity and water-filled porosity, thickness the sum. With several strata the method
+   therefore differs from the other two even with no aerobic layer; with one stratum and an aerobic depth of
+   zero it equals the legacy result (a test, 1e-9). The panel says so.
+3. **Foundation and source are the legacy method's.** h is the legacy crack (the foundation as a soil-like layer,
+   D_crack eta / thickness), the soil gas velocity is the legacy Q_soil over the floor area in every soil gas mode
+   (including "modern default ratio", whose pressure inputs the legacy method still reads), a dirt floor
+   (`basementDirt`, `crawlDirt`) gives h = infinity as the engine documents, and the source (soil with its
+   residual-phase test and optional TPH mixture, soil gas, groundwater) is the legacy source object.
+4. **Defaults the screen ships.** Aerobic depth 1 m (option 1), baseline soil respiration on (its rate and
+   source are M6 ruling 11), oxygen at the base of the foundation 20.9 percent by volume of dry air converted to
+   kg/m3 with the ideal gas law at 1 atm and the soil temperature (M_O2 0.031998 kg/mol). The aerobic rate and the
+   oxygen mass ratio are filled from the chemical's database row when it is picked (class rate in 1/h as
+   `api2012biovapor` publishes it; the ratio to four significant figures) and are blank for a chemical in no
+   class, which the engine treats as non-degrading with its warning. The oxygen diffusion coefficients in air and
+   water and the oxygen Henry's constant stay required inputs with no default (M6 ruling 10 stands).
+   Respiration uses the thickness-weighted organic carbon and bulk density of the strata below the floor.
+5. **Indoor only.** The method has no outdoor path, so the outdoor panel stays with the box and the Soil Screening
+   Guidance factor, and a risk feed sent with it carries indoor air (origin `vapor.devaull-2007`, the chemical id
+   tagging unchanged) and no outdoor air. The set of feed origins in K1 ruling 2 gains `vapor.devaull-2007`
+   (`coefficients.test.ts` pins the set).
+6. **Cleanup coefficients.** Published as quantified where the path passes the linearity guard: option 1, and options
+   2 and 3 when a total hydrocarbon vapor concentration is entered (the oxygen demand is then fixed, the aerobic
+   depth does not move with the source, and the air is proportional to it). Published as not quantified, with the
+   option named in the reason, when the demand is taken from the source vapor (the aerobic depth moves with the
+   source). Soil sources keep the residual-phase `maxSource`; a TPH mixture stays not quantified. This refines K1
+   ruling 2, which expected a quantified false for both oxygen options: with the demand fixed they are linear and
+   the guard confirms it. Slice V2a replaces the not-linear case with a solve.
+7. **Older files.** The new form keys are fingerprinted only once they differ from their defaults, and the rate and
+   mass ratio are read off the chemical, so a project saved before this slice does not open with stale feeds
+   (`project/hash.ts`). A file saved before the keys existed reads blank rate and mass ratio for any chemical
+   but the Table R-3 fixture, whose benzene values (0.73 /h, 3.072) are the defaults.
+8. **Report.** The vapor section lists `vapor.devaull-2007` among the methods run, its warnings and its CSV tables
+   when the method is chosen.
+9. **Expected inputs with no counterpart (Appendix K data requirements, read as a map).** The oxygen-limited model
+   RISC5 describes also takes a minimum oxygen concentration below which degradation stops, and an oxygen
+   mass transfer coefficient K_O; the engine method has no counterpart for either (its oxygen is a fixed
+   concentration at the foundation base with diffusion through the soil, and its aerobic layer ends where the
+   oxygen is used up). It also offers an outdoor air prediction from the same model (breathing zone height, box
+   length, wind speed); the engine method is indoor only. Every other row of that table has an input or a
+   counterpart: porosity and water content, the distance to the foundation, ambient oxygen, the chemical's
+   diffusion coefficients and Henry's constant, the source forms (soil gas, soil with TPH and its molecular
+   weight, solubility, organic carbon, bulk density), and the building and soil gas entry terms. The degradation
+   rate is entered in 1/h (the BioVapor unit) where RISC5 lists 1/day.

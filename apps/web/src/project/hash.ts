@@ -1,4 +1,5 @@
 import { legacyDispersivityBasis } from '../vadose/form';
+import { DEFAULT_FORM as VAPOR_DEFAULT, oxygenClassDefaults } from '../vapor/form';
 
 /** JSON text with object keys in sorted order, so equal content always gives equal text. */
 export function stableStringify(value: unknown): string {
@@ -63,6 +64,26 @@ export const FINGERPRINT_SKIP: Record<
   saturated: { always: ['chemicalId', 'texture'] },
   plantsEco: { always: ['wildlifeRows'] },
   surfaceWater: { always: ['chemicalId'] },
+  // the oxygen-limited method's keys (wave V slice V1) feed the computation, so each counts once it
+  // differs from its default and a file written before they existed keeps its fingerprint
+  vapor: {
+    atDefault: {
+      dvOxMode: VAPOR_DEFAULT.dvOxMode,
+      dvAerobicDepth: VAPOR_DEFAULT.dvAerobicDepth,
+      dvO2Percent: VAPOR_DEFAULT.dvO2Percent,
+      dvDa: VAPOR_DEFAULT.dvDa,
+      dvDw: VAPOR_DEFAULT.dvDw,
+      dvH: VAPOR_DEFAULT.dvH,
+      dvRespiration: VAPOR_DEFAULT.dvRespiration,
+      dvTotalHc: VAPOR_DEFAULT.dvTotalHc,
+    },
+    // the class rate and mass ratio belong to the chemical: an older file's chemical gets the reading
+    // `fromProject` gives it (the fixture's benzene values, or blank), which is no change
+    legacy: {
+      dvKw: (form) => oxygenClassDefaults(String(form['chemicalId'] ?? '')).dvKw,
+      dvMassRatio: (form) => oxygenClassDefaults(String(form['chemicalId'] ?? '')).dvMassRatio,
+    },
+  },
 };
 
 function without(value: unknown, always: readonly string[]): unknown {

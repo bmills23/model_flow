@@ -304,6 +304,11 @@ function vapor(s: Screens, feed: Feed): SectionResults {
     if (o.ok) addWarnings(sec, INDOOR_ORIGIN[m], o.result.warnings);
     else sec.notes.push(`The ${METHOD_NAME[m]} did not run: ${o.error}`);
   }
+  const dv = outcome.devaull;
+  if (dv) {
+    if (dv.ok) addWarnings(sec, INDOOR_ORIGIN.devaull, dv.result.warnings);
+    else sec.notes.push(`The oxygen-limited method did not run: ${dv.error}`);
+  }
   return sec;
 }
 

@@ -5,6 +5,7 @@
   --s-legacy: #2a78d6;
   --s-modern: #eb6834;
   --s-domenico: #6250d6;
+  --s-devaull: #1b8a6b;
   --alert-bg: #fbe9e7;
   --alert-text: #7a1f14;
   --field-bg: #ffffff;
@@ -17,6 +18,7 @@
     --s-legacy: #3987e5;
     --s-modern: #d95926;
     --s-domenico: #9085e9;
+    --s-devaull: #3fb68b;
     --alert-bg: #3b1d19;
     --alert-text: #ffb4a8;
     --field-bg: #111617;
@@ -405,9 +407,15 @@ fieldset.seg {
   fill: var(--s-domenico);
 }
 
+.s-devaull {
+  stroke: var(--s-devaull);
+  fill: var(--s-devaull);
+}
+
 .line.s-legacy,
 .line.s-modern,
-.line.s-domenico {
+.line.s-domenico,
+.line.s-devaull {
   fill: none;
 }
 

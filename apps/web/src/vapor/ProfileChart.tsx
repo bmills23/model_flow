@@ -6,7 +6,16 @@ import { DataTable } from '../vadose/DataTable';
 import type { Band, ProfileCurve, VaporMethod } from './chartData';
 
 const H = 320;
-const LABEL: Record<VaporMethod, string> = { legacy: 'Legacy J&E', modern: 'Modern EPA' };
+const LABEL: Record<VaporMethod, string> = {
+  legacy: 'Legacy J&E',
+  modern: 'Modern EPA',
+  devaull: 'DeVaull oxygen-limited',
+};
+const DASH: Record<VaporMethod, string | undefined> = {
+  legacy: undefined,
+  modern: '6 3',
+  devaull: '2 4',
+};
 
 /**
  * Vapor concentration against height above the top of the source, one curve per method, on a log
@@ -23,7 +32,7 @@ export function ProfileChart(props: { curves: ProfileCurve[]; bands: Band[] }) {
   const top = Math.max(0, ...curves.flatMap((c) => c.heights));
   const positive = curves.flatMap((c) => c.values).filter((v) => v > 0 && Number.isFinite(v));
 
-  // The heights the curves share (both methods use the layer boundaries of the same column).
+  // The heights the curves share (the methods share the layer boundaries of the same column; the oxygen-limited one adds its own points).
   const heights = useMemo(() => {
     const all = curves.flatMap((c) => c.heights);
     return [...new Set(all.map((h) => Number(h.toPrecision(12))))].sort((a, b) => a - b);
@@ -151,7 +160,7 @@ export function ProfileChart(props: { curves: ProfileCurve[]; bands: Band[] }) {
               d={linePath(c.values.map((v, i) => [sx(Math.max(v, lo)), sy(c.heights[i]!)]))}
               className={`line s-${c.method}`}
               fill="none"
-              strokeDasharray={c.method === 'modern' ? '6 3' : undefined}
+              strokeDasharray={DASH[c.method]}
             />
           ))}
           {probe !== null && (

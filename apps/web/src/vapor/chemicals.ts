@@ -13,6 +13,10 @@ export interface VaporChemicalRow {
     s?: { value: number };
   };
   epa2004je?: { tbK?: number; tcK?: number; dhvbCalPerMol?: number };
+  /** Class rate of the oxygen-limited method, when the chemical is in a published class. */
+  biodegradation?: { kwPerHour?: number };
+  /** Oxygen demand of complete oxidation, g O2 per g chemical. */
+  oxygen?: { massRatio?: number };
 }
 
 export interface VaporChemicalsFile {
@@ -37,7 +41,21 @@ const str = (v: number | undefined): string => (v === undefined ? '' : String(v)
 /** The chemical fields of the form for a database row (RSL values first, EPA 2004 thermo data when present). */
 export function chemicalFields(
   row: VaporChemicalRow,
-): Pick<VaporForm, 'chemicalId' | 'M' | 'S' | 'H' | 'Koc' | 'Da' | 'Dw' | 'TB' | 'TC' | 'dHvb'> {
+): Pick<
+  VaporForm,
+  | 'chemicalId'
+  | 'M'
+  | 'S'
+  | 'H'
+  | 'Koc'
+  | 'Da'
+  | 'Dw'
+  | 'TB'
+  | 'TC'
+  | 'dHvb'
+  | 'dvKw'
+  | 'dvMassRatio'
+> {
   const e = row.epa2004je;
   const thermo =
     e?.tbK !== undefined && e.tcK !== undefined && e.dhvbCalPerMol !== undefined ? e : undefined;
@@ -52,5 +70,10 @@ export function chemicalFields(
     TB: str(thermo?.tbK),
     TC: str(thermo?.tcK),
     dHvb: str(thermo?.dhvbCalPerMol),
+    // blank for a chemical in no published class: the oxygen-limited method then treats it as non-degrading
+    dvKw: str(row.biodegradation?.kwPerHour),
+    dvMassRatio: str(
+      row.oxygen?.massRatio === undefined ? undefined : Number(row.oxygen.massRatio.toPrecision(4)),
+    ),
   };
 }

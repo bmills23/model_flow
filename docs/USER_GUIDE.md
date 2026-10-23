@@ -218,6 +218,23 @@ picking one fills the properties from the EPA tables; the Table R-3 benzene test
 as a test case, not a project chemical. A project chemical with no vapor properties in the database is marked as
 unavailable, you can enter its properties by hand, and it cannot be sent on.
 
+The oxygen-limited method (DeVaull) is the third choice of "Method shown in detail", for petroleum vapors that
+degrade only where oxygen reaches them. The soil between the source and the foundation is split into a deeper layer
+with no oxygen and a shallower aerobic layer where the chemical degrades at a first-order rate; the strata below the
+floor are treated as one layer with averaged porosity and water-filled porosity. The **Oxygen-limited
+biodegradation (DeVaull)** group (it opens when the method is chosen) takes the aerobic rate (filled from the
+chemical's class when you pick it; blank means no credit for biodegradation, with a warning) and one of three ways
+to set the aerobic layer: **Aerobic layer depth entered**, **Fast reaction front** (chemical and oxygen meet at a
+front), or **Coupled oxygen balance** (the depth where the oxygen supply just meets the demand). The last two need
+the oxygen at the base of the foundation (percent by volume), the oxygen mass ratio (filled for classed chemicals),
+the oxygen diffusion coefficients in air and water and the oxygen Henry's constant (no defaults: enter them from your
+own source), optionally the total hydrocarbon vapor at the source (blank: the chemical alone sets the oxygen demand,
+with a warning that the aerobic layer is overestimated) and a switch for baseline soil respiration. The method adds
+a column to the comparison table, a details panel (layers, fluxes, oxygen balance), a curve on the vapor profile and
+two CSV tables, and its warnings join the list. It gives indoor air only; the outdoor air panel stays with the
+legacy box and the Soil Screening Guidance factor. With the method chosen, "Send to exposure and risk" sends its
+indoor air (tagged with the method and the chemical) and no outdoor air.
+
 ### Surface water and sediment (`#/surface-water`)
 
 A groundwater plume that reaches a river or lake discharges through the bed. Mix it into the water body to
@@ -330,8 +347,11 @@ or soil concentration that gives each indoor and outdoor air level above. Each i
 the vapor run's air-over-source coefficient (shown beside it as the vapor method id), so a source at that
 level alone just meets the target; the legacy and modern receptor methods each get a row. This holds where
 the vapor run's air is proportional to its source, which it is for the legacy and modern Johnson and
-Ettinger methods, the legacy box and the Soil Screening Guidance factor. A path that is not is listed as
-**not quantified** with the reason and no level, never as zero: a soil source with a TPH mixture, a soil
+Ettinger methods, the legacy box, the Soil Screening Guidance factor and the oxygen-limited method with an entered
+aerobic layer depth (or with the total hydrocarbon vapor entered, which fixes the oxygen demand). A path that is not
+is listed as **not quantified** with the reason and no level, never as zero: the oxygen-limited fast reaction front or
+coupled option when its oxygen demand comes from the source vapor itself (the aerobic layer then moves with the
+source), a soil source with a TPH mixture, a soil
 level above the residual-phase limit (where the model's vapor stops rising, so no soil level reaches that
 air level), a Soil Screening Guidance factor for a source series, and a model that transfers nothing from
 the source. A source series sent from another screen gives the same coefficient as a single value, because

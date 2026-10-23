@@ -2,9 +2,16 @@ import type { AttenuationMedium, FoundationType, SoilTextureCode } from '@model-
 import { z } from 'zod';
 import { cloneData, mergeDefaults } from '../project/merge';
 import { flag, partialObject, text, texts } from '../project/fields';
-import { DEFAULT_FORM, type SourceKind, type SoilGasMode, type VaporForm } from './form';
+import {
+  DEFAULT_FORM,
+  oxygenClassDefaults,
+  type SourceKind,
+  type SoilGasMode,
+  type VaporForm,
+} from './form';
 import { DEFAULT_OUTDOOR, type OutdoorForm } from './outdoor';
 import { DEFAULT_PVI, type AfOptions, type PviForm } from './screening';
+import type { OxygenMode } from './oxygenLimited';
 import type { SourceChoice } from './VaporPanels';
 
 /**
@@ -64,6 +71,12 @@ const CHOICES = [
   'saturated',
 ] as const satisfies readonly SourceChoice[];
 
+const OXYGEN_MODE_VALUES = [
+  'entered',
+  'fastReaction',
+  'coupled',
+] as const satisfies readonly OxygenMode[];
+
 const layer = z.object({
   name: text,
   texture: z.enum(TEXTURES),
@@ -91,7 +104,19 @@ const formSchema = partialObject({
   ),
   soilGasMode: z.enum(SOIL_GAS_MODES),
   ...texts('dP', 'kv', 'seam', 'viscosity', 'viscosityModern', 'qsoil'),
-  method: z.enum(['legacy', 'modern']),
+  method: z.enum(['legacy', 'modern', 'devaull']),
+  ...texts(
+    'dvKw',
+    'dvAerobicDepth',
+    'dvO2Percent',
+    'dvMassRatio',
+    'dvDa',
+    'dvDw',
+    'dvH',
+    'dvTotalHc',
+  ),
+  dvOxMode: z.enum(OXYGEN_MODE_VALUES),
+  dvRespiration: flag,
 });
 
 const outdoorSchema = partialObject(
@@ -149,7 +174,14 @@ export function toProject(state: VaporState): VaporProject {
 
 export function fromProject(p: VaporProject | undefined): VaporState {
   return {
-    form: mergeDefaults(DEFAULT_FORM, p?.form),
+    // a file saved before the oxygen-limited method reads its chemical's class values, not the fixture's
+    form: mergeDefaults(
+      {
+        ...DEFAULT_FORM,
+        ...(p?.form ? oxygenClassDefaults(p.form.chemicalId ?? DEFAULT_FORM.chemicalId) : {}),
+      },
+      p?.form,
+    ),
     outdoor: mergeDefaults(DEFAULT_OUTDOOR, p?.outdoor),
     af: mergeDefaults(DEFAULT_AF, p?.af),
     pvi: mergeDefaults(DEFAULT_PVI, p?.pvi),

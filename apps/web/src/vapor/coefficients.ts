@@ -1,6 +1,8 @@
 import {
+  devaullRun,
   jeEpaIndoor,
   jeLegacyIndoor,
+  type DevaullInput,
   type EpaJeInput,
   type LegacyJeInput,
   type Warning,
@@ -12,8 +14,10 @@ import {
   OUTDOOR_ORIGIN,
   seriesSources,
   type MethodKey,
+  type OutdoorKey,
   type SourceSeries,
 } from './series';
+import { OXYGEN_MODES } from './oxygenLimited';
 
 /**
  * The air-over-source coefficients of the vapor screen's indoor and outdoor air paths, offered to the
@@ -131,6 +135,64 @@ function modernRuns(form: VaporForm, parsed: Extract<Parsed, { ok: true }>): Ind
   };
 }
 
+/** The oxygen option's name as the screen shows it, lower case. */
+function oxygenOptionName(parsed: Extract<Parsed, { ok: true }>): string {
+  const mode = parsed.devaull?.ok ? parsed.devaull.input.oxygen.mode : 'entered';
+  return (OXYGEN_MODES.find((m) => m.value === mode)?.label ?? mode).toLowerCase();
+}
+
+/**
+ * The forward runs of the oxygen-limited method, or why it has no coefficient. Its aerobic depth is
+ * entered, or set from the oxygen demand: when the demand is the total hydrocarbon vapor entered it
+ * does not move with the source and the air is proportional to it; when the demand is taken from the
+ * source vapor itself the depth moves with the source and the air is not (slice V2a solves that case).
+ */
+function devaullRuns(
+  form: VaporForm,
+  parsed: Extract<Parsed, { ok: true }>,
+): IndoorRuns | Extract<VaporCoefficient, { quantified: false }> {
+  const methodId = INDOOR_ORIGIN.devaull;
+  const d = parsed.devaull;
+  if (!d) return { quantified: false, methodId, reason: 'the oxygen-limited method was not run' };
+  if (!d.ok) {
+    return {
+      quantified: false,
+      methodId,
+      reason: `the oxygen-limited method did not run: ${d.errors.join('; ')}`,
+    };
+  }
+  const input = d.input;
+  const ox = input.oxygen;
+  if (ox.mode !== 'entered' && ox.totalHydrocarbonVapor === undefined) {
+    return {
+      quantified: false,
+      methodId,
+      reason: `the ${oxygenOptionName(parsed)} oxygen option takes the oxygen demand from the source vapor, so the aerobic depth changes with the source and the air is not proportional to it (a fixed total hydrocarbon vapor concentration would hold the demand)`,
+    };
+  }
+  return {
+    methodId,
+    run: (kind, s) => {
+      let source: DevaullInput['source'];
+      if (kind === 'soil') {
+        if (input.source.kind !== 'soil') throw new RangeError('the entered source is not soil');
+        source = { ...input.source, F: s };
+      } else if (kind === 'soilGas') {
+        source = { kind: 'soilGas', csg: s };
+      } else {
+        source = seriesSources(form, parsed, kind, s).legacy;
+      }
+      const r = devaullRun({ ...input, source });
+      return {
+        air: r.concentration,
+        sourceVapor: r.sourceVapor,
+        residual: hasResidual(r.warnings),
+      };
+    },
+    vaporCap: () => (input.source.kind === 'soil' ? input.source.H * input.source.S : null),
+  };
+}
+
 /** Largest soil source that stays below the residual-phase limit; the probe is kept below it. */
 function soilIndoor(runs: IndoorRuns): VaporCoefficient {
   let f = 1e-3; // 1000 mg/kg, halved by tens until no separate phase is present
@@ -169,7 +231,14 @@ function indoorCoefficient(
   src: SourceSeries | null,
   method: MethodKey,
 ): VaporCoefficient {
-  const runs = method === 'legacy' ? legacyRuns(form, parsed) : modernRuns(form, parsed);
+  let runs: IndoorRuns;
+  if (method === 'devaull') {
+    const d = devaullRuns(form, parsed);
+    if ('quantified' in d) return d;
+    runs = d;
+  } else {
+    runs = method === 'legacy' ? legacyRuns(form, parsed) : modernRuns(form, parsed);
+  }
   const kind: VaporSourceKind = src ? src.kind : form.source;
   if (kind === 'soil') {
     if (form.tphOn) {
@@ -189,7 +258,9 @@ function indoorCoefficient(
         quantified: false,
         methodId: runs.methodId,
         reason:
-          'the air concentration is not proportional to the source (the doubling check failed)',
+          method === 'devaull'
+            ? `the air concentration is not proportional to the source for the ${oxygenOptionName(parsed)} oxygen option (the doubling check failed)`
+            : 'the air concentration is not proportional to the source (the doubling check failed)',
       };
     }
     return { quantified: true, methodId: runs.methodId, value: s.value, source: kind };
@@ -203,7 +274,7 @@ function outdoorCoefficient(
   parsed: Extract<Parsed, { ok: true }>,
   src: SourceSeries | null,
   outdoorForm: OutdoorForm,
-  method: MethodKey,
+  method: OutdoorKey,
   indoor: VaporCoefficient,
 ): VaporCoefficient {
   const methodId = OUTDOOR_ORIGIN[method];
@@ -300,6 +371,8 @@ export function vaporCoefficients(
   method: MethodKey,
 ): VaporCoefficients {
   const indoor = indoorCoefficient(form, parsed, src, method);
+  // The oxygen-limited method is an indoor method: it has no outdoor air path.
+  if (method === 'devaull') return { indoor };
   // The box rides on the legacy source vapor; the SSG factor does not need the indoor run.
   const legacyIndoor =
     method === 'legacy' ? indoor : indoorCoefficient(form, parsed, src, 'legacy');

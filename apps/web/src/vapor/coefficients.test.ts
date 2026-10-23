@@ -170,11 +170,16 @@ describe('vapor air-over-source coefficients', () => {
   });
 });
 
-describe('the risk feed reaches only the Johnson and Ettinger indoor and box or SSG outdoor methods', () => {
+describe('the risk feed reaches only the Johnson and Ettinger and DeVaull indoor and box or SSG outdoor methods', () => {
   // DECISIONS K1 ruling 2: jury-bam and attenuation-factor-2015 are linear but no feed carries them,
-  // so the cleanup screen never quantifies them. A new origin here must be added to that ruling too.
+  // so the cleanup screen never quantifies them. A new origin here must be added to that ruling too
+  // (the DeVaull indoor method was, in wave V slice V1).
   it('maps each risk method to its origin ids and nothing else', () => {
-    expect(INDOOR_ORIGIN).toEqual({ legacy: 'vapor.je-1991', modern: 'vapor.je-epa' });
+    expect(INDOOR_ORIGIN).toEqual({
+      legacy: 'vapor.je-1991',
+      modern: 'vapor.je-epa',
+      devaull: 'vapor.devaull-2007',
+    });
     expect(OUTDOOR_ORIGIN).toEqual({ legacy: 'outdoorAir.box', modern: 'outdoorAir.ssg-vf-1996' });
   });
 });

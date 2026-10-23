@@ -170,4 +170,33 @@ describe('vaporSourceLevels', () => {
     expect(rows.every((r) => r.what.endsWith('(indoor air)'))).toBe(true);
     expect(vaporSourceLevels(out, { ...FEED, chemicalId: '108-88-3' })).toEqual([]);
   });
+
+  it('carries the oxygen-limited indoor method: a level where it is linear, the reason where it is not', () => {
+    const out = outcome();
+    const indoorOnly = (indoor: NonNullable<VaporRiskFeed['coefficients']>['indoor']) => {
+      const { outdoor: _outdoor, ...rest } = FEED;
+      void _outdoor;
+      return { ...rest, coefficients: { indoor } } as VaporRiskFeed;
+    };
+    const linear = vaporSourceLevels(
+      out,
+      indoorOnly({
+        quantified: true,
+        methodId: 'vapor.devaull-2007',
+        value: 5e-5,
+        source: 'groundwater',
+      }),
+    ).find((r) => r.method === 'modern')!;
+    expect(linear.vaporMethod).toBe('vapor.devaull-2007');
+    expect(linear.level).toBe(levelOf(out, 'modern', 'indoorAir').level! / 5e-5);
+    const reason =
+      'the fast reaction front oxygen option takes the oxygen demand from the source vapor';
+    const not = vaporSourceLevels(
+      out,
+      indoorOnly({ quantified: false, methodId: 'vapor.devaull-2007', reason }),
+    ).find((r) => r.method === 'modern')!;
+    expect(not.level).toBeNull();
+    expect(not.reason).toBe(reason);
+    expect(not.vaporMethod).toBe('vapor.devaull-2007');
+  });
 });

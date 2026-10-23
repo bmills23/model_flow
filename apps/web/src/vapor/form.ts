@@ -12,6 +12,13 @@ import {
   type SoilTextureCode,
   type Stratum,
 } from '@model-flow/engine';
+import { Reader } from './reader';
+import {
+  AMBIENT_OXYGEN_PERCENT,
+  parseDevaull,
+  type DevaullParse,
+  type OxygenMode,
+} from './oxygenLimited';
 
 export type TextureChoice = SoilTextureCode | 'custom';
 export type SourceKind = 'soil' | 'soilGas' | 'groundwater';
@@ -68,7 +75,18 @@ export interface VaporForm {
   viscosity: string; // g/(cm s), legacy method
   viscosityModern: string; // g/(cm s), modern method
   qsoil: string; // L/min
-  method: 'legacy' | 'modern';
+  method: 'legacy' | 'modern' | 'devaull';
+  // oxygen-limited indoor method (DeVaull), read only when it is the method chosen
+  dvKw: string; // 1/h, aerobic water-phase first-order rate; blank = no class rate (non-degrading)
+  dvOxMode: OxygenMode;
+  dvAerobicDepth: string; // m, option 1
+  dvO2Percent: string; // % by volume of O2 in the soil gas at the base of the foundation
+  dvMassRatio: string; // g O2 per g chemical
+  dvDa: string; // cm2/s, oxygen in air (no default)
+  dvDw: string; // cm2/s, oxygen in water (no default)
+  dvH: string; // oxygen Henry's constant, dimensionless (no default)
+  dvRespiration: boolean; // baseline soil respiration in the aerobic layer
+  dvTotalHc: string; // mg/m3, total hydrocarbon vapor at the source, blank = the chemical alone
 }
 
 export const RISC4_BENZENE_ID = 'risc4-benzene';
@@ -82,6 +100,20 @@ export const RISC4_BENZENE = {
   Da: '0.088',
   Dw: '9.8e-6',
 } as const;
+
+/** The oxygen-limited method's class rate and oxygen mass ratio for benzene (database values, alkylbenzene class). */
+export const RISC4_BENZENE_OXYGEN = { dvKw: '0.73', dvMassRatio: '3.072' } as const;
+
+/**
+ * The class rate and oxygen mass ratio a form holds for a chemical it was saved with before the
+ * oxygen-limited method existed: the fixture's benzene values, or blank (non-degrading) for any other
+ * chemical, whose class rate is filled only when it is picked.
+ */
+export function oxygenClassDefaults(chemicalId: string): { dvKw: string; dvMassRatio: string } {
+  return chemicalId === RISC4_BENZENE_ID
+    ? { ...RISC4_BENZENE_OXYGEN }
+    : { dvKw: '', dvMassRatio: '' };
+}
 
 const R3_SOIL = { porosity: '0.35', bulkDensity: '1.7', foc: '0.01' } as const;
 
@@ -136,6 +168,15 @@ export const DEFAULT_FORM: VaporForm = {
   viscosityModern: '1.75e-4',
   qsoil: '5',
   method: 'legacy',
+  ...RISC4_BENZENE_OXYGEN,
+  dvOxMode: 'entered',
+  dvAerobicDepth: '1',
+  dvO2Percent: AMBIENT_OXYGEN_PERCENT,
+  dvDa: '',
+  dvDw: '',
+  dvH: '',
+  dvRespiration: true,
+  dvTotalHc: '',
 };
 
 export const FOUNDATIONS: { value: FoundationType; label: string }[] = [
@@ -196,32 +237,14 @@ export function carveFromSource(column: SoilLayer[], height: number): SoilLayer[
 }
 
 export type Parsed =
-  { ok: true; legacy: LegacyJeInput; modern: EpaJeInput } | { ok: false; errors: string[] };
-
-class Reader {
-  errors: string[] = [];
-  num(
-    raw: string,
-    label: string,
-    rule: 'pos' | 'nonneg' | 'any' | 'frac' | 'fracpos' = 'pos',
-  ): number {
-    const t = raw.trim();
-    const v = t === '' ? NaN : Number(t);
-    if (!Number.isFinite(v)) {
-      this.errors.push(`${label} must be a number`);
-      return NaN;
+  | {
+      ok: true;
+      legacy: LegacyJeInput;
+      modern: EpaJeInput;
+      /** Present only when the oxygen-limited method is the one chosen; its faults do not fail the parse. */
+      devaull?: DevaullParse;
     }
-    if (rule === 'pos' && !(v > 0)) this.errors.push(`${label} must be greater than 0`);
-    if (rule === 'nonneg' && v < 0) this.errors.push(`${label} must not be negative`);
-    if (rule === 'frac' && !(v >= 0 && v <= 1)) this.errors.push(`${label} must be from 0 to 1`);
-    if (rule === 'fracpos' && !(v > 0 && v <= 1))
-      this.errors.push(`${label} must be above 0, at most 1`);
-    return v;
-  }
-  optional(raw: string, label: string): number | undefined {
-    return raw.trim() === '' ? undefined : this.num(raw, label);
-  }
-}
+  | { ok: false; errors: string[] };
 
 /** Parses the form into the legacy and modern engine inputs, or lists every field that fails. */
 export function toInputs(f: VaporForm): Parsed {
@@ -424,7 +447,11 @@ export function toInputs(f: VaporForm): Parsed {
     source: modernSource,
     ...(f.source === 'groundwater' && Object.keys(capillary).length > 0 ? { capillary } : {}),
   };
-  return { ok: true, legacy, modern };
+  const devaull =
+    f.method === 'devaull'
+      ? parseDevaull(f, { legacy, strata, floorDepth, foundation: f.foundation })
+      : undefined;
+  return { ok: true, legacy, modern, ...(devaull ? { devaull } : {}) };
 }
 
 /** True while the inputs are the Table R-3 case A (the method shown does not matter). */

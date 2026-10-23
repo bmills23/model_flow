@@ -2,7 +2,7 @@ import type { VaporOutcome } from './compute';
 
 const MGM3 = 1e-6; // kg/m3 per mg/m3
 
-export type VaporMethod = 'legacy' | 'modern';
+export type VaporMethod = 'legacy' | 'modern' | 'devaull';
 
 export interface ProfileCurve {
   method: VaporMethod;
@@ -15,9 +15,9 @@ export interface ProfileCurve {
 /** The engine's vapor profile of each method that ran, unchanged but for the unit. */
 export function profileCurves(out: VaporOutcome): ProfileCurve[] {
   const curves: ProfileCurve[] = [];
-  for (const method of ['legacy', 'modern'] as const) {
+  for (const method of ['legacy', 'modern', 'devaull'] as const) {
     const o = out[method];
-    if (!o.ok) continue;
+    if (!o?.ok) continue;
     curves.push({
       method,
       heights: o.result.profile.map((p) => p.height),

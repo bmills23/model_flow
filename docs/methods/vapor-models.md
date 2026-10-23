@@ -44,7 +44,7 @@ applying a steady model at each time ("quasi-steady"; see "Coupling").
 | Legacy oxygen-limited model (App. K) | No (DEFAULT ruling 2) | Its only source is an unpublished draft (a "written communication" in the references of `epa2015pvi`), so there is no primary publication to implement from, and the review says its output was never validated. DeVaull 2007 covers the same physics and is published |
 | Legacy outdoor air box model fed by soil, groundwater and vadose emissions (App. F) | Yes, `outdoorAir.box` | Legacy default for outdoor air |
 | Modern EPA Johnson and Ettinger implementation (2004 equations, 2017 Version 6.0 defaults), groundwater, soil gas and soil sources, temperature-corrected Henry's constant, capillary zone from the van Genuchten curve, finite-source option | Yes, `vapor.je-epa` | Named by the M6 row (DEFAULT ruling 9 for the 2017 defaults) |
-| Modern oxygen-limited biodegradation, DeVaull 2007 in the BioVapor formulation | Yes, `vapor.devaull-2007` | Named by the M6 row |
+| Modern oxygen-limited biodegradation, DeVaull 2007 in the BioVapor formulation | Yes, `vapor.devaull-2007` | Named by the M6 row; offered on `#/vapor` as an indoor method since wave V (it is also the capability that stands in for the unbuilt Appendix K model) |
 | EPA 2015 empirical attenuation factors as used by the VISL calculator | Yes, `vapor.attenuation-factor-2015` | Named by the M6 row |
 | EPA 2015 petroleum vapor intrusion vertical-separation screen | Yes, `vapor.pvi-screen-2015` (a verdict, not a concentration) | Named by the M6 row |
 | Modern outdoor air: Soil Screening Guidance volatilization factor with a dispersion factor Q/C | Yes, `outdoorAir.ssg-vf-1996` | ROADMAP row F modern option |
@@ -381,6 +381,30 @@ foundation (identity test). With L_a fixed it is the dominant-layer model with l
 and layer 3 = 0, if the reaction terms are matched (lambda theta_w = k_w theta_w); that cross-check is a
 test.
 
+**On the vapor screen** (`#/vapor`, wave V slice V1). The method is the third choice of "Method shown in
+detail" and gives indoor air only (it has no outdoor path; the box and the Soil Screening Guidance factor stay
+legacy and modern). The screen builds the engine input from the inputs the other two methods read:
+
+- the strata below the floor, with a capillary zone included, become the one homogeneous layer the model
+  needs, with thickness-weighted porosity and water-filled porosity (so with several strata the method differs
+  from the other two even with no aerobic layer; with one stratum and L_a = 0 it equals the legacy result, a test);
+- the foundation is the crack of the legacy method (the foundation as a soil-like layer, h = D_crack eta / L)
+  with the soil gas entry of the legacy method as its velocity Q_soil / A_B, or h = infinity for a dirt floor;
+- the source is the legacy method's source (soil with its residual-phase test and optional TPH mixture, soil
+  gas, groundwater);
+- k_w and the oxygen mass ratio are filled from the chemical's database row (class rate and formula) and can be
+  edited; a chemical in no class has them blank and is non-degrading and warned;
+- the oxygen at the base of the foundation is entered as percent by volume (20.9 by default) and converted with
+  the ideal gas law at 1 atm and the soil temperature; the oxygen diffusion coefficients and Henry's constant
+  have no default, so options (2) and (3) do not run until they are entered; baseline respiration uses the
+  organic carbon and bulk density of the strata below the floor, thickness-weighted, and can be switched off.
+
+Air over source for the cleanup screen: the coefficient is published where the air is proportional to the
+source, which is option (1), and options (2) and (3) when a total hydrocarbon vapor concentration is entered
+(the oxygen demand is then fixed, so L_a does not move with the source). With the demand taken from the source
+vapor, the aerobic depth moves with the source and the coefficient is published as not quantified, naming the
+option.
+
 ## Modern screening: empirical attenuation factors (`vapor.attenuation-factor-2015`)
 
 Citations: `epa2015vi`, `epavisl`, `epa2004je` (the temperature correction the VISL calculator applies).
@@ -510,7 +534,7 @@ SI, with its kind) to a receptor air concentration, plus the profile and diagnos
 | `vapor.je-1991`, `vapor.je-epa` (infinite source) | Yes for groundwater and soil gas. For soil, yes below the residual-phase point; above it C_vs is fixed at x S H and the output stops responding to F (M5 must report that no soil cleanup level exists above saturation, not root-find through a flat function) |
 | `vapor.je-epa` finite source | Yes below saturation: C_vs is proportional to F, so psi and beta do not depend on F and the time-averaged C_in scales with F; the mass-limit branch is also proportional to F |
 | `vapor.dominant-layer-1998` | Yes (linear equations in C_vs), with the same soil saturation caveat |
-| `vapor.devaull-2007` | Only with the aerobic depth entered (option 1), or when the layer is wholly aerobic or wholly anaerobic. Options 2 and 3 are nonlinear: the aerobic depth depends on the total hydrocarbon concentration, so M5 needs the root find |
+| `vapor.devaull-2007` | Only with the aerobic depth entered (option 1), or when the layer is wholly aerobic or wholly anaerobic. Options 2 and 3 are nonlinear when the oxygen demand is taken from the source vapor: the aerobic depth then depends on it, so M5 needs the root find. With a total hydrocarbon vapor concentration entered the demand is fixed and the air is proportional to the source (the vapor screen publishes the coefficient in that case and for option 1, and not quantified otherwise) |
 | `vapor.attenuation-factor-2015` | Yes |
 | `outdoorAir.box`, `outdoorAir.ssg-vf-1996` | Yes (the mass-limit VF too) |
 | `vapor.jury-bam` | Yes (linear equation, linear initial condition) |

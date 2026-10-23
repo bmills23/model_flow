@@ -1,4 +1,5 @@
 import {
+  devaullRun,
   henryAtTemperature,
   jeEpaIndoor,
   jeLegacyIndoor,
@@ -9,6 +10,7 @@ import {
   type EpaJeInput,
   type EpaJeResult,
   type EpcSeries,
+  type DevaullResult,
   type EpcSpec,
   type LegacyJeInput,
   type LegacyJeResult,
@@ -17,6 +19,7 @@ import {
 import type { VaporOutcome } from './compute';
 import type { Parsed, VaporForm } from './form';
 import { runOutdoor, type OutdoorForm } from './outdoor';
+import { DEVAULL_ID } from './oxygenLimited';
 
 /**
  * A source that changes with time, or holds one value, offered by another screen. All SI: seconds and
@@ -26,7 +29,11 @@ export type SourceSeries =
   | { kind: 'groundwater' | 'poreWater'; label: string; series: EpcSeries; chemicalId?: string }
   | { kind: 'poreWater'; label: string; constant: number; chemicalId?: string };
 
-export const INDOOR_ORIGIN = { legacy: 'vapor.je-1991', modern: 'vapor.je-epa' } as const;
+export const INDOOR_ORIGIN = {
+  legacy: 'vapor.je-1991',
+  modern: 'vapor.je-epa',
+  devaull: DEVAULL_ID,
+} as const;
 export const OUTDOOR_ORIGIN = {
   legacy: 'outdoorAir.box',
   modern: 'outdoorAir.ssg-vf-1996',
@@ -35,11 +42,13 @@ export const OUTDOOR_ORIGIN = {
 /** A long source series is thinned to this many times (ends kept); each time is one steady run. */
 export const MAX_SERIES_TIMES = 120;
 
-export type MethodKey = 'legacy' | 'modern';
+export type MethodKey = 'legacy' | 'modern' | 'devaull';
+/** The methods that have an outdoor air path (the oxygen-limited method is indoor only). */
+export type OutdoorKey = 'legacy' | 'modern';
 
 export interface VaporEpcs {
   indoor: Partial<Record<MethodKey, EpcSpec>>;
-  outdoor: Partial<Record<MethodKey, EpcSpec>>;
+  outdoor: Partial<Record<OutdoorKey, EpcSpec>>;
   /** Why a method has no result. */
   errors: Partial<Record<MethodKey | 'outdoor', string>>;
   warnings: Warning[];
@@ -116,6 +125,7 @@ export function vaporEpcs(
   const out: VaporEpcs = { indoor: {}, outdoor: {}, errors: {}, warnings: [] };
   const legacyRuns = new Map<number, LegacyJeResult>();
   const modernRuns = new Map<number, EpaJeResult>();
+  const devaullRuns = new Map<number, DevaullResult>();
   try {
     times.forEach((t, i) => {
       legacyRuns.set(
@@ -139,12 +149,27 @@ export function vaporEpcs(
     out.errors.modern = message(e);
   }
 
+  if (parsed.devaull?.ok) {
+    const dv = parsed.devaull.input;
+    try {
+      times.forEach((t, i) => {
+        devaullRuns.set(t, devaullRun({ ...dv, source: sources(series.values[i]!).legacy }));
+      });
+    } catch (e) {
+      devaullRuns.clear();
+      out.errors.devaull = message(e);
+    }
+  } else if (parsed.devaull) {
+    out.errors.devaull = parsed.devaull.errors.join('; ');
+  }
+
   const indoorSpec = (runs: Map<number, { concentration: number }>, origin: string): EpcSpec =>
     isSeries
       ? vaporSeriesEpc((t) => runs.get(t)!, times, origin)
       : { kind: 'constant', value: Math.max(0, runs.get(times[0]!)!.concentration), origin };
   if (legacyRuns.size > 0) out.indoor.legacy = indoorSpec(legacyRuns, INDOOR_ORIGIN.legacy);
   if (modernRuns.size > 0) out.indoor.modern = indoorSpec(modernRuns, INDOOR_ORIGIN.modern);
+  if (devaullRuns.size > 0) out.indoor.devaull = indoorSpec(devaullRuns, INDOOR_ORIGIN.devaull);
 
   // Outdoor box over the legacy source vapor at each time.
   if (legacyRuns.size > 0) {
@@ -197,13 +222,14 @@ export function constantEpcs(
   const indoor: VaporEpcs['indoor'] = {};
   const outdoor: VaporEpcs['outdoor'] = {};
   const o = outcome[method];
-  if (o.ok) {
+  if (o?.ok) {
     indoor[method] = {
       kind: 'constant',
       value: Math.max(0, o.result.concentration),
       origin: INDOOR_ORIGIN[method],
     };
   }
+  if (method === 'devaull') return { indoor, outdoor };
   const od = runOutdoor(form, parsed, outcome, outdoorForm)[method];
   if (od.ok) {
     outdoor[method] = {

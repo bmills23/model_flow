@@ -129,6 +129,7 @@ function idsFor(key: ScreenKey, s: Screens): string[] {
         'outdoorAir.ssg-vf-1996',
         'vapor.pvi-screen-2015',
       ];
+      if (s.vapor.form.method === 'devaull') ids.push('vapor.devaull-2007');
       if (s.vapor.form.source !== 'soil') ids.push('vapor.attenuation-factor-2015');
       return ids;
     }

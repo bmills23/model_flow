@@ -25,6 +25,7 @@ import {
   subscribeWaterTableFeed,
 } from './feeds';
 import { runOutdoor, type OutdoorForm } from './outdoor';
+import { OxygenDetails, OxygenInputs } from './OxygenPanels';
 import { ProfileChart } from './ProfileChart';
 import { afMediaFor, runAttenuation, runPvi, type AfOptions, type PviForm } from './screening';
 import { heldSources } from './heldSources';
@@ -44,6 +45,7 @@ import {
   R3_PUBLISHED,
   RISC4_BENZENE,
   RISC4_BENZENE_ID,
+  RISC4_BENZENE_OXYGEN,
   TEXTURE_OPTIONS,
   applyTexture,
   isR3Case,
@@ -59,7 +61,12 @@ import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 const byKey = new Map(references.map((r) => [r.key, r]));
 const sig = (v: number): string => formatConcentration(v);
 const MGM3 = 1e-6; // kg/m3 per mg/m3
-const METHOD_LABEL = { legacy: 'Legacy Johnson and Ettinger', modern: 'Modern EPA' } as const;
+const METHOD_LABEL = {
+  legacy: 'Legacy Johnson and Ettinger',
+  modern: 'Modern EPA',
+  devaull: 'Oxygen-limited (DeVaull)',
+} as const;
+const WARNING_LABEL = { legacy: 'Legacy', modern: 'Modern', devaull: 'Oxygen-limited' } as const;
 
 type Setter = <K extends keyof VaporForm>(key: K, value: VaporForm[K]) => void;
 
@@ -138,43 +145,72 @@ interface Row {
   label: string;
   legacy: string;
   modern: string;
+  /** Present on every row when the oxygen-limited method is chosen. */
+  devaull?: string;
 }
 
 function comparisonRows(out: VaporOutcome): Row[] {
   const l = out.legacy.ok ? out.legacy.result : null;
   const m = out.modern.ok ? out.modern.result : null;
+  const chosen = out.devaull !== undefined;
+  const d = out.devaull?.ok ? out.devaull.result : null;
   const f = (v: number | undefined, scale = 1): string =>
     v === undefined ? 'n/a' : sig(v / scale);
-  return [
+  const dv = (v: string): { devaull?: string } => (chosen ? { devaull: v } : {});
+  const rows: Row[] = [
     {
       label: 'Indoor air (mg/m3)',
       legacy: f(l?.concentration, MGM3),
       modern: f(m?.concentration, MGM3),
+      ...dv(f(d?.concentration, MGM3)),
     },
     {
       label: 'Indoor air (ug/m3)',
       legacy: f(l?.concentration, 1e-9),
       modern: f(m?.concentration, 1e-9),
+      ...dv(f(d?.concentration, 1e-9)),
     },
-    { label: 'Attenuation coefficient (-)', legacy: f(l?.alpha), modern: f(m?.alpha) },
+    {
+      label: 'Attenuation coefficient (-)',
+      legacy: f(l?.alpha),
+      modern: f(m?.alpha),
+      ...dv(f(d?.coefficient)),
+    },
     {
       label: 'Source vapor (mg/m3)',
       legacy: f(l?.sourceVapor, MGM3),
       modern: f(m?.sourceVapor, MGM3),
+      ...dv(f(d?.sourceVapor, MGM3)),
     },
-    { label: 'Source to building distance (m)', legacy: f(l?.LT), modern: f(m?.LT) },
+    {
+      label: 'Source to building distance (m)',
+      legacy: f(l?.LT),
+      modern: f(m?.LT),
+      ...dv(f(d ? d.aerobicDepth + d.anaerobicDepth : undefined)),
+    },
     {
       label: 'Soil gas flow into the building (L/min)',
       legacy: f(l ? l.Qsoil * 6e4 : undefined),
       modern: f(m ? m.Qsoil * 6e4 : undefined),
+      ...dv('n/a'),
     },
-    { label: 'Crack Peclet number (-)', legacy: f(l?.xi), modern: f(m?.xi) },
+    { label: 'Crack Peclet number (-)', legacy: f(l?.xi), modern: f(m?.xi), ...dv('n/a') },
     {
       label: 'Diffusion only (mg/m3)',
       legacy: f(l?.concentrationDiffusionOnly, MGM3),
       modern: 'n/a',
+      ...dv('n/a'),
     },
   ];
+  if (chosen) {
+    rows.push({
+      label: 'Aerobic layer thickness (m)',
+      legacy: 'n/a',
+      modern: 'n/a',
+      devaull: f(d?.aerobicDepth),
+    });
+  }
+  return rows;
 }
 
 export function VaporPage() {
@@ -302,6 +338,7 @@ export function VaporPage() {
       TB: '',
       TC: '',
       dHvb: '',
+      ...RISC4_BENZENE_OXYGEN,
     }));
   // A project chemical is picked at once; its properties fill from the database as soon as it has loaded.
   const pickChemical = (id: string): void => {
@@ -336,7 +373,7 @@ export function VaporPage() {
       feedEpcs ?? constantEpcs(form, shownParsed, shown, outdoorForm, riskMethod);
     const indoor = r.indoor[riskMethod];
     if (!indoor) return;
-    const outdoorSpec = r.outdoor[riskMethod];
+    const outdoorSpec = riskMethod === 'devaull' ? undefined : r.outdoor[riskMethod];
     const coefficients = currentCoefficients();
     if (!coefficients) return;
     setVaporRiskFeed({
@@ -356,14 +393,16 @@ export function VaporPage() {
       ? 'The chosen source is for another chemical; choose a source for this chemical or the entered source.'
       : riskChemical === null
         ? 'Pick a chemical from the database above to send its air concentrations; the Table R-3 test values are not a chemical.'
-        : feedEpcs && !feedEpcs.indoor[riskMethod]
-          ? `The ${riskMethod} method did not run on this source series.`
-          : null;
+        : shown?.devaull && !shown.devaull.ok && riskMethod === 'devaull'
+          ? `The oxygen-limited method did not run: ${shown.devaull.error}`
+          : feedEpcs && !feedEpcs.indoor[riskMethod]
+            ? `The ${riskMethod} method did not run on this source series.`
+            : null;
 
   const warnings = shown
-    ? (['legacy', 'modern'] as const).flatMap((m) => {
+    ? (['legacy', 'modern', 'devaull'] as const).flatMap((m) => {
         const o = shown[m];
-        return o.ok ? o.result.warnings.map((w) => ({ method: m, ...w })) : [];
+        return o?.ok ? o.result.warnings.map((w) => ({ method: m, ...w })) : [];
       })
     : [];
 
@@ -374,7 +413,8 @@ export function VaporPage() {
       <p className="lede">
         Chemical vapors from soil, soil gas or groundwater diffuse up through the soil and enter a
         building through its foundation. Compare the legacy and the modern Johnson and Ettinger
-        methods on one set of inputs.
+        methods on one set of inputs, or choose the oxygen-limited method (DeVaull) for petroleum
+        vapors that biodegrade where oxygen reaches them.
       </p>
 
       <section className="panel example" aria-label="Table R-3 validation case">
@@ -719,6 +759,13 @@ export function VaporPage() {
               </div>
             )}
           </Group>
+
+          <OxygenInputs
+            form={form}
+            set={set}
+            chosen={method === 'devaull'}
+            onChoose={() => set('method', 'devaull')}
+          />
         </form>
 
         <div className="results" aria-busy={stale}>
@@ -731,6 +778,7 @@ export function VaporPage() {
               options={[
                 { value: 'legacy', label: 'Legacy J&E' },
                 { value: 'modern', label: 'Modern EPA' },
+                { value: 'devaull', label: 'Oxygen-limited (DeVaull)' },
               ]}
             />
           </div>
@@ -757,6 +805,7 @@ export function VaporPage() {
                         <th scope="col">Quantity</th>
                         <th scope="col">Legacy</th>
                         <th scope="col">Modern</th>
+                        {shown.devaull && <th scope="col">Oxygen-limited</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -765,6 +814,7 @@ export function VaporPage() {
                           <th scope="row">{r.label}</th>
                           <td>{r.legacy}</td>
                           <td>{r.modern}</td>
+                          {shown.devaull && <td>{r.devaull ?? 'n/a'}</td>}
                         </tr>
                       ))}
                     </tbody>
@@ -777,9 +827,9 @@ export function VaporPage() {
                     feeds: vaporFeedsRead(active ? choice : 'entered', form.chemicalId),
                   }))}
                 />
-                {(['legacy', 'modern'] as const).map((m) => {
+                {(['legacy', 'modern', 'devaull'] as const).map((m) => {
                   const o = shown[m];
-                  return o.ok ? null : (
+                  return !o || o.ok ? null : (
                     <p className="note" key={m}>
                       <strong>{METHOD_LABEL[m]} did not run.</strong> {o.error}
                     </p>
@@ -807,6 +857,10 @@ export function VaporPage() {
               )}
 
               {(() => {
+                if (method === 'devaull') {
+                  const dv = shown.devaull;
+                  return dv?.ok ? <OxygenDetails result={dv.result} /> : null;
+                }
                 const o = shown[method];
                 if (!o.ok) return null;
                 const r = o.result;
@@ -923,8 +977,7 @@ export function VaporPage() {
                       <li key={`${w.method}:${w.code}`}>
                         <code className="warn-code">{w.code}</code>
                         <span>
-                          <strong>{w.method === 'legacy' ? 'Legacy' : 'Modern'}.</strong>{' '}
-                          {w.message}
+                          <strong>{WARNING_LABEL[w.method]}.</strong> {w.message}
                         </span>
                       </li>
                     ))}
