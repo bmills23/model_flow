@@ -262,13 +262,20 @@ export function modernReceptorFromBoundary(b: ModernReceptorBoundary): ModernRec
   return out;
 }
 
-/** The ED-weighted mean of the bathing event times of the stages, s (0.6708 h for the resident). */
-export function timeWeightedBathingTime(stages: readonly LifeStage[]): number | undefined {
+/**
+ * The ED-weighted mean of the event times of the stages, s (0.6708 h for the resident's bathing time).
+ * `time` picks the event time of a stage, the bathing time by default.
+ */
+export function timeWeightedBathingTime(
+  stages: readonly LifeStage[],
+  time: (s: LifeStage) => number | undefined = (s) => s.bathingEventTime,
+): number | undefined {
   let num = 0;
   let den = 0;
   for (const s of stages) {
-    if (s.bathingEventTime === undefined) return undefined;
-    num += s.ed * s.bathingEventTime;
+    const t = time(s);
+    if (t === undefined) return undefined;
+    num += s.ed * t;
     den += s.ed;
   }
   return den > 0 ? num / den : undefined;

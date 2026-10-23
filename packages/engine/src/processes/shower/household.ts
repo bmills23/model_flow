@@ -38,7 +38,7 @@ export function showerHouseholdAir(p: HouseholdInput): HouseholdResult {
     {
       code: 'shower.household-factor-unverified',
       message:
-        "The household transfer factor K is an entered value, not verified against a primary page of the RSL documentation. Entered as 0.5 L/m3 (table 1 of the archived RSL user's guide) it reproduces the tap water inhalation screening levels of the RSL November 2024 table, all but the trichloroethylene and vinyl chloride cells (see the validation page).",
+        "The household transfer factor K is an entered value, not verified against a primary page of the RSL documentation. Entered as 0.5 L/m3 (table 1 of the archived RSL user's guide) it reproduces all 265 tap water inhalation screening levels of the RSL November 2024 table (see the validation page).",
     },
   ];
   if (!p.volatile) {

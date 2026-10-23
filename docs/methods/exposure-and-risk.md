@@ -48,7 +48,6 @@ Not in M4, and where it goes:
 | Back-calculation of cleanup levels, individual versus cumulative | M5 | M4 exposes per-pathway linear coefficients (risk and HQ per unit EPC) so M5's direct-pathway case needs no solver |
 | Target-organ segregation of the hazard index | Later (no machine-readable target-organ source is in the data plan) | The total HI is reported with each HQ; a warning suggests segregation when the HI exceeds 1 |
 | Subchronic and acute noncancer evaluation | Later | Chronic reference values only, as RISC5 |
-| The RSL special cases for trichloroethylene (mutagenic for one endpoint only) and vinyl chloride (an adult-only additional term) | Later | Computed as an ordinary mutagen or carcinogen and warned (`exposure.special-case-not-modelled`) |
 | Monte Carlo over exposure factors | M10 | Deterministic only |
 
 ## Units
@@ -166,7 +165,7 @@ RISC5 choices recorded on the method:
 ## Modern method: RAGS Parts E and F, 2014 defaults, ADAF (`exposure.rags-e-f-2014`)
 
 Citations: `rags1989`, `ragse2004`, `ragsf2009`, `epa2014ef`, `epa2005adaf`, `epa2005cancer`,
-`epa2012asrba`, `epa2011efh`.
+`epa2012asrba`, `epa2011efh`, `epa2024rslug`.
 
 ### Life stages
 
@@ -176,7 +175,7 @@ stages, child (ED 6 yr) and adult (ED 20 yr), ADAF 1. For a mutagen there are fo
 6 to 16 and 16 to 26 yr, with ADAF 10, 3, 3 and 1 (`epa2005adaf`: 10 before the second birthday, 3 from
 2 to before 16, 1 after); the 0 to 6 years take the child's exposure factors and 6 to 26 the adult's,
 the convention of the RSL user's guide (`epa2024rslug`, section 5.17). A worker is one adult stage.
-The mutagen flag comes from the database (`docs/methods/chemical-database.md`).
+The mutagen flag comes from the database (`docs/methods/chemical-database.md`). Trichloroethylene and vinyl chloride, which carry the flag, are the exception: see the section on the RSL special cases below.
 
 ### Intake for cancer
 
@@ -189,6 +188,65 @@ the lifetime averaging time:
 
 with the unit conversions at the boundary (soil ingestion in mg/d times kg/kg). RBA defaults to 0.6
 for inorganic arsenic (`epa2012asrba`) and 1 otherwise.
+
+### The RSL special cases: trichloroethylene and vinyl chloride (`epa2024rslug`)
+
+Status: built in wave T (2026-10-23), replacing the earlier treatment of both as ordinary chemicals. Source: the
+RSL User's Guide equations for the resident (sections 4.1.1.5 and 4.1.1.6 soil, 4.1.2.5 and 4.1.2.6 tap water,
+4.1.3.4 and 4.1.3.5 air) and the recreator (4.6.1.5 and 4.6.1.6 soil or sediment, 4.6.2.5 and 4.6.2.6 surface
+water), and the adjustment factors of section 5.18, all read 2026-10-23. The equations are published as images;
+the values and forms below were read from them and are implemented here in our own notation. The cancer slope
+factor and unit risk the tables carry for both chemicals are adult-based values, so the database values
+(`docs/methods/chemical-database.md`) are used unchanged. The mutagen flag the database carries for both
+chemicals does not select the ordinary ADAF treatment for a receptor the special equations cover.
+
+**Trichloroethylene.** The cancer and the mutagenic (kidney) parts of the toxicity values differ, so the guide
+splits each value into two fractions of the adult-based one: CAF_o = 0.804 and MAF_o = 0.202 for the oral slope
+factor (component values 3.7e-2 and 9.3e-3 per mg/kg-d against 4.6e-2), CAF_i = 0.756 and MAF_i = 0.244 for the
+inhalation unit risk (3.1e-6 and 1.0e-6 per ug/m^3 against 4.1e-6), the constants as printed to three figures.
+The dose of a pathway is the stages (child and adult, ADAF 1) weighted by CAF plus the four ADAF segments
+(0 to 2, 2 to 6, 6 to 16, 16 to 26 yr; 10, 3, 3, 1) weighted by MAF:
+
+    risk = SF ( CAF sum_stages( c_s EF_s ED_s / AT_c ) + MAF sum_segments( c_g ADAF_g EF_g ED_g / AT_c ) )
+
+with c the contact term per unit concentration of the pathway (the same terms as the ordinary equations), SF the
+oral slope factor for ingestion and dermal pathways (the dermal one divided by GIABS when GIABS is below 0.5) and
+the unit risk for inhalation. Dermal water uses one time-weighted event time over the ADAF segments for both
+parts, as the ordinary cancer dose does (0.6708 h for the resident).
+
+**Vinyl chloride.** The guide adds to the lifetime-averaged dose of the child and adult stages (no ADAF) the
+child's daily dose once more, with no frequency, duration or averaging, which is the non-prorated early-life
+exposure that the IRIS assessment combines with continuous lifetime exposure:
+
+    risk = SF ( sum_stages( c_s EF_s ED_s / AT_c ) + c_child )          ingestion and dermal
+    risk = IUR C ( sum_stages( ET_s EF_s ED_s / AT_c ) + 1 )            inhalation
+
+The inhalation addition is a unit contact (the air is breathed continuously from birth). Dermal water uses the
+ED-weighted event time of the child and adult stages (0.6708 h for the resident).
+
+**Where it applies.** To every receptor with ADAF segments (`mutagenStages`): the RSL resident, the child
+resident of the screen and any receptor the user edits from them, for every pathway of the chemical except
+vinyl chloride in shower air and in homegrown produce, which the guide gives no early-life term for (those use
+the ordinary equation and are warned). The noncancer hazard quotients are never affected. Surface water ingestion and dermal contact follow the recreator equations of the guide
+(time-weighted event time over the same stage sets). A receptor without ADAF segments, the composite worker, uses
+the ordinary equation, as the RSL does for workers, and is warned. The legacy method has no age-dependent
+adjustment and is unchanged. Because every consumer reads the pathway coefficients, the cleanup levels, the
+vapor and household paths and the uncertainty runs follow without a copy of the equations.
+
+**Concentration series.** The cancer terms of the two chemicals are not one per life stage. A trichloroethylene
+run has the child and adult terms and the four ADAF terms (six per-term averages, all starting at the exposure
+start), a vinyl chloride run the child and adult terms and the child's unaveraged term, whose concentration is
+the average over the child's years. With a constant concentration this reduces to the equations above.
+
+**Entered cancer values.** When a project overrides the slope factor or unit risk of either chemical, the
+equations are applied to the entered value in the guide's own proportions (the constants above) and
+`exposure.special-case-override` says so.
+
+**Checks.** `packages/engine/test/exposure-special-cases.test.ts` writes each equation out from the guide in its
+own units; the RSL sweep reproduces every trichloroethylene and vinyl chloride cell the engine computes (tap water
+including the household inhalation term, resident soil ingestion, resident air) and the VISL comparison
+reproduces the resident trichloroethylene cancer level, both at the unchanged tolerance. Not compared: the soil
+inhalation cells, which need the volatilization factor the sweep does not compute.
 
 ### Dermal absorbed dose (`ragse2004`)
 
@@ -330,7 +388,8 @@ Warnings (codes are part of the result):
 | `exposure.route-extrapolated` | legacy | route-to-route extrapolation was switched on and used |
 | `exposure.dermal-outside-epd` | modern | dermal water computed for a chemical outside the RAGS E prediction domain |
 | `exposure.giabs-adjusted` | modern | a dermal toxicity value was adjusted because GIABS < 0.5 |
-| `exposure.special-case-not-modelled` | modern | trichloroethylene or vinyl chloride, whose RSL treatment differs |
+| `exposure.special-case-not-modelled` | modern | trichloroethylene or vinyl chloride on a receptor or pathway the RSL equations for them do not cover (no early-life segments; vinyl chloride in shower air or homegrown produce); the ordinary equation is used and the message names what is not covered |
+| `exposure.special-case-override` | modern | trichloroethylene or vinyl chloride with an entered cancer value: the RSL equations are applied to it |
 | `exposure.site-specific-required` | both | a swimming pathway lacks a frequency or event time |
 | `exposure.csat-exceeded` | both | a soil EPC exceeds the chemical's Csat (dermal and ingestion assumptions may not hold) |
 | `exposure.soil-ceiling` | both | a soil EPC exceeds 1e5 mg/kg (10 percent of the soil by mass) |

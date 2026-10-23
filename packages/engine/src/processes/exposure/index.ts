@@ -105,10 +105,12 @@ export const exposureModern: MethodDescriptor<ModernScenarioInput, ModernScenari
     'epa2005cancer',
     'epa2012asrba',
     'epa2011efh',
+    'epa2024rslug',
   ],
   assumptions: [
     ...COMMON_ASSUMPTIONS,
     'A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.',
+    "Trichloroethylene and vinyl chloride follow the cancer equations of the RSL User's Guide for a receptor with early-life segments: trichloroethylene splits its slope factor and unit risk into a cancer part and a mutagenic part (the mutagenic part with the age segments), vinyl chloride adds the child's unaveraged dose to the lifetime-averaged dose; other receptors use the ordinary equation and are warned.",
     'The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.',
     'Inhalation uses the exposure concentration (no breathing rate or body weight).',
     'Life-stage hazard quotients are never added; the headline hazard index is the largest.',

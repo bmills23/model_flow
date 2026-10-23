@@ -36,6 +36,17 @@ checked against the endpoint the engine finds governing.
   found.
 - `householdK`: the 265 tap water inhalation cells (93 cancer, 172 noncancer) that test K.
 
+## Trichloroethylene and vinyl chloride
+
+The RSL tables compute the cancer levels of these two chemicals with their own equations (the cancer and
+mutagenic parts of trichloroethylene's values; vinyl chloride's added early-life term). The engine applies those
+equations (wave T, 2026-10-23) to the resident, so the tap water cancer cells (ingestion, dermal, inhalation and
+total, 8 cells), the resident soil ingestion cancer cells (2) and the resident air cancer cells (2) reproduce, all
+265 tap water inhalation cells reproduce, and the class that excepted them (`special-case-equations`) is gone.
+The composite worker cells of both chemicals reproduce as ordinary chemicals. Their soil inhalation cells and the
+soil totals that include them remain excepted under the existing soil classes, like every other chemical's: the
+volatilization factor is not computed here.
+
 ## Unexplained
 
 Four tap water total cancer cells: Aroclor 1242, 1248, 1254 and 1260 print 0.0078 ug/L, the engine computes

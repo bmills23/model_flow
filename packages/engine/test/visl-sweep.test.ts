@@ -237,15 +237,32 @@ describe('VISL comparison: the rules can fail', () => {
     expect(judge(c, 'cgw').status).toBe('reproduced');
   });
 
-  it('excepts a mutagen cancer level only when the printed value lies between the two engine bounds', () => {
+  it('reproduces the trichloroethylene cancer level of the resident runs from the RSL equations, with no exception', () => {
+    for (const f of ['resident-default', 'resident-tgw10'] as const) {
+      const row = RUNS[f].results[1]!;
+      expect(row.cas).toBe('79-01-6');
+      for (const comparison of COMPARISON_IDS) {
+        const c = contextOf(comparison, f, row);
+        expect(c.basis.special, `${comparison} ${f}`).toBe('trichloroethylene');
+        expect(judge(c, 'ciaC').status, `${comparison} ${f}`).toBe('reproduced');
+      }
+    }
+  });
+
+  it('does not reproduce a trichloroethylene cancer level the equations do not give, and does not except it', () => {
     const c = contextOf('printed-inputs', 'resident-default', tce);
-    expect(judge(c, 'ciaC').cls).toBe('special-case-bracketed');
-    const lower = JSON.parse(JSON.stringify(tce)) as typeof tce;
-    lower.visl.find((x) => x.column.startsWith(COLUMN.ciaC))!.cell = '1.00E-01';
-    expect(judge({ ...c, result: lower }, 'ciaC').status).toBe('unexplained');
-    const higher = JSON.parse(JSON.stringify(tce)) as typeof tce;
-    higher.visl.find((x) => x.column.startsWith(COLUMN.ciaC))!.cell = '9.00E-01';
-    expect(judge({ ...c, result: higher }, 'ciaC').status).toBe('unexplained');
+    for (const wrong of ['1.00E-01', '9.00E-01']) {
+      const other = JSON.parse(JSON.stringify(tce)) as typeof tce;
+      other.visl.find((x) => x.column.startsWith(COLUMN.ciaC))!.cell = wrong;
+      expect(judge({ ...c, result: other }, 'ciaC').status).toBe('unexplained');
+    }
+  });
+
+  it('keeps the commercial trichloroethylene cancer level ordinary, as the receptor has no early-life segments', () => {
+    const row = RUNS['commercial-default'].results[1]!;
+    const c = contextOf('printed-inputs', 'commercial-default', row);
+    expect(c.setting.receptor.mutagenStages).toBeUndefined();
+    expect(judge(c, 'ciaC').status).toBe('reproduced');
   });
 
   it('excepts a rounding miss only when inputs that round to the printed ones reach the cell', () => {

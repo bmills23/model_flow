@@ -1,6 +1,6 @@
 # Attributions
 
-Generated 2026-10-18 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
+Generated 2026-10-23 from `packages/engine/src/references/references.json` and the method registry. Do not edit by hand.
 
 Lineage: the methods implemented here were first implemented in, or popularised by, the RISC family of software (BP RISC and its successors). They are reimplemented from the primary literature listed below. This project is independent and is not affiliated with, endorsed by, or derived from the software of the RISC authors or vendors.
 
@@ -233,6 +233,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - A chemical without a value for a route contributes nothing to that route and is reported as not quantified, never as zero.
   - The homegrown produce pathway reads the soil concentration through a fresh-weight plant factor per produce class (soil-derived uptake only; vapor and irrigation contributions to the plant are not added), with a user-entered homegrown fraction and no default.
   - A resident is one age-segmented receptor (child then adult); mutagens use the four age segments with the factors 10, 3, 3 and 1.
+  - Trichloroethylene and vinyl chloride follow the cancer equations of the RSL User's Guide for a receptor with early-life segments: trichloroethylene splits its slope factor and unit risk into a cancer part and a mutagenic part (the mutagenic part with the age segments), vinyl chloride adds the child's unaveraged dose to the lifetime-averaged dose; other receptors use the ordinary equation and are warned.
   - The dermal event model and the dermal toxicity adjustment for low gastrointestinal absorption follow RAGS Part E; the cancer bathing event time is the time-weighted resident value.
   - Inhalation uses the exposure concentration (no breathing rate or body weight).
   - Life-stage hazard quotients are never added; the headline hazard index is the largest.
@@ -246,6 +247,7 @@ Software dependencies and their licences are listed separately in [THIRD_PARTY_L
   - U.S. Environmental Protection Agency (2005). Guidelines for Carcinogen Risk Assessment. U.S. Environmental Protection Agency, Risk Assessment Forum. EPA/630/P-03/001F, March 2005. <https://www.epa.gov/sites/default/files/2013-09/documents/cancer_guidelines_final_3-25-05.pdf>
   - U.S. Environmental Protection Agency (2012). Recommendations for Default Value for Relative Bioavailability of Arsenic in Soil. U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response. OSWER 9200.1-113, December 2012. <https://semspub.epa.gov/work/HQ/175338.pdf>
   - U.S. Environmental Protection Agency (2011). Exposure Factors Handbook: 2011 Edition (Final). U.S. Environmental Protection Agency, National Center for Environmental Assessment. EPA/600/R-09/052F, September 2011. <https://cfpub.epa.gov/ncea/risk/recordisplay.cfm?deid=236252>
+  - U.S. Environmental Protection Agency (2024). Regional Screening Levels (RSLs), User's Guide. U.S. Environmental Protection Agency. Web page accompanying the November 2024 tables. <https://www.epa.gov/risk/regional-screening-levels-rsls-users-guide>
 
 ### cleanup
 

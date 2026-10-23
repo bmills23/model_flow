@@ -123,6 +123,14 @@ per value with a source column; chemicals you define are included, with the sour
 and your note. The EPA values cannot be edited here (a toxicity value is edited on a chemical card, see Edit
 values); the full file loads the first time the screen opens, so it needs a connection that first time.
 
+Trichloroethylene and vinyl chloride are marked as RSL special cases. For the resident and child receptors the
+modern method computes their cancer risk with the equations the RSL User's Guide gives for them (trichloroethylene
+splits its slope factor and unit risk into a cancer part and a mutagenic part; vinyl chloride adds the child's
+unaveraged dose), so cleanup levels and the other screens that use the modern method follow. A worker uses the
+ordinary equation, as the RSL does, and the results carry a warning that says so. If you edit the slope factor or
+unit risk of either chemical, the same equations are applied to your value in the guide's proportions and a
+warning says so. The legacy method has no age adjustment and is unchanged.
+
 The screen opens with **Project chemicals**, the one list of chemicals the project works on. **Add to project**
 beside a chemical puts it on the list (a chemical already on it reads "In the project"). **Remove** takes a
 chemical out of the whole project, after asking: the question names what goes with it, which is its row and

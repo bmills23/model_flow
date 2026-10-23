@@ -11,6 +11,7 @@ import {
 import {
   modernPathway,
   noncancerGroups,
+  specialStatus,
   validateModernChemical,
   type ModernCell,
   type ModernChemical,
@@ -66,6 +67,8 @@ export interface ModernChemicalBoundary {
   organic?: boolean | undefined;
   inEpd?: boolean | undefined;
   special?: SpecialCase | undefined;
+  /** The slope factor or unit risk was entered by the user (see `ModernChemical.cancerOverridden`). */
+  cancerOverridden?: boolean | undefined;
   /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil). */
   produceFactors?: ProduceFactors | undefined;
 }
@@ -83,6 +86,7 @@ export function modernChemical(b: ModernChemicalBoundary): ModernChemical {
   if (b.csat !== undefined) out.csat = mgPerKgToKgPerKg(b.csat);
   if (b.inEpd !== undefined) out.inEpd = b.inEpd;
   if (b.special !== undefined) out.special = b.special;
+  if (b.cancerOverridden === true) out.cancerOverridden = true;
   if (b.produceFactors !== undefined) out.produceFactors = { ...b.produceFactors };
   if (b.kp !== undefined && b.organic !== undefined) {
     out.dermalWater = dermalWaterParams(b, b.kp, b.organic);
@@ -267,6 +271,7 @@ export function evaluateModernReceptor(run: ModernReceptorRun): ModernReceptorRe
   const totals = newTotals(groups);
   const seenSiteSpecific = new Set<string>();
   const seenSpecial = new Set<string>();
+  const seenOverride = new Set<string>();
 
   for (const pathway of run.pathways) {
     if (!run.chemicals.some((c) => c.epcs[pathway] !== undefined)) {
@@ -283,11 +288,27 @@ export function evaluateModernReceptor(run: ModernReceptorRun): ModernReceptorRe
       const cell = modernPathway(pathway, run.receptor, c.chemical, given);
       cells.push({ chemical: c.id, pathway, cell });
 
-      if (c.chemical.special !== undefined && !seenSpecial.has(c.id)) {
-        seenSpecial.add(c.id);
+      const status = specialStatus(c.chemical, run.receptor, pathway);
+      if (status.kind === 'not-covered' && !seenSpecial.has(`${c.id}:${status.what}`)) {
+        seenSpecial.add(`${c.id}:${status.what}`);
         warnings.push({
           code: 'exposure.special-case-not-modelled',
-          message: `${run.label}: ${c.id} is ${c.chemical.special}, which the RSL tables treat with their own equations; computed as an ordinary chemical`,
+          message: `${run.label}: ${c.id} is ${c.chemical.special}, which the RSL User's Guide treats with its own equations for the resident and recreator; not applied here: ${status.what}`,
+        });
+      }
+      if (
+        status.kind === 'applied' &&
+        c.chemical.cancerOverridden === true &&
+        !seenOverride.has(c.id)
+      ) {
+        seenOverride.add(c.id);
+        warnings.push({
+          code: 'exposure.special-case-override',
+          message: `${run.label}: ${c.id} has an entered cancer value; the RSL equations for ${c.chemical.special} are applied to it${
+            c.chemical.special === 'trichloroethylene'
+              ? ' in the guide proportions (cancer 0.804 and mutagenic 0.202 of the oral value, 0.756 and 0.244 of the inhalation value)'
+              : ' (the non-prorated early-life term is added to the prorated lifetime term)'
+          }`,
         });
       }
 

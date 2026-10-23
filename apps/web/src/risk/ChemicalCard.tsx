@@ -50,12 +50,14 @@ export function ChemicalCard(props: {
   const setConc = (m: Medium, v: string): void =>
     props.onChange({ ...row, conc: { ...row.conc, [m]: v } });
   const facts = [
-    t.mutagen ? 'Mutagen: the age-dependent adjustment applies to the modern cancer dose.' : '',
+    t.mutagen && !t.special
+      ? 'Mutagen: the age-dependent adjustment applies to the modern cancer dose.'
+      : '',
     t.volatile ? 'Volatile.' : '',
     t.giabs !== undefined ? `Gastrointestinal absorption ${fmtTox(t.giabs)}.` : '',
     t.absd !== undefined ? `Dermal soil absorption ${fmtTox(t.absd)}.` : '',
     t.special
-      ? `RSL special case (${t.special}); computed here as an ordinary chemical, see the warnings.`
+      ? `RSL special case (${t.special}): the modern cancer dose of a receptor with early-life segments follows the RSL User's Guide equations for this chemical; other receptors use the ordinary equation (see the warnings).`
       : '',
   ].filter(Boolean);
   return (

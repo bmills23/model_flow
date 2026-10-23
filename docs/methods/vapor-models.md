@@ -754,12 +754,13 @@ printed values, not from these trials.
    no answers it has a criterion for, twice: from the calculator's printed inputs (checks the equations) and from
    the database the app ships (checks what a user gets). The tolerance is half a unit of the last printed digit
    (three significant figures, asserted), against the engine's unrounded value. Result: of the 195
-   cells of the first comparison 181 reproduce, 14 are named exceptions and 0 are unexplained, and of the 210
-   cells of the second 203 reproduce, 7 are named exceptions and 0 are unexplained; the per-run counts, the exception classes
+   cells of the first comparison 183 reproduce, 12 are named exceptions and 0 are unexplained, and of the 210
+   cells of the second 205 reproduce, 5 are named exceptions and 0 are unexplained; the per-run counts, the exception classes
    with their reasons and every excepted cell are in `test/fixtures/visl-sweep/exceptions.json` and
-   `docs/VALIDATION.md`. The exceptions: the trichloroethylene cancer level at the resident settings (the
-   calculator uses the RSL's own equations; the printed level lies between the engine's all-mutagenic and
-   not-mutagenic levels, as in the RSL sweeps); the pure phase vapor concentration at 10 deg C, which the
+   `docs/VALIDATION.md`. The trichloroethylene cancer level at the resident settings reproduces in both comparisons
+   through the RSL's own equations for that chemical, which the modern exposure method applies
+   (`docs/methods/exposure-and-risk.md`); the commercial level reproduces as an ordinary chemical, as that receptor
+   has no early-life segments. The exceptions: the pure phase vapor concentration at 10 deg C, which the
    calculator prints equal to its 25 deg C value under a header naming 10 deg C (the engine reproduces the
    printed number from the printed 25 deg C vapor pressure); a few outputs that miss by less than the rounding of
    the calculator's three-figure printed inputs; and, in the database comparison, trichloroethylene (critical

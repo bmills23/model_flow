@@ -3749,3 +3749,47 @@ trichloroethylene cancer equations, which both the RSL sweep and the VISL compar
 6. **Docs (DEFAULT).** The methods notes that describe the deferral (exposure and risk, chemical database, shower
    and vapor models) are corrected in place with the slice, and VALIDATION is regenerated. The roadmap and the
    handoff move at the wave close.
+
+### Wave T, special-case cancer equations
+
+Rulings taken while building (2026-10-23), each marked DEFAULT and open to Bryan's overturn. Source for all of them:
+the RSL User's Guide (`epa2024rslug`) equation images of sections 4.1.1.5 to 4.1.3.5 and 4.6.1.5 to 4.6.2.6 for
+the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
+
+1. **Receptors covered (DEFAULT).** The guide gives the equations for the resident and the recreator only. The
+   engine applies them to a receptor that has ADAF segments (`mutagenStages`): the RSL resident, the screen's
+   child resident and any receptor edited from them. A receptor without ADAF segments (the composite worker) uses
+   the ordinary equation, which is what the guide's worker tables do (the published industrial cells reproduce),
+   and keeps `exposure.special-case-not-modelled` with a message that names the reason. The recreator has no
+   preset in the engine, so its soil and surface-water equations are implemented through the same stage sets and
+   have no published cell to be checked against.
+2. **Trichloroethylene fractions (DEFAULT).** The guide prints the cancer and mutagenic fractions of the
+   adult-based oral slope factor (0.804 and 0.202) and inhalation unit risk (0.756 and 0.244) to three figures,
+   with the component values they come from (3.7e-2, 9.3e-3, 4.6e-2; 3.1e-6, 1.0e-6, 4.1e-6). The three-figure
+   constants are entered as printed (not recomputed from the ratios); every published cell reproduces with them.
+   Dermal doses use the oral fractions. Nothing was read from the IRIS pages themselves: every value used is
+   printed in the guide.
+3. **Vinyl chloride (DEFAULT).** The ordinary lifetime-averaged dose of the child and adult stages without ADAF,
+   plus the first stage once more as an unaveraged term: for ingestion and dermal pathways the child's daily dose
+   (no frequency, duration or averaging), for inhalation a unit contact. The mutagen flag the database carries for
+   the chemical does not select the ADAF treatment where these equations apply.
+4. **Pathways not covered (DEFAULT).** Vinyl chloride in shower air and in homegrown produce: the guide has no
+   early-life equation for them, so they use the ordinary equation and are warned (`exposure.special-case-not-modelled`,
+   naming the pathway). Trichloroethylene is applied to every pathway (its fractions are a split of the toxicity
+   value, valid for any dose). Surface-water dermal contact of both chemicals uses one time-weighted event time over
+   the stage set of the term, as the guide's recreator equations do and as the bathing dermal dose already does.
+5. **Series concentrations (DEFAULT).** The cancer terms of a pathway are listed by `cancerPlan` with their place on
+   the life-time axis, and the scenario runner averages each term over its own window: trichloroethylene has six
+   terms (two stages, four ADAF segments, all starting at the exposure start), vinyl chloride the child and adult
+   terms and the unaveraged child term, which takes the average over the child's years. A constant concentration
+   gives the equations as printed.
+6. **Overridden values (DEFAULT).** `ModernChemical.cancerOverridden` is set by the screens when the slope factor or
+   unit risk carries the `user` source. The equations are applied to the entered value with the constants above;
+   the warning is `exposure.special-case-override`.
+7. **Checks (DEFAULT).** The class `special-case-equations` of the RSL sweep and `special-case-bracketed` of the VISL
+   comparison are removed. RSL sweep after: tap water 3053 compared, 3048 reproduced, 1 excepted, 4 unexplained
+   (before 3040, 9, 4); resident soil 2140 reproduced, 872 excepted (before 2138, 874); industrial soil unchanged;
+   air 809 reproduced, 3 excepted (before 807, 5); all 265 household K cells reproduce (before 263). VISL first
+   comparison 183 reproduced, 12 excepted, 0 unexplained (before 181, 14); second 205, 5, 0 (before 203, 7). No cell
+   is unexplained on account of these chemicals; their soil inhalation cells and the soil totals that include them
+   stay under the existing soil classes, as for every chemical, because the volatilization factor is not computed.

@@ -143,7 +143,9 @@ two tap water totals in all 850 rows that have one, so the summary is at THQ 1 d
 under one CAS number (the build asserts uniqueness). 151 of the roughly 890 RSL rows carry a leading `~` on
 the analyte name, whose meaning the user's guide does not state; the build keeps the name exactly as
 printed in `rslName` and strips the marker from the display `name`. The rows the user's guide gives their own equations
-(trichloroethylene and vinyl chloride) carry `special: "<code>"` so the engine can warn.
+(trichloroethylene and vinyl chloride) carry `special: "<code>"` so the modern exposure method applies those equations
+(`docs/methods/exposure-and-risk.md`, "The RSL special cases"); their slope factor and unit risk are the adult-based
+values the tables print, which those equations take as given.
 
 ## Attribution wording (public domain)
 
@@ -165,5 +167,5 @@ published value from a project value.
 | Key | Verified against |
 |---|---|
 | `epa2024rsl` | EPA Generic Tables page and SEMS collection 36504 (all documents dated 11/13/2024, "November 2024"); the five spreadsheets above downloaded and opened |
-| `epa2024rslug` | EPA User's Guide page (sections 2.3 toxicity hierarchy, 4.9 dermal parameters, 5.10 arsenic RBA, 5.17 mutagens, 5.18 trichloroethylene); page last updated March 13, 2026 |
+| `epa2024rslug` | EPA User's Guide page (sections 2.3 toxicity hierarchy, 4.9 dermal parameters, 5.10 arsenic RBA, 5.17 mutagens, 5.18 trichloroethylene); page last updated March 13, 2026. Read again 2026-10-23 for the trichloroethylene and vinyl chloride equations of sections 4.1 and 4.6 and the adjustment factors of 5.18 |
 | `epa2003toxhier` | EPA SEMS copy of the memorandum (OSWER Directive 9285.7-53, December 5, 2003) |

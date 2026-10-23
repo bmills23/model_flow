@@ -35,8 +35,17 @@ export interface ModernChemical extends ToxicityValues {
   dermalWater?: DermalWaterParams;
   /** The chemical lies in the RAGS E effective prediction domain (false: outside, true or absent: inside or unknown). */
   inEpd?: boolean;
-  /** An RSL special case (computed as an ordinary chemical, warned by the receptor evaluation). */
+  /**
+   * An RSL special case: the cancer equations of the RSL User's Guide for trichloroethylene or vinyl chloride
+   * (`specialCancerTerms`) replace the ordinary cancer dose for a receptor that models early-life exposure.
+   */
   special?: SpecialCase;
+  /**
+   * The cancer slope factor or unit risk was entered by the user, not taken from the database. The equations of
+   * a special case are applied to the given value in the guide's own proportions, and the receptor evaluation
+   * warns.
+   */
+  cancerOverridden?: boolean;
   /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil), for the `produce` pathway. */
   produceFactors?: ProduceFactors;
 }
@@ -103,6 +112,134 @@ export function validateModernChemical(chem: ModernChemical): void {
   if (chem.dermalWater !== undefined) validateDermalWater(chem.dermalWater);
 }
 
+/**
+ * Trichloroethylene (RSL User's Guide section 5.18): the cancer and mutagenic parts of its toxicity values, as
+ * fractions of the adult-based value the tables carry (0.037 of 0.046 and 0.0093 of 0.046 per mg/kg-d; 3.1e-6
+ * and 1.0e-6 of 4.1e-6 per ug/m3, as printed in the guide's equation, read 2026-10-23). The guide's equations
+ * print the fractions to three figures, and so do these constants.
+ */
+export const TCE_ADJUSTMENT = {
+  oral: { cancer: 0.804, mutagen: 0.202 },
+  inhalation: { cancer: 0.756, mutagen: 0.244 },
+} as const;
+
+/** One term of the cancer dose: a life stage, its place on the life-time axis and its weight. */
+export interface CancerTerm {
+  id: string;
+  stage: LifeStage;
+  /** Start of the stage on the life-time axis (the stage list it belongs to starts at age 0), s. */
+  offset: number;
+  /** Multiplier of the slope factor or unit risk: the ADAF, and for trichloroethylene the CAF or MAF. */
+  weight: number;
+  /**
+   * True: the dose is averaged over the lifetime (EF ED / LT). False: the unaveraged early-life term of vinyl
+   * chloride, the child's daily dose (inhalation: a unit contact) with no frequency, duration or averaging.
+   */
+  averaged: boolean;
+}
+
+export interface CancerPlan {
+  terms: CancerTerm[];
+  /** The stages that define the time-weighted event time of the dermal-water cancer dose. */
+  timeStages: readonly LifeStage[];
+  /** The RSL special-case equations are applied to this pathway and receptor. */
+  special: boolean;
+}
+
+const segments = (
+  stages: readonly LifeStage[],
+  weight: (s: LifeStage) => number,
+  tag = '',
+): CancerTerm[] => {
+  let offset = 0;
+  return stages.map((s) => {
+    const term: CancerTerm = {
+      id: `${s.id}${tag}`,
+      stage: s,
+      offset,
+      weight: weight(s),
+      averaged: true,
+    };
+    offset += s.ed;
+    return term;
+  });
+};
+
+/** Pathways to which the early-life term of vinyl chloride does not extend (the guide has no equation for them). */
+const VINYL_CHLORIDE_UNCOVERED: readonly PathwayId[] = ['showerInhalation', 'produce'];
+
+/** What the RSL special-case equations cover for a chemical, receptor and pathway. */
+export type SpecialStatus =
+  { kind: 'none' } | { kind: 'applied' } | { kind: 'not-covered'; what: string };
+
+export function specialStatus(
+  chem: ModernChemical,
+  receptor: ModernReceptor,
+  pathway: PathwayId,
+): SpecialStatus {
+  if (chem.special === undefined) return { kind: 'none' };
+  if (receptor.mutagenStages === undefined) {
+    return {
+      kind: 'not-covered',
+      what: 'the receptor has no early-life segments, so the ordinary cancer equation is used (the RSL does the same for workers)',
+    };
+  }
+  if (chem.special === 'vinyl-chloride' && VINYL_CHLORIDE_UNCOVERED.includes(pathway)) {
+    return {
+      kind: 'not-covered',
+      what: `${pathway} has no early-life term in the guide's equations, so the ordinary cancer equation is used`,
+    };
+  }
+  return { kind: 'applied' };
+}
+
+/**
+ * The terms of the cancer dose of a chemical for a receptor and pathway.
+ *
+ * Ordinary: the receptor's stages (a mutagen's ADAF segments when it has them), each weighted by its ADAF.
+ *
+ * Trichloroethylene (guide sections 4.1.x.6, 4.6.x.6 and 5.18), where the receptor has ADAF segments: the
+ * stages weighted by the cancer fraction CAF plus the ADAF segments weighted by the mutagenic fraction MAF
+ * (oral or inhalation by the route of the pathway; the dermal dose uses the oral fractions).
+ *
+ * Vinyl chloride (sections 4.1.x.5 and 4.6.x.5): the stages averaged over the lifetime without an ADAF, plus
+ * the first stage (the child) once more as an unaveraged daily dose, which is the guide's non-prorated
+ * early-life exposure added to the prorated continuous exposure.
+ */
+export function cancerPlan(
+  pathway: PathwayId,
+  receptor: ModernReceptor,
+  chem: ModernChemical,
+): CancerPlan {
+  if (specialStatus(chem, receptor, pathway).kind === 'applied') {
+    const adaf = receptor.mutagenStages!;
+    if (chem.special === 'trichloroethylene') {
+      const f =
+        PATHWAYS[pathway].route === 'inhalation' ? TCE_ADJUSTMENT.inhalation : TCE_ADJUSTMENT.oral;
+      return {
+        terms: [
+          ...segments(receptor.stages, (s) => s.adaf * f.cancer),
+          ...segments(adaf, (s) => s.adaf * f.mutagen),
+        ],
+        timeStages: adaf,
+        special: true,
+      };
+    }
+    const first = receptor.stages[0]!;
+    return {
+      terms: [
+        ...segments(receptor.stages, (s) => s.adaf),
+        { id: `${first.id}-from-birth`, stage: first, offset: 0, weight: 1, averaged: false },
+      ],
+      timeStages: receptor.stages,
+      special: true,
+    };
+  }
+  const stages =
+    chem.mutagen && receptor.mutagenStages !== undefined ? receptor.mutagenStages : receptor.stages;
+  return { terms: segments(stages, (s) => s.adaf), timeStages: stages, special: false };
+}
+
 interface Contact {
   /** Contact term per unit EPC on an exposure day (per kg body weight; inhalation: the day fraction). */
   perEpc: number | null;
@@ -133,7 +270,7 @@ function efFor(stage: LifeStage, pathway: PathwayId, missing: string[]): number 
  * Soil ingestion IRS RBA / BW; soil dermal SA AF EV ABSd / BW (the event dose of eq. 3.12);
  * drinking water IRW / BW; dermal water SA EV DA_event / BW (eq. 3.1 with DA_event of eq. 3.2 to 3.4);
  * surface-water ingestion IRsw t_ev EV / BW; dermal surface water as dermal water.
- * `eventTimeOverride` replaces the stage's bathing event time (the time-weighted cancer convention).
+ * `eventTimeOverride` replaces the stage's bathing or swimming event time (the time-weighted cancer convention).
  */
 export function modernStageContact(
   pathway: PathwayId,
@@ -203,7 +340,7 @@ export function modernStageContact(
       dermalWater(
         stage.swimSkinArea,
         'swimSkinArea',
-        stage.swimEventTime,
+        eventTimeOverride ?? stage.swimEventTime,
         'swimEventTime',
         stage.swimEventsPerDay ?? 1,
       );
@@ -269,20 +406,19 @@ export function modernPathway(
 ): ModernCell {
   validateModernChemical(chem);
   const route = PATHWAYS[pathway].route;
-  const cancerStages =
-    chem.mutagen && receptor.mutagenStages !== undefined ? receptor.mutagenStages : receptor.stages;
+  const plan = cancerPlan(pathway, receptor, chem);
   const groups = noncancerGroups(receptor);
 
   let cancerEpc: readonly number[];
   let noncancerEpc: Record<string, number>;
   if (typeof epc === 'number') {
     checkConcentration(pathway, epc);
-    cancerEpc = cancerStages.map(() => epc);
+    cancerEpc = plan.terms.map(() => epc);
     noncancerEpc = Object.fromEntries(groups.map((g) => [g.group, epc]));
   } else {
-    if (epc.cancerByStage.length !== cancerStages.length) {
+    if (epc.cancerByStage.length !== plan.terms.length) {
       throw new RangeError(
-        `${pathway}: cancerByStage needs ${cancerStages.length} concentrations, one per life stage`,
+        `${pathway}: cancerByStage needs ${plan.terms.length} concentrations, one per cancer term (${plan.terms.map((x) => x.id).join(', ')})`,
       );
     }
     cancerEpc = epc.cancerByStage;
@@ -315,18 +451,23 @@ export function modernPathway(
   }
 
   const missing = new Set<string>();
-  const weighted =
-    pathway === 'waterDermal'
-      ? (receptor.cancerBathingEventTime ?? timeWeightedBathingTime(cancerStages))
-      : undefined;
+  let weighted: number | undefined;
+  if (pathway === 'waterDermal') {
+    weighted = receptor.cancerBathingEventTime ?? timeWeightedBathingTime(plan.timeStages);
+  } else if (pathway === 'swimDermal' && plan.special) {
+    weighted = timeWeightedBathingTime(plan.timeStages, (s) => s.swimEventTime);
+  }
 
   const riskByStage: ModernCell['riskByStage'] = [];
-  for (const [i, s] of cancerStages.entries()) {
+  for (const [i, term] of plan.terms.entries()) {
+    const s = term.stage;
     const c = modernStageContact(pathway, s, chem, weighted);
     c.missing.forEach((x) => missing.add(x));
     if (c.perEpc !== null && sf !== undefined) {
-      const coef = (sf * s.adaf * c.perEpc * c.ef * s.ed) / receptor.lifetime;
-      riskByStage.push({ stage: s.id, riskPerEpc: coef, risk: coef * cancerEpc[i]! });
+      let coef: number;
+      if (term.averaged) coef = (sf * term.weight * c.perEpc * c.ef * s.ed) / receptor.lifetime;
+      else coef = sf * term.weight * (route === 'inhalation' ? 1 : c.perEpc);
+      riskByStage.push({ stage: term.id, riskPerEpc: coef, risk: coef * cancerEpc[i]! });
     }
   }
   const hqByGroup: ModernCell['hqByGroup'] = [];

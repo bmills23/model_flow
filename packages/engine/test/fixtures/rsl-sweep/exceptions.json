@@ -4,19 +4,19 @@
   "householdK": {
     "lPerM3": 0.5,
     "cells": 265,
-    "reproduced": 263
+    "reproduced": 265
   },
   "sweeps": {
     "tapwater": {
       "compared": 3053,
-      "reproduced": 3040,
-      "excepted": 9,
+      "reproduced": 3048,
+      "excepted": 1,
       "unexplained": 4
     },
     "soil-resident": {
       "compared": 3012,
-      "reproduced": 2138,
-      "excepted": 874,
+      "reproduced": 2140,
+      "excepted": 872,
       "unexplained": 0
     },
     "soil-industrial": {
@@ -27,8 +27,8 @@
     },
     "air": {
       "compared": 812,
-      "reproduced": 807,
-      "excepted": 5,
+      "reproduced": 809,
+      "excepted": 3,
       "unexplained": 0
     }
   },
@@ -790,16 +790,6 @@
         "air": 2
       },
       "chemicals": ["Refractory Ceramic Fibers (units in fibers)"]
-    },
-    {
-      "id": "special-case-equations",
-      "reason": "The RSL tables treat trichloroethylene (mutagenic for one endpoint only) and vinyl chloride (an adult-only additional term) with their own equations (docs/methods/exposure-and-risk.md). The engine computes both as ordinary chemicals and warns exposure.special-case-not-modelled, so the printed values are not expected to reproduce. Cells of these two chemicals that do reproduce are counted as reproduced.",
-      "cells": {
-        "tapwater": 8,
-        "soil-resident": 2,
-        "air": 2
-      },
-      "chemicals": ["Trichloroethylene", "Vinyl Chloride"]
     }
   ],
   "unexplained": [

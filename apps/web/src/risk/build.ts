@@ -38,6 +38,7 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import { PATHWAY_LABELS } from './chartData';
+import { USER_SOURCE } from '../overrides/toxicity';
 import type { ChemicalDb, ChemicalRecord } from './chemicalDb';
 import { feedChemicalProblem } from '../project/feedChemical';
 import { pickSlot, type FeedSlots } from '../project/feedSlots';
@@ -149,6 +150,7 @@ export function modernChem(
     fa: rec.phys?.fa,
     inEpd: rec.phys?.inEpd,
     special: t.special,
+    cancerOverridden: t.sfo?.source === USER_SOURCE || t.iur?.source === USER_SOURCE,
     organic: dermalForm === undefined ? undefined : dermalForm === 'organic',
     produceFactors,
   });

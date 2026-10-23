@@ -683,10 +683,10 @@ export const validationCatalog: CatalogInput = {
       methodIds: ['shower.rsl-household'],
       warningCode: 'shower.household-factor-unverified',
       referenceKey: 'epa2024rslug',
-      note: "An entered value, not verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The page prints its equations as images, so the form (C_a = C_w K) was not read from it. Numerically, K = 0.5 reproduces 263 of the 265 tap water inhalation levels of the RSL November 2024 table (the resident air level divided by K; the two misses are the trichloroethylene and vinyl chloride cancer cells, which the RSL computes with its own equations; see the tap water sweep above). That is consistency with the published table, not verification from a primary source, so the warning stays.",
+      note: "An entered value, not verified against a primary page of the RSL documentation. Table 1 of the archived RSL User's Guide (19january2021snapshot.epa.gov/risk/regional-screening-levels-rsls-users-guide_.html, read 2026-10-21) lists K, the Andelman volatilization factor, as 0.5 L/m3, citing U.S. EPA 1991b (pg. 20). The page prints its equations as images, so the form (C_a = C_w K) was not read from it. Numerically, K = 0.5 reproduces all 265 tap water inhalation levels of the RSL November 2024 table (the resident air level divided by K; the two trichloroethylene and vinyl chloride cancer cells reproduce through the RSL equations for those chemicals, which the modern exposure method applies; see the tap water sweep above). That is consistency with the published table, not verification from a primary source, so the warning stays.",
       where: {
         file: 'packages/engine/src/processes/shower/household.ts',
-        needle: 'it reproduces the tap water inhalation screening levels',
+        needle: 'it reproduces all 265 tap water inhalation screening levels',
       },
     },
     {
@@ -793,7 +793,7 @@ export const validationCatalog: CatalogInput = {
     },
     {
       subject: 'RSL sweep cells that do not reproduce',
-      note: 'Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: the trichloroethylene and vinyl chloride cancer cells (the RSL special-case equations), lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.',
+      note: 'Unexplained: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (printed 0.0078 ug/L, computed 0.007852 ug/L; no reason found). Excepted with a reason: lead (key G, no toxicity value in the database) and refractory ceramic fibers (key G, database value in fibers). The counts are in the sweep entries above.',
       where: {
         file: 'packages/engine/test/fixtures/rsl-sweep/README.md',
         needle: 'Aroclor 1242, 1248, 1254 and 1260',

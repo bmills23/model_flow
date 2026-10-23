@@ -162,13 +162,15 @@ to the indoor air pathway, never to the shower stall pathway. Fixture 3 (Little 
 results) is not in E1: no printed Little values were available, so E1's tests are the identity and hand cases
 (fixtures 1 and 2) only.
 
-Wave R sweep (2026-10-22): the RSL November 2024 tap water table prints 265 inhalation cells (93 cancer, 172
-noncancer). With K entered as 0.5 L/m^3 and the resident indoor air level (24 h per day) divided by it, 263 of the
-265 reproduce at half a unit of the second significant figure (`rsl-tables-sweep.test.ts`, listed on `#/validation`).
-The two that do not are the trichloroethylene and vinyl chloride cancer cells, which the RSL computes with its own
-equations. So the published table is consistent with K = 0.5 and with the form C_a = C_w K. This is a numeric check
-against the published table, not a reading of the primary page: the warning stays, K is still not called verified
-from a primary source, and it is still entered rather than defaulted.
+Wave R sweep (2026-10-22, completed in wave T, 2026-10-23): the RSL November 2024 tap water table prints 265
+inhalation cells (93 cancer, 172 noncancer). With K entered as 0.5 L/m^3 and the resident indoor air level (24 h
+per day) divided by it, all 265 reproduce at half a unit of the second significant figure
+(`rsl-tables-sweep.test.ts`, listed on `#/validation`). The two trichloroethylene and vinyl chloride cancer cells
+reproduce through the RSL's own equations for those chemicals, which the modern exposure method applies
+(`docs/methods/exposure-and-risk.md`); the other 263 were already reproduced as ordinary chemicals. So the published
+table is consistent with K = 0.5 and with the form C_a = C_w K. This is a numeric check against the published
+table, not a reading of the primary page: the warning stays, K is still not called verified from a primary source,
+and it is still entered rather than defaulted.
 
 ## Legacy method: sprinkler volatilization (`irrigation.sprinkler-fc`)
 

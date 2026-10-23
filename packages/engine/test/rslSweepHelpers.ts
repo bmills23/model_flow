@@ -264,7 +264,6 @@ export const CLASS_IDS = [
   'soil-total-with-inhalation-not-computed',
   'key-g-no-toxicity-value',
   'key-g-fiber-units',
-  'special-case-equations',
 ] as const;
 export type ClassId = (typeof CLASS_IDS)[number];
 
@@ -293,8 +292,6 @@ export interface SweepResult {
   /** Reproduced cells of the industrial air sweep whose key letter names the endpoint the engine finds governing. */
   keyLetters: { checked: number; agree: number };
 }
-
-const chemicalFlags = new Map(levels.chemicals.map((c) => [c.id, c]));
 
 function sweepOfColumn(column: string): SweepId | null {
   const medium = column.split('.')[0]!;
@@ -382,7 +379,6 @@ export function runRslSweep(): SweepResult {
         cls = 'soil-total-with-inhalation-not-computed';
       } else if (keyG && computed === null) cls = 'key-g-no-toxicity-value';
       else if (keyG) cls = 'key-g-fiber-units';
-      else if (chemicalFlags.get(ch.id)?.special !== undefined) cls = 'special-case-equations';
 
       if (cls !== null) {
         counts.excepted += 1;

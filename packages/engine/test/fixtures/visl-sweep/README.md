@@ -51,20 +51,25 @@ relative 0.05 to 0.5 percent. Nothing is widened. A yes or no answer must be equ
   unexplained. The test recomputes them.
 - `classes`: each exception class with its reason, the cells per comparison and run, and the chemicals it names.
   A cell is excepted only when it does not reproduce and the class's own evidence holds; the test checks that
-  evidence for every cell (for example, that a printed trichloroethylene cancer level lies strictly between the
-  engine's two bounds).
+  evidence for every cell (for example, that the 25 deg C vapor pressure reproduces a pure phase vapor
+  concentration printed at 10 deg C).
 - `cells`: every excepted cell with the printed and the computed value, its class and, for
   `database-input-differs`, the database inputs whose difference explains it.
 - `unexplained`: every cell that neither reproduces nor belongs to a class, with the printed and the computed
   value. These are counted and printed in the validation catalog, never hidden and never given a reason that was
   not found.
 
+## Trichloroethylene
+
+The calculator takes the cancer level of trichloroethylene from the RSL's own equations for it (the unit risk
+split into a cancer part and a mutagenic part). The engine applies those equations (wave T, 2026-10-23, from the
+RSL User's Guide) to a receptor with early-life segments, so the resident cancer level reproduces in both
+comparisons and the class that excepted it (`special-case-bracketed`) is gone. The commercial receptor has no
+early-life segments and reproduces as an ordinary chemical. The special-case flag of a chemical is read from the
+RSL toxicity file by CAS number in both comparisons; it is not a calculator input.
+
 ## Classes
 
-- `special-case-bracketed`: the trichloroethylene cancer level at the resident settings. The calculator uses the
-  RSL's own equations for this chemical; the engine has only the two bounds (all of the unit risk mutagenic,
-  none of it), and the printed level lies between them. The same exception as `special-case-equations` in
-  `../rsl-sweep/`.
 - `pure-phase-vapor-at-25`: at a groundwater temperature of 10 deg C the calculator prints a pure phase vapor
   concentration, under a header that names 10 deg C, equal to its 25 deg C value. The engine reproduces the
   printed number from the printed 25 deg C vapor pressure, not from the printed 10 deg C vapor pressure.

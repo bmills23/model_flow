@@ -401,8 +401,27 @@ describe('modern scenario: warning codes', () => {
     expect(codes(r)).toContain('exposure.giabs-adjusted');
   });
 
-  it('exposure.special-case-not-modelled', () => {
+  it('exposure.special-case-not-modelled (a receptor with no early-life segments)', () => {
     const vc = modernChemical({ ...benzeneBoundary, id: '75-01-4', special: 'vinyl-chloride' });
+    const r = runModernScenario({
+      receptors: [
+        rec({
+          receptor: modernWorker(),
+          pathways: ['waterIngestion'],
+          chemicals: [chem('vc', vc, { waterIngestion: water })],
+        }),
+      ],
+    });
+    expect(codes(r)).toContain('exposure.special-case-not-modelled');
+  });
+
+  it('exposure.special-case-override (an entered cancer value on a special case)', () => {
+    const vc = modernChemical({
+      ...benzeneBoundary,
+      id: '75-01-4',
+      special: 'vinyl-chloride',
+      cancerOverridden: true,
+    });
     const r = runModernScenario({
       receptors: [
         rec({
@@ -411,7 +430,8 @@ describe('modern scenario: warning codes', () => {
         }),
       ],
     });
-    expect(codes(r)).toContain('exposure.special-case-not-modelled');
+    expect(codes(r)).toContain('exposure.special-case-override');
+    expect(codes(r)).not.toContain('exposure.special-case-not-modelled');
   });
 
   it('exposure.site-specific-required (swimming needs a frequency and event time)', () => {

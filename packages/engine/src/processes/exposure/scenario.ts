@@ -18,8 +18,10 @@ import type { EpcSpec } from './epc.js';
 import type { LegacyChemical, LegacyReceptor } from './legacy.js';
 import { isAgeSegmented } from './lifeStages.js';
 import {
+  cancerPlan,
   modernPathway,
   noncancerGroups,
+  type CancerTerm,
   type ModernChemical,
   type ModernEpcInput,
 } from './modern.js';
@@ -202,25 +204,16 @@ export interface ModernScenarioResult extends ModernRunResult {
   summary: RunRiskSummary;
 }
 
-function cancerStagesOf(
-  receptor: ModernScenarioReceptor['receptor'],
-  chem: ModernChemical,
-): ModernScenarioReceptor['receptor']['stages'] {
-  return chem.mutagen && receptor.mutagenStages !== undefined
-    ? receptor.mutagenStages
-    : receptor.stages;
-}
-
-function stageWindows(
-  stages: ModernScenarioReceptor['receptor']['stages'],
+/** The windows of the cancer terms on the life-time axis, each with its weight (default 0). */
+function termWindows(
+  terms: readonly CancerTerm[],
   weights: readonly number[],
 ): { offset: number; length: number; weight: number }[] {
-  let offset = 0;
-  return stages.map((s, k) => {
-    const w = { offset, length: s.ed, weight: weights[k] ?? 0 };
-    offset += s.ed;
-    return w;
-  });
+  return terms.map((term, k) => ({
+    offset: term.offset,
+    length: term.stage.ed,
+    weight: weights[k] ?? 0,
+  }));
 }
 
 export function runModernScenario(input: ModernScenarioInput): ModernScenarioResult {
@@ -248,12 +241,12 @@ export function runModernScenario(input: ModernScenarioInput): ModernScenarioRes
     for (const { c, pathway, spec } of cells) {
       if (spec.kind !== 'series') continue;
       const unit = modernPathway(pathway, r.receptor, c.chemical, 1);
-      const stages = cancerStagesOf(r.receptor, c.chemical);
+      const cancerTerms = cancerPlan(pathway, r.receptor, c.chemical).terms;
       terms.push({
         series: spec.series,
-        windows: stageWindows(
-          stages,
-          stages.map((_, k) => unit.riskByStage[k]?.riskPerEpc ?? 0),
+        windows: termWindows(
+          cancerTerms,
+          cancerTerms.map((_, k) => unit.riskByStage[k]?.riskPerEpc ?? 0),
         ),
       });
     }
@@ -285,7 +278,7 @@ export function runModernScenario(input: ModernScenarioInput): ModernScenarioRes
           continue;
         }
         let shorter = false;
-        const windows = stageWindows(cancerStagesOf(r.receptor, c.chemical), []);
+        const windows = termWindows(cancerPlan(pathway, r.receptor, c.chemical).terms, []);
         const cancerByStage = windows.map((w) => {
           const a = windowAverage(
             spec.series,

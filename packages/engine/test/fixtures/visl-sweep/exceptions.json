@@ -5,14 +5,14 @@
     "printed-inputs": {
       "resident-default": {
         "compared": 65,
-        "reproduced": 62,
-        "excepted": 3,
+        "reproduced": 63,
+        "excepted": 2,
         "unexplained": 0
       },
       "resident-tgw10": {
         "compared": 65,
-        "reproduced": 55,
-        "excepted": 10,
+        "reproduced": 56,
+        "excepted": 9,
         "unexplained": 0
       },
       "commercial-default": {
@@ -23,22 +23,22 @@
       },
       "all": {
         "compared": 195,
-        "reproduced": 181,
-        "excepted": 14,
+        "reproduced": 183,
+        "excepted": 12,
         "unexplained": 0
       }
     },
     "database": {
       "resident-default": {
         "compared": 70,
-        "reproduced": 69,
-        "excepted": 1,
+        "reproduced": 70,
+        "excepted": 0,
         "unexplained": 0
       },
       "resident-tgw10": {
         "compared": 70,
-        "reproduced": 64,
-        "excepted": 6,
+        "reproduced": 65,
+        "excepted": 5,
         "unexplained": 0
       },
       "commercial-default": {
@@ -49,28 +49,13 @@
       },
       "all": {
         "compared": 210,
-        "reproduced": 203,
-        "excepted": 7,
+        "reproduced": 205,
+        "excepted": 5,
         "unexplained": 0
       }
     }
   },
   "classes": [
-    {
-      "id": "special-case-bracketed",
-      "reason": "The calculator flags trichloroethylene as mutagenic and its cancer level follows the RSL's own equations for that chemical, as in the RSL sweeps (special-case-equations there), not the generic early-life adjustment of the whole unit risk. The engine has only the two bounds, all of the unit risk treated as mutagenic and none of it. The test excepts a cell only when the printed level lies strictly between those two engine values, and checks that for every cell.",
-      "cells": {
-        "printed-inputs": {
-          "resident-default": 1,
-          "resident-tgw10": 1
-        },
-        "database": {
-          "resident-default": 1,
-          "resident-tgw10": 1
-        }
-      },
-      "chemicals": ["Trichloroethylene"]
-    },
     {
       "id": "pure-phase-vapor-at-25",
       "reason": "At a groundwater temperature other than 25 deg C the calculator prints a pure phase vapor concentration under a header that names the new temperature, but the number equals its 25 deg C value. The engine, given the vapor pressure the calculator prints for the new temperature, gives a smaller value. The test excepts a cell only when the engine reproduces the printed number from the printed 25 deg C vapor pressure.",
@@ -114,15 +99,6 @@
     {
       "comparison": "printed-inputs",
       "fixture": "resident-default",
-      "chemical": "Trichloroethylene",
-      "quantity": "ciaC",
-      "printed": "4.78E-01",
-      "computed": 0.24729,
-      "class": "special-case-bracketed"
-    },
-    {
-      "comparison": "printed-inputs",
-      "fixture": "resident-default",
       "chemical": "Tetrachloroethylene",
       "quantity": "cgw",
       "printed": "5.76E+00",
@@ -155,15 +131,6 @@
       "printed": "3.98E+08",
       "computed": 203050000,
       "class": "pure-phase-vapor-at-25"
-    },
-    {
-      "comparison": "printed-inputs",
-      "fixture": "resident-tgw10",
-      "chemical": "Trichloroethylene",
-      "quantity": "ciaC",
-      "printed": "4.78E+00",
-      "computed": 2.4729,
-      "class": "special-case-bracketed"
     },
     {
       "comparison": "printed-inputs",
@@ -236,24 +203,6 @@
       "printed": "7.24E-01",
       "computed": 0.72347,
       "class": "printed-input-rounding"
-    },
-    {
-      "comparison": "database",
-      "fixture": "resident-default",
-      "chemical": "Trichloroethylene",
-      "quantity": "ciaC",
-      "printed": "4.78E-01",
-      "computed": 0.24729,
-      "class": "special-case-bracketed"
-    },
-    {
-      "comparison": "database",
-      "fixture": "resident-tgw10",
-      "chemical": "Trichloroethylene",
-      "quantity": "ciaC",
-      "printed": "4.78E+00",
-      "computed": 2.4729,
-      "class": "special-case-bracketed"
     },
     {
       "comparison": "database",

@@ -11,6 +11,7 @@ import {
   type HenryTemperatureInput,
   type LifeStageBoundary,
   type ModernReceptor,
+  type SpecialCase,
 } from '../src/index.js';
 
 import resident25 from '../../data/raw/visl/visl-default-resident-2026-10-22.json' with { type: 'json' };
@@ -160,6 +161,8 @@ export interface Basis {
   /** mg/m3 */
   rfc?: number;
   mutagen: boolean;
+  /** The RSL special case of the chemical (by CAS number, from the RSL toxicity file): the same in both comparisons. */
+  special?: SpecialCase;
 }
 export type BasisKey = keyof Basis;
 
@@ -210,6 +213,7 @@ export function evaluate(b: Basis, s: Setting): Evaluated {
   const chem = modernChemical({
     id: 'x',
     mutagen: b.mutagen,
+    ...(b.special !== undefined ? { special: b.special } : {}),
     ...(b.iur !== undefined ? { iur: b.iur } : {}),
     ...(b.rfc !== undefined ? { rfci: b.rfc } : {}),
   });
@@ -393,6 +397,7 @@ export function printedBasis(
       iur: n('iur'),
       rfc: n('rfc'),
       mutagen: text(r.visl, 'Mutagenic Indicator') !== 'No',
+      ...specialOf(r.cas),
     },
     units,
   };
@@ -412,6 +417,7 @@ interface VaporRow {
 interface ToxRow {
   id: string;
   mutagen: boolean;
+  special?: SpecialCase;
   iur?: { value: number };
   rfci?: { value: number };
 }
@@ -421,6 +427,12 @@ const vaporRows = new Map(
 const toxRows = new Map(
   (toxJson as unknown as { toxicity: ToxRow[] }).toxicity.map((c) => [c.id, c]),
 );
+
+/** The special case of a chemical by CAS number: a flag of the chemical, so both comparisons carry it. */
+const specialOf = (cas: string): { special: SpecialCase } | Record<string, never> => {
+  const s = toxRows.get(cas)?.special;
+  return s === undefined ? {} : { special: s };
+};
 
 /**
  * Second comparison: the values the app ships. Chemical properties come from the file the vapor screen
@@ -458,6 +470,7 @@ export function databaseBasis(cas: string): Basis {
     ...(t.iur !== undefined ? { iur: t.iur.value } : {}),
     ...(t.rfci !== undefined ? { rfc: t.rfci.value } : {}),
     mutagen: t.mutagen,
+    ...specialOf(cas),
   };
 }
 
@@ -542,7 +555,6 @@ function shown(q: NumericQuantity | AnswerQuantity, e: Evaluated): number | stri
 }
 
 export const CLASSES = [
-  'special-case-bracketed',
   'pure-phase-vapor-at-25',
   'printed-input-rounding',
   'database-input-differs',
@@ -610,9 +622,6 @@ const covers = (range: [number, number] | null, printed: string): boolean => {
 /**
  * Decides one cell. A cell that does not reproduce is excepted only when a class applies and its own
  * evidence holds, never by name; otherwise it is unexplained.
- * - `special-case-bracketed`: a chemical the calculator flags mutagenic whose printed cancer level lies
- *   strictly between the engine's all-mutagenic and not-mutagenic levels (the calculator treats only part
- *   of its cancer risk as mutagenic, by the RSL's own equations; the engine has the two bounds only);
  * - `pure-phase-vapor-at-25`: a pure phase vapor concentration printed under a groundwater temperature other
  *   than 25 deg C that the engine reproduces from the vapor pressure at 25 deg C (the calculator keeps its
  *   25 deg C value; the engine, given the printed vapor pressure at the new temperature, does not);
@@ -645,15 +654,6 @@ export function judge(c: RowContext, q: NumericQuantity | AnswerQuantity): CellO
     cls,
     ...(inputs !== undefined ? { inputs } : {}),
   });
-
-  if (q === 'ciaC' && basis.mutagen) {
-    const mutagenic = e.ciaC;
-    const ordinary = evaluate({ ...basis, mutagen: false }, setting).ciaC;
-    const target = Number(printed);
-    if (mutagenic !== null && ordinary !== null && mutagenic < target && target < ordinary) {
-      return except('special-case-bracketed');
-    }
-  }
 
   if (q === 'cvp' && setting.tgwC !== 25) {
     const vp25 = Number(find(r.properties, 'Vapor Pressure VP (mm Hg)').cell);

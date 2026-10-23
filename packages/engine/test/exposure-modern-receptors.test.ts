@@ -350,7 +350,21 @@ describe('receptor evaluation', () => {
     expect(codes(r)).toContain('exposure.giabs-adjusted');
   });
 
-  it('warns for the special-case chemicals, once per chemical', () => {
+  it('warns for a special-case chemical on a receptor the equations do not cover, once per reason', () => {
+    const tce = modernChemical({ ...benzeneB, special: 'trichloroethylene' });
+    const r = evaluateModernReceptor(
+      run({
+        receptor: modernWorker(),
+        pathways: ['soilIngestion', 'indoorInhalation'],
+        chemicals: [
+          { id: 'tce', chemical: tce, epcs: { soilIngestion: soil, indoorInhalation: air } },
+        ],
+      }),
+    );
+    expect(codes(r).filter((c) => c === 'exposure.special-case-not-modelled')).toHaveLength(1);
+  });
+
+  it('does not warn for a special-case chemical on the resident, whose equations are applied', () => {
     const tce = modernChemical({ ...benzeneB, special: 'trichloroethylene' });
     const r = evaluateModernReceptor(
       run({
@@ -360,7 +374,7 @@ describe('receptor evaluation', () => {
         ],
       }),
     );
-    expect(codes(r).filter((c) => c === 'exposure.special-case-not-modelled')).toHaveLength(1);
+    expect(codes(r)).not.toContain('exposure.special-case-not-modelled');
   });
 
   it('warns not-quantified and site-specific-required', () => {

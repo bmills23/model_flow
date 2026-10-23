@@ -131,6 +131,39 @@ describe('overrides change results by the expected ratio', () => {
     expect(eff.modern / base.modern).toBeCloseTo(2, 9);
   });
 
+  it('applies the trichloroethylene equations to an overridden slope factor, in proportion, and warns', () => {
+    const TCE = '79-01-6';
+    const form = () => {
+      const f = waterForm();
+      return {
+        ...f,
+        chemicals: [{ ...newChemicalRow(db.byId.get(TCE)!), conc: { groundwater: '0.005' } }],
+      };
+    };
+    const modern = (d: ChemicalDb) => {
+      const b = buildInputs(form(), d, null);
+      if (!b.ok) throw new Error(b.errors.join(';'));
+      const o = runRisk(b);
+      if (!o.modern.ok) throw new Error('the modern method failed');
+      return {
+        risk: o.modern.result.summary.receptors[0]!.cancerRisk,
+        codes: o.modern.result.warnings.map((w) => w.code),
+      };
+    };
+    const sfo = db.byId.get(TCE)!.tox.sfo!.value;
+    const base = modern(db);
+    const eff = modern(
+      applyToxOverrides(db, {
+        ...emptyOverrides(),
+        toxicity: setField({}, TCE, 'sfo', { value: String(sfo * 2), note: 'site memo' }),
+      }),
+    );
+    expect(eff.risk / base.risk).toBeCloseTo(2, 9);
+    expect(base.codes).not.toContain('exposure.special-case-override');
+    expect(base.codes).not.toContain('exposure.special-case-not-modelled');
+    expect(eff.codes).toContain('exposure.special-case-override');
+  });
+
   it('restores the database result when the override is removed', () => {
     const base = risk(db);
     const set = withField('sfo', String(dbSfo() * 3));
