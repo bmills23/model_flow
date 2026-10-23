@@ -3801,3 +3801,32 @@ the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
    comparison 183 reproduced, 12 excepted, 0 unexplained (before 181, 14); second 205, 5, 0 (before 203, 7). No cell
    is unexplained on account of these chemicals; their soil inhalation cells and the soil totals that include them
    stay under the existing soil classes, as for every chemical, because the volatilization factor is not computed.
+
+## 2026-10-23: Wave U scope, RSL soil inhalation comparison
+
+Bryan, after wave T: "ok do it" (the recommended next wave: the RSL soil volatilization factor and the comparison of
+the RSL soil inhalation levels, the largest block of RSL cells not yet compared).
+
+1. **What is compared (DEFAULT).** Every soil inhalation cell (cancer and noncancer) of the RSL November 2024
+   resident and industrial soil tables, and every soil total cell that includes one, at half a unit of the last
+   printed figure against the engine's unrounded value; nothing is widened.
+2. **Method (DEFAULT).** The engine already has the Soil Screening Guidance volatilization factor
+   (`outdoorAir.ssg-vf-1996`, infinite source and mass limit) and particulate emission factors
+   (`particulate.ssg-pef-1996`, `particulate.ssg-pef-2002`), and the RSL air level equations. The comparison composes
+   them with the inputs the RSL User's Guide documents (dispersion factors for volatiles and for wind, soil
+   properties, exposure interval per receptor, the emission inputs) and the chemical values of the RSL
+   chemical-specific parameter sheet already shipped. Where the RSL's form differs from the engine's (a different
+   dispersion factor, the exposure interval, a saturation limit, which chemicals get a volatilization factor), the
+   engine gets the difference only where an existing screen shows that quantity, with a citation; otherwise the
+   test composes it and says so. No new screen or exposure pathway.
+3. **Source (DEFAULT).** Every input and equation comes from a guide page read in this wave, with the read date and
+   sections recorded in the reference notes. A value that cannot be read from a primary page is not entered, and
+   that part of the wave stops and is reported.
+4. **Checks (DEFAULT).** The sweep classes `soil-inhalation-not-computed` and
+   `soil-total-with-inhalation-not-computed` are removed. A cell that still does not reproduce is unexplained unless
+   a reason applies whose evidence the test checks, and is reported with its numbers. The counts in the fixture and
+   the validation entries are recomputed from the test data.
+5. **Validation and docs (DEFAULT).** The sweep entries and the unverified list carry the new counts; the
+   volatilization and particulate methods name the comparison as evidence where it checks them; the methods notes
+   that describe the comparison are corrected in place with the slice, and VALIDATION is regenerated. The roadmap
+   and the handoff move at the wave close.
