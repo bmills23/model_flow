@@ -2,6 +2,7 @@ import type { Warning } from '../../registry/index.js';
 import { checkReceptorCount, checkUniqueChemicals } from '../exposure/checks.js';
 import { legacyPathway, type LegacyChemical, type LegacyReceptor } from '../exposure/legacy.js';
 import { modernPathway, type ModernChemical } from '../exposure/modern.js';
+import { specialCaseWarnings } from '../exposure/receptorsModern.js';
 import { isAgeSegmented, type ModernReceptor } from '../exposure/lifeStages.js';
 import { assertAdditiveAllowed } from '../risk/additivity.js';
 import { PATHWAYS, type Medium, type PathwayId } from '../exposure/units.js';
@@ -548,7 +549,7 @@ export function backCalculateLegacy(
 export function backCalculateModern(
   input: DirectInput<ModernReceptor, ModernChemical>,
 ): DirectResult {
-  return runCore({
+  const result = runCore({
     receptors: input.receptors,
     chemicals: input.chemicals,
     coef: modernCoef(input),
@@ -557,4 +558,16 @@ export function backCalculateModern(
     additive: input.additive === true,
     segmented: input.receptors.map((r) => isAgeSegmented(r.receptor)),
   });
+  // the RSL special cases warn here as on the risk screen, once per chemical, receptor and reason
+  for (const r of input.receptors) {
+    const seen = new Set<string>();
+    for (const c of input.chemicals) {
+      for (const pathway of r.pathways) {
+        result.warnings.push(
+          ...specialCaseWarnings(r.label, c.id, c.chemical, r.receptor, pathway, seen),
+        );
+      }
+    }
+  }
+  return result;
 }

@@ -3774,8 +3774,12 @@ the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
    (no frequency, duration or averaging), for inhalation a unit contact. The mutagen flag the database carries for
    the chemical does not select the ADAF treatment where these equations apply.
 4. **Pathways not covered (DEFAULT).** Vinyl chloride in shower air and in homegrown produce: the guide has no
-   early-life equation for them, so they use the ordinary equation and are warned (`exposure.special-case-not-modelled`,
-   naming the pathway). Trichloroethylene is applied to every pathway (its fractions are a split of the toxicity
+   early-life equation for them, so they use the mutagen equation with the age-dependent adjustment factors
+   (10, 3, 3 and 1), which the database's mutagen flag selects (shower air about 2.6 times the form without the
+   factors; kept as the conservative form, corrective pass, 2026-10-23), and are warned
+   (`exposure.special-case-not-modelled`, naming the pathway and the equation used). The same holds for a
+   receptor whose first stage is not a child stage (an engine receptor such as an adult stage with an adult
+   segment): the unaveraged term is the child's dose, so vinyl chloride is not covered there. Trichloroethylene is applied to every pathway (its fractions are a split of the toxicity
    value, valid for any dose). Surface-water dermal contact of both chemicals uses one time-weighted event time over
    the stage set of the term, as the guide's recreator equations do and as the bathing dermal dose already does.
 5. **Series concentrations (DEFAULT).** The cancer terms of a pathway are listed by `cancerPlan` with their place on
@@ -3783,9 +3787,11 @@ the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
    terms (two stages, four ADAF segments, all starting at the exposure start), vinyl chloride the child and adult
    terms and the unaveraged child term, which takes the average over the child's years. A constant concentration
    gives the equations as printed.
-6. **Overridden values (DEFAULT).** `ModernChemical.cancerOverridden` is set by the screens when the slope factor or
-   unit risk carries the `user` source. The equations are applied to the entered value with the constants above;
-   the warning is `exposure.special-case-override`.
+6. **Overridden values (DEFAULT).** `ModernChemical.cancerOverridden` (`{ sfo, iur }`) is set by the screens when
+   the slope factor or unit risk carries the `user` source. The equations are applied to the entered value with
+   the constants above; the warning is `exposure.special-case-override`, once per entered value that a
+   switched-on pathway's route uses, quoting that value's proportions only. The cleanup back-calculation raises
+   the same two special-case warnings, through the same `specialCaseWarnings`, once per receptor.
 7. **Checks (DEFAULT).** The class `special-case-equations` of the RSL sweep and `special-case-bracketed` of the VISL
    comparison are removed. RSL sweep after: tap water 3053 compared, 3048 reproduced, 1 excepted, 4 unexplained
    (before 3040, 9, 4); resident soil 2140 reproduced, 872 excepted (before 2138, 874); industrial soil unchanged;

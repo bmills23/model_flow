@@ -41,11 +41,11 @@ export interface ModernChemical extends ToxicityValues {
    */
   special?: SpecialCase;
   /**
-   * The cancer slope factor or unit risk was entered by the user, not taken from the database. The equations of
-   * a special case are applied to the given value in the guide's own proportions, and the receptor evaluation
-   * warns.
+   * Which cancer values were entered by the user, not taken from the database: the oral slope factor `sfo`
+   * and the inhalation unit risk `iur`. The equations of a special case are applied to a given value in the
+   * guide's own proportions, and the receptor evaluation warns for each value a pathway uses.
    */
-  cancerOverridden?: boolean;
+  cancerOverridden?: { sfo: boolean; iur: boolean };
   /** Fresh-weight plant factors per produce class (kg/kg per kg/kg soil), for the `produce` pathway. */
   produceFactors?: ProduceFactors;
 }
@@ -184,11 +184,23 @@ export function specialStatus(
       what: 'the receptor has no early-life segments, so the ordinary cancer equation is used (the RSL does the same for workers)',
     };
   }
-  if (chem.special === 'vinyl-chloride' && VINYL_CHLORIDE_UNCOVERED.includes(pathway)) {
-    return {
-      kind: 'not-covered',
-      what: `${pathway} has no early-life term in the guide's equations, so the ordinary cancer equation is used`,
-    };
+  // what the cancer dose falls back to: a mutagen takes its age-dependent adjustment factors (cancerPlan)
+  const fallback = chem.mutagen
+    ? 'the mutagen equation with the age-dependent adjustment factors (10, 3, 3 and 1) is used'
+    : 'the ordinary cancer equation is used';
+  if (chem.special === 'vinyl-chloride') {
+    if (VINYL_CHLORIDE_UNCOVERED.includes(pathway)) {
+      return {
+        kind: 'not-covered',
+        what: `${pathway} has no early-life term in the guide's equations, so ${fallback}`,
+      };
+    }
+    if (receptor.stages[0]!.group !== 'child') {
+      return {
+        kind: 'not-covered',
+        what: `the receptor's first stage is not a child stage, so the guide's early-life term has no child to take, and ${fallback}`,
+      };
+    }
   }
   return { kind: 'applied' };
 }
@@ -202,8 +214,8 @@ export function specialStatus(
  * stages weighted by the cancer fraction CAF plus the ADAF segments weighted by the mutagenic fraction MAF
  * (oral or inhalation by the route of the pathway; the dermal dose uses the oral fractions).
  *
- * Vinyl chloride (sections 4.1.x.5 and 4.6.x.5): the stages averaged over the lifetime without an ADAF, plus
- * the first stage (the child) once more as an unaveraged daily dose, which is the guide's non-prorated
+ * Vinyl chloride (sections 4.1.x.5 and 4.6.x.5), where the first stage is a child: the stages averaged over the
+ * lifetime without an ADAF, plus the first stage (the child) once more as an unaveraged daily dose, which is the guide's non-prorated
  * early-life exposure added to the prorated continuous exposure.
  */
 export function cancerPlan(

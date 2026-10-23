@@ -150,7 +150,7 @@ export function modernChem(
     fa: rec.phys?.fa,
     inEpd: rec.phys?.inEpd,
     special: t.special,
-    cancerOverridden: t.sfo?.source === USER_SOURCE || t.iur?.source === USER_SOURCE,
+    cancerOverridden: { sfo: t.sfo?.source === USER_SOURCE, iur: t.iur?.source === USER_SOURCE },
     organic: dermalForm === undefined ? undefined : dermalForm === 'organic',
     produceFactors,
   });

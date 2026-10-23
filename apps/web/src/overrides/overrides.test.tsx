@@ -1,8 +1,10 @@
+import { render } from '@testing-library/react';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { buildInputs } from '../risk/build';
 import { runRisk } from '../risk/compute';
-import { defaultForm, newChemicalRow } from '../risk/form';
+import { defaultForm, defaultReceptor, newChemicalRow } from '../risk/form';
+import { WarningsList } from '../cleanup/Results';
 import { buildCleanup } from '../cleanup/build';
 import { runCleanup } from '../cleanup/compute';
 import { defaultCleanupForm } from '../cleanup/form';
@@ -162,6 +164,40 @@ describe('overrides change results by the expected ratio', () => {
     expect(base.codes).not.toContain('exposure.special-case-override');
     expect(base.codes).not.toContain('exposure.special-case-not-modelled');
     expect(eff.codes).toContain('exposure.special-case-override');
+  });
+
+  it('the cleanup screen lists the special-case warnings of a worker and of an entered cancer value', () => {
+    const TCE = '79-01-6';
+    const outcomeFor = (d: ChemicalDb, preset: 'resident' | 'worker') => {
+      const f = defaultCleanupForm();
+      f.a = defaultReceptor(preset);
+      f.a.pathways = Object.fromEntries(
+        Object.keys(f.a.pathways).map((k) => [k, false]),
+      ) as typeof f.a.pathways;
+      f.a.pathways[preset === 'worker' ? 'soilIngestion' : 'waterIngestion'] = true;
+      f.chemicals = [{ ...newChemicalRow(d.byId.get(TCE)!), conc: {} }];
+      f.targetRisk = '1e-6';
+      f.targetHq = '1';
+      const b = buildCleanup(f, d);
+      if (!b.ok) throw new Error(b.errors.join(';'));
+      return { outcome: runCleanup(b), notes: b.notes };
+    };
+    const shownCodes = (o: ReturnType<typeof outcomeFor>): string[] => {
+      const { container, unmount } = render(<WarningsList outcome={o.outcome} notes={o.notes} />);
+      const codes = [...container.querySelectorAll('ul.warnings code')].map((c) => c.textContent!);
+      unmount();
+      return codes;
+    };
+    expect(shownCodes(outcomeFor(db, 'worker'))).toContain('exposure.special-case-not-modelled');
+    expect(shownCodes(outcomeFor(db, 'resident'))).not.toContain('exposure.special-case-override');
+    const edited = applyToxOverrides(db, {
+      ...emptyOverrides(),
+      toxicity: setField({}, TCE, 'sfo', {
+        value: String(db.byId.get(TCE)!.tox.sfo!.value * 2),
+        note: 'site memo',
+      }),
+    });
+    expect(shownCodes(outcomeFor(edited, 'resident'))).toContain('exposure.special-case-override');
   });
 
   it('restores the database result when the override is removed', () => {

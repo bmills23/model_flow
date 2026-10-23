@@ -226,8 +226,12 @@ ED-weighted event time of the child and adult stages (0.6708 h for the resident)
 
 **Where it applies.** To every receptor with ADAF segments (`mutagenStages`): the RSL resident, the child
 resident of the screen and any receptor the user edits from them, for every pathway of the chemical except
-vinyl chloride in shower air and in homegrown produce, which the guide gives no early-life term for (those use
-the ordinary equation and are warned). The noncancer hazard quotients are never affected. Surface water ingestion and dermal contact follow the recreator equations of the guide
+vinyl chloride in shower air and in homegrown produce, which the guide gives no early-life term for. Those
+pathways use the mutagen equation with the age-dependent adjustment factors (10, 3, 3 and 1), because the
+database flags vinyl chloride as a mutagen; that is the more conservative form (shower air is about 2.6 times the
+form without the factors) and the warning says so. Vinyl chloride also needs the first stage of the receptor to
+be a child stage, since the unaveraged term is the child's dose: for an engine receptor whose first stage is an
+adult it uses the same mutagen equation and is warned. The noncancer hazard quotients are never affected. Surface water ingestion and dermal contact follow the recreator equations of the guide
 (time-weighted event time over the same stage sets). A receptor without ADAF segments, the composite worker, uses
 the ordinary equation, as the RSL does for workers, and is warned. The legacy method has no age-dependent
 adjustment and is unchanged. Because every consumer reads the pathway coefficients, the cleanup levels, the
@@ -240,7 +244,9 @@ the average over the child's years. With a constant concentration this reduces t
 
 **Entered cancer values.** When a project overrides the slope factor or unit risk of either chemical, the
 equations are applied to the entered value in the guide's own proportions (the constants above) and
-`exposure.special-case-override` says so.
+`exposure.special-case-override` says so, once for each entered value a switched-on pathway uses, quoting the
+proportions of that value only (oral for the slope factor, inhalation for the unit risk). The cleanup screen gets
+the same two special-case warnings as the risk screen.
 
 **Checks.** `packages/engine/test/exposure-special-cases.test.ts` writes each equation out from the guide in its
 own units; the RSL sweep reproduces every trichloroethylene and vinyl chloride cell the engine computes (tap water
@@ -388,8 +394,8 @@ Warnings (codes are part of the result):
 | `exposure.route-extrapolated` | legacy | route-to-route extrapolation was switched on and used |
 | `exposure.dermal-outside-epd` | modern | dermal water computed for a chemical outside the RAGS E prediction domain |
 | `exposure.giabs-adjusted` | modern | a dermal toxicity value was adjusted because GIABS < 0.5 |
-| `exposure.special-case-not-modelled` | modern | trichloroethylene or vinyl chloride on a receptor or pathway the RSL equations for them do not cover (no early-life segments; vinyl chloride in shower air or homegrown produce); the ordinary equation is used and the message names what is not covered |
-| `exposure.special-case-override` | modern | trichloroethylene or vinyl chloride with an entered cancer value: the RSL equations are applied to it |
+| `exposure.special-case-not-modelled` | modern | trichloroethylene or vinyl chloride on a receptor or pathway the RSL equations for them do not cover (no early-life segments; vinyl chloride in shower air or homegrown produce, or with a first stage that is not a child); the ordinary equation is used, or for a mutagen the equation with the age-dependent adjustment factors, and the message names what is not covered; raised by the risk and cleanup screens |
+| `exposure.special-case-override` | modern | trichloroethylene or vinyl chloride with an entered cancer value: the RSL equations are applied to it; raised by the risk and cleanup screens |
 | `exposure.site-specific-required` | both | a swimming pathway lacks a frequency or event time |
 | `exposure.csat-exceeded` | both | a soil EPC exceeds the chemical's Csat (dermal and ingestion assumptions may not hold) |
 | `exposure.soil-ceiling` | both | a soil EPC exceeds 1e5 mg/kg (10 percent of the soil by mass) |

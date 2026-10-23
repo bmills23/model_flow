@@ -284,14 +284,85 @@ describe('what the equations do not cover', () => {
     const w = r.warnings.filter((x) => x.code === 'exposure.special-case-not-modelled');
     expect(w).toHaveLength(1);
     expect(w[0]!.message).toContain('showerInhalation');
+    // the fallback is the mutagen equation with the age-dependent adjustment factors, and the warning says so
+    expect(w[0]!.message).toContain('mutagen equation');
+    expect(w[0]!.message).toContain('age-dependent adjustment factors (10, 3, 3 and 1)');
     const ordinary = modernChemical({ ...vcB, special: undefined, mutagen: true });
     near(coef('showerInhalation', resident, vc), coef('showerInhalation', resident, ordinary));
   });
 });
 
+describe('a receptor whose first stage is not a child', () => {
+  // engine-API receptor: an adult stage with one adult ADAF segment
+  const adultFirst = modernReceptor({
+    label: 'Adult only',
+    stages: MODERN_RESIDENT_BOUNDARY.stages.slice(1, 2),
+    mutagenStages: MODERN_RESIDENT_BOUNDARY.mutagenStages!.slice(3, 4),
+  });
+
+  it('gets no from-birth term for vinyl chloride, the mutagen equation instead, and a warning that says why', () => {
+    const ordinary = modernChemical({ ...vcB, special: undefined, mutagen: true });
+    for (const pathway of ['soilIngestion', 'waterIngestion', 'indoorInhalation'] as const) {
+      const cell = modernPathway(pathway, adultFirst, vc, 1);
+      expect(cell.riskByStage.map((x) => x.stage)).toEqual(['age-16-26']);
+      near(cell.riskPerEpc!, coef(pathway, adultFirst, ordinary));
+    }
+    const r = evaluateModernReceptor({
+      label: 'Adult only',
+      receptor: adultFirst,
+      pathways: ['soilIngestion'],
+      chemicals: [{ id: 'vc', chemical: vc, epcs: { soilIngestion: mgPerKgToKgPerKg(1) } }],
+    });
+    const w = r.warnings.filter((x) => x.code === 'exposure.special-case-not-modelled');
+    expect(w).toHaveLength(1);
+    expect(w[0]!.message).toContain('first stage is not a child stage');
+  });
+
+  it('still applies the trichloroethylene fractions, which do not need a child', () => {
+    const cell = modernPathway('soilIngestion', adultFirst, tce, 1);
+    expect(cell.riskByStage.map((x) => x.stage)).toEqual(['adult', 'age-16-26']);
+  });
+});
+
+describe('the cleanup level warns as the risk screen does', () => {
+  const cleanup = (receptor: ModernReceptor, chemical: ModernChemical, pathways: PathwayId[]) =>
+    backCalculateModern({
+      receptors: [{ label: 'receptor', receptor, pathways }],
+      chemicals: [{ id: 'chem', chemical }],
+    }).warnings.filter((w) => w.code.startsWith('exposure.special-case'));
+
+  it('warns for a worker, once for the chemical however many pathways', () => {
+    const w = cleanup(modernWorker(), tce, ['soilIngestion', 'soilDermal']);
+    expect(w.map((x) => x.code)).toEqual(['exposure.special-case-not-modelled']);
+    expect(w[0]!.message).toContain('no early-life segments');
+  });
+
+  it('warns for vinyl chloride in shower air, naming the pathway', () => {
+    const w = cleanup(resident, vc, ['waterIngestion', 'showerInhalation']);
+    expect(w.map((x) => x.code)).toEqual(['exposure.special-case-not-modelled']);
+    expect(w[0]!.message).toContain('showerInhalation');
+  });
+
+  it('warns for an entered cancer value, once, and not for the database value', () => {
+    const edited = modernChemical({ ...tceB, cancerOverridden: { sfo: true, iur: false } });
+    const w = cleanup(resident, edited, ['waterIngestion', 'soilIngestion']);
+    expect(w.map((x) => x.code)).toEqual(['exposure.special-case-override']);
+    expect(cleanup(resident, tce, ['waterIngestion'])).toEqual([]);
+  });
+
+  it('is silent when the equations apply in full', () => {
+    expect(cleanup(resident, vc, ['waterIngestion', 'soilIngestion'])).toEqual([]);
+  });
+});
+
 describe('overridden cancer values', () => {
   it('applies the equations to the given value in the guide proportions, and warns', () => {
-    const edited = modernChemical({ ...tceB, sfo: 0.1, iur: 1e-5, cancerOverridden: true });
+    const edited = modernChemical({
+      ...tceB,
+      sfo: 0.1,
+      iur: 1e-5,
+      cancerOverridden: { sfo: true, iur: true },
+    });
     const IFW = ifs((s) => s.irw);
     const IFWM = ifsm((s) => s.irw);
     const sl = (TR * AT_LT) / (0.1 * 1e-3 * (CAF_O * IFW + MAF_O * IFWM));
@@ -423,5 +494,61 @@ describe('the cleanup level follows the equations', () => {
     });
     const lv = r.media[0]!.levels[0]!;
     near(lv.cancerLevel! / UG_L, 1 / (1 / slIng + 1 / slDerm));
+  });
+});
+
+describe('the override message quotes the proportions of the entered value only', () => {
+  const messages = (b: ModernChemicalBoundary, pathways: PathwayId[]): string[] =>
+    evaluateModernReceptor({
+      label: 'Resident',
+      receptor: resident,
+      pathways,
+      chemicals: [
+        {
+          id: 'tce',
+          chemical: modernChemical(b),
+          epcs: Object.fromEntries(pathways.map((p) => [p, 1e-6])),
+        },
+      ],
+    })
+      .warnings.filter((w) => w.code === 'exposure.special-case-override')
+      .map((w) => w.message);
+
+  it('an entered slope factor: the oral proportions, and not the inhalation ones', () => {
+    const m = messages({ ...tceB, sfo: 0.1, cancerOverridden: { sfo: true, iur: false } }, [
+      'waterIngestion',
+      'indoorInhalation',
+    ]);
+    expect(m).toHaveLength(1);
+    expect(m[0]).toContain('0.804');
+    expect(m[0]).toContain('0.202');
+    expect(m[0]).not.toContain('0.756');
+    expect(m[0]).not.toContain('0.244');
+  });
+
+  it('an entered unit risk: the inhalation proportions, and not the oral ones', () => {
+    const m = messages({ ...tceB, iur: 1e-5, cancerOverridden: { sfo: false, iur: true } }, [
+      'waterIngestion',
+      'indoorInhalation',
+    ]);
+    expect(m).toHaveLength(1);
+    expect(m[0]).toContain('0.756');
+    expect(m[0]).toContain('0.244');
+    expect(m[0]).not.toContain('0.804');
+  });
+
+  it('both entered: one message per value', () => {
+    const m = messages({ ...tceB, cancerOverridden: { sfo: true, iur: true } }, [
+      'waterIngestion',
+      'indoorInhalation',
+    ]);
+    expect(m).toHaveLength(2);
+  });
+
+  it('an entered value that no switched-on pathway uses gives no message', () => {
+    const m = messages({ ...tceB, iur: 1e-5, cancerOverridden: { sfo: false, iur: true } }, [
+      'waterIngestion',
+    ]);
+    expect(m).toEqual([]);
   });
 });

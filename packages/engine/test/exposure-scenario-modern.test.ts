@@ -420,7 +420,7 @@ describe('modern scenario: warning codes', () => {
       ...benzeneBoundary,
       id: '75-01-4',
       special: 'vinyl-chloride',
-      cancerOverridden: true,
+      cancerOverridden: { sfo: true, iur: false },
     });
     const r = runModernScenario({
       receptors: [
