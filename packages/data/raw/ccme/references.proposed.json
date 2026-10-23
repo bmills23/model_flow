@@ -1,0 +1,15 @@
+[
+  {
+    "key": "ccme2026summary",
+    "type": "data",
+    "status": "data",
+    "authors": "Canadian Council of Ministers of the Environment",
+    "year": 2026,
+    "title": "Canadian Environmental Quality Guidelines, Summary Table",
+    "venue": "Canadian Council of Ministers of the Environment, Winnipeg (ccme.ca)",
+    "url": "https://ccme.ca/en/summary-table",
+    "accessed": "2026-10-23",
+    "notes": "Online summary table, exported as CSV on 2026-10-23 (SHA-256 8877e4ef5b532bc37c61fa1165f9cf9c7a8c83b62ed1cd05ca2292753a8e78e9). The page prints no edition date; the year is the site copyright year, and every guideline carries its own year in the table. Columns used: Water Quality Guidelines for the Protection of Aquatic Life (freshwater and marine, long term and short term, ug/L) and Sediment Quality Guidelines for the Protection of Aquatic Life (freshwater and marine, ISQG and PEL, ug/kg dry weight). Transcribed to packages/data/raw/ccme/ccme.csv. All rights reserved by CCME; the fetched file is not committed.",
+    "tags": ["surfaceWater"]
+  }
+]

@@ -3913,3 +3913,30 @@ criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and
    Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
 7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
    place with what landed, and the 102-item count is restated from those rows.
+
+### Wave V slice c-ccme
+
+All rulings DEFAULT and open to Bryan's overturn.
+
+1. **Source.** The current official CCME replacement for the PDF summary tables is the online summary table
+   (https://ccme.ca/en/summary-table), which exports CSV. The CSV for all 207 chemicals was fetched 2026-10-23
+   (SHA-256 in `packages/data/raw/ccme/manifest.json`) and transcribed by `packages/data/scripts/extract-ccme.ts`
+   to `raw/ccme/ccme.csv`. An independent re-parse of the fetched file found every one of the 274 numeric values
+   equal to its source cell.
+2. **Terms.** CCME states no reuse licence (footer: all rights reserved), so the fetched file is not committed; the
+   values ship as facts with the citation, per ruling 4.
+3. **Rows.** Rows exist for water (freshwater and marine, long-term and short-term, ug/L) and sediment (freshwater
+   and marine, ISQG and PEL, ug/kg dry weight). Cells reading No data, Insufficient data, NRG or Not assessed produce
+   no row. Cells holding a word (Equation, Variable, Table, Narrative, No PEL derived) or a non-single-value text
+   produce a row with an empty value and the printed text in the note, so the comparison shows them as site-specific
+   (ruling 5). No equation is transcribed. Dioxin and furan cells in ng TEQ/kg dry weight keep that unit.
+4. **Chemical-group and non-chemical entries** (pH, dissolved oxygen, nutrients, narrative guidelines) stay in the CSV
+   as valueless rows without a unit; a consumer matching by CAS ignores them.
+5. **Printed oddities.** Phenanthrene's CAS is printed as the spreadsheet date 1985-01-08 and is decoded to 85-01-8
+   only because the check digit holds; the note says so (2,4,6-trichlorophenol has the same defect but no guideline
+   value, so it has no row). Imidacloprid's printed CAS 13826-41-3 fails its check digit; it is kept as printed
+   with a note, not corrected from outside knowledge. Metribuzin
+   freshwater long-term is printed "1,0" and nitrite "60 NO2-N"; both are left as valueless rows with the printed
+   text rather than interpreted.
+6. **Dates.** The page prints no edition date; each guideline carries its own year in the note, and the reference year
+   is the site copyright year, 2026.

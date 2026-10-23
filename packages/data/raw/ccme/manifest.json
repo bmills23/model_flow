@@ -1,0 +1,26 @@
+{
+  "set": "ccme",
+  "retrieved": "2026-10-23",
+  "files": [
+    {
+      "file": "summary-table.csv",
+      "role": "fetched source, not committed",
+      "reference": "ccme2026summary",
+      "pageUrl": "https://ccme.ca/en/summary-table",
+      "url": "https://ccme.ca/en/results/<ids of all 207 chemicals, comma separated, as listed on the page>/csv",
+      "note": "The CSV export of the CCME summary table page for every chemical and all six guideline chapters (the Export CSV button of the page). 209 lines: a chapter heading line, a column heading line and 207 chemical rows.",
+      "bytes": 69188,
+      "sha256": "8877e4ef5b532bc37c61fa1165f9cf9c7a8c83b62ed1cd05ca2292753a8e78e9"
+    },
+    {
+      "file": "ccme.csv",
+      "role": "transcribed table",
+      "reference": "ccme2026summary",
+      "extractedBy": "packages/data/scripts/extract-ccme.ts"
+    }
+  ],
+  "terms": {
+    "summary": "No reuse licence is stated. The site footer reads: (c) CCME 2026. All rights reserved. The fetched file is therefore not redistributed; only the guideline values ship, as facts with the citation, the retrieval date and the SHA-256 above (Wave V ruling 4). CCME describes its guidance as voluntary and advises consulting the federal, provincial or territorial authority having jurisdiction.",
+    "url": "https://ccme.ca/en/privacy_policy"
+  }
+}
