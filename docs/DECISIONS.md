@@ -305,7 +305,9 @@ DEFAULT rulings (applied in the notes, Bryan's to overturn):
     rows wait for M7 and M9. The RSL independent check requires the engine's screening level to round
     to the published two-figure value.
 13. **RSL special cases** (trichloroethylene, vinyl chloride) are computed as ordinary chemicals and
-    warned (`exposure.special-case-not-modelled`).
+    warned (`exposure.special-case-not-modelled`). Superseded 2026-10-23 by the Wave T blocks: the modern
+    method applies the RSL User's Guide equations for both, and the warning remains only where they do not
+    apply.
 14. **Smaller calls.** Exposure years are 365 days (the guidance convention), so averaging windows on
     the transport time axis are not corrected for the 365.25-day year (the window length only: a pinned
     exposure start and the start year shown are on the transport axis, 365.25-day years); swimming frequency and event
