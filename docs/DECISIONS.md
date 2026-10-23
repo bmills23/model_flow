@@ -3867,3 +3867,49 @@ against), read 2026-10-23.
    percent above the half-unit limit).
 8. **No saturation or ceiling substitution (DEFAULT).** The tables apply neither (guide sections 5.12 and 5.13), and
    no printed soil inhalation cell needed one.
+
+## 2026-10-23: Wave V scope, the last three parity gaps
+
+Bryan, after wave U: "okay let's just get it to 100% parity NOW". The 2026-10-21 parity audit (102 inventory items)
+left three gaps after waves O and P: the oxygen-limited vapor model (inventory F13 and F14, RISC5 Appendix K), cleanup
+source levels through paths that are not linear in the source (H9, H12), and the international aquatic and sediment
+criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and open to Bryan's overturn.
+
+1. **Oxygen-limited vapor.** RISC5's own Appendix K model stays unbuilt: its reference list cites it as Johnson 1998,
+   "in development", so there is no publication to implement from (M6 ruling 2). The capability is met by the
+   published oxygen-limited model the engine already has, `vapor.devaull-2007` (DeVaull 2007, rates from
+   `api2012biovapor`), which no screen offers today. It goes on `#/vapor` as an indoor method with its three oxygen
+   options, inputs, warnings, a profile chart, the risk feed and the CSV. The appendix's data requirements section is
+   read only as a map of which inputs a user expects, never for equations or values. The parity row records the
+   substitution.
+2. **Nonlinear source levels.** A cleanup source level on a path that is not linear in the source is solved against the
+   forward model with the engine's existing Brent solve in the logarithm of the source (`cleanup.modeled-chains`,
+   `brent1973`), never from a tabulated curve or by extrapolation. Covered: the vapor panel (soil above the residual
+   phase limit, a TPH mixture soil source, DeVaull's fast-reaction and coupled modes, and any other path now published
+   as not quantified because it is not linear); the surface water panel and the surface water target (an upstream
+   background, a plume fed by a vadose or saturated source screen, and soil sources through those chains). A target
+   the path cannot reach at any source up to the solubility or saturation limit is reported as not reached, with the
+   limit, as the modeled cleanup already does. The verified linear shortcut stays where the linearity guard passes.
+   What a feed must carry for the solve is new optional state inside the current format version; an older feed asks
+   to be sent again.
+3. **International criteria.** The criteria comparison on `#/surface-water` gains a choice of set. Water: the current
+   successors of the sets Appendix M lists: Canada (CCME water quality guidelines for the protection of aquatic
+   life), the European Union (Directive 2008/105/EC Annex I as amended by Directive 2013/39/EU), the United Kingdom
+   (the current England and Wales standards directions), and Australia and New Zealand (ANZG 2018 default guideline
+   values). Sediment: the CCME sediment quality guidelines and the MacDonald et al. 2000 consensus TEC and PEC, beside
+   the EPA Region 4 2018 benchmarks. The 1990s sediment sets of Appendix N that later sets superseded are not rebuilt.
+4. **Sources (extends M8 rulings 13 and 14).** Every value is transcribed from a document fetched in this wave, never
+   from recall, with the table or page and the retrieval date. A raw file is committed under the SHA-256 manifest where
+   its terms allow redistribution (EU legal texts under the Commission reuse decision, the UK Open Government Licence,
+   CC BY); otherwise only the values ship, as facts with the citation, and the manifest records the URL, the retrieval
+   date and the fetched file's SHA-256. MacDonald 2000 values ship only from a copy of the article or a complete public
+   reproduction of all 28 TEC and PEC pairs, cited as such; if neither can be fetched, MacDonald stays open and the wave
+   says so. NOAA SQuiRTs stay excluded.
+5. **Comparison rules.** Each set keeps its own basis (annual average or maximum allowable, chronic or acute,
+   protection level, freshwater or marine), shown beside each value; the peak rule of M8 ruling 11 applies unchanged;
+   ratios are per chemical and criterion, never summed. A value the source gives only as a hardness or site-chemistry
+   equation is shown as site-specific unless the equation is transcribed with the set.
+6. **Checks.** TDD per slice. New references enter `references.json` with status `used`; attributions are regenerated.
+   Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
+7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
+   place with what landed, and the 102-item count is restated from those rows.
