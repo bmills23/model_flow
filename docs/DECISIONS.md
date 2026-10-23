@@ -4124,7 +4124,7 @@ All rulings DEFAULT and open to Bryan's overturn.
    value, so it has no row). Imidacloprid's printed CAS 13826-41-3 fails its check digit; it is kept as printed
    with a note, not corrected from outside knowledge. Metribuzin
    freshwater long-term is printed "1,0" and nitrite "60 NO2-N"; both are left as valueless rows with the printed
-   text rather than interpreted.
+   text rather than interpreted (in the raw CSV; the V3 build then gives them no row, V3 ruling 5).
 6. **Dates.** The page prints no edition date; each guideline carries its own year in the note, and the reference year
    is the site copyright year, 2026.
 ### Wave V slice C-euuk

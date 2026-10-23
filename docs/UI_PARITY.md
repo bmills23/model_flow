@@ -1,6 +1,6 @@
 # UI near-parity gaps: model_flow against RISC5 (2026-10-19)
 
-Status (2026-10-21): slices U1 to U10 are all landed (wave H, 2026-10-19, merged to main); each slice carries a status line below. The gap table in section 2 was corrected in place on 2026-10-21 to match the tree, with each row naming what landed and in which wave or slice. The slice text in section 3 is the plan as written, not rewritten after the fact.
+Status (2026-10-23): wave V closed the last three gaps of the 2026-10-21 audit of the 102 inventory items, so all 102 are now present (74, one of them by substitution, F13 and F14) or different by design (28); rows F13 and F14, H9, H10 to H12 and I14 were corrected in place. Earlier status (2026-10-21): slices U1 to U10 are all landed (wave H, 2026-10-19, merged to main); each slice carries a status line below. The gap table in section 2 was corrected in place on 2026-10-21 to match the tree, with each row naming what landed and in which wave or slice. The slice text in section 3 is the plan as written, not rewritten after the fact.
 
 Inputs: `docs/RISC5_UI_INVENTORY.md` (102 paraphrased features, IDs A1 to J8 used below), `docs/USER_GUIDE.md`,
 `apps/web/src/App.tsx`, `docs/ROADMAP.md` section 7 Deferred lists, and targeted source reads cited inline.
@@ -53,7 +53,7 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | F6, F7 TPH effective solubility, fraction held in back-calc (5-4, 5-5) | Vadose has Raoult's law with TPH in source; G1 is adding TPH totals to cleanup | None beyond G1 | - | - |
 | F9 degradation rate edit (10-4) | Half-life on transport, mu on vadose | None | - | - |
 | F10 to F12 run time, time step, pulse, steady-state note (5-6) | Evaluation time and pulse on transport; vapor is steady state | None | - | - |
-| F13, F14 run models, model list (5-5, 1-3) | In-browser workers; every listed model has a screen (oxygen-limited vapor deferred engine) | None for UI | - | - |
+| F13, F14 run models, model list (5-5, 1-3) | In-browser workers; every listed model has a screen. Since wave V (slice V1) the oxygen-limited vapor model is DeVaull 2007 on `#/vapor` (indoor, three oxygen options, risk feed, CSV, report) | None, by substitution (wave V ruling 1): RISC5's own Appendix K model is not reproduced (its source is cited as in development), so its minimum oxygen concentration, oxygen transfer coefficient and outdoor air prediction, which DeVaull 2007 does not use, are not offered | - | - |
 | G1, G2 pathway checklist (6-2, 7-1) | Per-receptor checkboxes on risk | None | - | - |
 | G3, G4 one or two receptors, additive (6-4) | Two receptors, additive on cleanup and risk | None | - | - |
 | G5 free-text receptor labels (6-5) | Label is "Receptor 1 (Resident)" from `PRESET_LABELS` | None (landed in wave H, slice U5: optional receptor name on the receptor panel (`risk/ReceptorPanel.tsx`), listed in the report's user values) | - | - |
@@ -62,12 +62,12 @@ Value H/M/L is user value toward parity; size S/M/L is implementation effort. "N
 | G11, G12 back-calc note, two scenarios at once (6-1, 1-5) | Two receptors with different presets | None | - | - |
 | H1 to H5, H7, H13, H14 risk vs cleanup, individual vs cumulative, targets, governing level (8-1 to 8-9) | `#/risk` and `#/cleanup` | None | - | - |
 | H6, H8 MCL target, averaging time (8-2, 8-3) | MCL targets (`cleanup/mcl.ts`) and averaging time on modeled cleanup | None | - | - |
-| H9 surface water target overrides groundwater (8-5) | None (landed in wave P, slice P2: per-chemical surface water target on `#/cleanup`, linear route, dissolved groundwater sources) | Soil sources and nonlinear paths are not quantified | - | - |
-| H10 to H12 one receptor for modeled, deterministic only, run (8-1, 8-4) | Modeled cleanup chains; probabilistic cleanup also | None (exceeds) | - | - |
+| H9 surface water target overrides groundwater (8-5) | None (landed in wave P, slice P2: per-chemical surface water target on `#/cleanup`, linear route, dissolved groundwater sources; wave V, slice V2b: soil sources through the surface water run's linked aquifer and the nonlinear paths are solved by root finding) | None | - | - |
+| H10 to H12 one receptor for modeled, deterministic only, run (8-1, 8-4) | Modeled cleanup chains; probabilistic cleanup also; since wave V (slices V2a, V2b) the vapor and surface water source levels on paths not linear in the source are solved against the forward model with the same root find, and a target the path cannot reach is shown as not reached with its limit | None (exceeds) | - | - |
 | I1 to I5, I8 to I10 risk, hazard, input and output summary, cleanup results, per-medium tables (9-1, 5-6, 8-9) | Per-screen result tables with CSV; `#/report` with inputs, results, warnings, methods statement | None | - | - |
 | I6, I7, I13, I15 spreadsheet output, output menu, print via spreadsheet, macros (2-1, 9-1, FAQ-4) | CSV, report, browser print | Out of scope (web equivalents exist) | - | - |
 | I11, I12 concentration vs time charts, breakthrough check (5-5, 5-6) | Breakthrough and depth charts on screens; report charts are G2 | None beyond G2 | - | - |
-| I14 surface water and sediment criteria comparison (1-5) | US criteria comparison on `#/surface-water` | International sets are engine and data deferral (M8) | - | - |
+| I14 surface water and sediment criteria comparison (1-5) | US criteria comparison on `#/surface-water`; since wave V (slice V3) a set choice adds CCME water and sediment, EU EQS (Directive 2008/105/EC Annex I, 2013 consolidation), UK EQS (England and Wales Directions 2015), ANZG 2018 default guideline values and the MacDonald et al. 2000 TEC and PEC | None (RISC5's 1990s sediment sets that later sets superseded are not rebuilt; a 2026 revision of the EU annex is reported and not yet read) | - | - |
 | J3 vegetable uptake factor (10-4) | Plant factors on `#/plants-eco` | None | - | - |
 | J5 TPH fractions as chemicals (10-1) | TPHCWG and MADEP sets on `#/plants-eco` | None | - | - |
 | J6 RfC and unit risk conversion (10-7) | Engine converters (`iurFromPerUgM3`, `rfdFromMgPerKgDay`) | None | - | - |
@@ -219,8 +219,10 @@ Serial chains: U4 then U5; U8 then U7. Parallel pairs with low conflict: U3 with
 - Ecological Step 2 and 4 screens (E9, G13): RISC5's own guide leaves them pending; `#/plants-eco` covers
   screening.
 - 50-chemical limit (D2): a constraint, not a feature.
-- International criteria (I14): an engine and data deferral in M8, not UI. Surface water as a cleanup target
-  (H9) landed in wave P, slice P2, for dissolved groundwater sources on the linear route. Vapor and surface water source levels are on `#/cleanup` (wave K, slices K1 and K2); the
-  paths they do not quantify (nonlinear, soil above residual, upstream background) remain engine work.
+- International criteria (I14): deferred in M8; landed in wave V, slice V3 (see the I14 row). Surface water as a
+  cleanup target (H9) landed in wave P, slice P2, for dissolved groundwater sources on the linear route, and for
+  soil sources and nonlinear paths in wave V, slice V2b. Vapor and surface water source levels are on `#/cleanup`
+  (wave K, slices K1 and K2); the paths wave K left not quantified (nonlinear, soil above residual, upstream
+  background, a fed plume) are solved by root finding since wave V (slices V2a and V2b).
 - Multi-chemical runs through every fate screen (D1, D4 at full scope): landed in waves N to P as one project
   chemical list, one active chemical per fate screen and one feed slot per chemical, not simultaneous multi-chemical workers.

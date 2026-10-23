@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave U push)
+# HANDOFF (written from the tree, 2026-10-23, after the wave V push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -16,9 +16,19 @@ skipping a done one.
   `dedaca7`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-22, and wave S (one slice on
   branch `wave-s`), pushed 2026-10-22, and wave T (one slice and a corrective pass on branch `wave-t`; code head
   `ecad1cd`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave U (one slice on
-  branch `wave-u`; code head `901ca8e`), pushed 2026-10-23. Pages deploys from main:
+  branch `wave-u`; code head `901ca8e`), pushed 2026-10-23, and wave V (seven slices on branch `wave-v`; code head
+  `ad95271`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-u` (2026-10-23, `901ca8e`): exit 0, build included. Test counts: engine
+- Last full `corepack pnpm gate` on `wave-v` (2026-10-23, `ad95271`): exit 0, build included. Test counts: engine
+  1477, web 2123, data 258 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 594 s, 0 overflow
+  and 0 axe violations on every route at 390 light, 390 dark and 1280, including the new `#/surface-water`
+  criteria visit (all sets, 4 criteria tables) and `#/vapor`. Neither the check nor its seeded state opens the
+  DeVaull method or the solved cleanup panels; slices V1 and V2a checked those with temporary scripts (0 overflow,
+  axe 0+0), and the solved
+  surface water panel on `#/cleanup` was checked the same way at 390 light, 390 dark and 1280 (0 overflow, axe 0+0,
+  a solved row present in its scroll region; no not-reached row could be produced from the form, so that row's
+  layout is unchecked).
+- Before that, on `wave-u` (2026-10-23, `901ca8e`): exit 0, build included. Test counts: engine
   1477, web 1998, data 197 passed and 3 skipped. Nothing under `apps/web` changed, so `mobile:check:full` was not
   re-run; the `#/validation` route (whose generated data changed) passed at m390-light and m390-dark with 0
   overflow and 0 axe violations.
@@ -100,9 +110,28 @@ skipping a done one.
 - CI cost: about 6 billed minutes per push to main, re-measured 2026-10-21 after the waves L and M push (runs
   39680530613 and 39680530951: gate 3 min 2 s, Pages build 17 s plus deploy 9 s; recorded in CLAUDE.md). Docs-only
   pushes trigger nothing.
-- Reference counts (`packages/engine/src/references/references.json`, 111 entries): 74 `used`, 25
-  `planned`, 8 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
+- Reference counts (`packages/engine/src/references/references.json`, 119 entries): 74 `used`, 24
+  `planned`, 17 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave V landed (2026-10-23)
+Bryan: "okay let's just get it to 100% parity NOW". Rulings in the DECISIONS.md "Wave V scope, the last three parity
+gaps" block and its slice subsections (V1, V2a, V2b, c-ccme, C-euuk, anzg, macdonald2000, V3), all DEFAULT. All 102
+audit items are now present or different by design (`docs/UI_PARITY.md` status line).
+- V1: `vapor.devaull-2007` on `#/vapor` as "Oxygen-limited (DeVaull)" (apps/web/src/vapor/), with the three oxygen
+  options, profile curve, CSV table, report entry and risk feed (indoor only). RISC5 Appendix K inputs with no
+  DeVaull counterpart: minimum oxygen concentration, oxygen transfer coefficient, outdoor air prediction.
+- V2a: `apps/web/src/vapor/forward.ts` (the forward input on the feed) and `apps/web/src/cleanup/vaporSolve.ts`
+  (calls the engine's `solveSourceLevel`); rows and CSV say "Level from" linear coefficient or solve.
+- V2b: `apps/web/src/cleanup/surfaceSolve.ts` and `useSurfaceSolves.ts`, run in the cleanup worker: background,
+  fed plume and soil source routes; the soil route is offered by the surface water target only.
+- V3: `packages/data/src/criteria/`, `scripts/build-criteria.ts`, `raw/criteria-sets.manifest.json`, generated
+  `generated/criteria-2026-10-23/` (ccme 286, eu 180, uk 263, anzg 841 in fresh and salt files, macdonald2000 57);
+  extract scripts `extract-ccme.ts`, `extract-eu-eqs.ts`, `extract-uk-eqs.ts`, `extract-anzg.ts`,
+  `extract-macdonald2000.ts`; the set choice is the optional `criteriaSet` key; `scripts/mobile-check.mjs` gained
+  a criteria visit.
+- Review: one Fable pass, 0 high, 0 medium, 2 low (a sediment read that predates the wave and degrades to "not
+  compared", and a session-only memo map that is never pruned); no corrective pass.
 
 ## Wave U landed (2026-10-23)
 Bryan: "ok do it" (the RSL soil inhalation comparison). Rulings in the DECISIONS.md "Wave U scope, RSL soil
@@ -484,8 +513,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   says so; the ROADMAP section 3 row is annotated).
 - Six references still carry square-bracketed descriptor titles (all `planned`, listed above); replace each
   with its verified published title when a milestone marks it `used` (a test enforces this).
-- MacDonald et al. 2000 TEC and PEC values are not shipped (could not be verified; `macdonald2000` is
-  `planned`). The Region 4 2018 sediment basis comes from cell shading (28 rows `basisInferred`; the report
+- MacDonald et al. 2000 TEC and PEC values ship since wave V (`macdonald2000` is `data`), transcribed from a
+  complete copy of the article and checked against a second copy; the raw copies are not committed (Springer
+  copyright; its terms page could not be fetched). The Region 4 2018 sediment basis comes from cell shading (28 rows `basisInferred`; the report
   contradicts itself on Florida coastal; DECISIONS.md).
 - The outdoor box cites Hanna, Briggs and Hosker 1982; an ASTM E1739 attribution is unconfirmed and not cited.
 - DeVaull 2007: no published numeric example was verified; the oxygen balances are checked against a
@@ -514,13 +544,23 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Run basis (wave R): rows inherited from the vadose or saturated screen show that screen's current chemical only,
   so in a multi-chemical modeled cleanup the report says the table covers one chemical (DECISIONS R1b.3, CB.3).
 - The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not used.
-- RISC5 Appendix K (oxygen-limited, degradation) is not implemented: its only source is an unpublished
-  draft. DeVaull 2007 is the modern alternative.
+- RISC5 Appendix K (oxygen-limited, degradation) is not reproduced: its only source is an unpublished draft.
+  Since wave V DeVaull 2007 is on `#/vapor` in its place (indoor only; no outdoor oxygen-limited path).
+- International criteria (wave V): the EU set is the 2013 consolidation of Directive 2008/105/EC Annex I; a
+  secondary source reports a 2026 revision (Directive (EU) 2026/805), not fetched or read. The UK Directions 2015
+  are as made (no amendment found, which does not rule one out). CCME metribuzin (printed "1,0") and nitrite
+  ("60 NO2-N") are not interpreted; CCME imidacloprid and ANZG vanadium CAS numbers fail their check digit and
+  are kept as printed. CCME and ANZG raw files are not committed (no reuse licence stated), so the build rests on
+  the committed CSVs with the fetched files' hashes. The UK zinc catchment values are not used.
+- Engine chunk: `src-*.js` is 497.06 kB against the 500 kB bundle limit after wave V; the next engine addition
+  needs a split or lazy load.
+- Surface water solves (wave V): a first solve through a fed chain takes about 25 s in the worker, and a 2-year
+  full run about 63 s.
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted (sec-butylbenzene enthalpy,
   tert-butylbenzene row).
 - Cleanup screen gaps: produce does not apply to modeled sources (DEFAULT, delegated ruling in wave I); no total
   TPH cancer endpoint (DEFAULT, delegated). Modeled cleanup sources are sampled since wave I. Vapor and surface
-  water source levels landed in wave K. Since waves N to P each surface water result records its chemical and each
+  water source levels landed in wave K, and paths not linear in the source are solved since wave V. Since waves N to P each surface water result records its chemical and each
   chemical keeps its own (an untagged result still counts only in a one-chemical run), and surface water is a
   per-chemical cleanup target (P2).
 - Feed staleness: live since wave L. The mark is as coarse as the source form (any edit of the sending form marks
@@ -566,17 +606,17 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to U merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-23: waves J to V merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
   the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick,
-  the evidence wave, landed as wave R (see "Wave R landed"). Not ruled on, recommended: source levels through
-  nonlinear paths; RISC5 Appendix K not built (its only source is an
-  unpublished draft; DeVaull 2007 covers oxygen-limited vapor); international criteria sets only for work outside
-  the US; MacDonald et al. 2000 TEC and PEC values once the paper is read. The VISL comparison landed as wave S, the RSL trichloroethylene and vinyl chloride equations as wave T and the RSL soil inhalation comparison as wave U.
-  The wave P remainders (a soil-to-groundwater
-  comparison for user chemicals, user Kd, vapor and dermal values, soil and nonlinear sources for the surface water
-  target) are listed under the Wave P entry in ROADMAP section 7.
+  the evidence wave, landed as wave R (see "Wave R landed"). The VISL comparison landed as wave S, the RSL
+  trichloroethylene and vinyl chloride equations as wave T, the RSL soil inhalation comparison as wave U, and the
+  last three audit gaps (DeVaull on `#/vapor` in place of Appendix K, nonlinear source levels, international
+  criteria and MacDonald 2000) as wave V. Not ruled on, recommended: Bryan's review of the wave V substitution
+  (ruling 1) and of the vinyl chloride fallback (open items); reading the 2026 EU annex revision; making the mobile
+  check fail on a blank page. The wave P remainders still open (a soil-to-groundwater comparison for user
+  chemicals; user Kd, vapor and dermal values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
   2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a
