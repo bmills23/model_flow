@@ -1,0 +1,61 @@
+# MacDonald, Ingersoll and Berger 2000, Arch Environ Contam Toxicol 39(1):20-31, Tables 2 and 3, consensus-based columns.
+# Transcribed by scripts/extract-macdonald2000.ts from a text-layer copy of the article (see manifest.json); value is as printed with thousands separators removed.
+# The article prints no CAS numbers; cas is empty. Table 2 has 29 TEC rows, Table 3 has 28 PEC rows.
+cas,name_printed,medium,basis,value,unit_printed,table_or_page,note
+,Arsenic,sediment-freshwater,TEC,9.79,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Cadmium,sediment-freshwater,TEC,0.99,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Chromium,sediment-freshwater,TEC,43.4,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Copper,sediment-freshwater,TEC,31.6,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Lead,sediment-freshwater,TEC,35.8,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Mercury,sediment-freshwater,TEC,0.18,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Nickel,sediment-freshwater,TEC,22.7,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Zinc,sediment-freshwater,TEC,121,mg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Anthracene,sediment-freshwater,TEC,57.2,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Fluorene,sediment-freshwater,TEC,77.4,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Naphthalene,sediment-freshwater,TEC,176,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Phenanthrene,sediment-freshwater,TEC,204,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Benz[a]anthracene,sediment-freshwater,TEC,108,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Benzo(a)pyrene,sediment-freshwater,TEC,150,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Chrysene,sediment-freshwater,TEC,166,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,"Dibenz[a,h]anthracene",sediment-freshwater,TEC,33.0,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight; the article prints no PEC for this substance
+,Fluoranthene,sediment-freshwater,TEC,423,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Pyrene,sediment-freshwater,TEC,195,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Total PAHs,sediment-freshwater,TEC,1610,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Total PCBs,sediment-freshwater,TEC,59.8,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Chlordane,sediment-freshwater,TEC,3.24,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Dieldrin,sediment-freshwater,TEC,1.90,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Sum DDD,sediment-freshwater,TEC,4.88,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Sum DDE,sediment-freshwater,TEC,3.16,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Sum DDT,sediment-freshwater,TEC,4.16,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Total DDTs,sediment-freshwater,TEC,5.28,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Endrin,sediment-freshwater,TEC,2.22,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Heptachlor epoxide,sediment-freshwater,TEC,2.47,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Lindane (gamma-BHC),sediment-freshwater,TEC,2.37,µg/kg DW,"Table 2, Arch Environ Contam Toxicol 39(1):23",dry weight
+,Arsenic,sediment-freshwater,PEC,33.0,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Cadmium,sediment-freshwater,PEC,4.98,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Chromium,sediment-freshwater,PEC,111,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Copper,sediment-freshwater,PEC,149,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Lead,sediment-freshwater,PEC,128,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Mercury,sediment-freshwater,PEC,1.06,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Nickel,sediment-freshwater,PEC,48.6,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Zinc,sediment-freshwater,PEC,459,mg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Anthracene,sediment-freshwater,PEC,845,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Fluorene,sediment-freshwater,PEC,536,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Naphthalene,sediment-freshwater,PEC,561,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Phenanthrene,sediment-freshwater,PEC,1170,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Benz[a]anthracene,sediment-freshwater,PEC,1050,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Benzo(a)pyrene,sediment-freshwater,PEC,1450,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Chrysene,sediment-freshwater,PEC,1290,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Fluoranthene,sediment-freshwater,PEC,2230,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Pyrene,sediment-freshwater,PEC,1520,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Total PAHs,sediment-freshwater,PEC,22800,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Total PCBs,sediment-freshwater,PEC,676,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Chlordane,sediment-freshwater,PEC,17.6,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Dieldrin,sediment-freshwater,PEC,61.8,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Sum DDD,sediment-freshwater,PEC,28.0,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Sum DDE,sediment-freshwater,PEC,31.3,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Sum DDT,sediment-freshwater,PEC,62.9,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Total DDTs,sediment-freshwater,PEC,572,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Endrin,sediment-freshwater,PEC,207,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Heptachlor epoxide,sediment-freshwater,PEC,16.0,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight
+,Lindane (gamma-BHC),sediment-freshwater,PEC,4.99,µg/kg DW,"Table 3, Arch Environ Contam Toxicol 39(1):24",dry weight

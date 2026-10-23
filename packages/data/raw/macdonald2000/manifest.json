@@ -1,0 +1,46 @@
+{
+  "set": "macdonald2000",
+  "retrieved": "2026-10-23",
+  "source": "MacDonald, D.D., Ingersoll, C.G., Berger, T.A. 2000. Archives of Environmental Contamination and Toxicology 39(1):20-31, Tables 2 and 3 (consensus-based TEC and PEC)",
+  "transcribedFrom": {
+    "file": "ECO_BENCH_CONSENSUS.pdf",
+    "url": "https://rais.ornl.gov/documents/ECO_BENCH_CONSENSUS.pdf",
+    "kind": "complete copy of the article (13 pages, ResearchGate cover page, text layer), journal pages 20 to 31",
+    "bytes": 154832,
+    "sha256": "66058413a754d06d3dc3aaed7f88b619c629cb256b776e617c661c5e7f23e1e7",
+    "committed": false
+  },
+  "crossCheck": {
+    "file": "40168746.pdf",
+    "url": "https://semspub.epa.gov/work/07/40168746.pdf",
+    "kind": "complete copy of the article from the EPA Superfund records (12 pages, scanned images, handwritten marks on the table pages)",
+    "bytes": 954899,
+    "sha256": "138c76c4cd4db335b1d41dd15233654309624b1f38525764ce4be8fea789096b",
+    "committed": false,
+    "result": "Every consensus TEC (29) and PEC (28) value was read independently from page images of Tables 2 and 3 and matched the text-layer extraction with no differences."
+  },
+  "alsoFetchedNotUsed": [
+    {
+      "url": "https://water.waterboards.ca.gov/water_issues/programs/tmdl/docs/303d_policydocs/241.pdf",
+      "sha256": "0e18cd35529ce6d86fe80ba6a95636f758c65854dd4fa6223b26eaf02e1dc9a7",
+      "why": "scan with poor OCR; the consensus columns have no text layer, so it was not used"
+    }
+  ],
+  "terms": {
+    "statement": "The article carries a Springer-Verlag New York Inc. 2000 copyright notice on its first page. No licence permitting redistribution of the article or of copies of it was found, and the publisher page did not return its terms to a scripted fetch. The article is therefore not committed. Only the numerical guideline values ship, as facts, with the citation.",
+    "termsUrl": "https://link.springer.com/article/10.1007/s002440010075",
+    "termsUrlFetched": false
+  },
+  "files": [
+    {
+      "file": "consensus-tec-pec.csv",
+      "script": "packages/data/scripts/extract-macdonald2000.ts",
+      "rows": 57
+    }
+  ],
+  "findings": [
+    "Table 2 prints 29 consensus TEC values and Table 3 prints 28 consensus PEC values; Dibenz[a,h]anthracene has a TEC (33.0 ug/kg DW) and no PEC. The article's '28 chemicals' counts the PEC list.",
+    "The article prints no CAS numbers, so the cas column is empty.",
+    "Only two complete copies of the same article were compared; no separate reproduction disagreed."
+  ]
+}
