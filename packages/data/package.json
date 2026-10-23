@@ -20,7 +20,8 @@
     "build:ecossl": "tsx scripts/build-ecossl.ts",
     "fetch:ecossl": "tsx scripts/fetch-ecossl.ts verify 2026-10-18",
     "extract:r4-sediment": "tsx scripts/extract-r4-sediment.ts",
-    "extract:ccme": "tsx scripts/extract-ccme.ts"
+    "extract:ccme": "tsx scripts/extract-ccme.ts",
+    "extract:anzg": "tsx scripts/extract-anzg.ts"
   },
   "dependencies": {
     "@model-flow/engine": "workspace:*"

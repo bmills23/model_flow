@@ -3973,3 +3973,35 @@ below is DEFAULT and open to Bryan's overturn.
 7. **Raw files.** Both source files are committed: the European text under Commission Decision 2011/833/EU and the
    United Kingdom PDF under the Open Government Licence v3.0, each with its SHA-256 in `manifest.json`. The EUR-Lex
    legal notice page could not be read; the decision text was. The European source file keeps its own printed dashes.
+
+### Wave V slice anzg
+
+Criteria data acquisition for the Australia and New Zealand set (ruling 3). All rulings DEFAULT and open to Bryan's overturn.
+
+1. **Source.** The official master table of toxicant default guideline values, `toxicants-dgvs-mastertable.xlsx`, linked
+   from the Water Quality Australia page "Toxicant default guideline values for protecting aquatic ecosystems" (page last
+   modified 10 September 2026), retrieved 2026-10-23. One worksheet holds every freshwater and marine water toxicant, so
+   no per-toxicant pages were needed. The sediment DGVs are a separate ANZG document and are not in this set.
+2. **Redistribution (ruling 4).** The page carries no Creative Commons mark, so the department's default terms apply
+   (personal or in-organisation use, no onward copying). The workbook is not committed. The values ship as facts in
+   `packages/data/raw/anzg/anzg-2018-dgv.csv` with the citation; the manifest records the URL, the date and the
+   workbook SHA-256.
+3. **Which document each value comes from.** The workbook's own `Publish date` is kept as `publish_year`. A year of 2000
+   marks a value the workbook says is carried forward from ANZECC and ARMCANZ (2000) with the reliability reclassified under
+   Warne et al. (2018) (286 of the 326 source rows); later years are values derived and published under ANZG.
+4. **Basis column.** The protection level as printed: 99, 95, 90 and 80 percent species protection, and "unknown level of
+   protection" for the single value the workbook gives where marine data were insufficient and the freshwater value is
+   suggested with caution. The reliability the source assigns is its own column. Where the source prints a comma list in
+   one cell (zinc and nickel in fresh water: Australia, New Zealand; nitrate: soft, moderately hard, hard water) the list
+   is split into one row per entry, labelled by the sentence the row itself prints. These are site-chemistry dependent
+   values; the equations are not in the table, so ruling 5 applies to every other hardness or pH dependence (the
+   comments are carried in `note`, for example aluminium is two separate rows by pH).
+5. **Source defects handled, never corrected from memory.** Eight distinct CAS numbers (15 rows) were stored by the workbook as date-like
+   text (for example `0107-06-02`); they are restored by a fixed rule and kept only when the CAS check digit verifies.
+   Vanadium's printed number fails the check and is kept as printed with a flag in `note` for slice V3 to treat as
+   unverified. One reliability word is misspelled in the source and read as "Very High". 77 source rows (marine rows
+   with insufficient data) print no value and produce no row.
+6. **References.** `references.proposed.json` holds the ANZG 2018 entry as the copyright notice prints it, plus
+   Warne et al. (2018) and ANZECC and ARMCANZ (2000) as the workbook cites them (authors, year, and for Warne the title only).
+   The full references of those two are not printed in the fetched documents, so their identifier and URL fields are empty
+   for the integrator to confirm.

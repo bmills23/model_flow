@@ -1,0 +1,509 @@
+{
+  "set": "anzg",
+  "edition": "Toxicant default guideline values master table, page last modified 10 September 2026",
+  "retrieved": "2026-10-23",
+  "source": {
+    "url": "https://www.waterquality.gov.au/sites/default/files/documents/toxicants-dgvs-mastertable.xlsx",
+    "landingPage": "https://www.waterquality.gov.au/anz-guidelines/guideline-values/default/water-quality-toxicants/search/master-table",
+    "file": "toxicants-dgvs-mastertable.xlsx",
+    "bytes": 65450,
+    "sha256": "d3fe5c2b66fb3d0adec6ba28c4c68d7939c546aa562068dab9c6f34bcfeea61c",
+    "worksheet": "Sheet1",
+    "publicationDetails": "Australian and New Zealand governments, and Australian state and territory governments, 2026",
+    "committed": false
+  },
+  "terms": {
+    "url": "https://www.waterquality.gov.au/anz-guidelines/copyright",
+    "summary": "The page marks the master table with no Creative Commons logo. Under the department copyright notice, material not available under a licence may be downloaded for personal non-commercial use or use within an organisation, and may not otherwise be copied, changed or supplied to another person. The workbook is therefore not committed. The values ship as facts with the citation.",
+    "attribution": "ANZG 2018. Australian and New Zealand Guidelines for Fresh and Marine Water Quality. Australian and New Zealand Governments and Australian state and territory governments, Canberra, ACT, Australia. Viewed 2026-10-23, https://www.waterquality.gov.au/anz-guidelines/guideline-values/default/water-quality-toxicants/search/master-table"
+  },
+  "extractor": "packages/data/scripts/extract-anzg.ts",
+  "csv": {
+    "file": "anzg-2018-dgv.csv",
+    "bytes": 452593,
+    "sha256": "90d9302253a6ed87601b136e2375c9bb470f86596358ffa6f61cc12848c6e77a",
+    "rows": 841,
+    "sourceRows": 326,
+    "rowsByProtectionLevel": {
+      "99 percent species protection": 196,
+      "95 percent species protection": 196,
+      "90 percent species protection": 196,
+      "80 percent species protection": 196,
+      "unknown level of protection": 57
+    }
+  },
+  "provenance": "Column publish_year 2000 marks values the workbook says come from ANZECC and ARMCANZ (2000) and ANZG 2018 carries forward, with the reliability reclassified per Warne et al. (2018). Any other year is a value derived under the revised method and published by ANZG in that year. Sediment DGVs are a separate ANZG document and are not in this set.",
+  "normalisations": [
+    "medium Marine Water and Marine water become marine; Freshwater becomes freshwater",
+    "names and reliability words trimmed; the printed misspelling \"Very Hihj\" reads Very High",
+    "CAS numbers stored as date-like text restored to digit groups and kept only when the check digit verifies",
+    "a printed CAS of \"-\" becomes blank; a CAS followed by a name keeps the number and the name goes to the note",
+    "comma-list cells split into one row per entry, labelled from the row own comment text",
+    "two stock sentences (reliability update, technical brief pointer) dropped from the general comment",
+    "a long dash in the general comment (four rows) becomes a colon and a space, per project style"
+  ],
+  "rowsWithoutValues": [
+    {
+      "row": 21,
+      "name": "1,2,3-Trichlorobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 22,
+      "name": "1,2,4,5-Tetrachloro-3-nitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 28,
+      "name": "1,2-Dichlorobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 37,
+      "name": "1,3,5-Trinitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 39,
+      "name": "1,3-Dichlorobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 43,
+      "name": "1,3-Dinitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 45,
+      "name": "1,4-Dichlorobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 47,
+      "name": "1,4-Dinitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 49,
+      "name": "1-Chloro-3-nitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 51,
+      "name": "1-Methoxy-2-nitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 52,
+      "name": "2,3,4,6-Tetrachlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 55,
+      "name": "2,3,5,6-Tetrachlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 57,
+      "name": "2,3-Dichlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 58,
+      "name": "2,4,5-T",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 61,
+      "name": "2,4,6-Trichlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 62,
+      "name": "2,4,6-Trinitrophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 65,
+      "name": "2,4,6-Trinitrotoluene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 66,
+      "name": "2,4-D",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 69,
+      "name": "2,4-Dichloroaniline",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 71,
+      "name": "2,4-Dichlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 73,
+      "name": "2,4-Dimethylphenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 74,
+      "name": "2,4-Dinitrophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 77,
+      "name": "2,4-Dinitrotoluene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 79,
+      "name": "2,6-Dichlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 81,
+      "name": "2-Chlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 83,
+      "name": "2-Nitrotoluene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 87,
+      "name": "3-Chloropropene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 89,
+      "name": "3-Nitrotoluene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 91,
+      "name": "4-Chlorophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 92,
+      "name": "4-Nitrophenol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 95,
+      "name": "4-Nitrotoluene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 97,
+      "name": "Acrolein",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 99,
+      "name": "Alcohol ethoxylated sulfate (AES)",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 100,
+      "name": "Alcohol ethoxylated surfactants (AE)",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 112,
+      "name": "Aniline",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 117,
+      "name": "Aroclor 1242",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 119,
+      "name": "Aroclor 1254",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 124,
+      "name": "Azinphos methyl",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 130,
+      "name": "Bis(diethylthiocarbamyl)disulfide",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 132,
+      "name": "Bis(dimethylthiocarbamyl)sulfide",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 138,
+      "name": "BP 1100X",
+      "medium": "freshwater",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 141,
+      "name": "Carbofuran",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 143,
+      "name": "Carbon disulfide",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 167,
+      "name": "Corexit 9527",
+      "medium": "freshwater",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 176,
+      "name": "Deltamethrin",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 178,
+      "name": "Di(2-ethylhexyl)phthalate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 180,
+      "name": "Diazinon",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 182,
+      "name": "Dibutylphthalate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 186,
+      "name": "Dicofol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 188,
+      "name": "Dieldrin",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 190,
+      "name": "Diethylphthalate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 192,
+      "name": "Dimethoate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 194,
+      "name": "Dimethylformamide",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 196,
+      "name": "Dimethylphthalate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 199,
+      "name": "Diquat",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 207,
+      "name": "Esfenvalerate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 210,
+      "name": "Ethanol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 214,
+      "name": "Ethylene glycol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 222,
+      "name": "Glyphosate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 229,
+      "name": "Hexachloroethane",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 233,
+      "name": "Isophorone",
+      "medium": "freshwater",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 236,
+      "name": "Isopropyl alcohol",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 243,
+      "name": "Malathion",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 252,
+      "name": "Methomyl",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 258,
+      "name": "Mirex",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 260,
+      "name": "Molinate",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 273,
+      "name": "Nitrobenzene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 275,
+      "name": "o-Xylene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 276,
+      "name": "Paraquat",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 278,
+      "name": "Parathion",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 294,
+      "name": "Profenofos",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 297,
+      "name": "p-Xylene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 303,
+      "name": "S-Methoprene",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 306,
+      "name": "Tebuthiuron",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 312,
+      "name": "Thiobencarb",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 314,
+      "name": "Thiram",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    },
+    {
+      "row": 321,
+      "name": "Trifluralin",
+      "medium": "marine",
+      "reason": "no value printed in any protection column"
+    }
+  ]
+}
