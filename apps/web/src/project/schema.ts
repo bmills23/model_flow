@@ -78,8 +78,10 @@ export const feedShapes = {
             sourceUnit: z.literal('mg/L'),
             source: z.number().optional(),
             solubility: z.number().optional(),
+            path: z.enum(['linear', 'background', 'fed', 'none']).optional(),
           })
           .optional(),
+        solve: z.object({ request: jsonObject }).optional(),
         chemicalId: text.optional(),
       })
       .refine(sameLength, sameLengthMessage),

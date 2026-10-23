@@ -46,7 +46,7 @@ form. It is the regulatory screening option moved here from M2.
 | MCL column and published SSL columns from the committed RSL files | Yes, as a data slice | No data package edit in stage 1 |
 | Vapour pathways (indoor air from soil or groundwater, outdoor air) as modeled chains | No; M6 | Their EPCs stay user entered and get their own direct cleanup level per medium |
 | Shower inhalation from tap water (Andelman factor), particulates, irrigation | No; M7 | The RSL tap water and resident soil totals include these terms, so the fixtures avoid them |
-| Surface water as a modeled target medium | No; M8 | RISC5 allows a surface-water target when that model runs; it arrives with M8 |
+| Surface water as a modeled target medium | Yes, as source levels | The groundwater or soil source level behind a surface water level or target, from the surface water run sent to the cleanup screen: the level over the run's coefficient where the run is linear in a dissolved groundwater source, otherwise the same root find on the surface water forward run (an upstream background, a plume fed by a vadose or saturated source screen, a soil source carried to the bank); see "Source levels on paths that are not linear" in `surface-water.md` |
 | Plant uptake, TPH fraction cleanup levels (TPHCWG, RISC5 Appendix Q) | No; M9 | |
 | Probabilistic cleanup levels | No; M10 | Deterministic only, as RISC5 |
 | Target-organ segregation of the hazard index | No (deferred in M4) | Cumulative HI is a total over all organs, warned |

@@ -3913,3 +3913,74 @@ criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and
    Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
 7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
    place with what landed, and the 102-item count is restated from those rows.
+
+### Wave V slice V2b
+
+Surface water source levels on paths that are not linear in the source (scope ruling 2, surface water part). Every
+ruling below is DEFAULT.
+
+1. **Same solve, new forward model (DEFAULT).** The level is found with the engine's `solveSourceLevel` (the
+   verified linear shortcut, otherwise a bracket and Brent's method in the logarithm of the source;
+   `cleanup.modeled-chains`, `brent1973`), run on the surface water screen's own forward model: the peak of the
+   series of the method the run was sent for (well-mixed is the legacy series, mass-discharge the modern one).
+   No second root finder, no table, no extrapolation. The code is `cleanup/surfaceSolve.ts`; the worker is the
+   modeled cleanup's (`modeled.worker.ts` takes `{ surface: jobs }` beside the array of modeled requests), so
+   heavy runs stay off the page thread. `surfaceSolveRunner.ts` is its runner (same latest-wins and timer
+   fallback as `modeledRunner.ts`), `useSurfaceSolves.ts` the hook (a job is keyed by a hash of its content, so
+   only new jobs are sent).
+2. **Three routes (DEFAULT).** `groundwater`: the typed groundwater concentration of an unlinked run, or the held
+   concentration c0 of a linked typed run, with the run's upstream background (path `background`). `fed`: the
+   plume is fed by a vadose or saturated source screen; the unknown is that screen's soil concentration, shown in
+   mg/kg, found by repeating the screen's run for each trial (path `fed`). `soil`: a soil source of the cleanup
+   (vadose or saturated sent to the cleanup screen) carried to the surface water; this route is offered by the
+   surface water target only, because the source level panel starts from the surface water levels of the direct
+   (medium contacted) cleanup, which has no soil source. Zero transfer (path `none`) stays not quantified, with
+   the coefficient's reason.
+3. **Soil route aquifer (DEFAULT).** The aquifer, source box, bank distance, discharge thickness, background and
+   receptor are the surface water run's own (its linked transport scenario), not the cleanup's transport feed,
+   because the surface water run is what defines where the bank is. The soil source replaces the loading: the
+   screen's run feeds the same loading-step machinery as a fed transport run (`withFedSteps`), the source box of
+   the linked scenario kept as it is, the same mass-by-delivery rule as the modeled cleanup chain. The method pair
+   follows the surface water method: well-mixed with VADSAT and two-region (legacy), mass-discharge with the
+   layered column and the exponential release (modern); a vadose scenario with no legacy description is not
+   quantified for a well-mixed run, with its reason. A surface water run that is not linked has no aquifer and is
+   not quantified, saying so. The TPH mode is the cleanup form's (`tphHeld`), kept (scaled with the chemical) for
+   a plume fed from the surface water screen.
+4. **Limits (DEFAULT).** The ceiling is the solubility entered on the surface water run for a dissolved source,
+   and the pure substance (1 kg/kg, or the bound the TPH sets) for soil, as the modeled cleanup does. A target
+   the surface water does not reach there is shown as not reached, naming the ceiling and the most the surface
+   water gets to at it. A soil level above the chemical's soil saturation concentration (database) carries the
+   free product warning, not a refusal, as in the modeled cleanup. A target at or below what the upstream
+   background alone gives has no source level and says so. The linear route keeps its solubility refusal.
+5. **Feed state (DEFAULT).** A surface water feed gains two optional keys inside format version 2, both written
+   by the surface water screen at send time: `coefficient.path` (`linear`, `background`, `fed`, `none`) and
+   `solve.request` (the run's own request, with the resolved fed loading steps left out because they are
+   rebuilt). `feedShapes.surfaceWater` accepts both, and the saved file carries them like the bank feed does
+   (non-finite numbers tagged by the codec). A feed saved without them still gives its linear levels unchanged;
+   one whose coefficient is null and has no path or request reads "not quantified" with its reason and asks to be
+   sent again. No version bump and no re-prompt.
+6. **Rows say linear or solved (DEFAULT).** Both row types gain `path` (`linear` or `solved`), `solver` (shortcut
+   or Brent with the number of forward runs), `sourceMedium` and the unit that goes with it (mg/L groundwater,
+   mg/kg soil), and a `pending` flag while the worker has not answered. The panels show Source, Source level and
+   Level path columns; the two CSV tables gain `level path` and `solve detail` (the target table also writes
+   the source medium in its `source` text); the report solves the jobs in the worker before it builds the
+   cleanup section's tables. The CSV download is disabled while a row waits. The surface water level in the
+   source level table is a water concentration and stays in mg/L whatever the source medium.
+7. **One job per surface water run (DEFAULT).** The legacy and modern receptor rows of one chemical share one
+   job whose targets are the union of their surface water levels (governing, cancer and noncancer each solved,
+   sharing the forward model), so the transport is done once; the worker also keeps the last six forward models,
+   so a source level panel and a target row on the same run share one.
+8. **Cost and exactness (DEFAULT).** A linked surface water run costs seconds and a fed one tens of seconds (the
+   bank plane quadrature), far too dear for a root find. Its aquifer response is linear in the loading, so it is
+   computed once (`computeBase`, in `surfaceWater/compute.ts`) and a trial is that response times the trial
+   loading through the same mixing, decay and sediment model (`computeScaled`): a factor for a typed linked
+   source, and for a fed or soil chain the sum of the single-step responses (each built once) weighted by the
+   trial's loading steps. This equals the screen's full run to rounding, which the tests hold against the
+   screen's own `compute`; only a trial whose step boundaries differ from the reference (a depletion time that
+   moves with F) falls back to a full run. The bank plane warnings (reach and depth shares) are not repeated for
+   a scaled trial because the solve reads the peak only.
+9. **Files outside the assigned list (DEFAULT).** `surfaceWater/compute.ts` (the base and scaled runs, `compute`
+   itself unchanged in behavior), `surfaceWater/coefficient.ts`, `surfaceWater/feed.ts`,
+   `surfaceWater/SurfaceWaterScreen.tsx` (writes the two new keys), `project/schema.ts`, `report/results.ts`,
+   `cleanup/sourceLevelsCsv.ts`, `cleanup/CleanupPage.tsx`, `cleanup/modeled.worker.ts`, and the methods notes
+   `surface-water.md` and `cleanup-levels.md` (rows that said a surface water target needs no solver).

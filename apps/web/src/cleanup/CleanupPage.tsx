@@ -27,6 +27,9 @@ import { getSurfaceWaterFeedSlots, subscribeSurfaceWaterFeed } from '../surfaceW
 import { SurfaceWaterPanel, SurfaceWaterTargetPanel } from './SurfaceWaterPanel';
 import { SurfaceWaterTargetInputs } from './SurfaceWaterTargetInputs';
 import { surfaceTargetLevels, surfaceTargetTables, targetsOfChemicals } from './surfaceWaterTarget';
+import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
+import { jobsOf } from './surfaceSolved';
+import { useSurfaceSolves } from './useSurfaceSolves';
 import { useCriteriaDb } from './useCriteriaDb';
 import { TphPanel } from './TphPanel';
 import {
@@ -208,18 +211,67 @@ export function CleanupPage() {
     return out;
   }, [form.chemicals, lastGood, db]);
 
-  const targetRows = useMemo(
+  // the soil saturation concentration of each cleanup chemical (kg/kg), for the free product warning
+  const csat = useMemo(() => {
+    const out: Record<string, number> = {};
+    for (const c of form.chemicals) {
+      const v = db?.byId.get(c.id)?.tox.csat;
+      if (v !== undefined) out[c.id] = v * 1e-6;
+    }
+    return out;
+  }, [form.chemicals, db]);
+  const targetArgs = useMemo(
+    () => ({
+      targets: targetsOfChemicals(
+        form.surfaceTargets,
+        form.chemicals.map((c) => c.id),
+      ),
+      db: criteriaDb,
+      slots: surfaceSlots,
+      names,
+      source: form.source,
+      runCount: form.chemicals.length,
+      soil: { vadose: vadoseSlots, saturated: saturatedSlots, tphHeld: form.tphHeld, csat },
+    }),
+    [
+      form.surfaceTargets,
+      form.chemicals,
+      form.source,
+      form.tphHeld,
+      criteriaDb,
+      surfaceSlots,
+      vadoseSlots,
+      saturatedSlots,
+      names,
+      csat,
+    ],
+  );
+  // the surface water levels that are not linear in the source are solved in the worker (wave V slice V2b):
+  // the jobs are read off the rows before any result is in, and the rows are drawn again with the results
+  const surfaceFeeds = useMemo(
     () =>
-      surfaceTargetLevels({
-        targets: targetsOfChemicals(form.surfaceTargets, rowIds),
-        db: criteriaDb,
-        slots: surfaceSlots,
-        names,
-        source: form.source,
-        runCount: form.chemicals.length,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [form.surfaceTargets, form.chemicals, form.source, criteriaDb, surfaceSlots, names],
+      panelFeeds(
+        surfaceSlots,
+        form.chemicals.map((c) => c.id),
+      ),
+    [surfaceSlots, form.chemicals],
+  );
+  const surfaceJobs = useMemo(
+    () =>
+      jobsOf([
+        ...(!modeledOn && shown
+          ? surfaceFeeds.flatMap((f) =>
+              surfaceWaterSourceLevels(shown.outcome, f, names, undefined, csat),
+            )
+          : []),
+        ...surfaceTargetLevels(targetArgs),
+      ]),
+    [targetArgs, modeledOn, shown, surfaceFeeds, names, csat],
+  );
+  const surfaceSolved = useSurfaceSolves(surfaceJobs);
+  const targetRows = useMemo(
+    () => surfaceTargetLevels({ ...targetArgs, solves: surfaceSolved.solves }),
+    [targetArgs, surfaceSolved.solves],
   );
 
   const addChemical = (id: string): void => {
@@ -667,26 +719,35 @@ export function CleanupPage() {
               {panelFeeds(vaporSlots, rowIds).map((f) => (
                 <VaporPanel key={f.chemicalId} outcome={shown.outcome} feed={f} names={names} />
               ))}
-              {panelFeeds(surfaceSlots, rowIds).map((f) => (
+              {surfaceFeeds.map((f) => (
                 <SurfaceWaterPanel
                   key={f.chemicalId ?? ''}
                   outcome={shown.outcome}
                   feed={f}
                   names={names}
+                  solves={surfaceSolved.solves}
+                  csat={csat}
+                  progress={surfaceSolved.progress}
+                  solveError={surfaceSolved.error}
                 />
               ))}
               <DownloadCsv
-                disabled={stale}
+                disabled={stale || surfaceSolved.computing}
                 tables={[
                   ...cleanupCsvTables(shown.outcome, names).map((t) => ({
                     ...t,
                     feeds: directFeeds,
                   })),
-                  ...sourceLevelCsvTables(shown.outcome, names, {
-                    household: householdSlots,
-                    vapor: vaporSlots,
-                    surface: surfaceSlots,
-                  }),
+                  ...sourceLevelCsvTables(
+                    shown.outcome,
+                    names,
+                    {
+                      household: householdSlots,
+                      vapor: vaporSlots,
+                      surface: surfaceSlots,
+                    },
+                    { solves: surfaceSolved.solves, csat },
+                  ),
                 ]}
               />
               <NotQuantified outcome={shown.outcome} inputs={shown.built} names={names} />
@@ -708,8 +769,17 @@ export function CleanupPage() {
               feeds={modeledFeeds}
             />
           )}
-          <SurfaceWaterTargetPanel rows={targetRows} />
-          {targetRows.length > 0 && <DownloadCsv tables={surfaceTargetTables(targetRows)} />}
+          <SurfaceWaterTargetPanel
+            rows={targetRows}
+            progress={surfaceSolved.progress}
+            solveError={surfaceSolved.error}
+          />
+          {targetRows.length > 0 && (
+            <DownloadCsv
+              disabled={targetRows.some((r) => r.pending)}
+              tables={surfaceTargetTables(targetRows)}
+            />
+          )}
           <SsgResults form={buildForm} db={db} />
         </div>
       </div>

@@ -117,7 +117,48 @@ function fullExtent(
   };
 }
 
+/**
+ * What a linked run holds that is exactly proportional to the groundwater loading: the screen-averaged
+ * groundwater concentration at the bank (legacy), and the mass discharge across the bank plane with the
+ * flow through it and the depth share (modern). A run whose loading is the base loading times k has these
+ * times k, so `computeScaled` evaluates it without repeating the transport integrals (the dear part of a
+ * linked run). The upstream background is not part of it: it stays as entered.
+ */
+export interface SwBase {
+  /** kg/m^3 */
+  gw: number[];
+  /** Mass discharge W(t) across the bank plane, kg/s. */
+  discharge: number[];
+  /** m^3/s */
+  groundwaterFlow: number;
+  depthFraction?: number;
+}
+
 export function compute(req: SwRequest): SwOutcome {
+  return evaluate(req).outcome;
+}
+
+/** A full run of a linked request, with the proportional part kept for `computeScaled`. */
+export function computeBase(req: SwRequest): { outcome: SwOutcome; base: SwBase | null } {
+  return evaluate(req);
+}
+
+/**
+ * The run of `req` with its groundwater loading multiplied by `k`, from the base of the unscaled run of
+ * `req` itself. The surface water, sediment and flow series equal the full run's to rounding (the bank
+ * plane quadrature decides its refinement on relative tolerances, so it is scale free); the warnings of
+ * the bank plane (reach and depth shares) are not repeated. Meant for the level search, which reads the
+ * peak.
+ */
+export function computeScaled(req: SwRequest, base: SwBase, k: number): SwOutcome {
+  return evaluate(req, { base, k }).outcome;
+}
+
+function evaluate(
+  req: SwRequest,
+  scaled?: { base: SwBase; k: number },
+): { outcome: SwOutcome; base: SwBase | null } {
+  let base: SwBase | null = null;
   try {
     const link = req.link;
     const scenario: Scenario | null = link
@@ -150,26 +191,30 @@ export function compute(req: SwRequest): SwOutcome {
         darcyFlux: scenario.velocity * scenario.porosity,
         thickness: req.thickness,
       };
-      const input = at123dInput(scenario, 0);
-      const { time: _t, ...fixed } = input;
-      void _t;
-      const depths = Array.from(
-        { length: SCREEN_POINTS },
-        (_, k) => (source!.thickness * k) / (SCREEN_POINTS - 1),
-      );
-      gw = [
-        ...bankScreenAverage(
-          (t) => ({
-            concentrations: depths.map((d) =>
-              at123dConcentration(
-                { ...fixed, time: t },
-                { x: source!.bankX, y: 0, z: scenario.zOf(d) },
+      if (scaled) {
+        gw = scaled.base.gw.map((v) => v * scaled.k);
+      } else {
+        const input = at123dInput(scenario, 0);
+        const { time: _t, ...fixed } = input;
+        void _t;
+        const depths = Array.from(
+          { length: SCREEN_POINTS },
+          (_, k) => (source!.thickness * k) / (SCREEN_POINTS - 1),
+        );
+        gw = [
+          ...bankScreenAverage(
+            (t) => ({
+              concentrations: depths.map((d) =>
+                at123dConcentration(
+                  { ...fixed, time: t },
+                  { x: source!.bankX, y: 0, z: scenario.zOf(d) },
+                ),
               ),
-            ),
-          }),
-          times,
-        ).values,
-      ];
+            }),
+            times,
+          ).values,
+        ];
+      }
     } else {
       gw = times.map(() => req.groundwaterConcentration);
     }
@@ -225,7 +270,14 @@ export function compute(req: SwRequest): SwOutcome {
         }
       : undefined;
     let bank: ModernSurfaceWaterInput['bank'];
-    if (scenario && source) {
+    if (scenario && source && scaled) {
+      bank = {
+        kind: 'discharge',
+        times,
+        discharge: scaled.base.discharge.map((w) => w * scaled.k),
+        groundwaterFlow: scaled.base.groundwaterFlow,
+      };
+    } else if (scenario && source) {
       const { time: _t, ...fixed } = at123dInput(scenario, 0);
       void _t;
       bank = {
@@ -266,9 +318,18 @@ export function compute(req: SwRequest): SwOutcome {
     };
     const modern = runModernSurfaceWater(modernIn);
     // linked: the legacy underflow check takes the depth share measured on the modern bank plane
-    const legacy = legacyFirst ?? runLegacy(modern.depthFraction);
+    const legacy =
+      legacyFirst ?? runLegacy(scaled ? scaled.base.depthFraction : modern.depthFraction);
+    if (scenario && source && !scaled) {
+      base = {
+        gw: [...gw],
+        discharge: [...modern.discharge],
+        groundwaterFlow: modern.groundwaterFlow,
+        ...(modern.depthFraction !== undefined ? { depthFraction: modern.depthFraction } : {}),
+      };
+    }
 
-    return {
+    const outcome: SwOutcome = {
       ok: true,
       result: {
         times,
@@ -293,7 +354,11 @@ export function compute(req: SwRequest): SwOutcome {
         },
       },
     };
+    return { outcome, base };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+    return {
+      outcome: { ok: false, error: e instanceof Error ? e.message : String(e) },
+      base: null,
+    };
   }
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { toScenario } from '../transport/form';
 import { compute, type SwResult } from './compute';
 import { DEFAULT_FORM, toRequest, type SwRequest } from './inputs';
-import { surfaceWaterCoefficient } from './coefficient';
+import { surfaceWaterCoefficient, surfaceWaterSolveState } from './coefficient';
 import { REGRESSION_FORM as TRANSPORT_FORM } from '../transport/regression.testkit';
 
 const peak = (xs: number[]): number => Math.max(...xs);
@@ -62,6 +62,7 @@ describe('surfaceWaterCoefficient', () => {
       expect(c.method).toBe(`surfaceWater.${method}`);
       expect(c.sourceMedium).toBe('groundwater');
       expect(c.sourceUnit).toBe('mg/L');
+      expect(c.path).toBe('linear');
     }
   });
 
@@ -100,6 +101,7 @@ describe('surfaceWaterCoefficient', () => {
     const c = surfaceWaterCoefficient(fedReq, run(req), 'well-mixed');
     expect(c.value).toBeNull();
     expect(c.reason).toMatch(/vadose or saturated/i);
+    expect(c.path).toBe('fed');
   }, 60000);
 
   it('an upstream background makes the peak non-proportional to the source: not quantified', () => {
@@ -107,6 +109,7 @@ describe('surfaceWaterCoefficient', () => {
     const c = surfaceWaterCoefficient(req, run(req), 'well-mixed');
     expect(c.value).toBeNull();
     expect(c.reason).toMatch(/background/i);
+    expect(c.path).toBe('background');
   });
 
   it('a zero source or a zero peak is not quantified, never a zero coefficient', () => {
@@ -114,11 +117,35 @@ describe('surfaceWaterCoefficient', () => {
     const c = surfaceWaterCoefficient(req, run(req), 'well-mixed');
     expect(c.value).toBeNull();
     expect(c.reason).toMatch(/no groundwater source|transfers nothing/i);
+    expect(c.path).toBe('none');
   });
 
   it('carries the solubility (kg/m3) when the run has one', () => {
     const req = unlinked({ solubility: '1780' });
     const c = surfaceWaterCoefficient(req, run(req), 'mass-discharge');
     expect(c.solubility).toBeCloseTo(1.78, 12);
+  });
+});
+
+describe('surfaceWaterSolveState', () => {
+  it('keeps the request, and leaves the resolved fed loading steps out (they are rebuilt)', () => {
+    const req = linked();
+    expect(surfaceWaterSolveState(req).request).toBe(req);
+    const steps = [{ start: 0, end: 1, rate: 1e-9 }];
+    const fedReq: SwRequest = {
+      ...req,
+      link: {
+        ...req.link!,
+        scenario: {
+          ...req.link!.scenario,
+          fed: { method: 'modern', label: 'Vadose leachate', vadose: {} as never, steps },
+        },
+      },
+    };
+    const state = surfaceWaterSolveState(fedReq);
+    expect(state.request.link!.scenario.fed!.steps).toBeUndefined();
+    expect(state.request.link!.scenario.fed!.label).toBe('Vadose leachate');
+    // the run's own fed steps are untouched
+    expect(fedReq.link!.scenario.fed!.steps).toBe(steps);
   });
 });

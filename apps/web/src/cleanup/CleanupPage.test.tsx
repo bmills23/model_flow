@@ -4,8 +4,9 @@ import { CleanupPage } from './CleanupPage';
 import { clearHouseholdFeed, setHouseholdFeed } from '../household/feeds';
 import { clearVaporRiskFeed, setVaporRiskFeed } from '../vapor/feeds';
 import { clearProduceFeed, clearTphFeed, setProduceFeed, setTphFeed } from '../plantsEco/feeds';
-import { forgetMemory } from '../project/store';
+import { forgetMemory, getScreen, setScreen } from '../project/store';
 import { clearSurfaceWaterFeed, setSurfaceWaterFeed } from '../surfaceWater/feed';
+import { unlinkedRequest } from './surfaceSolve.testkit';
 
 async function loaded() {
   render(<CleanupPage />);
@@ -15,6 +16,23 @@ async function loaded() {
 async function addChemical(query: string, name: RegExp) {
   fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: query } });
   fireEvent.click(await screen.findByRole('button', { name }));
+}
+
+/** Swimming switched on for the first receptor, so the run has surface water levels to trace to a source. */
+function withSwimming(): void {
+  const s = getScreen('cleanup');
+  setScreen('cleanup', {
+    ...s,
+    form: {
+      ...s.form,
+      a: {
+        ...s.form.a,
+        pathways: { ...s.form.a.pathways, swimIngestion: true, swimDermal: true },
+        swimTime: '2.6',
+        swimDays: '12',
+      },
+    },
+  });
 }
 
 async function withBenzene() {
@@ -152,11 +170,42 @@ describe('CleanupPage', () => {
         sourceUnit: 'mg/L',
       },
     });
+    withSwimming();
     await withBenzene();
     const region = await screen.findByRole('region', { name: /surface water source levels/i });
-    expect(within(region).getAllByText(/groundwater source level/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText(/source level/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText(/groundwater source/i).length).toBeGreaterThan(0);
+    expect(within(region).getAllByText('Linear').length).toBeGreaterThan(0);
     expect(within(region).getAllByText('surfaceWater.mass-discharge').length).toBeGreaterThan(0);
   }, 30000);
+
+  it('solves the source level of a surface water run with an upstream background and says so', async () => {
+    setSurfaceWaterFeed({
+      method: 'mass-discharge',
+      origin: 'surfaceWater.mass-discharge',
+      label: 'Modern mass-discharge surface water, 10.0 years',
+      times: [1],
+      values: [1e-6],
+      coefficient: {
+        value: null,
+        reason: 'The run has an upstream background concentration.',
+        method: 'surfaceWater.mass-discharge',
+        sourceMedium: 'groundwater',
+        sourceUnit: 'mg/L',
+        path: 'background',
+      },
+      solve: { request: unlinkedRequest({ background: '0.0001' }) },
+    });
+    withSwimming();
+    await withBenzene();
+    const region = await screen.findByRole('region', { name: /surface water source levels/i });
+    // the level comes back from the solve (the tests have no worker, so it runs on a timer tick)
+    expect(
+      (await within(region).findAllByText(/^Solved/, undefined, { timeout: 20000 })).length,
+    ).toBeGreaterThan(0);
+    expect(within(region).queryByText(/solving\.\.\./i)).toBeNull();
+    expect(within(region).getAllByText(/groundwater source/i).length).toBeGreaterThan(0);
+  }, 60000);
 
   it('shows no surface water panel without a surface water run', async () => {
     await withBenzene();

@@ -15,11 +15,21 @@ import type { SwRequest } from './inputs';
  * peak over the source is a constant: doubling the source doubles the peak (coefficient.test.ts).
  * It is not quantified where the chain is not proportional to the source (an upstream background
  * adds a fixed part) or where the source is not a groundwater concentration (a vadose or saturated
- * fed plume, whose soil or leachate concentration the run does not record).
+ * fed plume, whose soil or leachate concentration the run does not record). Those two paths carry
+ * `path: 'background'` or `'fed'` and are solved on the cleanup screen against the run's forward model
+ * (`SurfaceWaterSolveState`, `cleanup/surfaceSolve.ts`); a run that transfers nothing (`'none'`) stays
+ * not quantified.
  */
 export interface SurfaceWaterCoefficient {
   /** Peak surface water over source, dimensionless (kg/m3 per kg/m3); null when not quantified. */
   value: number | null;
+  /**
+   * Which path the run is on: `linear` (a coefficient exists), `background` (an upstream background adds a
+   * fixed part), `fed` (the plume is fed by a vadose or saturated source screen) or `none` (nothing
+   * transfers). The three that carry no coefficient are solved against the forward run when the feed holds
+   * its `solve` state (wave V slice V2b). Absent on a feed saved before the field existed.
+   */
+  path?: 'linear' | 'background' | 'fed' | 'none';
   /** Why the coefficient is not quantified; null when it is. */
   reason: string | null;
   /** The registered method id of the series it was taken from (the feed origin). */
@@ -37,7 +47,26 @@ export interface SurfaceWaterCoefficient {
 const notQuantified = (
   base: Omit<SurfaceWaterCoefficient, 'value' | 'reason'>,
   reason: string,
-): SurfaceWaterCoefficient => ({ ...base, value: null, reason });
+  path: NonNullable<SurfaceWaterCoefficient['path']>,
+): SurfaceWaterCoefficient => ({ ...base, value: null, reason, path });
+
+/**
+ * What the cleanup screen needs beyond the coefficient to solve a surface water level that is not linear
+ * in the source (wave V slice V2b): the run's own request, which the engine's forward run takes, with
+ * the vadose-fed loading steps left out (they are rebuilt from the screen's source concentration). It is
+ * plain data and rides in the saved feed. A feed saved without it asks to be sent again.
+ */
+export interface SurfaceWaterSolveState {
+  request: SwRequest;
+}
+
+export function surfaceWaterSolveState(request: SwRequest): SurfaceWaterSolveState {
+  const link = request.link;
+  if (link === null || !link.scenario.fed) return { request };
+  const { steps: _steps, ...fed } = link.scenario.fed;
+  void _steps;
+  return { request: { ...request, link: { ...link, scenario: { ...link.scenario, fed } } } };
+}
 
 export function surfaceWaterCoefficient(
   request: SwRequest,
@@ -58,12 +87,14 @@ export function surfaceWaterCoefficient(
     return notQuantified(
       base,
       'The plume is fed by a vadose or saturated source screen, so the run does not hold a groundwater source concentration to divide by.',
+      'fed',
     );
   }
   if (request.background > 0) {
     return notQuantified(
       base,
       'The run has an upstream background concentration, which adds a fixed part to the surface water concentration, so the peak is not proportional to the groundwater source.',
+      'background',
     );
   }
   const peak = series.reduce((a, b) => Math.max(a, b), 0);
@@ -71,7 +102,8 @@ export function surfaceWaterCoefficient(
     return notQuantified(
       base,
       'The run has no groundwater source or transfers nothing to the surface water (coefficient 0), so there is no risk-based source level.',
+      'none',
     );
   }
-  return { ...base, value: peak / source, reason: null };
+  return { ...base, value: peak / source, reason: null, path: 'linear' };
 }

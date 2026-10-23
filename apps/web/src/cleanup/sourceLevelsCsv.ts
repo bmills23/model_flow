@@ -8,6 +8,8 @@ import type { CleanupOutcome } from './compute';
 import { CLEANUP_METHOD_IDS } from './csv';
 import { householdSourceLevels } from './householdLevels';
 import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
+import type { SurfaceSolveJob, SurfaceSolves } from './surfaceSolve';
+import { jobsOf, LEVEL_PATH_TEXT } from './surfaceSolved';
 import { vaporSourceLevels } from './vaporLevels';
 
 /**
@@ -86,6 +88,22 @@ function rowOf(r: PanelRow, chemical: string): CsvRow {
 }
 
 /**
+ * The forward-run solves behind the surface water panels (see `panelFeeds`): the jobs a caller outside the
+ * screen (the report) runs before it builds the CSV tables, which then read their results.
+ */
+export function surfaceSolveJobs(
+  outcome: CleanupOutcome,
+  names: Record<string, string>,
+  feeds: SourceLevelFeeds,
+): SurfaceSolveJob[] {
+  return jobsOf(
+    panelFeeds(feeds.surface, Object.keys(names)).flatMap((f) =>
+      surfaceWaterSourceLevels(outcome, f, names),
+    ),
+  );
+}
+
+/**
  * The source level panels of the cleanup screen as CSV tables, one per panel (see `panelFeeds`): the
  * same rows the panel prints, in the screen unit at full precision. A level that is not quantified is
  * an empty cell with its reason beside it, never zero. With two or more panels of one kind, each file
@@ -95,6 +113,7 @@ export function sourceLevelCsvTables(
   outcome: CleanupOutcome,
   names: Record<string, string>,
   feeds: SourceLevelFeeds,
+  solve: { solves?: SurfaceSolves; csat?: Record<string, number> } = {},
 ): CsvTable[] {
   const name = (id: string): string => names[id] ?? id;
   const ids = Object.keys(names);
@@ -137,15 +156,24 @@ export function sourceLevelCsvTables(
       feeds: [
         tagged ? { feed: 'surfaceWater', chemicalId: slotOfValue(f) } : { feed: 'surfaceWater' },
       ],
-      rows: surfaceWaterSourceLevels(outcome, f, names).map((r) => ({
+      rows: surfaceWaterSourceLevels(outcome, f, names, solve.solves, solve.csat).map((r) => ({
         ...rowOf(
-          { ...r, sourceMethod: r.surfaceMethod, what: 'Groundwater source (surface water)' },
+          {
+            ...r,
+            sourceMethod: r.surfaceMethod,
+            what: `${r.sourceMedium === 'soil' ? 'Soil source' : 'Groundwater source'} (surface water)`,
+          },
           name(r.chemical),
         ),
-        surfaceWaterLevel: scaled(r.mediumLevel, r.fromSi),
+        // the surface water level is a concentration in water, whatever the source medium
+        surfaceWaterLevel: scaled(r.mediumLevel, 1e3),
+        path: r.path,
+        solver: r.solver ?? (r.path === 'linear' ? LEVEL_PATH_TEXT.linear : null),
       })),
       columns: columns('surface water method', [
         { key: 'surfaceWaterLevel', header: 'surface water level' },
+        { key: 'path', header: 'level path' },
+        { key: 'solver', header: 'solve detail' },
       ]),
     });
   }

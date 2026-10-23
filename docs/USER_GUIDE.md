@@ -342,30 +342,48 @@ says to send the vapor air again. The send button is off while the vapor inputs 
 The household, vapor and surface water tables are in the cleanup CSV downloads (one file each, only for a run that has been sent) and in the report; a level that is not quantified keeps its reason in the file.
 
 Surface water source levels: when the surface water screen has sent a result (the "use ... for swimming" buttons),
-and a swimming pathway is on, a **Surface water source levels** panel lists the dissolved groundwater
-concentration that gives each surface water level, in mg/L. It divides the surface water level by the run's
-coefficient (the peak surface water concentration per unit of groundwater source, taken from the run you sent,
-for the series you sent), so a groundwater source at that level alone just meets the target. Each surface water run is kept for the chemical it was sent for, so the panel quantifies a level only for the cleanup row of that
-chemical; a row of another chemical reads "not quantified" and says why. The send buttons are off
-while the surface water screen shows an engine error, so only a current result is sent. The level reads "not quantified", with the reason, when
-the run has an upstream background (the peak is then not proportional to the source), when the plume is fed by a
-vadose or saturated source screen (the run holds no groundwater source concentration), when nothing transfers
-to the surface water, when the source level would exceed the solubility entered on the surface water screen, or
-when the result was sent before this panel existed (send it again). When the surface water inputs change after the
-send, the note at the top of the page marks the sent series as out of date, and the panel keeps using what was sent
-until you send again.
+and a swimming pathway is on, a **Surface water source levels** panel lists the source concentration that gives
+each surface water level. The **Level path** column says how each was found. **Linear**: the run is linear in a
+dissolved groundwater source, so the level (in mg/L) is the surface water level divided by the run's
+coefficient (the peak surface water concentration per unit of groundwater source, taken from the run you sent, for
+the series you sent), and a groundwater source at that level alone just meets the target. **Solved**: the run is not
+linear in its source, so the panel runs the surface water model forward until its peak meets the level, with the
+same root find as the modeled cleanup, in the background (a "solving" note shows while it runs; a linked run takes
+a few seconds to about a minute). This covers a run with an upstream background (the answer is a groundwater
+concentration, in mg/L) and a plume fed by a vadose or saturated source screen (the answer is the soil
+concentration of that screen, in mg/kg, and the Source column says so). A level the source cannot reach is shown
+as not quantified, naming the limit it was searched up to (the solubility entered on the surface water screen for
+a dissolved source; a pure substance, or the bound the TPH sets, for soil) and the most the surface water reaches
+there; a level at or below what the upstream background alone gives has no source level. A soil level above the
+soil saturation concentration carries a free product warning. Each surface water run is kept for the chemical it
+was sent for, so the panel quantifies a level only for the cleanup row of that chemical; a row of another chemical
+reads "not quantified" and says why. The send buttons are off while the surface water screen shows an engine error,
+so only a current result is sent. The level still reads "not quantified", with the reason, when nothing transfers to
+the surface water, when the linear source level would exceed the solubility entered on the surface water screen, or
+when the result was sent before the solve existed (send it again: an older result carries the run's coefficient but
+not the request the solve needs). When the surface water inputs change after the send, the note at the top of the
+page marks the sent series as out of date, and the panel keeps using what was sent until you send again.
 
 Surface water target: the cleanup screen has a **Surface water target** section with one choice per cleanup chemical: none,
 an **NRWQC criterion**, or **My value**. An NRWQC criterion is read from the shipped EPA National Recommended Water Quality
 Criteria tables; pick the kind of criterion from the list (the default is the freshwater chronic aquatic life criterion, else
 the human health criterion for water and organism consumption; a criterion that needs hardness, pH or other site inputs is not
 listed). My value is a concentration in ug/L and needs a note saying where it comes from. A **Surface water target source
-levels** panel then gives, for each chemical, the dissolved groundwater source level (mg/L) that just meets the target: the
-target divided by the peak surface water concentration per unit of source from that chemical's own surface water run. The row
-shows the target in ug/L, its basis, the citation of the table or "User value (this project)" with your note, and the stale
-mark of the surface water result. It applies to a dissolved groundwater source only (a soil source reads "not quantified" and
-says so). A chemical with no criterion, no surface water result sent, or a run with no coefficient says which is missing.
-The rows are in the CSV downloads (one file) and in the report.
+levels** panel then gives, for each chemical, the source level that just meets the target, from that chemical's own
+surface water run. For a dissolved groundwater source whose run is linear it is the target divided by the peak surface
+water concentration per unit of source (mg/L, **Linear**). A run with an upstream background, or a plume fed by a
+vadose or saturated source screen, is **Solved** against the surface water model, as in the panel above (mg/L for the
+groundwater concentration, mg/kg for the screen's soil concentration). A soil source of this cleanup (the "Soil, vadose
+zone" and "Soil, saturated" sources) is also solved: the vadose or saturated run sent to the cleanup screen is carried
+through the aquifer and bank of the surface water run, so that run must be linked to a groundwater transport run (a
+well-mixed surface water run uses the legacy vadose and saturated methods, a mass-discharge run the modern ones). A
+target the source cannot reach is shown as not reached, with the limit, as above. The row
+shows the target in ug/L, its basis, the citation of the table or "User value (this project)" with your note, the source
+and its unit, how the level was found, and the stale
+mark of the surface water result. A chemical with no criterion, no surface water result sent, or a run without the
+request to solve it says which is missing (send the surface water result again).
+The rows are in the CSV downloads (one file; the **level path** and **solve detail** columns say linear or solved) and in
+the report.
 
 A modeled source (groundwater, vadose or saturated soil source carried to the well) takes any number of
 chemicals. Each chemical is solved on its own through the groundwater, vadose or saturated run sent for it, so send
@@ -466,8 +484,10 @@ yet" on its own.
 The household, vapor and surface water source level panels of the cleanup screen print in the report's cleanup
 section when their run has been sent here, each as a table of the same rows as the panel (method ids, source,
 unit, source level, limiting endpoint, cancer and noncancer levels; the surface water table also gives the
-surface water level it reproduces). A level that is not quantified prints as an empty cell with its reason in the
-last column, never as zero. The three tables also have Download CSV buttons on the cleanup screen.
+surface water level it reproduces and whether each level is linear or solved, with the solve detail). A level that
+is not quantified prints as an empty cell with its reason in the
+last column, never as zero. The report solves the surface water levels that are not linear
+before it prints them. The three tables also have Download CSV buttons on the cleanup screen.
 
 ### Validation (`#/validation`)
 

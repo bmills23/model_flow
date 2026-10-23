@@ -12,8 +12,10 @@ import { defaultCleanupForm } from './form';
 import { householdSourceLevels } from './householdLevels';
 import { vaporSourceLevels } from './vaporLevels';
 import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
+import { solveSurfaceJob } from './surfaceSolve';
+import { unlinkedRequest } from './surfaceSolve.testkit';
 import { CLEANUP_METHOD_IDS } from './csv';
-import { sourceLevelCsvTables, sourceLevelsHeld } from './sourceLevelsCsv';
+import { sourceLevelCsvTables, sourceLevelsHeld, surfaceSolveJobs } from './sourceLevelsCsv';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -137,7 +139,41 @@ describe('source level CSV tables', () => {
       level: panel[0]!.level! * 1e3,
       surfaceWaterLevel: panel[0]!.mediumLevel! * 1e3,
       reason: null,
+      path: 'linear',
     });
+    expect(String(rows[0]!.solver)).toMatch(/linear/i);
+    expect(tables[0]!.columns.map((c) => c.key)).toEqual(
+      expect.arrayContaining(['path', 'solver']),
+    );
+  });
+
+  it('surface water rows of a run with a background say solved, with the detail, once the worker has answered', () => {
+    const out = outcome();
+    const request = unlinkedRequest({ background: '0.0001' });
+    const f: SurfaceWaterFeed = {
+      ...SURFACE,
+      coefficient: {
+        ...SURFACE.coefficient!,
+        value: null,
+        reason: 'The run has an upstream background concentration.',
+        path: 'background',
+      },
+      solve: { request },
+    };
+    const waiting = sourceLevelCsvTables(out, NAMES, { surface: f })[0]!.rows;
+    expect(waiting.every((r) => r.level === null && r.path === null)).toBe(true);
+    const jobs = surfaceSolveJobs(out, NAMES, { surface: f });
+    expect(jobs).toHaveLength(1);
+    const solves = new Map(jobs.map((j) => [j.key, solveSurfaceJob(j)]));
+    const rows = sourceLevelCsvTables(out, NAMES, { surface: f }, { solves })[0]!.rows;
+    for (const r of rows) {
+      expect(r.path).toBe('solved');
+      expect(String(r.solver)).toMatch(/forward run|shortcut|Brent/);
+      expect(r.unit).toBe('mg/L');
+      expect(typeof r.level).toBe('number');
+      expect(r.source).toBe('Groundwater source (surface water)');
+      expect(r.reason).toBeNull();
+    }
   });
 
   it('surface water rows from a feed with no coefficient are not quantified with the reason', () => {
