@@ -7,7 +7,7 @@ import type {
   HumanHealthFile,
 } from '@model-flow/data/nrwqc-types';
 import type { BenchmarkFile, BenchmarkRow } from '@model-flow/data/sediment-types';
-import type { CriteriaSetId } from '@model-flow/data/criteria-types';
+import type { CriteriaPointer, CriteriaSetId } from '@model-flow/data/criteria-types';
 import type { CriteriaSetChoice } from './criteriaSetChoice';
 
 export interface CriteriaChemical {
@@ -16,6 +16,13 @@ export interface CriteriaChemical {
   name: string;
   hasSurfaceWater: boolean;
   hasSediment: boolean;
+  /** Set only for a chemical the set prints no row for because its text points it to a group row. */
+  coveredBy?: string;
+}
+
+/** A printed pointer from a chemical to a group row, with the label of the set that prints it. */
+export interface CoveredInfo extends CriteriaPointer {
+  setLabel: string;
 }
 
 /** What the screen shows beside a criterion: its set, basis, medium and the table it was read from. */
@@ -54,6 +61,8 @@ export interface CriteriaDb {
   byChemical: Map<string, Criterion[]>;
   /** Basis, medium and source of every criterion, by criterion id. */
   info: Map<string, CriterionInfo>;
+  /** Chemicals the chosen set points to a group row, by chemical id (a chemical with rows of its own is not here). */
+  covered: Map<string, CoveredInfo>;
   /** Media the chosen sets have values for. */
   media: Criterion['medium'][];
   sources: CriteriaSourceNote[];
@@ -220,6 +229,8 @@ export interface DbParts {
   info: Map<string, CriterionInfo>;
   /** Chemical id to name; the first name given for an id is kept. */
   names: Map<string, string>;
+  /** Printed pointers from a chemical to a group row (eu2026 PFOS), by chemical id. */
+  covered?: Map<string, CoveredInfo>;
   sources: CriteriaSourceNote[];
   nrwqcEdition: string;
   sedimentEdition: string;
@@ -251,6 +262,7 @@ export function assembleDb(set: CriteriaSetChoice, parts: DbParts): CriteriaDb {
     chemicals,
     byChemical,
     info: parts.info,
+    covered: new Map([...(parts.covered ?? [])].filter(([id]) => !byChemical.has(id))),
     media,
     sources: parts.sources,
   };
@@ -358,6 +370,21 @@ export function searchCriteriaChemicals(
     const at = name.indexOf(q);
     if (at >= 0) hits.push({ c, rank: at === 0 ? 0 : 1 });
     else if (c.id.includes(q)) hits.push({ c, rank: 1 });
+  }
+  for (const [id, p] of db.covered) {
+    const name = p.name.toLowerCase();
+    const at = name.indexOf(q);
+    if (at < 0 && !id.includes(q)) continue;
+    hits.push({
+      c: {
+        id,
+        name: p.name,
+        hasSurfaceWater: true,
+        hasSediment: false,
+        coveredBy: `${p.group.name}, entry ${p.group.entry}`,
+      },
+      rank: at === 0 ? 0 : 1,
+    });
   }
   hits.sort(
     (a, b) =>

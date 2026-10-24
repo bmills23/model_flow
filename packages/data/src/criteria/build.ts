@@ -5,6 +5,7 @@ import { parseCsv } from '../sediment/csv.js';
 import { verifyCriteriaManifest } from './manifest.js';
 import {
   CRITERIA_SET_IDS,
+  type CriteriaPointer,
   type CriteriaRow,
   type CriteriaSetFile,
   type CriteriaSetId,
@@ -298,6 +299,54 @@ const resolveId = (
   return { chemicalId: slug(name), idBy: 'name' };
 };
 
+/**
+ * The note of a row printed twice with the same value. Two notes that differ only in the entry number
+ * ("entry 15; ..." and "entry 28; ...") become "entries 15 and 28; ..."; any other difference keeps the first
+ * note and adds the second.
+ */
+export const mergeNotes = (first: string, second: string, table: string): string => {
+  const entry = /^entr(?:y|ies) ([0-9]+(?:(?:, | and )[0-9]+)*)(; |$)/;
+  const a = entry.exec(first);
+  const b = entry.exec(second);
+  if (a === null || b === null) {
+    return [first, second === '' ? `also printed again in ${table}` : `printed again: ${second}`]
+      .filter((x) => x !== '')
+      .join('; ');
+  }
+  const restA = first.slice(a[0].length);
+  const restB = second.slice(b[0].length);
+  const nums = [...a[1]!.split(/, | and /), ...b[1]!.split(/, | and /)];
+  const label =
+    nums.length === 2 ? `entries ${nums[0]} and ${nums[1]}` : `entries ${nums.join(', ')}`;
+  const rest = restA === restB ? restA : `${restA}; printed again (entry ${b[1]}): ${restB}`;
+  return rest === '' ? label : `${label}; ${rest}`;
+};
+
+/**
+ * Chemicals a set prints no value for because its text points them to a group standard, one entry per
+ * printed pointer, read from the source by hand (never inferred from a footnote that merely lists members).
+ * eu2026 entry 35 prints, for PFOS (CAS 1763-23-1), "Covered by substance group 65 (Per- and polyfluoroalkyl
+ * substances (PFAS) – sum of 25)" in place of its cells. The build checks that the covering group has rows
+ * in the set and that the chemical has none of its own.
+ */
+export const GROUP_POINTERS: Partial<Record<CriteriaSetId, CriteriaPointer[]>> = {
+  eu2026: [
+    {
+      chemicalId: '1763-23-1',
+      name: 'Perfluorooctane sulfonic acid (PFOS) and its derivatives',
+      cas: '1763-23-1',
+      entry: 35,
+      printed:
+        'Covered by substance group 65 (Per- and polyfluoroalkyl substances (PFAS) – sum of 25)',
+      group: {
+        chemicalId: 'per-and-polyfluoroalkyl-substances-pfas-sum-of-25',
+        name: 'Per- and polyfluoroalkyl substances (PFAS) – sum of 25',
+        entry: 65,
+      },
+    },
+  ],
+};
+
 /** CCME prints a word where there is no single number; these three mean "depends on site chemistry". */
 const SITE_WORD = /printed as: (Equation|Variable|Table)$/;
 
@@ -309,8 +358,7 @@ const buildSet = (
 ): CriteriaSetFile => {
   const entry = manifest.sets[set];
   const rows: CriteriaRow[] = [];
-  const notes: string[] = [];
-  const noteIx = new Map<string, number>();
+  const noteTexts = new Map<string, string>();
   const omitted: Record<string, number> = {};
   const used = new Set<string>();
   const omit = (why: string): void => {
@@ -319,6 +367,7 @@ const buildSet = (
 
   for (const file of SET_CSV[set]) {
     for (const r of csvRows(rawDir, file)) {
+      const table = r.table_or_page ?? '';
       const where = `${file} ${r.name_printed ?? ''} ${r.medium ?? ''} ${r.basis ?? ''}`;
       const m = MEDIA[r.medium ?? ''];
       if (m === undefined) throw new Error(`${where}: unknown medium ${r.medium ?? ''}`);
@@ -349,20 +398,25 @@ const buildSet = (
         if (spec.note !== undefined) extra.push(spec.note);
       }
       const noteText = [...extra, rawNote].filter((s) => s !== '').join('; ');
-      let note: number | undefined;
-      if (noteText !== '') {
-        note = noteIx.get(noteText);
-        if (note === undefined) {
-          note = notes.length;
-          notes.push(noteText);
-          noteIx.set(noteText, note);
-        }
-      }
       const { chemicalId, idBy } = resolveId(set, name, casInfo.cas, idx);
       const base = `${set}:${chemicalId}:${m.medium}:${m.waterType}:${slug(basis)}`;
+      // The same value printed again for the same chemical, medium, endpoint, basis and unit (eu2026
+      // fluoranthene, entry 15 and a PAH sub-row of entry 28) is one row whose note names both entries.
+      const twin = rows.find(
+        (x) =>
+          value !== undefined &&
+          x.id.replace(/#\d+$/, '') === base &&
+          x.value === value &&
+          x.unit === unit,
+      );
+      if (twin !== undefined) {
+        noteTexts.set(twin.id, mergeNotes(noteTexts.get(twin.id) ?? '', noteText, table));
+        continue;
+      }
       let id = base;
       for (let k = 2; used.has(id); k++) id = `${base}#${k}`;
       used.add(id);
+      noteTexts.set(id, noteText);
       const row: CriteriaRow = {
         id,
         set,
@@ -383,16 +437,50 @@ const buildSet = (
         printedUnit,
         ...(siteSpecific ? { siteSpecific: true as const } : {}),
         table: r.table_or_page ?? '',
-        ...(note !== undefined ? { note } : {}),
         ...(r.reliability ? { reliability: r.reliability } : {}),
         ...(yearOf(set, r, rawNote) !== undefined ? { year: yearOf(set, r, rawNote)! } : {}),
       };
       rows.push(row);
     }
   }
+  // Notes are numbered in order of first use, after the merge, so none is left unused.
+  const notes: string[] = [];
+  const noteIx = new Map<string, number>();
+  const finished = rows.map((row) => {
+    const text = noteTexts.get(row.id) ?? '';
+    if (text === '') return row;
+    let n = noteIx.get(text);
+    if (n === undefined) {
+      n = notes.length;
+      notes.push(text);
+      noteIx.set(text, n);
+    }
+    // `note` keeps its place after `table`, so a set without a merge is byte for byte what it was.
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(row)) {
+      out[k] = v;
+      if (k === 'table') out['note'] = n;
+    }
+    return out as unknown as CriteriaRow;
+  });
+  rows.length = 0;
+  rows.push(...finished);
   const media = (['surfaceWater', 'sediment'] as const).filter((md) =>
     rows.some((r) => r.medium === md),
   );
+  const pointers = GROUP_POINTERS[set] ?? [];
+  for (const p of pointers) {
+    if (!rows.some((r) => r.chemicalId === p.group.chemicalId && r.name === p.group.name)) {
+      throw new Error(
+        `${set}: ${p.name} points to a group row (${p.group.name}) the set does not have`,
+      );
+    }
+    if (rows.some((r) => r.chemicalId === p.chemicalId)) {
+      throw new Error(
+        `${set}: ${p.name} has rows of its own and cannot also be covered by a group`,
+      );
+    }
+  }
   return {
     set,
     edition: manifest.edition,
@@ -401,6 +489,7 @@ const buildSet = (
     source: entry.source,
     notes,
     omitted,
+    ...(pointers.length > 0 ? { coveredBy: pointers } : {}),
     rows,
   };
 };

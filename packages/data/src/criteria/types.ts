@@ -78,6 +78,24 @@ export interface CriteriaSource {
   csv: string;
 }
 
+/**
+ * A chemical a set prints no water or sediment value for because its text points the chemical to a group
+ * standard (eu2026 PFOS, entry 35, "Covered by substance group 65"). Listed by hand in the build from the
+ * printed text, never inferred; the comparison names the covering row instead of saying the set lacks the chemical.
+ */
+export interface CriteriaPointer {
+  /** The chemical the set points away from. */
+  chemicalId: string;
+  name: string;
+  cas: string | null;
+  /** The entry number the set prints the chemical under. */
+  entry: number;
+  /** The pointer as the source prints it. */
+  printed: string;
+  /** The covering group row: its chemical id (a chemicalId of rows in the same set), name and entry. */
+  group: { chemicalId: string; name: string; entry: number };
+}
+
 export interface CriteriaSetFile {
   set: CriteriaSetId;
   /** Directory-level edition label of the generated files. */
@@ -90,5 +108,7 @@ export interface CriteriaSetFile {
   notes: string[];
   /** Counts of rows the build left out and why (a narrative guideline has no number). */
   omitted: Record<string, number>;
+  /** Chemicals the set points to a group row; absent when it has none. */
+  coveredBy?: CriteriaPointer[];
   rows: CriteriaRow[];
 }

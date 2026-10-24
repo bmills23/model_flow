@@ -223,7 +223,7 @@ describe('the 2026 revision of the EU standards (eu2026) beside the 2013 set (eu
   });
 
   it('loads the revised set from a file of its own, with the substances the revision added', () => {
-    expect(db('eu2026').criteria).toHaveLength(272);
+    expect(db('eu2026').criteria).toHaveLength(270);
     for (const k of db('eu2026').criteria) expect(k.id.startsWith('eu2026:'), k.id).toBe(true);
     const gly = criteriaFor(db('eu2026'), GLYPHOSATE, 'surfaceWater');
     expect(gly.length).toBe(5);
@@ -254,5 +254,24 @@ describe('the 2026 revision of the EU standards (eu2026) beside the 2013 set (eu
   it('is part of the union of all sets', () => {
     expect(db('all').criteria.some((k) => k.id.startsWith('eu2026:'))).toBe(true);
     expect(db('all').criteria.some((k) => k.id.startsWith('eu:'))).toBe(true);
+  });
+});
+
+describe('a chemical the text points to a group row (eu2026 PFOS)', () => {
+  const PFOS = '1763-23-1';
+  it('is covered in eu2026, not in the 2013 set, and not in the all-sets database where the US sets name it', () => {
+    expect(db('eu2026').covered.get(PFOS)?.group.entry).toBe(65);
+    expect(db('eu2026').byChemical.has(PFOS)).toBe(false);
+    expect(db('eu').covered.size).toBe(0);
+    expect(db('us').covered.size).toBe(0);
+    expect(db('all').byChemical.has(PFOS)).toBe(true);
+    expect(db('all').covered.has(PFOS)).toBe(false);
+  });
+
+  it('is found by name or CAS number in eu2026, labelled as covered by the group', () => {
+    for (const q of ['perfluorooctane sulfonic', PFOS]) {
+      const hit = searchCriteriaChemicals(db('eu2026'), q).find((c) => c.id === PFOS);
+      expect(hit?.coveredBy, q).toMatch(/PFAS.*entry 65/);
+    }
   });
 });

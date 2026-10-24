@@ -18,8 +18,9 @@ export interface SurfaceSolveState {
 /**
  * Debounced, latest-wins solve of the surface water source level jobs in the background worker. A job is
  * identified by its key (a hash of everything that goes into it), so only the jobs not yet solved are sent
- * and editing one chemical does not re-solve the others. The results of earlier job sets stay in the map
- * (a job is looked up by key, so a result that is no longer asked for is simply never read).
+ * and editing one chemical does not re-solve the others. The map keeps only the results of the jobs now asked
+ * for: a result for a job that is gone is dropped (so the map cannot grow without bound over a long session),
+ * and a job that comes back is solved again.
  */
 export function useSurfaceSolves(jobs: readonly SurfaceSolveJob[]): SurfaceSolveState {
   const [solves, setSolves] = useState<SurfaceSolves>(EMPTY);
@@ -30,11 +31,22 @@ export function useSurfaceSolves(jobs: readonly SurfaceSolveJob[]): SurfaceSolve
   } | null>(null);
   const runner = useRef<SurfaceRunner | null>(null);
   const known = useRef(new Map<string, SurfaceSolveResult>());
+  const wanted = useRef(new Set<string>());
   const key = useMemo(() => jobs.map((j) => j.key).join('|'), [jobs]);
 
   useEffect(() => () => runner.current?.dispose(), []);
 
   useEffect(() => {
+    // keep only the entries of the current requests
+    wanted.current = new Set(jobs.map((j) => j.key));
+    let pruned = false;
+    for (const k of [...known.current.keys()]) {
+      if (!wanted.current.has(k)) {
+        known.current.delete(k);
+        pruned = true;
+      }
+    }
+    if (pruned) setSolves(new Map(known.current));
     const todo = jobs.filter((j) => !known.current.has(j.key));
     if (todo.length === 0) return;
     const timer = setTimeout(() => {
@@ -45,7 +57,10 @@ export function useSurfaceSolves(jobs: readonly SurfaceSolveJob[]): SurfaceSolve
         .then((reply) => {
           if (reply === null) return;
           if (reply.ok) {
-            todo.forEach((j, i) => known.current.set(j.key, reply.results[i]!));
+            // a reply for jobs that are no longer asked for is dropped
+            todo.forEach((j, i) => {
+              if (wanted.current.has(j.key)) known.current.set(j.key, reply.results[i]!);
+            });
             setSolves(new Map(known.current));
             setError(null);
           } else {

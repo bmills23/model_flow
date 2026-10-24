@@ -3,6 +3,7 @@ import type { CsvColumn, CsvRow } from '../export/csv';
 import type { SwResult } from './compute';
 import {
   criteriaFor,
+  type CoveredInfo,
   type CriteriaDb,
   type CriteriaChemical,
   type CriterionInfo,
@@ -80,6 +81,68 @@ export function sourceLine(info: CriterionInfo): string {
   if (info.waterType !== undefined) parts.push(WATER_NAME[info.waterType]);
   parts.push(info.source);
   return parts.join('; ');
+}
+
+/** A criterion of the covering group row, as the screen and the CSV show it (ug/L). */
+export interface CoveringRow {
+  id: string;
+  basis: string;
+  waterType?: 'fresh' | 'salt';
+  source: string;
+  /** In ug/L; absent for a site-specific row. */
+  value?: number;
+  condition?: string;
+}
+
+/** The pointer for a chemical the set does not give a row of its own, if the set prints one. */
+export function coveredBy(db: CriteriaDb, chemicalId: string): CoveredInfo | undefined {
+  return db.byChemical.has(chemicalId) ? undefined : db.covered.get(chemicalId);
+}
+
+/** The water criteria of the group row a chemical is covered by, in the set's own units. */
+export function coveringRows(db: CriteriaDb, pointer: CoveredInfo): CoveringRow[] {
+  return criteriaFor(db, pointer.group.chemicalId, 'surfaceWater').map((c) => {
+    const i = db.info.get(c.id);
+    return {
+      id: c.id,
+      basis: i?.basis ?? c.endpoint,
+      ...(c.waterType !== undefined ? { waterType: c.waterType } : {}),
+      source: i?.source ?? '',
+      ...(c.value !== undefined ? { value: c.unit === 'mg/L' ? c.value * 1000 : c.value } : {}),
+      ...(i?.condition !== undefined ? { condition: i.condition } : {}),
+    };
+  });
+}
+
+/** The sentence under a covered chemical: what the set prints, and why no ratio is computed. */
+export function coveredText(pointer: CoveredInfo): string {
+  return `${pointer.setLabel} prints no value of its own for ${pointer.name} (entry ${pointer.entry}); it prints "${pointer.printed}". The value of that row (entry ${pointer.group.entry}, ${pointer.group.name}) is shown. It is a sum over the listed substances weighted by their relative potency, so the peak of one substance is not compared with it.`;
+}
+
+/** CSV rows for a covered chemical: the covering row's value, status "covered by group", no peak or ratio. */
+export function coveredCsvRows(
+  db: CriteriaDb,
+  chemical: { id: string; name: string },
+  pointer: CoveredInfo,
+): CsvRow[] {
+  return coveringRows(db, pointer).map((r) => ({
+    chemicalId: chemical.id,
+    chemical: chemical.name,
+    method: '',
+    medium: MEDIUM_NAME.surfaceWater,
+    set: pointer.setLabel,
+    basis: r.basis,
+    waterType: r.waterType === undefined ? '' : WATER_NAME[r.waterType],
+    criterion: pointer.group.name,
+    source: r.source,
+    status: 'covered by group',
+    criterionValue: r.value ?? null,
+    peak: null,
+    unit: 'ug/L',
+    ratio: null,
+    exceeds: null,
+    note: [coveredText(pointer), r.condition ?? ''].filter((t) => t !== '').join(' '),
+  }));
 }
 
 export const CRITERIA_COLUMNS: CsvColumn[] = [

@@ -12,6 +12,7 @@ import {
 import { verifyCriteriaManifest } from '../src/criteria/manifest.js';
 import type { CriteriaRow, CriteriaSetFile } from '../src/criteria/types.js';
 import { references } from '@model-flow/engine';
+import { GROUP_POINTERS } from '../src/criteria/build.js';
 import { casCheckDigitValid } from '../src/nrwqc/parse.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -252,8 +253,8 @@ describe('European Union as amended by Directive (EU) 2026/805 (eu2026)', () => 
     expect(built.sets.eu.label).toBe('European Union (Directive 2008/105/EC)');
   });
 
-  it('holds the 272 water rows of the fetched text, and the 2013 set keeps its 180', () => {
-    expect(rowsOf('eu2026')).toHaveLength(272);
+  it('holds 270 rows for the 272 water rows of the fetched text (two printed twice are merged), and the 2013 set keeps its 180', () => {
+    expect(rowsOf('eu2026')).toHaveLength(270);
     expect(rowsOf('eu')).toHaveLength(180);
     expect(rowsOf('eu2026').every((r) => r.medium === 'surfaceWater')).toBe(true);
   });
@@ -465,5 +466,70 @@ describe('generated files', () => {
       ]),
     );
     for (const r of rows) expect(r).toEqual(whole.get(r.id));
+  });
+});
+
+describe('identical rows printed under two entries', () => {
+  it('keeps one eu2026 fluoranthene MAC row per water type, its note naming entries 15 and 28', () => {
+    for (const [wt, basis] of [
+      ['fresh', 'MAC-EQS inland'],
+      ['salt', 'MAC-EQS other surface waters'],
+    ] as const) {
+      const rows = rowsOf('eu2026').filter(
+        (r) => r.chemicalId === '206-44-0' && r.waterType === wt && r.basis === basis,
+      );
+      expect(rows.length, wt).toBe(1);
+      expect(rows[0]!.id).not.toContain('#');
+      const note = built.sets.eu2026.notes[rows[0]!.note!]!;
+      expect(note).toMatch(/^entries 15 and 28; /);
+      expect(note).not.toContain('entry 15;');
+    }
+    // The AA-EQS rows are printed once (entry 15) and keep their note.
+    const aa = find('eu2026', '206-44-0', 'surfaceWater', 'fresh', 'AA-EQS inland')!;
+    expect(built.sets.eu2026.notes[aa.note!]).toMatch(/^entry 15; /);
+  });
+
+  it('leaves no unused note, and merges rows of no other set (the others differ in value or carry one entry)', () => {
+    for (const set of Object.keys(built.sets) as (keyof CriteriaBuild['sets'])[]) {
+      const file = built.sets[set];
+      const used = new Set(file.rows.map((r) => r.note).filter((n) => n !== undefined));
+      expect(used.size, set).toBe(file.notes.length);
+      // every remaining "#k" id is a different value (ANZG arsenic and chromium, carried-forward rows)
+      const by = new Map<string, CriteriaRow[]>();
+      for (const r of file.rows) {
+        const k = r.id.replace(/#\d+$/, '');
+        by.set(k, [...(by.get(k) ?? []), r]);
+      }
+      for (const [k, rs] of by) {
+        if (rs.length < 2) continue;
+        expect(new Set(rs.map((r) => `${r.value}|${r.unit}`)).size, k).toBe(rs.length);
+      }
+    }
+  });
+});
+
+describe('chemicals the text points to a group row', () => {
+  it('lists eu2026 PFOS (entry 35) as covered by the PFAS sum (entry 65), and no other set', () => {
+    expect(Object.keys(GROUP_POINTERS)).toEqual(['eu2026']);
+    const covered = built.sets.eu2026.coveredBy!;
+    expect(covered).toHaveLength(1);
+    expect(covered[0]).toMatchObject({
+      chemicalId: '1763-23-1',
+      cas: '1763-23-1',
+      entry: 35,
+      group: { entry: 65 },
+    });
+    for (const set of Object.keys(built.sets) as (keyof CriteriaBuild['sets'])[]) {
+      if (set !== 'eu2026') expect(built.sets[set].coveredBy, set).toBeUndefined();
+    }
+  });
+
+  it('points only at a group that has rows in the set, and the covered chemical has none of its own', () => {
+    for (const p of built.sets.eu2026.coveredBy!) {
+      const group = rowsOf('eu2026').filter((r) => r.chemicalId === p.group.chemicalId);
+      expect(group.length).toBeGreaterThan(0);
+      expect(group.every((r) => r.name === p.group.name)).toBe(true);
+      expect(rowsOf('eu2026').some((r) => r.chemicalId === p.chemicalId)).toBe(false);
+    }
   });
 });

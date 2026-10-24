@@ -6,6 +6,10 @@ import { Field, Seg } from '../ui/controls';
 import type { SwResult } from './compute';
 import {
   compareAll,
+  coveredBy,
+  coveredCsvRows,
+  coveredText,
+  coveringRows,
   criteriaCsvRows,
   sourceLine,
   toDisplay,
@@ -15,6 +19,7 @@ import {
 import {
   criteriaFor,
   searchCriteriaChemicals,
+  type CoveredInfo,
   type CriteriaDb,
   type CriterionInfo,
 } from './criteriaDb';
@@ -174,6 +179,44 @@ function ResultTable(props: {
   );
 }
 
+/** What the set prints for a chemical it points to a group row: the pointer and the covering row's values. */
+function CoveredBlock(props: { db: CriteriaDb; pointer: CoveredInfo }) {
+  const rows = coveringRows(props.db, props.pointer);
+  return (
+    <div>
+      <p className="muted">{coveredText(props.pointer)}</p>
+      <div className="sat-wrap">
+        <table className="sat crit">
+          <caption className="sr-only">
+            {props.pointer.group.name}, the row that covers {props.pointer.name}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Covering row</th>
+              <th scope="col">Criterion</th>
+              <th scope="col">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id}>
+                <td>
+                  {props.pointer.group.name} (entry {props.pointer.group.entry})
+                </td>
+                <td>
+                  <span className="crit-basis">{r.basis}</span>
+                  <span className="crit-src">{[props.pointer.setLabel, r.source].join('; ')}</span>
+                </td>
+                <td>{r.value === undefined ? 'no value' : `${sig(r.value)} ug/L`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Compares the peak of the modelled surface water and sediment series with the criteria of a chosen set for a
  * chosen chemical: by default the EPA national recommended water quality criteria and the Region 4 sediment
@@ -208,10 +251,18 @@ export function CriteriaPanel(props: {
         : [],
     [db, chosen, inSet, props.result, waterType, h, hardnessBad, props.foc],
   );
+  // a chemical the set prints no row for because its text points it to a group row (eu2026 PFOS)
+  const covered = db && chosen && !inSet ? coveredBy(db, chosen.id) : undefined;
   const { onRows } = props;
   useEffect(() => {
-    onRows?.(db && chosen ? criteriaCsvRows(compared, db.info, chosen) : []);
-  }, [onRows, db, chosen, compared]);
+    onRows?.(
+      db && chosen
+        ? covered
+          ? coveredCsvRows(db, chosen, covered)
+          : criteriaCsvRows(compared, db.info, chosen)
+        : [],
+    );
+  }, [onRows, db, chosen, compared, covered]);
   const hasMetals =
     db && chosen ? criteriaFor(db, chosen.id, 'surfaceWater').some((c) => c.hardness) : false;
 
@@ -278,9 +329,11 @@ export function CriteriaPanel(props: {
                 Compare {c.name} ({c.id})
               </span>
               <span className="hit-tox">
-                {[c.hasSurfaceWater && 'water criteria', c.hasSediment && 'sediment benchmarks']
-                  .filter(Boolean)
-                  .join(', ')}
+                {c.coveredBy !== undefined
+                  ? `covered by ${c.coveredBy}`
+                  : [c.hasSurfaceWater && 'water criteria', c.hasSediment && 'sediment benchmarks']
+                      .filter(Boolean)
+                      .join(', ')}
               </span>
             </button>
           </li>
@@ -319,7 +372,8 @@ export function CriteriaPanel(props: {
               Hardness must be a positive number.
             </div>
           )}
-          {!inSet && (
+          {covered && db && <CoveredBlock db={db} pointer={covered} />}
+          {!inSet && !covered && (
             <p className="muted">
               This set has no criterion for {chosen.name}. Choose another set or another chemical.
             </p>
