@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, type Plugin, type UserConfig } from 'vite';
 import { shortCommit } from './src/buildCommit';
 
 // The chemical property file is imported with ?url, which copies it unchanged. The committed file is
@@ -46,7 +46,11 @@ function engineChunk(id: string): string | null {
   if (/node_modules[\\/](\.pnpm[\\/])?(zod|@stdlib)/.test(id)) return 'engine-libs';
   return null;
 }
-function codeSplitting() {
+type OutputOptions = Exclude<
+  NonNullable<NonNullable<UserConfig['build']>['rolldownOptions']>['output'],
+  unknown[] | undefined
+>;
+function codeSplitting(page: boolean): NonNullable<OutputOptions['codeSplitting']> {
   return {
     includeDependenciesRecursively: false,
     groups: [
@@ -58,6 +62,20 @@ function codeSplitting() {
         priority: 20,
       },
       { name: engineChunk, priority: 10 },
+      // The page's own modules that the entry loads and the lazy routes use too (the project store and the forms,
+      // about 140 kB). Without this group the bundler folds them into the entry chunk, which then has little
+      // room under its 200 kB limit. A worker has one entry, so it has no such modules.
+      ...(page
+        ? [
+            {
+              name: 'shared',
+              test: /apps[\\/]web[\\/]src[\\/]/,
+              tags: ['$initial' as const],
+              minShareCount: 2,
+              priority: 5,
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -70,12 +88,12 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
-    rolldownOptions: { output: { codeSplitting: codeSplitting() } },
+    rolldownOptions: { output: { codeSplitting: codeSplitting(true) } },
   },
   worker: {
     // A worker is bundled apart from the page. ES modules let it share chunks and split its code the same way;
     // every worker is created with { type: 'module' }.
     format: 'es',
-    rolldownOptions: { output: { codeSplitting: codeSplitting() } },
+    rolldownOptions: { output: { codeSplitting: codeSplitting(false) } },
   },
 });
