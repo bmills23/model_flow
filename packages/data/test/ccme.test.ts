@@ -27,7 +27,7 @@ describe('CCME aquatic life guidelines (raw/ccme/ccme.csv)', () => {
     expect(count('sediment-freshwater', 'PEL')).toBe(33);
     expect(count('sediment-marine', 'ISQG')).toBe(34);
     expect(count('sediment-marine', 'PEL')).toBe(33);
-    expect(rows.filter((r) => r.value !== '')).toHaveLength(274);
+    expect(rows.filter((r) => r.value !== '')).toHaveLength(276);
   });
 
   it('uses only the four media and units by medium', () => {
@@ -69,6 +69,22 @@ describe('CCME aquatic life guidelines (raw/ccme/ccme.csv)', () => {
     expect(cd?.value).toBe('');
     expect(cd?.note).toContain('printed as: Equation');
     expect(pick('7440-50-8', 'freshwater', 'long-term')?.value).toBe('');
+  });
+
+  it('ships the two cells that were left valueless, each with its printed text and basis in the note', () => {
+    // Metribuzin prints "1,0": one digit after the comma is not a thousands group, and every other cell
+    // of the table writes its decimals with a point, so the comma is a decimal separator.
+    const met = pick('21087-64-9', 'freshwater', 'long-term');
+    expect(met?.value).toBe('1.0');
+    expect(met?.unit_printed).toBe('µg/L');
+    expect(met?.note).toContain('printed as: 1,0');
+    expect(met?.note).toContain('decimal');
+    // Nitrite prints "60 NO2-N": the figure is stated as nitrogen.
+    const nit = pick('14797-65-0', 'freshwater', 'long-term');
+    expect(nit?.value).toBe('60');
+    expect(nit?.unit_printed).toBe('µg/L');
+    expect(nit?.note).toContain('printed as: 60 NO2-N');
+    expect(nit?.note).toContain('as nitrogen');
   });
 
   it('decodes a CAS number the source prints as a date', () => {

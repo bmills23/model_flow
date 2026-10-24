@@ -209,7 +209,7 @@ cas,name_printed,medium,basis,value,unit_printed,table_or_page,note
 94-74-6,Methylchlorophenoxyacetic acid (MCPA),marine,long-term,4.2,µg/L,"CCME summary table, aquatic life columns",guideline year 1995
 22967-92-6,Methylmercury,freshwater,long-term,0.004,µg/L,"CCME summary table, aquatic life columns",guideline year 2003
 51218-45-2,Metolachlor,freshwater,long-term,7.8,µg/L,"CCME summary table, aquatic life columns",guideline year 1991
-21087-64-9,Metribuzin,freshwater,long-term,,,"CCME summary table, aquatic life columns","guideline year 1990; no single number, printed as: 1,0"
+21087-64-9,Metribuzin,freshwater,long-term,1.0,µg/L,"CCME summary table, aquatic life columns","guideline year 1990; printed as: 1,0, read as 1.0 with the comma as a decimal separator"
 7439-98-7,Molybdenum,freshwater,long-term,73,µg/L,"CCME summary table, aquatic life columns",guideline year 1999
 108-90-7,Monochlorobenzene,freshwater,long-term,1.3,µg/L,"CCME summary table, aquatic life columns",guideline year 1997
 108-90-7,Monochlorobenzene,marine,long-term,25,µg/L,"CCME summary table, aquatic life columns",guideline year 1997
@@ -225,7 +225,7 @@ cas,name_printed,medium,basis,value,unit_printed,table_or_page,note
 14797-55-8,Nitrate,freshwater,short-term,550000,µg/L,"CCME summary table, aquatic life columns",guideline year 2012; also printed as: 550 mg/L
 14797-55-8,Nitrate,marine,long-term,200000,µg/L,"CCME summary table, aquatic life columns",guideline year 2012; also printed as: 200 mg/L
 14797-55-8,Nitrate,marine,short-term,1500000,µg/L,"CCME summary table, aquatic life columns",guideline year 2012; also printed as: 1500 mg/L
-14797-65-0,Nitrite,freshwater,long-term,,,"CCME summary table, aquatic life columns","guideline year 1987; no single number, printed as: 60 NO2-N"
+14797-65-0,Nitrite,freshwater,long-term,60,µg/L,"CCME summary table, aquatic life columns","guideline year 1987; printed as: 60 NO2-N; the value is stated as nitrogen (NO2-N), not as the nitrite ion"
 84852-15-3,Nonylphenol and its ethoxylates,freshwater,long-term,1,µg/L,"CCME summary table, aquatic life columns",guideline year 2002
 84852-15-3,Nonylphenol and its ethoxylates,marine,long-term,0.7,µg/L,"CCME summary table, aquatic life columns",guideline year 2002
 84852-15-3,Nonylphenol and its ethoxylates,sediment-freshwater,ISQG,1400,µg/kg dry weight,"CCME summary table, aquatic life columns",guideline year 2002

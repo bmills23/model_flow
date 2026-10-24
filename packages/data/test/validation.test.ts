@@ -179,7 +179,12 @@ describe('validation documents', () => {
   });
 
   it('keeps the JSON small and parseable', () => {
-    expect(json.length).toBeLessThan(60_000);
+    // The cap guards the size of what the report and validation pages load. Both import the file statically into their
+    // own lazy chunks (apps/web/src/report/ReportPage.tsx, basisView.ts), so it is parsed once with the chunk and is
+    // far below the 500 kB chunk limit of bundleSize.test.ts. The old cap of 60,000 left under 400 characters of room, which
+    // one catalog entry uses up; 70,000 is about 17 percent above the roughly 59,600 characters of wave Z, enough for several
+    // entries, and still small enough that growth beyond it is a decision, not drift.
+    expect(json.length).toBeLessThan(70_000);
     const parsed = JSON.parse(json) as ValidationManifest;
     expect(parsed.examples.length).toBe(manifest.examples.length);
   });

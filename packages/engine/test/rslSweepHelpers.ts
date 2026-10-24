@@ -270,9 +270,16 @@ export function engineCoef(
   medium: string,
   pathway: PathwayName,
   id: string,
-  include: { dermal: boolean; inhalation: boolean; particulateOnly?: boolean },
+  include: { dermal: boolean; inhalation: boolean; particulateOnly?: boolean; iurFactor?: number },
 ): Coef | 'missing' | 'not-computed' {
-  const { chemical } = sweeperOf(id);
+  // `iurFactor` rescales the inhalation unit risk, to test a cell against the rounding of the printed value
+  const chemical =
+    include.iurFactor === undefined
+      ? sweeperOf(id).chemical
+      : modernChemical({
+          ...boundaryOf(id),
+          iur: (boundaryOf(id).iur ?? 0) * include.iurFactor,
+        });
   const soil = medium.startsWith('soil');
   const receptor = medium === 'soil-industrial' ? worker : resident;
   const ing: PathwayId = soil ? 'soilIngestion' : 'waterIngestion';
@@ -357,8 +364,43 @@ export const CLASS_IDS = [
   'soil-total-vf-input-missing',
   'key-g-no-toxicity-value',
   'key-g-fiber-units',
+  'iur-printed-three-figures',
 ] as const;
 export type ClassId = (typeof CLASS_IDS)[number];
+
+/**
+ * Whether the printed cell can come from an inhalation unit risk that rounds to the printed one. The tables print
+ * the unit risk to three significant figures (Aroclor 1242: 5.71E-4), so the value they computed with lies in
+ * [5.705E-4, 5.715E-4); the level is monotone in it, so the cell is reachable when the engine's levels at the two
+ * ends of that interval span a value that rounds to the printed cell. Only a unit risk printed to at most three
+ * figures qualifies, and the engine itself still uses the printed value.
+ */
+export function reachableWithinPrintedIur(
+  id: string,
+  medium: string,
+  pathway: PathwayName,
+  include: { dermal: boolean; inhalation: boolean },
+  endpoint: 'cancer' | 'noncancer',
+  units: string,
+  published: number,
+): boolean {
+  const iur = boundaryOf(id).iur;
+  if (endpoint !== 'cancer' || iur === undefined || iur <= 0) return false;
+  if (Number(iur.toPrecision(3)) !== iur) return false;
+  const half = 0.5 * 10 ** (Math.floor(Math.log10(iur)) - 2);
+  const ends: number[] = [];
+  for (const factor of [(iur - half) / iur, (iur + half) / iur]) {
+    const level = engineLevel(
+      engineCoef(medium, pathway, id, { ...include, iurFactor: factor }),
+      endpoint,
+      units,
+    );
+    if (typeof level !== 'number') return false;
+    ends.push(level);
+  }
+  const unit = 10 ** (Math.floor(Math.log10(published)) - 1);
+  return Math.min(...ends) <= published + 0.5 * unit && Math.max(...ends) >= published - 0.5 * unit;
+}
 
 export interface SweepCounts {
   compared: number;
@@ -517,6 +559,26 @@ export function runRslSweep(): SweepResult {
         }
       } else if (keyG && computed === null) cls = 'key-g-no-toxicity-value';
       else if (keyG) cls = 'key-g-fiber-units';
+      else if (
+        typeof computed === 'number' &&
+        endpoint === 'cancer' &&
+        medium !== 'air-resident' &&
+        (pathway === 'inhalation' || pathway === 'total') &&
+        reachableWithinPrintedIur(
+          ch.id,
+          medium,
+          pathway as PathwayName,
+          {
+            dermal: ch.values[`${medium}.dermal.${endpoint}`] !== undefined,
+            inhalation: ch.values[`${medium}.inhalation.${endpoint}`] !== undefined,
+          },
+          endpoint,
+          col.units,
+          cell.value,
+        )
+      ) {
+        cls = 'iur-printed-three-figures';
+      }
 
       if (cls !== null) {
         counts.excepted += 1;

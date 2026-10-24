@@ -121,6 +121,48 @@ describe('RSL screening-level sweep: unexplained cells', () => {
   });
 });
 
+describe('RSL screening-level sweep: the cells once left unexplained', () => {
+  it('reproduces PCB 105 resident noncancer soil inhalation from the TEF-applied reference concentration', () => {
+    // 2,3,7,8-TCDD RfCi 4E-8 over the guide's TEF of 3E-5 is 1.3333E-3, printed 1.33E-3; the rounded value gave 833.3
+    const pcb105 = levels.chemicals.find((c) => c.id === '32598-14-4')!;
+    const cell = pcb105.values['soil-resident.inhalation.noncancer']!;
+    expect(cell.value).toBe(840);
+    const computed = engineLevel(
+      engineCoef('soil-resident', 'inhalation', pcb105.id, { dermal: true, inhalation: true }),
+      'noncancer',
+      'mg/kg',
+    );
+    expect(computed).toBeGreaterThan(835);
+    expect(withinHalfUnit(computed as number, 840)).toBe(true);
+    expect(result.unexplained.map((u) => u.chemical)).not.toContain(pcb105.id);
+  });
+
+  it('excepts the four Aroclor tap water total cancer cells only through the printed unit risk interval', () => {
+    const cls = result.classes['iur-printed-three-figures'];
+    expect(cls.cells).toEqual({ tapwater: 4 });
+    expect(cls.chemicals).toEqual(['Aroclor 1242', 'Aroclor 1248', 'Aroclor 1254', 'Aroclor 1260']);
+    const ch = levels.chemicals.find((c) => c.name === 'Aroclor 1242')!;
+    const published = ch.values['tapwater.total.cancer']!.value;
+    expect(published).toBe(0.0078);
+    const at = (iurFactor: number): number =>
+      engineLevel(
+        engineCoef('tapwater', 'total', ch.id, { dermal: false, inhalation: true, iurFactor }),
+        'cancer',
+        'ug/L',
+      ) as number;
+    // at the printed unit risk the total misses by 0.0000020; at the top of its rounding interval it prints 0.0078
+    expect(withinHalfUnit(at(1), published)).toBe(false);
+    expect(withinHalfUnit(at(5.715 / 5.71), published)).toBe(true);
+    expect(withinHalfUnit(at(5.7125 / 5.71), published)).toBe(true);
+    expect(withinHalfUnit(at(5.711 / 5.71), published)).toBe(false);
+  });
+
+  it('leaves n-nonane industrial noncancer soil total unexplained and visible', () => {
+    expect(result.unexplained.map((u) => u.name)).toEqual(['Nonane, n-']);
+    expect(result.unexplained[0]).toMatchObject({ published: 72, computed: 72.5 });
+  });
+});
+
 describe('RSL screening-level sweep: the household factor K', () => {
   it('reproduces the tap water inhalation levels as the resident air level over K', () => {
     // the 265 published inhalation cells of the tap water table (93 cancer, 172 noncancer)

@@ -56,10 +56,12 @@
     "guideline year 2019; no single number, printed as: Equation",
     "guideline year 2003",
     "guideline year 2007; Target Organism Management value: 0.53",
+    "guideline year 1990; printed as: 1,0, read as 1.0 with the comma as a decimal separator",
     "guideline year 2012; also printed as: 13 mg/L",
     "guideline year 2012; also printed as: 550 mg/L",
     "guideline year 2012; also printed as: 200 mg/L",
     "guideline year 2012; also printed as: 1500 mg/L",
+    "guideline year 1987; printed as: 60 NO2-N; the value is stated as nitrogen (NO2-N), not as the nitrite ion",
     "guideline year 2006",
     "guideline year 1999; CAS printed as the date 1985-01-08, read as 85-01-8 (check digit valid)",
     "expressed as toxic equivalents (TEQ); the printed unit is ng TEQ/kg dry weight; guideline year 2001",
@@ -68,7 +70,7 @@
     "guideline year 2018; no single number, printed as: Equation"
   ],
   "omitted": {
-    "no number printed (narrative, framework, range or unreadable cell)": 29
+    "no number printed (narrative, framework, range or unreadable cell)": 27
   },
   "rows": [
     {
@@ -4063,6 +4065,26 @@
       "year": 1991
     },
     {
+      "id": "ccme:21087-64-9:surfaceWater:fresh:long-term",
+      "set": "ccme",
+      "chemicalId": "21087-64-9",
+      "idBy": "cas",
+      "name": "Metribuzin",
+      "cas": "21087-64-9",
+      "medium": "surfaceWater",
+      "waterType": "fresh",
+      "basis": "long-term",
+      "basisLabel": "long-term exposure guideline",
+      "endpoint": "ccme-fresh-long-term",
+      "value": 1,
+      "unit": "ug/L",
+      "printedValue": "1.0",
+      "printedUnit": "µg/L",
+      "table": "CCME summary table, aquatic life columns",
+      "note": 36,
+      "year": 1990
+    },
+    {
       "id": "ccme:7439-98-7:surfaceWater:fresh:long-term",
       "set": "ccme",
       "chemicalId": "7439-98-7",
@@ -4298,7 +4320,7 @@
       "printedValue": "13000",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 36,
+      "note": 37,
       "year": 2012
     },
     {
@@ -4318,7 +4340,7 @@
       "printedValue": "550000",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 37,
+      "note": 38,
       "year": 2012
     },
     {
@@ -4338,7 +4360,7 @@
       "printedValue": "200000",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 38,
+      "note": 39,
       "year": 2012
     },
     {
@@ -4358,8 +4380,28 @@
       "printedValue": "1500000",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 39,
+      "note": 40,
       "year": 2012
+    },
+    {
+      "id": "ccme:14797-65-0:surfaceWater:fresh:long-term",
+      "set": "ccme",
+      "chemicalId": "14797-65-0",
+      "idBy": "cas",
+      "name": "Nitrite",
+      "cas": "14797-65-0",
+      "medium": "surfaceWater",
+      "waterType": "fresh",
+      "basis": "long-term",
+      "basisLabel": "long-term exposure guideline",
+      "endpoint": "ccme-fresh-long-term",
+      "value": 60,
+      "unit": "ug/L",
+      "printedValue": "60",
+      "printedUnit": "µg/L",
+      "table": "CCME summary table, aquatic life columns",
+      "note": 41,
+      "year": 1987
     },
     {
       "id": "ccme:84852-15-3:surfaceWater:fresh:long-term",
@@ -4498,7 +4540,7 @@
       "printedValue": "0.004",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 40,
+      "note": 42,
       "year": 2006
     },
     {
@@ -4518,7 +4560,7 @@
       "printedValue": "0.001",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 40,
+      "note": 42,
       "year": 2006
     },
     {
@@ -4538,7 +4580,7 @@
       "printedValue": "0.4",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 41,
+      "note": 43,
       "year": 1999
     },
     {
@@ -4558,7 +4600,7 @@
       "printedValue": "41.9",
       "printedUnit": "µg/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 41,
+      "note": 43,
       "year": 1999
     },
     {
@@ -4578,7 +4620,7 @@
       "printedValue": "515",
       "printedUnit": "µg/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 41,
+      "note": 43,
       "year": 1999
     },
     {
@@ -4598,7 +4640,7 @@
       "printedValue": "86.7",
       "printedUnit": "µg/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 41,
+      "note": 43,
       "year": 1999
     },
     {
@@ -4618,7 +4660,7 @@
       "printedValue": "544",
       "printedUnit": "µg/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 41,
+      "note": 43,
       "year": 1999
     },
     {
@@ -4818,7 +4860,7 @@
       "printedValue": "0.85",
       "printedUnit": "ng TEQ/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 42,
+      "note": 44,
       "year": 2001
     },
     {
@@ -4838,7 +4880,7 @@
       "printedValue": "21.5",
       "printedUnit": "ng TEQ/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 42,
+      "note": 44,
       "year": 2001
     },
     {
@@ -4858,7 +4900,7 @@
       "printedValue": "0.85",
       "printedUnit": "ng TEQ/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 42,
+      "note": 44,
       "year": 2001
     },
     {
@@ -4878,7 +4920,7 @@
       "printedValue": "21.5",
       "printedUnit": "ng TEQ/kg dry weight",
       "table": "CCME summary table, aquatic life columns",
-      "note": 42,
+      "note": 44,
       "year": 2001
     },
     {
@@ -5058,7 +5100,7 @@
       "printedValue": "0.25",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 43,
+      "note": 45,
       "year": 2015
     },
     {
@@ -5078,7 +5120,7 @@
       "printedValue": "7.5",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 43,
+      "note": 45,
       "year": 2015
     },
     {
@@ -5638,7 +5680,7 @@
       "printedValue": "15",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 44,
+      "note": 46,
       "year": 2011
     },
     {
@@ -5658,7 +5700,7 @@
       "printedValue": "33",
       "printedUnit": "µg/L",
       "table": "CCME summary table, aquatic life columns",
-      "note": 44,
+      "note": 46,
       "year": 2011
     },
     {
@@ -5677,7 +5719,7 @@
       "printedUnit": "",
       "siteSpecific": true,
       "table": "CCME summary table, aquatic life columns",
-      "note": 45,
+      "note": 47,
       "year": 2018
     },
     {
@@ -5696,7 +5738,7 @@
       "printedUnit": "",
       "siteSpecific": true,
       "table": "CCME summary table, aquatic life columns",
-      "note": 45,
+      "note": 47,
       "year": 2018
     },
     {

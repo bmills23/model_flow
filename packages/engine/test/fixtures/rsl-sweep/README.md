@@ -61,7 +61,7 @@ exposure interval of 26 years, a dry bulk density of 1.5 and particle density of
 not the rounded 0.43), water-filled porosity 0.15, organic carbon 0.006, Kd = Koc f_oc, pi printed as 3.14 (the
 factor is rescaled by sqrt(3.14 / pi)), and the wind factor with Q/C 93.77 (PEF 1.36E9 m^3/kg). Chemicals the tables
 call volatile take both terms, the others the particulate term. A hand calculation of benzene (all four levels) is
-in the test. Of 435 inhalation cells and 435 totals that include one per table, the resident table reproduces 421 and
+in the test. Of 435 inhalation cells and 435 totals that include one per table, the resident table reproduces 422 and
 422 and the industrial table 422 and 421.
 
 Class `soil-inhalation-vf-input-missing` and `soil-total-vf-input-missing`: twelve volatile chemicals have neither a
@@ -71,20 +71,33 @@ per table). The guide text read does not say what the tables do without a Kd, so
 reproduced. The vinyl chloride equation image prints the volatilization factor term only; the sweep adds the
 particulate term (under one part in 100000 of the sum, checked by the test).
 
+## Excepted by a printed input's rounding
+
+Class `iur-printed-three-figures`: four tap water total cancer cells. Aroclor 1242, 1248, 1254 and 1260 print 0.0078
+ug/L and the engine computes 0.007852 (rounds to 0.0079). The tables print the inhalation unit risk of these rows as
+5.71E-4, three significant figures, so the value they computed with lies in 5.705E-4 to 5.715E-4. The level is
+monotone in it, and at 5.7118E-4 or more the total is 0.00785 or less and prints 0.0078; the ingestion, inhalation
+and air cells of the rows reproduce at either end. The sweep excepts a non-reproducing cancer cell only when the
+engine's levels at the two ends of the printed interval span a value that rounds to the printed cell
+(`reachableWithinPrintedIur`). The unrounded unit risk is not printed, so these are excepted, not counted as
+reproduced, and the engine keeps the printed 5.71E-4. A missing dermal term does not explain the gap (it would move
+the total to 0.0020).
+
+## Reproduced after a data fix (wave Z)
+
+The resident noncancer inhalation level of PCB 105 prints 840 mg/kg; the engine computed 833.3 from the printed
+reference concentration 1.33E-3. The RSL key `W` means a TEF was applied to the toxicity value, and the guide's table
+prints the TEF (3E-5 for PCB 105): 2,3,7,8-TCDD RfCi 4E-8 over 3E-5 is 1.3333E-3, which the tables print to three
+figures. The data build (`packages/data/src/rsl/tef.ts`) now keeps the quotient for the reference dose and
+concentration of the 12 numbered PCBs keyed `W` (after checking it rounds to the printed value), and the cell
+computes 835.4 and reproduces. No other cell changed class.
+
 ## Unexplained
 
-Four tap water total cancer cells: Aroclor 1242, 1248, 1254 and 1260 print 0.0078 ug/L, the engine computes
-0.007852 (rounds to 0.0079, 0.7 percent above the printed value). The ingestion and inhalation cells of these rows
-reproduce on their own (the printed dermal cell is blank, the chemicals are outside the RAGS E prediction domain),
-and the total is their harmonic sum. Adding a dermal term from the database permeability values would move the
-total to 0.0020, so a missing dermal term does not explain the gap. No reason was found; it is not widened. No
-engine numerics were changed.
-
-Two soil cells: the resident noncancer inhalation level of PCB 105 prints 840 mg/kg and computes 833.3 mg/kg (0.8
-percent below; the volatilization factor term governs, the other PCB cells reproduce, and an input difference of
-about 1.6 percent in the apparent diffusivity would close it, none was found); the industrial noncancer total of
-n-nonane prints 72 mg/kg and computes 72.5012 mg/kg, 0.002 percent above the half-unit limit of 72.5. Neither is
-widened.
+One soil cell: the industrial noncancer total of n-nonane prints 72 mg/kg and computes 72.5012 mg/kg, 0.002 percent
+above the half-unit limit of 72.5. The printed volatilization factor (1040, three figures) agrees with the engine's
+1043.6, and the inhalation cell (91) and ingestion cell (350) reproduce; a rise of about 0.0035 percent in the
+volatilization factor would close the total, and no printed input or rule found accounts for it. It is not widened.
 
 ## Not in the sweep
 
