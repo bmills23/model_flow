@@ -186,7 +186,7 @@ const FED_ROUTES = [
     noPress: true,
     viaSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
       const btn=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim())||re.test(x.getAttribute('aria-label')||''));
-      // the autosave carries over between views: add each chemical only when the project list lacks it
+      // add each chemical only when the project list lacks it
       const listed=(re)=>[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>re.test(l.textContent));
       if(!listed(/benzene/i)){await u.pick('71-43-2',/^add to project: benzene/i);await u.sleep(600)}
       if(!listed(/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/)){
@@ -373,9 +373,13 @@ const send = (method, params = {}) =>
   });
 const evaluate = async (expression) =>
   (await send('Runtime.evaluate', { expression, returnByValue: true })).result?.value;
-const evaluateAsync = async (expression) =>
-  (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result
-    ?.value;
+// a setup script that throws comes back as its error message, so the visit reports it instead of an object
+const evaluateAsync = async (expression) => {
+  const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+  if (r.exceptionDetails)
+    return `setup threw: ${r.exceptionDetails.exception?.description ?? r.exceptionDetails.text}`;
+  return r.result?.value;
+};
 
 const PRESS = `(async()=>{
   // the seed names the TPH fractions; the buttons that would reset them or append a blank row are left alone
@@ -473,7 +477,9 @@ for (const view of VIEWS) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
-      `try{localStorage.setItem('model_flow.project.autosave.v1',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
+      // every visit starts from the seed: it goes under the key the app reads first (the legacy key is read
+      // only when that one is missing, so a seed there would leave the previous visit's project in place)
+      `try{localStorage.removeItem('model_flow.project.autosave.v1');localStorage.setItem('model_flow.project.autosave.v2',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
     );
     await sleep(1800);
     if (viaSetup) {
@@ -514,7 +520,10 @@ for (const view of VIEWS) {
       // the long committed documents are measured in full but only their first screen is captured
       captureBeyondViewport: !/^#\/docs\/(?!user-guide)/.test(route),
     });
-    writeFileSync(join(outDir, `${view.name}-${slug}.png`), Buffer.from(shot.data, 'base64'));
+    // a refused capture (an error in place of the image) fails the view rather than the whole run
+    const shotFailed = typeof shot?.data !== 'string';
+    if (shotFailed) console.log(`    screenshot failed: ${JSON.stringify(shot).slice(0, 300)}`);
+    else writeFileSync(join(outDir, `${view.name}-${slug}.png`), Buffer.from(shot.data, 'base64'));
     let axeBad = false;
     let axeNote = '';
     if (AXE) {
@@ -532,6 +541,7 @@ for (const view of VIEWS) {
     }
     const shell = shellProblems(m);
     const bad =
+      shotFailed ||
       shell.length > 0 ||
       m.n > 0 ||
       m.sw > m.cw ||
