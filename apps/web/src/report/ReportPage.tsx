@@ -25,6 +25,8 @@ import type { ScreenKey } from './methodsRun';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
+import type { ChemicalBlock } from './chemicalBlocks';
+import type { CsvTable } from '../export/DownloadCsv';
 import { HelpLink } from '../docs/HelpLink';
 
 const MODEL_KIND_LABEL = { legacy: 'Legacy', modern: 'Modern' } as const;
@@ -34,9 +36,122 @@ function dateText(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : d.toISOString().slice(0, 10);
 }
 
+function MethodBasisNote({ basis }: { basis: NonNullable<SectionResults['methodBasis']> }) {
+  return (
+    <div className="report-method-basis">
+      <p>
+        <strong>Method basis.</strong> {basis.statement}
+      </p>
+      {basis.disagreements.length > 0 && (
+        <div role="note" className="report-method-disagree">
+          <p>
+            <span className="badge badge-legacy">Methods disagree</span> The legacy and modern
+            methods disagree on whether a criterion or target is exceeded. The conclusion follows
+            the {basis.basis}; the other result is a sensitivity.
+          </p>
+          <ul className="report-notes">
+            {basis.disagreements.map((d) => (
+              <li key={d}>{d}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ResultTable({ table, level = 4 }: { table: CsvTable; level?: 4 | 5 }) {
+  const text = tableText(table);
+  const Heading = level === 4 ? 'h4' : 'h5';
+  return (
+    <div className="result-block">
+      <Heading>{text.label}</Heading>
+      <table className="result-table" aria-label={text.label}>
+        <thead>
+          <tr>
+            {text.headers.map((h, i) => (
+              <th key={`${i}:${h}`} scope="col">
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {text.rows.map((row, r) => (
+            <tr key={r}>
+              {row.map((cell, c) => (
+                <td key={c} data-label={text.headers[c]}>
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ChemicalBlocks({ blocks }: { blocks: readonly ChemicalBlock[] }) {
+  return (
+    <div className="report-chemicals">
+      <h4>Results sent on, one block per chemical</h4>
+      <p className="muted">
+        A screen runs one chemical at a time. Each block below is the result sent from this screen
+        for one chemical, as the later screens used it, with the inputs it ran with.
+      </p>
+      {blocks.map((b) => (
+        <section key={b.chemicalId} className="report-chemical" aria-label={b.name}>
+          <h4 className="report-chemical-name">{b.name}</h4>
+          <ul className="report-notes">
+            {b.sent.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+            {b.notes.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          {b.inputs.length > 0 && (
+            <table className="report-table" aria-label={`Inputs of the sent run, ${b.name}`}>
+              <thead>
+                <tr>
+                  <th scope="col">Input of the sent run</th>
+                  <th scope="col">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {b.inputs.map((row) => (
+                  <tr key={row.label}>
+                    <th scope="row">{row.label}</th>
+                    <td>{row.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {b.tables.map((t) => (
+            <ResultTable key={t.name} table={t} level={5} />
+          ))}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function ResultTables({ results }: { results: SectionResults }) {
   return (
     <>
+      {results.methodBasis !== undefined && <MethodBasisNote basis={results.methodBasis} />}
+      {results.chemicals !== undefined && <ChemicalBlocks blocks={results.chemicals} />}
+      {results.current !== undefined && (
+        <p className="report-current-run">
+          <strong>Run on the screen now: {results.current.chemical}.</strong>{' '}
+          {results.current.sentTo === null
+            ? 'This run was not sent to another screen, so the exposure, risk and cleanup results do not use it.'
+            : `Its result was sent to ${results.current.sentTo}.`}{' '}
+          What follows in this section is this run.
+        </p>
+      )}
       {results.notes.length > 0 && (
         <ul className="report-notes">
           {results.notes.map((n) => (
@@ -44,42 +159,9 @@ function ResultTables({ results }: { results: SectionResults }) {
           ))}
         </ul>
       )}
-      {results.tables.map((t) => {
-        const text = tableText(t);
-        return (
-          <div key={text.name} className="result-block">
-            <h4>{text.label}</h4>
-            <table className="result-table" aria-label={text.label}>
-              <thead>
-                <tr>
-                  {text.headers.map((h, i) => (
-                    <th key={`${i}:${h}`} scope="col">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {text.rows.map((row, r) => (
-                  <tr key={r}>
-                    {row.map((cell, c) => (
-                      <td key={c} data-label={text.headers[c]}>
-                        {cell}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {text.total > text.rows.length && (
-              <p className="muted">
-                Showing the first {text.rows.length} of {text.total} rows. The CSV download on the
-                screen holds all of them.
-              </p>
-            )}
-          </div>
-        );
-      })}
+      {results.tables.map((t) => (
+        <ResultTable key={t.name} table={t} />
+      ))}
     </>
   );
 }
@@ -505,10 +587,10 @@ export function ReportView({
       )}
       <p className="muted report-scope">
         Inputs are shown as typed, in the units each screen labels. Results are the screen's own
-        tables, computed again from these inputs, with numbers shortened to six significant digits;
-        the CSV download on each screen holds every row at full precision. Each chart is followed by
-        its data table. Uncertainty results are included only when asked for, and are repeated from
-        the saved setup and seed.
+        tables, computed again from these inputs and printed in full, with numbers shortened to six
+        significant digits; the CSV download on each screen holds them at full precision. Each chart
+        is followed by its data table. Uncertainty results are included only when asked for, and are
+        repeated from the saved setup and seed.
       </p>
 
       <section className="report-section" aria-labelledby="rep-methods">

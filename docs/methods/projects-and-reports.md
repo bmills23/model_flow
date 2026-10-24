@@ -244,8 +244,8 @@ so it is the one feed that still starts empty after a reload.
   `plantsEcoCsvTables`), so the report tables and the CSV downloads cannot drift apart. Values passed
   between screens come from the project's stored feeds, decoded as loading a project decodes them; a feed
   the file lacks leaves that screen unfed, as it is after a reload. Tables print with the CSV headers
-  (units included), numbers shortened to six significant digits and at most 40 rows each, with a line
-  giving the full row count (the CSV download holds every row at full precision). Warnings are the engine
+  (units included) and numbers shortened to six significant digits, every row of each (since wave AA a
+  result table is never cut short; the CSV download holds the same rows at full precision). Warnings are the engine
   `{code, message}` pairs with the method or table that raised them, de-duplicated. A screen that cannot
   be computed prints "Not computed" with the form's own error text instead of a table. Charts and
   uncertainty results landed in Wave G slice G2 (a later bullet). Not in the report: (1) the modeled
@@ -259,6 +259,17 @@ so it is the one feed that still starts empty after a reload.
   surface water and plants screens used, through CDP device emulation at 390x844 (mobile, scale 2) in
   light and dark and at 1280x900 light: 8 result tables rendered, overflowing elements 0 in all three,
   scroll width equal to client width.
+- **Wave AA (a report fit to submit; `chemicalBlocks.ts`, `siteValues.ts`, `methodBasis.ts`, `risk/quantified.ts`).**
+  A fate screen's section prints one block per chemical for which a result was sent (the per-chemical feed
+  slots), each named by the chemical's name with the inputs it ran with, and then labels the run the screen
+  shows now, as sent or not sent. A value that could not be quantified (no toxicity value, a missing input, a
+  method that does not cover it) prints "not quantified" with the reason, never 0; a CSV leaves the cell empty
+  and gives the reason in a note column. Every site value in use is listed as an entry without a source, typed
+  or pre-filled (a soil property still equal to its texture class's value is cited and is not listed), and the
+  "no value lacks a source" sentences print only when no such row exists. Each section that shows legacy and
+  modern results states which method its conclusions rest on (the screen's method shown; the modern method for
+  a screen with no choice), prints the other as a sensitivity and flags a criterion or benchmark the two
+  disagree on.
 - **Implemented (Wave G slice G2, charts and uncertainty results).** Each section carries the screen's
   main charts, drawn by the screen's own chart components from the same compute result as the tables
   (`ChartItem` in `report/chartItems.ts`, built in `results.ts`): the receptor breakthrough chart

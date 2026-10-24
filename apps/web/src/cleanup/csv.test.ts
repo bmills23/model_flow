@@ -44,6 +44,96 @@ function form(over: Partial<CleanupForm> = {}): CleanupForm {
   };
 }
 
+/** A hand-built run: one chemical with no toxicity value, one with no cancer value, one fully quantified. */
+const lv = (chemical: string, over: Record<string, unknown>) => ({
+  chemical,
+  level: 1e-3,
+  cancerLevel: 2e-3,
+  noncancerLevel: 1e-3,
+  limiting: 'noncancer',
+  noncancerGroup: 'total',
+  limitingReceptor: 'Resident',
+  byReceptor: [
+    {
+      label: 'Resident',
+      byPathway: [
+        { pathway: 'waterIngestion', cancerLevel: 2e-3, noncancerLevel: null },
+        { pathway: 'waterDermal', cancerLevel: null, noncancerLevel: null },
+      ],
+    },
+  ],
+  ...over,
+});
+const gappy = (allocation: string) =>
+  ({
+    modern: {
+      ok: true,
+      result: {
+        media: [
+          {
+            medium: 'groundwater',
+            allocation,
+            levels: [
+              lv('none', { level: null, cancerLevel: null, noncancerLevel: null, limiting: null }),
+              lv('tol', { cancerLevel: null }),
+              lv('benz', {}),
+            ],
+          },
+        ],
+      },
+    },
+    legacy: { ok: false, error: 'x' },
+  }) as unknown as ReturnType<typeof runCleanup>;
+
+describe('direct cleanup level CSV, values that are not quantified', () => {
+  const names = { none: 'No data', tol: 'Toluene', benz: 'Benzene' };
+
+  it('leaves a missing level empty and says why in the note, never 0', () => {
+    const rows = cleanupLevelRows(gappy('individual'), names);
+    const none = rows.find((r) => r.chemical === 'No data')!;
+    expect(none.level).toBeNull();
+    expect(none.note).toBe(
+      'no level: no toxicity value for any switched-on pathway of this medium',
+    );
+    const tol = rows.find((r) => r.chemical === 'Toluene')!;
+    expect(tol.cancerLevel).toBeNull();
+    expect(tol.level).not.toBeNull();
+    expect(tol.note).toBe(
+      'cancer level: no cancer endpoint; the level rests on the noncancer endpoint alone',
+    );
+    expect(rows.find((r) => r.chemical === 'Benzene')!.note).toBe('');
+  });
+
+  it('adds the zero-concentration reason under cumulative allocation', () => {
+    const none = cleanupLevelRows(gappy('cumulative'), names).find(
+      (r) => r.chemical === 'No data',
+    )!;
+    expect(String(none.note)).toContain('no concentration entered (blank or zero) in this medium');
+  });
+
+  it('gives the pathway rows a reason for each empty level', () => {
+    const rows = cleanupPathwayRows(gappy('individual'), names).filter(
+      (r) => r.chemical === 'Benzene',
+    );
+    const ingestion = rows.find((r) => r.pathway === 'Drinking water')!;
+    expect(ingestion.noncancerLevel).toBeNull();
+    expect(ingestion.note).toBe('noncancer level: no noncancer toxicity value for this route');
+    const dermal = rows.find((r) => r.pathway === 'Bathing dermal contact')!;
+    expect(dermal.note).toBe(
+      'cancer level: no cancer toxicity value for this route; noncancer level: no noncancer toxicity value for this route',
+    );
+  });
+
+  it('declares the empty-value columns and the reason column of both tables', () => {
+    const [levels, pathways] = cleanupCsvTables(gappy('individual'), names);
+    expect(levels!.missing).toEqual({
+      keys: ['level', 'cancerLevel', 'noncancerLevel'],
+      because: 'note',
+    });
+    expect(pathways!.missing).toEqual({ keys: ['cancerLevel', 'noncancerLevel'], because: 'note' });
+  });
+});
+
 describe('direct cleanup level CSV', () => {
   it('writes one row per method, medium and chemical in the screen unit, full precision', () => {
     const built = buildCleanup(form(), db);

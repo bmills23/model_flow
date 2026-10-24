@@ -1,4 +1,4 @@
-import { overridesOf, chemicalsOf, screensOf, type Project } from '../project';
+import { defaultScreens, overridesOf, chemicalsOf, screensOf, type Project } from '../project';
 import { receptorKey } from '../overrides/receptors';
 import { editableRows, shownValue } from '../risk/receptorRows';
 import { overrideRows } from '../overrides/toxicity';
@@ -13,6 +13,7 @@ import { chemicalFields, type VaporChemicalRow } from '../vapor/chemicals';
 import type { Report, ReportSection } from './buildReport';
 import type { ScreenKey } from './methodsRun';
 import type { ProjectResults } from './results';
+import { siteEntries } from './siteValues';
 
 /**
  * What a run rests on. Pure: the report model, the section results, the project and the databases go
@@ -23,7 +24,9 @@ import type { ProjectResults } from './results';
  *   the run used. A `warning`-scoped default is listed when its warning code is among the section's
  *   warnings, a `method`-scoped one when any of its method ids ran in the section.
  * - `entered-unsourced`: a fate property typed on a screen whose chemical was entered by hand (blank
- *   chemical id), or that names no database record. Nothing says where the number came from.
+ *   chemical id), or that names no database record; and every site value in use (see `siteValues.ts`),
+ *   typed by the user or pre-filled with the program's example value. Nothing says where the number
+ *   came from.
  * - `typed-over-database`: a fate property that differs numerically from the database row the screen's
  *   chemical id names.
  * - `user-override`, `user-chemical`, `receptor-edit`: project-level edits, each with its source note
@@ -269,6 +272,21 @@ function fateRowsFor(
   return out;
 }
 
+/** What a site value row says about where the number came from. */
+export const SITE_TYPED = 'typed by the user; no source is cited';
+export const SITE_PREFILLED = 'pre-filled example value, not changed; no source is cited';
+
+/** Every site value of the screen in use, as an entry without a source. */
+function siteRowsFor(
+  key: ScreenKey,
+  form: Record<string, unknown>,
+  defaults: Record<string, unknown>,
+): BasisRow[] {
+  return siteEntries(key, form, defaults).map((e) =>
+    row('entered-unsourced', e.subject, e.value, { detail: e.typed ? SITE_TYPED : SITE_PREFILLED }),
+  );
+}
+
 function defaultRows(
   sec: ReportSection,
   warningCodes: ReadonlySet<string>,
@@ -370,13 +388,16 @@ export function runBasis(input: BasisInput): ProjectBasis {
   const byId = new Map(input.fateRows.map((r) => [r.id, r]));
   const propsById = new Map([...userCleanupProps(chemicalsOf(project)), ...input.cleanupProps]);
   const own = new Map<ScreenKey, BasisRow[]>();
+  const fresh = defaultScreens();
   for (const sec of report.sections) {
     const codes = new Set((results[sec.key]?.warnings ?? []).map((w) => w.code));
     // The uncertainty setup screen has no `form`; it types no fate property.
     const form = (screens[sec.key] as unknown as { form?: Record<string, unknown> }).form ?? {};
+    const freshForm = (fresh[sec.key] as unknown as { form?: Record<string, unknown> }).form ?? {};
     own.set(sec.key, [
       ...defaultRows(sec, codes, defaults),
       ...fateRowsFor(sec.key, form, byId, propsById),
+      ...siteRowsFor(sec.key, form, freshForm),
     ]);
   }
   const sectionKeys = new Set(report.sections.map((s) => s.key));

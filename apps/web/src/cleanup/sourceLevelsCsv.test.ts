@@ -123,6 +123,11 @@ describe('source level CSV tables', () => {
     expect(none.cancerLevel).toBeNull();
     expect(none.reason).toBe('TPH mixture in the soil');
     expect(none.level).not.toBe(0);
+    // the report prints the empty level as "not quantified", with the reason column beside it
+    expect(tables[0]!.missing).toEqual({
+      keys: ['level', 'cancerLevel', 'noncancerLevel'],
+      because: 'reason',
+    });
     // each row says where its level came from: the linear coefficient, the solve, or neither
     expect(quant.basis).toBe('linear coefficient');
     expect(none.basis).toBeNull();

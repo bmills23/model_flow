@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { TablesAlwaysOpen } from '../vadose/tablesOpen';
 import type { BarRow } from './chartData';
+import { NOT_QUANTIFIED_TEXT } from './quantified';
 
 /**
  * Horizontal stacked bars, one row per receptor and method. Every row is drawn to the same scale (the
@@ -29,7 +30,9 @@ export function StackedBars(props: {
     }
   }
   const entries = [...legend.values()].flat().sort((a, b) => a.slot - b.slot);
-  const allLabels = [...new Set(rows.flatMap((r) => r.segments.map((s) => s.label)))];
+  const allLabels = [
+    ...new Set(rows.flatMap((r) => [...r.segments.map((s) => s.label), ...Object.keys(r.gaps)])),
+  ];
   return (
     <figure className="chart stacked">
       <figcaption>{props.title}</figcaption>
@@ -52,10 +55,14 @@ export function StackedBars(props: {
                   ))}
                 </div>
               ) : (
-                <span className="stack-none">none</span>
+                <span className="stack-none">
+                  {r.totalGap === null ? 'none' : NOT_QUANTIFIED_TEXT}
+                </span>
               )}
             </div>
-            <div className="stack-total">{fmt(r.total)}</div>
+            <div className="stack-total">
+              {r.totalGap === null ? fmt(r.total) : NOT_QUANTIFIED_TEXT}
+            </div>
           </div>
         ))}
       </div>
@@ -92,14 +99,18 @@ export function StackedBars(props: {
                   <th scope="row">{l}</th>
                   {rows.map((r) => {
                     const s = r.segments.find((x) => x.label === l);
-                    return <td key={r.label}>{s ? fmt(s.value) : '0'}</td>;
+                    return (
+                      <td key={r.label}>
+                        {s ? fmt(s.value) : r.gaps[l] !== undefined ? NOT_QUANTIFIED_TEXT : '0'}
+                      </td>
+                    );
                   })}
                 </tr>
               ))}
               <tr>
                 <th scope="row">Total</th>
                 {rows.map((r) => (
-                  <td key={r.label}>{fmt(r.total)}</td>
+                  <td key={r.label}>{r.totalGap === null ? fmt(r.total) : NOT_QUANTIFIED_TEXT}</td>
                 ))}
               </tr>
             </tbody>

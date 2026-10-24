@@ -1,5 +1,6 @@
 import type { EpcRecord, ReceptorRiskSummary, Warning } from '@model-flow/engine';
 import { PATHWAY_LABELS, barRows, fmtHi, fmtRisk, type BarRow } from './chartData';
+import { NOT_QUANTIFIED_TEXT, quantificationsOf } from './quantified';
 import { TRANSPORT_YEAR_S } from './build';
 import type { RiskOutcome } from './compute';
 import { StackedBars } from './StackedBars';
@@ -32,6 +33,8 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
   const count = Math.max(s.legacy?.length ?? 0, s.modern?.length ?? 0);
   const modernAdd = outcome.modern.ok ? outcome.modern.result.summary.additiveCancerRisk : null;
   const legacyAdd = outcome.legacy.ok ? outcome.legacy.result.summary.additiveCancerRisk : null;
+  const ql = quantificationsOf(outcome, 'legacy');
+  const qm = quantificationsOf(outcome, 'modern');
   return (
     <section className="panel" aria-label="Legacy versus modern">
       <h2>Legacy versus modern</h2>
@@ -59,15 +62,33 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
               <tbody>
                 <tr>
                   <th scope="row">Cancer risk</th>
-                  <td>{l ? fmtRisk(l.cancerRisk) : 'did not run'}</td>
-                  <td>{m ? fmtRisk(m.cancerRisk) : 'did not run'}</td>
-                  <td>{l && m ? ratio(m.cancerRisk, l.cancerRisk) : '-'}</td>
+                  <td>
+                    {l
+                      ? ql[i]?.total.risk
+                        ? NOT_QUANTIFIED_TEXT
+                        : fmtRisk(l.cancerRisk)
+                      : 'did not run'}
+                  </td>
+                  <td>
+                    {m
+                      ? qm[i]?.total.risk
+                        ? NOT_QUANTIFIED_TEXT
+                        : fmtRisk(m.cancerRisk)
+                      : 'did not run'}
+                  </td>
+                  <td>
+                    {l && m && !ql[i]?.total.risk && !qm[i]?.total.risk
+                      ? ratio(m.cancerRisk, l.cancerRisk)
+                      : '-'}
+                  </td>
                 </tr>
                 <tr>
                   <th scope="row">Hazard index</th>
                   <td>{l ? hiText(l, 'legacy') : 'did not run'}</td>
                   <td>{m ? hiText(m, 'modern') : 'did not run'}</td>
-                  <td>{l && m ? ratio(m.hi, l.hi) : '-'}</td>
+                  <td>
+                    {l && m && !ql[i]?.total.hi && !qm[i]?.total.hi ? ratio(m.hi, l.hi) : '-'}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -86,8 +107,22 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
       {props.additive && (
         <p>
           Two receptors added (cancer risk only, hazard indices never added): legacy{' '}
-          <strong>{legacyAdd === null ? 'did not run' : fmtRisk(legacyAdd)}</strong>, modern{' '}
-          <strong>{modernAdd === null ? 'did not run' : fmtRisk(modernAdd)}</strong>.
+          <strong>
+            {legacyAdd === null
+              ? 'did not run'
+              : ql.length > 0 && ql.every((q) => q.total.risk)
+                ? NOT_QUANTIFIED_TEXT
+                : fmtRisk(legacyAdd)}
+          </strong>
+          , modern{' '}
+          <strong>
+            {modernAdd === null
+              ? 'did not run'
+              : qm.length > 0 && qm.every((q) => q.total.risk)
+                ? NOT_QUANTIFIED_TEXT
+                : fmtRisk(modernAdd)}
+          </strong>
+          .
         </p>
       )}
     </section>
@@ -97,12 +132,14 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
 /** The four stacked-bar charts: cancer risk and hazard index, by pathway and by chemical. */
 export function Charts(props: { outcome: RiskOutcome; names: Record<string, string> }) {
   const s = summaries(props.outcome);
-  const rows = (['legacy', 'modern'] as const).flatMap((method) =>
-    (s[method] ?? []).map((summary) => ({
+  const rows = (['legacy', 'modern'] as const).flatMap((method) => {
+    const quant = quantificationsOf(props.outcome, method);
+    return (s[method] ?? []).map((summary, i) => ({
       label: `${summary.label}, ${method}`,
       summary,
-    })),
-  );
+      ...(quant[i] ? { quant: quant[i] } : {}),
+    }));
+  });
   if (rows.length === 0) return null;
   const make = (measure: 'risk' | 'hi', by: 'pathway' | 'chemical'): BarRow[] =>
     barRows(measure, by, rows, props.names);

@@ -8,7 +8,14 @@ import type { StaleSlot } from '../project/store';
 import type { CleanupProps } from '../cleanup/ssg';
 import type { VaporChemicalRow } from '../vapor/chemicals';
 import { buildReport } from './buildReport';
-import { runBasis, BASIS_SCOPES, type BasisDefault, type BasisRow } from './basis';
+import {
+  runBasis,
+  BASIS_SCOPES,
+  SITE_PREFILLED,
+  SITE_TYPED,
+  type BasisDefault,
+  type BasisRow,
+} from './basis';
 import type { ProjectResults, ResultWarning, SectionResults } from './results';
 
 const NOW = new Date('2026-10-22T12:00:00.000Z');
@@ -76,6 +83,10 @@ function run(o: Setup = {}) {
 }
 
 const kinds = (rows: BasisRow[]) => rows.map((r) => r.kind);
+
+/** The rows about a chemical's fate properties: the site value rows are tested in `siteValues.test.ts`. */
+const fate = (rows: BasisRow[]) =>
+  rows.filter((r) => r.detail !== SITE_TYPED && r.detail !== SITE_PREFILLED);
 
 const BENZENE_FORM = {
   M: '78.11',
@@ -146,7 +157,7 @@ describe('runBasis, typed over database', () => {
       edit: vadose({ chemicalId: '71-43-2', ...BENZENE_FORM, foc: '0.01' }),
     });
     expect(kinds(b.sections.vadose!)).not.toContain('typed-over-database');
-    expect(kinds(b.sections.vadose!)).not.toContain('entered-unsourced');
+    expect(kinds(fate(b.sections.vadose!))).not.toContain('entered-unsourced');
   });
 
   it('compares numerically, so 146.0 equals 146', () => {
@@ -177,7 +188,7 @@ describe('runBasis, typed over database', () => {
     const b = run({
       edit: vadose({ chemicalId: '', foc: '0.0123', M: '', S: '', H: '', Koc: '', Da: '', Dw: '' }),
     });
-    expect(kinds(b.sections.vadose!)).not.toContain('entered-unsourced');
+    expect(kinds(fate(b.sections.vadose!))).not.toContain('entered-unsourced');
   });
 
   it('compares the transport Kd with Koc times foc', () => {
@@ -367,7 +378,7 @@ describe('runBasis, plants and eco compares against the cleanup properties', () 
     } as Screens['plantsEco'];
   };
   const ACRYL: CleanupProps = new Map([['79-06-1', { koc: 4.6, logKow: -0.67 }]]);
-  const plantRows = (b: ReturnType<typeof run>) => b.sections.plantsEco ?? [];
+  const plantRows = (b: ReturnType<typeof run>) => fate(b.sections.plantsEco ?? []);
 
   it('lists nothing for values filled from a cleanup-property chemical absent from the fate rows', () => {
     const b = run({
@@ -417,5 +428,34 @@ describe('runBasis, plants and eco compares against the cleanup properties', () 
       edit: plants({ chemicalId: 'user-1', koc: '50' }),
     });
     expect(plantRows(b).filter((r) => r.kind !== 'unverified-default')).toEqual([]);
+  });
+});
+
+describe('runBasis, site values', () => {
+  it('lists every site value in use as an entry without a source, typed or pre-filled', () => {
+    const b = run({
+      edit: (s) => {
+        s.vapor = {
+          ...s.vapor,
+          form: { ...s.vapor.form, crackFraction: '0.002' },
+        } as Screens['vapor'];
+      },
+      results: { vapor: sec() },
+    });
+    const rows = b.sections.vapor!.filter((r) => r.kind === 'entered-unsourced');
+    const crack = rows.find((r) => r.subject === 'Crack fraction')!;
+    expect(crack).toMatchObject({ value: '0.002', detail: SITE_TYPED, note: 'no note' });
+    const pressure = rows.find((r) => r.subject === 'Indoor-outdoor pressure difference')!;
+    expect(pressure).toMatchObject({ value: '1 Pa', detail: SITE_PREFILLED });
+  });
+
+  it('lists nothing for a screen that types no site value', () => {
+    const b = run({
+      edit: (s) => {
+        s.uncertainty = { ...s.uncertainty, risk: { ...s.uncertainty.risk, seed: 'x1' } };
+      },
+      results: { uncertainty: sec() },
+    });
+    expect(b.sections.uncertainty!.filter((r) => r.kind === 'entered-unsourced')).toEqual([]);
   });
 });

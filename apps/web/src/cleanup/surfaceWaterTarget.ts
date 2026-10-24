@@ -428,6 +428,7 @@ export function surfaceTargetTables(rows: readonly SurfaceTargetLevel[]): CsvTab
         reason: r.reason,
       })),
       columns: COLUMNS,
+      missing: { keys: ['level'], because: 'reason' },
     },
   ];
 }

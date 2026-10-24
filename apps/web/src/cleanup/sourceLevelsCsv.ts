@@ -59,6 +59,12 @@ interface PanelRow {
   reason: string | null;
 }
 
+/** The level columns left empty when a source level is not quantified, and the column with the reason. */
+const MISSING = {
+  keys: ['level', 'cancerLevel', 'noncancerLevel'],
+  because: 'reason',
+} as const;
+
 function columns(sourceMethodHeader: string, extra: CsvColumn[] = []): CsvColumn[] {
   return [
     { key: 'method', header: 'method' },
@@ -134,6 +140,7 @@ export function sourceLevelCsvTables(
         rowOf({ ...r, sourceMethod: r.householdMethod }, name(f.chemicalId)),
       ),
       columns: columns('household method'),
+      missing: MISSING,
     });
   }
   const vapor = panelFeeds(feeds.vapor, ids);
@@ -148,6 +155,7 @@ export function sourceLevelCsvTables(
         basis: VAPOR_BASIS[r.basis ?? 'none'],
       })),
       columns: columns('vapor method', [{ key: 'basis', header: 'level from' }]),
+      missing: MISSING,
     });
   }
   const surface = panelFeeds(feeds.surface, ids);
@@ -179,6 +187,7 @@ export function sourceLevelCsvTables(
         { key: 'path', header: 'level path' },
         { key: 'solver', header: 'solve detail' },
       ]),
+      missing: { keys: [...MISSING.keys, 'surfaceWaterLevel'], because: 'reason' },
     });
   }
   return tables;

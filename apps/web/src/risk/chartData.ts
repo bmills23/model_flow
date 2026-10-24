@@ -1,4 +1,5 @@
 import { PATHWAY_IDS, type PathwayId, type ReceptorRiskSummary } from '@model-flow/engine';
+import type { Quantification } from './quantified';
 
 export const PATHWAY_LABELS: Record<PathwayId, string> = {
   soilIngestion: 'Soil ingestion',
@@ -40,6 +41,13 @@ export interface BarRow {
   label: string;
   total: number;
   segments: Segment[];
+  /**
+   * Segment labels with no value at all (nothing could be quantified for them), with the reason. A label
+   * in the row's table but in neither `segments` nor here is a true zero.
+   */
+  gaps: Record<string, string>;
+  /** Why the row's total is not quantified, or null when it is. */
+  totalGap: string | null;
 }
 
 export const SLOTS = 8;
@@ -48,7 +56,7 @@ export const SLOTS = 8;
 export function barRows(
   measure: Measure,
   by: Split,
-  rows: readonly { label: string; summary: ReceptorRiskSummary }[],
+  rows: readonly { label: string; summary: ReceptorRiskSummary; quant?: Quantification }[],
   names: Readonly<Record<string, string>>,
 ): BarRow[] {
   const pick = (r: { summary: ReceptorRiskSummary }) =>
@@ -69,6 +77,18 @@ export function barRows(
         slot: ids.indexOf(c.id) % SLOTS,
       }))
       .filter((s) => s.value > 0);
-    return { label: r.label, total: segments.reduce((s, x) => s + x.value, 0), segments };
+    const gaps: Record<string, string> = {};
+    const split = by === 'pathway' ? r.quant?.byPathway : r.quant?.byChemical;
+    for (const c of pick(r)) {
+      const gap = split?.get(c.id)?.[measure];
+      if (gap !== undefined && gap !== null) gaps[label(c.id)] = gap;
+    }
+    return {
+      label: r.label,
+      total: segments.reduce((s, x) => s + x.value, 0),
+      segments,
+      gaps,
+      totalGap: r.quant?.total[measure] ?? null,
+    };
   });
 }

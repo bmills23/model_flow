@@ -47,6 +47,28 @@ describe('ReportPage', () => {
     expect(screen.getByRole('heading', { name: 'Warnings and notes' })).toBeTruthy();
   });
 
+  it('states which method the conclusions of a section rest on and calls the other a sensitivity', async () => {
+    const v = getScreen('vadose');
+    setScreen('vadose', {
+      ...v,
+      form: { ...v.form, foc: '0.0123', method: 'modern', dispersivityBasis: 'regression' },
+    } as typeof v);
+    render(<ReportPage />);
+    const text = await screen.findByText(/rest on the modern method, the method shown/i);
+    expect(text.closest('.report-method-basis')!.textContent).toMatch(
+      /legacy method is printed as a sensitivity check/i,
+    );
+  });
+
+  it('prints every row of a result table and never the "showing the first" line', async () => {
+    const t = getScreen('transport');
+    setScreen('transport', { ...t, form: { ...t.form, K: '12.5', dispLaw: 'legacy' } });
+    render(<ReportPage />);
+    const table = await screen.findByRole('table', { name: 'breakthrough curve' });
+    expect(table.querySelectorAll('tbody tr').length).toBeGreaterThan(40);
+    expect(screen.queryByText(/showing the first/i)).toBeNull();
+  });
+
   it('draws each chart of a used screen with its data table open and no toggle', async () => {
     const v = getScreen('vadose');
     setScreen('vadose', {
@@ -177,6 +199,26 @@ describe('ReportPage', () => {
       const table = section.querySelector('table.report-basis')!;
       expect(table.querySelector('td[data-label="Subject"]')).not.toBeNull();
       expect(table.textContent).toContain('built-in default');
+    },
+  );
+
+  it(
+    'lists the typed and pre-filled site values as entries without a source, and makes no claim that none exist',
+    { timeout: 20000 },
+    async () => {
+      const t = getScreen('transport');
+      setScreen('transport', { ...t, form: { ...t.form, K: '12.5' } });
+      render(<ReportPage />);
+      const summary = await screen.findByRole('region', { name: /What this run rests on/i }, SLOW);
+      expect(summary.textContent).toMatch(/Entered, no source: \d+/);
+      expect(summary.textContent).not.toMatch(/No value in this run is/i);
+      const heading = await screen.findByRole('heading', { name: 'What this run rests on' }, SLOW);
+      const text = heading.closest('section')!.textContent ?? '';
+      expect(text).toContain('Hydraulic conductivity');
+      expect(text).toContain('12.5 m/d');
+      expect(text).toContain('typed by the user; no source is cited');
+      expect(text).toContain('pre-filled example value, not changed; no source is cited');
+      expect(text).not.toMatch(/Nothing in this section is/i);
     },
   );
 

@@ -20,6 +20,12 @@ export interface CsvTable {
    * `-stale-inputs` name suffix (see `markStaleTable`).
    */
   feeds?: readonly FeedRef[];
+  /**
+   * Value columns that are empty when the value could not be quantified (a missing toxicity value, a
+   * missing input, a method that does not cover the case) and the column that gives the reason. The file
+   * keeps the cell empty and the reason in the `because` column; the report prints "not quantified".
+   */
+  missing?: { keys: readonly string[]; because: string };
 }
 
 /** "Download CSV" controls, one button per table. Renders nothing when there are no tables. */

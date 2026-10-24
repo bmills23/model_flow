@@ -293,3 +293,21 @@
   color: var(--text);
   overflow-wrap: anywhere;
 }
+
+.report-chemical {
+  margin: 12px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.report-chemical-name,
+.report-chemical .result-block h5 {
+  margin: 8px 0 4px;
+}
+
+.report-current-run,
+.report-method-basis {
+  overflow-wrap: anywhere;
+}

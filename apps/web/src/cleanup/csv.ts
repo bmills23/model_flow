@@ -34,7 +34,19 @@ const LEVEL_COLUMNS: CsvColumn[] = [
   { key: 'noncancerLevel', header: 'noncancer level' },
   { key: 'group', header: 'noncancer group' },
   { key: 'receptor', header: 'limiting receptor' },
+  { key: 'note', header: 'not quantified because' },
 ];
+
+/** Why a cleanup level cell is empty: the same words the cleanup screen's "Not quantified" panel uses. */
+export const LEVEL_GAP = {
+  none: 'no toxicity value for any switched-on pathway of this medium',
+  noneCumulative:
+    'no toxicity value for any switched-on pathway of this medium, or no concentration entered (blank or zero) in this medium; with cumulative allocation it has no level, which is not the same as a required level of zero',
+  noCancer: 'no cancer endpoint; the level rests on the noncancer endpoint alone',
+  noNoncancer: 'no noncancer endpoint; the level rests on the cancer endpoint alone',
+  noCancerRoute: 'no cancer toxicity value for this route',
+  noNoncancerRoute: 'no noncancer toxicity value for this route',
+} as const;
 
 const PATHWAY_COLUMNS: CsvColumn[] = [
   { key: 'method', header: 'method' },
@@ -45,6 +57,7 @@ const PATHWAY_COLUMNS: CsvColumn[] = [
   { key: 'pathway', header: 'pathway' },
   { key: 'cancerLevel', header: 'cancer level' },
   { key: 'noncancerLevel', header: 'noncancer level' },
+  { key: 'note', header: 'not quantified because' },
 ];
 
 export function cleanupLevelRows(outcome: CleanupOutcome, names: Record<string, string>): CsvRow[] {
@@ -63,6 +76,14 @@ export function cleanupLevelRows(outcome: CleanupOutcome, names: Record<string, 
         noncancerLevel: scaled(lv.noncancerLevel, r.medium),
         group: lv.noncancerGroup,
         receptor: lv.limitingReceptor,
+        note:
+          lv.level === null
+            ? `no level: ${r.allocation === 'cumulative' ? LEVEL_GAP.noneCumulative : LEVEL_GAP.none}`
+            : lv.cancerLevel === null
+              ? `cancer level: ${LEVEL_GAP.noCancer}`
+              : lv.noncancerLevel === null
+                ? `noncancer level: ${LEVEL_GAP.noNoncancer}`
+                : '',
       })),
     );
   });
@@ -87,6 +108,12 @@ export function cleanupPathwayRows(
             pathway: PATHWAY_LABELS[p.pathway],
             cancerLevel: scaled(p.cancerLevel, r.medium),
             noncancerLevel: scaled(p.noncancerLevel, r.medium),
+            note: [
+              p.cancerLevel === null ? `cancer level: ${LEVEL_GAP.noCancerRoute}` : '',
+              p.noncancerLevel === null ? `noncancer level: ${LEVEL_GAP.noNoncancerRoute}` : '',
+            ]
+              .filter((t) => t !== '')
+              .join('; '),
           })),
         ),
       ),
@@ -105,6 +132,7 @@ export function cleanupCsvTables(
       label: 'cleanup levels',
       rows: cleanupLevelRows(outcome, names),
       columns: LEVEL_COLUMNS,
+      missing: { keys: ['level', 'cancerLevel', 'noncancerLevel'], because: 'note' },
     },
     {
       name: 'cleanup-pathways',
@@ -112,6 +140,7 @@ export function cleanupCsvTables(
       label: 'each pathway alone',
       rows: cleanupPathwayRows(outcome, names),
       columns: PATHWAY_COLUMNS,
+      missing: { keys: ['cancerLevel', 'noncancerLevel'], because: 'note' },
     },
   ];
 }
@@ -349,6 +378,7 @@ export function ssgCsvTables(rows: readonly SsgRow[]): CsvTable[] {
       label: 'leaching levels',
       rows: ssgRows(rows),
       columns: SSG_COLUMNS,
+      missing: { keys: ['level'], because: 'note' },
     },
   ];
 }

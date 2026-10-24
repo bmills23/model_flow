@@ -4,7 +4,7 @@ import { PATHWAY_IDS } from '@model-flow/engine';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { emptyOverrides, setField, type OverridesState } from '../overrides/model';
-import { computeResults, tableText, MAX_ROWS } from './results';
+import { computeResults, tableText } from './results';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
 
@@ -402,25 +402,152 @@ describe('computeResults', () => {
   });
 });
 
+describe('computeResults, one block per chemical', () => {
+  const YR = 365.25 * 86400;
+  const well = (id: string, peak: number) => ({
+    method: 'modern' as const,
+    label: 'Receptor well, modern method, 15 years',
+    chemicalId: id,
+    times: [0, YR, 2 * YR],
+    values: [0, peak, peak / 2],
+  });
+  const air = (id: string, peak: number) => ({
+    chemicalId: id,
+    label: 'Vapor run',
+    indoor: {
+      kind: 'series',
+      series: { times: [0, YR], values: [0, peak] },
+      origin: 'vapor.je-1991',
+    },
+  });
+
+  it('prints the benzene well and indoor air results although the screens last ran MTBE', async () => {
+    const r = await computeResults(
+      project(
+        (s) => {
+          s.transport = { ...s.transport, form: { ...s.transport.form, chemicalId: '1634-04-4' } };
+          s.vapor = { ...s.vapor, form: { ...s.vapor.form, chemicalId: '1634-04-4' } };
+        },
+        (s) => ({
+          well: {
+            '71-43-2': feedEntry('transport', s.transport.form, well('71-43-2', 2e-3)),
+            '1634-04-4': feedEntry('transport', s.transport.form, well('1634-04-4', 8e-3)),
+          },
+          vaporRisk: {
+            '71-43-2': feedEntry('vapor', s.vapor.form, air('71-43-2', 3e-6)),
+            '1634-04-4': feedEntry('vapor', s.vapor.form, air('1634-04-4', 1e-6)),
+          },
+        }),
+      ),
+    );
+    const gw = r['transport']!;
+    expect(gw.chemicals!.map((b) => b.name)).toEqual(['Benzene', expect.stringMatching(/butyl/i)]);
+    expect(gw.chemicals![0]!.tables.length).toBeGreaterThan(0);
+    const vapor = r['vapor']!;
+    expect(vapor.chemicals!.map((b) => b.name)).toEqual([
+      'Benzene',
+      expect.stringMatching(/butyl/i),
+    ]);
+    expect(vapor.chemicals![0]!.tables[0]!.rows[0]).toMatchObject({
+      where: 'Indoor air',
+      concentration: 3,
+    });
+    // the screens' own tables are the MTBE run, named by name and marked as sent
+    expect(gw.current).toEqual({
+      chemical: expect.stringMatching(/butyl/i),
+      sentTo: 'the exposure and risk screen',
+    });
+  }, 60000);
+
+  it('labels the run on the screen as not sent when no result was sent for its chemical', async () => {
+    const r = await computeResults(
+      project(
+        (s) => {
+          s.transport = { ...s.transport, form: { ...s.transport.form, chemicalId: '108-88-3' } };
+        },
+        (s) => ({
+          well: { '71-43-2': feedEntry('transport', s.transport.form, well('71-43-2', 2e-3)) },
+        }),
+      ),
+    );
+    const gw = r['transport']!;
+    expect(gw.chemicals!.map((b) => b.name)).toEqual(['Benzene']);
+    expect(gw.current).toEqual({ chemical: 'Toluene', sentTo: null });
+  }, 60000);
+
+  it('has no block and only the current run label for a screen that sent nothing', async () => {
+    const r = await computeResults(
+      project((s) => {
+        s.transport = { ...s.transport, form: { ...s.transport.form, K: '12.5' } };
+      }),
+    );
+    expect(r['transport']!.chemicals).toBeUndefined();
+    expect(r['transport']!.current).toEqual({
+      chemical: 'a chemical entered by hand',
+      sentTo: null,
+    });
+  }, 60000);
+
+  it('still labels the run and prints the sent blocks when the screen itself did not compute', async () => {
+    const r = await computeResults(
+      project(
+        (s) => {
+          s.transport = { ...s.transport, form: { ...s.transport.form, K: 'abc' } };
+        },
+        (s) => ({
+          well: { '71-43-2': feedEntry('transport', s.transport.form, well('71-43-2', 2e-3)) },
+        }),
+      ),
+    );
+    expect(r['transport']!.notes.join(' ')).toMatch(/^Not computed/);
+    expect(r['transport']!.chemicals!.map((b) => b.name)).toEqual(['Benzene']);
+    expect(r['transport']!.current).toBeDefined();
+  }, 60000);
+});
+
 describe('tableText', () => {
-  it('writes headers with units, blanks for missing cells and limits long tables', () => {
-    const rows = Array.from({ length: MAX_ROWS + 5 }, (_, i) => ({
-      a: i,
-      b: i === 0 ? null : 'x',
-    }));
+  it('writes headers with units and blanks for missing cells', () => {
     const t = tableText({
       name: 'n',
       label: 'l',
-      rows,
+      rows: [{ a: 0, b: null }],
       columns: [
         { key: 'a', header: 'a', unit: 'm' },
         { key: 'b', header: 'b' },
       ],
     });
     expect(t.headers).toEqual(['a (m)', 'b']);
-    expect(t.rows.length).toBe(MAX_ROWS);
-    expect(t.total).toBe(MAX_ROWS + 5);
     expect(t.rows[0]).toEqual(['0', '']);
+  });
+
+  it('prints "not quantified" for an empty cell of a missing-value column, and only there', () => {
+    const t = tableText({
+      name: 'n',
+      label: 'l',
+      rows: [
+        { value: 3, other: null, why: '' },
+        { value: null, other: null, why: 'no cancer toxicity value for this route' },
+        { value: 0, other: null, why: '' },
+      ],
+      columns: [
+        { key: 'value', header: 'value' },
+        { key: 'other', header: 'other' },
+        { key: 'why', header: 'not quantified because' },
+      ],
+      missing: { keys: ['value'], because: 'why' },
+    });
+    expect(t.rows).toEqual([
+      ['3', '', ''],
+      ['not quantified', '', 'no cancer toxicity value for this route'],
+      ['0', '', ''],
+    ]);
+  });
+
+  it('never truncates a table: every row is printed', () => {
+    const rows = Array.from({ length: 125 }, (_, i) => ({ a: i }));
+    const t = tableText({ name: 'n', label: 'l', rows, columns: [{ key: 'a', header: 'a' }] });
+    expect(t.rows.length).toBe(125);
+    expect(t.rows[124]).toEqual(['124']);
   });
 
   it('shortens numbers to six significant digits', () => {

@@ -56,6 +56,20 @@ import { computeTph } from '../plantsEco/tph';
 import { loadEcossl, substanceFor } from '../plantsEco/ecossl';
 import { plantsEcoCsvTables } from '../plantsEco/csv';
 import type { ChartItem } from './chartItems';
+import {
+  BLOCK_BUILDERS,
+  SENT_TO,
+  type ChemicalBlock,
+  type CurrentRun,
+  type NameOf,
+} from './chemicalBlocks';
+import {
+  basisChoice,
+  criteriaDisagreements,
+  methodBasisOf,
+  riskDisagreements,
+  type MethodBasis,
+} from './methodBasis';
 import { saturatedSeries, saturatedVlines } from '../saturated/timeSeries';
 import { profileCurves, layerBands } from '../vapor/chartData';
 import type { VadoseFeed } from '../vadose/feed';
@@ -66,7 +80,7 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
-import { pickSlot, type FeedSlots } from '../project/feedSlots';
+import { pickSlot, slotOf, type FeedSlots } from '../project/feedSlots';
 import { isChemicalFeed } from '../project/schema';
 
 /** An engine warning with the method (or table) it came from. */
@@ -83,20 +97,30 @@ export interface SectionResults {
   charts: ChartItem[];
   warnings: ResultWarning[];
   notes: string[];
+  /**
+   * Which method the section's conclusions rest on and where legacy and modern disagree on an exceedance;
+   * absent for a screen that does not show legacy against modern.
+   */
+  methodBasis?: MethodBasis;
+  /**
+   * A fate screen's results sent on, one block per chemical (see `chemicalBlocks.ts`): what the exposure,
+   * risk and cleanup screens used. Absent for a screen that sends nothing per chemical.
+   */
+  chemicals?: ChemicalBlock[];
+  /** The run the fate screen shows now (the tables of this section), and whether it was sent on. */
+  current?: CurrentRun;
 }
 
 export type ProjectResults = Partial<Record<ScreenKey, SectionResults>>;
 
-/** Rows of one table the report prints; the screen's CSV download holds every row. */
-export const MAX_ROWS = 40;
+/** What the report prints in a value cell that is empty because the value could not be quantified. */
+export const NOT_QUANTIFIED = 'not quantified';
 
 export interface TableText {
   name: string;
   label: string;
   headers: string[];
   rows: string[][];
-  /** Rows the table has before the cap. */
-  total: number;
 }
 
 function cellText(v: CsvCell): string {
@@ -106,14 +130,25 @@ function cellText(v: CsvCell): string {
   return v;
 }
 
-/** A CSV table as display text: headers with units, numbers to six significant digits, at most MAX_ROWS rows. */
+/**
+ * A CSV table as display text: headers with units, numbers to six significant digits, and every row (a
+ * result table is never cut short in the report). An empty cell of a column the table lists in `missing`
+ * reads "not quantified"; the reason is in the column `missing.because` names, which is printed too.
+ */
 export function tableText(t: CsvTable): TableText {
+  const unquantified = new Set(t.missing?.keys ?? []);
   return {
     name: t.name,
     label: t.label,
     headers: t.columns.map(csvHeader),
-    rows: t.rows.slice(0, MAX_ROWS).map((row) => t.columns.map((c) => cellText(row[c.key]))),
-    total: t.rows.length,
+    rows: t.rows.map((row) =>
+      t.columns.map((c) => {
+        const v = row[c.key];
+        return unquantified.has(c.key) && (v === null || v === undefined || v === '')
+          ? NOT_QUANTIFIED
+          : cellText(v);
+      }),
+    ),
   };
 }
 
@@ -537,7 +572,12 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
   );
   // used-ness is judged on the saved forms: a receptor edit alone does not make a screen used
   const used = USED_SCREENS_ORDER.filter((k) => screenUsed(k, saved, feeds));
-  const needsDb = used.includes('risk') || used.includes('cleanup');
+  // the risk and cleanup screens need the database to compute; a fate screen needs it only to name a chemical
+  const namesChemicals = (k: ScreenKey): boolean =>
+    SENT_TO[k] !== undefined &&
+    (currentChemicalId(k, saved, feed) !== '' ||
+      Object.keys(SENT_TO[k]!).some((f) => feed.slots(f).size > 0));
+  const needsDb = used.some((k) => k === 'risk' || k === 'cleanup' || namesChemicals(k));
   let db: ChemicalDb | null = null;
   let dbError = '';
   if (needsDb) {
@@ -547,6 +587,7 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
       dbError = e instanceof Error ? e.message : String(e);
     }
   }
+  const nameOf = chemicalNamer(project, db);
   const out: ProjectResults = {};
   for (const key of used) {
     try {
@@ -554,12 +595,115 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
       if (sec.tables.length === 0 && sec.notes.length === 0) {
         sec.notes.push('No result yet: the inputs entered are not enough to compute one.');
       }
+      const basis = sectionBasis(key, screens, feed, sec);
+      if (basis !== null) sec.methodBasis = basis;
+      attachChemicals(key, screens, feed, nameOf, sec);
       out[key] = sec;
     } catch (e) {
       out[key] = notComputed(e instanceof Error ? e.message : String(e));
     }
   }
   return out;
+}
+
+/**
+ * How a chemical id is named in the report: the name the project list gives it, else the database's, so a
+ * chemical is never called by its CAS number or id while a name is known.
+ */
+function chemicalNamer(project: Project, db: ChemicalDb | null): NameOf {
+  const listed = new Map(chemicalsOf(project).map((c) => [c.id, c.name]));
+  return (id) => {
+    const name = listed.get(id);
+    if (name !== undefined && name.trim() !== '' && name !== id) return name;
+    if (id === FIXTURE_ID) return 'Benzene (the built-in validation case)';
+    return db?.byId.get(id)?.name ?? name ?? id;
+  };
+}
+
+/** The vapor screen's built-in fixture chemical (see `project/chemicals.ts`). */
+const FIXTURE_ID = 'risc4-benzene';
+
+/** The id of the chemical a fate screen's form is set to now (blank when typed by hand). */
+function currentChemicalId(key: ScreenKey, s: Screens, feed: Feed): string {
+  switch (key) {
+    case 'transport':
+      return s.transport.form.chemicalId;
+    case 'vadose':
+      return s.vadose.form.chemicalId;
+    case 'saturated':
+      return s.saturated.form.chemicalId;
+    case 'vapor':
+      return s.vapor.form.chemicalId;
+    case 'household':
+      return s.household.form.chemicalId;
+    case 'plantsEco':
+      return s.plantsEco.form.chemicalId;
+    case 'surfaceWater': {
+      const form = s.surfaceWater.form;
+      const bank = form.linked ? feed<BankFeed>('bank', form.chemicalId) : null;
+      return bank?.chemicalId ?? form.chemicalId;
+    }
+    default:
+      return '';
+  }
+}
+
+/** The per-chemical blocks of a fate screen's section and the label of the run the screen shows now. */
+function attachChemicals(
+  key: ScreenKey,
+  screens: Screens,
+  feed: Feed,
+  nameOf: NameOf,
+  sec: SectionResults,
+): void {
+  const build = BLOCK_BUILDERS[key];
+  const sentTo = SENT_TO[key];
+  if (build === undefined || sentTo === undefined) return;
+  const blocks = build(feed.slots, nameOf);
+  if (blocks.length > 0) sec.chemicals = blocks;
+  const id = currentChemicalId(key, screens, feed);
+  const typed = (screens[key] as { form?: { chemicalName?: string } }).form?.chemicalName?.trim();
+  const to = [
+    ...new Set(
+      Object.entries(sentTo)
+        .filter(([f]) => feed.slots(f).has(slotOf(id)))
+        .map(([, screen]) => screen),
+    ),
+  ];
+  sec.current = {
+    chemical: id === '' ? (typed ? typed : 'a chemical entered by hand') : nameOf(id),
+    sentTo: to.length === 0 ? null : to.join(' and '),
+  };
+}
+
+/**
+ * The method basis of a section that shows legacy against modern results: the screen's method shown (see
+ * `basisChoice`), the other method as a sensitivity, and the exceedances the two disagree on, read from
+ * the section's own tables. Null for a section with no table to rest on.
+ */
+function sectionBasis(
+  key: ScreenKey,
+  screens: Screens,
+  feed: Feed,
+  sec: SectionResults,
+): MethodBasis | null {
+  if (sec.tables.length === 0) return null;
+  const sent =
+    key === 'surfaceWater'
+      ? (feed<SurfaceWaterFeed>('surfaceWater', screens.surfaceWater.form.chemicalId)?.method ??
+        null)
+      : null;
+  const choice = basisChoice(key, screens, sent);
+  if (choice === null) return null;
+  const rowsOf = (match: (name: string) => boolean) =>
+    sec.tables.filter((t) => match(t.name)).flatMap((t) => t.rows);
+  const disagreements =
+    key === 'surfaceWater'
+      ? criteriaDisagreements(rowsOf((n) => n.startsWith('surface-water-criteria')))
+      : key === 'risk'
+        ? riskDisagreements(rowsOf((n) => n === 'risk-results'))
+        : [];
+  return methodBasisOf(choice, disagreements);
 }
 
 async function computeOne(

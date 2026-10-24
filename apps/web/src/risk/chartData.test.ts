@@ -75,3 +75,53 @@ describe('barRows', () => {
     expect(out[0]!.total).toBe(0);
   });
 });
+
+describe('barRows, values that are not quantified', () => {
+  const quant = {
+    total: { risk: null, hi: null },
+    byPathway: new Map([
+      ['waterIngestion', { risk: null, hi: null }],
+      ['waterDermal', { risk: 'an input is missing', hi: 'an input is missing' }],
+    ]),
+    byChemical: new Map([['71-43-2', { risk: null, hi: null }]]),
+  };
+  const withDermal = summary({
+    byPathway: [
+      { id: 'waterIngestion', risk: 2e-6, riskShare: 1, hi: 0.3, hiShare: 1 },
+      { id: 'waterDermal', risk: 0, riskShare: null, hi: 0, hiShare: null },
+    ],
+  });
+
+  it('marks a pathway with no quantified cell, so the table can say so instead of 0', () => {
+    const [row] = barRows('risk', 'pathway', [{ label: 'A', summary: withDermal, quant }], {});
+    expect(row!.gaps).toEqual({ 'Bathing dermal contact': 'an input is missing' });
+    expect(row!.totalGap).toBeNull();
+  });
+
+  it('marks a total that nothing quantified', () => {
+    const nothing = {
+      ...quant,
+      total: { risk: 'no cancer toxicity value for this route', hi: null },
+    };
+    const [risk] = barRows(
+      'risk',
+      'chemical',
+      [{ label: 'A', summary: summary(), quant: nothing }],
+      {},
+    );
+    expect(risk!.totalGap).toBe('no cancer toxicity value for this route');
+    const [hi] = barRows(
+      'hi',
+      'chemical',
+      [{ label: 'A', summary: summary(), quant: nothing }],
+      {},
+    );
+    expect(hi!.totalGap).toBeNull();
+  });
+
+  it('has no gaps for rows built without a quantification', () => {
+    const [row] = barRows('risk', 'pathway', [{ label: 'A', summary: summary() }], {});
+    expect(row!.gaps).toEqual({});
+    expect(row!.totalGap).toBeNull();
+  });
+});
