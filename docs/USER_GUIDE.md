@@ -497,7 +497,9 @@ readable. **Print or save as PDF** uses your browser's print dialog, which has a
 
 Each fate screen's section (groundwater, vadose, saturated, vapor, household, surface water, plants and ecology)
 prints one block for every chemical whose result was sent on, named by its name, with the inputs that run used and
-its results. Under the blocks, **Run on the screen now** names the chemical the screen is set to and says what
+its results. The inputs are recorded when the result is sent, so they stay those of the sent run after the screen
+changes; a result sent from an earlier version of the app says its inputs were not recorded, and sending it again
+records them. Under the blocks, **Run on the screen now** names the chemical the screen is set to and says what
 became of that run: sent to which screen; not sent, so the exposure, risk and cleanup results do not use it; or
 changed since a result was sent, in which case the block above shows the run that was sent and the tables that
 follow are the screen's current run. In a vadose or saturated block the table of the method that was sent is the

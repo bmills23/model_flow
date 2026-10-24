@@ -28,7 +28,7 @@ bed gradient and discharge thickness.
 
 | ID | Severity | Route | What happened | Smallest fix | Wave | Status |
 |---|---|---|---|---|---|---|
-| B1 | Blocker | `#/report` | Transport and vapor sections print only the run last made on each screen (MTBE); benzene's well and indoor air concentrations, which drive the risk, appear nowhere | One block per chemical from the per-chemical sent results | AA | Partly done (AA, 2026-10-24): one named block per chemical with its own results, and a changed screen run is labelled; the inputs of a run sent from transport, vapor or surface water are not recorded, so the block prints only the method (follow-up slice open) |
+| B1 | Blocker | `#/report` | Transport and vapor sections print only the run last made on each screen (MTBE); benzene's well and indoor air concentrations, which drive the risk, appear nowhere | One block per chemical from the per-chemical sent results | AA | Done (AA, 2026-10-24): one named block per chemical with its own results and the inputs its run used (recorded when the result is sent), and a changed screen run is labelled |
 | B2 | Blocker | `#/cleanup` to `#/report` | With a groundwater modeled source the report says "Not computed: a modeled source ... open the cleanup screen"; the site-specific levels never print | Solve them for the report, as the surface water levels already are | AA | Done (AA, 2026-10-24): kept with the project per chemical and printed while their fingerprint matches; confirmed by the acceptance run |
 | B3 | Blocker | `#/report` | "Showing the first 40 of 60 rows": legacy cleanup rows are missing from the print | Never truncate a result table in the report | AA | Done (AA, 2026-10-24): every table prints in full; the plume map's data table stays a labelled sample of 20 rows |
 | M1 | Major | `#/report` | Says no value is an entry without a source, yet every typed and pre-filled site value (bulk density 1.7, crack fraction, 1 Pa) has none | List typed and pre-filled site inputs as entries without a source | AA | Done (AA, 2026-10-24): confirmed by the acceptance run (52 entries without a source listed) |
@@ -57,7 +57,7 @@ bed gradient and discharge thickness.
 
 ## Waves
 
-- **AA, a report fit to submit (landed 2026-10-24, B1 partly):** B1 to B3, M1, M4, M5, M8 (stale results), M9 and M11. Every number the report prints is
+- **AA, a report fit to submit (landed 2026-10-24):** B1 to B3, M1, M4, M5, M8 (stale results), M9 and M11. Every number the report prints is
   complete, current, honest about its sources, and says what was not quantified.
 - **AB, plain language:** M2, M3, m1 to m8 and n1. Labels, names and units instead of internal keys, codes and raw numbers.
 - **AC, a guided site workflow:** M6, M7, M8 (blank start), M10, m9, m10 and n2. Fate screens that start blank and run every

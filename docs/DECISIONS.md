@@ -4621,3 +4621,28 @@ Implementation choices (2026-10-24), each DEFAULT and open to Bryan's overturn.
     other findings go to later waves: the cleanup screen and report say "the groundwater transport run is for MTBE,
     not Ethylbenzene" while runs for four chemicals are held (wording, AB), and the vapor screen's "Source from
     another screen" selector sits below the results, so a user typed the groundwater concentrations by hand (AC).
+
+## 2026-10-24: Wave AA follow-up, the inputs of each sent run
+
+Bryan's "sounds good" on finishing wave AA covers it: the acceptance run found ruling 1's "the inputs it ran with"
+unmet for results sent from the groundwater (well), vapor and surface water screens. Each choice is DEFAULT and open to
+Bryan's overturn.
+
+1. **Recorded when sent.** The well, surface water, vapor risk, household and produce feeds carry an optional
+   `runInputs` field of labelled rows (label, value with unit, in words), built by the sending screen from the scenario
+   or form it ran, at the moment it sends. The project keeps only each screen's current form, so the inputs of an
+   earlier sent run cannot be rebuilt later; rows are the stored form because they are small and stay readable when
+   the screen's form changes shape.
+2. **Rows per feed.** Well: the rows the bank-fed block already printed (aquifer, decay, dispersivities, source box,
+   source concentration or the feeding screen, receptor position and time) plus the receptor depth. Vapor: the indoor
+   method, the source (fed, or medium and concentration), chemical properties, soil temperature, floor depth, each soil
+   layer, the building and soil gas entry, and the outdoor box when outdoor air was sent. Surface water: the water
+   body, flows, discharge, reach, bank distance, the groundwater source (named as fed when linked), sediment,
+   downstream distance and solubility. Household: only the processes sent, with a water concentration taken from
+   another screen named as fed. Plants: the produce factors' inputs; the ecology and TPH panels record none.
+3. **No staleness effect.** The rows are left out of every feed content key, so recording them moves no inputs hash,
+   staleness mark or sent value.
+4. **Old files.** A feed without rows loads unchanged and its block says the inputs of that run were not recorded and
+   that sending it again records them. A malformed rows value is dropped on load without dropping the slot.
+5. **Transport block.** When the well and the plume (bank) feeds hold the same rows they print once; when they differ,
+   or the well feed has none, the plume rows are labelled as the surface water plume run's.
