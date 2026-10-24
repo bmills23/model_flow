@@ -274,13 +274,15 @@ only in values the VF method already takes as options (Q/C, interval, soil), so 
 rescales the factor by sqrt(3.14 / pi). The porosity is the computed 0.434, not the rounded 0.43 the guide prints
 beside it: with 0.43, 38 of 84 resident volatile cancer cells reproduce, with 0.434, 83 do.
 
-Result: of 435 inhalation cells and 435 totals that include one in each soil table, 421 and 422 (resident) and 422
-and 421 (industrial) reproduce. Twelve volatile chemicals with neither a Koc nor a Kd in the parameter sheet print
-the particulate-only level, so the VF method has no input for them and the sweep excepts their 13 inhalation cells
-and 13 totals per table (it checks that the particulate-only level matches the printed cell). The vinyl chloride
-equation image prints the volatilization factor term only; the sweep adds the particulate term (under one part in
-100000 of the sum). Unexplained: the resident noncancer inhalation level of PCB 105 (840 printed, 833.3 computed) and
-the industrial noncancer total of n-nonane (72 printed, 72.5012 computed, 0.002 percent above the limit). The counts
+Result: of 435 inhalation cells and 435 totals that include one in each soil table, 421 and 422 (resident) and
+422 and 421 (industrial) reproduce. Twelve volatile chemicals with neither a Koc nor a Kd in the parameter sheet
+print the particulate-only level, so the VF method has no input for them and the sweep excepts their 13
+inhalation cells and 13 totals per table (it checks that the particulate-only level matches the printed cell).
+The vinyl chloride equation image prints the volatilization factor term only; the sweep adds the particulate
+term (under one part in 100000 of the sum). Where the tables print a toxicity value to three figures (the
+Aroclor unit risk 5.71E-4 and the TEF-applied reference concentration of PCB 105, 1.33E-3), the sweep excepts
+the cells a value inside the printed interval reproduces (class `printed-three-figures`). Unexplained: the
+industrial noncancer total of n-nonane (72 printed, 72.5012 computed, 0.002 percent above the limit). The counts
 are in `docs/VALIDATION.md`, recomputed from the test data.
 
 ### Dermal absorbed dose (`ragse2004`)

@@ -419,12 +419,17 @@ its basis (as printed and in words), the table, page or worksheet cell it was re
   dioxins); ug Sn/L (tributyltin) is ug/L with the note "expressed as tin"; ng TEQ/kg (CCME dioxins and furans)
   becomes ug/kg with the note "expressed as toxic equivalents". Sediment values are dry weight; none is organic
   carbon normalized.
-- A value the source gives only as an equation or a site-chemistry rule (CCME cells printed Equation, Variable or
-  Table: cadmium, copper, lead, nickel, zinc, manganese, aluminium, ammonia) is a row with no value, shown as
+- A value the source gives only as an equation or a site-chemistry rule (CCME cells printed Equation, Variable
+  or Table: cadmium, copper, lead, nickel, zinc, manganese, aluminium, ammonia) is a row with no value, shown as
   "site-specific, not computed", because no equation is transcribed with the set. A cell with no number (a
-  narrative guideline, a guidance framework, a range, a printed "No PEL derived") produces no row and is
-  counted in the file's `omitted` block; two cells the source prints oddly (metribuzin "1,0", nitrite
-  "60 NO2-N") are left out the same way and are reported, not interpreted.
+  narrative guideline, a guidance framework, a range, a printed "No PEL derived") produces no row and is counted
+  in the file's `omitted` block. Metribuzin, printed "1,0", is read as 1.0 (one digit after a comma is not a
+  thousands group, and every other cell prints a decimal point), and nitrite, printed "60 NO2-N", ships as 60
+  ug/L stated as nitrogen.
+- A value the source states on an element basis (CCME nitrite as NO2-N, the UK un-ionised ammonia as nitrogen,
+  the ANZG ammonia rows as NH3-N) carries that basis (`elementBasis`) and gets no exceedance ratio: the row says
+  "stated as ...", and a concentration reported on the same basis is compared by the reader. It is never
+  converted by molar mass.
 - A value printed with a condition is compared at the value printed. For the UK copper (bioavailable), zinc
   (plus an ambient background) and manganese (bioavailable) that value is never higher than the standard that
   applies, so the comparison is conservative; the condition is shown with the value. Cadmium has one row per

@@ -4486,3 +4486,37 @@ DEFAULT and open to Bryan's overturn.
 7. **Library copies.** The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp 2015,
    Trapp and Matthies 1995, Schulze-Makuch 2005) need Bryan or a library; they stay open, listed once.
 8. **Checks.** Slice checks, one gate, `mobile:check:full` once, one review, per the project cadence.
+
+### Wave Z slices Z1 and Z2 and the corrective pass
+
+Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn.
+
+1. **Covered chemicals.** The water type, hardness field and hardness alert render only for a chemical the set names;
+   the covered search hit reports `hasSurfaceWater: false`. A chemical the set neither names nor covers still shows
+   them.
+2. **The not-reached row.** A component test renders the `SurfaceWaterTargetPanel` row for an unreached solve (the
+   level reads "not quantified" and the line names the solubility limit and the peak). Its layout was checked once at
+   390 px, light and dark, by placing the rendered row in the built app's `#/cleanup` with the built styles: 0 elements
+   past the edge. The mobile check has no state that produces the row.
+3. **CCME cells.** The source refetched with the same SHA-256. Metribuzin ships as 1.0 ug/L: the cell prints "1,0", one
+   digit after a comma is not a thousands group, and every other cell prints a decimal point. Nitrite ships as 60 ug/L
+   stated as nitrogen. Valued CCME rows: 274 to 276.
+4. **Element basis.** A row whose source states its value as an element (CCME nitrite as NO2-N, the UK un-ionised
+   ammonia as nitrogen and 8 ANZG ammonia rows as NH3-N) carries `elementBasis`; the comparison computes no ratio for
+   it, shows "stated as ..." in the row, and the CSV and report carry the status (`element-basis`); it is never
+   converted by molar mass, and the cleanup target takes no level from it. A value the user enters clears the basis.
+   Nitrate rows whose sources name no element are unchanged.
+5. **RSL cells.** The tables print a toxicity value to three figures where the guide derives it: the Aroclor 1242,
+   1248, 1254 and 1260 unit risk (5.71E-4) and the TEF-applied reference concentration of PCB 105 (1.33E-3, against
+   the quotient 4E-8 / 3E-5). Their five cells are excepted under `printed-three-figures`, which requires a value
+   printed with exactly three figures and checks that a value inside its printed interval (half-open) reproduces the
+   printed cell. A first version stored the PCB quotients in the database instead; the review found the chemicals
+   screen then showed 0.00133333333333 against the table's 1.33E-3 and saved projects moved by 0.13 percent under the
+   same edition label, so the database keeps the printed values. n-nonane stays unexplained: its printed
+   volatilization factor (1040) agrees with the engine's (1043.6) and no printed input closes the 0.002 percent gap.
+   Sweep: 9823 reproduced, 64 excepted, 1 unexplained.
+6. **Validation file.** The cap is 70,000 bytes (the file was about 59.6 kB): shortening notes would not give real
+   room, and the report and validation pages import the file in lazy chunks, so the first load is unchanged.
+7. **Review.** One review: 0 high, 4 medium (the PCB database values and saved projects, the nitrite basis, and the
+   not-reached check being one-off; all but the last fixed in the corrective pass, which is recorded in item 2), 6 low,
+   one folded in (the half-open interval).
