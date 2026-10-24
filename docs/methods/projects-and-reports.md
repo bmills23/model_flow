@@ -249,10 +249,11 @@ so it is the one feed that still starts empty after a reload.
   `{code, message}` pairs with the method or table that raised them, de-duplicated. A screen that cannot
   be computed prints "Not computed" with the form's own error text instead of a table. Charts and
   uncertainty results landed in Wave G slice G2 (a later bullet). Not in the report: (1) the modeled
-  cleanup chart (the plume map is printed since wave I); (2) a modeled cleanup source is not computed by the
+  cleanup chart (the plume map is printed since wave I); (2) a modeled cleanup source is not solved by the
   report: it solves through the groundwater chain feed (it holds a function and is not saved), so the report
   prints the modeled-source uncertainty summary kept from the cleanup screen this session when it is current,
-  says it is out of date, or says it has not been run. The household, vapor and surface water source levels of the
+  says it is out of date, or says it has not been run. Since wave AA the point levels themselves are kept with
+  the project (the optional `modeledLevels` key, see the wave AA bullet) and printed as described there. The household, vapor and surface water source levels of the
   cleanup screen print in its section and write to the cleanup CSV since wave K (slice K3). On a phone each result row prints as a labeled card so no
   table scrolls sideways; the printed page keeps the plain table.
   Viewport check (2026-10-18): `#/report` for a project with the groundwater, vadose, saturated, vapor,
@@ -270,6 +271,21 @@ so it is the one feed that still starts empty after a reload.
   modern results states which method its conclusions rest on (the screen's method shown; the modern method for
   a screen with no choice), prints the other as a sensitivity and flags a criterion or benchmark the two
   disagree on.
+  The modeled cleanup levels of a groundwater, vadose or saturated source (`cleanup/modeledLevels.ts`) are kept
+  with the project, per chemical, under an optional `modeledLevels` key (no format version bump: a file without
+  the key loads as before, and an entry that does not parse is dropped on its own). The cleanup screen writes an
+  entry when its solve answers the chemical's request and the groundwater run (and the vadose or saturated
+  source) it used is not out of date against the screen it was sent from. An entry holds the point levels of both
+  methods, the target, how the solve ended, the warnings and notes, never the curve, with a fingerprint of the
+  inputs it came from: the cleanup form without its allocation, soil screening and surface water panels and the
+  entered concentrations, the groundwater screen's form, the vadose or saturated run that was sent, the
+  chemical's toxicity and property record, and the data edition. The report prints an entry while the fingerprint
+  of the saved project still equals it, and otherwise says the levels are out of date and that the cleanup screen
+  solves them again, or that they have not been solved. The solubility ceiling defaults per chemical to the
+  database's aqueous solubility, with its edition named; a ceiling typed on the screen wins. A dissolved level
+  (groundwater and soil pore water, in mg/L) above it is flagged on the screen, in the CSV (an "above the
+  solubility" column) and in the report. A typed ceiling also stops a dissolved source's search at it, as
+  before; the database default only flags.
 - **Implemented (Wave G slice G2, charts and uncertainty results).** Each section carries the screen's
   main charts, drawn by the screen's own chart components from the same compute result as the tables
   (`ChartItem` in `report/chartItems.ts`, built in `results.ts`): the receptor breakthrough chart

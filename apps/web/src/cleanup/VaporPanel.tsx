@@ -1,6 +1,7 @@
 import { StaleMark } from '../project/StaleMark';
 import type { VaporRiskFeed } from '../vapor/feeds';
 import type { CleanupOutcome } from './compute';
+import { solubilityFlag, type SolubilityCeiling } from './solubility';
 import { vaporSourceLevels } from './vaporLevels';
 
 const fmt = (si: number | null, fromSi: number): string => {
@@ -25,10 +26,19 @@ export function VaporPanel(props: {
   outcome: CleanupOutcome;
   feed: VaporRiskFeed;
   names: Record<string, string>;
+  /** The solubility a dissolved source level (mg/L) is held against; a level above it is flagged. */
+  ceiling?: SolubilityCeiling | null;
 }) {
   const { outcome, feed, names } = props;
   const rows = vaporSourceLevels(outcome, feed);
   if (rows.length === 0) return null;
+  const chemical = names[feed.chemicalId] ?? feed.chemicalId;
+  // only a source in water (groundwater, soil pore water; mg/L) is held against the solubility
+  const flagOf = (r: (typeof rows)[number]): string | null =>
+    r.unit === 'mg/L' && r.level !== null
+      ? solubilityFlag(chemical, r.level * r.fromSi, props.ceiling ?? null)
+      : null;
+  const flags = [...new Set(rows.flatMap((r) => (flagOf(r) === null ? [] : [flagOf(r)!])))];
   const warnings = [...new Set(rows.flatMap((r) => r.warnings))];
   return (
     <section className="panel" aria-label="Vapor source levels">
@@ -78,6 +88,7 @@ export function VaporPanel(props: {
                   <strong>
                     {fmt(r.level, r.fromSi)} {r.level === null ? '' : r.unit}
                   </strong>
+                  {flagOf(r) !== null && <div className="level-flag">above the solubility</div>}
                   {r.reason && <div className="muted">{r.reason}</div>}
                 </td>
                 <td data-label="Limiting">{r.limiting ?? 'none'}</td>
@@ -89,6 +100,11 @@ export function VaporPanel(props: {
           </tbody>
         </table>
       </div>
+      {flags.map((f) => (
+        <p className="alert" role="note" key={f}>
+          {f}
+        </p>
+      ))}
       {warnings.length > 0 && (
         <ul className="warnings">
           {warnings.map((w) => (

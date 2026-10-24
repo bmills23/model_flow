@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import * as overrides from '../overrides/project';
 import type { OverridesState } from '../overrides/model';
 import * as site from '../site/project';
+import { readSavedModeledLevels, type SavedModeledLevels } from '../cleanup/modeledLevels';
 import type { SiteState } from '../site/model';
 import * as cleanup from '../cleanup/project';
 import * as household from '../household/project';
@@ -86,6 +87,8 @@ export interface BuildOptions {
   site?: SiteState;
   /** The project chemical list; the key is written when given. */
   chemicals?: readonly ProjectChemical[];
+  /** The modeled cleanup levels the cleanup screen solved, by chemical id; the key is written when any are given. */
+  modeledLevels?: Readonly<Record<string, SavedModeledLevels>>;
   data?: NonNullable<Project['data']>;
   title?: string;
   /** The app version string (from package.json) the file is written with. */
@@ -121,6 +124,9 @@ export function buildProject(o: BuildOptions): Project {
   const st = o.site === undefined ? undefined : site.toProject(o.site);
   if (st !== undefined) project.site = st;
   if (o.chemicals !== undefined) project.chemicals = o.chemicals.map((c) => ({ ...c }));
+  if (o.modeledLevels !== undefined && Object.keys(o.modeledLevels).length > 0) {
+    project.modeledLevels = JSON.parse(JSON.stringify(o.modeledLevels)) as Record<string, unknown>;
+  }
   if (o.data !== undefined) project.data = o.data;
   return project;
 }
@@ -131,6 +137,10 @@ export const overridesOf = (project: Project): OverridesState =>
 
 /** The advisory site model choices of a loaded project; the defaults when the file has no `site` key. */
 export const siteOf = (project: Project): SiteState => site.fromProject(project.site);
+
+/** The modeled cleanup levels a loaded project carries (none when the file has no `modeledLevels` key). */
+export const modeledLevelsOf = (project: Project): Record<string, SavedModeledLevels> =>
+  readSavedModeledLevels(project.modeledLevels);
 
 /**
  * The chemical list of a loaded project: the saved one when the file carries the key (an empty list

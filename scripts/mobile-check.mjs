@@ -149,6 +149,19 @@ const FED_ROUTES = [
       document.querySelectorAll('main details.override-panel').forEach(d=>{d.open=true});
       await u.sleep(500)})()`,
   },
+  // "solubility" route: #/cleanup with toluene and xylenes added and a very low solubility ceiling typed, so
+  // the per-chemical solubility list, the ceiling box and the flag on a groundwater level above the ceiling
+  // (the "above the solubility" line in the cell and the note under the table) are on screen.
+  {
+    route: '#/cleanup',
+    tag: 'solubility',
+    noPress: true,
+    viaSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
+      await u.pick('108-88-3',/^add toluene/i);await u.sleep(600);
+      await u.pick('1330-20-7',/^add xylenes/i);await u.sleep(600);
+      u.tick(/medium contacted/i);await u.sleep(500);
+      u.fill(/^solubility ceiling/i,'0.0000001');await u.sleep(800)})()`,
+  },
   // "criteria" route: #/surface-water with the comparison panel open on the union of all criteria sets and zinc
   // compared, so the set selector, the basis and source lines under each criterion and the wide result tables
   // are on screen (the panel is closed by default, and the other visits never reach it).
@@ -417,7 +430,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),solubility:{list:document.querySelectorAll('main ul.solubility-defaults li').length,flags:document.querySelectorAll('main .level-flag').length,notes:[...document.querySelectorAll('main p.alert[role=note]')].filter(p=>/above the solubility/.test(p.textContent)).length},fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     navMain:document.querySelectorAll('nav[aria-label="Main"]').length,mains:document.querySelectorAll('main#main').length,mainH1:document.querySelectorAll('main#main h1').length,controls:document.querySelectorAll('main#main input,main#main select,main#main textarea').length,links:document.querySelectorAll('main#main a[href]').length,textLen:((document.querySelector('main#main')||{}).innerText||'').trim().length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
@@ -533,10 +546,12 @@ for (const view of VIEWS) {
           m.projectList.confirm
         )) ||
       (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2)) ||
+      (tag === 'solubility' &&
+        !(m.solubility.list >= 2 && m.solubility.flags >= 1 && m.solubility.notes >= 1)) ||
       (tag === 'criteria' && !(m.critSet === 'all' && m.critTables >= 2 && m.critRows >= 10));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'solubility' ? ` solubility=${JSON.stringify(m.solubility)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }

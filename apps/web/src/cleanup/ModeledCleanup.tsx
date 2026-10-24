@@ -9,6 +9,7 @@ import type { ModeledItem } from './modeledSolve';
 import type { ModeledRequest } from './modeledTypes';
 import { ModeledResults } from './ModeledSection';
 import { ModeledSourceUncertainty } from './ModeledSourceUncertainty';
+import type { SolubilityCeiling } from './solubility';
 
 /** A chemical's last solve with the request it answers. */
 export interface ModeledSolved {
@@ -38,8 +39,11 @@ export function ModeledRowsView(props: {
   progress: ModeledProgress | null;
   solveError: string | null;
   feeds: readonly FeedRef[];
+  /** The solubility ceiling of a chemical (database value unless the user entered one), for the flag. */
+  ceilingOf?: (chemicalId: string) => SolubilityCeiling | null;
 }) {
   const { rows, solved, computing, progress, solveError, feeds } = props;
+  const ceilingOf = props.ceilingOf ?? (() => null);
   const multi = rows.length > 1;
   const anyBuilt = rows.some((r) => r.result.ok);
   // a chemical's held solve is current while it answers the request the chemical builds now; one that
@@ -50,7 +54,9 @@ export function ModeledRowsView(props: {
   };
   const csvEntries = rows.flatMap((r) => {
     const s = solved.get(r.id);
-    return r.result.ok && s?.item.ok ? [{ id: r.id, name: r.name, outcome: s.item.outcome }] : [];
+    return r.result.ok && s?.item.ok
+      ? [{ id: r.id, name: r.name, outcome: s.item.outcome, ceiling: ceilingOf(r.id) }]
+      : [];
   });
   // the file holds the current chemicals' tables; the ones being solved again join it once they land.
   // With none current the buttons stay but are disabled, as before.
@@ -117,6 +123,7 @@ export function ModeledRowsView(props: {
                   outcome={s.item.outcome}
                   name={row.name}
                   notes={built ? built.notes : []}
+                  ceiling={ceilingOf(row.id)}
                   {...(multi ? { named: true } : {})}
                 />
               </div>

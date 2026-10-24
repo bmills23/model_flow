@@ -73,6 +73,7 @@ import { clearChemicalSlots } from '../vapor/feedStore';
 import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
+import type { SavedModeledLevels } from '../cleanup/modeledLevels';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
 import { pickSlot, slotOf, slotOfValue, type FeedSlots } from './feedSlots';
@@ -90,6 +91,7 @@ import {
   screensOf,
   overridesOf,
   siteOf,
+  modeledLevelsOf,
   type Feeds,
   type Project,
   type ProjectChemical,
@@ -140,6 +142,11 @@ let site: SiteState = defaultSite();
  * once on open (see `chemicalsOf`).
  */
 let chemicals: ProjectChemical[] = [];
+/**
+ * The modeled cleanup levels the cleanup screen solved, by chemical id, with the project (wave AA). The
+ * groundwater run they came through is not saved, so these are what the report prints.
+ */
+let modeledLevels: Record<string, SavedModeledLevels> = {};
 /** Fingerprint of the project as last saved, opened or started; the unsaved-changes check compares to it. */
 let savedSnapshot: string | null = null;
 /**
@@ -414,6 +421,7 @@ function build(): ReturnType<typeof buildProject> {
     overrides,
     site,
     chemicals,
+    modeledLevels,
     createdWith: APP_VERSION,
     ...(title !== '' ? { title } : {}),
   });
@@ -423,7 +431,15 @@ function build(): ReturnType<typeof buildProject> {
 export const currentProject = build;
 
 function snapshot(): string {
-  return stableStringify({ screens, title, feeds: currentFeeds(), overrides, site, chemicals });
+  return stableStringify({
+    screens,
+    title,
+    feeds: currentFeeds(),
+    overrides,
+    site,
+    chemicals,
+    modeledLevels,
+  });
 }
 
 const startSnapshot = (): string =>
@@ -434,6 +450,7 @@ const startSnapshot = (): string =>
     overrides: emptyOverrides(),
     site: defaultSite(),
     chemicals: [],
+    modeledLevels: {},
   });
 
 /**
@@ -475,6 +492,28 @@ export const getSite = (): SiteState => site;
 export function setSite(next: SiteState): void {
   if (stableStringify(next) === stableStringify(site)) return;
   site = next;
+  schedule();
+  notify();
+}
+
+export const getModeledLevels = (): Readonly<Record<string, SavedModeledLevels>> => modeledLevels;
+/**
+ * Keep the levels the cleanup screen just solved for one chemical. The same levels again change nothing
+ * (no save, no unsaved-change mark); subscribers are told otherwise.
+ */
+export function setModeledLevels(entry: SavedModeledLevels): void {
+  const held = modeledLevels[entry.chemicalId];
+  if (held !== undefined && stableStringify(held) === stableStringify(entry)) return;
+  modeledLevels = { ...modeledLevels, [entry.chemicalId]: entry };
+  schedule();
+  notify();
+}
+/** Forget the levels kept for one chemical (it left the project). */
+export function clearModeledLevels(chemicalId: string): void {
+  if (!(chemicalId in modeledLevels)) return;
+  const { [chemicalId]: _gone, ...rest } = modeledLevels;
+  void _gone;
+  modeledLevels = rest;
   schedule();
   notify();
 }
@@ -574,6 +613,7 @@ export function removeProjectChemical(id: string): void {
     });
   }
   clearChemicalSlots(id);
+  clearModeledLevels(id);
   if (USER_ID.test(id)) clearUserIdState(id);
   removeChemical(id);
 }
@@ -905,6 +945,7 @@ export function forgetMemory(): void {
   overrides = emptyOverrides();
   site = defaultSite();
   chemicals = [];
+  modeledLevels = {};
   hashes = {};
   heldBaseline = {};
   stale = [];
@@ -945,6 +986,7 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
   overrides = overridesOf(project);
   site = siteOf(project);
   chemicals = chemicalsOf(project);
+  modeledLevels = modeledLevelsOf(project);
   title = project.title ?? '';
   dropped = [...droppedKeys];
   const feeds = (project.feeds ?? {}) as Record<string, unknown>;
@@ -1017,6 +1059,7 @@ export function newProject(): void {
   overrides = emptyOverrides();
   site = defaultSite();
   chemicals = [];
+  modeledLevels = {};
   clearAllFeeds();
   hashes = {};
   heldBaseline = {};

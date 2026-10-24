@@ -2,6 +2,7 @@ import type { ModeledEndpoint, Warning } from '@model-flow/engine';
 import { MEDIUM_UNIT } from './build';
 import { fmtLevel } from './format';
 import { ModeledChart } from './ModeledChart';
+import { solubilityFlag, type SolubilityCeiling } from './solubility';
 import type { ModeledMethodOutcome, ModeledOutcome, ModeledRun } from './modeledTypes';
 
 type Method = 'legacy' | 'modern';
@@ -79,6 +80,8 @@ function MethodSection(props: {
   name: string;
   /** Name the chemical in the section label (several chemicals on the screen). */
   named?: boolean;
+  /** The solubility a dissolved level is held against; a level above it is flagged. */
+  ceiling?: SolubilityCeiling | null;
 }) {
   const { method, outcome, medium, name } = props;
   // under a chemical's own heading (several chemicals) the sections sit one level lower
@@ -94,6 +97,11 @@ function MethodSection(props: {
   const lv = run.result.levels[0]!;
   const unit = MEDIUM_UNIT(medium);
   const sourceText = medium === 'soil' ? 'in the source soil' : 'in the source groundwater';
+  // only a dissolved concentration (mg/L) is held against the solubility
+  const flag =
+    medium === 'groundwater' && lv.level !== null
+      ? solubilityFlag(name, lv.level * 1e3, props.ceiling ?? null)
+      : null;
   return (
     <section
       className="panel"
@@ -125,6 +133,7 @@ function MethodSection(props: {
               <td data-label="Cleanup level" className="level">
                 <strong>{lv.level === null ? 'not reached' : fmtLevel(lv.level, medium)}</strong>{' '}
                 <small>{unit}</small>
+                {flag !== null && <div className="level-flag">above the solubility</div>}
               </td>
               <td data-label="Limiting">
                 {lv.limiting === null ? 'none' : ENDPOINT_TEXT[lv.limiting]}
@@ -136,6 +145,11 @@ function MethodSection(props: {
           </tbody>
         </table>
       </div>
+      {flag !== null && (
+        <p className="alert" role="note">
+          {flag}
+        </p>
+      )}
       {lv.impliedTph !== null && (
         <p className="muted">
           Implied TPH at the level: {fmtLevel(lv.impliedTph, 'soil')} {MEDIUM_UNIT('soil')}.
@@ -159,6 +173,8 @@ export function ModeledResults(props: {
   name: string;
   notes: string[];
   named?: boolean;
+  /** The solubility a dissolved level is held against (database value unless the user entered one). */
+  ceiling?: SolubilityCeiling | null;
 }) {
   const { outcome } = props;
   const H = props.named ? 'h3' : 'h2';
@@ -183,6 +199,7 @@ export function ModeledResults(props: {
             medium={outcome.medium}
             name={props.name}
             {...(props.named ? { named: true } : {})}
+            {...(props.ceiling !== undefined ? { ceiling: props.ceiling } : {})}
           />
         ) : null;
       })}

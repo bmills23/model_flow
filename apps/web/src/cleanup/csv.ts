@@ -4,7 +4,9 @@ import type { CsvTable } from '../export/DownloadCsv';
 import { PATHWAY_LABELS } from '../risk/chartData';
 import { FROM_SI, MEDIUM_UNIT } from './build';
 import type { CleanupOutcome } from './compute';
-import type { ModeledMethodOutcome, ModeledOutcome } from './modeledTypes';
+import type { ModeledOutcome } from './modeledTypes';
+import { NOT_REACHED, summarizeModeledLevels, type SavedModeledLevels } from './modeledLevels';
+import { solubilityFlag, type SolubilityCeiling } from './solubility';
 import type { SsgRow } from './ssg';
 import type { TphRiskFeed } from '../plantsEco/feeds';
 
@@ -34,6 +36,7 @@ const LEVEL_COLUMNS: CsvColumn[] = [
   { key: 'noncancerLevel', header: 'noncancer level' },
   { key: 'group', header: 'noncancer group' },
   { key: 'receptor', header: 'limiting receptor' },
+  { key: 'solubility', header: 'above the solubility' },
   { key: 'note', header: 'not quantified because' },
 ];
 
@@ -60,7 +63,11 @@ const PATHWAY_COLUMNS: CsvColumn[] = [
   { key: 'note', header: 'not quantified because' },
 ];
 
-export function cleanupLevelRows(outcome: CleanupOutcome, names: Record<string, string>): CsvRow[] {
+export function cleanupLevelRows(
+  outcome: CleanupOutcome,
+  names: Record<string, string>,
+  ceilingOf: (chemicalId: string) => SolubilityCeiling | null = () => null,
+): CsvRow[] {
   return METHODS.flatMap((m) => {
     const o = outcome[m];
     if (!o.ok) return [];
@@ -76,6 +83,15 @@ export function cleanupLevelRows(outcome: CleanupOutcome, names: Record<string, 
         noncancerLevel: scaled(lv.noncancerLevel, r.medium),
         group: lv.noncancerGroup,
         receptor: lv.limitingReceptor,
+        // a groundwater level is a dissolved concentration, so it is held against the solubility
+        solubility:
+          r.medium === 'groundwater' && lv.level !== null
+            ? (solubilityFlag(
+                names[lv.chemical] ?? lv.chemical,
+                lv.level * FROM_SI('groundwater'),
+                ceilingOf(lv.chemical),
+              ) ?? '')
+            : '',
         note:
           lv.level === null
             ? `no level: ${r.allocation === 'cumulative' ? LEVEL_GAP.noneCumulative : LEVEL_GAP.none}`
@@ -124,13 +140,14 @@ export function cleanupPathwayRows(
 export function cleanupCsvTables(
   outcome: CleanupOutcome,
   names: Record<string, string>,
+  ceilingOf: (chemicalId: string) => SolubilityCeiling | null = () => null,
 ): CsvTable[] {
   return [
     {
       name: 'cleanup-levels',
       editions: ['rsl'],
       label: 'cleanup levels',
-      rows: cleanupLevelRows(outcome, names),
+      rows: cleanupLevelRows(outcome, names, ceilingOf),
       columns: LEVEL_COLUMNS,
       missing: { keys: ['level', 'cancerLevel', 'noncancerLevel'], because: 'note' },
     },
@@ -166,6 +183,8 @@ function modeledResultColumns(medium: ModeledOutcome['medium']): CsvColumn[] {
     { key: 'evaluations', header: 'forward runs' },
     { key: 'residual', header: 'residual', unit: '-' },
     { key: 'transport', header: 'transport method' },
+    { key: 'solubility', header: 'above the solubility' },
+    { key: 'note', header: 'not quantified because' },
   ];
 }
 
@@ -183,33 +202,72 @@ function modeledCurveColumns(medium: ModeledOutcome['medium']): CsvColumn[] {
 
 function modeledRuns(outcome: ModeledOutcome) {
   return MODELED_METHODS.flatMap((m) => {
-    const o: ModeledMethodOutcome | undefined = outcome[m];
+    const o = outcome[m];
     return o?.ok ? [{ m, run: o.run }] : [];
   });
 }
 
-export function modeledResultRows(outcome: ModeledOutcome, chemicalName: string): CsvRow[] {
-  const medium = outcome.medium;
-  return modeledRuns(outcome).map(({ m, run }) => {
-    const lv = run.result.levels[0]!;
-    const conc = run.shown.endpoint === 'concentration';
-    return {
-      method: MODELED_METHOD_ID,
-      basis: m,
-      chemical: chemicalName,
-      level: scaled(lv.level, medium),
-      limiting: lv.limiting,
-      cancerLevel: scaled(lv.cancerLevel, medium),
-      noncancerLevel: scaled(lv.noncancerLevel, medium),
-      endpoint: run.shown.endpoint,
-      target: conc ? run.shown.target * 1e3 : run.shown.target,
-      impliedTph: scaled(lv.impliedTph, 'soil'),
-      solvedBy: run.convergence.method,
-      evaluations: run.convergence.evaluations,
-      residual: run.convergence.residual,
-      transport: run.transportLabel,
-    };
+/**
+ * The rows of the modeled levels table from what a project keeps of a solve (`SavedModeledLevels`), which
+ * is also what the cleanup screen's own table is made from, so the screen file and the report print the
+ * same rows. A level that is not reached is an empty cell with its reason in the note column, never zero;
+ * a dissolved level above the chemical's solubility says so in its own column.
+ */
+export function savedLevelRows(
+  entry: SavedModeledLevels,
+  ceiling: SolubilityCeiling | null = null,
+): CsvRow[] {
+  const medium = entry.medium;
+  return MODELED_METHODS.flatMap((m) => {
+    const o = entry.methods[m];
+    if (o === undefined || !o.ok) return [];
+    const conc = o.endpoint === 'concentration';
+    const mgL = medium === 'groundwater' && o.level !== null ? o.level * FROM_SI(medium) : null;
+    return [
+      {
+        method: MODELED_METHOD_ID,
+        basis: m,
+        chemical: entry.chemical,
+        level: scaled(o.level, medium),
+        limiting: o.limiting,
+        cancerLevel: scaled(o.cancerLevel, medium),
+        noncancerLevel: scaled(o.noncancerLevel, medium),
+        endpoint: o.endpoint,
+        target: conc ? o.target * 1e3 : o.target,
+        impliedTph: scaled(o.impliedTph, 'soil'),
+        solvedBy: o.solvedBy,
+        evaluations: o.evaluations,
+        residual: o.residual,
+        transport: o.transport,
+        solubility: solubilityFlag(entry.chemical, mgL, ceiling) ?? '',
+        note:
+          o.level === null
+            ? NOT_REACHED
+            : o.cancerLevel === null
+              ? `cancer level: ${LEVEL_GAP.noCancer}`
+              : o.noncancerLevel === null
+                ? `noncancer level: ${LEVEL_GAP.noNoncancer}`
+                : '',
+      },
+    ];
   });
+}
+
+export function modeledResultRows(
+  outcome: ModeledOutcome,
+  chemicalName: string,
+  ceiling: SolubilityCeiling | null = null,
+): CsvRow[] {
+  return savedLevelRows(
+    summarizeModeledLevels(outcome, {
+      chemicalId: '',
+      chemical: chemicalName,
+      fingerprint: '',
+      source: 'dissolved',
+      notes: [],
+    }),
+    ceiling,
+  );
 }
 
 export function modeledCurveRows(outcome: ModeledOutcome, chemicalName = ''): CsvRow[] {
@@ -227,14 +285,39 @@ export function modeledCurveRows(outcome: ModeledOutcome, chemicalName = ''): Cs
   );
 }
 
-export function modeledCsvTables(outcome: ModeledOutcome, chemicalName: string): CsvTable[] {
+/** The modeled levels table alone, for a project's saved levels (the curve is not kept). */
+export function savedLevelsTable(
+  entry: SavedModeledLevels,
+  ceiling: SolubilityCeiling | null = null,
+): CsvTable {
+  return {
+    name: 'cleanup-modeled-levels',
+    editions: ['rsl'],
+    label: 'modeled level',
+    rows: savedLevelRows(entry, ceiling),
+    columns: modeledResultColumns(entry.medium),
+    missing: MODELED_MISSING,
+  };
+}
+
+const MODELED_MISSING = {
+  keys: ['level', 'cancerLevel', 'noncancerLevel'],
+  because: 'note',
+} as const;
+
+export function modeledCsvTables(
+  outcome: ModeledOutcome,
+  chemicalName: string,
+  ceiling: SolubilityCeiling | null = null,
+): CsvTable[] {
   return [
     {
       name: 'cleanup-modeled-levels',
       editions: ['rsl'],
       label: 'modeled level',
-      rows: modeledResultRows(outcome, chemicalName),
+      rows: modeledResultRows(outcome, chemicalName, ceiling),
       columns: modeledResultColumns(outcome.medium),
+      missing: MODELED_MISSING,
     },
     {
       name: 'cleanup-modeled-curve',
@@ -252,16 +335,24 @@ export function modeledCsvTables(outcome: ModeledOutcome, chemicalName: string):
  * the plain tables; with several, each table name carries the chemical id and its label the chemical name.
  */
 export function modeledCsvTablesAll(
-  entries: readonly { id: string; name: string; outcome: ModeledOutcome }[],
+  entries: readonly {
+    id: string;
+    name: string;
+    outcome: ModeledOutcome;
+    ceiling?: SolubilityCeiling | null;
+  }[],
 ): (CsvTable & { chemicalId: string })[] {
   // each table carries the id of the chemical it was made for, so a caller never has to infer it
   // from the position of the table
   if (entries.length === 1) {
     const e = entries[0]!;
-    return modeledCsvTables(e.outcome, e.name).map((t) => ({ ...t, chemicalId: e.id }));
+    return modeledCsvTables(e.outcome, e.name, e.ceiling ?? null).map((t) => ({
+      ...t,
+      chemicalId: e.id,
+    }));
   }
   return entries.flatMap((e) =>
-    modeledCsvTables(e.outcome, e.name).map((t) => ({
+    modeledCsvTables(e.outcome, e.name, e.ceiling ?? null).map((t) => ({
       ...t,
       name: `${t.name}-${e.id}`,
       label: `${t.label}, ${e.name}`,

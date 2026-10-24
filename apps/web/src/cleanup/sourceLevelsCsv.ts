@@ -10,6 +10,7 @@ import { householdSourceLevels } from './householdLevels';
 import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
 import type { SurfaceSolveJob, SurfaceSolves } from './surfaceSolve';
 import { jobsOf, LEVEL_PATH_TEXT } from './surfaceSolved';
+import { solubilityFlag, type SolubilityCeiling } from './solubility';
 import { vaporSourceLevels } from './vaporLevels';
 
 /**
@@ -122,7 +123,12 @@ export function sourceLevelCsvTables(
   outcome: CleanupOutcome,
   names: Record<string, string>,
   feeds: SourceLevelFeeds,
-  solve: { solves?: SurfaceSolves; csat?: Record<string, number> } = {},
+  solve: {
+    solves?: SurfaceSolves;
+    csat?: Record<string, number>;
+    /** The solubility ceiling of a chemical; a vapor source level in water above it is flagged. */
+    ceilingOf?: (chemicalId: string) => SolubilityCeiling | null;
+  } = {},
 ): CsvTable[] {
   const name = (id: string): string => names[id] ?? id;
   const ids = Object.keys(names);
@@ -153,8 +159,19 @@ export function sourceLevelCsvTables(
       rows: vaporSourceLevels(outcome, f).map((r) => ({
         ...rowOf({ ...r, sourceMethod: r.vaporMethod }, name(f.chemicalId)),
         basis: VAPOR_BASIS[r.basis ?? 'none'],
+        solubility:
+          r.unit === 'mg/L' && r.level !== null
+            ? (solubilityFlag(
+                name(f.chemicalId),
+                r.level * r.fromSi,
+                solve.ceilingOf?.(f.chemicalId) ?? null,
+              ) ?? '')
+            : '',
       })),
-      columns: columns('vapor method', [{ key: 'basis', header: 'level from' }]),
+      columns: columns('vapor method', [
+        { key: 'basis', header: 'level from' },
+        { key: 'solubility', header: 'above the solubility' },
+      ]),
       missing: MISSING,
     });
   }

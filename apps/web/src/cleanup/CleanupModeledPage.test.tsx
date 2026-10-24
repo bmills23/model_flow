@@ -1,13 +1,24 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { CleanupPage } from './CleanupPage';
 import { clearTransportFeed, setTransportFeed } from '../transport/chainFeed';
 import { toScenario } from '../transport/form';
 import { REGRESSION_FORM as DEFAULT_FORM } from '../transport/regression.testkit';
+import {
+  currentProject,
+  forgetMemory,
+  getModeledLevels,
+  getScreen,
+  newProject,
+  setScreen,
+} from '../project/store';
+import { computeResults } from '../report/results';
 
 afterEach(() => {
   cleanup();
   clearTransportFeed();
+  forgetMemory();
+  newProject();
 });
 
 async function withBenzene() {
@@ -81,4 +92,96 @@ describe('CleanupPage modeled sources', () => {
     expect(within(region).getByText(/not reached/i, { selector: 'strong' })).toBeTruthy();
     expect(within(region).getByText(/no cleanup level to report/i)).toBeTruthy();
   }, 120000);
+});
+
+describe('CleanupPage solubility ceiling', () => {
+  async function add(query: string, name: RegExp) {
+    fireEvent.change(screen.getByLabelText(/find a chemical/i), { target: { value: query } });
+    fireEvent.click(await screen.findByRole('button', { name }));
+  }
+
+  it('defaults each chemical to its database solubility and says where the value came from', async () => {
+    render(<CleanupPage />);
+    await screen.findByText(/890 chemicals/i, undefined, { timeout: 20000 });
+    await add('108-88-3', /add toluene/i);
+    await add('1330-20-7', /add xylenes/i);
+    const list = await screen.findByRole('list', { name: /solubility used for each chemical/i });
+    const text = list.textContent ?? '';
+    expect(text).toMatch(
+      /Toluene: 526 mg\/L \(aqueous solubility from the EPA Regional Screening Levels/,
+    );
+    expect(text).toMatch(/Xylenes[^:]*: 106 mg\/L/);
+    expect(text).toContain('2024-11');
+    // the box is there for every source, blank by default, and says a typed value wins
+    const box = screen.getByLabelText(/solubility ceiling/i) as HTMLInputElement;
+    expect(box.value).toBe('');
+    fireEvent.change(box, { target: { value: '300' } });
+    expect((await screen.findByRole('list', { name: /solubility used/i })).textContent).toMatch(
+      /Toluene: 300 mg\/L \(a ceiling entered on the cleanup screen\)/,
+    );
+  }, 60000);
+});
+
+describe('CleanupPage keeps the modeled levels with the project', () => {
+  it('saves the solved levels and the report prints them while the inputs match, then calls them out of date', async () => {
+    hold();
+    await withBenzene();
+    fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
+    fireEvent.click(screen.getByRole('radio', { name: /concentration at the well/i }));
+    await screen.findByRole(
+      'region',
+      { name: /modeled cleanup level, modern/i },
+      { timeout: 60000 },
+    );
+    await waitFor(() => expect(getModeledLevels()['71-43-2']).toBeDefined(), { timeout: 10000 });
+    const kept = getModeledLevels()['71-43-2']!;
+    expect(kept.chemical).toBe('Benzene');
+    expect(kept.methods.modern).toMatchObject({ ok: true });
+    expect(kept.fingerprint).toMatch(/^[0-9a-f]{8}$/);
+
+    // the saved project carries the levels, and a reload of its text brings them back
+    const text = JSON.stringify(currentProject());
+    const reread = JSON.parse(text) as { modeledLevels?: Record<string, unknown> };
+    expect(Object.keys(reread.modeledLevels ?? {})).toEqual(['71-43-2']);
+
+    const r = await computeResults(currentProject());
+    const sec = r['cleanup']!;
+    const table = sec.tables.find((t) => t.name === 'cleanup-modeled-levels');
+    expect(table, sec.notes.join(' ')).toBeDefined();
+    expect(table!.rows.length).toBeGreaterThan(0);
+    expect(sec.notes.join(' ')).not.toMatch(/out of date|not been solved|not computed/i);
+
+    // an input of the solve changes: the kept levels no longer match
+    const edited = JSON.parse(text) as { screens: { cleanup: { form: Record<string, unknown> } } };
+    edited.screens.cleanup.form['targetRisk'] = '1e-4';
+    const again = await computeResults(edited as never);
+    expect(
+      again['cleanup']!.tables.find((t) => t.name === 'cleanup-modeled-levels'),
+    ).toBeUndefined();
+    expect(again['cleanup']!.notes.join(' ')).toMatch(/out of date/i);
+  }, 180000);
+
+  it('does not keep a solve made through a groundwater run that is out of date', async () => {
+    hold();
+    await withBenzene();
+    fireEvent.click(screen.getByRole('radio', { name: /groundwater source/i }));
+    fireEvent.click(screen.getByRole('radio', { name: /concentration at the well/i }));
+    await screen.findByRole(
+      'region',
+      { name: /modeled cleanup level, modern/i },
+      { timeout: 60000 },
+    );
+    await waitFor(() => expect(getModeledLevels()['71-43-2']).toBeDefined(), { timeout: 10000 });
+    const first = getModeledLevels()['71-43-2']!.fingerprint;
+    // the groundwater screen's inputs change after the run was sent: the run is out of date
+    act(() => {
+      const t = getScreen('transport');
+      setScreen('transport', { ...t, form: { ...t.form, K: '77' } });
+    });
+    await new Promise((r) => setTimeout(r, 700));
+    expect(getModeledLevels()['71-43-2']!.fingerprint).toBe(first);
+    const r = await computeResults(currentProject());
+    expect(r['cleanup']!.tables.find((t) => t.name === 'cleanup-modeled-levels')).toBeUndefined();
+    expect(r['cleanup']!.notes.join(' ')).toMatch(/out of date/i);
+  }, 180000);
 });

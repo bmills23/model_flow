@@ -20,6 +20,20 @@
   white-space: nowrap;
 }
 
+.cleanup .cleanup-table td.level .level-flag {
+  white-space: normal;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--alert-text);
+}
+
+.cleanup .solubility-defaults {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .cleanup .cleanup-pathways {
   margin-top: 12px;
 }

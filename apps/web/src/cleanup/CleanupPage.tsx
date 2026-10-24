@@ -31,6 +31,9 @@ import { surfaceWaterSourceLevels } from './surfaceWaterLevels';
 import { jobsOf } from './surfaceSolved';
 import { useSurfaceSolves } from './useSurfaceSolves';
 import { useCriteriaDb } from './useCriteriaDb';
+import { useCleanupProps } from './useCleanupProps';
+import { useSaveModeledLevels } from './useSaveModeledLevels';
+import { solubilityCeiling, solubilityText } from './solubility';
 import { TphPanel } from './TphPanel';
 import {
   getProduceFeedSlots,
@@ -185,6 +188,21 @@ export function CleanupPage() {
     return out;
   }, [modeled.reply, modeled.answered]);
   const modeledSolveError = modeled.reply && !modeled.reply.ok ? modeled.reply.error : null;
+  // the levels solved through the groundwater run are kept with the project, which the report prints
+  useSaveModeledLevels({
+    form: buildForm,
+    db,
+    rows: modeledRows,
+    solved: modeledSolved,
+    feedsOf,
+  });
+  // the solubility each chemical's dissolved levels are held against: the database value unless the user entered one
+  const cleanupProps = useCleanupProps();
+  const edition = db?.edition ?? '';
+  const ceilingOf = useCallback(
+    (id: string) => solubilityCeiling(form.solubility, id, cleanupProps, edition),
+    [form.solubility, cleanupProps, edition],
+  );
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
   const needsInput =
     form.chemicals.length === 0 ||
@@ -499,15 +517,6 @@ export function CleanupPage() {
                     placeholder="automatic"
                     hint="Where the search starts; the answer does not depend on it."
                   />
-                  {form.source === 'dissolved' && (
-                    <Field
-                      label="Solubility ceiling (mg/L)"
-                      value={form.solubility}
-                      onChange={(v) => patch({ solubility: v })}
-                      placeholder="none"
-                      hint="A dissolved source cannot exceed it."
-                    />
-                  )}
                 </div>
                 {form.source !== 'dissolved' && (
                   <label className="check">
@@ -556,6 +565,35 @@ export function CleanupPage() {
                   <span>Also run the secant iteration and report how closely it agrees.</span>
                 </label>
               </>
+            )}
+            <div className="fields">
+              <Field
+                label="Solubility ceiling (mg/L)"
+                value={form.solubility}
+                onChange={(v) => patch({ solubility: v })}
+                placeholder="database solubility"
+                hint="Blank holds each chemical against its database solubility, listed below. A value typed here applies to every chemical and wins. A dissolved level above the ceiling is flagged; for a dissolved groundwater source a typed ceiling also stops the search at it."
+              />
+            </div>
+            {form.chemicals.length > 0 && (
+              <ul
+                className="muted solubility-defaults"
+                aria-label="Solubility used for each chemical"
+              >
+                {form.chemicals.map((c) => {
+                  const ceiling = ceilingOf(c.id);
+                  return (
+                    <li key={c.id}>
+                      {c.name}:{' '}
+                      {ceiling !== null
+                        ? solubilityText(ceiling)
+                        : cleanupProps === null
+                          ? 'loading the database solubility'
+                          : 'the database gives no solubility, so no level is flagged'}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
 
@@ -682,6 +720,7 @@ export function CleanupPage() {
               progress={modeled.progress}
               solveError={modeledSolveError}
               feeds={modeledFeeds}
+              ceilingOf={ceilingOf}
             />
           )}
           {!modeledOn && built && !built.ok && !needsInput && (
@@ -711,13 +750,29 @@ export function CleanupPage() {
           {!modeledOn && shown && (
             <div className={stale ? 'stale' : undefined}>
               <StaleMark feed={directFeeds} />
-              <LevelsSection method="modern" outcome={shown.outcome.modern} names={names} />
-              <LevelsSection method="legacy" outcome={shown.outcome.legacy} names={names} />
+              <LevelsSection
+                method="modern"
+                outcome={shown.outcome.modern}
+                names={names}
+                ceilingOf={ceilingOf}
+              />
+              <LevelsSection
+                method="legacy"
+                outcome={shown.outcome.legacy}
+                names={names}
+                ceilingOf={ceilingOf}
+              />
               {panelFeeds(householdSlots, rowIds).map((f) => (
                 <HouseholdPanel key={f.chemicalId} outcome={shown.outcome} feed={f} names={names} />
               ))}
               {panelFeeds(vaporSlots, rowIds).map((f) => (
-                <VaporPanel key={f.chemicalId} outcome={shown.outcome} feed={f} names={names} />
+                <VaporPanel
+                  key={f.chemicalId}
+                  outcome={shown.outcome}
+                  feed={f}
+                  names={names}
+                  ceiling={ceilingOf(f.chemicalId)}
+                />
               ))}
               {surfaceFeeds.map((f) => (
                 <SurfaceWaterPanel
@@ -734,7 +789,7 @@ export function CleanupPage() {
               <DownloadCsv
                 disabled={stale || surfaceSolved.computing}
                 tables={[
-                  ...cleanupCsvTables(shown.outcome, names).map((t) => ({
+                  ...cleanupCsvTables(shown.outcome, names, ceilingOf).map((t) => ({
                     ...t,
                     feeds: directFeeds,
                   })),
@@ -746,7 +801,7 @@ export function CleanupPage() {
                       vapor: vaporSlots,
                       surface: surfaceSlots,
                     },
-                    { solves: surfaceSolved.solves, csat },
+                    { solves: surfaceSolved.solves, csat, ceilingOf },
                   ),
                 ]}
               />

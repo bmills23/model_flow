@@ -179,6 +179,9 @@ export const projectSchema = z.object({
   site: siteSchema.optional(),
   // the project chemical list (see chemicals.ts); absent means derive it from the screens on open
   chemicals: chemicalsSchema.optional(),
+  // the modeled cleanup levels the cleanup screen solved, by chemical id; each entry is read on its own
+  // (see `readSavedModeledLevels`), so one that does not parse is dropped and never refuses the file
+  modeledLevels: z.record(z.string(), z.unknown()).optional(),
   // each entry is checked on its own by parseProject, so one unusable feed never refuses the file
   feeds: z.record(z.string(), z.unknown()).optional(),
   data: dataSchema.optional(),

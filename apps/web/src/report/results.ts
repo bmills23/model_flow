@@ -1,7 +1,14 @@
 import { convert, type Warning } from '@model-flow/engine';
 import { csvHeader, type CsvCell } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
-import { chemicalsOf, overridesOf, screensOf, type Project, type Screens } from '../project';
+import {
+  chemicalsOf,
+  modeledLevelsOf,
+  overridesOf,
+  screensOf,
+  type Project,
+  type Screens,
+} from '../project';
 import { decodeJson } from '../project/codec';
 import { screenUsed, USED_SCREENS_ORDER, type FeedsLike, type ScreenKey } from './methodsRun';
 import { effectiveDb } from '../overrides/userChemicals';
@@ -11,7 +18,8 @@ import { buildInputs } from '../risk/build';
 import { runRisk } from '../risk/compute';
 import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
-import { buildModeledRows } from '../cleanup/modeledBuild';
+import { modeledLevelsFingerprint, type SavedModeledLevels } from '../cleanup/modeledLevels';
+import { solubilityCeiling, solubilityText } from '../cleanup/solubility';
 import { runCleanup } from '../cleanup/compute';
 import { sourceLevelCsvTables, surfaceSolveJobs } from '../cleanup/sourceLevelsCsv';
 import { jobsOf } from '../cleanup/surfaceSolved';
@@ -27,6 +35,8 @@ import { reportCriteria } from '../surfaceWater/reportCriteria';
 import {
   cleanupCsvTables,
   CLEANUP_METHOD_IDS,
+  MODELED_METHOD_ID,
+  savedLevelsTable,
   ssgCsvTables,
   SSG_METHOD_ID,
   tphCsvTables,
@@ -407,31 +417,115 @@ function risk(s: Screens, feed: Feed, db: ChemicalDb): SectionResults {
   return sec;
 }
 
+/**
+ * The modeled cleanup levels of a groundwater, vadose or saturated source (docs/DECISIONS.md, wave AA
+ * ruling 2). The report does not solve them: the groundwater chain they go through holds a function and is
+ * not saved. It prints the levels the cleanup screen solved and kept with the project, per chemical, while
+ * the fingerprint of the inputs they came from still matches, and otherwise says they are out of date and
+ * that the cleanup screen solves them again.
+ */
+function modeledCleanup(
+  s: Screens,
+  feed: Feed,
+  db: ChemicalDb,
+  props: CleanupProps,
+  saved: Record<string, SavedModeledLevels>,
+): SectionResults {
+  const form = s.cleanup.form;
+  const sec = empty();
+  const many = form.chemicals.length > 1;
+  if (form.chemicals.length === 0) {
+    sec.notes.push('No chemical is on the cleanup screen, so there are no modeled cleanup levels.');
+    return sec;
+  }
+  for (const row of form.chemicals) {
+    const who = many ? `${row.name}: ` : '';
+    const kept = saved[row.id];
+    if (kept === undefined) {
+      sec.notes.push(
+        `${who}The modeled cleanup levels have not been solved for this project. Open the cleanup screen with the groundwater run sent from the groundwater screen; the screen solves them and they are then kept with the project and printed here.`,
+      );
+      continue;
+    }
+    const now = modeledLevelsFingerprint({
+      cleanup: form,
+      chemicalId: row.id,
+      transportForm: s.transport.form,
+      vadose: feed<VadoseFeed>('vadose', row.id),
+      saturated: feed<SaturatedFeed>('saturated', row.id),
+      rec: db.byId.get(row.id),
+      edition: db.edition,
+    });
+    if (now !== kept.fingerprint) {
+      sec.notes.push(
+        `${who}The modeled cleanup levels kept with this project are out of date, because an input they were solved from has changed since. Open the cleanup screen: it solves them again, and the report then prints the new levels.`,
+      );
+      continue;
+    }
+    const ceiling = solubilityCeiling(form.solubility, row.id, props, db.edition);
+    const table = savedLevelsTable(kept, ceiling);
+    sec.tables.push(
+      many
+        ? { ...table, name: `${table.name}-${row.id}`, label: `${table.label}, ${row.name}` }
+        : table,
+    );
+    for (const n of kept.notes) {
+      addWarnings(sec, 'cleanup screen', [{ code: 'ui.source-note', message: `${who}${n}` }]);
+    }
+    for (const m of ['legacy', 'modern'] as const) {
+      const o = kept.methods[m];
+      if (o === undefined) continue;
+      if (o.ok) addWarnings(sec, MODELED_METHOD_ID, o.warnings);
+      else sec.notes.push(`${who}The ${METHOD_NAME[m]} did not run: ${o.error}`);
+    }
+  }
+  noteSolubilities(sec, form, props, db.edition);
+  noteSolubilityFlags(sec);
+  return sec;
+}
+
+/**
+ * Says which solubility each cleanup chemical's dissolved levels are held against and where that value
+ * came from (docs/DECISIONS.md, wave AA ruling 7), so a flag, or the absence of one, can be checked.
+ */
+function noteSolubilities(
+  sec: SectionResults,
+  form: Screens['cleanup']['form'],
+  props: CleanupProps,
+  edition: string,
+): void {
+  for (const row of form.chemicals) {
+    const c = solubilityCeiling(form.solubility, row.id, props, edition);
+    if (c !== null) {
+      sec.notes.push(`Solubility used for ${row.name}: ${solubilityText(c)}.`);
+    }
+  }
+}
+
+/** Says in the section's notes every level its tables flag as above the solubility (each sentence once). */
+function noteSolubilityFlags(sec: SectionResults): void {
+  for (const t of sec.tables) {
+    for (const r of t.rows) {
+      const flag = String(r['solubility'] ?? '');
+      if (flag !== '' && !sec.notes.includes(flag)) sec.notes.push(flag);
+    }
+  }
+}
+
 async function cleanup(
   s: Screens,
   feed: Feed,
   db: ChemicalDb,
   props: () => Promise<CleanupProps>,
+  saved: Record<string, SavedModeledLevels> = {},
 ): Promise<SectionResults> {
   const form = s.cleanup.form;
-  if (form.source !== 'direct') {
-    const none = { transport: null, vadose: null, saturated: null };
-    const rows = buildModeledRows(form, db, () => none);
-    const many = rows.length > 1;
-    const reasons: string[] = [];
-    for (const row of rows) {
-      if (row.result.ok) continue;
-      for (const e of row.result.errors) {
-        if (/groundwater screen|transport/i.test(e)) continue;
-        reasons.push(many ? `${row.name}: ${e}` : e);
-      }
-    }
-    return notComputed([
-      'a modeled source is solved through the groundwater chain, which holds a function and is not saved with a project; open the cleanup screen after sending the chain from the groundwater screen to see the level',
-      ...reasons,
-    ]);
-  }
+  if (form.source !== 'direct') return modeledCleanup(s, feed, db, await props(), saved);
   const sec = empty();
+  // the solubility a dissolved level is held against: the database value unless the user entered one
+  const cleanupProps = await props();
+  const ceilingOf = (id: string) =>
+    solubilityCeiling(form.solubility, id, cleanupProps, db.edition);
   const built = buildCleanup(form, db, { produce: feed.slots<ProduceRiskFeed>('produce') });
   const tphHeld = feed<TphRiskFeed>('tph');
   if (tphHeld !== null) {
@@ -442,7 +536,7 @@ async function cleanup(
     const outcome = runCleanup(built);
     const names: Record<string, string> = {};
     for (const c of form.chemicals) names[c.id] = c.name;
-    sec.tables.push(...cleanupCsvTables(outcome, names));
+    sec.tables.push(...cleanupCsvTables(outcome, names, ceilingOf));
     for (const n of built.notes)
       addWarnings(sec, 'cleanup screen', [{ code: 'ui.pathway-skipped', message: n }]);
     addWarnings(sec, 'plant uptake', built.feedWarnings);
@@ -475,7 +569,7 @@ async function cleanup(
         ...surfaceTargetLevels(targetArgs),
       ]),
     );
-    sec.tables.push(...sourceLevelCsvTables(outcome, names, levelFeeds, { solves }));
+    sec.tables.push(...sourceLevelCsvTables(outcome, names, levelFeeds, { solves, ceilingOf }));
     if (targets.some((t) => t.kind !== 'none')) {
       sec.tables.push(...surfaceTargetTables(surfaceTargetLevels({ ...targetArgs, solves })));
     }
@@ -485,7 +579,7 @@ async function cleanup(
     sec.notes.push(`Not computed: ${built.errors.join('; ')}`);
   }
   if (form.ssg.on) {
-    const out = computeSsg(form, db, await props());
+    const out = computeSsg(form, db, cleanupProps);
     if (out.ok) {
       sec.tables.push(...ssgCsvTables(out.rows));
       for (const r of out.rows) if (r.ok) addWarnings(sec, SSG_METHOD_ID, r.warnings);
@@ -494,6 +588,8 @@ async function cleanup(
       sec.notes.push(`Leaching level not computed: ${out.errors.join('; ')}`);
     }
   }
+  noteSolubilities(sec, form, cleanupProps, db.edition);
+  noteSolubilityFlags(sec);
   return sec;
 }
 
@@ -588,10 +684,11 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
     }
   }
   const nameOf = chemicalNamer(project, db);
+  const modeledLevels = modeledLevelsOf(project);
   const out: ProjectResults = {};
   for (const key of used) {
     try {
-      const sec = await computeOne(key, screens, feed, db, dbError);
+      const sec = await computeOne(key, screens, feed, db, dbError, modeledLevels);
       if (sec.tables.length === 0 && sec.notes.length === 0) {
         sec.notes.push('No result yet: the inputs entered are not enough to compute one.');
       }
@@ -712,6 +809,7 @@ async function computeOne(
   feed: Feed,
   db: ChemicalDb | null,
   dbError: string,
+  modeledLevels: Record<string, SavedModeledLevels>,
 ): Promise<SectionResults> {
   switch (key) {
     case 'transport':
@@ -730,7 +828,7 @@ async function computeOne(
         : notComputed(`the chemical database did not load (${dbError})`);
     case 'cleanup':
       return db
-        ? cleanup(s, feed, db, loadCleanupProps)
+        ? cleanup(s, feed, db, loadCleanupProps, modeledLevels)
         : notComputed(`the chemical database did not load (${dbError})`);
     case 'household':
       return household(s, feed);

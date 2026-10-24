@@ -8,9 +8,10 @@ import {
 } from '@model-flow/engine';
 import { PATHWAY_LABELS } from '../risk/chartData';
 import { MEDIA } from '../risk/form';
-import { MEDIUM_UNIT, type CleanupLegacyInput, type CleanupModernInput } from './build';
+import { FROM_SI, MEDIUM_UNIT, type CleanupLegacyInput, type CleanupModernInput } from './build';
 import { fmtLevel } from './format';
 import type { CleanupOutcome } from './compute';
+import { solubilityFlag, type SolubilityCeiling } from './solubility';
 
 type Method = 'legacy' | 'modern';
 const METHOD_LABEL: Record<Method, string> = { legacy: 'Legacy', modern: 'Modern' };
@@ -38,10 +39,24 @@ function detailText(lv: DirectLevel): string {
   return bits.join(', ');
 }
 
-function MediumTable(props: { result: DirectMediumResult; names: Record<string, string> }) {
+function MediumTable(props: {
+  result: DirectMediumResult;
+  names: Record<string, string>;
+  ceilingOf?: ((chemicalId: string) => SolubilityCeiling | null) | undefined;
+}) {
   const { result, names } = props;
   const m = result.medium;
   const unit = MEDIUM_UNIT(m);
+  // a groundwater level is a dissolved concentration, so it is held against the solubility
+  const flagOf = (lv: DirectLevel): string | null =>
+    m === 'groundwater' && lv.level !== null && props.ceilingOf !== undefined
+      ? solubilityFlag(
+          names[lv.chemical] ?? lv.chemical,
+          lv.level * FROM_SI(m),
+          props.ceilingOf(lv.chemical),
+        )
+      : null;
+  const flags = result.levels.flatMap((lv) => flagOf(lv) ?? []);
   return (
     <div className="cleanup-medium">
       <h3>
@@ -70,6 +85,7 @@ function MediumTable(props: { result: DirectMediumResult; names: Record<string, 
                 </th>
                 <td data-label="Cleanup level" className="level">
                   <strong>{fmtLevel(lv.level, m)}</strong>
+                  {flagOf(lv) !== null && <div className="level-flag">above the solubility</div>}
                 </td>
                 <td data-label="Limiting">{limitingText(lv)}</td>
                 <td data-label="Cancer level">{fmtLevel(lv.cancerLevel, m)}</td>
@@ -80,6 +96,11 @@ function MediumTable(props: { result: DirectMediumResult; names: Record<string, 
           </tbody>
         </table>
       </div>
+      {flags.map((f) => (
+        <p className="alert" role="note" key={f}>
+          {f}
+        </p>
+      ))}
       {result.allocation === 'cumulative' && (
         <p className="muted">
           {result.scale === null
@@ -151,6 +172,8 @@ export function LevelsSection(props: {
   method: Method;
   outcome: CleanupOutcome['legacy'];
   names: Record<string, string>;
+  /** The solubility ceiling of a chemical, for the flag on a groundwater level above it. */
+  ceilingOf?: (chemicalId: string) => SolubilityCeiling | null;
 }) {
   const { method, outcome, names } = props;
   if (!outcome.ok) return null;
@@ -163,7 +186,7 @@ export function LevelsSection(props: {
       </h2>
       <p className="muted">{ALLOCATION_NOTE[allocation]}</p>
       {media.map((r) => (
-        <MediumTable key={r.medium} result={r} names={names} />
+        <MediumTable key={r.medium} result={r} names={names} ceilingOf={props.ceilingOf} />
       ))}
       {media.map((r) => (
         <PathwayTable key={`p-${r.medium}`} result={r} names={names} />

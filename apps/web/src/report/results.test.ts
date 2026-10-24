@@ -4,6 +4,10 @@ import { PATHWAY_IDS } from '@model-flow/engine';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { emptyOverrides, setField, type OverridesState } from '../overrides/model';
+import { savedFixture } from '../cleanup/modeledLevels.testkit';
+import { modeledLevelsFingerprint, type SavedModeledLevels } from '../cleanup/modeledLevels';
+import { overridesOf, screensOf } from '../project';
+import { withProjectReceptorEdits } from './userValues';
 import { computeResults, tableText } from './results';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
@@ -359,7 +363,7 @@ describe('computeResults', () => {
     expect(sec.notes.join(' ')).not.toMatch(/on the screen only/i);
   }, 60000);
 
-  it('notes that a modeled cleanup source needs the transport chain a saved project lacks', async () => {
+  it('says a modeled cleanup source has no kept levels yet and what to do', async () => {
     const db = await loadChemicalDb();
     const rec = db.byId.get('71-43-2')!;
     const r = await computeResults(
@@ -370,10 +374,13 @@ describe('computeResults', () => {
       }),
     );
     expect(r['cleanup']!.tables).toEqual([]);
-    expect(r['cleanup']!.notes.join(' ')).toMatch(/modeled/i);
+    const text = r['cleanup']!.notes.join(' ');
+    expect(text).toMatch(/modeled cleanup levels/i);
+    expect(text).toMatch(/not been solved/i);
+    expect(text).toMatch(/open the cleanup screen/i);
   }, 60000);
 
-  it('lists the not-computed reasons of every chemical row of a modeled cleanup source', async () => {
+  it('names every chemical row of a modeled cleanup source that has no kept levels', async () => {
     const db = await loadChemicalDb();
     const a = newChemicalRow(db.byId.get('71-43-2')!);
     const b = newChemicalRow(db.byId.get('108-88-3')!);
@@ -383,9 +390,9 @@ describe('computeResults', () => {
       }),
     );
     const text = r['cleanup']!.notes.join(' ');
-    expect(text.match(/vadose zone screen/gi)?.length).toBe(2);
-    expect(text).toContain(`${a.name}: Open the vadose`);
-    expect(text).toContain(`${b.name}: Open the vadose`);
+    expect(text).toContain(`${a.name}: `);
+    expect(text).toContain(`${b.name}: `);
+    expect(text.match(/not been solved/gi)?.length).toBe(2);
   }, 60000);
 
   it('notes that uncertainty runs are repeated from the setup, not saved', async () => {
@@ -617,4 +624,127 @@ describe('computeResults with receptor edits only', () => {
     expect(r['risk']).toBeUndefined();
     expect(r['cleanup']).toBeUndefined();
   });
+});
+
+describe('computeResults, modeled cleanup levels kept with the project', () => {
+  const edition = async () => (await loadChemicalDb()).edition;
+
+  async function withKept(
+    rowIds: string[],
+    keep: (fp: (id: string) => string) => Record<string, SavedModeledLevels>,
+    edit: (s: Screens) => void = () => {},
+  ) {
+    const db = await loadChemicalDb();
+    const make = (modeledLevels?: Record<string, SavedModeledLevels>) => {
+      const screens = defaultScreens();
+      screens.cleanup = {
+        form: {
+          ...screens.cleanup.form,
+          source: 'dissolved',
+          chemicals: rowIds.map((id) => newChemicalRow(db.byId.get(id)!)),
+        },
+      };
+      edit(screens);
+      return buildProject({
+        screens,
+        ...(modeledLevels ? { modeledLevels } : {}),
+        createdWith: '0.0.1',
+        now: NOW,
+      });
+    };
+    const bare = make();
+    const saved = withProjectReceptorEdits(screensOf(bare), overridesOf(bare));
+    const fp = (id: string): string =>
+      modeledLevelsFingerprint({
+        cleanup: saved.cleanup.form,
+        chemicalId: id,
+        transportForm: saved.transport.form,
+        vadose: null,
+        saturated: null,
+        rec: db.byId.get(id),
+        edition: db.edition,
+      });
+    return computeResults(make(keep(fp)));
+  }
+
+  it('prints the levels while the fingerprint of the inputs matches', async () => {
+    const r = await withKept(['1330-20-7'], (fp) => ({
+      '1330-20-7': savedFixture({ fingerprint: fp('1330-20-7') }),
+    }));
+    const sec = r['cleanup']!;
+    const table = sec.tables.find((t) => t.name === 'cleanup-modeled-levels')!;
+    expect(table.rows).toHaveLength(1);
+    expect(table.rows[0]).toMatchObject({ chemical: 'Xylenes', level: 481 });
+    expect(sec.notes.join(' ')).not.toMatch(/not computed|out of date|not been solved/i);
+    expect(sec.warnings.some((w) => /aquifer/i.test(w.message))).toBe(true);
+  }, 60000);
+
+  it('flags a dissolved level above the chemical solubility, with the solubility and its source', async () => {
+    const r = await withKept(['1330-20-7'], (fp) => ({
+      '1330-20-7': savedFixture({ fingerprint: fp('1330-20-7') }),
+    }));
+    const sec = r['cleanup']!;
+    const row = sec.tables.find((t) => t.name === 'cleanup-modeled-levels')!.rows[0]!;
+    expect(String(row['solubility'])).toMatch(/481 mg\/L is above the solubility of 106 mg\/L/);
+    expect(String(row['solubility'])).toContain(await edition());
+    expect(sec.notes.join(' ')).toMatch(/above the solubility of 106 mg\/L/);
+  }, 60000);
+
+  it('lets a solubility ceiling the user entered win over the database value', async () => {
+    const r = await withKept(
+      ['1330-20-7'],
+      (fp) => ({ '1330-20-7': savedFixture({ fingerprint: fp('1330-20-7') }) }),
+      (s) => {
+        s.cleanup = { form: { ...s.cleanup.form, solubility: '1000' } };
+      },
+    );
+    const row = r['cleanup']!.tables.find((t) => t.name === 'cleanup-modeled-levels')!.rows[0]!;
+    expect(row['solubility']).toBe('');
+  }, 60000);
+
+  it('says the kept levels are out of date when an input changed, and prints none of them', async () => {
+    const r = await withKept(['1330-20-7'], () => ({
+      '1330-20-7': savedFixture({ fingerprint: 'not-the-current-one' }),
+    }));
+    const sec = r['cleanup']!;
+    expect(sec.tables.find((t) => t.name === 'cleanup-modeled-levels')).toBeUndefined();
+    const text = sec.notes.join(' ');
+    expect(text).toMatch(/out of date/i);
+    expect(text).toMatch(/cleanup screen/i);
+    expect(text).toMatch(/solves them again/i);
+  }, 60000);
+
+  it('judges each chemical on its own', async () => {
+    const r = await withKept(['1330-20-7', '108-88-3'], (fp) => ({
+      '1330-20-7': savedFixture({ fingerprint: fp('1330-20-7') }),
+      '108-88-3': savedFixture({
+        chemicalId: '108-88-3',
+        chemical: 'Toluene',
+        fingerprint: 'old',
+      }),
+    }));
+    const sec = r['cleanup']!;
+    expect(sec.tables.map((t) => t.name)).toEqual(['cleanup-modeled-levels-1330-20-7']);
+    expect(sec.tables[0]!.label).toMatch(/Xylenes/);
+    const text = sec.notes.join(' ');
+    expect(text).toMatch(/Toluene[^.]*out of date/i);
+    expect(text).not.toMatch(/Xylenes[^.]*out of date/i);
+  }, 60000);
+
+  it('leaves a level that is not reached empty and gives the reason', async () => {
+    const base = savedFixture();
+    const m = base.methods.modern!;
+    if (!m.ok) throw new Error('fixture');
+    const r = await withKept(['1330-20-7'], (fp) => ({
+      '1330-20-7': savedFixture({
+        fingerprint: fp('1330-20-7'),
+        methods: { modern: { ...m, level: null, limiting: null } },
+      }),
+    }));
+    const row = r['cleanup']!.tables.find((t) => t.name === 'cleanup-modeled-levels')!.rows[0]!;
+    expect(row['level']).toBeNull();
+    expect(String(row['note'])).toMatch(/not reached/);
+    const text = tableText(r['cleanup']!.tables.find((t) => t.name === 'cleanup-modeled-levels')!);
+    expect(text.rows.flat().join(' ')).toContain('not quantified');
+  }, 60000);
 });
