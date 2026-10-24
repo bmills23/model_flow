@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave V push)
+# HANDOFF (written from the tree, 2026-10-23, after the wave V push and Bryan's rulings on it)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -144,8 +144,9 @@ inhalation comparison" block and the "Wave U, RSL soil inhalation comparison" bl
 
 ## Wave T landed (2026-10-23)
 Bryan: "do the TCE equations wave". Rulings in the DECISIONS.md "Wave T scope, RSL special-case cancer equations"
-block and the "Wave T, special-case cancer equations" block, all DEFAULT; vinyl chloride was included by scope
-ruling 1 because it shares the flag, the warning and the sweep class with trichloroethylene.
+block and the "Wave T, special-case cancer equations" block, all DEFAULT except scope ruling 1 and the shower and
+produce fallback (ruling 4), which Bryan accepted on 2026-10-23; vinyl chloride was included by scope ruling 1
+because it shares the flag, the warning and the sweep class with trichloroethylene.
 - `packages/engine/src/processes/exposure/modern.ts`: `TCE_ADJUSTMENT` (the guide's three-figure fractions),
   `specialStatus` and `cancerPlan` (the cancer terms with their place on the life-time axis; the vinyl chloride
   early-life term only when the receptor's first stage is a child stage); `scenario.ts` averages a series
@@ -525,10 +526,6 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   trichloroethylene critical temperature (544.2 K, EPA 2004) and naphthalene enthalpy of vaporization (10373
   cal/mol) differ from the calculator's (571 K, 10300 cal/mol), which changes their Henry constants away from
   25 deg C.
-- Vinyl chloride in shower air and homegrown produce (wave T): the RSL User's Guide has no early-life equation for
-  them, so the engine uses the mutagen equation with the age-dependent adjustment factors (the database flags the
-  chemical as a mutagen), which is higher than the lifetime-averaged dose without them, and warns. Open to
-  Bryan's ruling.
 - Mobile check (wave T): one run of m390-dark `#/risk` (seeded) reported `openPanels=0` and `charts=0` and passed
   on a re-run; not diagnosed. Watch for a repeat before treating it as a check flake.
 - RSL sweeps (waves R and U): 6 of 9888 cells are unexplained: the 4 Aroclor 1242, 1248, 1254 and 1260 total
@@ -608,15 +605,17 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 ## Next
 - Done 2026-10-21 to 2026-10-23: waves J to V merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
-- Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for
-  the jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick,
-  the evidence wave, landed as wave R (see "Wave R landed"). The VISL comparison landed as wave S, the RSL
+- Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
+  jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick, the
+  evidence wave, landed as wave R (see "Wave R landed"). The VISL comparison landed as wave S, the RSL
   trichloroethylene and vinyl chloride equations as wave T, the RSL soil inhalation comparison as wave U, and the
   last three audit gaps (DeVaull on `#/vapor` in place of Appendix K, nonlinear source levels, international
-  criteria and MacDonald 2000) as wave V. Not ruled on, recommended: Bryan's review of the wave V substitution
-  (ruling 1) and of the vinyl chloride fallback (open items); reading the 2026 EU annex revision; making the mobile
-  check fail on a blank page. The wave P remainders still open (a soil-to-groundwater comparison for user
-  chemicals; user Kd, vapor and dermal values) are listed under the Wave P entry in ROADMAP section 7.
+  criteria and MacDonald 2000) as wave V. Bryan, 2026-10-23 ("okay let's do it"): accepted the wave V substitution
+  (ruling 1, DeVaull in place of Appendix K, indoor only), the vinyl chloride shower and produce fallback and vinyl
+  chloride's place in wave T, all as recommended. Recommended next, not yet ruled on: reading the 2026 EU annex
+  revision (first); making the mobile check fail on a blank page. The wave P remainders still open (a
+  soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal values) are listed under the Wave P
+  entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
   2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a

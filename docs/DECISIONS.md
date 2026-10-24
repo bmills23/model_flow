@@ -3729,9 +3729,11 @@ recorded in wave R).
 ## 2026-10-23: Wave T scope, RSL special-case cancer equations
 
 Bryan, after wave S: "do the TCE equations wave" (the recommended next wave: build the RSL User's Guide's own
-trichloroethylene cancer equations, which both the RSL sweep and the VISL comparison excepted).
+trichloroethylene cancer equations, which both the RSL sweep and the VISL comparison excepted). After wave V Bryan
+accepted ruling 1 below and ruling 4 of the "Wave T, special-case cancer equations" block as recommended (2026-10-23,
+"okay let's do it"); both are marked BRYAN.
 
-1. **Chemicals (DEFAULT).** Trichloroethylene and vinyl chloride. Both carry the same `special` flag, the same
+1. **Chemicals (BRYAN).** Trichloroethylene and vinyl chloride. Both carry the same `special` flag, the same
    warning (`exposure.special-case-not-modelled`) and the same RSL sweep exception class (`special-case-equations`),
    and the exposure methods note defers them together; building one leaves the class and the warning half in place.
 2. **Source (DEFAULT).** The RSL User's Guide (`epa2024rslug`) sections for the two chemicals, read again in this
@@ -3757,7 +3759,8 @@ trichloroethylene cancer equations, which both the RSL sweep and the VISL compar
 
 ### Wave T, special-case cancer equations
 
-Rulings taken while building (2026-10-23), each marked DEFAULT and open to Bryan's overturn. Source for all of them:
+Rulings taken while building (2026-10-23), each marked DEFAULT and open to Bryan's overturn, except ruling 4, which
+Bryan accepted on 2026-10-23 (marked BRYAN). Source for all of them:
 the RSL User's Guide (`epa2024rslug`) equation images of sections 4.1.1.5 to 4.1.3.5 and 4.6.1.5 to 4.6.2.6 for
 the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
 
@@ -3778,7 +3781,7 @@ the two chemicals and the adjustment factors of section 5.18, read 2026-10-23.
    plus the first stage once more as an unaveraged term: for ingestion and dermal pathways the child's daily dose
    (no frequency, duration or averaging), for inhalation a unit contact. The mutagen flag the database carries for
    the chemical does not select the ADAF treatment where these equations apply.
-4. **Pathways not covered (DEFAULT).** Vinyl chloride in shower air and in homegrown produce: the guide has no
+4. **Pathways not covered (BRYAN).** Vinyl chloride in shower air and in homegrown produce: the guide has no
    early-life equation for them, so they use the mutagen equation with the age-dependent adjustment factors
    (10, 3, 3 and 1), which the database's mutagen flag selects (shower air about 2.6 times the form without the
    factors; kept as the conservative form, corrective pass, 2026-10-23), and are warned
@@ -3876,15 +3879,17 @@ against), read 2026-10-23.
 Bryan, after wave U: "okay let's just get it to 100% parity NOW". The 2026-10-21 parity audit (102 inventory items)
 left three gaps after waves O and P: the oxygen-limited vapor model (inventory F13 and F14, RISC5 Appendix K), cleanup
 source levels through paths that are not linear in the source (H9, H12), and the international aquatic and sediment
-criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and open to Bryan's overturn.
+criteria sets (I14, RISC5 Appendices M and N). Every ruling below is DEFAULT and open to Bryan's overturn, except
+ruling 1, which Bryan accepted as recommended after the wave closed (2026-10-23, "okay let's do it"; marked BRYAN).
 
-1. **Oxygen-limited vapor.** RISC5's own Appendix K model stays unbuilt: its reference list cites it as Johnson 1998,
-   "in development", so there is no publication to implement from (M6 ruling 2). The capability is met by the
-   published oxygen-limited model the engine already has, `vapor.devaull-2007` (DeVaull 2007, rates from
+1. **Oxygen-limited vapor (BRYAN).** RISC5's own Appendix K model stays unbuilt: its reference list cites it as
+   Johnson 1998, "in development", so there is no publication to implement from (M6 ruling 2). The capability is met
+   by the published oxygen-limited model the engine already has, `vapor.devaull-2007` (DeVaull 2007, rates from
    `api2012biovapor`), which no screen offers today. It goes on `#/vapor` as an indoor method with its three oxygen
    options, inputs, warnings, a profile chart, the risk feed and the CSV. The appendix's data requirements section is
    read only as a map of which inputs a user expects, never for equations or values. The parity row records the
-   substitution.
+   substitution. Accepted with it: no outdoor oxygen-limited path, and no minimum oxygen concentration or oxygen
+   transfer coefficient input unless a published method defines one.
 2. **Nonlinear source levels.** A cleanup source level on a path that is not linear in the source is solved against the
    forward model with the engine's existing Brent solve in the logarithm of the source (`cleanup.modeled-chains`,
    `brent1973`), never from a tabulated curve or by extrapolation. Covered: the vapor panel (soil above the residual
