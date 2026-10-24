@@ -4520,3 +4520,35 @@ Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn.
 7. **Review.** One review: 0 high, 4 medium (the PCB database values and saved projects, the nitrite basis, and the
    not-reached check being one-off; all but the last fixed in the corrective pass, which is recorded in item 2), 6 low,
    one folded in (the half-open interval).
+
+## 2026-10-23: Wave AA scope, a report fit to submit
+
+Bryan, after wave Y: "At some point this thing has gotta be usable". The usability walkthrough (`docs/USABILITY.md`)
+found the report could not be submitted for a multi-chemical site. This wave closes rows B1 to B3, M1, M4, M5, M8 (the
+stale results), M9 and M11. Every ruling below is DEFAULT and open to Bryan's overturn.
+
+1. **Every chemical.** Each fate screen's section of the report prints one block per chemical for which a result was
+   sent (the per-chemical feed slots of wave N), naming the chemical and the inputs it ran with. A screen's current run
+   that was not sent is printed too, labelled as not sent to the risk screen.
+2. **Modeled cleanup levels.** The deterministic levels solved for a modeled source on `#/cleanup` are kept with the
+   project together with a fingerprint of the inputs they came from, in the manner of the modeled uncertainty result
+   of wave J. The report prints them while the fingerprint matches, and otherwise says they are out of date and that
+   the cleanup screen re-solves them. The report does not solve them itself.
+3. **No truncated table.** Every result table prints in full in the report; a screen may keep a shorter preview.
+4. **Entries without a source.** Every site value the user typed and every pre-filled site value with no cited source
+   is listed as an entry without a source, and the report says that no value lacks a source only when that is true.
+5. **Not quantified.** A pathway or chemical with no toxicity value, a missing input, or a method that does not cover it
+   reads "not quantified" with the reason on the risk and cleanup screens and in the report, never 0; a CSV leaves the
+   value cell empty and gives the reason in its note column.
+6. **Method basis.** Where the report shows legacy and modern results, it states which method its conclusions rest on
+   (the screen's "Method shown"), prints the other as a sensitivity, and says so where the two disagree on whether a
+   criterion or target is exceeded.
+7. **Solubility.** The solubility ceiling on `#/cleanup` defaults per chemical to its database solubility, with that
+   value's source; a level above the solubility is flagged with the solubility shown. A ceiling the user enters wins.
+8. **Stale results.** A fate screen whose inputs have an error, or have changed since its last run, does not show its
+   last results as current: "Up to date" appears only when the results match the inputs.
+9. **No verdict without data.** The petroleum separation screen gives no verdict while a concentration it needs is
+   blank; it lists what is missing.
+10. **Acceptance.** Besides the gate, `mobile:check:full` and one review, the walkthrough's gas station job is run again
+    on the integrated build to confirm B1 to B3, M1 and M4.
+11. **Docs at close.** The rows of `docs/USABILITY.md` are updated in place.
