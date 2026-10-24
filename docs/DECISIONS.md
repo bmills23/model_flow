@@ -4404,3 +4404,28 @@ Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn.
    corrective pass), 4 low, two of them folded in (tests for the note merge branches, plural wording). Left open: a
    covered chemical still shows the water type and hardness fields, which nothing uses; the covered search hit
    reports `hasSurfaceWater: true` although the set has no row (only its label reads it today).
+
+## 2026-10-23: Wave Y scope, the engine chunk split
+
+Bryan, during wave X: "after this, do the engine split next". The engine chunk of the web build (`src-*.js`) is
+498,248 of the 500,000 bytes M11 ruling 12 allows, so the next engine addition fails the size test. The six worker
+bundles (`modeled.worker`, `uncertainty.worker` and four `compute.worker` files, 573,565 to 596,646 bytes) are already
+over the same limit: the size test reads only the build manifest, which does not list them. Every ruling below is
+DEFAULT and open to Bryan's overturn.
+
+1. **Split by build configuration.** The engine stays one package with one entry point and no change to its API. The
+   bundler's code-splitting settings divide its code into several chunks, each under 400 kB, so a chunk has at least
+   100 kB of headroom under the 500 kB rule; the entry chunk stays under 200 kB.
+2. **Workers counted.** The size test also reads every emitted worker file and the chunks each worker loads, under the
+   same 500 kB rule. Workers may build as ES modules (they are already created with `type: 'module'`) so their code can
+   be split too. If a worker cannot be brought under the limit by configuration, its measured size and the reason are
+   recorded instead of a silent exemption.
+3. **No behaviour change.** No engine source changes unless a module cycle or a side effect forces one, which is then
+   reported. The full gate and `mobile:check:full`, whose modeled visit runs the workers, confirm every screen and
+   worker still works.
+4. **Pages base path.** The Pages build sets `BASE_PATH=/model_flow/`; a screen that starts a worker is loaded in a real
+   browser from a build with that base, served under that base, to show the new chunk and worker URLs resolve there.
+5. **Load cost.** The JavaScript bytes the home screen and one worker screen fetch are reported before and after; the
+   total must not grow by more than 5 percent.
+6. **Checks.** Slice checks, one gate, `mobile:check:full` once and one review, per the project cadence.
+7. **Docs at close.** M11 ruling 12 and the handoff open item on the engine chunk are corrected in place.
