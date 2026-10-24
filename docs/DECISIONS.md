@@ -4350,3 +4350,27 @@ Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn u
    of 28) with the same maximum, so `eu2026` shows two identical rows; with "all of the sets" an unchanged substance
    shows once per EU set; a PFOS project on `eu2026` reads "not named" with no pointer to the PFAS sum; footnote 26
    repeats in two PFAS notes.
+
+## 2026-10-23: Wave X scope, a mobile check that fails on a blank page, and the wave W low findings
+
+Bryan, after wave W: "let's continue" (the remaining recommended item: the mobile check reported `ok` on a blank app
+in wave U, handoff open items). Every ruling below is DEFAULT and open to Bryan's overturn.
+
+1. **A blank page fails.** A view fails when the app shell has not mounted or the route rendered no content of its
+   own: the check requires the shell's navigation and one `main` with a level-one heading, and inside `main` at least
+   one form control, table or chart and a minimum of text. Thresholds are set from a normal run so that every route
+   passes today with margin. The rule is shown both ways: a build made with `BASE_PATH=/model_flow/` and served at
+   the root (the blank app wave U met) fails, and the normal build passes.
+2. **Identical rows of one set.** Where a set prints the same value for the same chemical, medium, endpoint, basis and
+   unit under two entries (`eu2026` fluoranthene, entries 15 and 28), the data build keeps one row whose note names
+   both entries. Any other set with the same case is reported and treated the same way.
+3. **Covered by a group row.** Where a set has no row for a chemical because the text points it to a group standard
+   (`eu2026` PFOS, entry 35, covered by the sum of PFAS, entry 65), the comparison names the covering row instead of
+   saying the set does not name the chemical. Each pointer is listed in the data build from the printed text, never
+   inferred.
+4. **Solve memo.** The surface water source-level memo in `apps/web/src/cleanup/useSurfaceSolves.ts` (wave V review,
+   low) keeps only the entries of the current requests.
+5. **Checks.** Slice checks, one gate, `mobile:check:full` once (under the new rule) and one review, per the project
+   cadence.
+6. **Docs at close.** The handoff open item on the blank page, item 7 of the "Wave W slices" block and the wave V memo
+   finding are corrected in place.
