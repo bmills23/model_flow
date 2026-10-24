@@ -4278,3 +4278,32 @@ water screen (scope rulings 3 to 5). Every ruling below is DEFAULT and open to B
     Directions are as made. The Springer terms page was not fetched. The 2026 CCME summary prints no edition
     date. `warne2018` has no venue or URL. None of the UK zinc ambient background catchment values
     (`zinc-abc.csv`) is used by the comparison.
+
+## 2026-10-23: Wave W scope, the 2026 revision of the EU water standards
+
+Bryan, after the wave V rulings were recorded: "okay let's do that next" (the recommended next wave: read the 2026
+revision of the EU priority substances framework that wave V left open, ruling 11 of the slice C-euuk block, and
+refresh the EU set from it). Every ruling below is DEFAULT and open to Bryan's overturn.
+
+1. **Source.** The amending act as published in the Official Journal and, where the Publications Office serves one,
+   the consolidated text that carries the surface water standards after it, both fetched in this wave from an
+   official EU address (the `publications.europa.eu` CELEX address, as in wave V). The act's number, title, dates
+   and values are taken from the fetched text, never from the secondary source that reported it or from memory. If
+   no official text can be fetched, or the act does not change the surface water standards, the wave stops after
+   acquisition and records what was found.
+2. **A second set, not a replacement.** The 2013 set keeps its id (`eu`) and its values, so a saved project that
+   chose it gives the same comparison, and its label names its instrument and year. The revised standards ship as a
+   new set beside it, labelled with the amending act.
+3. **Dates of application.** Where the act sets a later date from which a new or revised standard applies, or keeps
+   an earlier value in force until a date, the row of the new set carries that date in its note and the set's label
+   says the standards are as amended, which is not the same as in force at every date.
+4. **Extraction.** The new set is extracted by script from the fetched text in the manner of
+   `packages/data/scripts/extract-eu-eqs.ts` (water values only; biota cells and cells printed not applicable, see
+   footnote or blank left out; only the decimal comma and the printed power of ten normalised, the printed form kept
+   in the note). The raw file is committed under Commission Decision 2011/833/EU with its SHA-256. A data test pins
+   rows to the printed cells and lists the substances added, removed or changed against the 2013 set.
+5. **Citations.** The amending act is added to `references.json` with status `data`, with its CELEX number and
+   Official Journal reference as printed, and no DOI.
+6. **Checks.** Slice checks, one gate, `mobile:check:full` once and one review, per the project cadence; the mobile
+   criteria visit (all of the sets) covers the new set.
+7. **Docs at close.** The wave V open item (slice C-euuk ruling 11 and the handoff's open items) is corrected in place.
