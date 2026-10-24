@@ -410,6 +410,9 @@ const UI = `(()=>{
     tick(re){const l=labelled(re);const i=l&&(l.control||l.querySelector('input'));if(i&&!i.checked)i.click();return !!i},
   };
 })()`;
+const READY = `(()=>{const main=document.querySelector('main#main');
+  if(!main||!main.querySelector('h1'))return false;
+  return ![...main.querySelectorAll('p.muted')].some((p)=>/^Loading\\b/.test((p.textContent||'').trim()))})()`;
 const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
@@ -483,6 +486,13 @@ for (const view of VIEWS) {
       if (!noPress) await evaluate(PRESS);
     }
     await sleep(800);
+    // Routes are lazy chunks behind a Suspense fallback and the documents load a second time, so wait (bounded)
+    // for an h1 in main and no "Loading ..." fallback before measuring. A view that never gets there is measured
+    // as it stands and fails with the shell reason.
+    for (let waited = 0; waited < 10000; waited += 250) {
+      if ((await evaluate(READY)) === true) break;
+      await sleep(250);
+    }
     const m = JSON.parse(await evaluate(MEASURE));
     const slug =
       (route.replace(/[#/]/g, '') || 'home') + (via ? '-fed' : '') + (tag ? `-${tag}` : '');

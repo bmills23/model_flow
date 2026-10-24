@@ -12,7 +12,7 @@ import {
 import { verifyCriteriaManifest } from '../src/criteria/manifest.js';
 import type { CriteriaRow, CriteriaSetFile } from '../src/criteria/types.js';
 import { references } from '@model-flow/engine';
-import { GROUP_POINTERS } from '../src/criteria/build.js';
+import { GROUP_POINTERS, assertTwinRows, mergeNotes } from '../src/criteria/build.js';
 import { casCheckDigitValid } from '../src/nrwqc/parse.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -531,5 +531,70 @@ describe('chemicals the text points to a group row', () => {
       expect(group.every((r) => r.name === p.group.name)).toBe(true);
       expect(rowsOf('eu2026').some((r) => r.chemicalId === p.chemicalId)).toBe(false);
     }
+  });
+});
+
+describe('rows the build merges', () => {
+  const base = {
+    id: 'eu2026:x:surfaceWater:fresh:aa',
+    set: 'eu2026',
+    chemicalId: 'x',
+    idBy: 'cas',
+    name: 'X',
+    medium: 'surfaceWater',
+    waterType: 'fresh',
+    basis: 'AA',
+    basisLabel: 'AA',
+    endpoint: 'e',
+    value: 1,
+    unit: 'ug/L',
+    printedValue: '1',
+    printedUnit: 'ug/l',
+    table: 'T1',
+    reliability: 'high',
+    year: 2026,
+  } as unknown as CriteriaRow;
+
+  it('accepts a pair that differs only in id and note', () => {
+    expect(() =>
+      assertTwinRows(base, { ...base, id: 'other', note: 3 } as CriteriaRow, 'w'),
+    ).not.toThrow();
+  });
+
+  it.each([
+    ['reliability', { reliability: 'low' }],
+    ['year', { year: 2020 }],
+    ['table', { table: 'T2' }],
+    ['printedValue', { printedValue: '1.0' }],
+    ['siteSpecific', { siteSpecific: true }],
+  ])('throws when the second row differs in %s', (field, change) => {
+    expect(() => assertTwinRows(base, { ...base, ...change } as CriteriaRow, 'w')).toThrow(
+      new RegExp(`differs in ${field}`),
+    );
+  });
+
+  it('merges two entry notes with plural wording', () => {
+    expect(
+      mergeNotes(
+        'entry 15; a EQS is printed for this entry and applied',
+        'entry 28; a EQS is printed for this entry and applied',
+        'T',
+      ),
+    ).toBe('entries 15 and 28; a EQS is printed for these entries and applied');
+  });
+
+  it('falls back to "printed again" when a note is not an entry note', () => {
+    expect(mergeNotes('plain', 'other', 'T9')).toBe('plain; printed again: other');
+    expect(mergeNotes('plain', '', 'T9')).toBe('plain; also printed again in T9');
+    expect(mergeNotes('', '', 'T9')).toBe('also printed again in T9');
+  });
+
+  it('keeps both texts when the entry notes differ after the number', () => {
+    expect(mergeNotes('entry 15; one', 'entry 28; two', 'T')).toBe(
+      'entries 15 and 28; one; printed again (entry 28): two',
+    );
+    expect(mergeNotes('entries 15 and 28; one', 'entry 30; one', 'T')).toBe(
+      'entries 15, 28, 30; one',
+    );
   });
 });

@@ -300,6 +300,24 @@ const resolveId = (
 };
 
 /**
+ * Two rows the build would merge as one must be the same in every field but the id (the note is merged
+ * separately). Throws on any difference so a refresh cannot silently drop a row's data.
+ */
+export const assertTwinRows = (kept: CriteriaRow, dropped: CriteriaRow, where: string): void => {
+  const keys = new Set([...Object.keys(kept), ...Object.keys(dropped)]);
+  for (const k of keys) {
+    if (k === 'id' || k === 'note') continue;
+    const x = (kept as unknown as Record<string, unknown>)[k];
+    const y = (dropped as unknown as Record<string, unknown>)[k];
+    if (JSON.stringify(x) !== JSON.stringify(y)) {
+      throw new Error(
+        `${where}: would merge into ${kept.id} but differs in ${k} (${JSON.stringify(x)} vs ${JSON.stringify(y)})`,
+      );
+    }
+  }
+};
+
+/**
  * The note of a row printed twice with the same value. Two notes that differ only in the entry number
  * ("entry 15; ..." and "entry 28; ...") become "entries 15 and 28; ..."; any other difference keeps the first
  * note and adds the second.
@@ -319,7 +337,9 @@ export const mergeNotes = (first: string, second: string, table: string): string
   const label =
     nums.length === 2 ? `entries ${nums[0]} and ${nums[1]}` : `entries ${nums.join(', ')}`;
   const rest = restA === restB ? restA : `${restA}; printed again (entry ${b[1]}): ${restB}`;
-  return rest === '' ? label : `${label}; ${rest}`;
+  // two entries now share the sentence, so its "this entry" reads "these entries"
+  const plural = rest.replace(/\bfor this entry\b/g, 'for these entries');
+  return plural === '' ? label : `${label}; ${plural}`;
 };
 
 /**
@@ -400,25 +420,8 @@ const buildSet = (
       const noteText = [...extra, rawNote].filter((s) => s !== '').join('; ');
       const { chemicalId, idBy } = resolveId(set, name, casInfo.cas, idx);
       const base = `${set}:${chemicalId}:${m.medium}:${m.waterType}:${slug(basis)}`;
-      // The same value printed again for the same chemical, medium, endpoint, basis and unit (eu2026
-      // fluoranthene, entry 15 and a PAH sub-row of entry 28) is one row whose note names both entries.
-      const twin = rows.find(
-        (x) =>
-          value !== undefined &&
-          x.id.replace(/#\d+$/, '') === base &&
-          x.value === value &&
-          x.unit === unit,
-      );
-      if (twin !== undefined) {
-        noteTexts.set(twin.id, mergeNotes(noteTexts.get(twin.id) ?? '', noteText, table));
-        continue;
-      }
-      let id = base;
-      for (let k = 2; used.has(id); k++) id = `${base}#${k}`;
-      used.add(id);
-      noteTexts.set(id, noteText);
       const row: CriteriaRow = {
-        id,
+        id: base,
         set,
         chemicalId,
         idBy,
@@ -440,6 +443,26 @@ const buildSet = (
         ...(r.reliability ? { reliability: r.reliability } : {}),
         ...(yearOf(set, r, rawNote) !== undefined ? { year: yearOf(set, r, rawNote)! } : {}),
       };
+      // The same value printed again for the same chemical, medium, endpoint, basis and unit (eu2026
+      // fluoranthene, entry 15 and a PAH sub-row of entry 28) is one row whose note names both entries.
+      // Every other field must agree, so a refresh cannot lose a row's reliability, year, table or flags.
+      const twin = rows.find(
+        (x) =>
+          value !== undefined &&
+          x.id.replace(/#\d+$/, '') === base &&
+          x.value === value &&
+          x.unit === unit,
+      );
+      if (twin !== undefined) {
+        assertTwinRows(twin, row, where);
+        noteTexts.set(twin.id, mergeNotes(noteTexts.get(twin.id) ?? '', noteText, table));
+        continue;
+      }
+      let id = base;
+      for (let k = 2; used.has(id); k++) id = `${base}#${k}`;
+      used.add(id);
+      noteTexts.set(id, noteText);
+      row.id = id;
       rows.push(row);
     }
   }
