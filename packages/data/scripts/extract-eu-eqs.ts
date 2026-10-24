@@ -1,6 +1,9 @@
 // Manual use only, when the consolidated Directive 2008/105/EC is re-fetched. Never run by the gate or CI.
 //
-//   tsx scripts/extract-eu-eqs.ts [path/to/consolidated.xhtml]
+//   tsx scripts/extract-eu-eqs.ts [path/to/consolidated.xhtml [path/to/eqs.csv]]
+//
+// With no arguments it reads raw/eu-eqs/consolidated-02008L0105-20130913.xhtml and writes raw/eu-eqs/eqs.csv.
+// The 2026 revision has a different annex layout and its own script, extract-eu-eqs-2026.ts.
 //
 // Reads Annex I Part A (Environmental quality standards) of the consolidated text of Directive
 // 2008/105/EC as amended by Directive 2013/39/EU (consolidated version 13.09.2013, fetched from the
@@ -16,6 +19,7 @@ import { csvLine } from '../src/sediment/csv.js';
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dir = join(pkg, 'raw/eu-eqs');
 const src = process.argv[2] ?? join(dir, 'consolidated-02008L0105-20130913.xhtml');
+const dest = process.argv[3] ?? join(dir, 'eqs.csv');
 
 const decode = (s: string): string =>
   s
@@ -174,5 +178,5 @@ const lines = [
     csvLine([o.cas, o.name, o.medium, o.basis, o.value, 'μg/l', 'Annex I Part A table', o.note]),
   ),
 ];
-writeFileSync(join(dir, 'eqs.csv'), lines.join('\n') + '\n');
+writeFileSync(dest, lines.join('\n') + '\n');
 process.stderr.write(`wrote ${out.length} rows; ${skipped} water cells not applicable or blank\n`);

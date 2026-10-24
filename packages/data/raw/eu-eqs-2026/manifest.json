@@ -1,0 +1,70 @@
+{
+  "set": "eu-eqs-2026",
+  "retrieved": "2026-10-23",
+  "instrument": "Directive 2008/105/EC of the European Parliament and of the Council of 16 December 2008 on environmental quality standards and on the prevention and control of surface water pollution (title as replaced by Article 3(1) of Directive (EU) 2026/805), as amended by Directive 2013/39/EU of 12 August 2013 and Directive (EU) 2026/805 of 30 March 2026",
+  "amendingAct": {
+    "number": "Directive (EU) 2026/805 of the European Parliament and of the Council of 30 March 2026 amending Directive 2000/60/EC establishing a framework for Community action in the field of water policy, Directive 2006/118/EC on the protection of groundwater against pollution and deterioration and Directive 2008/105/EC on environmental quality standards in the field of water policy",
+    "celex": "32026L0805",
+    "officialJournal": "OJ L, 2026/805, 20.4.2026 (header printed 'L series 2026/805 20.4.2026'; the consolidated text lists it as 'L 805 1 20.4.2026')",
+    "surfaceWaterProvisions": "Article 3(10) amends Annex I to Directive 2008/105/EC in accordance with Annex VI (title and Part A replaced); Article 3(11) adds Annex VII as Annex II (river basin specific pollutants, Part C holds six substances moved out of Annex I Part A); Article 3(12) adds Annex VIII as Annex III; Article 3(3) amends Article 3(1a) of Directive 2008/105/EC with points (iii) and (iv)",
+    "applicationDates": "Article 4(1): transposition by 21 December 2027. Article 3(1a)(iii) of Directive 2008/105/EC as amended: revised EQS for the substances numbered 5, 9, 13, 15, 17, 21, 23, 24, 28, 30, 34, 37, 41 and 43 take effect from 22 December 2027, good surface water chemical status by 22 December 2033. Article 3(1a)(iv): newly identified substances numbered 46 to 70 take effect from 22 December 2027, good status by 22 December 2039, supplementary monitoring programme by 22 December 2027 and preliminary programme of measures by 22 December 2030. Article 3(1b): EQS listed in Part C of Annex II take effect from the beginning of the following river basin management plan period after the date the EQS was set."
+  },
+  "version": "Consolidated text 2008L0105, EN, 10.05.2026 (header '02008L0105 - EN - 10.05.2026 - 002.001'; the page title reads 'Consolidated TEXT: 32008L0105 - EN - 10.05.2026'), the latest consolidated version the Publications Office SPARQL endpoint lists for 02008L0105 (the only other one listed is 02008L0105-20130913, the version of the 2013 set). Annex I Part A (environmental quality standards) and Annex II Part C (harmonised EQS for river basin specific pollutants).",
+  "files": [
+    {
+      "file": "consolidated-02008L0105-20260510.xhtml",
+      "role": "source",
+      "url": "http://publications.europa.eu/resource/celex/02008L0105-20260510",
+      "fetch": "curl -sL with request headers 'Accept: application/xhtml+xml' and 'Accept-Language: en' (Publications Office content negotiation)",
+      "retrieved": "2026-10-23",
+      "bytes": 296037,
+      "sha256": "63874ec5c4c20c949c338121acf295831c1d7862dfb7240aa065158ef0175081",
+      "redistribution": "committed under the Commission reuse decision below"
+    },
+    {
+      "file": "eqs.csv",
+      "role": "table",
+      "generator": "packages/data/scripts/extract-eu-eqs-2026.ts",
+      "bytes": 77873,
+      "sha256": "c38e5f43c6eb842b334c759587ee6fd72fc22fc6882dec6587480a13958052e4"
+    }
+  ],
+  "actFetched": {
+    "file": "32026L0805.xhtml",
+    "url": "http://publications.europa.eu/resource/celex/32026L0805",
+    "fetch": "curl -sL with request headers 'Accept: application/xhtml+xml' and 'Accept-Language: en'",
+    "retrieved": "2026-10-23",
+    "bytes": 805142,
+    "sha256": "6c29912ee17d913910e3272bafbda0c6db334bf6874bb7044dbdecf238e5005d",
+    "committed": false,
+    "why": "The Official Journal act was read to identify the amendment and the dates of application and to check that Annex VI is the annex the consolidated text carries. The consolidated text is the committed source because it carries the amended Part A and the new Annex II Part C in one document; the SHA-256 lets the act be re-checked against a re-fetch."
+  },
+  "terms": {
+    "statement": "Reuse of documents of the EU institutions published by the Publications Office, including EUR-Lex legal acts, is authorised under Commission Decision 2011/833/EU of 12 December 2011 on the reuse of Commission documents, which permits reuse for commercial and non-commercial purposes without charge and without individual application (Articles 1 to 6), except for documents covered by Article 2(2) (third-party intellectual property, logos, software).",
+    "url": "http://publications.europa.eu/resource/celex/32011D0833",
+    "urlFetched": "2026-10-23",
+    "urlSha256": "2d5bc877b9a5aad948af21c680aca1d3409f41df5dd0dcc57ef9b1b225f60982",
+    "note": "The EUR-Lex legal notice page (eur-lex.europa.eu/content/legal-notice/legal-notice.html) answered with a bot challenge and could not be read; the decision text itself was read."
+  },
+  "mapping": {
+    "freshwater": "'Inland surface waters' (rivers and lakes and related artificial or heavily modified water bodies, footnote 4)",
+    "marine": "'Other surface waters' (the annex does not define the term further; the set treats it as the marine and transitional column)",
+    "basis": "AA-EQS = annual average; MAC-EQS = maximum allowable concentration; unit as printed, 'μg/l' for columns 6 to 9 of Annex I Part A"
+  },
+  "omitted": {
+    "biota": "Column 10 (EQS biota or sediment, μg/kg) is not transcribed; the medium list is water only. Article 3(2) as replaced applies the biota or sediment EQS instead of the water EQS where Part A prints one, so the water rows of those substances are not the standard applied.",
+    "notApplicableOrBlank": "78 water cells printed 'not applicable', 'not derived', 'see footnote' or left blank produce no row (including the AA-EQS water cells of brominated diphenylethers, hexachlorobenzene and mercury, the MAC cells of entries 17 alpha-ethinylestradiol, 17 beta-estradiol, estrone and ibuprofen, and the dioxin water cells)",
+    "pfos": "Entry 35 (PFOS and its derivatives) prints no water cells, only 'Covered by substance group 65 (Per- and polyfluoroalkyl substances (PFAS) – sum of 25)'; it produces no row. Entry 65 (PFAS) carries the sum expressed as PFOA equivalents.",
+    "annexIII": "Annex III (sum of bisphenols, sums of selected pesticides and pharmaceuticals by mode of action) prints no EQS and produces no row."
+  },
+  "notes": {
+    "annexIIPartC": "Alachlor, carbon tetrachloride, chlorfenvinphos, simazine, trichlorobenzenes and atrazine (Annex I Part A entries 1, 6a, 8, 29, 31 and 3 in the amended text) are printed 'moved to Part C of Annex II' and keep their 2013 values there. Their 20 water rows carry table_or_page 'Annex II Part C table'.",
+    "undatedChanges": "The water cells of hexachlorobenzene (entry 16, MAC inland 0.5 against 0.05 in 2013) and heptachlor and heptachlor epoxide (entry 44, AA 1.7e-7 in both columns against 2e-7 and 1e-8) differ from the 2013 set, but neither entry is named in Article 3(1a)(iii) or (iv), so the text gives no date of application for the changed value."
+  },
+  "counts": {
+    "rows": 272,
+    "partA": 252,
+    "partC": 20,
+    "distinctNamesPartA": 74
+  }
+}
