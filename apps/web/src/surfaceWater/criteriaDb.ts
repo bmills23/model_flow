@@ -379,7 +379,8 @@ export function searchCriteriaChemicals(
       c: {
         id,
         name: p.name,
-        hasSurfaceWater: true,
+        // the set has no row of its own for it; the group row is named in coveredBy
+        hasSurfaceWater: false,
         hasSediment: false,
         coveredBy: `${p.group.name}, entry ${p.group.entry}`,
       },

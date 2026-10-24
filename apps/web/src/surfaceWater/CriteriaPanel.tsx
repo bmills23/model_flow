@@ -345,32 +345,36 @@ export function CriteriaPanel(props: {
           <p>
             <strong>{chosen.name}</strong> ({chosen.id})
           </p>
-          <Seg
-            legend="Water type of the criteria"
-            name="criteriaWater"
-            value={waterType}
-            onChange={setWaterType}
-            options={[
-              { value: 'fresh', label: 'Freshwater' },
-              { value: 'salt', label: 'Saltwater' },
-            ]}
-          />
-          <div className="fields">
-            <Field
-              label="Hardness (mg/L as CaCO3)"
-              value={hardness}
-              onChange={setHardness}
-              hint={
-                hasMetals
-                  ? 'Sets the freshwater criteria of this metal.'
-                  : 'Used by the hardness-dependent metals only. Blank uses 100.'
-              }
-            />
-          </div>
-          {hardnessBad && (
-            <div className="alert" role="alert">
-              Hardness must be a positive number.
-            </div>
+          {!covered && (
+            <>
+              <Seg
+                legend="Water type of the criteria"
+                name="criteriaWater"
+                value={waterType}
+                onChange={setWaterType}
+                options={[
+                  { value: 'fresh', label: 'Freshwater' },
+                  { value: 'salt', label: 'Saltwater' },
+                ]}
+              />
+              <div className="fields">
+                <Field
+                  label="Hardness (mg/L as CaCO3)"
+                  value={hardness}
+                  onChange={setHardness}
+                  hint={
+                    hasMetals
+                      ? 'Sets the freshwater criteria of this metal.'
+                      : 'Used by the hardness-dependent metals only. Blank uses 100.'
+                  }
+                />
+              </div>
+              {hardnessBad && (
+                <div className="alert" role="alert">
+                  Hardness must be a positive number.
+                </div>
+              )}
+            </>
           )}
           {covered && db && <CoveredBlock db={db} pointer={covered} />}
           {!inSet && !covered && (

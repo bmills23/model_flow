@@ -122,6 +122,28 @@ describe('SurfaceWaterScreen', () => {
     });
   }, 60000);
 
+  it('shows no water type or hardness for a chemical a group row covers, and does for one with a row', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /compare with water quality criteria/i }));
+    const panel = await screen.findByRole('region', { name: /comparison with criteria/i });
+    fireEvent.change(within(panel).getByLabelText(/^criteria set/i), {
+      target: { value: 'eu2026' },
+    });
+    const search = await within(panel).findByLabelText(/find a chemical for the criteria/i);
+    await waitFor(() => expect((search as HTMLInputElement).disabled).toBe(false), {
+      timeout: 15000,
+    });
+    fireEvent.change(search, { target: { value: '1763-23-1' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare perfluoro/i }));
+    expect(within(panel).queryByLabelText(/hardness/i)).toBeNull();
+    expect(within(panel).queryByText(/water type of the criteria/i)).toBeNull();
+    // a chemical with a row of its own keeps both
+    fireEvent.change(search, { target: { value: '71-43-2' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare benzene/i }));
+    expect(within(panel).getByLabelText(/hardness/i)).toBeTruthy();
+    expect(within(panel).getByText(/water type of the criteria/i)).toBeTruthy();
+  }, 60000);
+
   it('offers the sets, keeps the US pair as the default, and shows basis, medium and source with each value', async () => {
     await loaded();
     fireEvent.click(screen.getByRole('button', { name: /compare with water quality criteria/i }));

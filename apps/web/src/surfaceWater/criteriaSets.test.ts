@@ -272,6 +272,8 @@ describe('a chemical the text points to a group row (eu2026 PFOS)', () => {
     for (const q of ['perfluorooctane sulfonic', PFOS]) {
       const hit = searchCriteriaChemicals(db('eu2026'), q).find((c) => c.id === PFOS);
       expect(hit?.coveredBy, q).toMatch(/PFAS.*entry 65/);
+      // the set has no row of its own for it, so the hit does not claim one
+      expect(hit?.hasSurfaceWater, q).toBe(false);
     }
   });
 });
