@@ -92,6 +92,20 @@ describe('PVI panel', () => {
     expect(r.result.separation).toBe(7);
   });
 
+  it('gives no verdict while every source concentration is blank, and lists what is missing', () => {
+    const r = runPvi(base, 2.8, 150);
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.error).toMatch(/no verdict/i);
+    for (const name of [/soil benzene/i, /soil TPH/i, /groundwater benzene/i, /groundwater TPH/i]) {
+      expect(r.error).toMatch(name);
+    }
+  });
+
+  it('gives no verdict for a stated source type while the concentrations are blank', () => {
+    expect(runPvi({ ...base, sourceType: 'dissolved' }, 2.8, 150).ok).toBe(false);
+  });
+
   it('reports an unreadable field', () => {
     const r = runPvi({ ...base, gwBenzene: 'x' }, 2.8, 150);
     expect(r.ok).toBe(false);
