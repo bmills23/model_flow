@@ -5,9 +5,14 @@ import { loadChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
 import { emptyOverrides, setField, type OverridesState } from '../overrides/model';
 import { savedFixture } from '../cleanup/modeledLevels.testkit';
-import { modeledLevelsFingerprint, type SavedModeledLevels } from '../cleanup/modeledLevels';
+import {
+  chainFingerprint,
+  modeledLevelsFingerprint,
+  type SavedModeledLevels,
+} from '../cleanup/modeledLevels';
 import { overridesOf, screensOf } from '../project';
 import { withProjectReceptorEdits } from './userValues';
+import { effectiveDb } from '../overrides/userChemicals';
 import { computeResults, tableText } from './results';
 
 const NOW = new Date('2026-10-18T12:00:00.000Z');
@@ -482,6 +487,47 @@ describe('computeResults, one block per chemical', () => {
     expect(gw.current).toEqual({ chemical: 'Toluene', sentTo: null });
   }, 60000);
 
+  it('says the screen run changed since it was sent when the transport inputs were edited and not sent again', async () => {
+    const sent = defaultScreens();
+    sent.transport = { ...sent.transport, form: { ...sent.transport.form, chemicalId: '71-43-2' } };
+    const now = defaultScreens();
+    now.transport = {
+      ...now.transport,
+      form: { ...now.transport.form, chemicalId: '71-43-2', K: '77' },
+    };
+    const p = buildProject({
+      screens: now,
+      feeds: {
+        well: { '71-43-2': feedEntry('transport', sent.transport.form, well('71-43-2', 2e-3)) },
+      } as never,
+      createdWith: '0.0.1',
+      now: NOW,
+    });
+    const gw = (await computeResults(p))['transport']!;
+    // the block still prints the sent run; the screen's own tables are a different run
+    expect(gw.chemicals!.map((b) => b.name)).toEqual(['Benzene']);
+    expect(gw.current).toEqual({
+      chemical: 'Benzene',
+      sentTo: null,
+      changedSince: 'the exposure and risk screen',
+    });
+  }, 60000);
+
+  it('keeps saying the run was sent while the transport inputs still match the send', async () => {
+    const same = defaultScreens();
+    same.transport = { ...same.transport, form: { ...same.transport.form, chemicalId: '71-43-2' } };
+    const p = buildProject({
+      screens: same,
+      feeds: {
+        well: { '71-43-2': feedEntry('transport', same.transport.form, well('71-43-2', 2e-3)) },
+      } as never,
+      createdWith: '0.0.1',
+      now: NOW,
+    });
+    const gw = (await computeResults(p))['transport']!;
+    expect(gw.current).toEqual({ chemical: 'Benzene', sentTo: 'the exposure and risk screen' });
+  }, 60000);
+
   it('has no block and only the current run label for a screen that sent nothing', async () => {
     const r = await computeResults(
       project((s) => {
@@ -509,6 +555,58 @@ describe('computeResults, one block per chemical', () => {
     expect(r['transport']!.notes.join(' ')).toMatch(/^Not computed/);
     expect(r['transport']!.chemicals!.map((b) => b.name)).toEqual(['Benzene']);
     expect(r['transport']!.current).toBeDefined();
+  }, 60000);
+});
+
+describe('computeResults, the surface water method basis', () => {
+  const sw = (chemicalId: string, method: 'well-mixed' | 'mass-discharge') => ({
+    method,
+    origin: `surfaceWater.${method}`,
+    label: 'sent surface water',
+    chemicalId,
+    times: [1],
+    values: [1e-6],
+  });
+  const make = (formChemical: string, sent: Record<string, ReturnType<typeof sw>>) => {
+    const screens = defaultScreens();
+    screens.surfaceWater = {
+      form: { ...screens.surfaceWater.form, volume: '3.3', chemicalId: formChemical },
+    } as Screens['surfaceWater'];
+    return buildProject({
+      screens,
+      feeds: {
+        surfaceWater: Object.fromEntries(
+          Object.entries(sent).map(([id, v]) => [
+            id,
+            feedEntry('surfaceWater', screens.surfaceWater.form, v),
+          ]),
+        ),
+      } as never,
+      createdWith: '0.0.1',
+      now: NOW,
+    });
+  };
+
+  it('does not take another chemical sent method when the form is on a chemical nothing was sent for', async () => {
+    const r = await computeResults(make('108-88-3', { '71-43-2': sw('71-43-2', 'well-mixed') }));
+    const basis = r['surfaceWater']!.methodBasis!;
+    expect(basis.basis).toBe('modern method');
+    expect(basis.statement).toMatch(
+      /No method was sent to the exposure and risk screen for this chemical/,
+    );
+    expect(basis.statement).not.toMatch(/the one sent/);
+  }, 60000);
+
+  it('takes the method sent for the chemical the form is on', async () => {
+    const r = await computeResults(
+      make('71-43-2', {
+        '71-43-2': sw('71-43-2', 'well-mixed'),
+        '108-88-3': sw('108-88-3', 'mass-discharge'),
+      }),
+    );
+    const basis = r['surfaceWater']!.methodBasis!;
+    expect(basis.basis).toBe('legacy method');
+    expect(basis.statement).toMatch(/the one sent to the exposure and risk screen/);
   }, 60000);
 });
 
@@ -658,7 +756,7 @@ describe('computeResults, modeled cleanup levels kept with the project', () => {
       modeledLevelsFingerprint({
         cleanup: saved.cleanup.form,
         chemicalId: id,
-        transportForm: saved.transport.form,
+        chain: chainFingerprint(saved.transport.form),
         vadose: null,
         saturated: null,
         rec: db.byId.get(id),
@@ -729,6 +827,159 @@ describe('computeResults, modeled cleanup levels kept with the project', () => {
     const text = sec.notes.join(' ');
     expect(text).toMatch(/Toluene[^.]*out of date/i);
     expect(text).not.toMatch(/Xylenes[^.]*out of date/i);
+  }, 60000);
+
+  describe('two chemicals, each judged against its own groundwater run', () => {
+    // the groundwater screen is set to Toluene (Kd and chemical differ from the run Xylenes was sent with)
+    // and its velocity was edited after the Xylenes run was sent
+    const onToluene = (s: Screens) => {
+      s.transport = {
+        ...s.transport,
+        form: { ...s.transport.form, chemicalId: '108-88-3', kd: '3.3', K: '99' },
+      } as Screens['transport'];
+    };
+    const xylenesRun = 'run-sent-for-xylenes';
+    const keepBoth = (fp: (id: string, chain: string) => string) => ({
+      '1330-20-7': savedFixture({ fingerprint: fp('1330-20-7', xylenesRun) }),
+    });
+
+    async function judged(session: Parameters<typeof computeResults>[1]) {
+      const db = await loadChemicalDb();
+      const screens = defaultScreens();
+      screens.cleanup = {
+        form: {
+          ...screens.cleanup.form,
+          source: 'dissolved',
+          chemicals: ['1330-20-7', '108-88-3'].map((id) => newChemicalRow(db.byId.get(id)!)),
+        },
+      };
+      onToluene(screens);
+      const saved = withProjectReceptorEdits(
+        screens,
+        overridesOf(buildProject({ screens, createdWith: '0', now: NOW })),
+      );
+      const fp = (id: string, chain: string): string =>
+        modeledLevelsFingerprint({
+          cleanup: saved.cleanup.form,
+          chemicalId: id,
+          chain,
+          vadose: null,
+          saturated: null,
+          rec: db.byId.get(id),
+          edition: db.edition,
+        });
+      return computeResults(
+        buildProject({ screens, modeledLevels: keepBoth(fp), createdWith: '0.0.1', now: NOW }),
+        session,
+      );
+    }
+
+    it('prints the levels of a chemical whose run is held, after another chemical was picked on the groundwater screen', async () => {
+      const r = await judged({ chainHash: (id) => (id === '1330-20-7' ? xylenesRun : undefined) });
+      const sec = r['cleanup']!;
+      expect(sec.tables.map((t) => t.name)).toEqual(['cleanup-modeled-levels-1330-20-7']);
+      expect(sec.notes.join(' ')).not.toMatch(/Xylenes[^.]*(out of date|cannot be confirmed)/i);
+    }, 60000);
+
+    it('calls the levels out of date when the run held for the chemical is a different one', async () => {
+      const r = await judged({ chainHash: () => 'a-run-sent-after-an-edit' });
+      const sec = r['cleanup']!;
+      expect(sec.tables).toEqual([]);
+      expect(sec.notes.join(' ')).toMatch(/Xylenes[^.]*out of date/i);
+    }, 60000);
+
+    it('says the levels cannot be confirmed when no run is held and the screen is set to another chemical', async () => {
+      const r = await judged({});
+      const sec = r['cleanup']!;
+      expect(sec.tables).toEqual([]);
+      const text = sec.notes.join(' ');
+      expect(text).toMatch(
+        /Xylenes: The modeled cleanup levels kept with this project cannot be confirmed/,
+      );
+      expect(text).toMatch(/not saved with the project/);
+    }, 60000);
+  });
+
+  it('says a kept entry that could not be read could not be read, and that the cleanup screen solves it again', async () => {
+    const db = await loadChemicalDb();
+    const screens = defaultScreens();
+    screens.cleanup = {
+      form: {
+        ...screens.cleanup.form,
+        source: 'dissolved',
+        chemicals: [newChemicalRow(db.byId.get('1330-20-7')!)],
+      },
+    };
+    const doc = JSON.parse(
+      JSON.stringify(
+        buildProject({
+          screens,
+          modeledLevels: { '1330-20-7': savedFixture() },
+          createdWith: '0.0.1',
+          now: NOW,
+        }),
+      ),
+    ) as Record<string, unknown>;
+    (doc['modeledLevels'] as Record<string, unknown>)['1330-20-7'] = {
+      chemicalId: '1330-20-7',
+      nonsense: 1,
+    };
+    const r = await computeResults(doc as never);
+    const text = r['cleanup']!.notes.join(' ');
+    expect(text).toMatch(/could not be read/);
+    expect(text).toMatch(/cleanup screen[^.]*solves them again/);
+    expect(text).not.toMatch(/have not been solved/);
+  }, 60000);
+
+  it('holds a user-defined chemical against the solubility the user entered for it, labelled as theirs', async () => {
+    const base = await loadChemicalDb();
+    const chemicals = [
+      {
+        id: 'user-1',
+        name: 'Mine',
+        values: {
+          rfdo: { value: '0.02', note: 'lab memo' },
+          s: { value: '42', note: 'measured at the site' },
+        },
+      },
+    ];
+    const db = effectiveDb(base, emptyOverrides(), chemicals);
+    const screens = defaultScreens();
+    screens.cleanup = {
+      form: {
+        ...screens.cleanup.form,
+        source: 'dissolved',
+        chemicals: [newChemicalRow(db.byId.get('user-1')!)],
+      },
+    };
+    const fp = modeledLevelsFingerprint({
+      cleanup: screens.cleanup.form,
+      chemicalId: 'user-1',
+      chain: chainFingerprint(screens.transport.form),
+      vadose: null,
+      saturated: null,
+      rec: db.byId.get('user-1'),
+      edition: db.edition,
+    });
+    const r = await computeResults(
+      buildProject({
+        screens,
+        chemicals,
+        modeledLevels: {
+          'user-1': savedFixture({ chemicalId: 'user-1', chemical: 'Mine', fingerprint: fp }),
+        },
+        createdWith: '0.0.1',
+        now: NOW,
+      }),
+    );
+    const sec = r['cleanup']!;
+    const row = sec.tables.find((t) => t.name === 'cleanup-modeled-levels')!.rows[0]!;
+    expect(String(row['solubility'])).toMatch(/481 mg\/L is above the solubility of 42 mg\/L/);
+    expect(String(row['solubility'])).toMatch(/entered by the user/);
+    expect(String(row['solubility'])).not.toMatch(/Regional Screening Levels/);
+    expect(sec.notes.join(' ')).toMatch(
+      /Solubility used for Mine: 42 mg\/L \(a solubility entered by the user/,
+    );
   }, 60000);
 
   it('leaves a level that is not reached empty and gives the reason', async () => {

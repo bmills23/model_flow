@@ -3,6 +3,7 @@ import { csvHeader, type CsvCell } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import {
   chemicalsOf,
+  feedEntry,
   modeledLevelsOf,
   overridesOf,
   screensOf,
@@ -11,14 +12,18 @@ import {
 } from '../project';
 import { decodeJson } from '../project/codec';
 import { screenUsed, USED_SCREENS_ORDER, type FeedsLike, type ScreenKey } from './methodsRun';
-import { effectiveDb } from '../overrides/userChemicals';
+import { effectiveDb, userCleanupProps } from '../overrides/userChemicals';
 import { withProjectReceptorEdits } from './userValues';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { buildInputs } from '../risk/build';
 import { runRisk } from '../risk/compute';
 import { riskCsvTables, RISK_METHOD_IDS } from '../risk/csv';
 import { buildCleanup } from '../cleanup/build';
-import { modeledLevelsFingerprint, type SavedModeledLevels } from '../cleanup/modeledLevels';
+import {
+  chainFingerprint,
+  modeledLevelsFingerprint,
+  type SavedModeledLevels,
+} from '../cleanup/modeledLevels';
 import { solubilityCeiling, solubilityText } from '../cleanup/solubility';
 import { runCleanup } from '../cleanup/compute';
 import { sourceLevelCsvTables, surfaceSolveJobs } from '../cleanup/sourceLevelsCsv';
@@ -215,10 +220,25 @@ export function feedOf<T>(project: Project, key: string, chemicalId?: string): T
   return pickSlot(feedSlotsOf<T>(project, key), chemicalId);
 }
 
+/**
+ * The fingerprint of the sending screen's form recorded when the slot of `key` was sent (see
+ * `feedEntry`), or null when the slot holds none.
+ */
+export function feedHashOf(project: Project, key: string, slot: string): string | null {
+  const entry = (project.feeds as Record<string, unknown> | undefined)?.[key];
+  if (entry === undefined || entry === null) return null;
+  const e = (
+    isChemicalFeed(key) ? (entry as Record<string, unknown>)[slot] : slot === '' ? entry : undefined
+  ) as { inputsHash?: unknown } | undefined;
+  return typeof e?.inputsHash === 'string' ? e.inputsHash : null;
+}
+
 /** A section's access to the stored feeds: one consumer's slot, or every slot of a feed. */
 interface Feed {
   <T>(key: string, chemicalId?: string): T | null;
   slots: <T>(key: string) => FeedSlots<T>;
+  /** The form fingerprint recorded when the slot was sent, or null. */
+  hash: (key: string, slot: string) => string | null;
 }
 
 function transport(s: Screens, feed: Feed): SectionResults {
@@ -417,6 +437,45 @@ function risk(s: Screens, feed: Feed, db: ChemicalDb): SectionResults {
   return sec;
 }
 
+/** The entries the file holds under `modeledLevels`, parsed or not. */
+function rawModeledLevels(project: Project): Record<string, unknown> {
+  const raw = project.modeledLevels as unknown;
+  return typeof raw === 'object' && raw !== null && !Array.isArray(raw)
+    ? (raw as Record<string, unknown>)
+    : {};
+}
+
+/** What the cleanup section knows beyond the screens: the kept modeled levels and what judges them. */
+interface KeptLevels {
+  /** The levels the project carries, by chemical id. */
+  saved: Record<string, SavedModeledLevels>;
+  /** Chemical ids the file holds an entry for that could not be read. */
+  unreadable: ReadonlySet<string>;
+  /** The solubility the user entered for each user-defined chemical. */
+  userProps: CleanupProps;
+  /** The fingerprint of the groundwater run held for a chemical in this session, when there is one. */
+  chainHash?: (chemicalId: string) => string | undefined;
+}
+
+/** What a caller who holds more than the saved project can tell the report. */
+export interface ReportSession {
+  /** The fingerprint of the groundwater run the session holds for a chemical (see `getChainHash`). */
+  chainHash?: (chemicalId: string) => string | undefined;
+}
+
+/**
+ * The fingerprint of the groundwater run the kept levels of `id` are judged against: the run this session
+ * holds for the chemical, else, when the groundwater screen is set to this chemical (or to none), the run
+ * that screen would send now. With the screen on another chemical and no run held the chain cannot be
+ * told, and the levels cannot be confirmed.
+ */
+function chainOf(id: string, s: Screens, kept: KeptLevels): string | null {
+  const live = kept.chainHash?.(id);
+  if (live !== undefined) return live;
+  const onScreen = slotOf(s.transport.form.chemicalId);
+  return onScreen === '' || onScreen === id ? chainFingerprint(s.transport.form) : null;
+}
+
 /**
  * The modeled cleanup levels of a groundwater, vadose or saturated source (docs/DECISIONS.md, wave AA
  * ruling 2). The report does not solve them: the groundwater chain they go through holds a function and is
@@ -429,8 +488,9 @@ function modeledCleanup(
   feed: Feed,
   db: ChemicalDb,
   props: CleanupProps,
-  saved: Record<string, SavedModeledLevels>,
+  kept: KeptLevels,
 ): SectionResults {
+  const saved = kept.saved;
   const form = s.cleanup.form;
   const sec = empty();
   const many = form.chemicals.length > 1;
@@ -440,46 +500,59 @@ function modeledCleanup(
   }
   for (const row of form.chemicals) {
     const who = many ? `${row.name}: ` : '';
-    const kept = saved[row.id];
-    if (kept === undefined) {
+    const held = saved[row.id];
+    if (held === undefined && kept.unreadable.has(row.id)) {
+      sec.notes.push(
+        `${who}The modeled cleanup levels kept with this project could not be read. Open the cleanup screen with the groundwater run sent from the groundwater screen: it solves them again, and they are then kept with the project and printed here.`,
+      );
+      continue;
+    }
+    if (held === undefined) {
       sec.notes.push(
         `${who}The modeled cleanup levels have not been solved for this project. Open the cleanup screen with the groundwater run sent from the groundwater screen; the screen solves them and they are then kept with the project and printed here.`,
+      );
+      continue;
+    }
+    const chain = chainOf(row.id, s, kept);
+    if (chain === null) {
+      sec.notes.push(
+        `${who}The modeled cleanup levels kept with this project cannot be confirmed: they were solved through a groundwater run that is not held now (a run is not saved with the project) and the groundwater screen is set to another chemical. Send the run for ${row.name} from the groundwater screen, then open the cleanup screen: it solves them again, and the report then prints the new levels.`,
       );
       continue;
     }
     const now = modeledLevelsFingerprint({
       cleanup: form,
       chemicalId: row.id,
-      transportForm: s.transport.form,
+      chain,
       vadose: feed<VadoseFeed>('vadose', row.id),
       saturated: feed<SaturatedFeed>('saturated', row.id),
       rec: db.byId.get(row.id),
       edition: db.edition,
     });
-    if (now !== kept.fingerprint) {
+    if (now !== held.fingerprint) {
       sec.notes.push(
         `${who}The modeled cleanup levels kept with this project are out of date, because an input they were solved from has changed since. Open the cleanup screen: it solves them again, and the report then prints the new levels.`,
       );
       continue;
     }
-    const ceiling = solubilityCeiling(form.solubility, row.id, props, db.edition);
-    const table = savedLevelsTable(kept, ceiling);
+    const ceiling = solubilityCeiling(form.solubility, row.id, props, db.edition, kept.userProps);
+    const table = savedLevelsTable(held, ceiling);
     sec.tables.push(
       many
         ? { ...table, name: `${table.name}-${row.id}`, label: `${table.label}, ${row.name}` }
         : table,
     );
-    for (const n of kept.notes) {
+    for (const n of held.notes) {
       addWarnings(sec, 'cleanup screen', [{ code: 'ui.source-note', message: `${who}${n}` }]);
     }
     for (const m of ['legacy', 'modern'] as const) {
-      const o = kept.methods[m];
+      const o = held.methods[m];
       if (o === undefined) continue;
       if (o.ok) addWarnings(sec, MODELED_METHOD_ID, o.warnings);
       else sec.notes.push(`${who}The ${METHOD_NAME[m]} did not run: ${o.error}`);
     }
   }
-  noteSolubilities(sec, form, props, db.edition);
+  noteSolubilities(sec, form, props, db.edition, kept.userProps);
   noteSolubilityFlags(sec);
   return sec;
 }
@@ -493,9 +566,10 @@ function noteSolubilities(
   form: Screens['cleanup']['form'],
   props: CleanupProps,
   edition: string,
+  user: CleanupProps,
 ): void {
   for (const row of form.chemicals) {
-    const c = solubilityCeiling(form.solubility, row.id, props, edition);
+    const c = solubilityCeiling(form.solubility, row.id, props, edition, user);
     if (c !== null) {
       sec.notes.push(`Solubility used for ${row.name}: ${solubilityText(c)}.`);
     }
@@ -517,15 +591,15 @@ async function cleanup(
   feed: Feed,
   db: ChemicalDb,
   props: () => Promise<CleanupProps>,
-  saved: Record<string, SavedModeledLevels> = {},
+  kept: KeptLevels,
 ): Promise<SectionResults> {
   const form = s.cleanup.form;
-  if (form.source !== 'direct') return modeledCleanup(s, feed, db, await props(), saved);
+  if (form.source !== 'direct') return modeledCleanup(s, feed, db, await props(), kept);
   const sec = empty();
   // the solubility a dissolved level is held against: the database value unless the user entered one
   const cleanupProps = await props();
   const ceilingOf = (id: string) =>
-    solubilityCeiling(form.solubility, id, cleanupProps, db.edition);
+    solubilityCeiling(form.solubility, id, cleanupProps, db.edition, kept.userProps);
   const built = buildCleanup(form, db, { produce: feed.slots<ProduceRiskFeed>('produce') });
   const tphHeld = feed<TphRiskFeed>('tph');
   if (tphHeld !== null) {
@@ -588,7 +662,7 @@ async function cleanup(
       sec.notes.push(`Leaching level not computed: ${out.errors.join('; ')}`);
     }
   }
-  noteSolubilities(sec, form, cleanupProps, db.edition);
+  noteSolubilities(sec, form, cleanupProps, db.edition, kept.userProps);
   noteSolubilityFlags(sec);
   return sec;
 }
@@ -658,13 +732,19 @@ function uncertainty(): SectionResults {
  * project's stored feeds, decoded as loading the project decodes them. A screen that cannot be
  * computed (a form that does not parse, an engine refusal) says why in its notes.
  */
-export async function computeResults(project: Project): Promise<ProjectResults> {
+export async function computeResults(
+  project: Project,
+  session: ReportSession = {},
+): Promise<ProjectResults> {
   const saved = screensOf(project);
   const screens = withProjectReceptorEdits(saved, overridesOf(project));
   const feeds = project.feeds as FeedsLike | undefined;
   const feed: Feed = Object.assign(
     <T>(key: string, chemicalId?: string): T | null => feedOf<T>(project, key, chemicalId),
-    { slots: <T>(key: string): FeedSlots<T> => feedSlotsOf<T>(project, key) },
+    {
+      slots: <T>(key: string): FeedSlots<T> => feedSlotsOf<T>(project, key),
+      hash: (key: string, slot: string): string | null => feedHashOf(project, key, slot),
+    },
   );
   // used-ness is judged on the saved forms: a receptor edit alone does not make a screen used
   const used = USED_SCREENS_ORDER.filter((k) => screenUsed(k, saved, feeds));
@@ -684,11 +764,17 @@ export async function computeResults(project: Project): Promise<ProjectResults> 
     }
   }
   const nameOf = chemicalNamer(project, db);
-  const modeledLevels = modeledLevelsOf(project);
+  const keptLevels = modeledLevelsOf(project);
+  const kept: KeptLevels = {
+    saved: keptLevels,
+    unreadable: new Set(Object.keys(rawModeledLevels(project)).filter((id) => !(id in keptLevels))),
+    userProps: userCleanupProps(chemicalsOf(project)),
+    ...(session.chainHash ? { chainHash: session.chainHash } : {}),
+  };
   const out: ProjectResults = {};
   for (const key of used) {
     try {
-      const sec = await computeOne(key, screens, feed, db, dbError, modeledLevels);
+      const sec = await computeOne(key, screens, feed, db, dbError, kept);
       if (sec.tables.length === 0 && sec.notes.length === 0) {
         sec.notes.push('No result yet: the inputs entered are not enough to compute one.');
       }
@@ -760,16 +846,28 @@ function attachChemicals(
   if (blocks.length > 0) sec.chemicals = blocks;
   const id = currentChemicalId(key, screens, feed);
   const typed = (screens[key] as { form?: { chemicalName?: string } }).form?.chemicalName?.trim();
-  const to = [
-    ...new Set(
-      Object.entries(sentTo)
-        .filter(([f]) => feed.slots(f).has(slotOf(id)))
-        .map(([, screen]) => screen),
-    ),
-  ];
+  // a result counts as the screen's run only while the screen's inputs still match the ones recorded
+  // when it was sent; otherwise it is an earlier run, printed in the block above, and the tables of
+  // this section are a different run that was not sent
+  const now = feedEntry(
+    key as keyof Screens,
+    (screens[key] as { form?: unknown }).form,
+    0,
+  ).inputsHash;
+  const sentSlots = Object.entries(sentTo).filter(([f]) => feed.slots(f).has(slotOf(id)));
+  const destinations = (match: boolean): string | null => {
+    const to = [
+      ...new Set(
+        sentSlots.filter(([f]) => (feed.hash(f, slotOf(id)) === now) === match).map(([, s]) => s),
+      ),
+    ];
+    return to.length === 0 ? null : to.join(' and ');
+  };
+  const changed = destinations(false);
   sec.current = {
     chemical: id === '' ? (typed ? typed : 'a chemical entered by hand') : nameOf(id),
-    sentTo: to.length === 0 ? null : to.join(' and '),
+    sentTo: destinations(true),
+    ...(changed === null ? {} : { changedSince: changed }),
   };
 }
 
@@ -785,10 +883,13 @@ function sectionBasis(
   sec: SectionResults,
 ): MethodBasis | null {
   if (sec.tables.length === 0) return null;
+  // the method sent for the chemical the screen shows (a linked run takes the bank run's chemical), from
+  // that chemical's own slot only: another chemical's sent method is not this chemical's basis
   const sent =
     key === 'surfaceWater'
-      ? (feed<SurfaceWaterFeed>('surfaceWater', screens.surfaceWater.form.chemicalId)?.method ??
-        null)
+      ? (feed
+          .slots<SurfaceWaterFeed>('surfaceWater')
+          .get(slotOf(currentChemicalId(key, screens, feed)))?.method ?? null)
       : null;
   const choice = basisChoice(key, screens, sent);
   if (choice === null) return null;
@@ -809,7 +910,7 @@ async function computeOne(
   feed: Feed,
   db: ChemicalDb | null,
   dbError: string,
-  modeledLevels: Record<string, SavedModeledLevels>,
+  kept: KeptLevels,
 ): Promise<SectionResults> {
   switch (key) {
     case 'transport':
@@ -828,7 +929,7 @@ async function computeOne(
         : notComputed(`the chemical database did not load (${dbError})`);
     case 'cleanup':
       return db
-        ? cleanup(s, feed, db, loadCleanupProps, modeledLevels)
+        ? cleanup(s, feed, db, loadCleanupProps, kept)
         : notComputed(`the chemical database did not load (${dbError})`);
     case 'household':
       return household(s, feed);

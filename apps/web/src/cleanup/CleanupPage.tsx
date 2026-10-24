@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
   addChemical as addProjectChemical,
+  getChemicals,
   getScreen,
   removeProjectChemical,
   setScreen,
+  subscribeChemicals,
 } from '../project/store';
+import { userCleanupProps } from '../overrides/userChemicals';
 import { useFollowList } from '../project/useFollowList';
 import { RemoveChemicalConfirm } from '../project/RemoveChemicalConfirm';
 import { Field, Seg } from '../ui/controls';
@@ -198,10 +201,13 @@ export function CleanupPage() {
   });
   // the solubility each chemical's dissolved levels are held against: the database value unless the user entered one
   const cleanupProps = useCleanupProps();
+  // a user-defined chemical carries the solubility the user entered for it
+  const projectChemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
+  const userProps = useMemo(() => userCleanupProps(projectChemicals), [projectChemicals]);
   const edition = db?.edition ?? '';
   const ceilingOf = useCallback(
-    (id: string) => solubilityCeiling(form.solubility, id, cleanupProps, edition),
-    [form.solubility, cleanupProps, edition],
+    (id: string) => solubilityCeiling(form.solubility, id, cleanupProps, edition, userProps),
+    [form.solubility, cleanupProps, edition, userProps],
   );
   const current: Snapshot | null = built?.ok && outcome ? { built, outcome } : null;
   const needsInput =
@@ -589,7 +595,9 @@ export function CleanupPage() {
                         ? solubilityText(ceiling)
                         : cleanupProps === null
                           ? 'loading the database solubility'
-                          : 'the database gives no solubility, so no level is flagged'}
+                          : userProps.has(c.id)
+                            ? 'no solubility was entered for this chemical, so no level is flagged'
+                            : 'the database gives no solubility, so no level is flagged'}
                     </li>
                   );
                 })}

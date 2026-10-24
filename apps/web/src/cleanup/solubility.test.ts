@@ -14,6 +14,39 @@ const props: CleanupProps = new Map([
   ['7440-38-2', {}],
 ]);
 
+describe('solubilityCeiling for a user chemical', () => {
+  const user: CleanupProps = new Map([
+    ['user-1', { s: 42 }],
+    ['user-2', { koc: 10 }],
+  ]);
+
+  it('uses the solubility the user entered for the chemical, labelled as entered by the user', () => {
+    const c = solubilityCeiling('', 'user-1', props, '2024-11', user);
+    expect(c).toMatchObject({ value: 42, origin: 'user' });
+    expect(c!.source).toMatch(/entered by the user/i);
+    expect(c!.source).not.toMatch(/Regional Screening Levels/);
+    expect(solubilityText(c!)).toMatch(/^42 mg\/L \(.*entered by the user/);
+  });
+
+  it('lets a ceiling typed on the cleanup screen win over the chemical value', () => {
+    expect(solubilityCeiling('10', 'user-1', props, '2024-11', user)).toMatchObject({
+      value: 10,
+      origin: 'entered',
+    });
+  });
+
+  it('has no ceiling for a user chemical that gave no solubility', () => {
+    expect(solubilityCeiling('', 'user-2', props, '2024-11', user)).toBeNull();
+  });
+
+  it('flags a level above it as above the solubility', () => {
+    const c = solubilityCeiling('', 'user-1', props, '2024-11', user);
+    expect(solubilityFlag('Mine', 100, c)).toMatch(
+      /above the solubility of 42 mg\/L \(.*entered by the user/,
+    );
+  });
+});
+
 describe('solubilityCeiling', () => {
   it('defaults to the database solubility of the chemical, with its source', () => {
     const c = solubilityCeiling('', '108-88-3', props, '2024-11');

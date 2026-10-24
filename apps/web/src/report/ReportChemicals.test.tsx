@@ -86,6 +86,51 @@ describe('the report section of a fate screen with sent results', () => {
   });
 });
 
+describe('a run on the screen that changed after it was sent', () => {
+  it('names the block as the sent run and the tables that follow as the current screen run, not sent', () => {
+    const changed: ProjectResults = {
+      transport: {
+        ...results.transport!,
+        current: {
+          chemical: 'Benzene',
+          sentTo: null,
+          changedSince: 'the exposure and risk screen',
+        },
+      },
+    };
+    render(<ReportView report={report()} preparedBy="" results={changed} />);
+    const label = screen.getByText(/Run on the screen now: Benzene/).closest('p')!;
+    expect(label.textContent).toMatch(
+      /inputs have changed since a result was sent to the exposure and risk screen/,
+    );
+    expect(label.textContent).toMatch(
+      /block above shows the run that was sent to it, not this one/,
+    );
+    expect(label.textContent).toMatch(
+      /What follows in this section is the current run on the screen, which was not sent/,
+    );
+    expect(label.textContent).not.toMatch(/Its result was sent/);
+    expect(label.textContent).not.toMatch(/What follows in this section is this run\./);
+  });
+
+  it('keeps both statements when one send matches the screen and another does not', () => {
+    const both: ProjectResults = {
+      transport: {
+        ...results.transport!,
+        current: {
+          chemical: 'Benzene',
+          sentTo: 'the surface water screen',
+          changedSince: 'the exposure and risk screen',
+        },
+      },
+    };
+    render(<ReportView report={report()} preparedBy="" results={both} />);
+    const text = screen.getByText(/Run on the screen now: Benzene/).closest('p')!.textContent!;
+    expect(text).toMatch(/Its result was sent to the surface water screen/);
+    expect(text).toMatch(/changed since a result was sent to the exposure and risk screen/);
+  });
+});
+
 describe('the method basis and a disagreement', () => {
   it('flags a disagreement on an exceedance and names the basis and the sensitivity', () => {
     const rep = report();

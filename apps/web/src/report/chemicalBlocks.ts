@@ -40,8 +40,14 @@ export interface ChemicalBlock {
 /** The run a fate screen currently shows, and whether it was sent on. */
 export interface CurrentRun {
   chemical: string;
-  /** Where its result went, or null when it was not sent. */
+  /** Where a result of exactly this run went, or null when none did. */
   sentTo: string | null;
+  /**
+   * Where a result of an earlier run of this chemical went, when the screen's inputs have changed since
+   * it was sent: the block above is that sent run, and this section's tables are not. Absent when no sent
+   * result is out of step with the screen.
+   */
+  changedSince?: string;
 }
 
 /** The held feed slots a section reads, by feed key. */
@@ -243,6 +249,46 @@ export function transportBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
 
 /* ------------------------------------------------------------------- vadose */
 
+type Method = 'legacy' | 'modern';
+const METHOD_WORDS: Record<Method, string> = { legacy: 'legacy method', modern: 'modern method' };
+
+/**
+ * The tables of a run repeated with both methods, split by method: the method that was sent first,
+ * labelled as the one the groundwater screen used, then the other, labelled as a sensitivity that is not
+ * the run the groundwater screen used (the way the rest of the report treats legacy against modern). A
+ * method the repeat did not produce has no tables.
+ */
+function tablesBySentMethod<R extends { runs: Partial<Record<Method, unknown>> }>(
+  result: R,
+  sent: Method,
+  build: (only: R) => CsvTable[],
+  block: ChemicalBlock,
+  id: string,
+): CsvTable[] {
+  const other: Method = sent === 'legacy' ? 'modern' : 'legacy';
+  const out: CsvTable[] = [];
+  for (const m of [sent, other]) {
+    if (result.runs[m] === undefined) continue;
+    const isSent = m === sent;
+    const note = isSent
+      ? `${METHOD_WORDS[m]}, the one the groundwater screen used`
+      : `${METHOD_WORDS[m]}, a sensitivity: not the run the groundwater screen used`;
+    out.push(
+      ...build({ ...result, runs: { [m]: result.runs[m] } }).map((t) => ({
+        ...t,
+        name: `${t.name}-${slug(id)}-${isSent ? 'sent' : 'sensitivity'}`,
+        label: `${t.label}, ${block.name}, ${note}`,
+      })),
+    );
+  }
+  if (result.runs[other] !== undefined) {
+    block.notes.push(
+      `The ${METHOD_WORDS[other]} is printed as a sensitivity and is not the run the groundwater screen used; the ${METHOD_WORDS[sent]} was sent.`,
+    );
+  }
+  return out;
+}
+
 export function vadoseBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
   const held = slots<VadoseFeed>('vadose');
   return chemicalsOf([held]).map((id) => {
@@ -268,13 +314,7 @@ export function vadoseBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
     const out = computeVadose({ scenario: f.scenario });
     if (!out.ok) block.notes.push(`The sent run could not be repeated: ${out.error}`);
     else {
-      block.tables.push(
-        ...vadoseCsvTables(out.result).map((t) => ({
-          ...t,
-          name: `${t.name}-${slug(id)}`,
-          label: `${t.label}, ${block.name}`,
-        })),
-      );
+      block.tables.push(...tablesBySentMethod(out.result, f.method, vadoseCsvTables, block, id));
     }
     return block;
   });
@@ -313,13 +353,7 @@ export function saturatedBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
     const out = computeSaturated({ scenario: { input: i } });
     if (!out.ok) block.notes.push(`The sent run could not be repeated: ${out.error}`);
     else {
-      block.tables.push(
-        ...saturatedCsvTables(out.result).map((t) => ({
-          ...t,
-          name: `${t.name}-${slug(id)}`,
-          label: `${t.label}, ${block.name}`,
-        })),
-      );
+      block.tables.push(...tablesBySentMethod(out.result, f.method, saturatedCsvTables, block, id));
     }
     return block;
   });

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
-import { currentProject, type StaleFeedKey, type StaleSlot } from '../project/store';
+import { currentProject, getChainHash, type StaleFeedKey, type StaleSlot } from '../project/store';
 import { staleAmong, staleSentence, useStaleSlots } from '../project/staleFeeds';
 import { chemicalsOf, overridesOf } from '../project';
 import validation from '@model-flow/data/generated/validation/validation.json';
@@ -138,20 +138,36 @@ function ChemicalBlocks({ blocks }: { blocks: readonly ChemicalBlock[] }) {
   );
 }
 
+/**
+ * What the tables of a fate screen's section are: the run on the screen now, and what became of it. A
+ * result sent from an earlier run of the screen is the block above, never these tables.
+ */
+function CurrentRunNote({ run }: { run: NonNullable<SectionResults['current']> }) {
+  const changed = run.changedSince !== undefined;
+  return (
+    <p className="report-current-run">
+      <strong>Run on the screen now: {run.chemical}.</strong>{' '}
+      {run.sentTo !== null && `Its result was sent to ${run.sentTo}. `}
+      {changed &&
+        `The screen's inputs have changed since a result was sent to ${run.changedSince}, so the block above shows the run that was sent to it, not this one. `}
+      {run.sentTo === null &&
+        !changed &&
+        'This run was not sent to another screen, so the exposure, risk and cleanup results do not use it. '}
+      {changed && run.sentTo === null
+        ? 'What follows in this section is the current run on the screen, which was not sent.'
+        : changed
+          ? `What follows in this section is the current run on the screen; it is not the run sent to ${run.changedSince}.`
+          : 'What follows in this section is this run.'}
+    </p>
+  );
+}
+
 function ResultTables({ results }: { results: SectionResults }) {
   return (
     <>
       {results.methodBasis !== undefined && <MethodBasisNote basis={results.methodBasis} />}
       {results.chemicals !== undefined && <ChemicalBlocks blocks={results.chemicals} />}
-      {results.current !== undefined && (
-        <p className="report-current-run">
-          <strong>Run on the screen now: {results.current.chemical}.</strong>{' '}
-          {results.current.sentTo === null
-            ? 'This run was not sent to another screen, so the exposure, risk and cleanup results do not use it.'
-            : `Its result was sent to ${results.current.sentTo}.`}{' '}
-          What follows in this section is this run.
-        </p>
-      )}
+      {results.current !== undefined && <CurrentRunNote run={results.current} />}
       {results.notes.length > 0 && (
         <ul className="report-notes">
           {results.notes.map((n) => (
@@ -684,7 +700,7 @@ export function ReportPage() {
   }, [project]);
   useEffect(() => {
     let live = true;
-    computeResults(project).then(
+    computeResults(project, { chainHash: getChainHash }).then(
       (r) => live && setResults(r),
       () => live && setResults({}),
     );

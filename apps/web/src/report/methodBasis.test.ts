@@ -41,7 +41,7 @@ describe('basisChoice', () => {
 
   it('takes the surface water method that was sent to the risk screen, else the modern one', () => {
     const s = defaultScreens();
-    expect(basisChoice('surfaceWater', s, null)).toEqual({ basis: 'modern', from: 'default' });
+    expect(basisChoice('surfaceWater', s, null)).toEqual({ basis: 'modern', from: 'unsent' });
     expect(basisChoice('surfaceWater', s, 'well-mixed')).toEqual({
       basis: 'legacy',
       from: 'sent',
@@ -77,6 +77,14 @@ describe('methodBasisOf', () => {
     const ox = methodBasisOf({ basis: 'oxygen-limited', from: 'screen' }, []);
     expect(ox.statement).toMatch(/oxygen-limited method/);
     expect(ox.statement).toMatch(/legacy and modern methods.* sensitivity/);
+  });
+
+  it('says no method was sent, and uses the stated default, when nothing was sent for the chemical', () => {
+    const b = methodBasisOf({ basis: 'modern', from: 'unsent' }, []);
+    expect(b.statement).toMatch(
+      /No method was sent to the exposure and risk screen for this chemical/,
+    );
+    expect(b.statement).toMatch(/rest on the modern method, the default/);
   });
 
   it('names the sent method for surface water', () => {

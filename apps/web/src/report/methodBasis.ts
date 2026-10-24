@@ -14,8 +14,11 @@ import type { ScreenKey } from './methodsRun';
 
 export type Basis = 'legacy' | 'modern' | 'oxygen-limited';
 
-/** Where the basis came from: the screen's own choice, the result sent on, or a default for a screen with no choice. */
-export type BasisFrom = 'screen' | 'sent' | 'default';
+/**
+ * Where the basis came from: the screen's own choice, the result sent on, a default for a screen with no
+ * choice, or the stated default because nothing was sent for the chemical the screen shows.
+ */
+export type BasisFrom = 'screen' | 'sent' | 'default' | 'unsent';
 
 export interface BasisChoice {
   basis: Basis;
@@ -58,7 +61,7 @@ export function basisChoice(
         : shown(screens.vapor.form.method);
     case 'surfaceWater':
       return sentSurfaceWater === null
-        ? { basis: 'modern', from: 'default' }
+        ? { basis: 'modern', from: 'unsent' }
         : { basis: sentSurfaceWater === 'well-mixed' ? 'legacy' : 'modern', from: 'sent' };
     case 'risk':
     case 'cleanup':
@@ -88,7 +91,9 @@ export function methodBasisOf(choice: BasisChoice, disagreements: readonly strin
       ? `The conclusions in this section rest on the ${name}, the method shown on the screen.`
       : choice.from === 'sent'
         ? `The conclusions in this section rest on the ${name}, the one sent to the exposure and risk screen.`
-        : `This screen does not offer a choice of method, so the conclusions in this section rest on the ${name}.`;
+        : choice.from === 'unsent'
+          ? `No method was sent to the exposure and risk screen for this chemical, so the conclusions in this section rest on the ${name}, the default.`
+          : `This screen does not offer a choice of method, so the conclusions in this section rest on the ${name}.`;
   const others = OTHERS[choice.basis];
   const sensitivity = `${others === 'The legacy and modern methods' ? 'The legacy and modern methods are' : `${others} is`} printed as a sensitivity check and is not the basis of any conclusion here.`;
   return { basis: name, statement: `${lead} ${sensitivity}`, disagreements: [...disagreements] };

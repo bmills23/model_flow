@@ -76,7 +76,7 @@ import { defaultSite, type SiteState } from '../site/model';
 import type { SavedModeledLevels } from '../cleanup/modeledLevels';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
-import { pickSlot, slotOf, slotOfValue, type FeedSlots } from './feedSlots';
+import { pickSlot, resolveSlot, slotOf, slotOfValue, type FeedSlots } from './feedSlots';
 import { hashInputs, stableStringify } from './hash';
 import { isChemicalFeed } from './schema';
 import { scrubRejected } from '../ui/decimalComma';
@@ -748,6 +748,16 @@ function contentKey(value: unknown): string {
   }
   contentKeys.set(value, key);
   return key;
+}
+
+/**
+ * The fingerprint of the groundwater screen's form recorded when the run a cleanup consumer for
+ * `chemicalId` reads was sent (the slot `feedSlots.resolveSlot` picks), or undefined when no run is held.
+ * It belongs to that run alone: another chemical's send, or an edit of the screen, does not move it.
+ */
+export function getChainHash(chemicalId: string): string | undefined {
+  const key = resolveSlot([...FEEDS.transportChain.slots().keys()], chemicalId);
+  return key === null ? undefined : hashOf('transportChain', key)?.inputsHash;
 }
 
 /** The slot a consumer for `chemical` reads from feed `key` (see `feedSlots.pickSlot`). */

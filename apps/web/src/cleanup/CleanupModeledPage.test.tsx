@@ -9,10 +9,13 @@ import {
   forgetMemory,
   getModeledLevels,
   getScreen,
+  addChemical as addProjectChemical,
   newProject,
   setScreen,
 } from '../project/store';
 import { computeResults } from '../report/results';
+import { newChemicalRow } from '../risk/form';
+import { userRecord } from '../overrides/userChemicals';
 
 afterEach(() => {
   cleanup();
@@ -119,6 +122,42 @@ describe('CleanupPage solubility ceiling', () => {
     expect((await screen.findByRole('list', { name: /solubility used/i })).textContent).toMatch(
       /Toluene: 300 mg\/L \(a ceiling entered on the cleanup screen\)/,
     );
+  }, 60000);
+});
+
+describe('CleanupPage solubility of a user-defined chemical', () => {
+  it('uses the solubility the user entered for it and says so, instead of saying the database gives none', async () => {
+    const mine = {
+      id: 'user-1',
+      name: 'Site solvent',
+      values: {
+        rfdo: { value: '0.02', note: 'lab memo' },
+        s: { value: '42', note: 'measured at the site' },
+      },
+    };
+    const other = {
+      id: 'user-2',
+      name: 'Other solvent',
+      values: { rfdo: { value: '0.02', note: 'lab memo' } },
+    };
+    act(() => {
+      addProjectChemical(mine);
+      addProjectChemical(other);
+      const c = getScreen('cleanup');
+      setScreen('cleanup', {
+        ...c,
+        form: {
+          ...c.form,
+          chemicals: [newChemicalRow(userRecord(mine)), newChemicalRow(userRecord(other))],
+        },
+      });
+    });
+    render(<CleanupPage />);
+    const list = await screen.findByRole('list', { name: /solubility used for each chemical/i });
+    await waitFor(() => expect(list.textContent).not.toMatch(/loading the database solubility/));
+    expect(list.textContent).toMatch(/Site solvent: 42 mg\/L \(a solubility entered by the user/);
+    expect(list.textContent).toMatch(/Other solvent: no solubility was entered for this chemical/);
+    expect(list.textContent).not.toMatch(/the database gives no solubility/);
   }, 60000);
 });
 

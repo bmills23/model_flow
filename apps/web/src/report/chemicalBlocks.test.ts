@@ -256,13 +256,27 @@ describe('vadoseBlocks and saturatedBlocks', () => {
     expect(b!.name).toBe('Benzene');
     expect(b!.inputs.find((i) => i.label === 'Run length')!.value).toBe('10 yr');
     expect(b!.inputs.find((i) => i.label === 'Source length')!.value).toBe('10 m');
-    expect(b!.notes).toEqual([]);
+    expect(b!.notes).toEqual([
+      'The legacy method is printed as a sensitivity and is not the run the groundwater screen used; the modern method was sent.',
+    ]);
+    // the sent method's tables first, the other method's as a sensitivity
     expect(b!.tables.map((t) => t.name)).toEqual([
-      'vadose-results-71-43-2',
-      'vadose-time-series-71-43-2',
+      'vadose-results-71-43-2-sent',
+      'vadose-time-series-71-43-2-sent',
+      'vadose-results-71-43-2-sensitivity',
+      'vadose-time-series-71-43-2-sensitivity',
     ]);
     expect(b!.tables[1]!.rows.length).toBeGreaterThan(0);
     expect(b!.tables[0]!.label).toContain('Benzene');
+    const methodsOf = (t: { rows: readonly { method?: unknown }[] }) => [
+      ...new Set(t.rows.map((r) => r.method)),
+    ];
+    expect(methodsOf(b!.tables[0]!)).toEqual(['vadose.layered']);
+    expect(methodsOf(b!.tables[2]!)).toEqual(['vadose.vadsat']);
+    expect(b!.tables[0]!.label).toMatch(/modern method, the one the groundwater screen used/);
+    expect(b!.tables[2]!.label).toMatch(
+      /legacy method, a sensitivity: not the run the groundwater screen used/,
+    );
   });
 
   it('repeats a sent saturated source run and prints its inputs', () => {
@@ -284,9 +298,14 @@ describe('vadoseBlocks and saturatedBlocks', () => {
     expect(b!.name).toBe('Benzene');
     expect(b!.inputs.find((i) => i.label === 'Aquifer conductivity')!.value).toBe('5 m/d');
     expect(b!.inputs.find((i) => i.label === 'Horizon')!.value).toBe('10 yr');
+    // sent: legacy; the modern run is the sensitivity
     expect(b!.tables.map((t) => t.name)).toEqual([
-      'saturated-results-71-43-2',
-      'saturated-time-series-71-43-2',
+      'saturated-results-71-43-2-sent',
+      'saturated-time-series-71-43-2-sent',
+      'saturated-results-71-43-2-sensitivity',
+      'saturated-time-series-71-43-2-sensitivity',
     ]);
+    expect(b!.tables[0]!.label).toMatch(/legacy method, the one the groundwater screen used/);
+    expect(b!.tables[2]!.label).toMatch(/modern method, a sensitivity/);
   });
 });

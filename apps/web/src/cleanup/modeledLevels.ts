@@ -108,34 +108,56 @@ export function summarizeModeledLevels(
 }
 
 /**
- * The inputs a modeled level depends on, as a short fingerprint. The groundwater run itself is not saved,
- * so it is stood for by the form of the groundwater screen it was sent from (a run that is out of date
- * against that form is never kept), and the vadose or saturated source by the run that was sent. Equal
- * fingerprints mean the cleanup screen would solve the same levels.
+ * The fingerprint of a groundwater run, as the project records it when the run is sent: a hash of the
+ * groundwater screen's form (see `feedEntry`). It is what the session's chain feed carries for a
+ * chemical, and what a run sent now from a screen set to that chemical would carry.
+ */
+export const chainFingerprint = (transportForm: unknown): string =>
+  hashInputs(fingerprintForm('transport', transportForm));
+
+/**
+ * The inputs a modeled level depends on, as a short fingerprint. The groundwater run itself is not saved
+ * and the groundwater screen's form is shared by every chemical (picking a chemical there rewrites its
+ * Kd), so the run is stood for by `chain`: the fingerprint recorded when this chemical's own run was
+ * sent. The vadose or saturated source is the run that was sent. Equal fingerprints mean the cleanup
+ * screen would solve the same levels. Inputs the levels do not depend on are left out: the starting
+ * concentration (the answer does not depend on it), the solubility ceiling for a soil source (it caps a
+ * dissolved source's search only), the entered concentrations, the allocation, the soil screening panel
+ * and the surface water targets.
  */
 export function modeledLevelsFingerprint(i: {
   /** The cleanup form with the project's receptor names and factor edits laid on. */
   cleanup: CleanupForm;
   chemicalId: string;
-  transportForm: unknown;
+  /** `chainFingerprint` of this chemical's own groundwater run. */
+  chain: string;
   vadose: VadoseFeed | null;
   saturated: SaturatedFeed | null;
   rec: ChemicalRecord | undefined;
   edition: string;
 }): string {
-  // allocation, the soil screening panel, the surface water targets and the entered concentrations do not
-  // enter a modeled solve; everything else on the form does
-  const { chemicals, ssg: _ssg, surfaceTargets: _st, allocation: _al, ...rest } = i.cleanup;
+  const {
+    chemicals,
+    ssg: _ssg,
+    surfaceTargets: _st,
+    allocation: _al,
+    startConc: _start,
+    solubility,
+    ...rest
+  } = i.cleanup;
   void _ssg;
   void _st;
   void _al;
+  void _start;
   const row = chemicals.find((c) => c.id === i.chemicalId);
   const { conc: _conc, ...rowRest } = row ?? { conc: {} };
   void _conc;
   return hashInputs({
     form: rest,
+    // the ceiling stops the search of a dissolved source only
+    solubility: i.cleanup.source === 'dissolved' ? solubility : null,
     row: rowRest,
-    transport: fingerprintForm('transport', i.transportForm),
+    chain: i.chain,
     vadose: i.cleanup.source === 'vadose' ? (i.vadose?.scenario ?? null) : null,
     saturated: i.cleanup.source === 'saturated' ? (i.saturated?.input ?? null) : null,
     tox: i.rec?.tox ?? null,

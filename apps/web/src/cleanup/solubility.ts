@@ -8,7 +8,7 @@ import type { CleanupProps } from './ssg';
 export interface SolubilityCeiling {
   /** mg/L. */
   value: number;
-  origin: 'database' | 'entered';
+  origin: 'database' | 'entered' | 'user';
   /** Where the value came from, in words for a reader. */
   source: string;
 }
@@ -17,17 +17,26 @@ export const databaseSolubilitySource = (edition: string): string =>
   `aqueous solubility from the EPA Regional Screening Levels chemical-specific parameters, ${edition} edition`;
 
 const ENTERED_SOURCE = 'a ceiling entered on the cleanup screen';
+const USER_SOURCE = 'a solubility entered by the user for this chemical';
 
-/** The ceiling for one chemical: the user's entry when it is a positive number, else the database value. */
+/**
+ * The ceiling for one chemical: the ceiling typed on the cleanup screen when it is a positive number,
+ * else the solubility the user entered for a user-defined chemical (`user`, by id), else the database value.
+ */
 export function solubilityCeiling(
   entered: string,
   chemicalId: string,
   props: CleanupProps | null,
   edition: string,
+  user?: CleanupProps | null,
 ): SolubilityCeiling | null {
   const typed = entered.trim() === '' ? NaN : Number(entered.trim());
   if (Number.isFinite(typed) && typed > 0) {
     return { value: typed, origin: 'entered', source: ENTERED_SOURCE };
+  }
+  const own = user?.get(chemicalId)?.s;
+  if (own !== undefined && Number.isFinite(own) && own > 0) {
+    return { value: own, origin: 'user', source: USER_SOURCE };
   }
   const s = props?.get(chemicalId)?.s;
   if (s === undefined || !Number.isFinite(s) || s <= 0) return null;
@@ -40,9 +49,10 @@ export function ceilingsOf(
   ids: readonly string[],
   props: CleanupProps | null,
   edition: string,
+  user?: CleanupProps | null,
 ): Record<string, SolubilityCeiling | null> {
   const out: Record<string, SolubilityCeiling | null> = {};
-  for (const id of ids) out[id] = solubilityCeiling(entered, id, props, edition);
+  for (const id of ids) out[id] = solubilityCeiling(entered, id, props, edition, user);
   return out;
 }
 

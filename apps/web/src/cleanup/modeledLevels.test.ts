@@ -110,6 +110,33 @@ describe('saved level rows', () => {
   });
 });
 
+describe('modeledLevelsFingerprint, what the levels do not depend on', () => {
+  it('ignores the starting concentration and, for a soil source, the solubility ceiling', async () => {
+    const db = await loadChemicalDb();
+    const rec = db.byId.get('1330-20-7')!;
+    const row = newChemicalRow(rec);
+    const soil = { ...defaultCleanupForm(), source: 'vadose' as const, chemicals: [row] };
+    const base = {
+      cleanup: soil,
+      chemicalId: row.id,
+      chain: 'c',
+      vadose: null,
+      saturated: null,
+      rec,
+      edition: db.edition,
+    };
+    const fp = modeledLevelsFingerprint(base);
+    expect(modeledLevelsFingerprint({ ...base, cleanup: { ...soil, startConc: '9' } })).toBe(fp);
+    expect(modeledLevelsFingerprint({ ...base, cleanup: { ...soil, solubility: '12' } })).toBe(fp);
+    // the ceiling does stop a dissolved source's search, so it counts there
+    const dissolved = { ...soil, source: 'dissolved' as const };
+    const dfp = modeledLevelsFingerprint({ ...base, cleanup: dissolved });
+    expect(
+      modeledLevelsFingerprint({ ...base, cleanup: { ...dissolved, solubility: '12' } }),
+    ).not.toBe(dfp);
+  }, 30000);
+});
+
 describe('modeledLevelsFingerprint', () => {
   it('changes with an input of the solve and not with one it does not use', async () => {
     const db = await loadChemicalDb();
@@ -119,7 +146,7 @@ describe('modeledLevelsFingerprint', () => {
     const base = {
       cleanup: form,
       chemicalId: row.id,
-      transportForm: { K: '10' },
+      chain: 'chain-1',
       vadose: null,
       saturated: null,
       rec,
@@ -134,7 +161,7 @@ describe('modeledLevelsFingerprint', () => {
     expect(modeledLevelsFingerprint({ ...base, cleanup: { ...form, solubility: '50' } })).not.toBe(
       fp,
     );
-    expect(modeledLevelsFingerprint({ ...base, transportForm: { K: '11' } })).not.toBe(fp);
+    expect(modeledLevelsFingerprint({ ...base, chain: 'chain-2' })).not.toBe(fp);
     expect(
       modeledLevelsFingerprint({
         ...base,
@@ -142,6 +169,7 @@ describe('modeledLevelsFingerprint', () => {
       }),
     ).not.toBe(fp);
     // not used by the solve
+    expect(modeledLevelsFingerprint({ ...base, cleanup: { ...form, startConc: '50' } })).toBe(fp);
     const withConc = { ...row, conc: { soil: '5' } };
     expect(modeledLevelsFingerprint({ ...base, cleanup: { ...form, chemicals: [withConc] } })).toBe(
       fp,
