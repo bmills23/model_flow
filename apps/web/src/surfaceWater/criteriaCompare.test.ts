@@ -2,7 +2,8 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { DEFAULT_HARDNESS } from '@model-flow/engine';
 import { compute } from './compute';
-import { compareAll } from './criteriaCompare';
+import { compareAll, coveredBy, coveredCsvRows, coveringRows } from './criteriaCompare';
+import { loadCriteriaDbFor } from './criteriaSets';
 import { loadCriteriaDb, type CriteriaDb } from './criteriaDb';
 import { DEFAULT_FORM, toRequest } from './inputs';
 import { reportCriteria } from './reportCriteria';
@@ -44,5 +45,41 @@ describe('reportCriteria', () => {
   it('prints no sediment row while sediment is off', async () => {
     const out = await reportCriteria('us', ARSENIC, run({ sedimentOn: false }), undefined);
     expect(out!.rows.some((r) => r['medium'] === 'sediment')).toBe(false);
+  });
+});
+
+describe('a chemical covered by a group row', () => {
+  const PFOS = '1763-23-1';
+  it('shows the covering row name and value instead of saying the set lacks the chemical', async () => {
+    const eu = await loadCriteriaDbFor('eu2026');
+    const pointer = coveredBy(eu, PFOS)!;
+    expect(pointer.group.name).toMatch(/PFAS/);
+    const rows = coveringRows(eu, pointer);
+    expect(rows.map((r) => r.value)).toEqual([0.0044, 0.0044]);
+    const csv = coveredCsvRows(eu, { id: PFOS, name: pointer.name }, pointer);
+    expect(csv).toHaveLength(2);
+    expect(csv[0]).toMatchObject({
+      chemicalId: PFOS,
+      status: 'covered by group',
+      criterionValue: 0.0044,
+      peak: null,
+      ratio: null,
+    });
+    expect(String(csv[0]!['note'])).toMatch(/entry 35.*Covered by substance group 65.*entry 65/s);
+  });
+
+  it('is in the report with the covering row, and a chemical with no pointer still returns null', async () => {
+    const out = await reportCriteria('eu2026', PFOS, run({ sedimentOn: false }), undefined);
+    expect(out).not.toBeNull();
+    expect(out!.rows.every((r) => r['status'] === 'covered by group')).toBe(true);
+    expect(out!.note).toContain('Covered by substance group 65');
+    expect(
+      await reportCriteria('eu2026', '999-99-9', run({ sedimentOn: false }), undefined),
+    ).toBeNull();
+  });
+
+  it('does not use the pointer for a chemical the set has rows for', async () => {
+    const eu = await loadCriteriaDbFor('eu2026');
+    expect(coveredBy(eu, '71-43-2')).toBeUndefined();
   });
 });

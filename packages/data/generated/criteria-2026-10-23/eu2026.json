@@ -51,7 +51,7 @@
     "entry 13; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii))",
     "entry 14",
     "entry 15; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii)); printed 7,62 × 10 -4; a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS",
-    "entry 15; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii)); a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS",
+    "entries 15 and 28; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii)); a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS",
     "entry 16; a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS; the Official Journal act (Annex VI of Directive (EU) 2026/805) prints the same cell as the consolidated text; no date clause of Article 3(1a) covers this entry, so the value carries no date of application",
     "entry 17; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii)); printed 9,5 x 10 -4; a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS",
     "entry 17; revised EQS, with effect from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033 (Article 3(1a)(iii)); printed 9,5 × 10 -4; a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS",
@@ -153,6 +153,20 @@
     "entry 6 of Annex II Part C; moved from Annex I Part A (entry 3); harmonised EQS for river basin specific pollutants (Annex II Part C heading); Article 3(1b) reads: shall take effect from the beginning of the following river basin management plan period after the date the EQS was set; footnote 7: Substance previously listed as a priority substance in Annex X to Directive 2000/60/EC or Annex I to Directive 2008/105/EC.; the value is the same as the 2013 Part A value"
   ],
   "omitted": {},
+  "coveredBy": [
+    {
+      "chemicalId": "1763-23-1",
+      "name": "Perfluorooctane sulfonic acid (PFOS) and its derivatives",
+      "cas": "1763-23-1",
+      "entry": 35,
+      "printed": "Covered by substance group 65 (Per- and polyfluoroalkyl substances (PFAS) – sum of 25)",
+      "group": {
+        "chemicalId": "per-and-polyfluoroalkyl-substances-pfas-sum-of-25",
+        "name": "Per- and polyfluoroalkyl substances (PFAS) – sum of 25",
+        "entry": 65
+      }
+    }
+  ],
   "rows": [
     {
       "id": "eu2026:120-12-7:surfaceWater:fresh:aa-eqs-inland",
@@ -2280,44 +2294,6 @@
       "value": 0.0014,
       "unit": "ug/L",
       "printedValue": "0.0014",
-      "printedUnit": "μg/l",
-      "table": "Annex I Part A table",
-      "note": 46
-    },
-    {
-      "id": "eu2026:206-44-0:surfaceWater:fresh:mac-eqs-inland#2",
-      "set": "eu2026",
-      "chemicalId": "206-44-0",
-      "idBy": "cas",
-      "name": "Fluoranthene",
-      "cas": "206-44-0",
-      "medium": "surfaceWater",
-      "waterType": "fresh",
-      "basis": "MAC-EQS inland",
-      "basisLabel": "maximum allowable concentration (MAC-EQS), inland",
-      "endpoint": "eu2026-fresh-mac-eqs-inland",
-      "value": 0.12,
-      "unit": "ug/L",
-      "printedValue": "0.12",
-      "printedUnit": "μg/l",
-      "table": "Annex I Part A table",
-      "note": 46
-    },
-    {
-      "id": "eu2026:206-44-0:surfaceWater:salt:mac-eqs-other-surface-waters#2",
-      "set": "eu2026",
-      "chemicalId": "206-44-0",
-      "idBy": "cas",
-      "name": "Fluoranthene",
-      "cas": "206-44-0",
-      "medium": "surfaceWater",
-      "waterType": "salt",
-      "basis": "MAC-EQS other surface waters",
-      "basisLabel": "maximum allowable concentration (MAC-EQS), other surface waters",
-      "endpoint": "eu2026-salt-mac-eqs-other-surface-waters",
-      "value": 0.012,
-      "unit": "ug/L",
-      "printedValue": "0.012",
       "printedUnit": "μg/l",
       "table": "Annex I Part A table",
       "note": 46

@@ -107,6 +107,16 @@ describe('eu-eqs-2026 manifest and source', () => {
   });
 });
 
+describe('eu-eqs-2026 pointers to a group row', () => {
+  it('prints PFOS (entry 35) as covered by group 65, which is the pointer the build lists', () => {
+    expect(text).toContain(
+      '(35) Perfluorooctane sulfonic acid (PFOS) and its derivatives Industrial substances 1763-23-1 217-179-8 Covered by substance group 65 (Per- and polyfluoroalkyl substances (PFAS) – sum of 25)',
+    );
+    expect(text.match(/Covered by substance group/g)).toHaveLength(1);
+    expect(rows.some((r) => r.cas === '1763-23-1')).toBe(false);
+  });
+});
+
 describe('eu-eqs-2026 rows read from the printed annex', () => {
   const v = (n: RegExp, medium: string, basis: string, set: Row[] = partA) =>
     find(set, n, medium, basis)?.value;

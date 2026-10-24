@@ -1,7 +1,13 @@
 import { DEFAULT_HARDNESS } from '@model-flow/engine';
 import type { CsvRow } from '../export/csv';
 import type { SwResult } from './compute';
-import { compareAll, criteriaCsvRows } from './criteriaCompare';
+import {
+  compareAll,
+  coveredBy,
+  coveredCsvRows,
+  coveredText,
+  criteriaCsvRows,
+} from './criteriaCompare';
 import { CRITERIA_SET_LABEL, type CriteriaSetChoice } from './criteriaSetChoice';
 import { loadCriteriaDbFor } from './criteriaSets';
 
@@ -32,7 +38,18 @@ export async function reportCriteria(
     return null;
   }
   const chemical = db.chemicals.find((c) => c.id === chemicalId);
-  if (chemical === undefined) return null;
+  if (chemical === undefined) {
+    // a chemical the set points to a group row: the covering row's name and value, no ratio
+    const pointer = coveredBy(db, chemicalId);
+    if (pointer === undefined) return null;
+    const rows = coveredCsvRows(db, { id: chemicalId, name: pointer.name }, pointer);
+    if (rows.length === 0) return null;
+    return {
+      set,
+      rows,
+      note: `Criteria comparison for ${pointer.name} (${chemicalId}) with ${CRITERIA_SET_LABEL[set]}: ${coveredText(pointer)}`,
+    };
+  }
   const compared = compareAll(db, chemical, result, foc !== undefined ? { foc } : {});
   const rows = criteriaCsvRows(compared, db.info, chemical);
   if (rows.length === 0) return null;

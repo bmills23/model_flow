@@ -4,6 +4,7 @@ import {
   assembleDb,
   loadCriteriaDb,
   loadUsParts,
+  type CoveredInfo,
   type CriteriaDb,
   type CriterionInfo,
   type DbParts,
@@ -55,6 +56,8 @@ export function setParts(file: CriteriaSetFile): DbParts {
   const criteria: Criterion[] = [];
   const info = new Map<string, CriterionInfo>();
   const names = new Map<string, string>();
+  const covered = new Map<string, CoveredInfo>();
+  for (const p of file.coveredBy ?? []) covered.set(p.chemicalId, { ...p, setLabel: file.label });
   for (const r of file.rows) {
     criteria.push({
       id: r.id,
@@ -96,6 +99,7 @@ export function setParts(file: CriteriaSetFile): DbParts {
     criteria,
     info,
     names,
+    covered,
     sources: [
       {
         set: file.set,
@@ -114,12 +118,17 @@ function mergeParts(parts: DbParts[]): DbParts {
   for (const part of parts) {
     for (const [id, name] of part.names) if (!names.has(id)) names.set(id, name);
   }
+  const covered = new Map<string, CoveredInfo>();
+  for (const part of parts) {
+    for (const [id, p] of part.covered ?? []) if (!covered.has(id)) covered.set(id, p);
+  }
   const sources = new Map<string, DbParts['sources'][number]>();
   for (const x of parts.flatMap((part) => part.sources)) sources.set(`${x.set}|${x.label}`, x);
   return {
     criteria: parts.flatMap((x) => x.criteria),
     info: new Map(parts.flatMap((x) => [...x.info])),
     names,
+    covered,
     sources: [...sources.values()],
     nrwqcEdition: parts.find((x) => x.nrwqcEdition !== '')?.nrwqcEdition ?? '',
     sedimentEdition: parts.find((x) => x.sedimentEdition !== '')?.sedimentEdition ?? '',
