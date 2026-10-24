@@ -134,6 +134,19 @@ export function runPvi(
   if (ethanol !== undefined && ethanol > 1) errors.push('Ethanol fraction must be from 0 to 1');
   if (!(dim > 0)) errors.push('Smallest building dimension must be above 0');
   if (errors.length > 0) return { ok: false, error: errors.join('; ') };
+  // No verdict without a source concentration: with all four blank the screen has nothing to judge
+  const missing = [
+    soilBenzene === undefined ? 'soil benzene (mg/kg)' : null,
+    soilTph === undefined ? 'soil TPH (mg/kg)' : null,
+    gwBenzene === undefined ? 'groundwater benzene (mg/L)' : null,
+    gwTph === undefined ? 'groundwater TPH (mg/L)' : null,
+  ].filter((m): m is string => m !== null);
+  if (missing.length === 4) {
+    return {
+      ok: false,
+      error: `No verdict yet: enter at least one source concentration. Missing: ${missing.join(', ')}.`,
+    };
+  }
   const input: PviInput = {
     separation,
     smallestBuildingDimension: dim,

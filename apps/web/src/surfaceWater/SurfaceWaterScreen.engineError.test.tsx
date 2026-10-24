@@ -31,12 +31,28 @@ describe('SurfaceWaterScreen after an engine error', () => {
     );
     fail = true;
     fireEvent.change(screen.getByLabelText(/^koc/i), { target: { value: '60' } });
-    await screen.findByText(/the engine rejected these inputs/i, undefined, { timeout: 15000 });
+    await screen.findAllByText(/the engine rejected these inputs/i, undefined, { timeout: 15000 });
     const legacy = screen.getByRole('button', { name: /use legacy surface water for swimming/i });
     const modern = screen.getByRole('button', { name: /use modern surface water for swimming/i });
     await waitFor(() => expect((legacy as HTMLButtonElement).disabled).toBe(true));
     expect((modern as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(modern);
     expect(getSurfaceWaterFeed()).toBeNull();
+  }, 40000);
+
+  it('does not read "Up to date" beside old results once the engine rejects the inputs', async () => {
+    render(<SurfaceWaterScreen />);
+    await screen.findByRole(
+      'img',
+      { name: /surface water concentration in mg\/L/i },
+      { timeout: 15000 },
+    );
+    await screen.findByText(/up to date/i, undefined, { timeout: 15000 });
+    fail = true;
+    fireEvent.change(screen.getByLabelText(/^koc/i), { target: { value: '60' } });
+    await screen.findAllByText(/the engine rejected these inputs/i, undefined, { timeout: 15000 });
+    expect(screen.queryByText(/^up to date$/i)).toBeNull();
+    expect(screen.getByText(/these results are out of date/i)).toBeTruthy();
+    expect(screen.getByText('Out of date')).toBeTruthy();
   }, 40000);
 });

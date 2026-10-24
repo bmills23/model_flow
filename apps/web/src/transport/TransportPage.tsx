@@ -25,6 +25,7 @@ import { getWaterTableFeedSlots, setWaterTableFeed, subscribeWaterTableFeed } fr
 import { ownSlot, pickSlot } from '../project/feedSlots';
 import { waterTableSource } from './vaporFeed';
 import { chemicalTag, projectNameOf, screenFeedProblem } from '../project/feedChemical';
+import { ResultStatus, StaleResultsNote } from '../ui/ResultStatus';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof TransportForm>(key: K, value: TransportForm[K]) => void;
@@ -687,9 +688,7 @@ export function TransportPage() {
                 method)
               </span>
             </label>
-            <p className={computing ? 'status on' : 'status'} role="status">
-              {computing ? 'Computing...' : 'Up to date'}
-            </p>
+            <ResultStatus computing={computing} problem={!parsed.ok || engineError !== null} />
           </div>
 
           {!parsed.ok && (
@@ -709,7 +708,10 @@ export function TransportPage() {
           )}
 
           {result && scenario && (
-            <div className={computing || !parsed.ok ? 'stale' : undefined}>
+            <div className={csvStale ? 'stale' : undefined}>
+              {(!parsed.ok || engineError !== null) && (
+                <StaleResultsNote reasons={parsed.ok ? [engineError!] : parsed.errors} />
+              )}
               <PlumeMap
                 result={result}
                 scenario={scenario}
@@ -767,7 +769,7 @@ export function TransportPage() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok}
+                    disabled={csvStale}
                     onClick={() => {
                       const k = keys.includes(wellMethod) ? wellMethod : 'modern';
                       const values = result.series[k];
@@ -806,7 +808,7 @@ export function TransportPage() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok}
+                    disabled={csvStale}
                     onClick={() => {
                       if (!scenario) return;
                       setTransportFeed({
@@ -842,7 +844,7 @@ export function TransportPage() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !parsed.ok}
+                    disabled={csvStale}
                     onClick={() => {
                       if (!parsed.ok) return;
                       const k = keys.includes(wellMethod) ? wellMethod : 'modern';
@@ -881,7 +883,7 @@ export function TransportPage() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={computing || !scenario}
+                    disabled={csvStale || !scenario}
                     onClick={() => {
                       if (!scenario) return;
                       const { zOf: _zOf, ...plain } = scenario;

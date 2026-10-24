@@ -38,6 +38,7 @@ import { vadoseCsvTables } from './csv';
 import { useVadoseResult } from './useVadoseResult';
 import { METHOD_SERIES } from './series';
 import { WaterTableFluxChart } from './WaterTableFluxChart';
+import { ResultStatus, StaleResultsNote } from '../ui/ResultStatus';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof VadoseForm>(key: K, value: VadoseForm[K]) => void;
@@ -498,9 +499,7 @@ export function VadosePage() {
                 { value: 'log', label: 'Log' },
               ]}
             />
-            <p className={computing ? 'status on' : 'status'} role="status">
-              {computing ? 'Computing...' : 'Up to date'}
-            </p>
+            <ResultStatus computing={computing} problem={!parsed.ok || engineError !== null} />
           </div>
 
           {!parsed.ok && (
@@ -521,6 +520,9 @@ export function VadosePage() {
 
           {result && scenario && run && (
             <div className={stale ? 'stale' : undefined}>
+              {(!parsed.ok || engineError !== null) && (
+                <StaleResultsNote reasons={parsed.ok ? [engineError!] : parsed.errors} />
+              )}
               {(['legacy', 'modern'] as const).map((m) =>
                 result.unavailable[m] ? (
                   <p className="note" key={m}>

@@ -95,6 +95,14 @@ describe('petroleum vapor screen', () => {
     expect(within(region).getByText(/screened out/i)).toBeTruthy();
   });
 
+  it('prints no verdict while the concentrations are blank and says what is missing', () => {
+    render(<VaporPage />);
+    const region = screen.getByRole('region', { name: /petroleum vapor screen/i });
+    expect(within(region).queryByText(/screened out/i)).toBeNull();
+    expect(within(region).queryByText(/further assessment needed/i)).toBeNull();
+    expect(within(region).getByText(/no verdict/i).textContent).toMatch(/groundwater benzene/i);
+  });
+
   it('lists a precluding factor', () => {
     render(<VaporPage />);
     const region = screen.getByRole('region', { name: /petroleum vapor screen/i });

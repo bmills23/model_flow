@@ -37,6 +37,7 @@ import { DownloadCsv } from '../export/DownloadCsv';
 import { saturatedCsvTables } from './csv';
 import { useSaturatedResult } from './useSaturatedResult';
 import { SATURATED_METHODS as METHODS, saturatedSeries, saturatedVlines } from './timeSeries';
+import { ResultStatus, StaleResultsNote } from '../ui/ResultStatus';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof SaturatedForm>(key: K, value: SaturatedForm[K]) => void;
@@ -469,9 +470,7 @@ export function SaturatedPage() {
                 { value: 'seasonal', label: 'Seasonal (high water part of each year)' },
               ]}
             />
-            <p className={computing ? 'status on' : 'status'} role="status">
-              {computing ? 'Computing...' : 'Up to date'}
-            </p>
+            <ResultStatus computing={computing} problem={!parsed.ok || engineError !== null} />
           </div>
 
           {!parsed.ok && (
@@ -492,6 +491,9 @@ export function SaturatedPage() {
 
           {result && scenario && first && (
             <div className={stale ? 'stale' : undefined}>
+              {(!parsed.ok || engineError !== null) && (
+                <StaleResultsNote reasons={parsed.ok ? [engineError!] : parsed.errors} />
+              )}
               {(['legacy', 'modern'] as const).map((m) =>
                 result.unavailable[m] ? (
                   <p className="note" key={m}>

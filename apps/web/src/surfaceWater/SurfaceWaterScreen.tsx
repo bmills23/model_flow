@@ -24,6 +24,7 @@ import { DEFAULT_FORM, LAKE_FORM, R8_PUBLISHED, isR8Case, toRequest, type SwForm
 import { DownloadCsv } from '../export/DownloadCsv';
 import { surfaceWaterCsvTables } from './csv';
 import { useSurfaceWaterResult } from './useSurfaceWaterResult';
+import { ResultStatus, StaleResultsNote } from '../ui/ResultStatus';
 import { HelpLink } from '../docs/HelpLink';
 
 type Setter = <K extends keyof SwForm>(key: K, value: SwForm[K]) => void;
@@ -481,9 +482,10 @@ export function SurfaceWaterScreen() {
                 { value: 'log', label: 'Log' },
               ]}
             />
-            <p className={computing ? 'status on' : 'status'} role="status">
-              {computing ? 'Computing...' : 'Up to date'}
-            </p>
+            <ResultStatus
+              computing={computing}
+              problem={!parsed.ok || engineError !== null || linkProblem !== null}
+            />
           </div>
 
           {linkProblem !== null && (
@@ -509,6 +511,9 @@ export function SurfaceWaterScreen() {
 
           {result && (
             <div className={computing || !parsed.ok || engineError ? 'stale' : undefined}>
+              {(!parsed.ok || engineError !== null) && (
+                <StaleResultsNote reasons={parsed.ok ? [engineError!] : parsed.errors} />
+              )}
               <section
                 className="panel"
                 aria-label="Surface water and sediment at the end of the run"
