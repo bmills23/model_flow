@@ -16,7 +16,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { csvLine } from '../src/sediment/csv.js';
+import { csvLine, parseCsv } from '../src/sediment/csv.js';
 
 const pkg = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dir = join(pkg, 'raw/eu-eqs-2026');
@@ -109,6 +109,8 @@ for (const n of entryList(nw[1]!)) {
     `newly identified substance, with effect from ${nw[2]}, good surface water chemical status to be achieved by ${nw[3]} (Article 3(1a)(iv))`,
   );
 }
+/** The wording of a revised entry whose printed water cells equal the 2013 ones: the revision is to the biota cell. */
+const revisedBiotaOnly = `the revision is to the biota or sediment cell; the water value is unchanged from 2013; with effect from ${rev[2]}, good surface water chemical status to be achieved by ${rev[3]} (Article 3(1a)(iii))`;
 const art31b =
   /shall take effect from the beginning of the following river basin management plan period after the date the EQS was set/.exec(
     plain,
@@ -143,6 +145,36 @@ const isNa = (s: string): boolean =>
   s === '';
 const normCas = (cell: string): string =>
   /^\d/.test(cell) ? cell.split(/\s*\/\s*|\s+/).join(';') : '';
+
+/** The 2013 water values per substance (name without case, spaces or punctuation): the set of medium, basis and value. */
+const identity = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+const old2013 = new Map<string, Set<string>>();
+for (const r of parseCsv(readFileSync(join(pkg, 'raw/eu-eqs/eqs.csv'), 'utf8'))) {
+  const id = identity(r['name_printed']!);
+  if (!old2013.has(id)) old2013.set(id, new Set());
+  old2013.get(id)!.add(`${r['medium']}|${r['basis']}|${Number(r['value'])}`);
+}
+const new2026 = new Map<string, Set<string>>();
+/** Whether the 2013 file has the substance and prints exactly the water values this file prints for it. */
+const sameAs2013 = (name: string): boolean => {
+  const id = identity(name);
+  const a = old2013.get(id);
+  const b = new2026.get(id);
+  return a !== undefined && b !== undefined && a.size === b.size && [...a].every((x) => b.has(x));
+};
+
+/**
+ * Entries 16 and 44 print water cells that differ from 2013 although Article 3(1a)(iii) does not name them. The
+ * Official Journal act (Annex VI of Directive (EU) 2026/805, SHA-256 in the manifest) was compared cell by cell
+ * and prints the same cells as the consolidated text, so they stay as printed and carry this note.
+ */
+const ACT_CHECKED_ENTRIES = new Set(['16', '44']);
+const ACT_NOTE =
+  'the Official Journal act (Annex VI of Directive (EU) 2026/805) prints the same cell as the consolidated text; no date clause of Article 3(1a) covers this entry, so the value carries no date of application';
+/** Entries that print a biota or sediment EQS in Part A, found from the printed cells below. */
+const biotaEntries = new Set<string>();
+const BIOTA_NOTE =
+  'a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS';
 
 const CLASS_TEXT = [
   '< 40 mg CaCO3/l',
@@ -299,6 +331,7 @@ for (const r of aRows) {
   let cells: string[];
   if (r.length === 13 && isEntry && !/^\(\d+\)$/.test(r[1]!)) {
     entry = r[0]!.slice(1, -1);
+    if (!isNa(r[9]!)) biotaEntries.add(entry);
     nameCell = r[1]!;
     casCell = r[3]!;
     cells = r.slice(5, 9);
@@ -354,6 +387,37 @@ for (const r of cRows) {
 for (const name of moved.keys()) {
   if (!out.some((o) => o.name === name && o.where === 'Annex II Part C table')) {
     throw new Error(`${name} marked moved but absent from Part C`);
+  }
+}
+
+// Notes that need the whole table: the revision of an entry whose water cells equal the 2013 ones is to the
+// biota cell, a water row of an entry that prints a biota or sediment EQS says which EQS is applied, a moved
+// substance keeps its 2013 value, and entries 16 and 44 carry the result of the check against the act.
+for (const o of out) {
+  const id = identity(o.name);
+  if (!new2026.has(id)) new2026.set(id, new Set());
+  new2026.get(id)!.add(`${o.medium}|${o.basis}|${Number(o.value)}`);
+}
+const iiiText = dated.get(Number([...dated.keys()].find((n) => dated.get(n)!.includes('(iii)'))!))!;
+for (const o of out) {
+  const m = /^entry (\d+)(?=;|$)/.exec(o.note);
+  const partC = o.where === 'Annex II Part C table';
+  if (partC) {
+    if (!sameAs2013(o.name))
+      throw new Error(`${o.name} in Part C differs from its 2013 Part A value`);
+    o.note += '; the value is the same as the 2013 Part A value';
+    continue;
+  }
+  if (!m) continue;
+  const n = m[1]!;
+  if (o.note.includes(iiiText) && sameAs2013(o.name)) {
+    o.note = o.note.replace(iiiText, revisedBiotaOnly);
+  }
+  if (biotaEntries.has(n)) o.note += `; ${BIOTA_NOTE}`;
+  if (ACT_CHECKED_ENTRIES.has(n)) {
+    if (dated.has(Number(n)))
+      throw new Error(`entry ${n} is named in Article 3(1a); drop its act note`);
+    o.note += `; ${ACT_NOTE}`;
   }
 }
 

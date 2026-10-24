@@ -302,6 +302,79 @@ describe('eu-eqs-2026 against the 2013 set', () => {
   });
 });
 
+describe('eu-eqs-2026 row notes', () => {
+  const noteOf = (name: RegExp, where = 'Annex I Part A table'): string[] =>
+    rows.filter((r) => name.test(r.name) && r.where === where).map((r) => r.note);
+  const APPLIED =
+    'a biota or sediment EQS is printed for this entry and, under footnote 6 to Annex I Part A, is applied instead of the water EQS';
+
+  it('says the printed biota or sediment EQS is the one applied, on exactly the entries that print one', () => {
+    const withStd = partA.filter((r) => r.note.includes(APPLIED));
+    const entries = [...new Set(withStd.map((r) => /^entry (\d+)/.exec(r.note)![1]))]
+      .map(Number)
+      .sort((a, b) => a - b);
+    // Entries 5, 15, 16, 17, 21, 28, 30, 34, 43, 44, 51 and 65 print a biota or sediment cell and have water rows;
+    // 37 prints one but has no water row.
+    expect(entries).toEqual([5, 15, 16, 17, 21, 28, 30, 34, 43, 44, 51, 65]);
+    expect(
+      partA.filter((r) => /^entry (5|15|16|17|21|28|30|34|43|44|51|65)(;|$)/.test(r.note)),
+    ).toHaveLength(withStd.length);
+    // Entry 6 (cadmium) prints no biota cell.
+    expect(noteOf(/^Cadmium/).some((n) => n.includes(APPLIED))).toBe(false);
+    expect(
+      noteOf(/^Trichloro-?benzenes/, 'Annex II Part C table').some((n) => n.includes(APPLIED)),
+    ).toBe(false);
+  });
+
+  it('says the six Part C values are the same as the 2013 Part A values', () => {
+    expect(partC).toHaveLength(20);
+    for (const r of partC) expect(r.note, r.name).toContain('same as the 2013 Part A value');
+  });
+
+  it('says the revision of entries 5, 21, 30 and the PAHs is to the biota cell, the water value being unchanged', () => {
+    for (const re of [
+      /^Brominated/,
+      /^Mercury/,
+      /^Tributyltin/,
+      /^Benzo\(b\)fluoranthene/,
+      /^Benzo\(g,h,i\)perylene/,
+    ]) {
+      const ns = noteOf(re);
+      expect(ns.length, String(re)).toBeGreaterThan(0);
+      for (const n of ns) {
+        expect(n).toContain(
+          'the revision is to the biota or sediment cell; the water value is unchanged from 2013',
+        );
+        expect(n).not.toContain('revised EQS, with effect from');
+        expect(n).toContain('22 December 2027');
+        expect(n).toContain('Article 3(1a)(iii)');
+      }
+    }
+    // A revised water cell keeps the plain wording.
+    for (const n of noteOf(/^Nickel/))
+      expect(n).toContain('revised EQS, with effect from 22 December 2027');
+  });
+
+  it('keeps hexachlorobenzene (16) and heptachlor (44) as the Official Journal act prints them', () => {
+    // Annex VI of Directive (EU) 2026/805 (SHA-256 in the manifest) prints the same cells as the consolidated
+    // text: HCB AA blank, MAC 0,5 inland and 0,05 other; heptachlor AA 1,7 x 10 -7 both, MAC 3 x 10 -4 and 3 x 10 -5.
+    expect(text).toContain('118-74-1 204-273-9 0,5 0,05');
+    expect(v2(/^Hexachlorobenzene$/, 'freshwater', 'MAC-EQS inland')).toBe(0.5);
+    expect(v2(/^Hexachlorobenzene$/, 'marine', 'MAC-EQS other surface waters')).toBe(0.05);
+    expect(v2(/^Heptachlor/, 'freshwater', 'AA-EQS inland')).toBe(1.7e-7);
+    expect(v2(/^Heptachlor/, 'marine', 'AA-EQS other surface waters')).toBe(1.7e-7);
+    for (const n of [...noteOf(/^Hexachlorobenzene$/), ...noteOf(/^Heptachlor/)]) {
+      expect(n).toContain(
+        'the Official Journal act (Annex VI of Directive (EU) 2026/805) prints the same cell as the consolidated text',
+      );
+      expect(n).toContain('no date clause of Article 3(1a) covers this entry');
+    }
+  });
+});
+
+const v2 = (n: RegExp, medium: string, basis: string): number | undefined =>
+  find(partA, n, medium, basis)?.value;
+
 // Counted from the printed annex and checked by hand against the source text.
 const COUNTS = { rows: 272, partA: 252, partC: 20, partANames: 74 };
 const ADDED = [

@@ -312,6 +312,40 @@ describe('European Union as amended by Directive (EU) 2026/805 (eu2026)', () => 
     for (const r of t) expect([r.chemicalId, r.idBy]).toEqual(['3380-34-5', 'name-join']);
   });
 
+  it('takes the first printed CAS number where a second one is an alternate number of the same substance', () => {
+    const cases: [string, string, string][] = [
+      ['Imidacloprid', '138261-41-3', '138261-41-3;105827-78-9'],
+      ['Acetamiprid', '135410-20-7', '135410-20-7;160430-64-8'],
+      ['Diclofenac', '15307-86-5', '15307-86-5;15307-79-6'],
+    ];
+    for (const [name, cas, printed] of cases) {
+      const rs = rowsOf('eu2026').filter((r) => r.name === name);
+      expect(rs.length, name).toBeGreaterThan(0);
+      for (const r of rs) {
+        expect([r.chemicalId, r.idBy, r.cas, r.casPrinted], r.id).toEqual([
+          cas,
+          'cas',
+          cas,
+          printed,
+        ]);
+        expect(casCheckDigitValid(cas)).toBe(true);
+        expect(r.casUnverified, r.id).toBeUndefined();
+      }
+    }
+    // The CCME misprint is untouched, and a genuine group still has no single CAS number.
+    expect(rowsOf('ccme').some((r) => r.cas === '13826-41-3' && r.casUnverified === true)).toBe(
+      true,
+    );
+    const hept = rowsOf('eu2026').filter((r) => /^Heptachlor/.test(r.name));
+    expect(hept.length).toBeGreaterThan(0);
+    for (const r of hept)
+      expect([r.cas, r.idBy, r.chemicalId]).toEqual([
+        null,
+        'name',
+        'heptachlor-and-heptachlor-epoxide',
+      ]);
+  });
+
   it('keeps PFOS out of the water rows (it points to the PFAS group)', () => {
     expect(rowsOf('eu2026').some((r) => /perfluorooctane sulfonic|PFOS/i.test(r.name))).toBe(false);
   });

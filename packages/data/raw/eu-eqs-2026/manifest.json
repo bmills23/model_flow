@@ -25,8 +25,8 @@
       "file": "eqs.csv",
       "role": "table",
       "generator": "packages/data/scripts/extract-eu-eqs-2026.ts",
-      "bytes": 77873,
-      "sha256": "c38e5f43c6eb842b334c759587ee6fd72fc22fc6882dec6587480a13958052e4"
+      "bytes": 87513,
+      "sha256": "8d39375ff4562d11a0278c9129a772b97dba1f36bddb81b31dc85f2351687dc7"
     }
   ],
   "actFetched": {
@@ -37,7 +37,7 @@
     "bytes": 805142,
     "sha256": "6c29912ee17d913910e3272bafbda0c6db334bf6874bb7044dbdecf238e5005d",
     "committed": false,
-    "why": "The Official Journal act was read to identify the amendment and the dates of application and to check that Annex VI is the annex the consolidated text carries. The consolidated text is the committed source because it carries the amended Part A and the new Annex II Part C in one document; the SHA-256 lets the act be re-checked against a re-fetch."
+    "why": "The Official Journal act was read to identify the amendment and the dates of application and to check that Annex VI is the annex the consolidated text carries. The consolidated text is the committed source because it carries the amended Part A and the new Annex II Part C in one document; the SHA-256 lets the act be re-checked against a re-fetch. Annex VI entries 16 (hexachlorobenzene) and 44 (heptachlor and heptachlor epoxide) were compared cell by cell on 2026-10-23 and print the same water cells as the consolidated text (16: AA blank, MAC 0,5 inland and 0,05 other waters; 44: AA 1,7 x 10 -7 both, MAC 3 x 10 -4 and 3 x 10 -5)."
   },
   "terms": {
     "statement": "Reuse of documents of the EU institutions published by the Publications Office, including EUR-Lex legal acts, is authorised under Commission Decision 2011/833/EU of 12 December 2011 on the reuse of Commission documents, which permits reuse for commercial and non-commercial purposes without charge and without individual application (Articles 1 to 6), except for documents covered by Article 2(2) (third-party intellectual property, logos, software).",

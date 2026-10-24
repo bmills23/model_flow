@@ -447,12 +447,19 @@ default loads none of them.
 
 **The revised EU set (wave W).** `eu2026` is built from `raw/eu-eqs-2026/eqs.csv` (extracted from the consolidated text
 by `scripts/extract-eu-eqs-2026.ts`) in the same way as `eu`; the table of a row says `Annex I Part A table` or
-`Annex II Part C table`. Water cells only: a biota or sediment EQS is not transcribed, and Article 3(2) applies
+`Annex II Part C table`. Water cells only: a biota or sediment EQS is not transcribed, and footnote 6 to Annex I Part A applies
 that EQS instead of the water EQS where Part A prints one, so the water row of such a substance is not always the
-standard applied. PFOS (entry 35) prints no water cells and points to the PFAS group (entry 65, a sum expressed
+standard applied; the water rows of entries 5, 15, 16, 17, 21, 28, 30, 34, 43, 44, 51 and 65 say so in their note.
+Where an entry named by Article 3(1a)(iii) prints water cells equal to 2013 (5, 21, 30 and the PAH sub-rows
+benzo(b)fluoranthene, benzo(k)fluoranthene and benzo(g,h,i)perylene), the note says the revision is to the biota
+cell. The six Part C rows say their value is the same as the 2013 Part A value. PFOS (entry 35) prints no water cells and points to the PFAS group (entry 65, a sum expressed
 as PFOA equivalents). Glyphosate inland has two annual averages (drinking water abstraction and otherwise) and
 silver other waters two salinity values; each is its own basis row. The two entries whose water cells differ from
-2013 but are named in neither Article 3(1a)(iii) nor (iv) (hexachlorobenzene MAC, heptachlor) carry no date. Triclosan,
+2013 but are named in neither Article 3(1a)(iii) nor (iv) (hexachlorobenzene MAC, heptachlor) carry no date; Annex VI
+of the Official Journal act was compared cell by cell and prints the same cells, so they ship as printed and say so.
+A printed pair of CAS numbers for one substance (acetamiprid, imidacloprid, diclofenac: an alternate registry number
+or salt) takes the first as the row's CAS number and keeps the pair in `casPrinted`, so imidacloprid joins on the valid
+138261-41-3, not on the CCME misprint 13826-41-3. Triclosan,
 which the 2013 set did not name, gives the UK triclosan row a CAS number by the name join, so that row's id changed.
 
 **CSV and report.** The comparison is a CSV table of its own (`surface-water-criteria-<set>`), one row per

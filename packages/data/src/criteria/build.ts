@@ -99,6 +99,18 @@ const normName = (s: string): string =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
+/**
+ * Printed CAS lists that name ONE substance with an alternate registry number (a salt, an isomer-specific or
+ * a superseded number), not a group: the row takes the first printed number as its CAS number and keeps the
+ * list as printed. A list of several substances (cyclodiene pesticides, heptachlor with its epoxide) is not
+ * here and stays a group with no single CAS number.
+ */
+const ALTERNATE_CAS = new Set([
+  '135410-20-7;160430-64-8',
+  '138261-41-3;105827-78-9',
+  '15307-86-5;15307-79-6',
+]);
+
 interface CleanCas {
   cas: string | null;
   casPrinted?: string;
@@ -109,6 +121,9 @@ const cleanCas = (printed: string, where: string): CleanCas => {
   if (printed === '') return { cas: null };
   // A group standard (cyclodiene pesticides, heptachlor with its epoxide) prints several CAS numbers: the row
   // keeps them as printed, has no single CAS number, and takes the slug of its name as its id.
+  if (ALTERNATE_CAS.has(printed)) {
+    return { ...cleanCas(printed.split(';')[0]!, where), casPrinted: printed };
+  }
   if (/[;/]/.test(printed)) {
     for (const part of printed.split(/[;/]/)) cleanCas(part, `${where} (group member)`);
     return { cas: null, casPrinted: printed };
