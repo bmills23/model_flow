@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave V push and Bryan's rulings on it)
+# HANDOFF (written from the tree, 2026-10-23, after the wave W push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -17,17 +17,20 @@ skipping a done one.
   branch `wave-s`), pushed 2026-10-22, and wave T (one slice and a corrective pass on branch `wave-t`; code head
   `ecad1cd`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave U (one slice on
   branch `wave-u`; code head `901ca8e`), pushed 2026-10-23, and wave V (seven slices on branch `wave-v`; code head
-  `ad95271`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
+  `ad95271`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave W (two slices
+  and a corrective pass on branch `wave-w`; code head `e990fe8`, then the wave close docs commit), fast-forwarded
+  to main and pushed 2026-10-23. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-v` (2026-10-23, `ad95271`): exit 0, build included. Test counts: engine
-  1477, web 2123, data 258 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 594 s, 0 overflow
-  and 0 axe violations on every route at 390 light, 390 dark and 1280, including the new `#/surface-water`
-  criteria visit (all sets, 4 criteria tables) and `#/vapor`. Neither the check nor its seeded state opens the
-  DeVaull method or the solved cleanup panels; slices V1 and V2a checked those with temporary scripts (0 overflow,
-  axe 0+0), and the solved
-  surface water panel on `#/cleanup` was checked the same way at 390 light, 390 dark and 1280 (0 overflow, axe 0+0,
-  a solved row present in its scroll region; no not-reached row could be produced from the form, so that row's
-  layout is unchecked).
+- Last full `corepack pnpm gate` on `wave-w` (2026-10-23, `e990fe8`): exit 0, build included. Test counts: engine
+  1477, web 2134, data 289 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 552 s, 75 views, 0
+  overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, including the `#/surface-water`
+  criteria visit (all sets, now with `eu2026`, 4 criteria tables) and `#/vapor`. The first gate run of the wave
+  timed out one wave V test (`surfaceSolve.test.ts`, fed saturated route, 240 s) while a review ran tests beside it;
+  alone it passed (9 of 9), and the final gate passed it. Neither the check nor its seeded state opens the DeVaull
+  method or the solved cleanup panels; in wave V slices V1 and V2a checked those with temporary scripts (0 overflow,
+  axe 0+0), and the solved surface water panel on `#/cleanup` was checked the same way at 390 light, 390 dark and
+  1280 (0 overflow, axe 0+0, a solved row present in its scroll region; no not-reached row could be produced from
+  the form, so that row's layout is unchecked).
 - Before that, on `wave-u` (2026-10-23, `901ca8e`): exit 0, build included. Test counts: engine
   1477, web 1998, data 197 passed and 3 skipped. Nothing under `apps/web` changed, so `mobile:check:full` was not
   re-run; the `#/validation` route (whose generated data changed) passed at m390-light and m390-dark with 0
@@ -110,9 +113,22 @@ skipping a done one.
 - CI cost: about 6 billed minutes per push to main, re-measured 2026-10-21 after the waves L and M push (runs
   39680530613 and 39680530951: gate 3 min 2 s, Pages build 17 s plus deploy 9 s; recorded in CLAUDE.md). Docs-only
   pushes trigger nothing.
-- Reference counts (`packages/engine/src/references/references.json`, 119 entries): 74 `used`, 24
-  `planned`, 17 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
+- Reference counts (`packages/engine/src/references/references.json`, 120 entries): 74 `used`, 24
+  `planned`, 18 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave W landed (2026-10-23)
+Bryan: "okay let's do that next" (the 2026 EU revision wave V left open). Rulings in the DECISIONS.md "Wave W
+scope" block and its "Wave W slices" block, all DEFAULT.
+- W1 (`27a0235`): Directive (EU) 2026/805 (CELEX 32026L0805) found and read; the consolidated text
+  02008L0105-20260510 is committed in `packages/data/raw/eu-eqs-2026/` with `eqs.csv` (272 rows) and its manifest;
+  `scripts/extract-eu-eqs-2026.ts`, and `extract-eu-eqs.ts` now takes paths (the 2013 CSV regenerates byte for byte).
+- W2 (`579fe2d`): set `eu2026` through the data build (`generated/criteria-2026-10-23/eu2026.json`, 198 kB),
+  the set choice, its own lazy chunk, the report and CSV, `eudir2026805` (status `data`) and the methods note;
+  `eu.json` is unchanged and a saved `eu` keeps the 2013 set.
+- Review: one pass, 0 high, 3 medium, 7 low. Corrective pass (`e990fe8`): imidacloprid, acetamiprid and diclofenac
+  take their printed CAS; entries 16 and 44 checked against the act (same cells, no date clause); footnote 6 and
+  Part C notes. The low findings left open are in the DECISIONS.md block, item 7.
 
 ## Wave V landed (2026-10-23)
 Bryan: "okay let's just get it to 100% parity NOW". Rulings in the DECISIONS.md "Wave V scope, the last three parity
@@ -130,8 +146,9 @@ audit items are now present or different by design (`docs/UI_PARITY.md` status l
   extract scripts `extract-ccme.ts`, `extract-eu-eqs.ts`, `extract-uk-eqs.ts`, `extract-anzg.ts`,
   `extract-macdonald2000.ts`; the set choice is the optional `criteriaSet` key; `scripts/mobile-check.mjs` gained
   a criteria visit.
-- Review: one Fable pass, 0 high, 0 medium, 2 low (a sediment read that predates the wave and degrades to "not
-  compared", and a session-only memo map that is never pruned); no corrective pass.
+- Review: one pass, 0 high, 0 medium, 2 low (a sediment read that predates the wave and degrades to "not
+  compared", which wave W found not as described, and a session-only memo map that is never pruned); no corrective
+  pass.
 
 ## Wave U landed (2026-10-23)
 Bryan: "ok do it" (the RSL soil inhalation comparison). Rulings in the DECISIONS.md "Wave U scope, RSL soil
@@ -543,12 +560,14 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not used.
 - RISC5 Appendix K (oxygen-limited, degradation) is not reproduced: its only source is an unpublished draft.
   Since wave V DeVaull 2007 is on `#/vapor` in its place (indoor only; no outdoor oxygen-limited path).
-- International criteria (wave V): the EU set is the 2013 consolidation of Directive 2008/105/EC Annex I; a
-  secondary source reports a 2026 revision (Directive (EU) 2026/805), not fetched or read. The UK Directions 2015
-  are as made (no amendment found, which does not rule one out). CCME metribuzin (printed "1,0") and nitrite
-  ("60 NO2-N") are not interpreted; CCME imidacloprid and ANZG vanadium CAS numbers fail their check digit and
-  are kept as printed. CCME and ANZG raw files are not committed (no reuse licence stated), so the build rests on
-  the committed CSVs with the fetched files' hashes. The UK zinc catchment values are not used.
+- International criteria (waves V and W): the EU set `eu` is the 2013 consolidation of Directive 2008/105/EC Annex I
+  and `eu2026` the annex as amended by Directive (EU) 2026/805, whose revised and new standards apply from 22
+  December 2027; its open low findings are in the DECISIONS.md "Wave W slices" block, item 7. CCME imidacloprid
+  (13826-41-3 as printed) no longer shares an id with the EU 2026 row (138261-41-3). The UK Directions 2015 are as
+  made (no amendment found, which does not rule one out). CCME metribuzin (printed "1,0") and nitrite ("60 NO2-N")
+  are not interpreted; CCME imidacloprid and ANZG vanadium CAS numbers fail their check digit and are kept as
+  printed. CCME and ANZG raw files are not committed (no reuse licence stated), so the build rests on the committed
+  CSVs with the fetched files' hashes. The UK zinc catchment values are not used.
 - Engine chunk: `src-*.js` is 497.06 kB against the 500 kB bundle limit after wave V; the next engine addition
   needs a split or lazy load.
 - Surface water solves (wave V): a first solve through a fed chain takes about 25 s in the worker, and a 2-year
@@ -603,7 +622,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to V merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-23: waves J to W merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
   jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick, the
@@ -612,8 +631,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   last three audit gaps (DeVaull on `#/vapor` in place of Appendix K, nonlinear source levels, international
   criteria and MacDonald 2000) as wave V. Bryan, 2026-10-23 ("okay let's do it"): accepted the wave V substitution
   (ruling 1, DeVaull in place of Appendix K, indoor only), the vinyl chloride shower and produce fallback and vinyl
-  chloride's place in wave T, all as recommended. Recommended next, not yet ruled on: reading the 2026 EU annex
-  revision (first); making the mobile check fail on a blank page. The wave P remainders still open (a
+  chloride's place in wave T, all as recommended. The 2026 EU revision shipped as wave W the same day. Recommended
+  next, not yet ruled on: making the mobile check fail on a blank page. The wave P remainders still open (a
   soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal values) are listed under the Wave P
   entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp

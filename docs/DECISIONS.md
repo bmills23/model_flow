@@ -3918,7 +3918,7 @@ ruling 1, which Bryan accepted as recommended after the wave closed (2026-10-23,
    ratios are per chemical and criterion, never summed. A value the source gives only as a hardness or site-chemistry
    equation is shown as site-specific unless the equation is transcribed with the set.
 6. **Checks.** TDD per slice. New references enter `references.json` with status `used`; attributions are regenerated.
-   Gate once at integration, `mobile:check:full` once after the corrective pass, one Fable review of the wave.
+   Gate once at integration, `mobile:check:full` once after the corrective pass, one review of the wave.
 7. **Parity record.** At the wave close `docs/UI_PARITY.md` rows F13 and F14, H9, H10 to H12 and I14 are corrected in
    place with what landed, and the 102-item count is restated from those rows.
 
@@ -4141,7 +4141,8 @@ below is DEFAULT and open to Bryan's overturn.
    13.09.2013 (the Directive as amended by 2013/39/EU), Annex I Part A, fetched 2026-10-23 by content negotiation on
    the `publications.europa.eu` CELEX address because the `eur-lex.europa.eu` addresses answer with a bot challenge. A
    2026 revision of the priority substances framework is reported by a secondary source; it was not fetched or read, so
-   the set is the 2013 annex the scope names and the revision stays an open item for a later wave.
+   the set is the 2013 annex the scope names and the revision stays an open item for a later wave. (Read and shipped
+   in wave W as the set `eu2026`; see the Wave W blocks.)
 2. **Medium mapping.** "Inland surface waters" is freshwater and "Other surface waters" is marine. The annex does not
    define "other"; the set follows the column name and the data build keeps the printed basis beside it.
 3. **United Kingdom instrument.** The England and Wales standards live in the Water Framework Directive (Standards and
@@ -4274,7 +4275,8 @@ water screen (scope rulings 3 to 5). Every ruling below is DEFAULT and open to B
     cites the US criteria only while the US pair is among them. Before this slice the screen CSV and the report
     held no criteria comparison at all, so the default report now gains one table when the run has a chemical
     with criteria.
-11. **Left open.** The EU set is the 2013 annex; a 2026 revision a secondary source reports was not read. The UK
+11. **Left open.** The EU set is the 2013 annex; a 2026 revision a secondary source reports was not read (closed in
+    wave W, set `eu2026`). The UK
     Directions are as made. The Springer terms page was not fetched. The 2026 CCME summary prints no edition
     date. `warne2018` has no venue or URL. None of the UK zinc ambient background catchment values
     (`zinc-abc.csv`) is used by the comparison.
@@ -4307,3 +4309,44 @@ refresh the EU set from it). Every ruling below is DEFAULT and open to Bryan's o
 6. **Checks.** Slice checks, one gate, `mobile:check:full` once and one review, per the project cadence; the mobile
    criteria visit (all of the sets) covers the new set.
 7. **Docs at close.** The wave V open item (slice C-euuk ruling 11 and the handoff's open items) is corrected in place.
+
+### Wave W slices W1 and W2 and the corrective pass
+
+Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn unless forced by the text named.
+
+1. **The act.** Directive (EU) 2026/805 of 30 March 2026 amending Directives 2000/60/EC, 2006/118/EC and 2008/105/EC
+   (OJ L series 2026/805, 20.4.2026, CELEX 32026L0805), fetched from the Publications Office; the number is the
+   text's own. Its Article 3(10) replaces Annex I Part A of Directive 2008/105/EC (the act's Annex VI). The committed
+   source is the consolidated text 02008L0105-20260510 (the Publications Office lists only it and the 2013 version);
+   the act itself is hashed in `raw/eu-eqs-2026/manifest.json`, not committed. The set id is `eu2026`.
+2. **Rows.** 272: 252 from Annex I Part A (70 entries, 25 of them new, 46 to 70) and 20 from Annex II Part C, where
+   the act moves alachlor, atrazine, carbon tetrachloride, chlorfenvinphos, simazine and the trichlorobenzenes. The
+   Part C rows are kept, with the table named and a note that the value equals the 2013 Part A value (the extractor
+   fails if one differs). PFOS (entry 35) prints no water cell and has no row; the sum of PFAS as PFOA equivalents
+   (entry 65) is its standard. Glyphosate (two inland annual averages, for drinking water abstraction and otherwise)
+   and silver (two salinity values) keep one row per printed basis.
+3. **Dates (forced by the text).** Revised standards apply from 22 December 2027 with good status by 22 December 2033
+   (Article 3(1a)(iii)); entries 46 to 70 from 22 December 2027 with good status by 22 December 2039 (Article
+   3(1a)(iv)); transposition by 21 December 2027 (Article 4(1)); Part C standards from the start of the following
+   river basin management plan period (Article 3(1b)). No clause keeps the 2013 values in force until a date. Each
+   date is in its row's note. Hexachlorobenzene (entry 16, inland maximum 0.5 against 0.05 in 2013) and heptachlor
+   (entry 44, annual average 1.7e-7) print changed water cells but neither is named in a date clause; the act's
+   Annex VI was compared cell by cell and prints the same cells as the consolidated text, and the rows say both.
+4. **Notes.** Footnote 6 of Annex I Part A (where a biota or sediment standard is printed, it is the one applied) is
+   noted on the water rows of entries 5, 15, 16, 17, 21, 28, 30, 34, 43, 44, 51 and 65. Rows of entries 5, 21 and 30
+   and three PAH rows of entry 28 whose water cells are unchanged from 2013 say the revision is to the biota or
+   sediment cell.
+5. **Chemical ids.** Imidacloprid, acetamiprid and diclofenac print a CAS number and an alternate one; `ALTERNATE_CAS`
+   in `src/criteria/build.ts` takes the first printed number. CCME imidacloprid keeps its printed 13826-41-3, which
+   fails its check digit, so the two sets no longer share an id for it. Triclosan, new in `eu2026`, gives the UK
+   triclosan rows CAS 3380-34-5 through the unique name join, which changed two ids in `uk.json`; no stored state
+   keys on criterion ids (a project saves only `criteriaSet`), so nothing saved changes.
+6. **Labels.** `eu` reads "European Union: Directive 2008/105/EC as amended by Directive 2013/39/EU (2013 annex)" and
+   `eu2026` names the 2026 act and says "standards as amended, dates of application in the row notes". The hardness
+   text in the criteria report prints `DEFAULT_HARDNESS`. The wave V review's sediment finding was not as described:
+   with sediment off no sediment series is computed and the comparison skips it.
+7. **Review.** One review: 0 high, 3 medium (the imidacloprid id, the undated entries 16 and 44, the footnote 6
+   notes; fixed in the corrective pass), 7 low. Left open: fluoranthene is printed twice (entry 15 and the PAH rows
+   of 28) with the same maximum, so `eu2026` shows two identical rows; with "all of the sets" an unchanged substance
+   shows once per EU set; a PFOS project on `eu2026` reads "not named" with no pointer to the PFAS sum; footnote 26
+   repeats in two PFAS notes.

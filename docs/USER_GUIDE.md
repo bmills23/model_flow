@@ -242,23 +242,24 @@ get the surface water concentration, find the sediment concentration by equilibr
 compare the well-mixed box (legacy) with the mass-discharge method (modern). The criteria and exposure
 section compares the result with water quality and sediment criteria.
 
-The comparison has a "Criteria set" choice. The default is the United States pair: the EPA national
-recommended water quality criteria (aquatic life and human health) and the EPA Region 4 sediment benchmarks.
-The other choices are Canada (CCME water and sediment guidelines), the European Union (Directive 2008/105/EC
-environmental quality standards), the United Kingdom (England and Wales standards directions), Australia and
-New Zealand (ANZG 2018 default guideline values), the MacDonald et al. (2000) consensus sediment guidelines (TEC
-and PEC), and all of the sets side by side. Pick the set, find a chemical by name or CAS number, and the peak of
-each series is compared with every criterion of that chemical in the set, one ratio per criterion, never summed.
-Each value is shown with its basis in words (acute or chronic, annual average or maximum allowable
-concentration, the level of species protection, TEC or PEC), the set, the water type and the table it was read
-from, and a Note opens the condition the source prints with it (a hardness class, a bioavailable fraction, a
-background added to the standard). A value the source gives only as an equation or a site rule, and that no
-equation comes with, reads "site-specific, not computed". The EU, UK and ANZG sets hold water only and the
-MacDonald set holds freshwater sediment only, so those comparisons have no sediment or no water table. A
-chemical a set does not name says so; choose another set. The set you choose is saved with the project (a
-project that never chose one opens with the United States pair). Download CSV: criteria comparison writes
-every row with its set, basis, medium and source, and the report prints the same comparison for the chemical of
-the run (freshwater and saltwater together, at the default hardness) and cites the sets it read.
+The comparison has a "Criteria set" choice. The default is the United States pair: the EPA national recommended
+water quality criteria (aquatic life and human health) and the EPA Region 4 sediment benchmarks. The other
+choices are Canada (CCME water and sediment guidelines), the European Union (Directive 2008/105/EC environmental
+quality standards, in two versions: the 2013 annex, and the annex as amended by Directive (EU) 2026/805, whose
+revised and new standards apply from 22 December 2027), the United Kingdom (England and Wales standards
+directions), Australia and New Zealand (ANZG 2018 default guideline values), the MacDonald et al. (2000)
+consensus sediment guidelines (TEC and PEC), and all of the sets side by side. Pick the set, find a chemical by
+name or CAS number, and the peak of each series is compared with every criterion of that chemical in the set,
+one ratio per criterion, never summed. Each value is shown with its basis in words (acute or chronic, annual
+average or maximum allowable concentration, the level of species protection, TEC or PEC), the set, the water
+type and the table it was read from, and a Note opens the condition the source prints with it (a hardness class,
+a bioavailable fraction, a background added to the standard). A value the source gives only as an equation or a
+site rule, and that no equation comes with, reads "site-specific, not computed". The EU, UK and ANZG sets hold
+water only and the MacDonald set holds freshwater sediment only, so those comparisons have no sediment or no
+water table. A chemical a set does not name says so; choose another set. The set you choose is saved with the
+project (a project that never chose one opens with the United States pair). Download CSV: criteria comparison
+writes every row with its set, basis, medium and source, and the report prints the same comparison for the
+chemical of the run (freshwater and saltwater together, at the default hardness) and cites the sets it read.
 
 ### Shower, irrigation and particulates (`#/household`)
 
