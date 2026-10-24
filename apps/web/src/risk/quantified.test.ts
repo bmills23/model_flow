@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gapNote, quantification } from './quantified';
+import { gapNote, omittedPathways, quantification } from './quantified';
 
 const cell = (
   chemical: string,
@@ -68,5 +68,32 @@ describe('gapNote', () => {
       'cancer risk: no cancer toxicity value for this route',
     );
     expect(gapNote({ risk: 'a', hi: 'b' })).toBe('cancer risk: a; hazard index: b');
+  });
+});
+
+describe('omittedPathways, a total that leaves a pathway out', () => {
+  const q = quantification([
+    cell('benzene', 'waterIngestion', { risk: 2e-6, hq: 0.1 }),
+    cell('benzene', 'waterDermal', { computable: false }),
+    cell('benzene', 'produce', { risk: null, hq: 0.2 }),
+  ]);
+
+  it('names each pathway no cell of which quantified the measure, while the total stands', () => {
+    expect(q.total).toEqual({ risk: null, hi: null });
+    expect(omittedPathways(q, 'risk')).toEqual(['waterDermal', 'produce']);
+    expect(omittedPathways(q, 'hi')).toEqual(['waterDermal']);
+  });
+
+  it('is empty for a fully quantified total and for a total nothing quantified', () => {
+    const full = quantification([cell('b', 'waterIngestion', { risk: 1e-6, hq: 0.1 })]);
+    expect(omittedPathways(full, 'risk')).toEqual([]);
+    const none = quantification([cell('b', 'waterIngestion', { hq: 0.1 })]);
+    expect(omittedPathways(none, 'risk')).toEqual([]);
+  });
+
+  it('writes the partial wording into the note', () => {
+    expect(gapNote({ risk: null, hi: null }, { risk: ['waterDermal'], hi: [] })).toBe(
+      'cancer risk: partial total, omits Bathing dermal contact (not quantified)',
+    );
   });
 });

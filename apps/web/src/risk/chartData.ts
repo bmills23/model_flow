@@ -1,5 +1,5 @@
 import { PATHWAY_IDS, type PathwayId, type ReceptorRiskSummary } from '@model-flow/engine';
-import type { Quantification } from './quantified';
+import { omittedLabels, omittedPathways, type Quantification } from './quantified';
 
 export const PATHWAY_LABELS: Record<PathwayId, string> = {
   soilIngestion: 'Soil ingestion',
@@ -48,6 +48,11 @@ export interface BarRow {
   gaps: Record<string, string>;
   /** Why the row's total is not quantified, or null when it is. */
   totalGap: string | null;
+  /**
+   * Labels of the pathways a quantified total leaves out (none of their cells quantified the measure):
+   * the total is partial and says so. Empty for a fully quantified total.
+   */
+  partialOmits: string[];
 }
 
 export const SLOTS = 8;
@@ -89,6 +94,7 @@ export function barRows(
       segments,
       gaps,
       totalGap: r.quant?.total[measure] ?? null,
+      partialOmits: r.quant ? omittedLabels(omittedPathways(r.quant, measure)) : [],
     };
   });
 }

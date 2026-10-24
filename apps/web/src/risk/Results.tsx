@@ -1,6 +1,12 @@
 import type { EpcRecord, ReceptorRiskSummary, Warning } from '@model-flow/engine';
 import { PATHWAY_LABELS, barRows, fmtHi, fmtRisk, type BarRow } from './chartData';
-import { NOT_QUANTIFIED_TEXT, quantificationsOf } from './quantified';
+import {
+  NOT_QUANTIFIED_TEXT,
+  omittedPathways,
+  partialText,
+  quantificationsOf,
+  type Quantification,
+} from './quantified';
 import { TRANSPORT_YEAR_S } from './build';
 import type { RiskOutcome } from './compute';
 import { StackedBars } from './StackedBars';
@@ -19,11 +25,25 @@ function summaries(outcome: RiskOutcome): Record<Method, ReceptorRiskSummary[] |
   };
 }
 
-function hiText(s: ReceptorRiskSummary, method: Method): string {
+/** A total with the words that say it leaves pathways out, or the plain value when it leaves none. */
+function withPartial(value: string, q: Quantification | undefined, measure: 'risk' | 'hi'): string {
+  const omitted = q ? omittedPathways(q, measure) : [];
+  return omitted.length > 0 ? `${value} (${partialText(omitted)})` : value;
+}
+
+function hiText(s: ReceptorRiskSummary, method: Method, q?: Quantification): string {
   if (s.headlineGroup === null) return 'not quantified';
-  return method === 'legacy'
-    ? `${fmtHi(s.hi)} (all target organs)`
-    : `${fmtHi(s.hi)} (${s.headlineGroup})`;
+  const value =
+    method === 'legacy'
+      ? `${fmtHi(s.hi)} (all target organs)`
+      : `${fmtHi(s.hi)} (${s.headlineGroup})`;
+  return withPartial(value, q, 'hi');
+}
+
+/** The note on an added cancer risk when any receptor's own total leaves a pathway out. */
+function addedPartial(qs: readonly Quantification[]): string {
+  const omitted = [...new Set(qs.flatMap((q) => omittedPathways(q, 'risk')))];
+  return omitted.length > 0 ? ` (${partialText(omitted)})` : '';
 }
 
 /** Legacy against modern for each receptor, from the same concentrations. */
@@ -66,14 +86,14 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
                     {l
                       ? ql[i]?.total.risk
                         ? NOT_QUANTIFIED_TEXT
-                        : fmtRisk(l.cancerRisk)
+                        : withPartial(fmtRisk(l.cancerRisk), ql[i], 'risk')
                       : 'did not run'}
                   </td>
                   <td>
                     {m
                       ? qm[i]?.total.risk
                         ? NOT_QUANTIFIED_TEXT
-                        : fmtRisk(m.cancerRisk)
+                        : withPartial(fmtRisk(m.cancerRisk), qm[i], 'risk')
                       : 'did not run'}
                   </td>
                   <td>
@@ -84,8 +104,8 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
                 </tr>
                 <tr>
                   <th scope="row">Hazard index</th>
-                  <td>{l ? hiText(l, 'legacy') : 'did not run'}</td>
-                  <td>{m ? hiText(m, 'modern') : 'did not run'}</td>
+                  <td>{l ? hiText(l, 'legacy', ql[i]) : 'did not run'}</td>
+                  <td>{m ? hiText(m, 'modern', qm[i]) : 'did not run'}</td>
                   <td>
                     {l && m && !ql[i]?.total.hi && !qm[i]?.total.hi ? ratio(m.hi, l.hi) : '-'}
                   </td>
@@ -112,7 +132,7 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
               ? 'did not run'
               : ql.length > 0 && ql.every((q) => q.total.risk)
                 ? NOT_QUANTIFIED_TEXT
-                : fmtRisk(legacyAdd)}
+                : `${fmtRisk(legacyAdd)}${addedPartial(ql)}`}
           </strong>
           , modern{' '}
           <strong>
@@ -120,7 +140,7 @@ export function Comparison(props: { outcome: RiskOutcome; additive: boolean }) {
               ? 'did not run'
               : qm.length > 0 && qm.every((q) => q.total.risk)
                 ? NOT_QUANTIFIED_TEXT
-                : fmtRisk(modernAdd)}
+                : `${fmtRisk(modernAdd)}${addedPartial(qm)}`}
           </strong>
           .
         </p>

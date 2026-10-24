@@ -11,6 +11,6 @@ describe('SaturatedPage stale results', () => {
     await screen.findByText(/fix these inputs/i);
     expect(screen.queryByText(/up to date/i)).toBeNull();
     expect(screen.getByText(/these results are out of date/i)).toBeTruthy();
-    expect(screen.getByText('Out of date')).toBeTruthy();
+    expect(screen.getByText('Inputs need attention')).toBeTruthy();
   }, 40000);
 });

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { TablesAlwaysOpen } from '../vadose/tablesOpen';
 import type { BarRow } from './chartData';
-import { NOT_QUANTIFIED_TEXT } from './quantified';
+import { NOT_QUANTIFIED_TEXT, partialText } from './quantified';
 
 /**
  * Horizontal stacked bars, one row per receptor and method. Every row is drawn to the same scale (the
@@ -62,6 +62,9 @@ export function StackedBars(props: {
             </div>
             <div className="stack-total">
               {r.totalGap === null ? fmt(r.total) : NOT_QUANTIFIED_TEXT}
+              {r.totalGap === null && r.partialOmits.length > 0 && (
+                <small className="partial-total"> ({partialText(r.partialOmits)})</small>
+              )}
             </div>
           </div>
         ))}
@@ -110,7 +113,12 @@ export function StackedBars(props: {
               <tr>
                 <th scope="row">Total</th>
                 {rows.map((r) => (
-                  <td key={r.label}>{r.totalGap === null ? fmt(r.total) : NOT_QUANTIFIED_TEXT}</td>
+                  <td key={r.label}>
+                    {r.totalGap === null ? fmt(r.total) : NOT_QUANTIFIED_TEXT}
+                    {r.totalGap === null && r.partialOmits.length > 0 && (
+                      <> ({partialText(r.partialOmits)})</>
+                    )}
+                  </td>
                 ))}
               </tr>
             </tbody>

@@ -22,6 +22,7 @@ afterEach(() => {
 });
 
 const MARK = 'Out of date';
+const INPUTS = 'Inputs need attention';
 
 describe('receiving screens mark a stale feed they read', () => {
   it('household: the well series', () => {
@@ -43,9 +44,11 @@ describe('receiving screens mark a stale feed they read', () => {
     const { zOf: _z, ...plain } = r.scenario;
     void _z;
     const s = getScreen('surfaceWater');
-    setScreen('surfaceWater', { form: { ...s.form, linked: true } });
+    setScreen('surfaceWater', { form: { ...s.form, linked: true, bankX: '50' } });
     act(() => setBankFeed({ scenario: plain, label: 'bank run' }));
     render(<SurfaceWaterScreen />);
+    // a fresh feed on valid inputs: neither the stale mark nor the input-error status
+    expect(screen.queryByText(INPUTS)).toBeNull();
     expect(screen.queryByText(MARK)).toBeNull();
     const t = getScreen('transport');
     act(() => setScreen('transport', { ...t, form: { ...t.form, K: '99' } }));
@@ -56,9 +59,10 @@ describe('receiving screens mark a stale feed they read', () => {
     const v = toVadose(VADOSE_FORM);
     if (!v.ok) throw new Error('vadose scenario');
     const t = getScreen('transport');
-    setScreen('transport', { ...t, form: { ...t.form, feedFromVadose: true } });
+    setScreen('transport', { ...t, form: { ...DEFAULT_FORM, feedFromVadose: true } });
     act(() => setVadoseFeed({ scenario: v.scenario, method: 'modern', label: 'vadose run' }));
     render(<TransportPage />);
+    expect(screen.queryByText(INPUTS)).toBeNull();
     expect(screen.queryByText(MARK)).toBeNull();
     const vs = getScreen('vadose');
     act(() => setScreen('vadose', { form: { ...vs.form, infiltration: '0.4' } }));
@@ -74,5 +78,26 @@ describe('receiving screens mark a stale feed they read', () => {
     const t = getScreen('transport');
     act(() => setScreen('transport', { ...t, form: { ...t.form, K: '99' } }));
     expect(screen.getByText(MARK)).toBeTruthy();
+  });
+
+  it('transport: a vadose feed for another chemical is a problem, not an up to date run', async () => {
+    const v = toVadose(VADOSE_FORM);
+    if (!v.ok) throw new Error('vadose scenario');
+    const t = getScreen('transport');
+    setScreen('transport', {
+      ...t,
+      form: { ...DEFAULT_FORM, chemicalId: 'benzene', feedFromVadose: true },
+    });
+    act(() =>
+      setVadoseFeed({
+        scenario: v.scenario,
+        method: 'modern',
+        label: 'vadose run',
+        chemicalId: 'toluene',
+      }),
+    );
+    render(<TransportPage />);
+    expect(await screen.findByText(INPUTS, undefined, { timeout: 15000 })).toBeTruthy();
+    expect(screen.queryByText('Up to date')).toBeNull();
   });
 });

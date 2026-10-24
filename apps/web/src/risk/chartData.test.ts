@@ -125,3 +125,25 @@ describe('barRows, values that are not quantified', () => {
     expect(row!.totalGap).toBeNull();
   });
 });
+
+describe('barRows, a total that omits a pathway', () => {
+  const quant = {
+    total: { risk: null, hi: null },
+    byPathway: new Map([
+      ['waterIngestion', { risk: null, hi: null }],
+      ['waterDermal', { risk: 'an input is missing', hi: 'an input is missing' }],
+    ]),
+    byChemical: new Map([['71-43-2', { risk: null, hi: null }]]),
+  };
+  it('lists the omitted pathways on the row, for either split', () => {
+    for (const by of ['pathway', 'chemical'] as const) {
+      const [row] = barRows('risk', by, [{ label: 'A', summary: summary(), quant }], {});
+      expect(row!.partialOmits).toEqual(['Bathing dermal contact']);
+    }
+  });
+  it('lists nothing for a fully quantified total', () => {
+    const full = { ...quant, byPathway: new Map([['waterIngestion', { risk: null, hi: null }]]) };
+    const [row] = barRows('risk', 'pathway', [{ label: 'A', summary: summary(), quant: full }], {});
+    expect(row!.partialOmits).toEqual([]);
+  });
+});

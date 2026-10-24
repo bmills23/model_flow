@@ -151,12 +151,31 @@ describe('risk CSV', () => {
     const [t] = riskCsvTables({ ...outcome } as RiskOutcome, {});
     const lines = exportCsv(t!.rows, t!.columns).split('\r\n');
     expect(lines[0]).toBe(
-      'method,receptor,incremental lifetime cancer risk (-),hazard index (-),hazard index group,not quantified because',
+      'method,receptor,incremental lifetime cancer risk (-),hazard index (-),hazard index group,not quantified or partial because',
     );
     const r = riskResultRows({
       ...outcome,
       legacy: { ok: true, result: { summary: { receptors: [summary('=cmd', 1)] } } },
     } as unknown as RiskOutcome);
     expect(exportCsv(r, t!.columns)).toContain("'=cmd");
+  });
+});
+
+describe('risk CSV, a total that omits a pathway', () => {
+  it('keeps the number but names the omitted pathway in the note', () => {
+    const [row] = riskResultRows(gappy);
+    expect(row!.cancerRisk).toBe(2e-6);
+    expect(row!.hazardIndex).toBe(0.5);
+    expect(String(row!.note)).toContain('cancer risk: partial total, omits Bathing dermal contact');
+    expect(String(row!.note)).toContain(
+      'hazard index: partial total, omits Bathing dermal contact',
+    );
+  });
+
+  it('heads the note column so a partial total is not read as unquantified', () => {
+    const [results] = riskCsvTables(gappy, {});
+    expect(results!.columns.find((c) => c.key === 'note')!.header).toBe(
+      'not quantified or partial because',
+    );
   });
 });
