@@ -1,4 +1,5 @@
 import type { RiskOutcome } from './compute';
+import { PATHWAY_LABELS } from './chartData';
 
 /**
  * Whether a number of the risk screen is a quantified result or a gap. A pathway or chemical none of
@@ -79,10 +80,43 @@ export const NOT_QUANTIFIED_TEXT = 'not quantified';
 /** No gap: the value stands as the engine gave it. */
 export const NO_GAP: Record<Measure, Gap> = { risk: null, hi: null };
 
-/** "cancer risk: no cancer toxicity value ..." for the gaps of one row, or '' when it has none. */
-export function gapNote(g: Record<Measure, Gap>): string {
+/**
+ * The pathways a quantified total leaves out for a measure: those none of whose cells quantified it.
+ * The total sums only the cells that did, so it is a partial total, and the omitted pathways are
+ * named wherever it is printed. Empty for a fully quantified total and for a total nothing quantified
+ * (that one is a gap, not a partial number).
+ */
+export function omittedPathways(
+  q: Pick<Quantification, 'total' | 'byPathway'>,
+  measure: Measure,
+): string[] {
+  if (q.total[measure] !== null) return [];
+  return [...q.byPathway].filter(([, g]) => g[measure] !== null).map(([id]) => id);
+}
+
+const pathwayLabel = (id: string): string => (PATHWAY_LABELS as Record<string, string>)[id] ?? id;
+
+/** "partial total, omits Bathing dermal contact (not quantified)" for the pathways a total leaves out. */
+export function partialText(ids: readonly string[]): string {
+  return `partial total, omits ${ids.map(pathwayLabel).join(', ')} (not quantified)`;
+}
+
+/** The pathway labels a total leaves out, for display beside it. */
+export const omittedLabels = (ids: readonly string[]): string[] => ids.map(pathwayLabel);
+
+/**
+ * "cancer risk: no cancer toxicity value ..." for the gaps of one row, or '' when it has none. With
+ * `omitted`, a quantified total that leaves pathways out is noted as partial and names them.
+ */
+export function gapNote(
+  g: Record<Measure, Gap>,
+  omitted?: Record<Measure, readonly string[]>,
+): string {
   const parts: string[] = [];
   if (g.risk !== null) parts.push(`cancer risk: ${g.risk}`);
+  else if (omitted && omitted.risk.length > 0)
+    parts.push(`cancer risk: ${partialText(omitted.risk)}`);
   if (g.hi !== null) parts.push(`hazard index: ${g.hi}`);
+  else if (omitted && omitted.hi.length > 0) parts.push(`hazard index: ${partialText(omitted.hi)}`);
   return parts.join('; ');
 }

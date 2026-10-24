@@ -45,3 +45,24 @@ describe('Comparison, a cancer risk nothing quantified', () => {
     ).toEqual(['not quantified', '2.0e-6', '-']);
   });
 });
+
+describe('Comparison, a total that omits a pathway', () => {
+  it('prints the number marked partial with the pathway named', () => {
+    const m = method(2e-6) as unknown as {
+      result: { receptors: { cells: unknown[] }[] };
+    };
+    m.result.receptors[0]!.cells.push({
+      chemical: 'tol',
+      pathway: 'waterDermal',
+      cell: { computable: false, risk: null, hq: null },
+    });
+    const outcome = { legacy: m, modern: method(2e-6) } as unknown as RiskOutcome;
+    render(<Comparison outcome={outcome} additive={false} />);
+    const row = screen.getByText('Cancer risk').closest('tr')!;
+    const cells = within(row)
+      .getAllByRole('cell')
+      .map((c) => c.textContent);
+    expect(cells[0]).toBe('2.0e-6 (partial total, omits Bathing dermal contact (not quantified))');
+    expect(cells[1]).toBe('2.0e-6');
+  });
+});

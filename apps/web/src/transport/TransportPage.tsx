@@ -688,7 +688,15 @@ export function TransportPage() {
                 method)
               </span>
             </label>
-            <ResultStatus computing={computing} problem={!parsed.ok || engineError !== null} />
+            <ResultStatus
+              computing={computing}
+              problem={
+                !parsed.ok ||
+                engineError !== null ||
+                (form.feedFromVadose && vadoseProblem !== null) ||
+                (form.feedFromSaturated && satProblem !== null)
+              }
+            />
           </div>
 
           {!parsed.ok && (

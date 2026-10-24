@@ -53,6 +53,6 @@ describe('SurfaceWaterScreen after an engine error', () => {
     await screen.findAllByText(/the engine rejected these inputs/i, undefined, { timeout: 15000 });
     expect(screen.queryByText(/^up to date$/i)).toBeNull();
     expect(screen.getByText(/these results are out of date/i)).toBeTruthy();
-    expect(screen.getByText('Out of date')).toBeTruthy();
+    expect(screen.getByText('Inputs need attention')).toBeTruthy();
   }, 40000);
 });

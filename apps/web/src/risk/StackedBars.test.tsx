@@ -12,6 +12,7 @@ const rows: BarRow[] = [
     segments: [{ id: 'waterIngestion', label: 'Drinking water', value: 2e-6, slot: 0 }],
     gaps: { 'Bathing dermal contact': 'an exposure input is missing' },
     totalGap: null,
+    partialOmits: [],
   },
   {
     label: 'Worker, legacy',
@@ -19,6 +20,7 @@ const rows: BarRow[] = [
     segments: [],
     gaps: {},
     totalGap: 'no cancer toxicity value for this route',
+    partialOmits: [],
   },
 ];
 
@@ -30,7 +32,7 @@ describe('StackedBars table of values', () => {
         title="Cancer risk by pathway"
         rows={[
           rows[0]!,
-          { ...rows[1]!, gaps: {}, totalGap: null },
+          { ...rows[1]!, gaps: {}, totalGap: null, partialOmits: [] },
           { ...rows[1]!, label: 'Worker, modern' },
         ]}
         fmt={fmtRisk}
@@ -51,5 +53,22 @@ describe('StackedBars table of values', () => {
         .getAllByRole('cell')
         .map((c) => c.textContent),
     ).toEqual(['2.0e-6', '0', 'not quantified']);
+  });
+});
+
+describe('StackedBars, a partial total', () => {
+  it('marks the total partial and names the omitted pathways beside it and in the table', () => {
+    render(
+      <StackedBars
+        by="Pathway"
+        title="Cancer risk by pathway"
+        rows={[{ ...rows[0]!, gaps: {}, partialOmits: ['Bathing dermal contact'] }]}
+        fmt={fmtRisk}
+        unit="risk"
+        ariaLabel="x"
+      />,
+    );
+    expect(screen.getAllByText(/partial total, omits Bathing dermal contact/).length).toBe(2);
+    expect(screen.getAllByText(/2\.0e-6/).length).toBeGreaterThan(0);
   });
 });

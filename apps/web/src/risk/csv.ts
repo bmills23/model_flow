@@ -4,7 +4,7 @@ import type { CsvTable } from '../export/DownloadCsv';
 import { PATHWAY_LABELS } from './chartData';
 import type { RiskOutcome } from './compute';
 import type { PathwayId } from '@model-flow/engine';
-import { gapNote, NO_GAP, quantificationsOf, type Gap } from './quantified';
+import { gapNote, NO_GAP, omittedPathways, quantificationsOf, type Gap } from './quantified';
 
 export const RISK_METHOD_IDS = {
   legacy: 'exposure.rags-a-1989',
@@ -20,7 +20,7 @@ const RESULT_COLUMNS: CsvColumn[] = [
   { key: 'cancerRisk', header: 'incremental lifetime cancer risk', unit: '-' },
   { key: 'hazardIndex', header: 'hazard index', unit: '-' },
   { key: 'hazardGroup', header: 'hazard index group' },
-  { key: 'note', header: 'not quantified because' },
+  { key: 'note', header: 'not quantified or partial because' },
 ];
 
 /** The value columns that stay empty when a value could not be quantified, and where the reason is. */
@@ -36,7 +36,7 @@ const CONTRIBUTION_COLUMNS: CsvColumn[] = [
   { key: 'item', header: 'pathway or chemical' },
   { key: 'cancerRisk', header: 'incremental lifetime cancer risk', unit: '-' },
   { key: 'hazardIndex', header: 'hazard index', unit: '-' },
-  { key: 'note', header: 'not quantified because' },
+  { key: 'note', header: 'not quantified or partial because' },
 ];
 
 function receptors(outcome: RiskOutcome, m: Method): ReceptorRiskSummary[] {
@@ -46,13 +46,17 @@ function receptors(outcome: RiskOutcome, m: Method): ReceptorRiskSummary[] {
 
 /**
  * One row per method and receptor: the cancer risk and the headline hazard index. A total no cell
- * quantified is empty, with the reason in the note, never 0.
+ * quantified is empty, with the reason in the note, never 0. A total that leaves a pathway out keeps
+ * its number and the note says it is partial and names the pathways.
  */
 export function riskResultRows(outcome: RiskOutcome): CsvRow[] {
   return METHODS.flatMap((m) => {
     const q = quantificationsOf(outcome, m);
     return receptors(outcome, m).map((r, i) => {
       const gap = q[i]?.total ?? NO_GAP;
+      const omitted = q[i]
+        ? { risk: omittedPathways(q[i]!, 'risk'), hi: omittedPathways(q[i]!, 'hi') }
+        : undefined;
       return {
         method: RISK_METHOD_IDS[m],
         receptor: r.label,
@@ -63,6 +67,7 @@ export function riskResultRows(outcome: RiskOutcome): CsvRow[] {
           r.headlineGroup === null && gap.hi === null
             ? { ...gap, hi: 'no noncancer toxicity value for this route' }
             : gap,
+          omitted,
         ),
       };
     });
