@@ -4462,3 +4462,27 @@ Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn. 
 7. **Review.** One review: 0 high, 2 medium (the entry growth, and workers never run in a browser; both closed in the
    corrective pass), 4 low, two folded in (the quote guard, a dead file pattern). Left open: `sourcemap: true`, which
    predates the wave, ships 16.9 MB of source maps (with their sources) to Pages beside 6.0 MB of JavaScript.
+
+## 2026-10-23: Wave Z scope, closing the small open items
+
+Bryan, after wave Y: "wrap em up. At some point this thing has gotta be usable". This wave closes the small open
+items; a usability walkthrough of real regulatory tasks runs beside it and sets the next waves. Every ruling below is
+DEFAULT and open to Bryan's overturn.
+
+1. **Covered chemicals.** A chemical covered by a group row (wave X ruling 3) no longer shows the water type and
+   hardness fields, which nothing uses for it, and its search hit no longer claims a surface water row of its own.
+2. **The not-reached row.** The surface water source-level row for a target the path cannot reach (wave V), never
+   laid out at phone width because the form could not produce one, is produced in a test and checked at 390 px.
+3. **CCME cells not interpreted.** Metribuzin (printed "1,0") and nitrite ("60 NO2-N") are read again in the CCME
+   source; each ships with the value the text prints and its basis in the note, or stays out with the reason.
+4. **The six unexplained RSL cells.** One bounded investigation of the four Aroclor tap water cells, PCB 105 resident
+   noncancer soil inhalation and n-nonane industrial noncancer soil total, from the RSL User's Guide and the RSL
+   tables only. A cell explained by a printed input or rounding rule becomes an excepted or reproduced cell with that
+   reason; a cell still unexplained is recorded as an accepted residual (6 of 9888) and the sweep keeps it visible.
+5. **Validation file cap.** `validation.json` (59,792 of 60,000 bytes) gets room by shortening notes or by a cap
+   raised to a stated value with the reason, whichever keeps the page's load the same.
+6. **Source maps.** `sourcemap: true` stays: maps load only when a reader opens the browser's developer tools, the
+   repository is public, they carry no local paths, and they make a reported error readable. The open item closes.
+7. **Library copies.** The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp 2015,
+   Trapp and Matthies 1995, Schulze-Makuch 2005) need Bryan or a library; they stay open, listed once.
+8. **Checks.** Slice checks, one gate, `mobile:check:full` once, one review, per the project cadence.
