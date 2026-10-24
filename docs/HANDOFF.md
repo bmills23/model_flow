@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave X push)
+# HANDOFF (written from the tree, 2026-10-23, after the wave Y push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -20,17 +20,15 @@ skipping a done one.
   `ad95271`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave W (two slices
   and a corrective pass on branch `wave-w`; code head `e990fe8`, then the wave close docs commit), fast-forwarded
   to main and pushed 2026-10-23, and wave X (two slices and a corrective pass on branch `wave-x`; code head
-  `968cd98`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
+  `968cd98`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave Y (one slice
+  and a corrective pass on branch `wave-y`; code head `3960439`, then the wave close docs commit), fast-forwarded to
+  main and pushed 2026-10-23. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-x` (2026-10-23, `968cd98`): exit 0, build included. Test counts: engine
-  1477, web 2145, data 303 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 593 s, 75 views, 0
-  overflow and 0 axe violations, under the wave X shell rule (every view printed nav=1 main=1 h1=1).
-- Before that, on `wave-w` (2026-10-23, `e990fe8`): exit 0, build included. Test counts: engine
-  1477, web 2134, data 289 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 552 s, 75 views, 0
-  overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, including the `#/surface-water`
-  criteria visit (all sets, now with `eu2026`, 4 criteria tables) and `#/vapor`. The first gate run of the wave
-  timed out one wave V test (`surfaceSolve.test.ts`, fed saturated route, 240 s) while a review ran tests beside it;
-  alone it passed (9 of 9), and the final gate passed it. Neither the check nor its seeded state opens the DeVaull
+- Last full `corepack pnpm gate` on `wave-y` (2026-10-23, `3960439`): exit 0, build included. Test counts: engine
+  1477, web 2145, data 303 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 538 s, 75 views, 0
+  overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, under the wave X shell rule, with
+  the modeled visit's worker run current. Before that, on `wave-x` (`968cd98`) the same counts and 593 s, and on
+  `wave-w` (`e990fe8`) web 2134 and data 289. Neither the check nor its seeded state opens the DeVaull
   method or the solved cleanup panels; in wave V slices V1 and V2a checked those with temporary scripts (0 overflow,
   axe 0+0), and the solved surface water panel on `#/cleanup` was checked the same way at 390 light, 390 dark and
   1280 (0 overflow, axe 0+0, a solved row present in its scroll region; no not-reached row could be produced from
@@ -120,6 +118,15 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 120 entries): 74 `used`, 24
   `planned`, 18 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave Y landed (2026-10-23)
+Bryan, during wave X: "after this, do the engine split next". Rulings in the DECISIONS.md "Wave Y scope" block and
+its "Wave Y slice" block, all DEFAULT.
+- Y1 (`174493f`): `apps/web/vite.config.ts` splits the engine into nine `engine-*` chunks and builds workers as ES
+  modules (3 to 19 kB each); `apps/web/src/bundleSize.test.ts` reads every emitted JavaScript file.
+- Review: one pass, 0 high, 2 medium, 4 low. Corrective pass (`3960439`): a `shared` chunk keeps the entry at
+  24.2 kB; the vadose and uncertainty workers ran in a browser; the import loop check guards against finding no
+  imports. JavaScript fetched grew 0.9 percent on home and 0.35 percent on `#/transport`.
 
 ## Wave X landed (2026-10-23)
 Bryan: "let's continue". Rulings in the DECISIONS.md "Wave X scope" block and its "Wave X slices" block, all
@@ -421,7 +428,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   `report/` at `#/report` (generated methods statement, inputs, result tables and engine warnings per
   screen, print CSS), `a11y/` (labels test, contrast token test, shell keyboard test), `docs/` at `#/docs`
   (reader over `docs/USER_GUIDE.md`, the attributions and `docs/methods/*.md`) and `bundleSize.test.ts`
-  (entry chunk under 200 kB, no chunk over 500 kB).
+  (since wave Y: every emitted JavaScript file, workers included; entry under 100 kB, engine and worker files under
+  400 kB, other chunks under 500 kB, no import loop among engine chunks).
 - `scripts/mobile-check.mjs` (`corepack pnpm mobile:check`, needs a built app and a local Chrome): true
   390x844 viewport through CDP, light and dark, every route plus four document pages, and once at 1280x900.
   `mobile:check:full` (`--modeled`) adds the in-browser modeled cleanup run and the report's modeled block;
@@ -586,8 +594,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   are not interpreted; CCME imidacloprid and ANZG vanadium CAS numbers fail their check digit and are kept as
   printed. CCME and ANZG raw files are not committed (no reuse licence stated), so the build rests on the committed
   CSVs with the fetched files' hashes. The UK zinc catchment values are not used.
-- Engine chunk: `src-*.js` is 497.06 kB against the 500 kB bundle limit after wave V; the next engine addition
-  needs a split or lazy load.
+- Bundle (wave Y): the engine is nine `engine-*` chunks, the largest 227.7 kB in a worker build; each worker build
+  carries its own engine chunk copies, so the page and the workers share no cached chunks. `sourcemap: true`
+  (older than wave Y) ships 16.9 MB of source maps, with sources, to Pages beside 6.0 MB of JavaScript.
 - Surface water solves (wave V): a first solve through a fed chain takes about 25 s in the worker, and a 2-year
   full run about 63 s.
 - Two EPA 2004 lookup values fail the plausibility screen and are omitted (sec-butylbenzene enthalpy,
@@ -640,7 +649,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to X merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-23: waves J to Y merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
   jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick, the
@@ -650,8 +659,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   criteria and MacDonald 2000) as wave V. Bryan, 2026-10-23 ("okay let's do it"): accepted the wave V substitution
   (ruling 1, DeVaull in place of Appendix K, indoor only), the vinyl chloride shower and produce fallback and vinyl
   chloride's place in wave T, all as recommended. The 2026 EU revision shipped as wave W and the blank-page check as
-  wave X, the same day. Next, at Bryan's request: wave Y, the engine chunk split (the engine chunk is 498,248 of
-  500,000 bytes, and the six worker bundles, 574 to 597 kB, are over the same limit but outside the size test). The
+  wave X, the same day. The engine chunk split followed at Bryan's request as wave Y. Not ruled on: whether
+  Pages should ship the source maps (see the bundle open item). The
   wave P remainders still open (a soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal
   values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp

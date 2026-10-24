@@ -1485,7 +1485,8 @@ overturn):
     user guide, lazy loaded; no second static generator.
 12. **Bundle (DEFAULT).** Lazy load every screen, keep generated data and `references.json` out of the
     entry, check engine tree shaking; entry under 200 kB and no chunk over 500 kB, enforced by a
-    build-size test on the Vite manifest, with numbers set from the first measurement.
+    build-size test on the Vite manifest, with numbers set from the first measurement. (Since wave Y the test reads
+    every emitted JavaScript file, workers included; see the Wave Y blocks.)
 13. **Deferred (DEFAULT).** Named projects in storage, cloud or gist sharing, a PDF library, RISC5 project
     import, comparing two saved projects, offline install, translation, and the mobile check in CI.
 14. **Slices.** S1 (feeds onto `createFeed`), S5 (CSV helper), S7 (bundle) and the S9 script start now;
@@ -4421,11 +4422,43 @@ DEFAULT and open to Bryan's overturn.
    be split too. If a worker cannot be brought under the limit by configuration, its measured size and the reason are
    recorded instead of a silent exemption.
 3. **No behaviour change.** No engine source changes unless a module cycle or a side effect forces one, which is then
-   reported. The full gate and `mobile:check:full`, whose modeled visit runs the workers, confirm every screen and
-   worker still works.
+   reported. The full gate and `mobile:check:full` confirm every screen still works; its modeled visit runs only the
+   modeled worker, so the slice runs the other workers in a browser (corrected at close).
 4. **Pages base path.** The Pages build sets `BASE_PATH=/model_flow/`; a screen that starts a worker is loaded in a real
    browser from a build with that base, served under that base, to show the new chunk and worker URLs resolve there.
 5. **Load cost.** The JavaScript bytes the home screen and one worker screen fetch are reported before and after; the
    total must not grow by more than 5 percent.
 6. **Checks.** Slice checks, one gate, `mobile:check:full` once and one review, per the project cadence.
 7. **Docs at close.** M11 ruling 12 and the handoff open item on the engine chunk are corrected in place.
+
+### Wave Y slice Y1 and the corrective pass
+
+Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn. Only `apps/web/vite.config.ts` and
+`apps/web/src/bundleSize.test.ts` changed; no engine source changed.
+
+1. **Engine groups.** Code-splitting groups put the engine into nine chunks: `engine-vapor` (vapor, vadose and
+   groundwater, which import each other), `engine-exposure`, `engine-saturatedSource`, `engine-cleanup`,
+   `engine-surfaceWater`, `engine-uncertainty`, `engine-processes` (the other process folders), `engine-core`
+   (numerics, references, registry) and `engine-libs` (zod and @stdlib). The largest is `engine-libs` at 227.7 kB in
+   a worker build (130.6 kB in the page build). A first split with a static import loop between engine chunks broke
+   the transport worker ("Cannot access 'c' before initialization"), so the test fails on any such loop.
+2. **Workers.** `worker.format` is `'es'` and workers use the same groups; the six worker files are 3 to 19 kB (were
+   573,565 to 596,646 bytes). Each worker is its own build, so each carries its own copies of the engine chunks
+   (byte-identical ones share a file); the page and the workers do not share cached chunks, as before.
+3. **Shared chunk.** The engine groups alone merged the old `store` chunk (web modules shared by the entry and lazy
+   routes) into the entry, 23.4 kB to 162.4 kB. A `shared` group (web source, `tags: ['$initial']`, `minShareCount:
+   2`, page build only) restores it: entry 24.2 kB, `shared` 142.0 kB (was `store`, 139.4 kB). `minShareCount` alone
+   built a 349 kB chunk because it counts lazy routes that share modules.
+4. **Size test.** It reads every emitted `.js` file (at least six workers and three engine chunks must be present):
+   entry under 100 kB, every chunk under 500 kB, engine and worker files under 400 kB, JSON assets under 700 kB as
+   before, and no static import loop among engine chunks, with a guard that imports were found in the entry and in
+   every worker (single or double quotes).
+5. **Load cost.** JavaScript fetched: home 887,106 to 895,073 bytes (+0.9 percent), `#/transport` with its worker
+   1,759,807 to 1,766,036 (+0.35 percent).
+6. **Browser runs.** The transport, saturated, surface water, vadose and uncertainty workers ran in a browser on the
+   normal build (the uncertainty run 200 iterations on 4 workers) with no console errors or failed requests, and the
+   modeled worker in `mobile:check:full`. Built with `BASE_PATH=/model_flow/` and served under it, the transport and
+   uncertainty workers ran with no 404.
+7. **Review.** One review: 0 high, 2 medium (the entry growth, and workers never run in a browser; both closed in the
+   corrective pass), 4 low, two folded in (the quote guard, a dead file pattern). Left open: `sourcemap: true`, which
+   predates the wave, ships 16.9 MB of source maps (with their sources) to Pages beside 6.0 MB of JavaScript.
