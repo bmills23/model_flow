@@ -1,4 +1,5 @@
 import { createChemicalFeed } from '../vapor/feedStore';
+import type { RunInputRow } from '../project/runInputs';
 import type { SurfaceWaterCoefficient, SurfaceWaterSolveState } from './coefficient';
 export type SurfaceWaterFeedMethod = 'well-mixed' | 'mass-discharge';
 
@@ -31,6 +32,11 @@ export interface SurfaceWaterFeed {
    * to; absent when the run is not linked or the bank run was untagged.
    */
   chemicalId?: string;
+  /**
+   * The inputs this result ran with, as labelled rows in the sending screen's words and units, recorded
+   * when the result was sent (see `project/runInputs.ts`). Absent in a project saved before it existed.
+   */
+  runInputs?: RunInputRow[];
 }
 
 /** One slot per chemical (see `project/feedSlots.ts`); `getSurfaceWaterFeed(chemicalId)` reads a consumer's slot. */

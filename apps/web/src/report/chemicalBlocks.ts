@@ -1,4 +1,4 @@
-import { convert, registry, type EpcSpec } from '@model-flow/engine';
+import { convert, type EpcSpec } from '@model-flow/engine';
 import type { CsvRow } from '../export/csv';
 import type { CsvTable } from '../export/DownloadCsv';
 import type { FeedSlots } from '../project/feedSlots';
@@ -15,6 +15,8 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import type { ScreenKey } from './methodsRun';
+import { methodName, notRecordedNote, readRunInputs, type RunInputRow } from '../project/runInputs';
+import { transportRunInputs } from '../transport/runInputs';
 
 /**
  * One chemical's block in the report section of a fate screen. A fate screen runs one chemical at a time,
@@ -61,11 +63,7 @@ const sig = (x: number): number => Number(x.toPrecision(6));
 
 const HAND = 'Chemical entered by hand (not from the database)';
 
-/** The name of a method id as the methods statement prints it, or the plain words for an entered value. */
-export function methodName(id: string | undefined): string {
-  if (id === undefined || id === '' || id === 'entered') return 'entered by the user';
-  return registry.has(id) ? registry.get(id).name : 'a method of this program';
-}
+export { methodName };
 
 /** The slot keys of several feeds of one screen, in the order first seen. */
 function chemicalsOf(slots: ReadonlyMap<string, unknown>[]): string[] {
@@ -156,6 +154,13 @@ const MG_PER_L = 1e3;
 /** kg/m3 to mg/m3. */
 const MG_PER_M3 = 1e6;
 
+/** Put a feed's recorded inputs into its block, or say they were not recorded and how to record them. */
+function recordedInputs(block: ChemicalBlock, feed: unknown, what: string, screen: string): void {
+  const rows = readRunInputs(feed);
+  if (rows === null) block.notes.push(notRecordedNote(what, screen));
+  else block.inputs.push(...rows);
+}
+
 /* ---------------------------------------------------------------- transport */
 
 const WELL_METHOD: Record<WellFeed['method'], string> = {
@@ -164,44 +169,27 @@ const WELL_METHOD: Record<WellFeed['method'], string> = {
   domenico: 'groundwater.domenico1987',
 };
 
-/** The aquifer, source and receptor a plume run carried, in the units the screen shows. */
-function transportInputs(bank: BankFeed): { label: string; value: string }[] {
-  const s = bank.scenario as unknown as Record<string, unknown>;
-  const num = (k: string): number | null => (typeof s[k] === 'number' ? (s[k] as number) : null);
-  const out: { label: string; value: string }[] = [];
-  const add = (label: string, v: number | null, unit: string, scale = 1): void => {
-    if (v !== null && Number.isFinite(v)) out.push({ label, value: `${sig(v * scale)} ${unit}` });
-  };
-  const velocity = num('velocity');
-  add('Seepage velocity', velocity, 'm/yr', YR);
-  add('Porosity', num('porosity'), '');
-  add('Retardation factor', num('retardation'), '');
-  const decay = num('decayRate');
-  out.push({
-    label: 'Decay half-life',
-    value: decay === null || decay <= 0 ? 'none' : `${sig(Math.LN2 / decay / YR)} yr`,
-  });
-  add('Longitudinal dispersivity', num('alphaL'), 'm');
-  add('Transverse dispersivity', num('alphaT'), 'm');
-  add('Vertical dispersivity', num('alphaV'), 'm');
-  add('Source length along flow', num('srcLength'), 'm');
-  add('Source width across flow', num('srcWidth'), 'm');
-  add('Source thickness', num('srcDepth'), 'm');
-  const fed = s['fed'] as { label?: string } | undefined;
-  if (fed !== undefined && fed !== null) {
-    out.push({
-      label: 'Source',
-      value: `fed by another screen's result (${fed.label ?? 'a sent run'})`,
-    });
-  } else {
-    add('Source concentration', num('c0'), 'mg/L', MG_PER_L);
-    add('Source mass release rate', num('massRate'), 'g/d', 1000 * 86400);
+const sameRows = (a: readonly RunInputRow[], b: readonly RunInputRow[]): boolean =>
+  a.length === b.length && a.every((r, i) => r.label === b[i]!.label && r.value === b[i]!.value);
+
+/**
+ * The rows of the well run and of the plume run sent to the surface water screen. They are usually one
+ * run, so equal rows print once; when the two differ, or a well result was sent without its rows, the
+ * plume run's rows name their run in each label so they are not read as the well's.
+ */
+function runRows(
+  well: { sent: boolean; rows: readonly RunInputRow[] | null },
+  bank: readonly RunInputRow[] | null,
+): RunInputRow[] {
+  const named = (rows: readonly RunInputRow[], run: string): RunInputRow[] =>
+    rows.map((r) => ({ ...r, label: `${r.label} (${run})` }));
+  if (well.rows !== null && bank !== null) {
+    return sameRows(well.rows, bank)
+      ? [...well.rows]
+      : [...named(well.rows, 'well run'), ...named(bank, 'surface water plume run')];
   }
-  const rx = s['receptor'] as { x?: number; y?: number } | undefined;
-  if (rx?.x !== undefined) add('Receptor distance downgradient', rx.x, 'm');
-  if (rx?.y !== undefined) add('Receptor distance across flow', rx.y, 'm');
-  add('Evaluation time', num('time'), 'yr', 1 / YR);
-  return out;
+  if (well.sent && bank !== null) return named(bank, 'surface water plume run');
+  return [...(well.rows ?? bank ?? [])];
 }
 
 export function transportBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
@@ -217,6 +205,9 @@ export function transportBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
       tables: [],
     };
     const w = well.get(id);
+    const wellRows = w === undefined ? null : readRunInputs(w);
+    const b = bank.get(id);
+    const bankRows = b === undefined ? null : transportRunInputs(b.scenario);
     if (w !== undefined) {
       block.sent.push(
         `Receptor well concentration sent to the exposure and risk screen: ${w.label}`,
@@ -233,16 +224,16 @@ export function transportBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
           methodName(WELL_METHOD[w.method]),
         ),
       );
+      if (wellRows === null) {
+        block.notes.push(notRecordedNote('receptor well concentration', 'groundwater screen'));
+      }
     } else {
       block.notes.push(
         'No well concentration was sent to the exposure and risk screen for this chemical.',
       );
     }
-    const b = bank.get(id);
-    if (b !== undefined) {
-      block.sent.push(`Plume run sent to the surface water screen: ${b.label}`);
-      block.inputs.push(...transportInputs(b));
-    }
+    if (b !== undefined) block.sent.push(`Plume run sent to the surface water screen: ${b.label}`);
+    block.inputs.push(...runRows({ sent: w !== undefined, rows: wellRows }, bankRows));
     return block;
   });
 }
@@ -405,6 +396,7 @@ export function vaporBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
       notes: [],
       tables: [],
     };
+    recordedInputs(block, f, 'vapor intrusion run', 'vapor intrusion screen');
     if (rows.length === 0) block.notes.push('The sent result holds no air concentration.');
     else {
       block.tables.push(
@@ -439,6 +431,7 @@ export function surfaceWaterBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[
       notes: [],
       tables: [],
     };
+    recordedInputs(block, f, 'surface water concentration', 'surface water screen');
     block.tables.push(
       ...seriesTables(
         'surface-water',
@@ -492,6 +485,7 @@ export function householdBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
       notes: [],
       tables: [],
     };
+    recordedInputs(block, f, 'household run', 'household screen');
     if (rows.length === 0) block.notes.push('The sent result holds no air concentration.');
     else {
       block.tables.push(
@@ -531,6 +525,7 @@ export function plantsBlocks(slots: Slots, nameOf: NameOf): ChemicalBlock[] {
       notes: [],
       tables: [],
     };
+    recordedInputs(block, f, 'homegrown produce factors', 'plants and ecology screen');
     block.tables.push(
       table(
         `plants-produce-${slug(id)}`,

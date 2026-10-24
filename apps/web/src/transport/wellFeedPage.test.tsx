@@ -31,6 +31,11 @@ describe('TransportPage well result for the exposure screen', () => {
     expect(feed?.times.length).toBe(feed?.values.length);
     expect(feed!.values.every((v) => Number.isFinite(v) && v >= 0)).toBe(true);
     expect(feed!.values.some((v) => v > 0)).toBe(true);
+    // the inputs the run used ride with the sent curve, in the screen's words and units
+    const row = (label: string) => feed?.runInputs?.find((r) => r.label === label)?.value;
+    expect(row('Source concentration')).toMatch(/^[\d.e+-]+ mg\/L$/);
+    expect(row('Longitudinal dispersivity')).toMatch(/ m$/);
+    expect(row('Evaluation time')).toMatch(/ yr$/);
     expect(screen.getByRole('link', { name: /open exposure and risk/i }).getAttribute('href')).toBe(
       '#/risk',
     );

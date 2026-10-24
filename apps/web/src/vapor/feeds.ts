@@ -1,5 +1,6 @@
 import type { EpcSpec } from '@model-flow/engine';
 import { createChemicalFeed } from './feedStore';
+import type { RunInputRow } from '../project/runInputs';
 import type { VaporCoefficients } from './coefficients';
 import type { SourceSeries } from './series';
 
@@ -44,6 +45,11 @@ export interface VaporRiskFeed {
    * vapor source levels (wave K slice K1). Absent in a project saved before it existed.
    */
   coefficients?: VaporCoefficients;
+  /**
+   * The inputs this result ran with, as labelled rows in the sending screen's words and units, recorded
+   * when the result was sent (see `project/runInputs.ts`). Absent in a project saved before it existed.
+   */
+  runInputs?: RunInputRow[];
 }
 
 const risk = createChemicalFeed<VaporRiskFeed>();

@@ -13,6 +13,7 @@ import { overridesSchema } from '../overrides/project';
 import { siteSchema } from '../site/project';
 import { chemicalsSchema } from './chemicals';
 import { text } from './fields';
+import { dropMalformedRunInputs, runInputRowsSchema } from './runInputs';
 
 export const PROJECT_FORMAT = 'model_flow.project';
 
@@ -48,6 +49,8 @@ const feedEnvelope = <V extends z.ZodType>(value: V) =>
   z.object({ source: text, inputsHash: text, value });
 
 const jsonObject = z.record(z.string(), z.json());
+/** A feed held as a JSON object whose recorded inputs, when malformed, are dropped rather than failing the slot. */
+const jsonFeed = jsonObject.transform(dropMalformedRunInputs);
 
 export const feedShapes = {
   well: feedEnvelope(
@@ -58,6 +61,7 @@ export const feedShapes = {
         times: numbers,
         values: numbers,
         chemicalId: text.optional(),
+        runInputs: runInputRowsSchema,
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),
@@ -83,6 +87,7 @@ export const feedShapes = {
           .optional(),
         solve: z.object({ request: jsonObject }).optional(),
         chemicalId: text.optional(),
+        runInputs: runInputRowsSchema,
       })
       .refine(sameLength, sameLengthMessage),
   ).optional(),
@@ -108,9 +113,9 @@ export const feedShapes = {
   vaporVadose: feedEnvelope(jsonObject).optional(),
   vaporWaterTable: feedEnvelope(jsonObject).optional(),
   vaporSaturated: feedEnvelope(jsonObject).optional(),
-  vaporRisk: feedEnvelope(jsonObject).optional(),
-  household: feedEnvelope(jsonObject).optional(),
-  produce: feedEnvelope(jsonObject).optional(),
+  vaporRisk: feedEnvelope(jsonFeed).optional(),
+  household: feedEnvelope(jsonFeed).optional(),
+  produce: feedEnvelope(jsonFeed).optional(),
   tph: feedEnvelope(jsonObject).optional(),
 };
 

@@ -13,6 +13,7 @@ import { DEFAULT_CRITERIA_SET, type CriteriaSetChoice } from './criteriaSetChoic
 import type { CsvRow } from '../export/csv';
 import { SedimentChart, SurfaceWaterChart } from './charts';
 import { surfaceWaterCoefficient, surfaceWaterSolveState } from './coefficient';
+import { surfaceWaterRunInputs } from './runInputs';
 import {
   getSurfaceWaterFeedSlots,
   setSurfaceWaterFeed,
@@ -170,6 +171,7 @@ export function SurfaceWaterScreen() {
         ? {
             coefficient: surfaceWaterCoefficient(request, result, method),
             solve: surfaceWaterSolveState(request),
+            runInputs: surfaceWaterRunInputs(request),
           }
         : {}),
       ...chemicalTag(runChemical),

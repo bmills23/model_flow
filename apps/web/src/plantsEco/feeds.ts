@@ -1,5 +1,6 @@
 import type { ProduceBoundary, ProduceFactors } from '@model-flow/engine';
 import { createChemicalFeed, createFeed } from '../vapor/feedStore';
+import type { RunInputRow } from '../project/runInputs';
 
 /**
  * The plants and ecology screen's homegrown produce inputs offered to the exposure and risk screen for
@@ -23,6 +24,11 @@ export interface ProduceRiskFeed {
    * a feed saved before the cleanup screen read it.
    */
   warnings?: { code: string; message: string }[];
+  /**
+   * The inputs this result ran with, as labelled rows in the sending screen's words and units, recorded
+   * when the result was sent (see `project/runInputs.ts`). Absent in a project saved before it existed.
+   */
+  runInputs?: RunInputRow[];
 }
 
 /** One slot per chemical (see `project/feedSlots.ts`). */

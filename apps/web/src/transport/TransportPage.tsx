@@ -20,6 +20,7 @@ import { getSaturatedFeedSlots, subscribeSaturatedFeed } from '../saturated/feed
 import { getVadoseFeedSlots, subscribeVadoseFeed } from '../vadose/feed';
 import { getBankFeedSlots, setBankFeed, subscribeBankFeed } from './bankFeed';
 import { getWellFeedSlots, setWellFeed, subscribeWellFeed } from './wellFeed';
+import { transportRunInputs } from './runInputs';
 import { getTransportFeedSlots, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeedSlots, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
 import { ownSlot, pickSlot } from '../project/feedSlots';
@@ -787,6 +788,7 @@ export function TransportPage() {
                         label: `Receptor well, ${SERIES[k].label}, ${form.timeYr} years`,
                         times: [...result.times],
                         values: [...values],
+                        runInputs: transportRunInputs(scenario),
                         ...chemicalTag(form.chemicalId),
                       });
                     }}

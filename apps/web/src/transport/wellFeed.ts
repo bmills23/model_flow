@@ -1,4 +1,5 @@
 import { createChemicalFeed } from '../vapor/feedStore';
+import type { RunInputRow } from '../project/runInputs';
 export type WellMethod = 'legacy' | 'modern' | 'domenico';
 
 /**
@@ -14,6 +15,11 @@ export interface WellFeed {
   values: number[];
   /** Database id of the chemical the screen was set to; absent when entered by hand or sent before the tag existed. */
   chemicalId?: string;
+  /**
+   * The inputs this result ran with, as labelled rows in the sending screen's words and units, recorded
+   * when the result was sent (see `project/runInputs.ts`). Absent in a project saved before it existed.
+   */
+  runInputs?: RunInputRow[];
 }
 
 /** One slot per chemical (see `project/feedSlots.ts`); `getWellFeed(chemicalId)` reads a consumer's slot. */

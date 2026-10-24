@@ -15,6 +15,7 @@ import {
   toScenario as saturatedScenario,
 } from '../saturated/form';
 import { DEFAULT_FORM as VADOSE_DEFAULT, toScenario as vadoseScenario } from '../vadose/form';
+import { transportRunInputs } from '../transport/runInputs';
 
 const YR = 365.25 * 86400;
 const NAMES: Record<string, string> = {
@@ -307,5 +308,180 @@ describe('vadoseBlocks and saturatedBlocks', () => {
     ]);
     expect(b!.tables[0]!.label).toMatch(/legacy method, the one the groundwater screen used/);
     expect(b!.tables[2]!.label).toMatch(/modern method, a sensitivity/);
+  });
+});
+
+describe('recorded inputs in the blocks', () => {
+  const rows = (c: string) => [
+    { label: 'Source concentration', value: `${c} mg/L` },
+    { label: 'Longitudinal dispersivity', value: '10 m' },
+  ];
+  const value = (b: { inputs: { label: string; value: string }[] }, label: string) =>
+    b.inputs.find((i) => i.label === label)?.value;
+  const noMarker = (notes: string[]) => notes.filter((n) => /not recorded/.test(n));
+
+  describe('transport, two chemicals sent with different source concentrations', () => {
+    const held = {
+      well: {
+        '71-43-2': {
+          method: 'modern',
+          label: 'Receptor well, modern, 15 years',
+          chemicalId: '71-43-2',
+          runInputs: rows('10'),
+          ...series(6.17e-3),
+        },
+        '1634-04-4': {
+          method: 'modern',
+          label: 'Receptor well, modern, 15 years',
+          chemicalId: '1634-04-4',
+          runInputs: rows('40'),
+          ...series(9e-3),
+        },
+      },
+    };
+
+    it("prints each chemical's own source concentration beside its own well series", () => {
+      const [benzene, mtbe] = transportBlocks(slotsOf(held), nameOf);
+      expect(value(benzene!, 'Source concentration')).toBe('10 mg/L');
+      expect(value(mtbe!, 'Source concentration')).toBe('40 mg/L');
+      expect(value(benzene!, 'Longitudinal dispersivity')).toBe('10 m');
+      // the method row stays, and neither block carries the other's value
+      expect(value(benzene!, 'Method sent')).toBeTruthy();
+      expect(JSON.stringify(benzene!.inputs)).not.toMatch(/40 mg\/L/);
+      expect(JSON.stringify(mtbe!.inputs)).not.toMatch(/10 mg\/L/);
+      expect(noMarker(benzene!.notes)).toEqual([]);
+      expect(benzene!.tables[0]!.rows[0]).toMatchObject({ peak: 6.17 });
+    });
+
+    it('prints the plume run rows once when the well run and the plume run are the same run', () => {
+      const bank = {
+        label: 'Groundwater transport run, 15 years',
+        chemicalId: '71-43-2',
+        scenario: { c0: 0.01, alphaL: 10, time: 15 * YR },
+      };
+      const [b] = transportBlocks(
+        slotsOf({
+          well: { '71-43-2': held.well['71-43-2'] },
+          bank: { '71-43-2': bank },
+        }),
+        nameOf,
+      );
+      // the bank scenario above gives other rows than the well's, so both print and each names its run
+      expect(b!.inputs.filter((i) => i.label.startsWith('Source concentration'))).toEqual([
+        { label: 'Source concentration (well run)', value: '10 mg/L' },
+        { label: 'Source concentration (surface water plume run)', value: '10 mg/L' },
+      ]);
+      const same = transportBlocks(
+        slotsOf({
+          well: {
+            '71-43-2': {
+              ...held.well['71-43-2'],
+              runInputs: transportRunInputs(bank.scenario),
+            },
+          },
+          bank: { '71-43-2': bank },
+        }),
+        nameOf,
+      )[0]!;
+      expect(same.inputs.filter((i) => i.label === 'Source concentration')).toHaveLength(1);
+    });
+
+    it('says the inputs were not recorded for a well result sent before they were, and how to record them', () => {
+      const old = { ...held.well['71-43-2'] } as Record<string, unknown>;
+      delete old['runInputs'];
+      const [b] = transportBlocks(slotsOf({ well: { '71-43-2': old } }), nameOf);
+      expect(b!.inputs.map((i) => i.label)).toEqual(['Method sent']);
+      const note = noMarker(b!.notes)[0] ?? '';
+      expect(note).toMatch(/not recorded/);
+      expect(note).toMatch(/send it again from the groundwater screen/);
+    });
+
+    it('does not trust a malformed value: it reads as not recorded', () => {
+      const [b] = transportBlocks(
+        slotsOf({ well: { '71-43-2': { ...held.well['71-43-2'], runInputs: 'broken' } } }),
+        nameOf,
+      );
+      expect(noMarker(b!.notes)).toHaveLength(1);
+    });
+  });
+
+  it('vapor: prints the recorded rows, and the note for a feed without them', () => {
+    const feed = {
+      chemicalId: '71-43-2',
+      label: 'Benzene, legacy',
+      indoor: { kind: 'constant', value: 1e-6, origin: 'vapor.je-1991' },
+    };
+    const [withRows] = vaporBlocks(
+      slotsOf({ vaporRisk: { '71-43-2': { ...feed, runInputs: rows('1000') } } }),
+      nameOf,
+    );
+    expect(value(withRows!, 'Source concentration')).toBe('1000 mg/L');
+    expect(noMarker(withRows!.notes)).toEqual([]);
+    const [without] = vaporBlocks(slotsOf({ vaporRisk: { '71-43-2': feed } }), nameOf);
+    expect(without!.inputs).toEqual([]);
+    expect(noMarker(without!.notes)[0]).toMatch(/send it again from the vapor intrusion screen/);
+  });
+
+  it('surface water: prints the recorded rows after the method, and the note for a feed without them', () => {
+    const feed = {
+      method: 'well-mixed',
+      origin: 'surfaceWater.well-mixed',
+      label: 'sw',
+      chemicalId: '71-43-2',
+      ...series(1e-3),
+    };
+    const [withRows] = surfaceWaterBlocks(
+      slotsOf({ surfaceWater: { '71-43-2': { ...feed, runInputs: rows('5') } } }),
+      nameOf,
+    );
+    expect(withRows!.inputs.map((i) => i.label)).toEqual([
+      'Method sent',
+      'Source concentration',
+      'Longitudinal dispersivity',
+    ]);
+    const [without] = surfaceWaterBlocks(slotsOf({ surfaceWater: { '71-43-2': feed } }), nameOf);
+    expect(without!.inputs.map((i) => i.label)).toEqual(['Method sent']);
+    expect(noMarker(without!.notes)[0]).toMatch(/send it again from the surface water screen/);
+  });
+
+  it('household: prints the recorded rows (the block listed none before), and the note without them', () => {
+    const feed = {
+      chemicalId: '71-43-2',
+      label: 'Benzene, household run',
+      bathroomAir: { kind: 'constant', value: 1e-6, origin: 'shower.little-1992' },
+      coefficients: {},
+      methods: { bathroomAir: 'shower.little-1992' },
+    };
+    const [withRows] = householdBlocks(
+      slotsOf({ household: { '71-43-2': { ...feed, runInputs: rows('0.5') } } }),
+      nameOf,
+    );
+    expect(value(withRows!, 'Source concentration')).toBe('0.5 mg/L');
+    const [without] = householdBlocks(slotsOf({ household: { '71-43-2': feed } }), nameOf);
+    expect(without!.inputs).toEqual([]);
+    expect(noMarker(without!.notes)[0]).toMatch(/send it again from the household screen/);
+  });
+
+  it('plants: prints the recorded rows after the method and intake, and the note without them', () => {
+    const feed = {
+      chemicalId: '71-43-2',
+      label: 'Benzene, plants',
+      method: 'plantUptake.hhrap-2005',
+      factors: { root: 0.1 },
+      intakes: { root: { gPerKgDay: 1, fractionHomegrown: 0.5 } },
+      intakeLabel: 'user entered',
+    };
+    const [withRows] = plantsBlocks(
+      slotsOf({ produce: { '71-43-2': { ...feed, runInputs: rows('10') } } }),
+      nameOf,
+    );
+    expect(withRows!.inputs.map((i) => i.label)).toEqual([
+      'Plant uptake method',
+      'Intake',
+      'Source concentration',
+      'Longitudinal dispersivity',
+    ]);
+    const [without] = plantsBlocks(slotsOf({ produce: { '71-43-2': feed } }), nameOf);
+    expect(noMarker(without!.notes)[0]).toMatch(/send it again from the plants and ecology screen/);
   });
 });

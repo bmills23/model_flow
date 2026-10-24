@@ -233,6 +233,11 @@ describe('SurfaceWaterScreen', () => {
     // the default run is a 5 mg/L groundwater source: the coefficient is its peak over that source
     expect(held?.coefficient?.value).toBeCloseTo(Math.max(...held!.values) / 5e-3, 12);
     expect(held?.coefficient?.method).toBe('surfaceWater.well-mixed');
+    // the inputs the run used ride with the series
+    const row = (label: string) => held?.runInputs?.find((r) => r.label === label)?.value;
+    expect(row('Groundwater concentration')).toBe('5 mg/L');
+    expect(row('Water body')).toBe('River');
+    expect(row('Upstream flow')).toBe('180 m3/d');
     fireEvent.click(screen.getByRole('button', { name: /use modern surface water for swimming/i }));
     expect(getSurfaceWaterFeed()?.origin).toBe('surfaceWater.mass-discharge');
   }, 30000);

@@ -9,6 +9,7 @@ import {
 } from '@model-flow/engine';
 import { CLASS_LABELS, readNumber, readOptional, type PlantsEcoForm, type Section } from './form';
 import type { ProduceRiskFeed } from './feeds';
+import { produceRunInputs } from './runInputs';
 
 export const LEGACY_PLANT_ID = 'plantUptake.trapp-matthies-1995';
 export const MODERN_PLANT_ID = 'plantUptake.hhrap-2005';
@@ -276,6 +277,7 @@ export function buildProduceFeed(
       intakes: row.intakes,
       intakeLabel: row.intakeLabel,
       warnings: row.warnings.map((w) => ({ code: w.code, message: w.message })),
+      runInputs: produceRunInputs(form),
     },
     notes:
       gaps.length > 0 ? [`Not quantified, so left out of the pathway: ${gaps.join(', ')}`] : [],

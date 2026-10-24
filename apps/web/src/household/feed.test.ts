@@ -225,3 +225,39 @@ describe('computeHousehold with a held series', () => {
     if (!out.irrigation.ok) expect(out.irrigation.errors.join(' ')).toMatch(/surface water/i);
   });
 });
+
+describe('buildHouseholdFeed records the inputs of the run', () => {
+  const value = (rows: { label: string; value: string }[] | undefined, label: string) =>
+    rows?.find((r) => r.label === label)?.value;
+
+  it('lists the water and soil concentrations and the inputs of each process that was sent', () => {
+    const r = buildHouseholdFeed(FORM, NONE);
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    const rows = r.feed.runInputs;
+    expect(value(rows, 'Tap water concentration for the shower')).toBe('0.5 mg/L');
+    expect(value(rows, 'Soil concentration')).toBe('40 mg/kg');
+    expect(value(rows, 'Shower water flow')).toBe('8 L/min');
+    expect(value(rows, 'Sprinkler flow')).toBe('20 L/min');
+    expect(value(rows, 'Outdoor wind speed')).toBe('2 m/s');
+    expect(value(rows, "Henry's constant")).toBe('0.2');
+    // a method is named in words, never by its registry id
+    expect(value(rows, 'Shower method')).not.toMatch(/shower\./);
+  });
+
+  it('names a water concentration taken from the well result as fed', () => {
+    const form = { ...FORM, showerWaterSource: 'well' as const };
+    const r = buildHouseholdFeed(form, { well: WELL, surface: null });
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    expect(value(r.feed.runInputs, 'Tap water concentration for the shower')).toBe(
+      'fed by the well result of the groundwater screen (Receptor well, modern method)',
+    );
+  });
+
+  it('leaves out the inputs of a process that was not sent', () => {
+    const form = { ...FORM, sprayDropletDiameter: '' };
+    const r = buildHouseholdFeed(form, NONE);
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    expect(r.feed.outdoorSprinkler).toBeUndefined();
+    expect(value(r.feed.runInputs, 'Sprinkler flow')).toBeUndefined();
+  });
+});

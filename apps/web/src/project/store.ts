@@ -76,6 +76,7 @@ import { defaultSite, type SiteState } from '../site/model';
 import type { SavedModeledLevels } from '../cleanup/modeledLevels';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
+import { withoutRunInputs } from './runInputs';
 import { pickSlot, resolveSlot, slotOf, slotOfValue, type FeedSlots } from './feedSlots';
 import { hashInputs, stableStringify } from './hash';
 import { isChemicalFeed } from './schema';
@@ -741,7 +742,8 @@ function contentKey(value: unknown): string {
   if (known !== undefined) return known;
   let key: string;
   try {
-    key = hashInputs(value);
+    // the inputs recorded with a sent result describe it; they are not part of what it is
+    key = hashInputs(withoutRunInputs(value));
   } catch {
     contentCounter += 1;
     key = `object-${contentCounter}`;

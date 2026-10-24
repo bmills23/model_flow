@@ -92,6 +92,10 @@ describe('PlantsEcoPage', () => {
     expect(feed?.chemicalId).toContain('7439-92-1-lead-and-compounds');
     expect(feed?.method).toBe('plantUptake.hhrap-2005');
     expect(Object.keys(feed!.factors).length).toBeGreaterThan(0);
+    // the inputs the run used ride with the factors
+    const row = (label: string) => feed?.runInputs?.find((r) => r.label === label)?.value;
+    expect(row('Soil-water partition coefficient')).toBe('5 L/kg');
+    expect(row('Soil dry bulk density')).toBe('1.5 kg/L');
   }, 30000);
 
   it('builds a TPH composition from the five RSL surrogates and gives a total level', async () => {

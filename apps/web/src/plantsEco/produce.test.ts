@@ -160,3 +160,30 @@ describe('buildProduceFeed', () => {
     expect(buildProduceFeed(bad, computeProduce(bad)).ok).toBe(false);
   });
 });
+
+describe('buildProduceFeed records the inputs of the run', () => {
+  const value = (rows: { label: string; value: string }[] | undefined, label: string) =>
+    rows?.find((r) => r.label === label)?.value;
+
+  it('lists the modern run: soil concentration, properties, soil and moisture', () => {
+    const form = modernForm();
+    const r = buildProduceFeed(form, computeProduce(form));
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    const rows = r.feed.runInputs;
+    expect(value(rows, 'Soil concentration')).toBe('10 mg/kg dry weight');
+    expect(value(rows, 'Log of the octanol-water partition coefficient')).toBe('3');
+    expect(value(rows, 'Soil-water partition coefficient')).toBe('5 L/kg');
+    expect(value(rows, 'Soil dry bulk density')).toBe('1.5 kg/L');
+    expect(value(rows, 'Moisture fraction of the fresh produce')).toBe('0.8');
+    expect(value(rows, 'Leaf area')).toBeUndefined();
+  });
+
+  it('lists the leaf inputs of the legacy run', () => {
+    const form = legacyForm();
+    const r = buildProduceFeed(form, computeProduce(form));
+    if (!r.ok) throw new Error(r.reasons.join('; '));
+    expect(value(r.feed.runInputs, 'Leaf area')).toBe('0.5 m2');
+    expect(value(r.feed.runInputs, 'Water-filled porosity')).toBe('0.3');
+    expect(value(r.feed.runInputs, 'Moisture fraction of the fresh produce')).toBeUndefined();
+  });
+});

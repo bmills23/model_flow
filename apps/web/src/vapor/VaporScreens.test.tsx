@@ -154,6 +154,14 @@ describe('source from another screen', () => {
     expect(ind?.quantified && ind.methodId).toBe('vapor.je-1991');
     expect(ind?.quantified && ind.source).toBe('groundwater');
     expect(feed?.coefficients?.outdoor?.methodId).toBe('outdoorAir.box');
+    // the inputs the run used ride with the air: the fed source, the method, the building and the outdoor box
+    const row = (label: string) => feed?.runInputs?.find((r) => r.label === label)?.value;
+    expect(row('Source')).toBe(
+      "fed by another screen's result (Water table under the building, modern)",
+    );
+    expect(row('Indoor air method')).toBe('Legacy Johnson and Ettinger');
+    expect(row('Floor area')).toBe('150 m2');
+    expect(row('Outdoor wind speed')).toBe('2.25 m/s');
   }, 30000);
 
   it('uses a single saturated region 1 value as a constant', () => {

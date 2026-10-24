@@ -1,5 +1,6 @@
 import type { EpcSpec } from '@model-flow/engine';
 import { createChemicalFeed } from '../vapor/feedStore';
+import type { RunInputRow } from '../project/runInputs';
 
 /**
  * The household screen's air concentrations offered to the exposure and risk screen (and its model
@@ -39,6 +40,11 @@ export interface HouseholdRiskFeed {
     sprayAir?: string;
     particulateAir?: string;
   };
+  /**
+   * The inputs this result ran with, as labelled rows in the sending screen's words and units, recorded
+   * when the result was sent (see `project/runInputs.ts`). Absent in a project saved before it existed.
+   */
+  runInputs?: RunInputRow[];
 }
 
 /** One slot per chemical (see `project/feedSlots.ts`). */

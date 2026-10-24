@@ -2,6 +2,7 @@ import { seriesEpc, waterDrivenEpc, type EpcSpec } from '@model-flow/engine';
 import { computeHousehold, type HeldSources, type Section } from './compute';
 import { PARTICULATE_ORIGIN, SHOWER_ORIGIN, SPRINKLER_ORIGIN, type HouseholdForm } from './form';
 import type { HouseholdRiskFeed } from './feeds';
+import { householdRunInputs } from './runInputs';
 
 export type FeedResult =
   { ok: true; feed: HouseholdRiskFeed; notes: string[] } | { ok: false; reasons: string[] };
@@ -114,5 +115,11 @@ export function buildHouseholdFeed(form: HouseholdForm, held: HeldSources): Feed
     reasons.push('No household result computes yet; complete the inputs of at least one process');
   }
   if (reasons.length > 0) return { ok: false, reasons };
+  // the inputs of the processes whose air was sent, as the screen ran them
+  feed.runInputs = householdRunInputs(form, held, {
+    shower: feed.bathroomAir !== undefined || feed.indoorAir !== undefined,
+    spray: feed.outdoorSprinkler !== undefined,
+    particulate: feed.outdoorParticulate !== undefined,
+  });
   return { ok: true, feed, notes };
 }

@@ -56,16 +56,13 @@ import {
   type VaporForm,
 } from './form';
 import { HelpLink } from '../docs/HelpLink';
+import { VAPOR_METHOD_WORDS, vaporRunInputs } from './runInputs';
 import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 
 const byKey = new Map(references.map((r) => [r.key, r]));
 const sig = (v: number): string => formatConcentration(v);
 const MGM3 = 1e-6; // kg/m3 per mg/m3
-const METHOD_LABEL = {
-  legacy: 'Legacy Johnson and Ettinger',
-  modern: 'Modern EPA',
-  devaull: 'Oxygen-limited (DeVaull)',
-} as const;
+const METHOD_LABEL = VAPOR_METHOD_WORDS;
 const WARNING_LABEL = { legacy: 'Legacy', modern: 'Modern', devaull: 'Oxygen-limited' } as const;
 
 type Setter = <K extends keyof VaporForm>(key: K, value: VaporForm[K]) => void;
@@ -385,6 +382,13 @@ export function VaporPage() {
         ...(coefficients.indoor ? { indoor: coefficients.indoor } : {}),
         ...(outdoorSpec && coefficients.outdoor ? { outdoor: coefficients.outdoor } : {}),
       },
+      runInputs: vaporRunInputs({
+        form,
+        outdoor: outdoorForm,
+        method: riskMethod,
+        fedBy: active ? active.label : null,
+        withOutdoor: outdoorSpec !== undefined,
+      }),
     });
   };
   const riskReason = !parsed.ok
