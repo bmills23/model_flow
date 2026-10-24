@@ -10,6 +10,9 @@
 // The "modeled" visit (an in-browser modeled cleanup run, then the report's modeled block) is the heaviest
 // visit, so it runs only with --modeled; `corepack pnpm mobile:check:full` passes it. While iterating on one
 // screen, narrow the run with --routes and --views: one route in one view takes seconds.
+// A view also fails when the app did not mount or the route is empty (a build made for another BASE_PATH
+// and served at the root is blank): it needs the Main nav, exactly one main#main with an h1, and inside it
+// a form control, table or chart plus a minimum of text (rule and thresholds: scripts/shell-verdict.mjs).
 // It also injects axe-core (a dev dependency, never bundled) into each page and fails on any serious or
 // critical violation; moderate and minor ones are counted and listed but do not fail the run.
 // Pass --no-axe to skip the axe pass, and --axe-json <file> to write every violation to a JSON file.
@@ -20,6 +23,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { shellProblems } from './shell-verdict.mjs';
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => {
@@ -411,6 +415,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
     seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    navMain:document.querySelectorAll('nav[aria-label="Main"]').length,mains:document.querySelectorAll('main#main').length,mainH1:document.querySelectorAll('main#main h1').length,controls:document.querySelectorAll('main#main input,main#main select,main#main textarea').length,links:document.querySelectorAll('main#main a[href]').length,textLen:((document.querySelector('main#main')||{}).innerText||'').trim().length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
 const AXE_RUN = `(async()=>{
@@ -502,7 +507,9 @@ for (const view of VIEWS) {
       for (const x of v)
         axeNote += `\n    [${x.impact}] ${x.id} (${x.count}): ${x.nodes.slice(0, 3).join(' | ')}`;
     }
+    const shell = shellProblems(m);
     const bad =
+      shell.length > 0 ||
       m.n > 0 ||
       m.sw > m.cw ||
       axeBad ||
@@ -519,7 +526,7 @@ for (const view of VIEWS) {
       (tag === 'criteria' && !(m.critSet === 'all' && m.critTables >= 2 && m.critRows >= 10));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }
