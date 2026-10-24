@@ -785,7 +785,7 @@ export const validationCatalog: CatalogInput = {
   notChecked: [
     {
       subject: 'RSL sweep cells that do not reproduce',
-      note: 'Unexplained: the industrial soil noncancer total of n-nonane (printed 72, computed 72.5012, 0.002 percent above the limit). Excepted with a reason: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (inside the rounding of the printed unit risk, so not counted as reproduced); twelve volatile chemicals with neither Koc nor Kd in the parameter sheet (soil inhalation cells and totals print the particulate-only level); lead (key G, no toxicity value); refractory ceramic fibers (key G, database value in fibers). Counts are in the sweep entries above.',
+      note: 'Unexplained: the industrial soil noncancer total of n-nonane (printed 72, computed 72.5012, 0.002 percent above the limit). Excepted with a reason: the tap water total cancer level of Aroclor 1242, 1248, 1254 and 1260 (inside the rounding of the printed unit risk) and the resident soil noncancer inhalation level of PCB 105 (inside the rounding of the printed reference concentration; neither is counted as reproduced); twelve volatile chemicals with neither Koc nor Kd in the parameter sheet (soil inhalation cells and totals print the particulate-only level); lead (key G, no toxicity value); refractory ceramic fibers (key G, database value in fibers). Counts are in the sweep entries above.',
       where: {
         file: 'packages/engine/test/fixtures/rsl-sweep/README.md',
         needle: 'Aroclor 1242, 1248, 1254 and 1260',

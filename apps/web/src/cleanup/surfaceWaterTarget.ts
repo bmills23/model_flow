@@ -61,9 +61,13 @@ export const USER_VALUE_BASIS = 'User value (this project)';
 const UG_PER_L_TO_SI = 1e-6;
 const MG_PER_L_TO_SI = 1e-3;
 
-/** A tabulated surface water criterion value in SI (kg/m3), or null where it needs site inputs. */
+/**
+ * A tabulated surface water criterion value in SI (kg/m3), or null where it needs site inputs or is printed on an
+ * element basis (nitrogen as N): the model's concentration is of the chemical itself, so it is no target.
+ */
 export function criterionSi(c: Criterion): number | null {
   if (c.medium !== 'surfaceWater' || c.value === undefined || !(c.value >= 0)) return null;
+  if (c.elementBasis !== undefined) return null;
   return c.value * (c.unit === 'mg/L' ? MG_PER_L_TO_SI : UG_PER_L_TO_SI);
 }
 

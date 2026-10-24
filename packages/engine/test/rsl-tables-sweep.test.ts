@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CLASS_IDS,
+  attainedMeetsPrinted,
   SWEEP_IDS,
   engineAirLevel,
   engineCoef,
@@ -122,25 +123,54 @@ describe('RSL screening-level sweep: unexplained cells', () => {
 });
 
 describe('RSL screening-level sweep: the cells once left unexplained', () => {
-  it('reproduces PCB 105 resident noncancer soil inhalation from the TEF-applied reference concentration', () => {
-    // 2,3,7,8-TCDD RfCi 4E-8 over the guide's TEF of 3E-5 is 1.3333E-3, printed 1.33E-3; the rounded value gave 833.3
+  it('excepts PCB 105 resident noncancer soil inhalation only through the printed reference concentration interval', () => {
+    // the tables print the TEF-applied RfCi to three figures (1.33E-3); the unrounded quotient 4E-8 / 3E-5 =
+    // 1.3333E-3 reproduces the printed 840, the printed value computes 833.3
+    const cls = result.classes['printed-three-figures'];
+    expect(cls.cells).toEqual({ tapwater: 4, 'soil-resident': 1 });
+    expect(cls.chemicals).toContain("Pentachlorobiphenyl, 2,3,3',4,4'- (PCB 105)");
     const pcb105 = levels.chemicals.find((c) => c.id === '32598-14-4')!;
-    const cell = pcb105.values['soil-resident.inhalation.noncancer']!;
-    expect(cell.value).toBe(840);
-    const computed = engineLevel(
-      engineCoef('soil-resident', 'inhalation', pcb105.id, { dermal: true, inhalation: true }),
-      'noncancer',
-      'mg/kg',
-    );
-    expect(computed).toBeGreaterThan(835);
-    expect(withinHalfUnit(computed as number, 840)).toBe(true);
+    const published = pcb105.values['soil-resident.inhalation.noncancer']!.value;
+    expect(published).toBe(840);
+    const at = (rfciFactor: number): number =>
+      engineLevel(
+        engineCoef('soil-resident', 'inhalation', pcb105.id, {
+          dermal: true,
+          inhalation: true,
+          rfciFactor,
+        }),
+        'noncancer',
+        'mg/kg',
+      ) as number;
+    expect(withinHalfUnit(at(1), published)).toBe(false);
+    expect(withinHalfUnit(at(4e-8 / 3e-5 / 1.33e-3), published)).toBe(true);
+    // the bottom of the interval (1.325E-3) prints 830, the middle of it reaches 835, and the open top (1.335E-3)
+    // is not attained
+    expect(withinHalfUnit(at(1.325 / 1.33), published)).toBe(false);
+    expect(withinHalfUnit(at(1.3325 / 1.33), published)).toBe(false);
+    expect(withinHalfUnit(at(1.333 / 1.33), published)).toBe(true);
     expect(result.unexplained.map((u) => u.chemical)).not.toContain(pcb105.id);
   });
 
+  it('treats the top of a printed input interval as not attained', () => {
+    // a cell printed 840 prints for levels in [835, 845). The input interval is closed at its bottom, open at its top
+    expect(attainedMeetsPrinted(836, 837, 840)).toBe(true);
+    // increasing level: the open top level 835 is the only point that would print 840
+    expect(attainedMeetsPrinted(830, 835, 840)).toBe(false);
+    expect(attainedMeetsPrinted(830, 835.0001, 840)).toBe(true);
+    // decreasing level (a unit risk): the open top level 845 prints 850, so only the closed bottom can reach
+    expect(attainedMeetsPrinted(850, 845, 840)).toBe(false);
+    expect(attainedMeetsPrinted(850, 844.9999, 840)).toBe(true);
+    expect(attainedMeetsPrinted(846, 845.5, 840)).toBe(false);
+    expect(attainedMeetsPrinted(845, 830, 840)).toBe(true);
+  });
+
   it('excepts the four Aroclor tap water total cancer cells only through the printed unit risk interval', () => {
-    const cls = result.classes['iur-printed-three-figures'];
-    expect(cls.cells).toEqual({ tapwater: 4 });
-    expect(cls.chemicals).toEqual(['Aroclor 1242', 'Aroclor 1248', 'Aroclor 1254', 'Aroclor 1260']);
+    const cls = result.classes['printed-three-figures'];
+    expect(cls.cells.tapwater).toBe(4);
+    expect(cls.chemicals).toEqual(
+      expect.arrayContaining(['Aroclor 1242', 'Aroclor 1248', 'Aroclor 1254', 'Aroclor 1260']),
+    );
     const ch = levels.chemicals.find((c) => c.name === 'Aroclor 1242')!;
     const published = ch.values['tapwater.total.cancer']!.value;
     expect(published).toBe(0.0078);

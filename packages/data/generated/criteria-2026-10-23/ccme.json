@@ -4399,6 +4399,7 @@
       "unit": "ug/L",
       "printedValue": "60",
       "printedUnit": "µg/L",
+      "elementBasis": "nitrogen (NO2-N)",
       "table": "CCME summary table, aquatic life columns",
       "note": 41,
       "year": 1987

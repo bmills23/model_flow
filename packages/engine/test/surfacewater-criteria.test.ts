@@ -215,6 +215,43 @@ describe('pH-dependent criteria', () => {
   });
 });
 
+describe('criteria stated on an element basis', () => {
+  const nitrite = water({
+    id: 'n',
+    chemicalId: '14797-65-0',
+    value: 60,
+    unit: 'ug/L',
+    elementBasis: 'nitrogen (NO2-N)',
+  });
+  it('computes no ratio and names the basis, never converting by molar mass', () => {
+    const r = compareToCriteria({
+      medium: 'surfaceWater',
+      chemicalId: '14797-65-0',
+      series: [1e-3],
+      criteria: [nitrite],
+    });
+    const x = r.results[0]!;
+    expect(x.status).toBe('element-basis');
+    expect(x.ratio).toBeUndefined();
+    expect(x.exceeds).toBeUndefined();
+    expect(x.comparedConcentration).toBeUndefined();
+    expect(x.criterionValue).toBeCloseTo(6e-5, 15);
+    const w = r.warnings.find((y) => y.code === 'criteria.element-basis')!;
+    expect(w.message).toContain('nitrogen (NO2-N)');
+  });
+  it("a user value is the user's own basis and is compared", () => {
+    const u = withUserValue(nitrite, 60, 'ug/L');
+    expect(u.elementBasis).toBeUndefined();
+    const r = compareToCriteria({
+      medium: 'surfaceWater',
+      chemicalId: '14797-65-0',
+      series: [1e-3],
+      criteria: [u],
+    });
+    expect(r.results[0]!.status).toBe('compared');
+  });
+});
+
 describe('site-specific and missing criteria', () => {
   it('a site-chemistry criterion is not computed, never a pass', () => {
     const crit = [

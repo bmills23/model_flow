@@ -77,6 +77,7 @@
       "unit": "ug/L",
       "printedValue": "21",
       "printedUnit": "µg/l",
+      "elementBasis": "nitrogen",
       "table": "Sch 3 Pt 2 Table 1, PDF p.25",
       "note": 0
     },

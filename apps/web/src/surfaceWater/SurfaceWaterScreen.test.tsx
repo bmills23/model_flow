@@ -182,6 +182,29 @@ describe('SurfaceWaterScreen', () => {
     expect(within(row).getByText('exceeds')).toBeTruthy();
   }, 60000);
 
+  it('shows a value stated as nitrogen in its own row, with no ratio', async () => {
+    await loaded();
+    fireEvent.click(screen.getByRole('button', { name: /compare with water quality criteria/i }));
+    const panel = await screen.findByRole('region', { name: /comparison with criteria/i });
+    fireEvent.change(within(panel).getByLabelText(/^criteria set/i), { target: { value: 'ccme' } });
+    const search = await within(panel).findByLabelText(/find a chemical for the criteria/i);
+    await waitFor(() => expect((search as HTMLInputElement).disabled).toBe(false), {
+      timeout: 15000,
+    });
+    fireEvent.change(search, { target: { value: '14797-65-0' } });
+    fireEvent.click(await within(panel).findByRole('button', { name: /compare nitrite/i }));
+    const table = await within(panel).findByRole('table', {
+      name: /legacy surface water, ratio of the peak/i,
+    });
+    const row = within(table)
+      .getByText(/long-term exposure guideline/i)
+      .closest('tr')!;
+    expect(row.textContent).toMatch(/stated as nitrogen \(NO2-N\)/);
+    expect(row.textContent).toMatch(/compare a result reported as N/);
+    expect(within(row).queryByText('exceeds')).toBeNull();
+    expect(within(row).queryByText('within')).toBeNull();
+  }, 60000);
+
   it('opens with the saved set and puts the set and basis in the CSV of the comparison', async () => {
     setScreen('surfaceWater', { form: getScreen('surfaceWater').form, criteriaSet: 'eu' });
     await loaded();

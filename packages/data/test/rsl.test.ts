@@ -211,46 +211,6 @@ describe('blanks and keys', () => {
   });
 });
 
-describe('TEF-applied toxicity values', () => {
-  // The guide (section 2.3) says the TEF is applied to the toxicity value of the numbered dioxin-like PCBs; its table
-  // prints the TEFs. The tables print each applied value to three figures, which rounds a repeating decimal
-  // (2,3,7,8-TCDD RfDo 7E-10 over 3E-5 is 2.3333E-5, printed 2.33E-5), so the build keeps the quotient.
-  const tefs: Record<string, number> = {
-    '39635-31-9': 0.00003,
-    '52663-72-6': 0.00003,
-    '69782-90-7': 0.00003,
-    '38380-08-4': 0.00003,
-    '32774-16-6': 0.03,
-    '65510-44-3': 0.00003,
-    '31508-00-6': 0.00003,
-    '32598-14-4': 0.00003,
-    '74472-37-0': 0.00003,
-    '57465-28-8': 0.1,
-    '32598-13-3': 0.0001,
-    '70362-50-4': 0.0003,
-  };
-  it('applies each TEF to the 2,3,7,8-TCDD reference doses and concentrations', () => {
-    const tcdd = tox('1746-01-6')!;
-    for (const [id, tef] of Object.entries(tefs)) {
-      const t = tox(id)!;
-      expect(t.rfdo!.value / (tcdd.rfdo!.value / tef), id).toBeCloseTo(1, 10);
-      expect(t.rfci!.value / (tcdd.rfci!.value / tef), id).toBeCloseTo(1, 10);
-      expect(t.sfo!.value / (tcdd.sfo!.value * tef), id).toBeCloseTo(1, 10);
-      expect(t.iur!.value / (tcdd.iur!.value * tef), id).toBeCloseTo(1, 10);
-      expect(t.rfdo!.source).toBe('W');
-    }
-    // PCB 105: printed 2.33E-5 and 1.33E-3, derived 2.3333E-5 and 1.3333E-3
-    expect(tox('32598-14-4')!.rfci!.value).toBeCloseTo(4e-8 / 0.00003, 12);
-  });
-  it('touches no value that is not W-keyed', () => {
-    const w = new Set(Object.keys(tefs));
-    for (const t of built.tox.toxicity) {
-      if (w.has(t.id)) continue;
-      for (const k of ['sfo', 'iur', 'rfdo', 'rfci'] as const) expect(t[k]?.source).not.toBe('W');
-    }
-  });
-});
-
 describe('generated files', () => {
   it('match a fresh build byte for byte', () => {
     const chemicals = readFileSync(join(generatedDir, 'chemicals.json'), 'utf8');

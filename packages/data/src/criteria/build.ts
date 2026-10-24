@@ -367,6 +367,22 @@ export const GROUP_POINTERS: Partial<Record<CriteriaSetId, CriteriaPointer[]>> =
   ],
 };
 
+/**
+ * A value the source states on an element basis: nitrogen as NO2-N, NH3-N or "(as nitrogen)", phosphorus as P or
+ * PO4-P. Read from the printed name and note, never from a chemical list. The returned text names the basis the way
+ * the source does; the build never converts such a value by molar mass.
+ */
+export const elementBasisOf = (name: string, note: string): string | undefined => {
+  const text = `${name}; ${note}`;
+  const n = /\b(NH3|NH4|NO2|NO3)-N\b/.exec(text);
+  if (n) return `nitrogen (${n[1]}-N)`;
+  if (/\(as nitrogen\)|\bas nitrogen\b|\bammonia nitrogen\b/i.test(text)) return 'nitrogen';
+  const p = /\b(PO4)-P\b/.exec(text);
+  if (p) return `phosphorus (${p[1]}-P)`;
+  if (/\(as phosphorus\)|\bas phosphorus\b|\(as P\)/i.test(text)) return 'phosphorus';
+  return undefined;
+};
+
 /** CCME prints a word where there is no single number; these three mean "depends on site chemistry". */
 const SITE_WORD = /printed as: (Equation|Variable|Table)$/;
 
@@ -439,6 +455,9 @@ const buildSet = (
         ...(printedValue !== '' ? { printedValue } : {}),
         printedUnit,
         ...(siteSpecific ? { siteSpecific: true as const } : {}),
+        ...(elementBasisOf(name, rawNote) !== undefined
+          ? { elementBasis: elementBasisOf(name, rawNote)! }
+          : {}),
         table: r.table_or_page ?? '',
         ...(r.reliability ? { reliability: r.reliability } : {}),
         ...(yearOf(set, r, rawNote) !== undefined ? { year: yearOf(set, r, rawNote)! } : {}),

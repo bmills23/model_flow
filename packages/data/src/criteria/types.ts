@@ -48,6 +48,12 @@ export interface CriteriaRow {
   printedValue?: string;
   printedUnit: string;
   siteSpecific?: true;
+  /**
+   * The value is printed on an element basis, in the words of the source ("nitrogen (NO2-N)", "nitrogen"). The
+   * comparison computes no ratio for such a row, because the model's concentration is of the chemical itself and the
+   * build never converts by molar mass.
+   */
+  elementBasis?: string;
   /** The table, page or worksheet cell the value was read from. */
   table: string;
   /** Index into the file's `notes` list, when the row has a note. */

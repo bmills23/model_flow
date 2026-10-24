@@ -44,6 +44,12 @@ export interface Criterion {
   waterType?: 'fresh' | 'salt' | undefined;
   /** A sediment benchmark published at this organic carbon fraction (for example 0.01), else dry weight. */
   ocBasis?: number | undefined;
+  /**
+   * The value is printed on an element basis (nitrogen as NO2-N, NH3-N; phosphorus as P), for example
+   * `nitrogen (NO2-N)`. The model's concentration is of the chemical itself, so no ratio is computed; the value is
+   * never converted by molar mass.
+   */
+  elementBasis?: string | undefined;
   /** `database` for a published value, `user` for one the user entered. */
   source: 'database' | 'user';
 }
@@ -74,7 +80,15 @@ export function hardnessCriterion(eq: HardnessEquation, hardness: number): numbe
 /** A site-specific or other criterion replaced by a value the user entered. */
 export function withUserValue(c: Criterion, value: number, unit: CriterionUnit): Criterion {
   checkNonNegative('criterion', value);
-  return { ...c, hardness: undefined, value, unit, siteSpecific: false, source: 'user' };
+  return {
+    ...c,
+    hardness: undefined,
+    value,
+    unit,
+    siteSpecific: false,
+    elementBasis: undefined,
+    source: 'user',
+  };
 }
 
 /** Criterion value to SI: kg/m^3 for water, kg/kg for sediment. */
@@ -95,7 +109,7 @@ function toSi(value: number, unit: CriterionUnit, medium: Criterion['medium']): 
   }
 }
 
-export type CriterionStatus = 'compared' | 'site-specific' | 'not-available';
+export type CriterionStatus = 'compared' | 'site-specific' | 'element-basis' | 'not-available';
 
 export interface CriterionResult {
   criterion: Criterion | undefined;
@@ -191,6 +205,13 @@ export function compareToCriteria(input: CompareInput): CompareResult {
     }
     checkNonNegative('criterion', value);
     const criterionValue = toSi(value, unit, c.medium);
+    if (c.elementBasis !== undefined) {
+      warn(
+        'criteria.element-basis',
+        `${c.endpoint} for ${c.chemicalId} is stated as ${c.elementBasis}; compare a result reported on that basis (no ratio is computed, and the value is not converted)`,
+      );
+      return { criterion: c, status: 'element-basis', source: c.source, criterionValue };
+    }
     let compared = peak;
     if (c.medium === 'sediment' && c.ocBasis !== undefined) {
       const foc = input.fractionOrganicCarbon;

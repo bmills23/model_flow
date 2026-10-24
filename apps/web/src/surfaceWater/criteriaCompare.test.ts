@@ -2,7 +2,14 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { DEFAULT_HARDNESS } from '@model-flow/engine';
 import { compute } from './compute';
-import { compareAll, coveredBy, coveredCsvRows, coveringRows } from './criteriaCompare';
+import {
+  compareAll,
+  coveredBy,
+  coveredCsvRows,
+  coveringRows,
+  criteriaCsvRows,
+  elementBasisStatus,
+} from './criteriaCompare';
 import { loadCriteriaDbFor } from './criteriaSets';
 import { loadCriteriaDb, type CriteriaDb } from './criteriaDb';
 import { DEFAULT_FORM, toRequest } from './inputs';
@@ -81,5 +88,32 @@ describe('a chemical covered by a group row', () => {
   it('does not use the pointer for a chemical the set has rows for', async () => {
     const eu = await loadCriteriaDbFor('eu2026');
     expect(coveredBy(eu, '71-43-2')).toBeUndefined();
+  });
+});
+
+describe('a criterion stated on an element basis', () => {
+  const NITRITE = '14797-65-0';
+  it('computes no ratio, names the basis in the status, and the CSV and report carry the same status', async () => {
+    const ccme = await loadCriteriaDbFor('ccme');
+    const chemical = ccme.chemicals.find((c) => c.id === NITRITE)!;
+    const compared = compareAll(ccme, chemical, run({ sedimentOn: false }), {});
+    const results = compared.flatMap((c) => (c.outcome.ok ? c.outcome.value.results : []));
+    expect(results).toHaveLength(2);
+    for (const r of results) {
+      expect(r.status).toBe('element-basis');
+      expect(r.ratio).toBeUndefined();
+      expect(r.exceeds).toBeUndefined();
+      expect(r.criterionValue).toBeCloseTo(6e-5, 15);
+    }
+    const status = 'stated as nitrogen (NO2-N); compare a result reported as N';
+    expect(elementBasisStatus('nitrogen (NO2-N)')).toBe(status);
+    const csv = criteriaCsvRows(compared, ccme.info, { id: NITRITE, name: chemical.name });
+    expect(csv).toHaveLength(2);
+    for (const row of csv) {
+      expect(row).toMatchObject({ status, peak: null, ratio: null, exceeds: null });
+      expect(row['criterionValue'] as number).toBeCloseTo(60, 9);
+    }
+    const out = await reportCriteria('ccme', NITRITE, run({ sedimentOn: false }), undefined);
+    expect(out!.rows.map((r) => r['status'])).toEqual([status, status]);
   });
 });

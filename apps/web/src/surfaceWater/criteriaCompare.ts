@@ -83,6 +83,15 @@ export function sourceLine(info: CriterionInfo): string {
   return parts.join('; ');
 }
 
+/**
+ * The status of a criterion printed on an element basis: it names the basis and what to compare. The comparison
+ * computes no ratio for it (the model's concentration is of the chemical itself) and never converts by molar mass.
+ */
+export function elementBasisStatus(basis: string): string {
+  const symbol = basis.startsWith('phosphorus') ? 'P' : 'N';
+  return `stated as ${basis}; compare a result reported as ${symbol}`;
+}
+
 /** A criterion of the covering group row, as the screen and the CSV show it (ug/L). */
 export interface CoveringRow {
   id: string;
@@ -202,9 +211,13 @@ export function criteriaCsvRows(
         waterType: i?.waterType === undefined ? '' : WATER_NAME[i.waterType],
         criterion: crit?.endpoint ?? '',
         source: i?.source ?? '',
-        status: r.status,
+        status:
+          r.status === 'element-basis' && crit?.elementBasis !== undefined
+            ? elementBasisStatus(crit.elementBasis)
+            : r.status,
         criterionValue:
-          r.status === 'compared' && r.criterionValue !== undefined
+          (r.status === 'compared' || r.status === 'element-basis') &&
+          r.criterionValue !== undefined
             ? toDisplay(r.criterionValue)
             : null,
         peak:

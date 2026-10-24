@@ -67,6 +67,7 @@ export function setParts(file: CriteriaSetFile): DbParts {
       ...(r.value !== undefined ? { value: r.value } : {}),
       unit: r.unit,
       ...(r.siteSpecific === true ? { siteSpecific: true } : {}),
+      ...(r.elementBasis !== undefined ? { elementBasis: r.elementBasis } : {}),
       waterType: r.waterType,
       source: 'database',
     });

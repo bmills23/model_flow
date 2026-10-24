@@ -61,8 +61,8 @@ exposure interval of 26 years, a dry bulk density of 1.5 and particle density of
 not the rounded 0.43), water-filled porosity 0.15, organic carbon 0.006, Kd = Koc f_oc, pi printed as 3.14 (the
 factor is rescaled by sqrt(3.14 / pi)), and the wind factor with Q/C 93.77 (PEF 1.36E9 m^3/kg). Chemicals the tables
 call volatile take both terms, the others the particulate term. A hand calculation of benzene (all four levels) is
-in the test. Of 435 inhalation cells and 435 totals that include one per table, the resident table reproduces 422 and
-422 and the industrial table 422 and 421.
+in the test. Of 435 inhalation cells and 435 totals that include one per table, the resident table reproduces 421 and
+422 (PCB 105 is excepted) and the industrial table 422 and 421.
 
 Class `soil-inhalation-vf-input-missing` and `soil-total-vf-input-missing`: twelve volatile chemicals have neither a
 Koc nor a Kd in the parameter sheet, so no volatilization factor is computed; their printed cells equal the
@@ -73,24 +73,25 @@ particulate term (under one part in 100000 of the sum, checked by the test).
 
 ## Excepted by a printed input's rounding
 
-Class `iur-printed-three-figures`: four tap water total cancer cells. Aroclor 1242, 1248, 1254 and 1260 print 0.0078
-ug/L and the engine computes 0.007852 (rounds to 0.0079). The tables print the inhalation unit risk of these rows as
-5.71E-4, three significant figures, so the value they computed with lies in 5.705E-4 to 5.715E-4. The level is
-monotone in it, and at 5.7118E-4 or more the total is 0.00785 or less and prints 0.0078; the ingestion, inhalation
-and air cells of the rows reproduce at either end. The sweep excepts a non-reproducing cancer cell only when the
-engine's levels at the two ends of the printed interval span a value that rounds to the printed cell
-(`reachableWithinPrintedIur`). The unrounded unit risk is not printed, so these are excepted, not counted as
-reproduced, and the engine keeps the printed 5.71E-4. A missing dermal term does not explain the gap (it would move
-the total to 0.0020).
+Class `printed-three-figures`: five cells, where the tables print a toxicity value to three significant figures and
+the value they computed with lies in the half-unit interval of the third figure, closed at its bottom and open at its
+top (a value at the top prints the next figure up). The level is monotone in the value, so the sweep excepts a
+non-reproducing cell only when the engine's levels at the two ends of the interval meet the interval of values that
+print as the cell (`reachableWithinPrinted`, `attainedMeetsPrinted`); the value must need exactly three figures, since
+one or two may be exact. The cancer cells test the inhalation unit risk, the noncancer cells the reference
+concentration. The unrounded value is not printed, so these are excepted, not counted as reproduced, and the engine
+keeps the printed value.
 
-## Reproduced after a data fix (wave Z)
-
-The resident noncancer inhalation level of PCB 105 prints 840 mg/kg; the engine computed 833.3 from the printed
-reference concentration 1.33E-3. The RSL key `W` means a TEF was applied to the toxicity value, and the guide's table
-prints the TEF (3E-5 for PCB 105): 2,3,7,8-TCDD RfCi 4E-8 over 3E-5 is 1.3333E-3, which the tables print to three
-figures. The data build (`packages/data/src/rsl/tef.ts`) now keeps the quotient for the reference dose and
-concentration of the 12 numbered PCBs keyed `W` (after checking it rounds to the printed value), and the cell
-computes 835.4 and reproduces. No other cell changed class.
+- Four tap water total cancer cells (4). Aroclor 1242, 1248, 1254 and 1260 print 0.0078 ug/L and the engine computes
+  0.007852 (rounds to 0.0079). The unit risk is printed 5.71E-4, so the value lies in [5.705E-4, 5.715E-4); at
+  5.7118E-4 or more the total is 0.00785 or less and prints 0.0078, and the ingestion, inhalation and air cells of
+  the rows reproduce at either end. A missing dermal term does not explain the gap (it would move the total to
+  0.0020).
+- One resident soil cell (1). The noncancer inhalation level of PCB 105 prints 840 mg/kg and the engine computes
+  833.3 from the printed reference concentration 1.33E-3. The RSL key `W` means a TEF was applied to the toxicity
+  value, and the guide's table prints the TEF (3E-5 for PCB 105); the tables print the TEF-applied reference
+  concentration to three figures, and the unrounded quotient 4E-8 / 3E-5 = 1.3333E-3 reproduces the printed 840
+  (835.4). The database keeps the printed 1.33E-3 for all twelve numbered PCBs.
 
 ## Unexplained
 

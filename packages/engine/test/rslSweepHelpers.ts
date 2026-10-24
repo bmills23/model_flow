@@ -270,15 +270,26 @@ export function engineCoef(
   medium: string,
   pathway: PathwayName,
   id: string,
-  include: { dermal: boolean; inhalation: boolean; particulateOnly?: boolean; iurFactor?: number },
+  include: {
+    dermal: boolean;
+    inhalation: boolean;
+    particulateOnly?: boolean;
+    iurFactor?: number;
+    rfciFactor?: number;
+  },
 ): Coef | 'missing' | 'not-computed' {
-  // `iurFactor` rescales the inhalation unit risk, to test a cell against the rounding of the printed value
+  // `iurFactor` and `rfciFactor` rescale the inhalation unit risk and the reference concentration, to test a cell
+  // against the rounding of the printed value
   const chemical =
-    include.iurFactor === undefined
+    include.iurFactor === undefined && include.rfciFactor === undefined
       ? sweeperOf(id).chemical
       : modernChemical({
           ...boundaryOf(id),
-          iur: (boundaryOf(id).iur ?? 0) * include.iurFactor,
+          iur: (boundaryOf(id).iur ?? 0) * (include.iurFactor ?? 1),
+          rfci:
+            boundaryOf(id).rfci === undefined
+              ? undefined
+              : boundaryOf(id).rfci! * (include.rfciFactor ?? 1),
         });
   const soil = medium.startsWith('soil');
   const receptor = medium === 'soil-industrial' ? worker : resident;
@@ -364,18 +375,39 @@ export const CLASS_IDS = [
   'soil-total-vf-input-missing',
   'key-g-no-toxicity-value',
   'key-g-fiber-units',
-  'iur-printed-three-figures',
+  'printed-three-figures',
 ] as const;
 export type ClassId = (typeof CLASS_IDS)[number];
 
 /**
- * Whether the printed cell can come from an inhalation unit risk that rounds to the printed one. The tables print
- * the unit risk to three significant figures (Aroclor 1242: 5.71E-4), so the value they computed with lies in
- * [5.705E-4, 5.715E-4); the level is monotone in it, so the cell is reachable when the engine's levels at the two
- * ends of that interval span a value that rounds to the printed cell. Only a unit risk printed to at most three
- * figures qualifies, and the engine itself still uses the printed value.
+ * Whether the levels attained over a half-open input interval meet the half-open interval of values that print as
+ * the published cell. The input (a unit risk or reference concentration printed to three figures) lies in
+ * [printed - half, printed + half): the bottom is a value that prints as the printed figure, the top prints the next
+ * figure up and is not attained. The level is monotone in the input, so the attained levels are one interval that
+ * is closed at the level of the bottom input and open at the level of the top input. The cell prints in
+ * [published - h, published + h), h half a unit of its second significant figure.
  */
-export function reachableWithinPrintedIur(
+export function attainedMeetsPrinted(
+  levelAtBottom: number,
+  levelAtTop: number,
+  published: number,
+): boolean {
+  const unit = 10 ** (Math.floor(Math.log10(published)) - 1);
+  const lo = published - 0.5 * unit;
+  const hi = published + 0.5 * unit;
+  if (levelAtBottom < levelAtTop) return levelAtBottom < hi && levelAtTop > lo;
+  return levelAtBottom >= lo && levelAtTop < hi;
+}
+
+/**
+ * Whether the printed cell can come from a toxicity value that rounds to the printed one. The tables print the
+ * inhalation unit risk (Aroclor 1242: 5.71E-4) and the reference concentration (PCB 105: 1.33E-3, the TEF-applied
+ * value) to three significant figures, so the value they computed with lies in [printed - half, printed + half),
+ * half a unit of the third figure. Only a value that needs exactly three figures qualifies (one or two figures may
+ * be exact), and the engine itself still uses the printed value. The cancer cells test the unit risk, the noncancer cells the reference
+ * concentration.
+ */
+export function reachableWithinPrinted(
   id: string,
   medium: string,
   pathway: PathwayName,
@@ -384,22 +416,28 @@ export function reachableWithinPrintedIur(
   units: string,
   published: number,
 ): boolean {
-  const iur = boundaryOf(id).iur;
-  if (endpoint !== 'cancer' || iur === undefined || iur <= 0) return false;
-  if (Number(iur.toPrecision(3)) !== iur) return false;
-  const half = 0.5 * 10 ** (Math.floor(Math.log10(iur)) - 2);
+  const b = boundaryOf(id);
+  const value = endpoint === 'cancer' ? b.iur : b.rfci;
+  if (value === undefined || value <= 0) return false;
+  // only a value that needs exactly three figures is known to be rounded: a value of one or two figures (n-nonane
+  // 2E-2) may be printed exactly
+  if (Number(value.toPrecision(3)) !== value || Number(value.toPrecision(2)) === value)
+    return false;
+  const half = 0.5 * 10 ** (Math.floor(Math.log10(value)) - 2);
   const ends: number[] = [];
-  for (const factor of [(iur - half) / iur, (iur + half) / iur]) {
+  for (const factor of [(value - half) / value, (value + half) / value]) {
     const level = engineLevel(
-      engineCoef(medium, pathway, id, { ...include, iurFactor: factor }),
+      engineCoef(medium, pathway, id, {
+        ...include,
+        ...(endpoint === 'cancer' ? { iurFactor: factor } : { rfciFactor: factor }),
+      }),
       endpoint,
       units,
     );
     if (typeof level !== 'number') return false;
     ends.push(level);
   }
-  const unit = 10 ** (Math.floor(Math.log10(published)) - 1);
-  return Math.min(...ends) <= published + 0.5 * unit && Math.max(...ends) >= published - 0.5 * unit;
+  return attainedMeetsPrinted(ends[0]!, ends[1]!, published);
 }
 
 export interface SweepCounts {
@@ -561,10 +599,10 @@ export function runRslSweep(): SweepResult {
       else if (keyG) cls = 'key-g-fiber-units';
       else if (
         typeof computed === 'number' &&
-        endpoint === 'cancer' &&
+        endpoint !== null &&
         medium !== 'air-resident' &&
         (pathway === 'inhalation' || pathway === 'total') &&
-        reachableWithinPrintedIur(
+        reachableWithinPrinted(
           ch.id,
           medium,
           pathway as PathwayName,
@@ -577,7 +615,7 @@ export function runRslSweep(): SweepResult {
           cell.value,
         )
       ) {
-        cls = 'iur-printed-three-figures';
+        cls = 'printed-three-figures';
       }
 
       if (cls !== null) {

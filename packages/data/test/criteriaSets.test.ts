@@ -598,3 +598,43 @@ describe('rows the build merges', () => {
     );
   });
 });
+
+describe('values printed on an element basis', () => {
+  const marked = (): string[] =>
+    (Object.keys(built.sets) as (keyof CriteriaBuild['sets'])[])
+      .flatMap((set) => rowsOf(set).filter((r) => r.elementBasis !== undefined))
+      .map((r) => `${r.id} | ${r.elementBasis}`)
+      .sort();
+
+  it('marks the basis in a field of the row, not only in the note', () => {
+    expect(find('ccme', '14797-65-0', 'surfaceWater', 'fresh', 'long-term')?.elementBasis).toBe(
+      'nitrogen (NO2-N)',
+    );
+    expect(
+      rowsOf('uk').find((r) => r.name === 'Unionised ammonia (as nitrogen)')?.elementBasis,
+    ).toBe('nitrogen');
+    const anzg = rowsOf('anzg').filter((r) => r.chemicalId === '7664-41-7');
+    expect(anzg).toHaveLength(8);
+    for (const r of anzg) expect(r.elementBasis, r.id).toBe('nitrogen (NH3-N)');
+  });
+
+  it('marks exactly these rows and no others (every set scanned)', () => {
+    const ids = marked().map((x) => x.split(' | ')[0]!);
+    expect(ids).toHaveLength(10);
+    expect(ids.filter((i) => i.startsWith('anzg:7664-41-7:'))).toHaveLength(8);
+    expect(ids).toContain('ccme:14797-65-0:surfaceWater:fresh:long-term');
+    expect(ids.filter((i) => i.startsWith('uk:'))).toHaveLength(1);
+  });
+
+  it('leaves the nitrate, un-ionized ammonia and phosphorus rows unmarked (the source states no element)', () => {
+    expect(find('ccme', '14797-55-8', 'surfaceWater', 'fresh', 'long-term')?.elementBasis).toBe(
+      undefined,
+    );
+    expect(find('ccme', '7664-41-7', 'surfaceWater', 'fresh', 'long-term')?.elementBasis).toBe(
+      undefined,
+    );
+    expect(rowsOf('anzg').filter((r) => r.chemicalId === '14797-55-8' && r.elementBasis)).toEqual(
+      [],
+    );
+  });
+});

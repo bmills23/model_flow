@@ -15,8 +15,8 @@
     },
     "soil-resident": {
       "compared": 3012,
-      "reproduced": 2984,
-      "excepted": 28,
+      "reproduced": 2983,
+      "excepted": 29,
       "unexplained": 0
     },
     "soil-industrial": {
@@ -36,8 +36,8 @@
     "soil-resident": {
       "inhalation": {
         "compared": 435,
-        "reproduced": 422,
-        "excepted": 13,
+        "reproduced": 421,
+        "excepted": 14,
         "unexplained": 0
       },
       "totalWithInhalation": {
@@ -130,12 +130,19 @@
       "chemicals": ["Refractory Ceramic Fibers (units in fibers)"]
     },
     {
-      "id": "iur-printed-three-figures",
-      "reason": "The tables print the inhalation unit risk of Aroclors 1242, 1248, 1254 and 1260 as 5.71E-4 (three significant figures), so the value they computed with lies in 5.705E-4 to 5.715E-4. The engine uses the printed 5.71E-4 and computes the tap water total cancer level as 0.007852 ug/L, which rounds to 0.0079, while the tables print 0.0078. At a unit risk of 5.7118E-4 or more, inside that interval, the total is 0.00785 or less and prints 0.0078; the ingestion (0.039), inhalation (0.0098) and air (0.0049) cells of the same rows reproduce at either end. The sweep excepts a non-reproducing cancer cell only when the engine's levels at the two ends of the printed interval span a value that rounds to the printed cell. The unrounded unit risk is not printed, so the cell is excepted, not counted as reproduced.",
+      "id": "printed-three-figures",
+      "reason": "The tables print some toxicity values to three significant figures, so the value they computed with lies in the half-unit interval of the third figure, closed at its bottom and open at its top (a value at the top prints the next figure up). Two cases. (1) The inhalation unit risk of Aroclors 1242, 1248, 1254 and 1260 is printed 5.71E-4, so the value lies in [5.705E-4, 5.715E-4). The engine uses 5.71E-4 and computes the tap water total cancer level as 0.007852 ug/L, which rounds to 0.0079, while the tables print 0.0078; at 5.7118E-4 or more the total is 0.00785 or less and prints 0.0078, and the ingestion (0.039), inhalation (0.0098) and air (0.0049) cells of the same rows reproduce at either end. (2) The resident noncancer soil inhalation level of PCB 105 (printed 840 mg/kg): the tables print the TEF-applied reference concentration to three figures (1.33E-3), and the unrounded quotient 4E-8 / 3E-5 = 1.3333E-3 reproduces the printed 840 (the printed 1.33E-3 computes 833.3). The sweep excepts a non-reproducing cell only when the engine's levels at the two ends of the printed interval of the unit risk (cancer cells) or reference concentration (noncancer cells), which must need exactly three figures, meet the interval that prints as the cell. The unrounded value is not printed, so the cell is excepted, not counted as reproduced.",
       "cells": {
-        "tapwater": 4
+        "tapwater": 4,
+        "soil-resident": 1
       },
-      "chemicals": ["Aroclor 1242", "Aroclor 1248", "Aroclor 1254", "Aroclor 1260"]
+      "chemicals": [
+        "Aroclor 1242",
+        "Aroclor 1248",
+        "Aroclor 1254",
+        "Aroclor 1260",
+        "Pentachlorobiphenyl, 2,3,3',4,4'- (PCB 105)"
+      ]
     }
   ],
   "unexplained": [

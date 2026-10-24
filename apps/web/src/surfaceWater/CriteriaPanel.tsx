@@ -11,6 +11,7 @@ import {
   coveredText,
   coveringRows,
   criteriaCsvRows,
+  elementBasisStatus,
   sourceLine,
   toDisplay,
   type Compared,
@@ -88,7 +89,9 @@ function valueText(r: CriterionResult): string {
   const c = r.criterion;
   if (!c) return 'none';
   if (r.status === 'site-specific') return 'site-specific, not computed';
-  if (r.status !== 'compared' || r.criterionValue === undefined) return 'no value';
+  if ((r.status !== 'compared' && r.status !== 'element-basis') || r.criterionValue === undefined) {
+    return 'no value';
+  }
   return c.medium === 'surfaceWater'
     ? `${sig(toDisplay(r.criterionValue))} ug/L`
     : `${sig(toDisplay(r.criterionValue))} mg/kg`;
@@ -141,6 +144,9 @@ function ResultTable(props: {
                 </th>
                 <td>
                   {valueText(r)}
+                  {r.criterion?.elementBasis !== undefined && (
+                    <span className="crit-src">stated as {r.criterion.elementBasis}</span>
+                  )}
                   {r.criterion && props.info.get(r.criterion.id)?.printed !== undefined && (
                     <span className="crit-src">
                       printed as {props.info.get(r.criterion.id)?.printed}
@@ -149,7 +155,9 @@ function ResultTable(props: {
                 </td>
                 <td>{peakText(r, props.medium)}</td>
                 <td>
-                  {r.ratio === undefined ? (
+                  {r.status === 'element-basis' && r.criterion?.elementBasis !== undefined ? (
+                    <span className="crit-src">{elementBasisStatus(r.criterion.elementBasis)}</span>
+                  ) : r.ratio === undefined ? (
                     ''
                   ) : (
                     <>

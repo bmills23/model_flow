@@ -12,6 +12,7 @@ import { solveSurfaceJob } from './surfaceSolve';
 import { run, unlinkedRequest, vadoseScenario } from './surfaceSolve.testkit';
 import {
   DEFAULT_CRITERION_ENDPOINTS,
+  criterionSi,
   defaultCriterion,
   newSurfaceTarget,
   surfaceTargetLevels,
@@ -62,6 +63,22 @@ const nrwqc = (chemicalId: string, criterionId = ''): SurfaceTargetRow => ({
   ...newSurfaceTarget(chemicalId),
   kind: 'nrwqc',
   criterionId,
+});
+
+describe('a criterion stated on an element basis', () => {
+  it('is no target: it is not a number of the chemical itself', () => {
+    const c: Criterion = {
+      id: 'ccme:14797-65-0:surfaceWater:fresh:long-term',
+      chemicalId: '14797-65-0',
+      medium: 'surfaceWater',
+      endpoint: 'ccme-fresh-long-term',
+      value: 60,
+      unit: 'ug/L',
+      source: 'database',
+    };
+    expect(criterionSi(c)).toBeCloseTo(6e-5, 15);
+    expect(criterionSi({ ...c, elementBasis: 'nitrogen (NO2-N)' })).toBeNull();
+  });
 });
 
 describe('criterion lookup', () => {
