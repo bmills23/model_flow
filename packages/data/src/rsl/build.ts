@@ -3,6 +3,7 @@ import readXlsxFile from 'read-excel-file/node';
 import { verifyManifest, type Manifest, type ManifestRole } from './checksums.js';
 import { inorganicDermalWater } from './dermal-form.js';
 import { sourceKeys } from './source-keys.js';
+import { applyPcbTefs } from './tef.js';
 import type {
   ChemicalEntry,
   CleanupChemicalEntry,
@@ -692,7 +693,7 @@ export const buildRsl = async (rawDir: string): Promise<RslBuild> => {
     },
     chemicals: checkedChemicals(buildChemicals(paramRows, tapRows, ids)),
   };
-  const toxEntries = buildTox(summaryRows, ids);
+  const toxEntries = applyPcbTefs(buildTox(summaryRows, ids));
   return {
     chemicals,
     screening: buildScreening(manifest, sheets, summarySheet, toxEntries, chemicals.chemicals),

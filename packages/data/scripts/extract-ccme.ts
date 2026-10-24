@@ -140,6 +140,25 @@ const parseValue = (raw: string): Parsed => {
   if (m) return { value: m[1]!, unit: m[2]!, note: '' };
   m = /^(\d+(?:\.\d+)?)\s*\((.+)\)$/.exec(spaced);
   if (m) return { value: m[1]!, unit: null, note: m[2]! };
+  // A comma followed by one or two digits is not a thousands group (those are three digits), and every
+  // other cell of the table writes decimals with a point: metribuzin "1,0" is read as 1.0.
+  m = /^(\d+),(\d{1,2})$/.exec(spaced);
+  if (m) {
+    return {
+      value: `${m[1]}.${m[2]}`,
+      unit: null,
+      note: `printed as: ${spaced}, read as ${m[1]}.${m[2]} with the comma as a decimal separator`,
+    };
+  }
+  // "60 NO2-N": the figure is stated as nitrogen (nitrite-nitrogen), not as the nitrite ion.
+  m = /^(\d+(?:\.\d+)?)\s+NO2-N$/.exec(spaced);
+  if (m) {
+    return {
+      value: m[1]!,
+      unit: null,
+      note: `printed as: ${spaced}; the value is stated as nitrogen (NO2-N), not as the nitrite ion`,
+    };
+  }
   return { value: '', unit: null, note: `no single number, printed as: ${spaced}` };
 };
 

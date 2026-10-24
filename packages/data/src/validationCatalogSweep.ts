@@ -99,22 +99,26 @@ export const sweepExamples: ExampleSpec[] = [
     title: 'tap water',
     cells: 3053,
     reproduced: 3048,
-    excepted: 1,
-    unexplained: 4,
+    excepted: 5,
+    unexplained: 0,
     columns:
       'Resident tap water ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1)',
-    excepts: 'one lead cell with no toxicity value in the database',
-    classCells: [[2, 1]],
+    excepts:
+      'one lead cell with no toxicity value in the database and four Aroclor total cancer cells that fall inside the rounding of the printed unit risk',
+    classCells: [
+      [2, 1],
+      [4, 4],
+    ],
     methodIds: ['exposure.rags-e-f-2014', 'shower.rsl-household'],
-    note: 'The 265 inhalation cells (93 cancer, 172 noncancer) are the resident air level divided by the household factor K, entered as 0.5 L/m3; all 265 reproduce, the trichloroethylene and vinyl chloride cancer cells included (through the RSL equations for those two chemicals, which the modern exposure method applies). Unexplained: the total cancer level of Aroclor 1242, 1248, 1254 and 1260 is printed 0.0078 ug/L and computed 0.007852 ug/L (0.7 percent above); the ingestion and inhalation cells of these rows reproduce and the dermal cell is blank, and no reason was found.',
+    note: 'The 265 inhalation cells (93 cancer, 172 noncancer) are the resident air level divided by the household factor K, entered as 0.5 L/m3; all 265 reproduce, the trichloroethylene and vinyl chloride cancer cells included (through the RSL equations for those two chemicals, which the modern exposure method applies). Excepted: the total cancer level of Aroclor 1242, 1248, 1254 and 1260 is printed 0.0078 ug/L and computed 0.007852 ug/L; the tables print their unit risk as 5.71E-4 (three figures) and at 5.7118E-4 or more, inside that rounding, the total prints 0.0078.',
   }),
   sweep({
     id: 'soil-resident',
     title: 'resident soil',
     cells: 3012,
-    reproduced: 2983,
+    reproduced: 2984,
     excepted: 28,
-    unexplained: 1,
+    unexplained: 0,
     columns:
       'Resident soil ingestion, dermal, inhalation and total, cancer (target risk 1e-6) and noncancer (child, hazard quotient 1)',
     excepts:
@@ -128,15 +132,15 @@ export const sweepExamples: ExampleSpec[] = [
     extraEvidence: SOIL_EXTRA_EVIDENCE,
     extraPins: [
       { path: 'soilInhalation.soil-resident.inhalation.compared', value: 435 },
-      { path: 'soilInhalation.soil-resident.inhalation.reproduced', value: 421 },
+      { path: 'soilInhalation.soil-resident.inhalation.reproduced', value: 422 },
       { path: 'soilInhalation.soil-resident.inhalation.excepted', value: 13 },
-      { path: 'soilInhalation.soil-resident.inhalation.unexplained', value: 1 },
+      { path: 'soilInhalation.soil-resident.inhalation.unexplained', value: 0 },
       { path: 'soilInhalation.soil-resident.totalWithInhalation.compared', value: 435 },
       { path: 'soilInhalation.soil-resident.totalWithInhalation.reproduced', value: 422 },
       { path: 'soilInhalation.soil-resident.totalWithInhalation.excepted', value: 13 },
       { path: 'soilInhalation.soil-resident.totalWithInhalation.unexplained', value: 0 },
     ],
-    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained; soil totals that include one: 435, of which 422 reproduce and 13 are excepted. Unexplained: the noncancer inhalation level of PCB 105 is printed 840 mg/kg and computed 833.3 mg/kg (0.8 percent below; the other PCB cells reproduce and no input difference was found).`,
+    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 422 reproduce and 13 are excepted; soil totals that include one: 435, of which 422 reproduce and 13 are excepted. The noncancer inhalation level of PCB 105 (printed 840 mg/kg) reproduces since the database keeps its TEF-applied reference concentration as 4E-8 over 3E-5 rather than the printed 1.33E-3.`,
   }),
   sweep({
     id: 'soil-industrial',
@@ -166,7 +170,7 @@ export const sweepExamples: ExampleSpec[] = [
       { path: 'soilInhalation.soil-industrial.totalWithInhalation.excepted', value: 13 },
       { path: 'soilInhalation.soil-industrial.totalWithInhalation.unexplained', value: 1 },
     ],
-    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 422 reproduce and 13 are excepted; soil totals that include one: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained. Unexplained: the noncancer total of n-nonane is printed 72 mg/kg and computed 72.5012 mg/kg, 0.002 percent above the half-unit limit of 72.5.`,
+    note: `${SOIL_NOTE} Soil inhalation cells: 435, of which 422 reproduce and 13 are excepted; soil totals that include one: 435, of which 421 reproduce, 13 are excepted and 1 is unexplained. Unexplained: the noncancer total of n-nonane is printed 72 mg/kg and computed 72.5012 mg/kg, 0.002 percent above the half-unit limit of 72.5; no printed input or rule accounts for it.`,
   }),
   sweep({
     id: 'air',

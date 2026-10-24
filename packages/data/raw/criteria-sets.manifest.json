@@ -20,8 +20,8 @@
         {
           "file": "ccme/ccme.csv",
           "role": "table",
-          "bytes": 42134,
-          "sha256": "75bc7f10e97c30c2b45b5ceb0f165bc9eab781baf716b71573099715259ac407"
+          "bytes": 42229,
+          "sha256": "e68575ba13fb5645ab7b47ca7178b078232014bd563d4a36fd779594845a164d"
         }
       ]
     },
