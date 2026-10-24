@@ -4347,9 +4347,9 @@ Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn u
    with sediment off no sediment series is computed and the comparison skips it.
 7. **Review.** One review: 0 high, 3 medium (the imidacloprid id, the undated entries 16 and 44, the footnote 6
    notes; fixed in the corrective pass), 7 low. Left open: fluoranthene is printed twice (entry 15 and the PAH rows
-   of 28) with the same maximum, so `eu2026` shows two identical rows; with "all of the sets" an unchanged substance
-   shows once per EU set; a PFOS project on `eu2026` reads "not named" with no pointer to the PFAS sum; footnote 26
-   repeats in two PFAS notes.
+   of 28) with the same maximum, so `eu2026` shows two identical rows (merged in wave X); with "all of the sets" an
+   unchanged substance shows once per EU set; a PFOS project on `eu2026` reads "not named" with no pointer to the
+   PFAS sum (the covering row is shown since wave X); footnote 26 repeats in two PFAS notes.
 
 ## 2026-10-23: Wave X scope, a mobile check that fails on a blank page, and the wave W low findings
 
@@ -4374,3 +4374,33 @@ in wave U, handoff open items). Every ruling below is DEFAULT and open to Bryan'
    cadence.
 6. **Docs at close.** The handoff open item on the blank page, item 7 of the "Wave W slices" block and the wave V memo
    finding are corrected in place.
+
+### Wave X slices X1 and X2 and the corrective pass
+
+Implementation choices (2026-10-23), each DEFAULT and open to Bryan's overturn.
+
+1. **The shell rule.** `scripts/shell-verdict.mjs` (`shellProblems`, unit tested in
+   `apps/web/src/mobileCheckShell.test.ts`) fails a view without `nav[aria-label=Main]`, with other than one
+   `main#main`, without a level-one heading in it, or with under 200 characters of text in it. A route's own content
+   is a form control, table or chart, or at least 5 links, or at least 5000 characters: the control, table or chart
+   test alone failed the home page and the five prose pages (methods and docs), which have none. The two allowances
+   could pass a thin page that is long or full of links. Before measuring, the check waits up to 10 s, polling every
+   250 ms, for an h1 and no "Loading" placeholder in `main` (the review found a single fixed-delay snapshot could catch
+   a lazy route's fallback). A build made with `BASE_PATH=/model_flow/` and served at the root fails every view tried;
+   the normal build passes every view.
+2. **Twin rows.** Only `eu2026` fluoranthene prints the same row twice (the maximum allowable concentrations under
+   entry 15 and the PAH rows of entry 28, fresh and marine): 272 printed rows, 270 built; every other set file is
+   unchanged. The build throws when two rows it would merge differ in any field other than the id and the note
+   (`assertTwinRows`), so a later refresh cannot drop a row's year, reliability or table silently.
+3. **Group pointers.** `GROUP_POINTERS` in `src/criteria/build.ts` holds the one pointer the 2026 text prints (PFOS,
+   entry 35, to the sum of PFAS as PFOA equivalents, entry 65), written to the set file as `coveredBy`; the build
+   fails if the group has no rows or the covered chemical has rows of its own. The comparison, the report and the CSV
+   show the covering row and its value with the status "covered by group" and no ratio (the group value is a
+   potency-weighted sum, so one PFOS peak against it would mislead). Under "all of the sets" the pointer is not used,
+   since the US sets name PFOS.
+4. **Solve memo.** `useSurfaceSolves.ts` prunes the memo to the current jobs on every change and drops a reply for a
+   job no longer asked for.
+5. **Review.** One review: 0 high, 2 medium (the fixed-delay snapshot and the silent twin merge, fixed in the
+   corrective pass), 4 low, two of them folded in (tests for the note merge branches, plural wording). Left open: a
+   covered chemical still shows the water type and hardness fields, which nothing uses; the covered search hit
+   reports `hasSurfaceWater: true` although the set has no row (only its label reads it today).

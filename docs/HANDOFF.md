@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave W push)
+# HANDOFF (written from the tree, 2026-10-23, after the wave X push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -19,9 +19,13 @@ skipping a done one.
   branch `wave-u`; code head `901ca8e`), pushed 2026-10-23, and wave V (seven slices on branch `wave-v`; code head
   `ad95271`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave W (two slices
   and a corrective pass on branch `wave-w`; code head `e990fe8`, then the wave close docs commit), fast-forwarded
-  to main and pushed 2026-10-23. Pages deploys from main:
+  to main and pushed 2026-10-23, and wave X (two slices and a corrective pass on branch `wave-x`; code head
+  `968cd98`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-w` (2026-10-23, `e990fe8`): exit 0, build included. Test counts: engine
+- Last full `corepack pnpm gate` on `wave-x` (2026-10-23, `968cd98`): exit 0, build included. Test counts: engine
+  1477, web 2145, data 303 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 593 s, 75 views, 0
+  overflow and 0 axe violations, under the wave X shell rule (every view printed nav=1 main=1 h1=1).
+- Before that, on `wave-w` (2026-10-23, `e990fe8`): exit 0, build included. Test counts: engine
   1477, web 2134, data 289 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 552 s, 75 views, 0
   overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, including the `#/surface-water`
   criteria visit (all sets, now with `eu2026`, 4 criteria tables) and `#/vapor`. The first gate run of the wave
@@ -117,6 +121,16 @@ skipping a done one.
   `planned`, 18 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
 
+## Wave X landed (2026-10-23)
+Bryan: "let's continue". Rulings in the DECISIONS.md "Wave X scope" block and its "Wave X slices" block, all
+DEFAULT.
+- X1 (`17345cf`): `scripts/shell-verdict.mjs` and its test; `scripts/mobile-check.mjs` fails a view whose shell never
+  mounted or whose route rendered no content, and prints `nav= main= h1= controls= links= text=` on every line.
+- X2 (`30f118b`): `eu2026` fluoranthene twin rows merged (270 rows built), the PFOS pointer to the PFAS sum
+  (`coveredBy`) shown in the comparison, report and CSV, and the surface water solve memo pruned.
+- Review: one pass, 0 high, 2 medium, 4 low. Corrective pass (`968cd98`): the check waits up to 10 s for the route
+  before measuring; the build throws on twin rows that differ in any field but the note.
+
 ## Wave W landed (2026-10-23)
 Bryan: "okay let's do that next" (the 2026 EU revision wave V left open). Rulings in the DECISIONS.md "Wave W
 scope" block and its "Wave W slices" block, all DEFAULT.
@@ -146,9 +160,9 @@ audit items are now present or different by design (`docs/UI_PARITY.md` status l
   extract scripts `extract-ccme.ts`, `extract-eu-eqs.ts`, `extract-uk-eqs.ts`, `extract-anzg.ts`,
   `extract-macdonald2000.ts`; the set choice is the optional `criteriaSet` key; `scripts/mobile-check.mjs` gained
   a criteria visit.
-- Review: one pass, 0 high, 0 medium, 2 low (a sediment read that predates the wave and degrades to "not
-  compared", which wave W found not as described, and a session-only memo map that is never pruned); no corrective
-  pass.
+- Review: one pass, 0 high, 0 medium, 2 low (a sediment read that predates the wave and degrades to "not compared",
+  which wave W found not as described, and a session-only memo map that was never pruned, pruned since wave X); no
+  corrective pass.
 
 ## Wave U landed (2026-10-23)
 Bryan: "ok do it" (the RSL soil inhalation comparison). Rulings in the DECISIONS.md "Wave U scope, RSL soil
@@ -552,9 +566,12 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   where the particulate-only level reproduces (a rule inferred from the data, not stated in the guide).
 - `packages/data/generated/validation/validation.json` is at 59,792 bytes against the 60,000 byte cap in
   `packages/data/test/validation.test.ts`; the next catalog addition needs shorter notes or a raised cap.
-- Mobile check (wave U): a run against a build made with `BASE_PATH=/model_flow/` served a blank app and still
-  reported `ok` (tables=0, axe moderate landmark-one-main and page-has-heading-one on `html`). The check does not
-  fail when the app shell never mounts; build without `BASE_PATH` for it, and consider making a blank page fail.
+- Mobile check (waves U and X): in wave U a build made with `BASE_PATH=/model_flow/` served a blank app and the check
+  still reported `ok`. Since wave X a view fails when its shell never mounted or its route rendered no content
+  (`scripts/shell-verdict.mjs`), so build without `BASE_PATH` for it. The rule's 5-link and 5000-character
+  allowances (for the home and prose pages) could pass a thin page that is long or full of links.
+- Criteria comparison (wave X review, low): a chemical covered by a group row still shows the water type and
+  hardness fields, and its search hit reports `hasSurfaceWater: true` though the set has no row of its own.
 - Run basis (wave R): rows inherited from the vadose or saturated screen show that screen's current chemical only,
   so in a multi-chemical modeled cleanup the report says the table covers one chemical (DECISIONS R1b.3, CB.3).
 - The SSG Appendix H benzene volatilization factor does not reproduce from its printed inputs and is not used.
@@ -562,7 +579,8 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   Since wave V DeVaull 2007 is on `#/vapor` in its place (indoor only; no outdoor oxygen-limited path).
 - International criteria (waves V and W): the EU set `eu` is the 2013 consolidation of Directive 2008/105/EC Annex I
   and `eu2026` the annex as amended by Directive (EU) 2026/805, whose revised and new standards apply from 22
-  December 2027; its open low findings are in the DECISIONS.md "Wave W slices" block, item 7. CCME imidacloprid
+  December 2027; its open low findings are in the DECISIONS.md "Wave W slices" block, item 7 (two of them closed in
+  wave X). CCME imidacloprid
   (13826-41-3 as printed) no longer shares an id with the EU 2026 row (138261-41-3). The UK Directions 2015 are as
   made (no amendment found, which does not rule one out). CCME metribuzin (printed "1,0") and nitrite ("60 NO2-N")
   are not interpreted; CCME imidacloprid and ANZG vanadium CAS numbers fail their check digit and are kept as
@@ -622,7 +640,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to W merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-23: waves J to X merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
   jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick, the
@@ -631,10 +649,11 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   last three audit gaps (DeVaull on `#/vapor` in place of Appendix K, nonlinear source levels, international
   criteria and MacDonald 2000) as wave V. Bryan, 2026-10-23 ("okay let's do it"): accepted the wave V substitution
   (ruling 1, DeVaull in place of Appendix K, indoor only), the vinyl chloride shower and produce fallback and vinyl
-  chloride's place in wave T, all as recommended. The 2026 EU revision shipped as wave W the same day. Recommended
-  next, not yet ruled on: making the mobile check fail on a blank page. The wave P remainders still open (a
-  soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal values) are listed under the Wave P
-  entry in ROADMAP section 7.
+  chloride's place in wave T, all as recommended. The 2026 EU revision shipped as wave W and the blank-page check as
+  wave X, the same day. Next, at Bryan's request: wave Y, the engine chunk split (the engine chunk is 498,248 of
+  500,000 bytes, and the six worker bundles, 574 to 597 kB, are over the same limit but outside the size test). The
+  wave P remainders still open (a soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal
+  values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
   2015, Trapp and Matthies 1995, Schulze-Makuch 2005) need a library copy.
 - Tooling notes from waves K to M, addressed 2026-10-21: `corepack pnpm gate` now reads stdin from `/dev/null` (a
