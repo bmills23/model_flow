@@ -385,15 +385,18 @@ Slice plan for the data (the RSL build in `packages/data/src/rsl/` is the model)
 
 The criteria comparison on `#/surface-water` has a choice of set (DECISIONS, "Wave V scope", rulings 3 to 5).
 The United States pair (EPA national recommended criteria and Region 4 sediment benchmarks) stays the default.
-The choice is one of: the US pair, Canada (CCME), the European Union, the United Kingdom, Australia and New
-Zealand (ANZG), the MacDonald et al. (2000) consensus guidelines, or all of them side by side. The choice is
+The choice is one of: the US pair, Canada (CCME), the European Union (the 2013 annex, `eu`), the European Union
+as amended by Directive (EU) 2026/805 (`eu2026`, wave W), the United Kingdom, Australia and New Zealand (ANZG),
+the MacDonald et al. (2000) consensus guidelines, or all of them side by side. A project saved with `eu` keeps
+loading the 2013 set unchanged. The choice is
 saved with the project as optional state (`criteriaSet`, written only when it is not the default), inside
 the current format version.
 
 | Set (reference key) | What it holds | Source and terms |
 |---|---|---|
 | Canada (`ccme2026summary`) | Aquatic life guidelines for freshwater and marine water, long-term and short-term (ug/L), and sediment guidelines for freshwater and marine sediment, the interim sediment quality guideline (ISQG) and the probable effect level (PEL) (ug/kg dry weight). 286 rows | The CCME online summary table, exported as CSV on 2026-10-23. No reuse licence is stated (all rights reserved), so the export is not committed; the transcribed CSV is |
-| European Union (`eudir2008105`, `eudir201339`) | Annex I Part A environmental quality standards: annual average (AA-EQS) and maximum allowable concentration (MAC-EQS) for inland and other surface waters (ug/L). 180 rows | The consolidated text of Directive 2008/105/EC as amended by Directive 2013/39/EU (version of 2013-09-13), committed under Commission Decision 2011/833/EU. A 2026 revision of the framework that a secondary source reports was not read |
+| European Union (`eudir2008105`, `eudir201339`) | Annex I Part A environmental quality standards: annual average (AA-EQS) and maximum allowable concentration (MAC-EQS) for inland and other surface waters (ug/L). 180 rows | The consolidated text of Directive 2008/105/EC as amended by Directive 2013/39/EU (version of 2013-09-13), committed under Commission Decision 2011/833/EU. Kept as it was; the 2026 revision is the next row |
+| European Union as amended by Directive (EU) 2026/805 (`eudir2008105`, `eudir201339`, `eudir2026805`) | Annex I Part A as replaced by the amending act (252 rows, 70 numbered entries, 25 of them new) and the six substances moved to Annex II Part C at unchanged values (20 rows), the same AA-EQS and MAC-EQS water columns (ug/L). 272 rows | The consolidated text 2008L0105 of 2026-05-10 (CELEX 02008L0105-20260510), committed under Commission Decision 2011/833/EU, with the amending act (CELEX 32026L0805, OJ L series 2026/805, 20.4.2026) read for the dates. Standards as amended, which is not the same as in force at every date: the row note of a revised or new standard carries its date of application (revised EQS from 22 December 2027 with good status by 22 December 2033; entries 46 to 70 from 22 December 2027 with good status by 22 December 2039). The Annex II Part C rows say they take effect from the start of the following river basin management plan period. The text keeps no 2013 value in force until a date; it is silent, and so is the set |
 | United Kingdom (`ukwfdstandards2015`) | The England and Wales standards directions of 2015: specific pollutants (long-term mean and short-term 95 percentile, fresh and salt water) and priority substances (AA-EQS and MAC-EQS). 263 rows | The Directions as made, committed under the Open Government Licence v3.0. No later version is served; none was found |
 | Australia and New Zealand (`anzg2018`, `warne2018`) | Toxicant default guideline values for fresh and marine water at 99, 95, 90 and 80 percent species protection and a value of unknown protection level, with the reliability class and the year of origin. 841 rows | The department's master table workbook, retrieved 2026-10-23. No open licence mark, so the workbook is not committed; the transcribed CSV is. Sediment values are a separate ANZG document and are not in the set |
 | MacDonald et al. (`macdonald2000`) | Consensus threshold effect concentration (TEC, 29 values) and probable effect concentration (PEC, 28 values) for freshwater sediment (mg/kg or ug/kg dry weight). 57 rows | Tables 2 and 3 of the article, from two complete copies compared value by value; Springer copyright, so only the values ship |
@@ -402,7 +405,7 @@ the current format version.
 reads only committed files: the transcribed CSV of each set, pinned by size and SHA-256 in
 `packages/data/raw/criteria-sets.manifest.json`, and the generated US files it joins to. It fails on a
 mismatch and never touches the network. For a set whose source file is not committed the manifest records the
-fetched file's SHA-256 as provenance. Output: `generated/criteria-2026-10-23/{ccme,eu,uk,macdonald2000}.json`
+fetched file's SHA-256 as provenance. Output: `generated/criteria-2026-10-23/{ccme,eu,eu2026,uk,macdonald2000}.json`
 and `anzg-fresh.json` and `anzg-salt.json` (the ANZG set is one file per water type so that no web chunk
 passes 500 kB). A row keeps the value as printed (`printedValue`, `printedUnit`), the value in the engine's unit,
 its basis (as printed and in words), the table, page or worksheet cell it was read from, and a shared note.
@@ -441,6 +444,16 @@ carbon rules above. The panel shows with each value its basis in words, the set,
 table it was read from, with the set's note in a disclosure. A set with no water values is not compared with
 water; a chemical a set does not name says so. Choosing a set loads that set only, in a chunk of its own; the
 default loads none of them.
+
+**The revised EU set (wave W).** `eu2026` is built from `raw/eu-eqs-2026/eqs.csv` (extracted from the consolidated text
+by `scripts/extract-eu-eqs-2026.ts`) in the same way as `eu`; the table of a row says `Annex I Part A table` or
+`Annex II Part C table`. Water cells only: a biota or sediment EQS is not transcribed, and Article 3(2) applies
+that EQS instead of the water EQS where Part A prints one, so the water row of such a substance is not always the
+standard applied. PFOS (entry 35) prints no water cells and points to the PFAS group (entry 65, a sum expressed
+as PFOA equivalents). Glyphosate inland has two annual averages (drinking water abstraction and otherwise) and
+silver other waters two salinity values; each is its own basis row. The two entries whose water cells differ from
+2013 but are named in neither Article 3(1a)(iii) nor (iv) (hexachlorobenzene MAC, heptachlor) carry no date. Triclosan,
+which the 2013 set did not name, gives the UK triclosan row a CAS number by the name join, so that row's id changed.
 
 **CSV and report.** The comparison is a CSV table of its own (`surface-water-criteria-<set>`), one row per
 criterion and method with the criteria set, basis, medium, water type, source table, status, criterion value,
@@ -642,7 +655,7 @@ slices.
 | `epa2018r4era` | The EPA PDF (cover and table list) and the Regional ERA supplemental guidance page | Cover, table list, section 6.2 headings |
 | `macdonald2000` | Crossref (authors, title, volume, pages, doi), and the two complete copies of the article read in wave V (Tables 2 and 3) | Yes, the tables (wave V); the reference is `data` |
 | `macdonald2000copy`, `macdonald2000epacopy` | The two copies of the article (rais.ornl.gov and EPA Superfund record 40168746) | Yes, Tables 2 and 3 |
-| `ccme2026summary`, `eudir2008105`, `eudir201339`, `ukwfdstandards2015`, `anzg2018`, `warne2018` | The documents named by each entry, fetched 2026-10-23 (`warne2018` only by the title the ANZG table prints; its venue and URL are not recorded) | Yes, the tables; see "International criteria sets (wave V)" |
+| `ccme2026summary`, `eudir2008105`, `eudir201339`, `eudir2026805`, `ukwfdstandards2015`, `anzg2018`, `warne2018` | The documents named by each entry, fetched 2026-10-23 (`warne2018` only by the title the ANZG table prints; its venue and URL are not recorded) | Yes, the tables; see "International criteria sets (wave V)" |
 | `long1995` | Crossref (Environmental Management 19(1):81-97, doi 10.1007/BF02472006) | No; deferred benchmark source |
 | `noaasquirts` | NOAA repository record (Buchman 2008, OR&R Report 08-1, public domain) and the OR&R page recording the removal on April 4, 2024 | Yes (introduction and terms of use) |
 | `arcadis2001`, `spence2001` | As in the vadose note; Table R-8 read in the RISC5 guide | Fixture use only |

@@ -1544,10 +1544,10 @@
       "note": 0
     },
     {
-      "id": "uk:triclosan:surfaceWater:fresh:long-term-mean",
+      "id": "uk:3380-34-5:surfaceWater:fresh:long-term-mean",
       "set": "uk",
-      "chemicalId": "triclosan",
-      "idBy": "name",
+      "chemicalId": "3380-34-5",
+      "idBy": "name-join",
       "name": "Triclosan",
       "cas": null,
       "medium": "surfaceWater",
@@ -1563,10 +1563,10 @@
       "note": 0
     },
     {
-      "id": "uk:triclosan:surfaceWater:fresh:short-term-95-percentile",
+      "id": "uk:3380-34-5:surfaceWater:fresh:short-term-95-percentile",
       "set": "uk",
-      "chemicalId": "triclosan",
-      "idBy": "name",
+      "chemicalId": "3380-34-5",
+      "idBy": "name-join",
       "name": "Triclosan",
       "cas": null,
       "medium": "surfaceWater",
@@ -1582,10 +1582,10 @@
       "note": 0
     },
     {
-      "id": "uk:triclosan:surfaceWater:salt:long-term-mean",
+      "id": "uk:3380-34-5:surfaceWater:salt:long-term-mean",
       "set": "uk",
-      "chemicalId": "triclosan",
-      "idBy": "name",
+      "chemicalId": "3380-34-5",
+      "idBy": "name-join",
       "name": "Triclosan",
       "cas": null,
       "medium": "surfaceWater",
@@ -1601,10 +1601,10 @@
       "note": 0
     },
     {
-      "id": "uk:triclosan:surfaceWater:salt:short-term-95-percentile",
+      "id": "uk:3380-34-5:surfaceWater:salt:short-term-95-percentile",
       "set": "uk",
-      "chemicalId": "triclosan",
-      "idBy": "name",
+      "chemicalId": "3380-34-5",
+      "idBy": "name-join",
       "name": "Triclosan",
       "cas": null,
       "medium": "surfaceWater",

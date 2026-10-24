@@ -20,6 +20,13 @@ describe('surface water project: the criteria set choice', () => {
     expect((toProject(state) as { criteriaSet?: string }).criteriaSet).toBe('eu');
   });
 
+  it('opens a project saved with the 2013 EU set (eu) on that set, and accepts the revised set eu2026', () => {
+    expect(fromProject({ criteriaSet: 'eu' }).criteriaSet).toBe('eu');
+    expect(fromProject({ criteriaSet: 'eu2026' }).criteriaSet).toBe('eu2026');
+    expect(surfaceWaterProjectSchema.safeParse({ criteriaSet: 'eu' }).success).toBe(true);
+    expect(surfaceWaterProjectSchema.safeParse({ criteriaSet: 'eu2026' }).success).toBe(true);
+  });
+
   it('accepts every choice and refuses an unknown one', () => {
     for (const c of CRITERIA_SET_CHOICES) {
       expect(surfaceWaterProjectSchema.safeParse({ criteriaSet: c }).success, c).toBe(true);

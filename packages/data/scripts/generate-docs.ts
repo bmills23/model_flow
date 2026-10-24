@@ -101,7 +101,7 @@ const dataEditions = [
     retrieved: ecossl.source.retrieved,
     licence: ecossl.source.licence,
   },
-  ...['ccme', 'eu', 'uk', 'anzg', 'macdonald2000'].map(criteriaEdition),
+  ...['ccme', 'eu', 'eu2026', 'uk', 'anzg', 'macdonald2000'].map(criteriaEdition),
 ];
 
 write('ATTRIBUTIONS.md', (generatedOn) =>

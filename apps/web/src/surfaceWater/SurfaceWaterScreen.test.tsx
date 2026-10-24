@@ -132,6 +132,7 @@ describe('SurfaceWaterScreen', () => {
       'us',
       'ccme',
       'eu',
+      'eu2026',
       'uk',
       'anzg',
       'macdonald2000',

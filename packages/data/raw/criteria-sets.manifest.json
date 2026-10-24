@@ -56,6 +56,38 @@
         }
       ]
     },
+    "eu2026": {
+      "source": {
+        "title": "Directive 2008/105/EC of the European Parliament and of the Council of 16 December 2008 on environmental quality standards and on the prevention and control of surface water pollution (title as replaced by Article 3(1) of Directive (EU) 2026/805), as amended by Directive 2013/39/EU of 12 August 2013 and Directive (EU) 2026/805 of 30 March 2026",
+        "references": [
+          "eudir2008105",
+          "eudir201339",
+          "eudir2026805"
+        ],
+        "url": "http://publications.europa.eu/resource/celex/02008L0105-20260510",
+        "pageDate": "2026-05-10",
+        "retrieved": "2026-10-23",
+        "terms": "Reuse of documents of the EU institutions published by the Publications Office, including EUR-Lex legal acts, is authorised under Commission Decision 2011/833/EU of 12 December 2011 on the reuse of Commission documents, which permits reuse for commercial and non-commercial purposes without charge and without individual application (Articles 1 to 6), except for documents covered by Article 2(2) (third-party intellectual property, logos, software).",
+        "termsUrl": "http://publications.europa.eu/resource/celex/32011D0833",
+        "redistributed": true,
+        "sourceSha256": "63874ec5c4c20c949c338121acf295831c1d7862dfb7240aa065158ef0175081",
+        "csv": "packages/data/raw/eu-eqs-2026/eqs.csv"
+      },
+      "files": [
+        {
+          "file": "eu-eqs-2026/consolidated-02008L0105-20260510.xhtml",
+          "role": "source",
+          "bytes": 296037,
+          "sha256": "63874ec5c4c20c949c338121acf295831c1d7862dfb7240aa065158ef0175081"
+        },
+        {
+          "file": "eu-eqs-2026/eqs.csv",
+          "role": "table",
+          "bytes": 77873,
+          "sha256": "c38e5f43c6eb842b334c759587ee6fd72fc22fc6882dec6587480a13958052e4"
+        }
+      ]
+    },
     "uk": {
       "source": {
         "title": "The Water Framework Directive (Standards and Classification) Directions (England and Wales) 2015, Schedule 3 Part 2 (specific pollutants) Table 1 and Table 2, and Part 3 (priority substances) Table 1",

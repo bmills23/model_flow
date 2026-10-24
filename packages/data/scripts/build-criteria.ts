@@ -1,4 +1,4 @@
-// Builds generated/criteria-<edition>/<set>.json (ccme, eu, uk, anzg, macdonald2000) from the committed CSVs
+// Builds generated/criteria-<edition>/<set>.json (ccme, eu, eu2026, uk, anzg, macdonald2000) from the committed CSVs
 // under raw/. Never touches the network and fails on a checksum mismatch.
 //
 //   tsx scripts/build-criteria.ts              build the JSON
@@ -32,6 +32,7 @@ if (process.argv.includes('--manifest')) {
   type Loose = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   const ccme = json<Loose>('ccme/manifest.json');
   const eu = json<Loose>('eu-eqs/manifest.json');
+  const eu2026 = json<Loose>('eu-eqs-2026/manifest.json');
   const uk = json<Loose>('uk-eqs/manifest.json');
   const anzg = json<Loose>('anzg/manifest.json');
   const mac = json<Loose>('macdonald2000/manifest.json');
@@ -69,6 +70,24 @@ if (process.argv.includes('--manifest')) {
       files: [
         pin('eu-eqs/consolidated-02008L0105-20130913.xhtml', 'source'),
         pin('eu-eqs/eqs.csv', 'table'),
+      ],
+    },
+    eu2026: {
+      source: {
+        title: eu2026.instrument,
+        references: ['eudir2008105', 'eudir201339', 'eudir2026805'],
+        url: eu2026.files[0].url,
+        pageDate: '2026-05-10',
+        retrieved,
+        terms: eu2026.terms.statement,
+        termsUrl: eu2026.terms.url,
+        redistributed: true,
+        sourceSha256: eu2026.files[0].sha256,
+        csv: 'packages/data/raw/eu-eqs-2026/eqs.csv',
+      },
+      files: [
+        pin('eu-eqs-2026/consolidated-02008L0105-20260510.xhtml', 'source'),
+        pin('eu-eqs-2026/eqs.csv', 'table'),
       ],
     },
     uk: {

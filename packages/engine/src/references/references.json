@@ -1147,6 +1147,19 @@
     "tags": ["surfaceWater"]
   },
   {
+    "key": "eudir2026805",
+    "type": "data",
+    "status": "data",
+    "authors": "European Parliament and Council of the European Union",
+    "year": 2026,
+    "title": "Directive (EU) 2026/805 of the European Parliament and of the Council of 30 March 2026 amending Directive 2000/60/EC establishing a framework for Community action in the field of water policy, Directive 2006/118/EC on the protection of groundwater against pollution and deterioration and Directive 2008/105/EC on environmental quality standards in the field of water policy",
+    "venue": "Official Journal of the European Union, L series, 2026/805, 20.4.2026",
+    "identifier": "CELEX 32026L0805",
+    "url": "http://publications.europa.eu/resource/celex/32026L0805",
+    "notes": "The amending act. Article 3(10) replaces Annex I Part A of Directive 2008/105/EC (Annex VI of the act) and Article 3(11) adds Annex II Part C. The values are read from the consolidated text 2008L0105 of 10.05.2026 (CELEX 02008L0105-20260510), which carries the amended annexes; the act itself is read for the dates of application (Article 3(1a)(iii) and (iv), Article 3(1b), Article 4(1)). Reused under Commission Decision 2011/833/EU. Accessed 2026-10-23.",
+    "tags": ["surfaceWater"]
+  },
+  {
     "key": "ukwfdstandards2015",
     "type": "data",
     "status": "data",

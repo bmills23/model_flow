@@ -29,6 +29,10 @@ function loadSetFiles(id: InternationalSet): Promise<CriteriaSetFile[]> {
       return import('@model-flow/data/generated/criteria-2026-10-23/eu.json').then((m) => [
         m.default as unknown as CriteriaSetFile,
       ]);
+    case 'eu2026':
+      return import('@model-flow/data/generated/criteria-2026-10-23/eu2026.json').then((m) => [
+        m.default as unknown as CriteriaSetFile,
+      ]);
     case 'uk':
       return import('@model-flow/data/generated/criteria-2026-10-23/uk.json').then((m) => [
         m.default as unknown as CriteriaSetFile,

@@ -51,7 +51,14 @@ describe('checksum manifest', () => {
 
   it('accepts the committed files', () => {
     const m = verifyCriteriaManifest(rawDir);
-    expect(Object.keys(m.sets).sort()).toEqual(['anzg', 'ccme', 'eu', 'macdonald2000', 'uk']);
+    expect(Object.keys(m.sets).sort()).toEqual([
+      'anzg',
+      'ccme',
+      'eu',
+      'eu2026',
+      'macdonald2000',
+      'uk',
+    ]);
   });
 
   it('fails the build on a checksum mismatch in a CSV', () => {
@@ -71,7 +78,14 @@ describe('checksum manifest', () => {
 
 describe('source blocks', () => {
   it('records the edition, the retrieval date, a reference and the terms of each set', () => {
-    expect(Object.keys(built.sets).sort()).toEqual(['anzg', 'ccme', 'eu', 'macdonald2000', 'uk']);
+    expect(Object.keys(built.sets).sort()).toEqual([
+      'anzg',
+      'ccme',
+      'eu',
+      'eu2026',
+      'macdonald2000',
+      'uk',
+    ]);
     for (const f of Object.values(built.sets) as CriteriaSetFile[]) {
       expect(f.edition).toBe('2026-10-23');
       expect(f.source.retrieved).toBe('2026-10-23');
@@ -83,6 +97,7 @@ describe('source blocks', () => {
     expect(built.sets.anzg.source.redistributed).toBe(false);
     expect(built.sets.macdonald2000.source.redistributed).toBe(false);
     expect(built.sets.eu.source.redistributed).toBe(true);
+    expect(built.sets.eu2026.source.redistributed).toBe(true);
     expect(built.sets.uk.source.redistributed).toBe(true);
   });
 });
@@ -221,6 +236,84 @@ describe('European Union (Directive 2008/105/EC Annex I Part A, as amended)', ()
 
   it('has no sediment rows', () => {
     expect(rowsOf('eu').every((r) => r.medium === 'surfaceWater')).toBe(true);
+  });
+});
+
+describe('European Union as amended by Directive (EU) 2026/805 (eu2026)', () => {
+  it('is a set of its own beside the 2013 set, with its own label and references', () => {
+    const f = built.sets.eu2026;
+    expect(f.set).toBe('eu2026');
+    expect(f.label).toBe(
+      'European Union (Directive 2008/105/EC as amended by Directive (EU) 2026/805)',
+    );
+    expect(f.media).toEqual(['surfaceWater']);
+    expect(f.source.references).toEqual(['eudir2008105', 'eudir201339', 'eudir2026805']);
+    expect(f.source.url).toBe('http://publications.europa.eu/resource/celex/02008L0105-20260510');
+    expect(built.sets.eu.label).toBe('European Union (Directive 2008/105/EC)');
+  });
+
+  it('holds the 272 water rows of the fetched text, and the 2013 set keeps its 180', () => {
+    expect(rowsOf('eu2026')).toHaveLength(272);
+    expect(rowsOf('eu')).toHaveLength(180);
+    expect(rowsOf('eu2026').every((r) => r.medium === 'surfaceWater')).toBe(true);
+  });
+
+  it('keeps the new PFAS, glyphosate and silver rows, each as its own basis', () => {
+    expect(
+      find(
+        'eu2026',
+        '1071-83-6',
+        'surfaceWater',
+        'fresh',
+        'AA-EQS inland, drinking water abstraction',
+      )?.value,
+    ).toBe(0.1);
+    expect(
+      find(
+        'eu2026',
+        '1071-83-6',
+        'surfaceWater',
+        'fresh',
+        'AA-EQS inland, not drinking water abstraction',
+      )?.value,
+    ).toBe(86.7);
+    const silver = rowsOf('eu2026').filter(
+      (r) => r.chemicalId === '7440-22-4' && r.waterType === 'salt',
+    );
+    expect(silver.map((r) => r.value).sort()).toEqual([0.006, 0.17]);
+    expect(rowsOf('eu')).not.toContainEqual(expect.objectContaining({ chemicalId: '1071-83-6' }));
+  });
+
+  it('puts the date of application in the note of a revised or new standard', () => {
+    const f = built.sets.eu2026;
+    const note = (r: CriteriaRow | undefined): string =>
+      r?.note !== undefined ? f.notes[r.note]! : '';
+    expect(note(find('eu2026', '2921-88-2', 'surfaceWater', 'fresh', 'AA-EQS inland'))).toMatch(
+      /from 22 December 2027, good surface water chemical status to be achieved by 22 December 2033/,
+    );
+    expect(
+      note(find('eu2026', '1071-83-6', 'surfaceWater', 'salt', 'AA-EQS other surface waters')),
+    ).toMatch(/22 December 2039/);
+  });
+
+  it('carries the six moved substances from Annex II Part C at their unchanged values', () => {
+    const c = rowsOf('eu2026').filter((r) => r.table === 'Annex II Part C table');
+    expect(c).toHaveLength(20);
+    const atrazine = c.filter((r) => r.chemicalId === '1912-24-9');
+    const old = rowsOf('eu').filter((r) => r.chemicalId === '1912-24-9');
+    expect(atrazine.map((r) => [r.basis, r.value]).sort()).toEqual(
+      old.map((r) => [r.basis, r.value]).sort(),
+    );
+  });
+
+  it('gives the UK triclosan row the CAS number the revised EU set prints, by a unique name join', () => {
+    const t = rowsOf('uk').filter((r) => r.name === 'Triclosan');
+    expect(t.length).toBeGreaterThan(0);
+    for (const r of t) expect([r.chemicalId, r.idBy]).toEqual(['3380-34-5', 'name-join']);
+  });
+
+  it('keeps PFOS out of the water rows (it points to the PFAS group)', () => {
+    expect(rowsOf('eu2026').some((r) => /perfluorooctane sulfonic|PFOS/i.test(r.name))).toBe(false);
   });
 });
 

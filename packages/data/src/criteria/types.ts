@@ -1,9 +1,10 @@
-/** The international aquatic and sediment criteria sets built in wave V (DECISIONS, "Wave V scope", rulings 3 to 5). */
-export type CriteriaSetId = 'ccme' | 'eu' | 'uk' | 'anzg' | 'macdonald2000';
+/** The international aquatic and sediment criteria sets built in wave V (DECISIONS, "Wave V scope", rulings 3 to 5), and the 2026 EU revision added in wave W (eu2026). */
+export type CriteriaSetId = 'ccme' | 'eu' | 'eu2026' | 'uk' | 'anzg' | 'macdonald2000';
 
 export const CRITERIA_SET_IDS: readonly CriteriaSetId[] = [
   'ccme',
   'eu',
+  'eu2026',
   'uk',
   'anzg',
   'macdonald2000',

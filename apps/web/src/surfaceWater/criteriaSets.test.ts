@@ -8,7 +8,12 @@ import {
   type CriteriaDb,
 } from './criteriaDb';
 import { loadCriteriaDbFor } from './criteriaSets';
-import { CRITERIA_SET_CHOICES, type CriteriaSetChoice } from './criteriaSetChoice';
+import {
+  CRITERIA_SET_CHOICES,
+  CRITERIA_SET_LABEL,
+  criteriaReferenceKeys,
+  type CriteriaSetChoice,
+} from './criteriaSetChoice';
 
 const dbs = new Map<CriteriaSetChoice, CriteriaDb>();
 beforeAll(async () => {
@@ -48,7 +53,7 @@ describe('loadCriteriaDbFor', () => {
   });
 
   it('holds only the rows of the chosen set', () => {
-    for (const id of ['ccme', 'eu', 'uk', 'anzg', 'macdonald2000'] as const) {
+    for (const id of ['ccme', 'eu', 'eu2026', 'uk', 'anzg', 'macdonald2000'] as const) {
       for (const k of db(id).criteria) expect(db(id).info.get(k.id)?.set, k.id).toBe(id);
     }
   });
@@ -56,6 +61,7 @@ describe('loadCriteriaDbFor', () => {
   it('records the media each set has: EU, UK and ANZG are water only, MacDonald is sediment only', () => {
     const media = (c: CriteriaSetChoice) => new Set(db(c).criteria.map((k) => k.medium));
     expect([...media('eu')]).toEqual(['surfaceWater']);
+    expect([...media('eu2026')]).toEqual(['surfaceWater']);
     expect([...media('uk')]).toEqual(['surfaceWater']);
     expect([...media('anzg')]).toEqual(['surfaceWater']);
     expect([...media('macdonald2000')]).toEqual(['sediment']);
@@ -202,5 +208,51 @@ describe('the union of all sets', () => {
     const all = db('all');
     const ids = all.chemicals.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('the 2026 revision of the EU standards (eu2026) beside the 2013 set (eu)', () => {
+  const GLYPHOSATE = '1071-83-6';
+
+  it('keeps the 2013 set as it was: no glyphosate, its own label, only its own rows', () => {
+    expect(criteriaFor(db('eu'), GLYPHOSATE, 'surfaceWater')).toEqual([]);
+    for (const k of db('eu').criteria) expect(k.id.startsWith('eu:'), k.id).toBe(true);
+    expect(db('eu').criteria).toHaveLength(180);
+    const any = db('eu').info.get(db('eu').criteria[0]!.id)!;
+    expect(any.setLabel).toBe('European Union (Directive 2008/105/EC)');
+  });
+
+  it('loads the revised set from a file of its own, with the substances the revision added', () => {
+    expect(db('eu2026').criteria).toHaveLength(272);
+    for (const k of db('eu2026').criteria) expect(k.id.startsWith('eu2026:'), k.id).toBe(true);
+    const gly = criteriaFor(db('eu2026'), GLYPHOSATE, 'surfaceWater');
+    expect(gly.length).toBe(5);
+    expect(db('eu2026').info.get(gly[0]!.id)!.setLabel).toMatch(
+      /as amended by Directive \(EU\) 2026\/805/,
+    );
+  });
+
+  it('shows the date of application of a revised or new standard in the note of the row', () => {
+    const gly = criteriaFor(db('eu2026'), GLYPHOSATE, 'surfaceWater');
+    for (const k of gly) {
+      expect(db('eu2026').info.get(k.id)!.condition, k.id).toMatch(/22 December 2027/);
+    }
+  });
+
+  it('labels both sets by their instrument, the revised one as amended', () => {
+    expect(CRITERIA_SET_LABEL.eu).toMatch(/2013/);
+    expect(CRITERIA_SET_LABEL.eu2026).toMatch(/2026\/805/);
+    expect(CRITERIA_SET_LABEL.eu2026).toMatch(/as amended/);
+  });
+
+  it('cites the amending act for the revised set only', () => {
+    expect(criteriaReferenceKeys('eu2026')).toContain('eudir2026805');
+    expect(criteriaReferenceKeys('eu')).not.toContain('eudir2026805');
+    expect(criteriaReferenceKeys('all')).toContain('eudir2026805');
+  });
+
+  it('is part of the union of all sets', () => {
+    expect(db('all').criteria.some((k) => k.id.startsWith('eu2026:'))).toBe(true);
+    expect(db('all').criteria.some((k) => k.id.startsWith('eu:'))).toBe(true);
   });
 });

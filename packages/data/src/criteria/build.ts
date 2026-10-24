@@ -61,6 +61,7 @@ const SEDIMENT_DIR = 'sediment-2026-10-16';
 export const SET_CSV: Record<CriteriaSetId, string[]> = {
   ccme: ['ccme/ccme.csv'],
   eu: ['eu-eqs/eqs.csv'],
+  eu2026: ['eu-eqs-2026/eqs.csv'],
   uk: ['uk-eqs/eqs.csv'],
   anzg: ['anzg/anzg-2018-dgv.csv'],
   macdonald2000: ['macdonald2000/consensus-tec-pec.csv'],
@@ -69,6 +70,7 @@ export const SET_CSV: Record<CriteriaSetId, string[]> = {
 export const SET_LABEL: Record<CriteriaSetId, string> = {
   ccme: 'Canada (CCME)',
   eu: 'European Union (Directive 2008/105/EC)',
+  eu2026: 'European Union (Directive 2008/105/EC as amended by Directive (EU) 2026/805)',
   uk: 'United Kingdom (England and Wales)',
   anzg: 'Australia and New Zealand (ANZG 2018)',
   macdonald2000: 'MacDonald et al. 2000 consensus sediment guidelines',
@@ -176,6 +178,7 @@ const basisLabel = (set: CriteriaSetId, basis: string): string => {
       if (basis === 'PEL') return 'probable effect level (PEL)';
       return basis;
     case 'eu':
+    case 'eu2026':
     case 'uk': {
       const aa = /^AA-EQS (.*)$/.exec(basis);
       if (aa) return `annual average (AA-EQS), ${aa[1]}`;
