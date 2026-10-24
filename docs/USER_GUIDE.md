@@ -78,6 +78,12 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
   `stale inputs`, carrying the same text on every row, and `-stale-inputs` is added to its file name; a
   current file is unchanged. A note beside the download says which values are out of date, and for which
   chemical.
+- The groundwater, vadose, saturated and surface water screens have a status line above their results:
+  **Computing...** while a run is pending, **Up to date** only when the results shown were computed from the
+  inputs on screen, and **Inputs need attention** when an input has an error, the engine refused the run or a
+  source the screen reads cannot be used. The last valid results then stay on screen, dimmed, under a note that
+  lists the input errors, and sending and downloading are off until the inputs are fixed. **Out of date** is
+  kept for a value sent from another screen whose inputs have changed (above).
 - **Share link** puts the project in the address after the `#`, compressed. A hash is never sent to a
   server, so the link carries the project without anyone hosting it. The link does not include the values
   passed between screens; whoever opens it sends those again from their source screens.
@@ -351,6 +357,13 @@ Chemical cards carry the same **Edit values** panel as the exposure screen, and 
 receptors carry the same name and **Edit exposure factors** panel, but their own edits: a factor changed
 on the cleanup screen does not change the exposure screen.
 
+Each chemical's groundwater and pore water levels are held against a solubility, listed per chemical with its
+source under the **Solubility ceiling** box: the ceiling you type there when you enter one (it applies to every
+chemical and also caps the search of a dissolved modeled source), else the solubility you entered for a chemical
+you defined, else the database solubility. A level above it is flagged "above the solubility" in its cell, with a
+note under the table, an "above the solubility" column in the CSV and a note in the report. The database value only
+flags a level; it does not cap it.
+
 Homegrown produce and total petroleum hydrocarbons come from the plants, ecology and TPH screen. For
 produce, send the plant factors from that screen, switch on "plant factors for homegrown produce" on the
 chemical and "Homegrown produce" on the receptor: the soil level then includes the produce pathway
@@ -457,8 +470,9 @@ source and from under a second to several seconds for a soil source, so the iter
 200 rather than 1000; a run projected over a minute asks first and one over 10 minutes is refused. When
 fewer than 10 draws lie below the chosen protection level, the results carry the warning
 `uncertainty.small-sample-tail`. The method, distributions, iteration count, protected fraction and seed
-are saved in the project. The report does not compute a modeled source; with **Include uncertainty results**
-ticked it prints the result of the last run made here (see the report section below).
+are saved in the project. The levels solved above are kept with the project, one entry per chemical, and the
+report prints them (see the report section below). The probabilistic result is not saved: with **Include
+uncertainty results** ticked the report prints the last run made here.
 
 The project's full mobile layout check (`corepack pnpm mobile:check:full`) runs this panel in a browser with a sampled
 seepage velocity and the default 200 iterations, then opens the report with **Include uncertainty results**
@@ -476,9 +490,30 @@ project, so a run repeats exactly.
 The report is built from the project: the inputs of each screen you used, each screen's result tables, the
 engine warnings, a methods statement that names the methods you chose with numbered references, and the
 non-affiliation notice. Each screen's main charts are included too, every one followed by its data table
-(including the groundwater plume map; its printed table is an evenly spaced sample of 20 centreline rows, and the groundwater screen's table holds every row). Charts print in shades of grey, so a black and white print stays
+(including the groundwater plume map; its printed table is an evenly spaced sample of 20 centreline rows, and the groundwater screen's table holds every row). Every result table prints in full; the plume map's data table is
+the only sample. Charts print in shades of grey, so a black and white print stays
 readable. **Print or save as PDF** uses your browser's print dialog, which has a PDF option. The optional
 "Prepared by" field is not saved to the project.
+
+Each fate screen's section (groundwater, vadose, saturated, vapor, household, surface water, plants and ecology)
+prints one block for every chemical whose result was sent on, named by its name, with the inputs that run used and
+its results. Under the blocks, **Run on the screen now** names the chemical the screen is set to and says what
+became of that run: sent to which screen; not sent, so the exposure, risk and cleanup results do not use it; or
+changed since a result was sent, in which case the block above shows the run that was sent and the tables that
+follow are the screen's current run. In a vadose or saturated block the table of the method that was sent is the
+one the groundwater screen used, and the other method's table is marked as a sensitivity.
+
+Where a section shows legacy and modern results it states which method its conclusions rest on: the screen's
+**Method shown**; for surface water, the method sent to the exposure and risk screen for that chemical (the modern
+method, said to be the default, when none was sent); for risk and cleanup, the modern method. The other method is
+printed as a sensitivity check, and the report says where the two disagree on whether a criterion or target is
+exceeded.
+
+A pathway or chemical the run could not quantify (no toxicity value, a missing input, a method that does not cover
+it) reads "not quantified" with its reason, never 0, on the risk and cleanup screens and in the report; a CSV leaves
+the value cell empty and gives the reason in its "not quantified or partial because" column. A receptor total that
+leaves out a pathway that was not quantified keeps its number and is marked as a partial total, naming the pathways
+it leaves out.
 
 The top of the report gives the generation date, the app version (0.1.0 while the evidence gap against
 published tables is open) and the short commit the build was made from ("unknown" when the build could not
@@ -489,7 +524,9 @@ Each section ends with **What this run rests on**, a table of the values in that
 source backs: built-in defaults that carry a warning (with the note and the reference status), fate
 properties typed with no database chemical, properties typed over the database value (with the database value
 beside), toxicity values and chemicals you supplied, and receptor factors you edited, each with its source note
-or "no note". A section that reads values sent from another screen also lists that screen's rows, marked with
+or "no note". Every site value you typed, and every pre-filled example value with no cited source, is listed as an
+entry without a source (a soil property still equal to its texture class value counts as cited), and the report
+says that no value lacks a source only when that list is empty. A section that reads values sent from another screen also lists that screen's rows, marked with
 the sender and "out of date" when the sent values no longer match. A summary under the title counts the rows by
 kind and names the unverified defaults used. **Download CSV: run basis** saves the same rows in one file with a
 screen column; when any row is out of date the file gains a stale inputs column and a `-stale-inputs` name
@@ -518,7 +555,17 @@ chart of the spread, which inputs matter (tornado, Spearman and, if switched on,
 iteration count, and the probabilistic cleanup levels. A panel with no distribution set is skipped with a
 note saying why. Results are not saved with the project.
 
-For a modeled cleanup source the report does not run the analysis. It prints the result of the run you made on
+For a modeled groundwater, vadose or saturated cleanup source the report prints the levels solved on the cleanup
+screen, which the project keeps for each chemical; it does not solve them itself. Each entry is checked against a
+fingerprint of what it was solved from: the cleanup form, that chemical's own groundwater run as it was sent, the
+vadose or saturated run, the chemical's toxicity and property values and the data edition (the starting
+concentration, and for a soil source the solubility ceiling, do not change the levels and are left out). Setting
+the groundwater screen to another chemical does not by itself change it. When an input has changed the report says
+the levels are out of date; when the groundwater run they came through is not held in this session and the
+groundwater screen is set to another chemical, it says they cannot be confirmed; when an entry cannot be read, it
+says so. In each case, send the chemical's groundwater run and open the cleanup screen: it solves them again.
+
+For a modeled cleanup source the report does not run the uncertainty analysis. It prints the result of the run you made on
 the cleanup screen in this session (levels table, iterations, seed, warnings and which inputs matter), or says
 the result is out of date because an input changed since the run and asks you to run it again there, or says no
 run has been made yet. That result is not saved with the project or the browser's copy, so after a reload, a new

@@ -1,6 +1,6 @@
 # Usability plan
 
-Status (2026-10-23): plan of record for making the app usable for its target user (regulatory work: a consultant
+Status (2026-10-24, after wave AA): plan of record for making the app usable for its target user (regulatory work: a consultant
 preparing a risk assessment for a state or EPA program, or an agency reviewer checking one). Feature parity with RISC5 is
 done (`docs/UI_PARITY.md`); this file tracks what stops that user finishing a real job. Each row's status is maintained in
 place; a status is a claim, grep the tree before trusting it.
@@ -28,20 +28,20 @@ bed gradient and discharge thickness.
 
 | ID | Severity | Route | What happened | Smallest fix | Wave | Status |
 |---|---|---|---|---|---|---|
-| B1 | Blocker | `#/report` | Transport and vapor sections print only the run last made on each screen (MTBE); benzene's well and indoor air concentrations, which drive the risk, appear nowhere | One block per chemical from the per-chemical sent results | AA | Open |
-| B2 | Blocker | `#/cleanup` to `#/report` | With a groundwater modeled source the report says "Not computed: a modeled source ... open the cleanup screen"; the site-specific levels never print | Solve them for the report, as the surface water levels already are | AA | Open |
-| B3 | Blocker | `#/report` | "Showing the first 40 of 60 rows": legacy cleanup rows are missing from the print | Never truncate a result table in the report | AA | Open |
-| M1 | Major | `#/report` | Says no value is an entry without a source, yet every typed and pre-filled site value (bulk density 1.7, crack fraction, 1 Pa) has none | List typed and pre-filled site inputs as entries without a source | AA | Open |
+| B1 | Blocker | `#/report` | Transport and vapor sections print only the run last made on each screen (MTBE); benzene's well and indoor air concentrations, which drive the risk, appear nowhere | One block per chemical from the per-chemical sent results | AA | Partly done (AA, 2026-10-24): one named block per chemical with its own results, and a changed screen run is labelled; the inputs of a run sent from transport, vapor or surface water are not recorded, so the block prints only the method (follow-up slice open) |
+| B2 | Blocker | `#/cleanup` to `#/report` | With a groundwater modeled source the report says "Not computed: a modeled source ... open the cleanup screen"; the site-specific levels never print | Solve them for the report, as the surface water levels already are | AA | Done (AA, 2026-10-24): kept with the project per chemical and printed while their fingerprint matches; confirmed by the acceptance run |
+| B3 | Blocker | `#/report` | "Showing the first 40 of 60 rows": legacy cleanup rows are missing from the print | Never truncate a result table in the report | AA | Done (AA, 2026-10-24): every table prints in full; the plume map's data table stays a labelled sample of 20 rows |
+| M1 | Major | `#/report` | Says no value is an entry without a source, yet every typed and pre-filled site value (bulk density 1.7, crack fraction, 1 Pa) has none | List typed and pre-filled site inputs as entries without a source | AA | Done (AA, 2026-10-24): confirmed by the acceptance run (52 entries without a source listed) |
 | M2 | Major | several | Internal keys and codes on screens and in the report (`c0`, `rx`, `alpha tOverride`, `steps 2 factor`, "108-88-3 ... waterIngestion", "needs etByPathway.waterDermal", "K_b i_b differs from the M1 Darcy flux") | Screen labels, chemical names and units in their place | AB | Open |
 | M3 | Major | `#/risk` | "71-43-2: no toxicity value for any linked bathroomAir pathway", but benzene has a unit risk; the cause is a missing exposure time | Name the missing input | AB | Open |
-| M4 | Major | `#/risk`, `#/report` | Not quantified shown as 0 (legacy bathing dermal contact 0; toluene and xylenes cancer risk 0) | Print "not quantified" | AA | Open |
-| M5 | Major | `#/cleanup` | Levels above solubility not flagged (toluene vapor source level 1160 mg/L, solubility 526; xylenes modeled 481 mg/L, solubility 106); the solubility ceiling is one blank box for all chemicals | Default the ceiling to each chemical's solubility and flag levels above it | AA | Open |
+| M4 | Major | `#/risk`, `#/report` | Not quantified shown as 0 (legacy bathing dermal contact 0; toluene and xylenes cancer risk 0) | Print "not quantified" | AA | Done (AA, 2026-10-24): "not quantified" with its reason, and a total that omits a pathway is marked partial |
+| M5 | Major | `#/cleanup` | Levels above solubility not flagged (toluene vapor source level 1160 mg/L, solubility 526; xylenes modeled 481 mg/L, solubility 106); the solubility ceiling is one blank box for all chemicals | Default the ceiling to each chemical's solubility and flag levels above it | AA | Done (AA, 2026-10-24): per-chemical ceiling with its source; levels above it flagged (mobile check and tests; the acceptance run's levels stayed below solubility) |
 | M6 | Major | `#/cleanup` | The modeled source solve leaves out indoor air; the vapor source levels apply at the building's water table, not at the source | Chain the vapor run into the modeled solve | AC | Open |
 | M7 | Major | `#/site` | One medium only, so groundwater plus vapor is refused; no groundwater to indoor air or to surface water path in modeled mode; says no screen compares groundwater with ecological benchmarks, which `#/surface-water` does | Add those paths and correct the statement | AC | Open |
-| M8 | Major | `#/vapor`, `#/surface-water` | Screens open on validation cases (Table R-3 and R-8 benzene) with results showing; a linked TCE run kept the benzene Koc and left source width blank, and the error sat beside old results marked "Up to date" | Start blank and fill from the linked run; hide results that no longer match the inputs (the stale display is in AA, the blank start in AC) | AA, AC | Open |
-| M9 | Major | `#/vapor` | The petroleum separation screen prints "Screened out: dissolved source" with every concentration blank | No verdict without concentrations | AA | Open |
+| M8 | Major | `#/vapor`, `#/surface-water` | Screens open on validation cases (Table R-3 and R-8 benzene) with results showing; a linked TCE run kept the benzene Koc and left source width blank, and the error sat beside old results marked "Up to date" | Start blank and fill from the linked run; hide results that no longer match the inputs (the stale display is in AA, the blank start in AC) | AA, AC | Stale display done (AA, 2026-10-24: "Inputs need attention" in place of "Up to date", old results dimmed); blank start open (AC) |
+| M9 | Major | `#/vapor` | The petroleum separation screen prints "Screened out: dissolved source" with every concentration blank | No verdict without concentrations | AA | Done (AA, 2026-10-24): "No verdict yet" with the missing concentrations listed |
 | M10 | Major | fate screens, `#/risk` | Five chemicals mean five runs each on transport and vapor, three send buttons per chemical, then ten checkboxes on `#/risk` | Run every project chemical at once and use sent results automatically | AC | Open |
-| M11 | Major | `#/surface-water`, `#/report` | Legacy and modern results disagree on an exceedance with nothing saying which governs | The report states which method is its basis and shows the other as a sensitivity | AA | Open |
+| M11 | Major | `#/surface-water`, `#/report` | Legacy and modern results disagree on an exceedance with nothing saying which governs | The report states which method is its basis and shows the other as a sensitivity | AA | Done (AA, 2026-10-24): each section states its method basis and prints the other as a sensitivity, flagging a disagreement |
 | m1 | Minor | input screens | Groundwater data in ug/L, every input in mg/L, no unit choice | A unit choice on concentration inputs | AB | Open |
 | m2 | Minor | chemical search | "toluene" does not put toluene first | Exact name match first | AB | Open |
 | m3 | Minor | transport | The Kd box shows 0.8922000000000001 | Format derived values | AB | Open |
@@ -52,12 +52,14 @@ bed gradient and discharge thickness.
 | m8 | Minor | `#/report` | Title re-cased to "Model_flow Project Report" | Keep the project name as typed | AB | Open |
 | m9 | Minor | `#/surface-water` | The criteria comparison cannot take a state standard | Let the user enter a standard with its source | AC | Open |
 | m10 | Minor | `#/docs` | The user guide is a 595-line reference with no worked example | A worked example project and a quick start | AC | Open |
+| n1 | Minor | `#/cleanup`, `#/report` | With runs held for four chemicals, the note for a fifth says "the groundwater transport run is for Methyl tert-Butyl Ether (MTBE), not Ethylbenzene", as if only one run were held (acceptance run, 2026-10-24) | Say no run was sent for that chemical | AB | Open |
+| n2 | Minor | `#/vapor` | The "Source from another screen" selector sits below the results, so the sent water table series went unused and the groundwater concentrations were typed by hand (acceptance run, 2026-10-24) | Put the source choice before the results and say which source the results use | AC | Open |
 
 ## Waves
 
-- **AA, a report fit to submit:** B1 to B3, M1, M4, M5, M8 (stale results), M9 and M11. Every number the report prints is
+- **AA, a report fit to submit (landed 2026-10-24, B1 partly):** B1 to B3, M1, M4, M5, M8 (stale results), M9 and M11. Every number the report prints is
   complete, current, honest about its sources, and says what was not quantified.
-- **AB, plain language:** M2, M3 and m1 to m8. Labels, names and units instead of internal keys, codes and raw numbers.
-- **AC, a guided site workflow:** M6, M7, M8 (blank start), M10, m9 and m10. Fate screens that start blank and run every
+- **AB, plain language:** M2, M3, m1 to m8 and n1. Labels, names and units instead of internal keys, codes and raw numbers.
+- **AC, a guided site workflow:** M6, M7, M8 (blank start), M10, m9, m10 and n2. Fate screens that start blank and run every
   project chemical, site model paths that match real sites, and a worked example. Product choices here go to Bryan
   before the wave starts.

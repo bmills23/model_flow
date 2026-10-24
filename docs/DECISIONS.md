@@ -4552,3 +4552,72 @@ stale results), M9 and M11. Every ruling below is DEFAULT and open to Bryan's ov
 10. **Acceptance.** Besides the gate, `mobile:check:full` and one review, the walkthrough's gas station job is run again
     on the integrated build to confirm B1 to B3, M1 and M4.
 11. **Docs at close.** The rows of `docs/USABILITY.md` are updated in place.
+
+### Wave AA slices R1, R2 and S1 and the corrective pass
+
+Implementation choices (2026-10-24), each DEFAULT and open to Bryan's overturn.
+
+1. **Every chemical (R1, `2053516`).** The per-chemical blocks come from the feed slots and name each chemical by its
+   name (the project list first, then the database). Vadose and saturated blocks re-run the sent run; transport,
+   vapor, surface water, household and plants blocks print the sent series or air values with the sent run's inputs.
+   A "Run on the screen now" line says whether the screen's own run was sent and to which screen. Corrective pass
+   (`98e133f`): the line compares the screen's inputs with the ones recorded when each result was sent, and once they
+   differ it says the tables that follow are the current run, not the sent one. A vadose or saturated block marks the
+   sent method's table as the one the groundwater screen used and prints the other as a sensitivity.
+2. **Modeled cleanup levels (R2, `b550e9d`).** An optional `modeledLevels` project key holds one entry per chemical,
+   with no file version bump; each entry is read on its own and a bad one is dropped (the report says it could not be
+   read). The cleanup screen saves an entry only when the solve answers the current request through runs that are not
+   out of date. The curve is not kept. Corrective pass: the fingerprint holds the hash recorded when that chemical's own
+   groundwater run was sent, not the groundwater form as it stands (that form is shared by every chemical, so switching
+   chemicals made every entry read out of date, and an edit made for another chemical could re-stamp old levels as
+   current). An entry with no recorded run is not saved. In the report, a chemical whose run is not held in the session
+   while the groundwater screen is set to another chemical reads "cannot be confirmed". The starting concentration, and
+   the solubility ceiling for a soil source, no longer enter the fingerprint.
+3. **No truncated table (R1).** Every report table prints every row. The plume map's data table stays an evenly spaced
+   sample of 20 centreline rows (it is a chart's data table, and the plume CSV holds the grid).
+4. **Entries without a source (R1).** A labelled catalog per screen lists the site values; a test fails when a form
+   field is in neither the catalog nor a named non-value. Typed values and pre-filled example values both list as
+   entries without a source, saying which. A soil property still equal to its texture class value counts as cited.
+   Household, plants and TPH fields are catalogued only when not blank.
+5. **Not quantified (R1, corrective pass `e1eee22`).** A cell is "not quantified" when no engine cell quantified it; a
+   quantified zero stays 0. CSVs leave the cell empty with the reason in a note column, now headed "not quantified or
+   partial because". A receptor total that omits a not-quantified pathway keeps its number and is marked partial,
+   naming the pathways, on the screen, in the chart and its table, both comparison tables, the CSV note and the
+   report. The unit is the pathway: a noncarcinogen with no cancer value is not reported as an omission.
+6. **Method basis (R1).** The basis is the screen's "Method shown"; surface water has no such control, so it is the
+   method sent to the exposure and risk screen for the same chemical, read from that chemical's own slot only
+   (corrective pass), else the modern method, said to be the default. Risk and cleanup default to modern.
+   Disagreements are flagged for the surface water criteria and for risk against 1e-6 and a hazard index of 1.
+7. **Solubility (R2, corrective pass).** The ceiling is the typed value first, then the solubility entered for a
+   user-defined chemical (corrective pass), then the database value with its edition. A typed ceiling still caps a
+   dissolved source's search; the database default only flags, so the level stays visible. Surface water panels keep
+   the solubility entered on the surface water run.
+8. **Stale results (S1, `16b338f`, corrective pass `e1eee22`).** A shared `ResultStatus` reads "Computing...", "Up to
+   date" only when the results match the inputs, and "Inputs need attention" for a field error, an engine error, a
+   broken link or a refused vadose or saturated feed on transport; old results stay dimmed under a note listing the
+   input errors, and send and download are off. "Out of date" stays the stale-feed mark only. Vapor, household and
+   plants and eco show no "Up to date" label and are unchanged.
+9. **No verdict without data (S1).** The petroleum separation screen says "No verdict yet" and lists the missing
+   concentrations when all four are blank; one blank among four is allowed, since the engine needs at least one.
+10. **Review and corrective pass.** One review of the merged tree: 2 high (the changed-run label, the shared-form
+    fingerprint), 3 medium (the surface water basis from another chemical's slot, partial totals, a user chemical's
+    solubility) and 4 low (the transport status ignoring a refused feed, inputs the levels do not depend on, an
+    unreadable entry reported as unsolved, the sent method's table not marked), all fixed in the pass. The report and
+    cleanup half of the pass was lost before it was committed and was rebuilt on 2026-10-24 from its recorded edits on
+    the same base commit.
+11. **Mobile check isolation (`c2b043b`).** Since the autosave moved to the `.v2` key (`3c379ae`) the check had
+    written each visit's seed under the legacy `.v1` key, which the app reads only when no `.v2` save exists, so
+    every visit after the first started from the previous visit's project. R2's new solubility visit left a direct
+    medium-contacted cleanup source, the modeled visit then found no modeled run, and its setup threw and crashed the
+    run. Each visit now seeds the current key and clears the legacy one; a setup that throws reports its error and a
+    refused screenshot fails its view, not the run. Full checks before this commit, from `3c379ae` through wave Z,
+    measured each visit on top of the previous one's state rather than on its own seed.
+12. **Acceptance (ruling 10).** The gas station job was redone on the integrated build (`a407582`) on 2026-10-24: B2,
+    B3, M1 and M4 confirmed fixed, and M8 (transport) and M9 on the way. B1 is partly fixed: each chemical has its own
+    named block with its own results and a changed screen run is labelled, but a block built from the well, vapor or
+    surface water feed prints only the method sent, because those feeds record no inputs and the project keeps only
+    each screen's current form. Benzene's 6.17 mg/L could not be tied to its source concentration. The follow-up (each
+    sent result records the inputs its run used, printed in its block) is the next slice, not part of this push. Two
+    other findings go to later waves: the cleanup screen and report say "the groundwater transport run is for MTBE,
+    not Ethylbenzene" while runs for four chemicals are held (wording, AB), and the vapor screen's "Source from
+    another screen" selector sits below the results, so a user typed the groundwater concentrations by hand (AC).

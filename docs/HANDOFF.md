@@ -1,4 +1,4 @@
-# HANDOFF (written from the tree, 2026-10-23, after the wave Z push)
+# HANDOFF (written from the tree, 2026-10-24, after the wave AA push)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
@@ -23,9 +23,17 @@ skipping a done one.
   `968cd98`, then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave Y (one slice
   and a corrective pass on branch `wave-y`; code head `3960439`, then the wave close docs commit), fast-forwarded to
   main and pushed 2026-10-23, and wave Z (two slices and a corrective pass on branch `wave-z`; code head `1cef583`,
-  then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23. Pages deploys from main:
+  then the wave close docs commit), fast-forwarded to main and pushed 2026-10-23, and wave AA (three slices and a
+  corrective pass on branch `wave-aa`; code head `c2b043b`, then the wave close docs commit), fast-forwarded to main
+  and pushed 2026-10-24. Pages deploys from main:
   https://bmills23.github.io/model_flow/
-- Last full `corepack pnpm gate` on `wave-z` (2026-10-23, `1cef583`): exit 0, build included. Test counts: engine
+- Last full `corepack pnpm gate` on `wave-aa` (2026-10-24, `a407582`): exit 0, build included. Test counts: engine
+  1483, web 2297, data 307 passed and 3 skipped. `mobile:check:full` on `c2b043b` (the app is unchanged since
+  `a407582`; that commit changes only the check script): exit 0 in 523 s, 78 views, 0 overflow and 0 axe violations
+  on every route at 390 light, 390 dark and 1280, with the modeled visit's result current. It is the first full run in
+  which every visit starts from its own seed (see the open items). Two earlier full runs on `a407582` crashed at the
+  modeled visit for that reason.
+- Before that, on `wave-z` (2026-10-23, `1cef583`): exit 0, build included. Test counts: engine
   1483, web 2150, data 307 passed and 3 skipped. `mobile:check:full` on that tree: exit 0 in 538 s, 75 views, 0
   overflow and 0 axe violations on every route at 390 light, 390 dark and 1280, under the wave X shell rule, with
   the modeled visit's worker run current. Before that, on `wave-y` (`3960439`) engine 1477, web 2145 and data 303,
@@ -119,6 +127,22 @@ skipping a done one.
 - Reference counts (`packages/engine/src/references/references.json`, 120 entries): 74 `used`, 24
   `planned`, 18 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
+
+## Wave AA landed (2026-10-24)
+Bryan: "wrap em up. At some point this thing has gotta be usable", then "sounds good" on finishing the interrupted
+corrective pass. Rulings in the DECISIONS.md "Wave AA scope" block and its "Wave AA slices" block, all DEFAULT.
+- S1 (`16b338f`): fate screens say "Up to date" only when the results match the inputs; the petroleum screen gives no
+  verdict without a concentration.
+- R1 (`2053516`): one named block per chemical in each fate section, entries without a source, "not quantified",
+  method basis, no truncated tables. R2 (`b550e9d`): modeled cleanup levels kept with the project; per-chemical
+  solubility ceiling with flags.
+- Review: one pass, 2 high, 3 medium, 4 low, all fixed in the corrective pass (`e1eee22` risk totals and screen
+  status; `98e133f` report and cleanup levels). The report and cleanup half was lost before it was committed (its
+  patch sat in a temporary folder that was wiped) and was rebuilt on 2026-10-24 from its recorded edits on the same
+  base commit.
+- `c2b043b`: the mobile check isolates its visits (see the open items).
+- Acceptance: the gas station job confirmed B2, B3, M1, M4, M8 (transport) and M9; B1 is partly fixed (USABILITY row
+  B1). Two new findings are rows n1 (AB) and n2 (AC).
 
 ## Wave Z landed (2026-10-23)
 Bryan: "wrap em up. At some point this thing has gotta be usable". Rulings in the DECISIONS.md "Wave Z scope" block
@@ -579,7 +603,12 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   cal/mol) differ from the calculator's (571 K, 10300 cal/mol), which changes their Henry constants away from
   25 deg C.
 - Mobile check (wave T): one run of m390-dark `#/risk` (seeded) reported `openPanels=0` and `charts=0` and passed
-  on a re-run; not diagnosed. Watch for a repeat before treating it as a check flake.
+  on a re-run; not diagnosed. Wave AA found that from `3c379ae` (2026-10-21, the autosave's move to the `.v2` key)
+  through wave Z the check wrote each seed under the legacy `.v1` key, which the app reads only when no `.v2` save
+  exists, so every visit after the first ran on the previous visit's project; that may explain it. Since `c2b043b`
+  each visit seeds the current key, a setup that throws reports its error, and a refused screenshot fails its view.
+  The full runs recorded above from waves O and P (where `3c379ae` landed) to Z measured visits on carried-over
+  state, not on their own seeds.
 - RSL sweeps (waves R, U and Z): 1 of 9888 cells is unexplained, n-nonane industrial noncancer soil total (printed
   72, computed 72.5012). The 4 Aroclor tap water total cancer cells and PCB 105 resident noncancer soil inhalation
   are excepted since wave Z under `printed-three-figures` (the tables print the value to three figures). 12
@@ -620,9 +649,12 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
 - Feed staleness: live since wave L. The mark is as coarse as the source form (any edit of the sending form marks
   its feeds, even one that changes no sent value), and staleness does not cascade through feed chains (DEFAULT,
   L1).
-- Report gaps: the report does not compute a modeled source; since wave J it prints the uncertainty result kept
-  from the cleanup screen this session (J2), which is not saved with the project, so it needs a re-run after a
-  reload, and it carries no distribution chart. The plume map is in the report since wave I. The household,
+- Report gaps: the report does not solve a modeled source. Since wave AA it prints the deterministic levels the
+  cleanup screen kept with the project for each chemical, while their fingerprint matches; since wave J it prints
+  the uncertainty result kept from the cleanup screen this session (J2), which is not saved with the project, so it
+  needs a re-run after a reload, and it carries no distribution chart. A result sent from the groundwater (well),
+  vapor or surface water screen records no inputs, so its block prints only the method sent (USABILITY row B1;
+  follow-up on branch `aa-inputs`). The plume map is in the report since wave I. The household,
   vapor and surface water source levels print since wave K (K3).
 - Plume CSV: done in wave J (J1), a separate download under the plume map; the report still prints 20 of 100
   centreline rows. At 390 px the button is covered by the
@@ -660,7 +692,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Done 2026-10-21 to 2026-10-23: waves J to Z merged to main and pushed (CI cost in CLAUDE.md); their worktrees
+- Done 2026-10-21 to 2026-10-24: waves J to AA merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
   jurisdiction: "state, federal, whatever" (EPA values now, a state's tables when a state comes up). His pick, the
@@ -671,8 +703,10 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (ruling 1, DeVaull in place of Appendix K, indoor only), the vinyl chloride shower and produce fallback and vinyl
   chloride's place in wave T, all as recommended. The 2026 EU revision shipped as wave W and the blank-page check as
   wave X, the same day. The engine chunk split followed at Bryan's request as wave Y, and the small open items
-  closed as wave Z. Next: the usability plan, `docs/USABILITY.md`, starting with wave AA (a report fit to submit:
-  every chemical's run, the modeled cleanup levels, no truncated tables, honest sources, "not quantified" for 0). The
+  closed as wave Z. The usability plan, `docs/USABILITY.md`, started with wave AA (2026-10-24, see "Wave AA landed").
+  Next: the B1 follow-up (each sent result records the inputs its run used; branch and worktree `aa-inputs`, started
+  2026-10-24), then wave AB (plain language) and wave AC (a guided site workflow, whose product choices go to Bryan
+  before it starts). The
   wave P remainders still open (a soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal
   values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
