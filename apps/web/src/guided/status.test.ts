@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultGuided, type GuidedState } from './state';
 import { chain } from './chain';
-import { guidedStatus, type OutputCheck } from './status';
+import { guidedStatus, hashOutputCheck, type OutputCheck } from './status';
 
 const guidedWith = (patch: (g: GuidedState) => void): GuidedState => {
   const g = defaultGuided();
@@ -117,5 +117,21 @@ describe('guidedStatus', () => {
     for (const id of ['pathways', 'receptors', 'toxicity', 'targets', 'results'] as const) {
       expect(s[id]).toBe('todo');
     }
+  });
+
+  it('the hash check: current while the recorded hash equals the live one, stale when not, missing when absent', () => {
+    const outputs = {
+      well: {
+        benzene: { inputsHash: 'aaaa0001', value: {} },
+        toluene: { inputsHash: 'bbbb0002', value: {} },
+      },
+    };
+    const live = { well: { benzene: 'aaaa0001', toluene: 'cccc0003' }, household: { benzene: 'x' } };
+    const check = hashOutputCheck(outputs, live);
+    expect(check('well', 'benzene')).toBe('current');
+    expect(check('well', 'toluene')).toBe('stale');
+    expect(check('household', 'benzene')).toBe('missing');
+    // an output the chain no longer chooses has no live hash: it is not current
+    expect(hashOutputCheck(outputs, {})('well', 'benzene')).toBe('stale');
   });
 });

@@ -1,9 +1,11 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { GuidedShell } from './GuidedShell';
 import { defaultGuided } from './state';
 import { GUIDED_STEPS } from '../steps';
-import { addChemical, forgetMemory, setGuided } from '../project/store';
+import { addChemical, forgetMemory, getGuided, setGuided } from '../project/store';
+import { loadVaporChemicals } from '../vapor/chemicals';
+import { outputHashes } from './hash';
 
 beforeEach(() => forgetMemory());
 afterEach(() => {
@@ -118,5 +120,38 @@ describe('GuidedShell', () => {
       </GuidedShell>,
     );
     expect(screen.getByText('the run screen')).toBeTruthy();
+  });
+
+  it('by default compares each output with the live hash of its inputs, so an edit marks 3d to run again', async () => {
+    addChemical({ id: '71-43-2', name: 'Benzene' });
+    const g = defaultGuided();
+    g.site.sources = ['groundwater'];
+    g.site.paths.well = true;
+    g.sources['71-43-2'] = {
+      values: { groundwater: { value: '1', unit: 'mg/L' } },
+      note: '',
+      tph: '',
+    };
+    const rows = await loadVaporChemicals();
+    const live = outputHashes(g, [
+      { id: '71-43-2', name: 'Benzene', fate: rows.find((r) => r.id === '71-43-2') },
+    ]);
+    for (const [feed, slots] of Object.entries(live)) {
+      g.outputs[feed] = { '71-43-2': { inputsHash: slots['71-43-2']!, value: {} } };
+    }
+    act(() => setGuided(g));
+    render(
+      <GuidedShell stepId="chemicals">
+        <p>body</p>
+      </GuidedShell>,
+    );
+    const run = () => within(list()).getAllByRole('listitem')[4]!.textContent;
+    await waitFor(() => expect(run()).toMatch(/done/i));
+    act(() => {
+      const next = structuredClone(getGuided());
+      next.sources['71-43-2']!.values.groundwater = { value: '2', unit: 'mg/L' };
+      setGuided(next);
+    });
+    await waitFor(() => expect(run()).toMatch(/run again/i));
   });
 });

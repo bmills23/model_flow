@@ -1,7 +1,6 @@
 import type { GuidedStepId } from '../steps';
-import { getGuided } from '../project/store';
 import { chain } from './chain';
-import type { GuidedState } from './state';
+import type { GuidedOutputs, GuidedState } from './state';
 import { classifyValue } from './units';
 
 /**
@@ -17,16 +16,25 @@ export type OutputState = 'current' | 'stale' | 'missing';
 export type OutputCheck = (feedKey: string, chemicalId: string) => OutputState;
 
 /**
- * The output check until the orchestration slice records input hashes: a slot that is there counts as
- * current. The shell takes a check as a prop so the marks can be tested with any answer.
+ * The output check of plan section 1: an output is current while the inputs hash it recorded at Run
+ * equals the live hash of its chemical and model (`guided/hash.ts`), stale when they differ, and missing
+ * when the Run left no output. An output with no live hash (its model left the chain) is not current.
  */
-export const presentOutputCheck: OutputCheck = (feedKey, chemicalId) =>
-  getGuided().outputs[feedKey]?.[chemicalId] === undefined ? 'missing' : 'current';
+export function hashOutputCheck(
+  outputs: GuidedOutputs,
+  live: Readonly<Record<string, Readonly<Record<string, string>>>>,
+): OutputCheck {
+  return (feedKey, chemicalId) => {
+    const slot = outputs[feedKey]?.[chemicalId];
+    if (slot === undefined) return 'missing';
+    return slot.inputsHash === live[feedKey]?.[chemicalId] ? 'current' : 'stale';
+  };
+}
 
 export interface StatusInput {
   chemicals: readonly { id: string }[];
   guided: GuidedState;
-  /** Step 3d. The input hash that decides "stale" arrives with the orchestration slice. */
+  /** Step 3d: whether each output is current (`hashOutputCheck`), injected so marks test with any answer. */
   outputCheck: OutputCheck;
   /**
    * Step 3a: true when no field a chosen model needs is blank. The property catalog supplies it when the
