@@ -1,8 +1,9 @@
 # Guided flow: implementation plan (wave AC)
 
-Status (2026-10-25): plan of record for building `docs/GUIDED_FLOW.md`, whose six open calls Bryan settled "all as
-recommended". Bryan approved this plan and the questions in section 8, each as recommended, the same day
-("approved"). Not started. The engine (`packages/engine`) does not change. Line references are to the tree at
+Status (2026-10-26): plan of record for building `docs/GUIDED_FLOW.md`, whose six open calls Bryan settled "all as
+recommended". Bryan approved this plan and the questions in section 8, each as recommended, on 2026-10-25
+("approved"). Wave AC1 (steps 1 to 3) landed 2026-10-26 on branch `wave-ac1`; AC2 (steps 4 to 6 and the report) is
+next, AC3 after it. See "Carried into AC2" below. The engine (`packages/engine`) does not change. Line references are to the tree at
 `114d140`.
 
 ## 0. The plan in short
@@ -18,6 +19,43 @@ recommended". Bryan approved this plan and the questions in section 8, each as r
   as arguments, so they read the guided outputs with no change to their logic.
 - **Staleness for the guided flow is a hash per chemical and model,** recorded at Run and compared live, which is how
   the step list marks later steps to run again.
+
+## Carried into AC2
+
+Wave AC1 landed 2026-10-26 (decisions in the DECISIONS.md "Wave AC1, the guided steps 1 to 3" block). AC2 slices must
+know these AC1 choices:
+
+- `ReceptorScreen` in `overrides/receptors.ts` does not yet include `'guided'`. The v2ToV3 migration copies receptor
+  edits and names into `guided.a` and `guided.b` inside overrides, but the type does not name the screen. AC2.1 adds it.
+- Run reasons and blocked outputs are saved with the project as `runNotes` and shown on 3d. AC2 reads them; it does
+  not rebuild them.
+- A model that cannot produce an output for the same inputs is "blocked", not "run again".
+- ND in step 3b reads as zero in the Run (`units.sourceNumber`). A pasted "<x" reads as ND. Take any new source value
+  through `sourceNumber`.
+- The Run lives in a module-level runner and survives leaving 3d. The time step drives only the transport curve,
+  capped at 500 points, with a note when coarsened.
+
+Scope rows from the AC1 review (polish, not fixed in AC1; the findings are reviewer 0 numbers 7 to 13 and reviewer 1
+numbers 4 to 9):
+
+- Step 1: the two-column CSS rule never matches.
+- 3b and 3d ignore the decimal comma setting and `inputMode`.
+- The indoor air source wording on step 3b is still the workbench's.
+- The 3c problem text is not referenced by `aria-describedby`.
+- Step 2 announces its problems twice.
+- Saving a user chemical at the 50 cap is dropped silently.
+- The TPH box is offered on a measured basis.
+- The missing-Koc message for transport needs plain wording.
+- Renaming a chemical marks its results to run again.
+- Simulation time is not validated in the run plan.
+- `readGuidedOutputs` keeps the raw slot instead of the parsed one.
+- A pasted "<x" loses its limit. Product call for Bryan: ND as zero, or half the limit.
+- Removing a chemical keeps its step 3c fate edits.
+- With the well path on and the household shower inputs blank, the Run writes no household output and the status
+  reads "out of date: No result yet" with no alert. Step 3a should flag those values as needed, or the Run should say
+  why.
+- `chain.test.ts` holds a literal long dash in a test (write it as an escape).
+- The bundle effect of `status.ts` importing the property catalog eagerly is unmeasured.
 
 ## 1. State model
 

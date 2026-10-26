@@ -28,6 +28,40 @@ and sources behind each calculation are in the methods notes listed on the docum
   all four on the plume map, one grid cell per press). The reading appears in the line below the chart. Every
   chart also has a data table.
 
+## The guided flow (steps 1 to 3)
+
+The guided flow takes one project through the steps in order, with one Run for every chemical and no send buttons.
+Steps 1 to 3 are available now; steps 4 to 6 (exposure, risk or cleanup levels, results) are coming. The main
+navigation and every screen below are unchanged, and the guided flow keeps its own answers: a check on a model screen
+never changes a guided result.
+
+- **Start it** with **Start the guided flow** on the home page. The step list shows every step with a mark (Done,
+  Current, To do, Run again, or Arrives with the next update). No step is locked: open them in any order, and Back and
+  Next move one step.
+- **Step 1, Chemicals** (`#/step/chemicals`). Search the EPA chemical list, add chemicals to the project (up to 50),
+  define your own, and download the list as a CSV. An exact name or CAS number comes first.
+- **Step 2, Site model** (`#/step/site`). Say who is exposed, whether the concentrations are modeled from a source or
+  measured in a medium, which source media you have (soil above or below the water table, groundwater, soil gas; several
+  at once are fine), which of the four paths apply (well, building, surface water, produce), whether the exposure point
+  is onsite or downgradient, the indoor air method, and produce. The panel names the models your answers use and says in
+  words what is missing or inconsistent.
+- **Step 3a, Site properties** (`#/step/properties`). The values the chosen models need, in groups, each tagged: from
+  the soil type, a default with no source, entered with no source, needed, or optional and left blank. The screen counts
+  the values still needed.
+- **Step 3b, Source values** (`#/step/sources`). A concentration for each chemical in each source medium, with a unit
+  chosen per column; you can paste a column. Type **ND** for a chemical not detected: the Run reads ND as zero. A
+  pasted "<x" reads as ND. Step 3c on the same page lists the chemical properties the models read and lets you edit one
+  with a note.
+- **Step 3d, Run** (`#/step/run`). Choose the simulation time, the time step, the source duration and the method
+  basis (legacy or modern) once, then press **Run all chemicals**. The time step sets only the groundwater curve, capped
+  at 500 points, with a note when it was coarsened. The result is a groundwater concentration curve at the well for each
+  chemical, an indoor air table (peak concentration, source used, method), a summary of the inputs, and a detail view per
+  chemical. **Download CSV** saves the well and indoor air rows with a unit column.
+- **Run-again marks.** A later step is marked **Run again** when something it depends on changed since the last Run:
+  the status names the model and chemical, for example "the indoor air model (Benzene)". A model that cannot produce an
+  output from the same inputs is marked blocked, with its reason, and pressing Run again would not change it. The Run
+  continues if you leave the page, and its reasons are saved with the project.
+
 ## Legacy and modern methods
 
 Each process offers a legacy method, which is the choice RISC5 makes, and a modern alternative. Where a

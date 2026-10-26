@@ -4669,3 +4669,53 @@ Bryan, 2026-10-24: "i don't like the UI of this app at all. It's not similar to 
    every input kept, and their sent results print in the workbench report rather than becoming step 3d results; and
    wave AC1 ships to main with steps 1 to 3 behind a home page link and steps 4 to 6 marked as arriving with the next
    update, the main navigation unchanged.
+
+## 2026-10-26: Wave AC1, the guided steps 1 to 3
+
+Wave AC1, the first of the three waves of `docs/GUIDED_FLOW_PLAN.md` that Bryan approved on 2026-10-25, built steps 1 to
+3 of `docs/GUIDED_FLOW.md` behind "Start the guided flow" on the home page; steps 4 to 6 show as arriving with the next
+update, and the main navigation and every existing screen are unchanged (his ruling 4 of 2026-10-25). The choices below
+were made while building and reviewing it. Each is DEFAULT and open to Bryan's overturn, except 12, which is his call.
+
+1. **Project format version 3.** A `guided` key holds every step's answers and the 3d outputs; it is left out of the file
+   at its defaults. Migration `v2ToV3` carries each screen's inputs into it: transport c0 (unless the source is a mass
+   rate) to groundwater, vadose and household and plants soil to soil above, saturated to soil below, the vapor screen's
+   chosen source only, surface water and household water to groundwater; the first screen to give a medium for a
+   chemical wins. Sent results are not carried over, so `guided.outputs` starts empty and the old feeds still print in
+   the workbench report. Share links strip `guided.outputs`.
+2. **Autosave key `.v3`,** read in the order `.v3`, `.v2`, `.v1`. New project writes the empty project to the current
+   key, so it cannot revive an older autosave on the next load. The mobile check seeds `.v3` and removes the other two.
+3. **The guided forms are separate from the workbench forms.** A workbench check never changes a guided result, and a
+   guided Run never changes a workbench form. Fate edits made in 3c are a `fate` set in overrides, applied to the
+   chemical rows so the workbench screens show the same values.
+4. **Step 3a groups.** The plan's list plus two: "Soil below the water table" (the saturated soil, its soil type and the
+   water-table fluctuation) and "Homegrown produce" (garden soil and plant values; shown only when the chain has a
+   produce path). Method choices (aquifer mode, dispersivity law, shower method, uptake) are not exposed in 3a; each
+   template keeps the screen default. The start is blank except the site values (foc, bulk density), and Kd is derived
+   per chemical at the Run.
+5. **ND in step 3b is a valid answer and reads as zero in the Run.** Zero typed by hand does not count as entered (use
+   ND). A pasted below-limit value, "<x", reads as ND and so loses its limit. Whether ND should read as zero or as half
+   the limit is a product call put to Bryan; zero stands until he rules.
+6. **Household Henry constant** is filled in atm m3/mol as the dimensionless value times 0.024465.
+7. **Run reasons are saved with the project** as `runNotes` and shown on 3d, so a refusal survives a reload and is not
+   only in the session.
+8. **A model that cannot produce an output for the same inputs is "blocked",** not "run again": pressing Run again would
+   give the same refusal. The mark names the reason.
+9. **The Run lives in a module-level runner** and survives leaving 3d; it writes outputs once, at the end, and drops
+   outputs of paths no longer in the chain and of chemicals that left the project.
+10. **Time step.** The time step drives only the groundwater transport curve, capped at 500 points, with a note when it
+    was coarsened; the other models keep their own steps. A blank source duration means a continuous source.
+11. **Timing and workers.** Five chemicals from soil above through the layered (modern) vadose model to a well took 9.7 s
+    on one thread (about 2.1 s per aromatic, 1.1 s for MTBE), so one worker runs the Run and the uncertainty pool is not
+    used; fifty chemicals would take about 1.6 minutes.
+12. **BRYAN, open.** Still to rule: ND as zero or half the limit (item 5), and what the Run should do when the household
+    shower inputs are blank (write no household output with a visible reason, or have 3a flag them as needed).
+13. **Staleness is a hash** per chemical and model, covering the derived form, the settings the model reads and the hash
+    of the model that feeds it. The status names the model and chemical but not the field.
+14. **Chain.** A source ticked with no path ticked is the added problem `no-path`. Two sources feeding the well are
+    refused as `two-well-sources` in AC1 (the plan's two-source well series is AC3). Groundwater plus soil gas, a well
+    plus a building, is allowed.
+15. **Step 1.** The project holds at most 50 chemicals, enforced in the screens (Add, Copy, Define and the user-chemical
+    save), not in the store; an exact name or CAS match sorts first in the database browser on both pages.
+16. **Not done, carried to AC2** (`docs/GUIDED_FLOW_PLAN.md`, "Carried into AC2"): the review's polish findings,
+    `'guided'` in the `ReceptorScreen` type, and the household values flag in 3a.
