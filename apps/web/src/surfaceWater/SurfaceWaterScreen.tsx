@@ -1,5 +1,5 @@
 import { StaleMark } from '../project/StaleMark';
-import { chemicalTag, projectNameOf } from '../project/feedChemical';
+import { projectNameOf } from '../project/feedChemical';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { getChemicals, getScreen, setScreen, subscribeChemicals } from '../project/store';
 import { ownSlot, pickSlot } from '../project/feedSlots';
@@ -12,8 +12,7 @@ import { CriteriaPanel } from './CriteriaPanel';
 import { DEFAULT_CRITERIA_SET, type CriteriaSetChoice } from './criteriaSetChoice';
 import type { CsvRow } from '../export/csv';
 import { SedimentChart, SurfaceWaterChart } from './charts';
-import { surfaceWaterCoefficient, surfaceWaterSolveState } from './coefficient';
-import { surfaceWaterRunInputs } from './runInputs';
+import { buildSurfaceWaterFeed } from './sendBuild';
 import {
   getSurfaceWaterFeedSlots,
   setSurfaceWaterFeed,
@@ -159,23 +158,14 @@ export function SurfaceWaterScreen() {
 
   const sendToRisk = (method: SurfaceWaterFeedMethod): void => {
     if (!result || linkProblem !== null) return;
-    const legacy = method === 'well-mixed';
-    const values = legacy ? result.legacy.surfaceWater : result.modern.surfaceWater;
-    setSurfaceWaterFeed({
-      method,
-      origin: `surfaceWater.${method}`,
-      label: `${legacy ? 'Legacy well-mixed' : 'Modern mass-discharge'} surface water, ${(result.times[last]! / (365.25 * DAY)).toFixed(1)} years`,
-      times: [...result.times],
-      values: [...values],
-      ...(request && !computing && outcome?.ok && outcome.result === result
-        ? {
-            coefficient: surfaceWaterCoefficient(request, result, method),
-            solve: surfaceWaterSolveState(request),
-            runInputs: surfaceWaterRunInputs(request),
-          }
-        : {}),
-      ...chemicalTag(runChemical),
-    });
+    setSurfaceWaterFeed(
+      buildSurfaceWaterFeed({
+        result,
+        request: request && !computing && outcome?.ok && outcome.result === result ? request : null,
+        method,
+        chemicalId: runChemical,
+      }),
+    );
   };
   const foc = Number(form.foc);
 

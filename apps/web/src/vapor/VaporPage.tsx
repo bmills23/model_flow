@@ -10,7 +10,6 @@ import { chemicalFields, loadVaporChemicals, type VaporChemicalRow } from './che
 import { layerBands, profileCurves } from './chartData';
 import { DownloadCsv } from '../export/DownloadCsv';
 import { vaporCsvTables } from './csv';
-import { vaporCoefficients, type VaporCoefficients } from './coefficients';
 import { runVapor, type VaporOutcome } from './compute';
 import { ownSlot, pickSlot } from '../project/feedSlots';
 import {
@@ -30,7 +29,8 @@ import { ProfileChart } from './ProfileChart';
 import { afMediaFor, runAttenuation, runPvi, type AfOptions, type PviForm } from './screening';
 import { heldSources } from './heldSources';
 import { projectNameOf } from '../project/feedChemical';
-import { constantEpcs, vaporEpcs, type VaporEpcs } from './series';
+import { vaporEpcs, type VaporEpcs } from './series';
+import { buildVaporRiskFeed } from './sendBuild';
 import {
   AttenuationPanel,
   OutdoorPanel,
@@ -56,7 +56,7 @@ import {
   type VaporForm,
 } from './form';
 import { HelpLink } from '../docs/HelpLink';
-import { VAPOR_METHOD_WORDS, vaporRunInputs } from './runInputs';
+import { VAPOR_METHOD_WORDS } from './runInputs';
 import { ProjectChemicalSelect } from '../ui/ProjectChemicalSelect';
 
 const byKey = new Map(references.map((r) => [r.key, r]));
@@ -359,37 +359,20 @@ export function VaporPage() {
 
   const riskMethod = form.method;
   const riskChemical = chemicals.find((c) => c.id === form.chemicalId) ?? null;
-  const currentCoefficients = (): VaporCoefficients | null =>
-    shownParsed && parsed.ok
-      ? vaporCoefficients(form, shownParsed, feedEpcs ? active : null, outdoorForm, riskMethod)
-      : null;
   const sendToRisk = (): void => {
-    // an invalid form leaves the last good run on screen, which the live fields no longer describe
-    if (!parsed.ok || !shownParsed || !shown || riskChemical === null || refusedChoice) return;
-    const r: Pick<VaporEpcs, 'indoor' | 'outdoor'> =
-      feedEpcs ?? constantEpcs(form, shownParsed, shown, outdoorForm, riskMethod);
-    const indoor = r.indoor[riskMethod];
-    if (!indoor) return;
-    const outdoorSpec = riskMethod === 'devaull' ? undefined : r.outdoor[riskMethod];
-    const coefficients = currentCoefficients();
-    if (!coefficients) return;
-    setVaporRiskFeed({
-      chemicalId: riskChemical.id,
-      label: `${riskChemical.name}, ${METHOD_LABEL[riskMethod]}${active ? `, ${active.label}` : ', entered source'}`,
-      indoor,
-      ...(outdoorSpec ? { outdoor: outdoorSpec } : {}),
-      coefficients: {
-        ...(coefficients.indoor ? { indoor: coefficients.indoor } : {}),
-        ...(outdoorSpec && coefficients.outdoor ? { outdoor: coefficients.outdoor } : {}),
-      },
-      runInputs: vaporRunInputs({
-        form,
-        outdoor: outdoorForm,
-        method: riskMethod,
-        fedBy: active ? active.label : null,
-        withOutdoor: outdoorSpec !== undefined,
-      }),
+    const feed = buildVaporRiskFeed({
+      form,
+      formValid: parsed.ok,
+      shownParsed,
+      shown,
+      outdoorForm,
+      method: riskMethod,
+      chemical: riskChemical,
+      refusedChoice,
+      active,
+      feedEpcs,
     });
+    if (feed) setVaporRiskFeed(feed);
   };
   const riskReason = !parsed.ok
     ? 'The inputs above have an error; fix it to send the air concentrations.'
