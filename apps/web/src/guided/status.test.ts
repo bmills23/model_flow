@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { defaultGuided, type GuidedState } from './state';
 import { chain } from './chain';
 import { blankTemplate, propertyView, setProperty } from './propertyCatalog';
-import { guidedStatus, type OutputCheck } from './status';
 import { guidedStatus, hashOutputCheck, type OutputCheck } from './status';
 
 const guidedWith = (patch: (g: GuidedState) => void): GuidedState => {

@@ -1,7 +1,6 @@
 import type { GuidedStepId } from '../steps';
 import { chain } from './chain';
 import { propertiesComplete as catalogComplete } from './propertyCatalog';
-import type { GuidedState } from './state';
 import type { GuidedOutputs, GuidedState } from './state';
 import { classifyValue } from './units';
 
