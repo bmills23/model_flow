@@ -23,7 +23,9 @@ import { compute as surfaceCompute } from '../surfaceWater/compute';
 import { buildSurfaceWaterFeed } from '../surfaceWater/sendBuild';
 import { buildHouseholdFeed } from '../household/feed';
 import type { HouseholdForm } from '../household/form';
+import { stableStringify } from '../project/hash';
 import { readGuidedOutputs } from './outputs';
+import { fromProject, toProject, type GuidedProject } from './project';
 import { defaultGuided, type GuidedState } from './state';
 import { deriveChemical, runPlan, type ChemicalData, type DerivedChemical } from './derive';
 import { jobsOf, runAll, runChemical, type ChemicalRun } from './run';
@@ -89,6 +91,20 @@ const runOne = (g: GuidedState, c: ChemicalData): ChemicalRun =>
 
 const keys = (r: ChemicalRun): string[] => Object.keys(r.outputs).sort();
 
+/** The outputs through the project file and back: each one a slot its feed accepts, unchanged. */
+const expectStored = (g: GuidedState, r: ChemicalRun): void => {
+  const withOutputs: GuidedState = { ...g, outputs: {} };
+  for (const [feed, v] of Object.entries(r.outputs)) {
+    withOutputs.outputs[feed] = { [r.chemicalId]: { inputsHash: '00000000', value: v } };
+  }
+  const saved = JSON.parse(JSON.stringify(toProject(withOutputs))) as GuidedProject;
+  const read = readGuidedOutputs(saved.outputs);
+  expect(read.dropped).toEqual([]);
+  expect(Object.keys(read.kept).sort()).toEqual(keys(r));
+  // equal as JSON (a stored -0 reads back as 0)
+  expect(stableStringify(fromProject(saved).outputs)).toBe(stableStringify(withOutputs.outputs));
+};
+
 describe('the Run walks the chain for each chemical', () => {
   it('groundwater to a well and a downgradient building', () => {
     const g = guidedWith((x) => {
@@ -103,6 +119,7 @@ describe('the Run walks the chain for each chemical', () => {
     for (const r of runs) {
       expect(r.problems).toEqual([]);
       expect(keys(r)).toEqual(['household', 'vaporRisk', 'vaporWaterTable', 'well']);
+      expectStored(g, r);
     }
     expect(runs.map((r) => r.chemicalId)).toEqual([BENZENE, MTBE]);
   });
@@ -129,6 +146,7 @@ describe('the Run walks the chain for each chemical', () => {
     expect(r.problems).toEqual([]);
     // the chain also keeps the receptor well series of the run that reaches the stream
     expect(keys(r)).toEqual(['bank', 'household', 'surfaceWater', 'well']);
+    expectStored(g, r);
   }, 60_000);
 
   it('soil gas to an onsite building with groundwater to a well', () => {
@@ -208,14 +226,7 @@ describe('the Run walks the chain for each chemical', () => {
       x.site.paths.building = true;
       value(x, BENZENE, 'soilBelow', '50', 'mg/kg');
     });
-    const r = runOne(g, chem(BENZENE, 'Benzene'));
-    const stored: Record<string, Record<string, unknown>> = {};
-    for (const [feed, v] of Object.entries(r.outputs)) {
-      stored[feed] = { [BENZENE]: { inputsHash: '00000000', value: JSON.parse(JSON.stringify(v)) } };
-    }
-    const read = readGuidedOutputs(stored);
-    expect(read.dropped).toEqual([]);
-    expect(Object.keys(read.kept).sort()).toEqual(keys(r));
+    expectStored(g, runOne(g, chem(BENZENE, 'Benzene')));
   });
 });
 
@@ -352,6 +363,7 @@ describe('a guided output equals the workbench send of the same inputs', () => {
     const r = runOne(g, c);
     expect(r.problems).toEqual([]);
     expect(keys(r)).toEqual(['household', 'vadose', 'well']);
+    expectStored(g, r);
 
     // the vadose screen: its run, then "use as source" for the method shown
     const vf = d.forms.vadose!;

@@ -287,3 +287,16 @@ export function runAll(
   });
   return out;
 }
+
+/** What the Run's worker posts: progress after each chemical, then the runs or the error that stopped it. */
+export type RunReply = { ok: true; runs: ChemicalRun[] } | { ok: false; error: string };
+export type RunMessage = RunReply | { progress: RunProgress };
+
+/** The worker's whole conversation for one Run, apart from the worker so it can be tested. */
+export function runMessages(jobs: readonly RunJob[], post: (m: RunMessage) => void): void {
+  try {
+    post({ ok: true, runs: runAll(jobs, (progress) => post({ progress })) });
+  } catch (err) {
+    post({ ok: false, error: message(err) });
+  }
+}
