@@ -40,3 +40,24 @@
   min-width: 0;
   width: 100%;
 }
+
+/* Two lists side by side on a wide screen, one above the other on a phone. */
+.chemicals .chem-lists {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.chemicals .chem-lists > * {
+  min-width: 0;
+}
+
+.chemicals .chem-step .chem-lists {
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .chemicals .chem-step .chem-lists {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
