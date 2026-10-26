@@ -1106,9 +1106,11 @@ export function newProject(): void {
   if (timer !== null) clearTimeout(timer);
   timer = null;
   try {
-    if (!autosaveBlocked) localStorage.removeItem(AUTOSAVE_KEY);
+    // write the empty project rather than remove the key: hydrate falls back to the older keys when the
+    // current one is missing, so a removed key would bring the previous project back on reload
+    if (!autosaveBlocked) localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(build()));
   } catch {
-    // nothing stored, or storage blocked
+    // storage blocked or full
   }
   markSaved();
   epoch += 1;

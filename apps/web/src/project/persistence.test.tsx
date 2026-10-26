@@ -62,7 +62,10 @@ describe('screens and the project store', () => {
       fireEvent.click(screen.getByRole('button', { name: /new project/i }));
       expect(mixing().value).toBe(original);
       expect(getWellFeed()).toBeNull();
-      expect(localStorage.getItem(AUTOSAVE_KEY)).toBeNull();
+      // the empty project is stored, so an older key cannot bring the previous one back
+      const saved = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) as string);
+      expect(saved.feeds ?? {}).toEqual({});
+      expect(saved.screens.groundwater?.form?.mixing ?? original).toBe(original);
     });
   }, 20000);
 });

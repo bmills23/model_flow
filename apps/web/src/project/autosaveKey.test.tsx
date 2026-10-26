@@ -88,6 +88,19 @@ describe('autosave keys', () => {
     expect(localStorage.getItem(PREVIOUS_AUTOSAVE_KEY)).toBe(v2);
   });
 
+  it('a new project then a reload stays empty although an older key still holds the old project', () => {
+    const doc = JSON.parse(makeSave());
+    doc.version = 2;
+    delete doc.guided;
+    localStorage.setItem(PREVIOUS_AUTOSAVE_KEY, JSON.stringify(doc));
+    hydrate();
+    expect(getScreen('transport').form.K).toBe('77');
+    newProject();
+    forgetMemory();
+    hydrate();
+    expect(getScreen('transport').form.K).not.toBe('77');
+  });
+
   it('the newest key wins over the older ones', () => {
     const text = makeSave();
     localStorage.setItem(LEGACY_AUTOSAVE_KEY, text.replace('"77"', '"11"'));

@@ -136,4 +136,26 @@ describe('project file version 3: the guided key', () => {
       expect(Object.keys(out.guided.forms[key]!).sort(), key).toEqual(expected.sort());
     }
   });
+
+  it('a transport template migrates in per-chemical Kd mode, whatever the screen used', () => {
+    const built = buildProject({ screens: defaultScreens(), createdWith: '0.0.0' });
+    const v2 = JSON.parse(JSON.stringify({ ...built, version: 2 }));
+    v2.screens.transport.form.retardMode = 'factor';
+    v2.screens.transport.form.retardation = '1';
+    const out = migrations[2]!(v2) as { guided: { forms: { transport: Record<string, unknown> } } };
+    expect(out.guided.forms.transport['retardMode']).toBe('kd');
+  });
+
+  it('a cleanup well target migrates to a state standard only when the screen applied it', () => {
+    const built = buildProject({ screens: defaultScreens(), createdWith: '0.0.0' });
+    const make = (targetKind: string) => {
+      const v2 = JSON.parse(JSON.stringify({ ...built, version: 2 }));
+      v2.screens.cleanup.form.targetKind = targetKind;
+      v2.screens.cleanup.form.wellTarget = '0.005';
+      v2.screens.cleanup.form.chemicals = [{ id: '71-43-2' }];
+      return (migrations[2]!(v2) as { guided: { targets?: { standards?: object } } }).guided;
+    };
+    expect(make('risk').targets?.standards).toBeUndefined();
+    expect(make('well').targets?.standards).toBeDefined();
+  });
 });

@@ -3,6 +3,7 @@ import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import { DEFAULT_FORM as TRANSPORT_DEFAULT } from '../transport/form';
 import { kdText } from '../transport/chemicalFill';
 import { defaultGuided, type GuidedState } from './state';
+import { volatileVerdict } from '../household/compute';
 import { deriveChemical, runPlan, type ChemicalData } from './derive';
 
 let rows: VaporChemicalRow[] = [];
@@ -294,5 +295,15 @@ describe('deriveChemical', () => {
     expect(h.irrigationWaterSource).toBe('well');
     expect(h.henry).toBe(String(row(BENZENE).rsl.hPrime!.value));
     expect(h.molecularWeight).toBe(String(row(BENZENE).rsl.mw!.value));
+  });
+
+  it('fills the Henry constant in atm m3/mol so a volatile chemical reads as volatile', () => {
+    const g = guidedWith((x) => {
+      wellSite(x);
+      value(x, BENZENE, 'groundwater', '1', 'mg/L');
+    });
+    const h = deriveChemical(g, runPlan(g)!, chem(BENZENE, 'Benzene')).forms.household!;
+    expect(Number(h.henryAtm)).toBeCloseTo(row(BENZENE).rsl.hPrime!.value * 0.024465, 6);
+    expect(volatileVerdict(h).volatile).toBe(true);
   });
 });
