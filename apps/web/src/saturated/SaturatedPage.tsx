@@ -20,8 +20,7 @@ import {
   setSaturatedVaporFeed,
   subscribeSaturatedVaporFeed,
 } from '../vapor/feeds';
-import { saturatedVaporSource } from './vaporFeed';
-import { chemicalTag } from '../project/feedChemical';
+import { buildSaturatedFeed, buildSaturatedVaporFeed } from './sendBuild';
 import { ownSlot } from '../project/feedSlots';
 import { TEXTURE_OPTIONS, type TextureChoice } from '../vapor/form';
 import {
@@ -177,19 +176,23 @@ export function SaturatedPage() {
     feed !== null && scenario !== null && feed.input === scenario.input && feed.method === feedable;
   const useAsSource = (): void => {
     if (!scenario || !result?.runs[feedable]) return;
-    setSaturatedFeed({
-      input: scenario.input,
-      method: feedable,
-      label: `${caseA ? 'Hand case A' : 'Saturated soil source run'}, ${METHODS[feedable].short} method`,
-      ...chemicalTag(form.chemicalId),
-    });
+    setSaturatedFeed(
+      buildSaturatedFeed({
+        input: scenario.input,
+        method: feedable,
+        caseA,
+        chemicalId: form.chemicalId,
+      }),
+    );
   };
 
-  const vaporSource = result?.runs[feedable]
-    ? saturatedVaporSource(
-        result.runs[feedable]!,
-        `${caseA ? 'Hand case A' : 'Saturated soil source run'}, ${METHODS[feedable].short} method, pore water above the water table`,
-      )
+  const vaporFeed = result?.runs[feedable]
+    ? buildSaturatedVaporFeed({
+        run: result.runs[feedable]!,
+        method: feedable,
+        caseA,
+        chemicalId: form.chemicalId,
+      })
     : null;
 
   const series = (kind: 'rate' | 'remaining'): TimeSeries[] =>
@@ -635,11 +638,8 @@ export function SaturatedPage() {
                   <button
                     type="button"
                     className="btn"
-                    disabled={stale || vaporSource === null}
-                    onClick={() =>
-                      vaporSource &&
-                      setSaturatedVaporFeed({ ...vaporSource, ...chemicalTag(form.chemicalId) })
-                    }
+                    disabled={stale || vaporFeed === null}
+                    onClick={() => vaporFeed && setSaturatedVaporFeed(vaporFeed)}
                   >
                     Use as vapor source
                   </button>{' '}
@@ -649,7 +649,7 @@ export function SaturatedPage() {
                     </a>
                   )}
                 </p>
-                {vaporSource === null && (
+                {vaporFeed === null && (
                   <p className="muted">This source has no region above the water table.</p>
                 )}
                 {vaporHeld && (
