@@ -255,6 +255,7 @@ describe('runBasis, project level', () => {
         toxicity: { '71-43-2': { sfo: { value: '0.1', note: 'State value 2024' } } },
         receptors: {},
         receptorNames: {},
+        fate: {},
       },
     });
     const row = b.project.find((r) => r.kind === 'user-override')!;
@@ -293,6 +294,7 @@ describe('runBasis, project level', () => {
           },
         },
         receptorNames: {},
+        fate: {},
       },
     });
     const rows = b.project.filter((r) => r.kind === 'receptor-edit');

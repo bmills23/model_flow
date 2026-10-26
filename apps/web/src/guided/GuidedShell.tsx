@@ -1,7 +1,8 @@
 import { useMemo, useSyncExternalStore, type ReactNode } from 'react';
 import { getChemicals, getGuided, subscribeChemicals, subscribeGuided } from '../project/store';
 import { GUIDED_STEPS, guidedHref, type GuidedStepId } from '../steps';
-import { guidedStatus, presentOutputCheck, type OutputCheck, type StepMark } from './status';
+import { guidedStatus, type OutputCheck, type StepMark } from './status';
+import { useGuidedOutputCheck } from './useOutputCheck';
 
 /**
  * The guided flow's frame: the step list (above the content at phone width, beside it on a wide screen)
@@ -26,9 +27,12 @@ interface GuidedShellProps {
 export function GuidedShell({
   stepId,
   children,
-  outputCheck = presentOutputCheck,
+  outputCheck: injected,
   propertiesComplete,
 }: GuidedShellProps) {
+  // the hash compare of each output with its live inputs, unless a check is injected
+  const liveCheck = useGuidedOutputCheck();
+  const outputCheck = injected ?? liveCheck;
   const guided = useSyncExternalStore(subscribeGuided, getGuided, getGuided);
   const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const status = useMemo(

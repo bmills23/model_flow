@@ -260,3 +260,193 @@
 .guided-chain-list p {
   margin: 4px 0 0;
 }
+
+/* Steps 3b and 3c: units, a card for each chemical, the paste box. */
+.guided-sources-units {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.guided-sources-units select,
+.guided-sources textarea {
+  min-width: 0;
+  width: 100%;
+  min-height: var(--tap);
+  font: inherit;
+}
+
+.guided-sources-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guided-sources-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.guided-sources-cells {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 700px) {
+  .guided-sources-cells {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+}
+
+.guided-sources-row input[type='text'] {
+  min-width: 0;
+  width: 100%;
+  min-height: var(--tap);
+}
+
+.guided-sources-paste {
+  margin: 16px 0;
+}
+
+.guided-sources-paste .btn,
+.guided-sources .override-panel summary {
+  min-height: var(--tap);
+}
+
+.guided-sources h2 {
+  margin-top: 24px;
+}
+
+/* Step 3d: settings, status, charts, tables, detail. */
+.guided-run-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 12px 0;
+}
+
+@media (min-width: 700px) {
+  .guided-run-settings {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.guided-run-settings input[type='text'] {
+  min-width: 0;
+  width: 100%;
+  min-height: var(--tap);
+}
+
+.guided-run .btn {
+  min-height: var(--tap);
+}
+
+.guided-run-status {
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.guided-run-problems {
+  margin: 8px 0;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+
+.guided-run h2 {
+  margin-top: 24px;
+}
+
+.guided-run-charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .guided-run-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.guided-run-chart {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.guided-run-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.guided-run-chart summary,
+.guided-run-detail summary {
+  min-height: var(--tap);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.guided-run-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.guided-run-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.guided-run-tick {
+  fill: var(--muted);
+  font-size: 12px;
+}
+
+.guided-run-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.guided-run-detail {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 12px 8px;
+  margin: 12px 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.guided-run-inputs {
+  margin: 0 0 8px;
+}
+
+.guided-run-inputs div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 700px) {
+  .guided-run-inputs div {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 12px;
+  }
+}
+
+.guided-run-inputs dt {
+  color: var(--muted);
+}
+
+.guided-run-inputs dd {
+  margin: 0;
+}

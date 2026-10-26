@@ -3,6 +3,7 @@ import { defaultGuided, type GuidedState } from './state';
 import { chain } from './chain';
 import { blankTemplate, propertyView, setProperty } from './propertyCatalog';
 import { guidedStatus, type OutputCheck } from './status';
+import { guidedStatus, hashOutputCheck, type OutputCheck } from './status';
 
 const guidedWith = (patch: (g: GuidedState) => void): GuidedState => {
   const g = defaultGuided();
@@ -87,6 +88,20 @@ describe('guidedStatus', () => {
     expect(guidedStatus(input).sources).toBe('todo');
   });
 
+  it('step 3b counts ND and a number above zero, not text a run cannot read', () => {
+    const g = guidedWith(wellSite);
+    const input = { chemicals, guided: g, outputCheck: noneRun };
+    const put = (v: string) => {
+      for (const id of ['benzene', 'toluene'])
+        g.sources[id] = { values: { groundwater: { value: v, unit: 'ug/L' } }, note: '', tph: '' };
+      return guidedStatus(input).sources;
+    };
+    expect(put('ND')).toBe('done');
+    expect(put('12.5')).toBe('done');
+    expect(put('abc')).toBe('todo');
+    expect(put('0')).toBe('todo');
+  });
+
   it('step 3d reads the injected output check for each chemical and chain output', () => {
     const g = guidedWith(wellSite);
     const input = { chemicals, guided: g };
@@ -118,5 +133,24 @@ describe('guidedStatus', () => {
     for (const id of ['pathways', 'receptors', 'toxicity', 'targets', 'results'] as const) {
       expect(s[id]).toBe('todo');
     }
+  });
+
+  it('the hash check: current while the recorded hash equals the live one, stale when not, missing when absent', () => {
+    const outputs = {
+      well: {
+        benzene: { inputsHash: 'aaaa0001', value: {} },
+        toluene: { inputsHash: 'bbbb0002', value: {} },
+      },
+    };
+    const live = {
+      well: { benzene: 'aaaa0001', toluene: 'cccc0003' },
+      household: { benzene: 'x' },
+    };
+    const check = hashOutputCheck(outputs, live);
+    expect(check('well', 'benzene')).toBe('current');
+    expect(check('well', 'toluene')).toBe('stale');
+    expect(check('household', 'benzene')).toBe('missing');
+    // an output the chain no longer chooses has no live hash: it is not current
+    expect(hashOutputCheck(outputs, {})('well', 'benzene')).toBe('stale');
   });
 });

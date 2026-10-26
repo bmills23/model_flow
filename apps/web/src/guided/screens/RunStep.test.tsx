@@ -1,0 +1,96 @@
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { defaultGuided } from '../state';
+import { RunStep } from './RunStep';
+import { addChemical, forgetMemory, getGuided, setGuided } from '../../project/store';
+
+beforeEach(() => forgetMemory());
+afterEach(() => {
+  cleanup();
+  forgetMemory();
+});
+
+const BENZENE = '71-43-2';
+const TOLUENE = '108-88-3';
+
+/** Groundwater under an onsite building: one indoor air result per chemical, quick to run. */
+function buildingSite(): void {
+  addChemical({ id: BENZENE, name: 'Benzene' });
+  addChemical({ id: TOLUENE, name: 'Toluene' });
+  const g = defaultGuided();
+  g.site = { ...g.site, sources: ['groundwater'], paths: { ...g.site.paths, building: true } };
+  g.forms.vapor = { capHeight: '0.2', capPorosity: '0.35', capMoisture: '0.25' };
+  for (const id of [BENZENE, TOLUENE]) {
+    g.sources[id] = { values: { groundwater: { value: '1', unit: 'mg/L' } }, note: '', tph: '' };
+  }
+  setGuided(g);
+}
+
+const runButton = () => screen.getByRole('button', { name: /^run all chemicals/i });
+
+describe('RunStep, 3d', () => {
+  it('asks for chemicals, then for a site model that works', () => {
+    render(<RunStep />);
+    expect(screen.getByText(/add at least one chemical/i)).toBeTruthy();
+    cleanup();
+    addChemical({ id: BENZENE, name: 'Benzene' });
+    render(<RunStep />);
+    expect(screen.getByText(/finish the site model/i)).toBeTruthy();
+  });
+
+  it('shows the run settings, saves edits, and says the time step drives only the well curve', () => {
+    buildingSite();
+    render(<RunStep />);
+    expect(screen.getByRole('heading', { level: 1, name: /run and view/i })).toBeTruthy();
+    fireEvent.change(screen.getByLabelText(/simulation time/i), { target: { value: '50' } });
+    expect(getGuided().run.timeYr).toBe('50');
+    fireEvent.change(screen.getByLabelText(/time step/i), { target: { value: '2' } });
+    expect(getGuided().run.stepYr).toBe('2');
+    fireEvent.click(screen.getByRole('radio', { name: /legacy/i }));
+    expect(getGuided().run.basis).toBe('legacy');
+    expect(screen.getByText(/only the groundwater transport curve/i)).toBeTruthy();
+    expect(screen.getByText(/keep their own time steps/i)).toBeTruthy();
+  });
+
+  it('runs every chemical with one button, then shows indoor air, the input summary and the CSV', async () => {
+    buildingSite();
+    render(<RunStep />);
+    await screen.findByText(/models are ready/i, undefined, { timeout: 20000 });
+    fireEvent.click(runButton());
+    const table = await screen.findByRole('table', { name: /indoor air/i }, { timeout: 60000 });
+    expect(within(table).getByText('Benzene')).toBeTruthy();
+    expect(within(table).getByText('Toluene')).toBeTruthy();
+    expect(Object.keys(getGuided().outputs['vaporRisk'] ?? {}).sort()).toEqual(
+      [TOLUENE, BENZENE].sort(),
+    );
+    expect(screen.getByRole('status').textContent).toMatch(/up to date/i);
+    expect(screen.getByRole('heading', { name: /model input summary/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /download csv/i })).toBeTruthy();
+    expect(screen.getByRole('group', { name: /^benzene$/i })).toBeTruthy();
+  }, 90000);
+
+  it('after an edit, says the results are out of date and names what changed', async () => {
+    buildingSite();
+    render(<RunStep />);
+    await screen.findByText(/models are ready/i, undefined, { timeout: 20000 });
+    fireEvent.click(runButton());
+    await screen.findByRole('table', { name: /indoor air/i }, { timeout: 60000 });
+    act(() => {
+      const g = getGuided();
+      setGuided({
+        ...g,
+        sources: {
+          ...g.sources,
+          [BENZENE]: {
+            ...g.sources[BENZENE]!,
+            values: { groundwater: { value: '3', unit: 'mg/L' } },
+          },
+        },
+      });
+    });
+    await screen.findByText(/out of date/i, { selector: 'strong' });
+    const note = screen.getByRole('status');
+    expect(note.textContent).toMatch(/indoor air model \(Benzene\)/i);
+    expect(note.textContent).not.toMatch(/Toluene/);
+  }, 90000);
+});

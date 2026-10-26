@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
-import { getChemicals, subscribeChemicals } from '../project/store';
+import { getChemicals, getOverrides, subscribeChemicals, subscribeProject } from '../project/store';
+import { applyFateOverrides } from '../overrides/fate';
 import { withUserFateRows } from '../overrides/userChemicals';
 import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 
@@ -37,12 +38,19 @@ export function fateFill(row: VaporChemicalRow): FateFill {
 
 /**
  * Loads the shared chemical database once per page, with the project's user chemicals added (see
- * `overrides/userChemicals.ts`); `failed` is true when the database did not load.
+ * `overrides/userChemicals.ts`) and the project's fate edits laid over it (`overrides/fate.ts`);
+ * `baseRows` is the same list before the edits; `failed` is true when the database did not load.
  */
-export function useChemicalRows(): { rows: VaporChemicalRow[]; failed: boolean } {
+export function useChemicalRows(): {
+  rows: VaporChemicalRow[];
+  baseRows: VaporChemicalRow[];
+  failed: boolean;
+} {
   const [loaded, setRows] = useState<VaporChemicalRow[]>([]);
   const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
-  const rows = useMemo(() => withUserFateRows(loaded, chemicals), [loaded, chemicals]);
+  const baseRows = useMemo(() => withUserFateRows(loaded, chemicals), [loaded, chemicals]);
+  const overrides = useSyncExternalStore(subscribeProject, getOverrides, getOverrides);
+  const rows = useMemo(() => applyFateOverrides(baseRows, overrides), [baseRows, overrides]);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let live = true;
@@ -58,5 +66,5 @@ export function useChemicalRows(): { rows: VaporChemicalRow[]; failed: boolean }
       live = false;
     };
   }, []);
-  return { rows, failed };
+  return { rows, baseRows, failed };
 }

@@ -29,18 +29,25 @@ export interface OverridesState {
   receptors: FieldOverrides;
   /** Optional receptor names by the same key, used in tables, CSV and the report. */
   receptorNames: Record<string, string>;
+  /**
+   * Fate and partition property edits per chemical id (mw, s, hPrime, koc, dia, diw), each with a
+   * required source note. Applied over the database rows by `fate.ts`.
+   */
+  fate: FieldOverrides;
 }
 
 export const emptyOverrides = (): OverridesState => ({
   toxicity: {},
   receptors: {},
   receptorNames: {},
+  fate: {},
 });
 
 export const isEmpty = (o: OverridesState): boolean =>
   Object.keys(o.toxicity).length === 0 &&
   Object.keys(o.receptors).length === 0 &&
-  Object.keys(o.receptorNames).length === 0;
+  Object.keys(o.receptorNames).length === 0 &&
+  Object.keys(o.fate).length === 0;
 
 /** The number an entry gives, or null when the entry is not usable (not above zero, or no note). */
 export function usableValue(e: OverrideEntry): number | null {
