@@ -67,11 +67,22 @@ current or to do; every screen has Back and Next. There are no send buttons: eac
 
 ## Open calls (DEFAULT, for Bryan)
 
-1. **Several source media at once.** Step 2 allows soil and groundwater together. RISC5 takes one source medium per
-   analysis.
-2. **Navigation.** Any step can be opened from the list, and an earlier change marks later steps to re-run. RISC5
-   unlocks a step only after the one before it.
-3. **One method choice.** Legacy or modern is chosen once in 3d with the other kept as a check, not on each screen.
-4. **The separate model screens.** Kept as a single-model workbench outside the six steps, or retired.
-5. **3c as its own screen.** The mockup shows it as a summary box on 3b.
-6. **Order against wave AB** (plain language in labels and units): which goes first.
+Each has a recommendation (2026-10-25) that Bryan has not yet ruled on.
+
+1. **Several source media at once.** Step 2 allows soil and groundwater together; RISC5 takes one source medium per
+   analysis. Recommended: allow it. Real sites have both, and the single-medium rule is what refused groundwater plus
+   vapor in the walkthrough (`docs/USABILITY.md` row M7).
+2. **Navigation.** Any step can be opened from the list, and an earlier change marks later steps to re-run; RISC5
+   unlocks a step only after the one before it. Recommended: free navigation with re-run marks. The stale marks
+   already exist, and a reviewer checking a project needs to jump to any step.
+3. **One method choice.** Legacy or modern chosen once in 3d with the other kept as a check, not on each screen.
+   Recommended: yes; it matches the report's method basis from wave AA.
+4. **The separate model screens.** Recommended: build the six steps from their forms and engine calls, take them out
+   of the main navigation, and keep one "Model workbench" link outside the steps for single-model checks and the
+   published-example reproductions. Their tests and the validation evidence keep working; retire them later if
+   nobody uses the workbench.
+5. **3c as its own screen.** Recommended: a summary on 3b with an edit panel, as in the mockup; chemical values
+   rarely change per project.
+6. **Order against wave AB** (plain language in labels and units). Recommended: the guided flow first, with AB's label
+   and unit fixes made in each screen as it is rebuilt; relabelling screens that are about to be replaced is wasted
+   work.
