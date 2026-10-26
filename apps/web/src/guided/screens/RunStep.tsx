@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import {
   getChemicals,
   getGuided,
@@ -11,11 +11,10 @@ import { csvFileName } from '../../export/csvFileName';
 import { downloadCsv, exportCsv } from '../../export/csv';
 import { Seg, TextField } from '../../ui/controls';
 import { chain } from '../chain';
-import type { ModelProblem } from '../derive';
-import { createGuidedRunner, prepareRun, runGuided, type GuidedRunner } from '../runner';
+import { getRunState, prepareRun, startGuidedRun, subscribeRunState } from '../runner';
 import { RunResults } from '../RunResults';
 import { runCsvTable } from '../runCsv';
-import { staleReport, staleSentence } from '../runView';
+import { blockedChemicals, staleReport, staleSentence } from '../runView';
 import { hashOutputCheck } from '../status';
 import { useGuidedChemicalData } from '../useOutputCheck';
 import type { GuidedRun } from '../state';
@@ -33,17 +32,8 @@ export function RunStep() {
   const ready = chemicals.length > 0 && result.problems.length === 0;
   const data = useGuidedChemicalData(ready);
 
-  const runnerRef = useRef<GuidedRunner | null>(null);
-  useEffect(
-    () => () => {
-      runnerRef.current?.dispose();
-      runnerRef.current = null;
-    },
-    [],
-  );
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
-  const [problems, setProblems] = useState<Map<string, ModelProblem[]> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // the Run is not tied to this screen: it goes on when the step is left, so its progress is read from there
+  const { progress, error } = useSyncExternalStore(subscribeRunState, getRunState, getRunState);
 
   const prepared = useMemo(
     () => (data === null || !ready ? null : prepareRun(guided, data)),
@@ -82,36 +72,29 @@ export function RunStep() {
   const settingsProblems = prepared?.plan?.problems ?? [];
   const feeds = prepared?.plan?.outputs ?? result.outputs;
   const anyOutput = Object.keys(guided.outputs).length > 0;
-  const check = prepared === null ? null : hashOutputCheck(guided.outputs, prepared.hashes);
+  const anyNotes = Object.values(guided.runNotes).some((n) => n.problems.length > 0);
+  const check =
+    prepared === null ? null : hashOutputCheck(guided.outputs, prepared.hashes, guided.runNotes);
   const stale = check === null ? null : staleReport(feeds, names, check);
+  const blocked = check === null ? [] : blockedChemicals(feeds, names, check);
+  // what the derivation already knows will stop a model, shown before there is any Run to report it
+  const jobProblems = prepared?.jobs.flatMap((j) => j.problems.map((p) => p.message)) ?? [];
 
-  const go = async (): Promise<void> => {
+  const go = (): void => {
     if (data === null || prepared === null || prepared.problems.length > 0) return;
-    runnerRef.current ??= createGuidedRunner();
-    setError(null);
-    setProgress({ done: 0, total: data.length });
-    try {
-      const runs = await runGuided(runnerRef.current, data, (p) =>
-        setProgress({ done: p.done, total: p.total }),
-      );
-      if (runs !== null) {
-        setProblems(new Map(runs.map((r) => [r.chemicalId, r.problems])));
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setProgress(null);
-    }
+    void startGuidedRun(data);
   };
 
   let status: React.ReactNode;
   if (running) {
     status = `Running chemical ${Math.min(progress.done + 1, progress.total)} of ${progress.total}...`;
-  } else if (!anyOutput) {
+  } else if (!anyOutput && !anyNotes) {
     status =
       feeds.length === 0
         ? 'Nothing to run: the values you entered are used as they are.'
         : 'Not run yet. Press the Run button.';
+  } else if (prepared === null) {
+    status = 'Checking whether the results are up to date...';
   } else if (stale !== null) {
     status = (
       <>
@@ -119,6 +102,11 @@ export function RunStep() {
         them.
       </>
     );
+  } else if (!anyOutput) {
+    status =
+      'The Run finished, but no model produced a result. The reasons are listed under each chemical below. Running again changes nothing until you fix them.';
+  } else if (blocked.length > 0) {
+    status = `Up to date. Some models could not run for ${blocked.join(', ')}; the reasons are listed under each chemical below.`;
   } else {
     status = 'Up to date';
   }
@@ -145,6 +133,7 @@ export function RunStep() {
         />
         <TextField
           label="How long the source lasts (years)"
+          hint="Leave blank for a source that never ends."
           value={guided.run.sourceYr}
           onChange={(v) => setRun({ sourceYr: v })}
         />
@@ -186,6 +175,18 @@ export function RunStep() {
           </ul>
         </div>
       )}
+      {jobProblems.length > 0 && !running && !anyOutput && !anyNotes && (
+        <div className="guided-run-skips">
+          <p>
+            <strong>Some models will not run</strong> for the values you have entered so far:
+          </p>
+          <ul className="guided-run-problems">
+            {jobProblems.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       {error !== null && (
         <p className="guided-run-problems" role="alert">
           The run stopped: {error}
@@ -199,12 +200,14 @@ export function RunStep() {
           disabled={
             running || prepared === null || prepared.problems.length > 0 || feeds.length === 0
           }
-          onClick={() => void go()}
+          onClick={go}
         >
           Run all chemicals ({chemicals.length})
         </button>
         {data === null && <span className="muted"> Loading chemical data...</span>}
-        {data !== null && !running && <span className="muted"> The models are ready to run.</span>}
+        {data !== null && !running && jobProblems.length === 0 && (
+          <span className="muted"> The models are ready to run.</span>
+        )}
       </p>
       <p
         className={
@@ -215,7 +218,7 @@ export function RunStep() {
         {status}
       </p>
 
-      {anyOutput && prepared?.plan && (
+      {(anyOutput || anyNotes) && prepared?.plan && (
         <>
           <p>
             <button
@@ -231,7 +234,7 @@ export function RunStep() {
             chemicals={names}
             plan={prepared.plan}
             run={guided.run}
-            problems={problems}
+            notes={guided.runNotes}
           />
         </>
       )}

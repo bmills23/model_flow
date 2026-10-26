@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { indoorAirRows, inputBlocks, staleReport, staleSentence } from './runView';
+import {
+  blockedChemicals,
+  indoorAirRows,
+  inputBlocks,
+  staleReport,
+  staleSentence,
+} from './runView';
 import type { OutputCheck } from './status';
 import type { GuidedOutputs } from './state';
 
@@ -60,5 +66,18 @@ describe('indoorAirRows and inputBlocks', () => {
     expect(blocks).toHaveLength(1);
     expect(blocks[0]!.model).toBe('indoor air model');
     expect(inputBlocks(outputs, 'b')).toEqual([]);
+  });
+});
+
+describe('blocked results', () => {
+  const chems = [
+    { id: 'a', name: 'Benzene' },
+    { id: 'b', name: 'Toluene' },
+  ];
+  it('are not out of date: staleReport ignores them, blockedChemicals names them', () => {
+    const check = (_f: string, id: string): 'current' | 'blocked' =>
+      id === 'a' ? 'blocked' : 'current';
+    expect(staleReport(['vaporRisk'], chems, check)).toBeNull();
+    expect(blockedChemicals(['vaporRisk'], chems, check)).toEqual(['Benzene']);
   });
 });

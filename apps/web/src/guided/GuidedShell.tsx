@@ -14,6 +14,7 @@ const MARK_TEXT: Record<StepMark, string> = {
   done: 'Done',
   todo: 'To do',
   'run-again': 'Run again',
+  checking: 'Checking',
 };
 
 interface GuidedShellProps {

@@ -4,6 +4,7 @@ import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import { defaultGuided, type GuidedState } from './state';
 import type { ChemicalData } from './derive';
 import { outputHashes } from './hash';
+import { fromProject, toProject } from './project';
 import { hashOutputCheck } from './status';
 import { runMessages, type RunMessage } from './run';
 import { createGuidedRunner, prepareRun, runGuided, type GuidedRunner } from './runner';
@@ -96,6 +97,31 @@ describe('runGuided', () => {
     expect(runs?.map((r) => r.chemicalId)).toEqual([BENZENE, MTBE]);
     const out = getGuided().outputs['vaporRisk']![BENZENE]!.value as { label: string };
     expect(out.label).toMatch(/Legacy/);
+  });
+
+  it('a Run in which every chemical fails keeps the reasons with the project and reads blocked, not missing', async () => {
+    const g = building();
+    g.sources[BENZENE] = { values: {}, note: '', tph: '' };
+    g.sources[MTBE] = { values: {}, note: '', tph: '' };
+    setGuided(g);
+    const runs = await runGuided(runner, data());
+    expect(runs).not.toBeNull();
+    const after = getGuided();
+    expect(after.outputs).toEqual({});
+    expect(after.runNotes[BENZENE]?.problems[0]?.message).toMatch(/no usable groundwater/);
+    expect(after.runNotes[MTBE]?.problems).toHaveLength(1);
+    const check = hashOutputCheck(after.outputs, outputHashes(after, data()), after.runNotes);
+    expect(check('vaporRisk', BENZENE)).toBe('blocked');
+    // the reasons survive a save and a load
+    expect(fromProject(toProject(after)).runNotes).toEqual(after.runNotes);
+    // an edit that changes the model's inputs makes the old reason stale
+    after.sources[BENZENE] = {
+      values: { groundwater: { value: '1', unit: 'mg/L' } },
+      note: '',
+      tph: '',
+    };
+    const edited = hashOutputCheck(after.outputs, outputHashes(after, data()), after.runNotes);
+    expect(edited('vaporRisk', BENZENE)).toBe('missing');
   });
 
   it('starts nothing and changes nothing while step 2 or a run setting has a problem', async () => {

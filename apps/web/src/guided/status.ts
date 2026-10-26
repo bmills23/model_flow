@@ -1,7 +1,7 @@
 import type { GuidedStepId } from '../steps';
 import { chain } from './chain';
 import { propertiesComplete as catalogComplete } from './propertyCatalog';
-import type { GuidedOutputs, GuidedState } from './state';
+import type { GuidedOutputs, GuidedRunNotes, GuidedState } from './state';
 import { classifyValue } from './units';
 
 /**
@@ -10,24 +10,35 @@ import { classifyValue } from './units';
  * injected checks, so it holds no store and no hash design of its own.
  */
 
-export type StepMark = 'done' | 'todo' | 'run-again';
+export type StepMark = 'done' | 'todo' | 'run-again' | 'checking';
 
-/** Whether a Run's output for one chemical and feed is current, out of date, or not there. */
-export type OutputState = 'current' | 'stale' | 'missing';
+/**
+ * Whether a Run's output for one chemical and feed is current, out of date, not there, blocked (the last
+ * Run could not produce it and its inputs have not changed since, so running again changes nothing), or
+ * unchecked (there, but the chemical files its hash needs are still loading).
+ */
+export type OutputState = 'current' | 'stale' | 'missing' | 'blocked' | 'unchecked';
 export type OutputCheck = (feedKey: string, chemicalId: string) => OutputState;
 
 /**
  * The output check of plan section 1: an output is current while the inputs hash it recorded at Run
  * equals the live hash of its chemical and model (`guided/hash.ts`), stale when they differ, and missing
  * when the Run left no output. An output with no live hash (its model left the chain) is not current.
+ * With the Run's notes, a missing output the Run recorded as unproducible for the same inputs is blocked.
  */
 export function hashOutputCheck(
   outputs: GuidedOutputs,
   live: Readonly<Record<string, Readonly<Record<string, string>>>>,
+  notes: GuidedRunNotes = {},
 ): OutputCheck {
   return (feedKey, chemicalId) => {
     const slot = outputs[feedKey]?.[chemicalId];
-    if (slot === undefined) return 'missing';
+    if (slot === undefined) {
+      const recorded = notes[chemicalId]?.feeds[feedKey];
+      return recorded !== undefined && recorded === live[feedKey]?.[chemicalId]
+        ? 'blocked'
+        : 'missing';
+    }
     return slot.inputsHash === live[feedKey]?.[chemicalId] ? 'current' : 'stale';
   };
 }
@@ -75,16 +86,27 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
   let run: StepMark = 'todo';
   if (hasChemicals && sound) {
     let ran = false;
-    let allCurrent = true;
+    let allSettled = true;
+    let anyCurrent = false;
+    let anyUnchecked = false;
+    let anyOpen = false;
     for (const chem of chemicals) {
       for (const feed of c.outputs) {
         const state = outputCheck(feed, chem.id);
         if (state !== 'missing') ran = true;
-        if (state !== 'current') allCurrent = false;
+        if (state === 'current') anyCurrent = true;
+        // blocked is settled: running again cannot change it until an input does
+        if (state !== 'current' && state !== 'blocked') allSettled = false;
+        if (state === 'unchecked') anyUnchecked = true;
+        else if (state === 'stale' || state === 'missing') anyOpen = true;
       }
     }
-    // nothing to run (values entered directly) is done once the chain is sound
-    run = allCurrent ? 'done' : ran ? 'run-again' : 'todo';
+    if (anyUnchecked && !anyOpen) run = 'checking';
+    else if (allSettled) {
+      // nothing to run (values entered directly) is done once the chain is sound; a Run that produced
+      // nothing at all (every output blocked) is not done
+      run = anyCurrent || c.outputs.length === 0 ? 'done' : 'todo';
+    } else run = ran ? 'run-again' : 'todo';
   }
 
   return {

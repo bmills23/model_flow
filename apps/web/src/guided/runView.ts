@@ -1,9 +1,10 @@
-import { MODEL_WORDS } from './derive';
+import { formatConcentration } from '../transport/chartData';
+import { MAX_CURVE_STEPS, MODEL_WORDS } from './derive';
 import { OUTPUT_MODEL } from './hash';
 import type { OutputCheck } from './status';
 import type { RunInputRow } from '../project/runInputs';
 import type { VaporRiskFeed } from '../vapor/feeds';
-import type { GuidedOutputs } from './state';
+import type { GuidedOutputs, GuidedRun } from './state';
 import { indoorSeries, type RunChemical } from './runCsv';
 
 /** What the step 3d results screen shows, as plain data (no store, no React). */
@@ -103,4 +104,32 @@ export function inputBlocks(
     blocks.push({ model: MODEL_WORDS[m], rows });
   }
   return blocks;
+}
+
+/**
+ * The chemicals a model could not run for in the last Run, its reason unchanged since (the check reads
+ * "blocked"). Running again changes nothing for them until an input changes.
+ */
+export function blockedChemicals(
+  feeds: readonly string[],
+  chemicals: readonly RunChemical[],
+  check: OutputCheck,
+): string[] {
+  return chemicals
+    .filter((c) => feeds.some((feed) => check(feed, c.id) === 'blocked'))
+    .map((c) => c.name);
+}
+
+/**
+ * The time step as the curve used it: the typed step, or, when the simulation time over the step passes the
+ * curve's point limit, the coarser step the limit gives (`MAX_CURVE_STEPS`).
+ */
+export function stepText(run: GuidedRun, nCurve: number): string {
+  const time = Number(run.timeYr);
+  const typed = Number(run.stepYr);
+  const used = Number.isFinite(time) && time > 0 ? time / nCurve : typed;
+  if (nCurve >= MAX_CURVE_STEPS && Number.isFinite(typed) && used > typed * 1.0001) {
+    return `${formatConcentration(used)} years, ${nCurve} points (you entered ${run.stepYr} years; the curve is limited to ${MAX_CURVE_STEPS} points, so the step was made coarser)`;
+  }
+  return `${run.stepYr} years, ${nCurve} points`;
 }

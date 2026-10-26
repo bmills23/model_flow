@@ -12,11 +12,15 @@ import { decodeJson, encodeJson } from '../project/codec';
 import { flag, partialObject, text } from '../project/fields';
 import { cloneData, mergeDefaults } from '../project/merge';
 import {
+  GUIDED_FORM_KEYS,
   MEASURED_MEDIUM_KEYS,
   MODELED_SOURCE_KEYS,
   defaultGuided,
   isDefaultGuided,
   type GuidedExposure,
+  type GuidedFormKey,
+  type GuidedRunNote,
+  type GuidedRunNotes,
   type GuidedOutputs,
   type GuidedSource,
   type GuidedState,
@@ -80,6 +84,8 @@ export const guidedProjectSchema = z.object({
     basis: z.enum(['modern', 'legacy']),
   }).optional(),
   outputs: z.record(z.string(), z.unknown()).optional(),
+  // held loose and read one note at a time by `fromProject`, like the outputs
+  runNotes: z.record(z.string(), z.unknown()).optional(),
   exposure: partialObject({
     pathways: z.record(z.string(), flag),
     a: receptorSchema,
@@ -114,6 +120,7 @@ export function toProject(g: GuidedState): GuidedProject | undefined {
     sources: g.sources,
     run: g.run,
     ...(Object.keys(outputs).length > 0 ? { outputs } : {}),
+    ...(Object.keys(g.runNotes).length > 0 ? { runNotes: g.runNotes } : {}),
     exposure: g.exposure,
     targets: g.targets,
   }) as GuidedProject;
@@ -128,6 +135,22 @@ function sourceOf(p: NonNullable<GuidedProject['sources']>[string]): GuidedSourc
     if (sourceKey.safeParse(k).success) values[k as SourceValueKey] = { ...v };
   }
   return { values, note: p.note ?? '', tph: p.tph ?? '' };
+}
+
+const formKeys: readonly string[] = GUIDED_FORM_KEYS;
+
+/** One saved run note, or null when it is not in the shape (one bad note never refuses the file). */
+function readRunNote(n: unknown): GuidedRunNote | null {
+  if (!isObj(n) || !Array.isArray(n['problems']) || !isObj(n['feeds'])) return null;
+  const problems: GuidedRunNote['problems'] = [];
+  for (const p of n['problems']) {
+    if (!isObj(p) || typeof p['model'] !== 'string' || typeof p['message'] !== 'string') continue;
+    if (!formKeys.includes(p['model'])) continue;
+    problems.push({ model: p['model'] as GuidedFormKey, message: p['message'] });
+  }
+  const feeds: Record<string, string> = {};
+  for (const [k, v] of Object.entries(n['feeds'])) if (typeof v === 'string') feeds[k] = v;
+  return { problems, feeds };
 }
 
 /** The live guided state of a loaded project; an absent key or part gives the defaults. */
@@ -151,12 +174,18 @@ export function fromProject(p: GuidedProject | undefined): GuidedState {
       };
     }
   }
+  const runNotes: GuidedRunNotes = {};
+  for (const [chemical, n] of Object.entries(p.runNotes ?? {})) {
+    const note = readRunNote(n);
+    if (note !== null) runNotes[chemical] = note;
+  }
   return {
     site: mergeDefaults(d.site, p.site),
     forms: cloneData(p.forms ?? {}) as GuidedState['forms'],
     sources: Object.fromEntries(Object.entries(p.sources ?? {}).map(([k, v]) => [k, sourceOf(v)])),
     run: mergeDefaults(d.run, p.run),
     outputs,
+    runNotes,
     exposure,
     targets: {
       ...mergeDefaults(d.targets, { ...p.targets, standards: undefined }),

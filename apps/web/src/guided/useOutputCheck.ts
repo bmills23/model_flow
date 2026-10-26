@@ -71,11 +71,11 @@ export function useGuidedChemicalData(enabled: boolean): ChemicalData[] | null {
   );
 }
 
-/** Until the chemical files load, an output that is there reads as current. */
+/** Until the chemical files load, an output that is there cannot be checked yet, so it reads unchecked. */
 const presentCheck =
   (outputs: ReturnType<typeof getGuided>['outputs']): OutputCheck =>
   (feed, id) =>
-    outputs[feed]?.[id] === undefined ? 'missing' : 'current';
+    outputs[feed]?.[id] === undefined ? 'missing' : 'unchecked';
 
 /**
  * The step list's 3d check: each output's recorded hash against the live hash of its chemical and model
@@ -89,7 +89,7 @@ export function useGuidedOutputCheck(): OutputCheck {
     () =>
       data === null
         ? presentCheck(guided.outputs)
-        : hashOutputCheck(guided.outputs, outputHashes(guided, data)),
+        : hashOutputCheck(guided.outputs, outputHashes(guided, data), guided.runNotes),
     [guided, data],
   );
 }

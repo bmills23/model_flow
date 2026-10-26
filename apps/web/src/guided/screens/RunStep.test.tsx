@@ -1,5 +1,6 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { resetGuidedRun } from '../runner';
 import { defaultGuided } from '../state';
 import { RunStep } from './RunStep';
 import { addChemical, forgetMemory, getGuided, setGuided } from '../../project/store';
@@ -7,6 +8,7 @@ import { addChemical, forgetMemory, getGuided, setGuided } from '../../project/s
 beforeEach(() => forgetMemory());
 afterEach(() => {
   cleanup();
+  resetGuidedRun();
   forgetMemory();
 });
 
@@ -24,6 +26,13 @@ function buildingSite(): void {
     g.sources[id] = { values: { groundwater: { value: '1', unit: 'mg/L' } }, note: '', tph: '' };
   }
   setGuided(g);
+}
+
+/** The building site with no groundwater value for Benzene: its indoor air model cannot run. */
+function failingSite(): void {
+  buildingSite();
+  const g = getGuided();
+  setGuided({ ...g, sources: { ...g.sources, [BENZENE]: { values: {}, note: '', tph: '' } } });
 }
 
 const runButton = () => screen.getByRole('button', { name: /^run all chemicals/i });
@@ -93,4 +102,78 @@ describe('RunStep, 3d', () => {
     expect(note.textContent).toMatch(/indoor air model \(Benzene\)/i);
     expect(note.textContent).not.toMatch(/Toluene/);
   }, 90000);
+
+  it('names a model that will be skipped before the Run, and keeps the reasons when no model computed', async () => {
+    addChemical({ id: BENZENE, name: 'Benzene' });
+    const g = defaultGuided();
+    g.site = { ...g.site, sources: ['groundwater'], paths: { ...g.site.paths, building: true } };
+    g.forms.vapor = { capHeight: '0.2', capPorosity: '0.35', capMoisture: '0.25' };
+    setGuided(g);
+    render(<RunStep />);
+    await screen.findByText(/some models will not run/i, undefined, { timeout: 20000 });
+    expect(screen.getByText(/no usable groundwater concentration/i)).toBeTruthy();
+    expect(screen.queryByText(/the models are ready to run/i)).toBeNull();
+    fireEvent.click(runButton());
+    await waitFor(
+      () => expect(screen.getByRole('status').textContent).toMatch(/no model produced a result/i),
+      { timeout: 30000 },
+    );
+    expect(screen.getByRole('status').textContent).not.toMatch(/not run yet/i);
+    const reason = (): HTMLElement =>
+      within(screen.getByRole('group', { name: /^benzene$/i })).getByText(
+        /no usable groundwater concentration/i,
+      );
+    expect(reason()).toBeTruthy();
+    // leaving the step and coming back, or reloading the project, keeps the reason
+    cleanup();
+    render(<RunStep />);
+    await screen.findByRole('group', { name: /^benzene$/i }, { timeout: 20000 });
+    expect(reason()).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toMatch(/no model produced a result/i);
+  }, 90000);
+
+  it('keeps running when the screen is left, and writes the outputs when it finishes', async () => {
+    buildingSite();
+    render(<RunStep />);
+    await screen.findByText(/models are ready/i, undefined, { timeout: 20000 });
+    fireEvent.click(runButton());
+    cleanup();
+    await waitFor(
+      () =>
+        expect(Object.keys(getGuided().outputs['vaporRisk'] ?? {}).sort()).toEqual(
+          [TOLUENE, BENZENE].sort(),
+        ),
+      { timeout: 60000 },
+    );
+    render(<RunStep />);
+    await screen.findByText(/up to date/i, undefined, { timeout: 20000 });
+  }, 90000);
+
+  it('shows the step the curve really used when it was coarsened to 500 points', async () => {
+    failingSite();
+    const g = getGuided();
+    setGuided({ ...g, run: { ...g.run, timeYr: '30', stepYr: '0.01' } });
+    render(<RunStep />);
+    await screen.findByText(/models are ready|some models will not run/i, undefined, {
+      timeout: 20000,
+    });
+    fireEvent.click(runButton());
+    const row = await screen.findByRole('row', { name: /time step/i }, { timeout: 30000 });
+    expect(row.textContent).toMatch(/0\.06 years/);
+    expect(row.textContent).toMatch(/500 points/);
+    expect(row.textContent).toMatch(/0\.01/);
+  }, 90000);
+
+  it('does not call saved results up to date while the chemical files are still loading', () => {
+    buildingSite();
+    const g = getGuided();
+    setGuided({
+      ...g,
+      outputs: { vaporRisk: { [BENZENE]: { inputsHash: 'old00001', value: {} } } },
+    });
+    render(<RunStep />);
+    const text = screen.getByRole('status').textContent ?? '';
+    expect(text).not.toMatch(/^up to date/i);
+    expect(text).toMatch(/checking/i);
+  });
 });

@@ -143,6 +143,19 @@ export interface GuidedOutput {
 /** Output slots by feed key, then by chemical id. */
 export type GuidedOutputs = Record<string, Record<string, GuidedOutput>>;
 
+/**
+ * What the last Run found for one chemical: why a model did not run (a missing value, a refused input), and
+ * the live inputs hash of each chain output the Run could not produce. An output with no result is
+ * "blocked", not "missing", while the live hash still equals the one recorded here, so running again is
+ * known to change nothing until an input changes.
+ */
+export interface GuidedRunNote {
+  problems: { model: GuidedFormKey; message: string }[];
+  feeds: Record<string, string>;
+}
+/** Run notes by chemical id. */
+export type GuidedRunNotes = Record<string, GuidedRunNote>;
+
 export interface GuidedExposure {
   pathways: Partial<Record<PathwayId, boolean>>;
   a: ReceptorForm;
@@ -172,6 +185,8 @@ export interface GuidedState {
   sources: Record<string, GuidedSource>;
   run: GuidedRun;
   outputs: GuidedOutputs;
+  /** The reasons of the last Run, kept with the project so a reload or a return to 3d still shows them. */
+  runNotes: GuidedRunNotes;
   exposure: GuidedExposure;
   targets: GuidedTargets;
 }
@@ -216,6 +231,7 @@ export const defaultGuided = (): GuidedState => ({
   sources: {},
   run: defaultGuidedRun(),
   outputs: {},
+  runNotes: {},
   exposure: defaultGuidedExposure(),
   targets: defaultGuidedTargets(),
 });
@@ -235,5 +251,7 @@ export function withoutGuidedChemical(g: GuidedState, chemicalId: string): Guide
     void _gone;
     if (Object.keys(rest).length > 0) outputs[key] = rest;
   }
-  return { ...g, sources, outputs, targets: { ...g.targets, standards } };
+  const { [chemicalId]: _note, ...runNotes } = g.runNotes;
+  void _note;
+  return { ...g, sources, outputs, runNotes, targets: { ...g.targets, standards } };
 }
