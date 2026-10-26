@@ -50,3 +50,34 @@ describe('step bar model', () => {
       expect(stepForHash(r)).toBeUndefined();
   });
 });
+
+describe('guided step list', () => {
+  it('lists the steps in order with a route each, steps 4 to 6 marked as arriving', async () => {
+    const { GUIDED_STEPS, guidedHref, guidedStepForHash } = await import('./steps');
+    expect(GUIDED_STEPS.map((s) => s.id)).toEqual([
+      'chemicals',
+      'site',
+      'properties',
+      'sources',
+      'run',
+      'pathways',
+      'receptors',
+      'toxicity',
+      'targets',
+      'results',
+    ]);
+    expect(GUIDED_STEPS.filter((s) => s.arrives).map((s) => s.number)).toEqual([
+      '4a',
+      '4b',
+      '4c',
+      '5',
+      '6',
+    ]);
+    for (const s of GUIDED_STEPS) {
+      expect(guidedHref(s.id)).toBe(`#/step/${s.id}`);
+      expect(guidedStepForHash(`#/step/${s.id}`)).toBe(s);
+    }
+    expect(guidedStepForHash('#/step/nope')).toBeUndefined();
+    expect(guidedStepForHash('#/site')).toBeUndefined();
+  });
+});
