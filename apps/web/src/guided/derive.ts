@@ -357,6 +357,10 @@ export function deriveChemical(
     f.chemicalId = chem.id;
     f.chemicalName = chem.name;
     f.henry = prop('hPrime');
+    // the RSL volatility test reads the Henry constant in atm m3/mol: the dimensionless constant times
+    // R T (8.2057E-5 atm m3/mol/K at 298.15 K). The database holds no vapor pressure, so that stays blank.
+    const hPrime = rsl.hPrime?.value;
+    if (hPrime !== undefined) f.henryAtm = numText(hPrime * 0.024465);
     f.molecularWeight = prop('mw');
     f.showerWaterSource = 'well';
     f.irrigationWaterSource = 'well';

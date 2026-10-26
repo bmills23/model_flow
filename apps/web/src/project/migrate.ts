@@ -224,6 +224,8 @@ export function v2ToV3(doc: Obj): Obj {
     if (form === undefined) continue;
     const t: Obj = {};
     for (const [k, v] of Object.entries(form)) if (!stripped.includes(k)) t[k] = cloneData(v);
+    // the guided transport template takes its retardation from each chemical's Kd, as a blank one does
+    if (screen === 'transport' && 'retardMode' in t) t['retardMode'] = 'kd';
     forms[screen] = t;
   }
   if (Object.keys(forms).length > 0) guided['forms'] = forms;
@@ -295,7 +297,8 @@ export function v2ToV3(doc: Obj): Obj {
       if (typeof cleanup[k] === 'string') t[k] = cleanup[k];
     const well = str(cleanup['wellTarget']);
     const rows = Array.isArray(cleanup['chemicals']) ? cleanup['chemicals'] : [];
-    if (well !== '') {
+    // the well target only counts when the screen applied it (target kind 'well')
+    if (well !== '' && cleanup['targetKind'] === 'well') {
       const standards: Obj = {};
       for (const row of rows) {
         const id = isObj(row) ? str(row['id']) : '';
