@@ -576,7 +576,10 @@ describe('project store', () => {
     expect(getScreen('transport').form.K).toBe(DEFAULT_FORM.K);
     expect(getWellFeed()).toBeNull();
     vi.advanceTimersByTime(5000);
-    expect(localStorage.getItem(AUTOSAVE_KEY)).toBeNull();
+    const stored = saved();
+    expect(stored).not.toBeNull();
+    expect(stored?.screens?.transport?.form?.K).toBe(DEFAULT_FORM.K);
+    expect(Object.keys(stored?.feeds ?? {})).toEqual([]);
   });
 
   it('writes only the feeds that were sent', () => {
