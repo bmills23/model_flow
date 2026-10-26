@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SITE_FIELDS } from '../report/siteValues';
-import { applyTexture as vadoseTexture } from '../vadose/form';
-import { applyTexture as vaporTexture } from '../vapor/form';
+import { applyTexture as vadoseTexture, DEFAULT_FORM as VADOSE_DEFAULT } from '../vadose/form';
+import { applyTexture as vaporTexture, DEFAULT_FORM as VAPOR_DEFAULT } from '../vapor/form';
 import {
   NON_VALUES,
   PROPERTY_FIELDS,
@@ -235,9 +235,9 @@ describe('the soil type', () => {
   it('fills every layer of the unsaturated zone and tags the values it filled', () => {
     const g = setSoilType(leachingBuilding, 'unsaturated', 'SL');
     const vadose = form(g, 'vadose') as { source: Form; above: Form[] };
-    expect(vadose.source).toEqual(vadoseTexture(blankTemplate('vadose').source, 'SL'));
+    expect(vadose.source).toEqual(vadoseTexture(VADOSE_DEFAULT.source, 'SL'));
     const vapor = form(g, 'vapor') as { layers: Form[] };
-    expect(vapor.layers[0]).toEqual(vaporTexture(blankTemplate('vapor').layers[0]!, 'SL'));
+    expect(vapor.layers[0]).toEqual(vaporTexture(VAPOR_DEFAULT.layers[0]!, 'SL'));
     const v = propertyView(g);
     const unsat = v.groups.find((x) => x.id === 'unsaturated')!;
     expect(unsat.soilType).toMatchObject({ value: 'SL' });

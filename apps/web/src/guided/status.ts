@@ -47,9 +47,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
   const sound = c.problems.length === 0;
   const hasChemicals = chemicals.length > 0;
 
-  const propertiesDone = sound
-    ? (input.propertiesComplete?.() ?? catalogComplete(guided))
-    : false;
+  const propertiesDone = sound ? (input.propertiesComplete?.() ?? catalogComplete(guided)) : false;
 
   const sourcesDone =
     hasChemicals &&

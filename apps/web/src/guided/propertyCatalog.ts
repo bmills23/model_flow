@@ -5,7 +5,11 @@ import { applyTexture as saturatedTexture, DEFAULT_FORM as SATURATED } from '../
 import { DEFAULT_FORM as SURFACE_WATER } from '../surfaceWater/inputs';
 import { DEFAULT_FORM as TRANSPORT } from '../transport/form';
 import { applyTexture as vadoseTexture, DEFAULT_FORM as VADOSE } from '../vadose/form';
-import { applyTexture as vaporTexture, DEFAULT_FORM as VAPOR, type TextureChoice } from '../vapor/form';
+import {
+  applyTexture as vaporTexture,
+  DEFAULT_FORM as VAPOR,
+  type TextureChoice,
+} from '../vapor/form';
 import { chain, type Chain } from './chain';
 import { provenanceOf, sameNumber, strongest, texturePreset, type Provenance } from './provenance';
 import {
@@ -226,7 +230,9 @@ export const PROPERTY_FIELDS: readonly PropertyField[] = [
     'Capillary zone thickness',
     'm',
     [b('vapor', 'capHeight', always)],
-    { hint: 'Blank: the modern method takes it from the deepest layer, the legacy method has none.' },
+    {
+      hint: 'Blank: the modern method takes it from the deepest layer, the legacy method has none.',
+    },
   ),
   field('capPorosity', 'unsaturated', 'Capillary zone porosity', '', [
     b('vapor', 'capPorosity', always),
@@ -363,14 +369,9 @@ export const PROPERTY_FIELDS: readonly PropertyField[] = [
     { hint: 'The same background for every chemical.' },
   ),
   field('mixingFraction', 'water', 'Mixing fraction', '', [b('surfaceWater', 'mixingFraction')]),
-  field(
-    'waterDecay',
-    'water',
-    'Decay rate in the water',
-    '1/d',
-    [b('surfaceWater', 'decay')],
-    { hint: 'The same rate for every chemical.' },
-  ),
+  field('waterDecay', 'water', 'Decay rate in the water', '1/d', [b('surfaceWater', 'decay')], {
+    hint: 'The same rate for every chemical.',
+  }),
   field('bedConductivity', 'water', 'Stream bed conductivity', 'm/d', [
     b('surfaceWater', 'bedConductivity'),
   ]),
@@ -439,9 +440,7 @@ export const PROPERTY_FIELDS: readonly PropertyField[] = [
   field('sprayFallTime', 'household', 'Sprinkler droplet fall time', 's', [
     b('household', 'sprayFallTime'),
   ]),
-  field('sprinklerFlow', 'household', 'Sprinkler flow', 'L/min', [
-    b('household', 'sprinklerFlow'),
-  ]),
+  field('sprinklerFlow', 'household', 'Sprinkler flow', 'L/min', [b('household', 'sprinklerFlow')]),
   field('applicationRate', 'household', 'Watering rate', 'mm/h', [
     b('household', 'applicationRate', always),
   ]),
@@ -487,9 +486,7 @@ export const PROPERTY_FIELDS: readonly PropertyField[] = [
   field('lossRate', 'produce', 'Loss rate by growth dilution and metabolism', '1/d', [
     b('plantsEco', 'lossRate', isModernUptake),
   ]),
-  field('growthPeriod', 'produce', 'Growing period', 'd', [
-    b('plantsEco', 'growthPeriod', always),
-  ]),
+  field('growthPeriod', 'produce', 'Growing period', 'd', [b('plantsEco', 'growthPeriod', always)]),
   field('tphThetaA', 'produce', 'Garden soil air-filled porosity, for TPH', '', [
     b('plantsEco', 'tphThetaA', always),
   ]),
@@ -686,12 +683,7 @@ function placesOf(form: Form, base: Form, key: string): Place[] {
 }
 
 /** The form with `fn` applied to every object the path reaches (`only`: one entry of a list). */
-function updateAt(
-  obj: Form,
-  segs: readonly string[],
-  fn: (o: Form) => Form,
-  only?: number,
-): Form {
+function updateAt(obj: Form, segs: readonly string[], fn: (o: Form) => Form, only?: number): Form {
   if (segs.length === 0) return fn(obj);
   const [seg, ...rest] = segs as [string, ...string[]];
   if (seg.endsWith('[]')) {
@@ -809,7 +801,8 @@ function fieldView(f: PropertyField, ctx: Ctx): PropertyFieldView | null {
     const required = !isOptional(bd, view);
     const name = bd.key.split('.').pop()!;
     for (const p of placesOf(ctx.forms.get(bd.model)!, ctx.blanks.get(bd.model)!, bd.key)) {
-      const preset = site?.fromTexture === true ? texturePreset(bd.model, p.parent, name) : undefined;
+      const preset =
+        site?.fromTexture === true ? texturePreset(bd.model, p.parent, name) : undefined;
       tagged.push({ ...p, tag: provenanceOf({ value: p.value, base: p.base, preset, required }) });
     }
   }
@@ -873,7 +866,8 @@ export function propertyView(g: GuidedState): PropertyView {
       const v = fieldView(f, ctx);
       if (v === null) continue;
       fields.push(v);
-      needed += v.items === null ? (v.needed ? 1 : 0) : v.items.filter((i) => i.tag === 'needed').length;
+      needed +=
+        v.items === null ? (v.needed ? 1 : 0) : v.items.filter((i) => i.tag === 'needed').length;
     }
     let soilType: SoilTypeView | null = null;
     const control = SOIL_TYPES.find((s) => s.group === group.id);
@@ -920,10 +914,7 @@ export function setProperty(
   for (const bd of f.bindings) {
     if (!active.has(bd.model)) continue;
     const form = changed.get(bd.model) ?? templateOf(g, bd.model);
-    changed.set(
-      bd.model,
-      writeKey(form, bd.key, value, f.perItem === true ? index : undefined),
-    );
+    changed.set(bd.model, writeKey(form, bd.key, value, f.perItem === true ? index : undefined));
   }
   return changed.size === 0 ? g : withForms(g, changed);
 }
