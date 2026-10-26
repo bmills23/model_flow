@@ -1,6 +1,7 @@
 import type { GuidedStepId } from '../steps';
 import { getGuided } from '../project/store';
 import { chain } from './chain';
+import { propertiesComplete as catalogComplete } from './propertyCatalog';
 import type { GuidedState } from './state';
 
 /**
@@ -28,8 +29,8 @@ export interface StatusInput {
   /** Step 3d. The input hash that decides "stale" arrives with the orchestration slice. */
   outputCheck: OutputCheck;
   /**
-   * Step 3a: true when no field a chosen model needs is blank. The property catalog supplies it when the
-   * step 3a screen lands; until then a sound chain with a template saved for every chosen model counts.
+   * Step 3a: true when no field a chosen model needs is blank. Without one, the property catalog's check
+   * (`guided/propertyCatalog.ts`) reads the guided state given here.
    */
   propertiesComplete?: () => boolean;
 }
@@ -47,7 +48,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
   const hasChemicals = chemicals.length > 0;
 
   const propertiesDone = sound
-    ? (input.propertiesComplete?.() ?? c.models.every((m) => guided.forms[m] !== undefined))
+    ? (input.propertiesComplete?.() ?? catalogComplete(guided))
     : false;
 
   const sourcesDone =

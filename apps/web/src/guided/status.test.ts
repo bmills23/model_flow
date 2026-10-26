@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultGuided, type GuidedState } from './state';
 import { chain } from './chain';
+import { blankTemplate, propertyView, setProperty } from './propertyCatalog';
 import { guidedStatus, type OutputCheck } from './status';
 
 const guidedWith = (patch: (g: GuidedState) => void): GuidedState => {
@@ -50,6 +51,20 @@ describe('guidedStatus', () => {
     // a chain with a problem never counts, whatever the check says
     g.site.paths.well = false;
     expect(guidedStatus({ ...input, propertiesComplete: () => true }).properties).toBe('todo');
+  });
+
+  it('step 3a reads the property catalog when no check is injected: a needed blank keeps it to do', () => {
+    const g = guidedWith(wellSite);
+    const input = { chemicals, guided: g, outputCheck: noneRun };
+    // a template saved for every chosen model is not enough: the dispersivities are still blank
+    g.forms.transport = blankTemplate('transport');
+    g.forms.household = blankTemplate('household');
+    expect(guidedStatus(input).properties).toBe('todo');
+    let filled = g;
+    for (const f of propertyView(g).groups.flatMap((x) => x.fields)) {
+      if (f.needed) filled = setProperty(filled, f.field.id, '1');
+    }
+    expect(guidedStatus({ ...input, guided: filled }).properties).toBe('done');
   });
 
   it('step 3b needs a value for every chemical and every source medium the chain needs', () => {
