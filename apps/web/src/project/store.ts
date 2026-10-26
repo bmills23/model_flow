@@ -426,9 +426,9 @@ function build(): ReturnType<typeof buildProject> {
   return buildProject({
     screens: scrubRejected(screens),
     feeds: currentFeeds(),
-    overrides,
+    overrides: scrubRejected(overrides),
     site,
-    guided,
+    guided: scrubRejected(guided),
     chemicals,
     modeledLevels,
     createdWith: APP_VERSION,

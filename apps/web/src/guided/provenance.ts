@@ -1,4 +1,5 @@
 import { applyTexture as saturatedTexture, type SaturatedForm } from '../saturated/form';
+import { REJECTED_ENTRY } from '../ui/decimalComma';
 import { applyTexture as vadoseTexture, type LayerForm as VadoseLayer } from '../vadose/form';
 import {
   applyTexture as vaporTexture,
@@ -75,7 +76,7 @@ export interface ProvenanceInput {
 }
 
 export function provenanceOf({ value, base, preset, required }: ProvenanceInput): Provenance {
-  const text = typeof value === 'string' ? value.trim() : '';
+  const text = typeof value === 'string' && value !== REJECTED_ENTRY ? value.trim() : '';
   if (text === '') return required ? 'needed' : 'optional';
   if (preset !== undefined && sameNumber(preset, text)) return 'soilType';
   if (typeof base === 'string' && sameNumber(base, text)) return 'default';

@@ -1,3 +1,4 @@
+import { REJECTED_ENTRY } from '../ui/decimalComma';
 import { describe, expect, it } from 'vitest';
 import { applyTexture as saturatedTexture, DEFAULT_FORM as SATURATED } from '../saturated/form';
 import { applyTexture as vadoseTexture, DEFAULT_FORM as VADOSE } from '../vadose/form';
@@ -12,6 +13,11 @@ import {
 } from './provenance';
 
 describe('provenanceOf', () => {
+  it('reads a rejected entry as blank', () => {
+    expect(provenanceOf({ value: REJECTED_ENTRY, base: '1', required: true })).toBe('needed');
+    expect(provenanceOf({ value: REJECTED_ENTRY, base: '1', required: false })).toBe('optional');
+  });
+
   it('marks a blank value as needed when a chosen model needs it, else as optional', () => {
     expect(provenanceOf({ value: '', base: '1', required: true })).toBe('needed');
     expect(provenanceOf({ value: '  ', base: '1', required: true })).toBe('needed');
