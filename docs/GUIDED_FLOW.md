@@ -1,7 +1,7 @@
 # Guided flow: one project, six steps
 
 Status (2026-10-25): direction approved by Bryan from a clickable mockup of the screens below ("looks good"). Not
-built. The open calls at the end are DEFAULT until Bryan rules on them; a plan comes before any code.
+built. Bryan ruled on the open calls at the end the same day ("all as recommended"); a plan comes before any code.
 
 ## Why
 
@@ -65,9 +65,10 @@ current or to do; every screen has Back and Next. There are no send buttons: eac
 - Web rules: no UI framework, mobile and desktop, light and dark, zero overflow at a true 390x844 viewport.
 - Projects saved by the current app keep opening.
 
-## Open calls (DEFAULT, for Bryan)
+## Open calls (ruled by Bryan, 2026-10-25)
 
-Each has a recommendation (2026-10-25) that Bryan has not yet ruled on.
+Each had a recommendation (2026-10-25). Bryan, 2026-10-25: "all as recommended". Each call below is settled as its
+recommendation says.
 
 1. **Several source media at once.** Step 2 allows soil and groundwater together; RISC5 takes one source medium per
    analysis. Recommended: allow it. Real sites have both, and the single-medium rule is what refused groundwater plus

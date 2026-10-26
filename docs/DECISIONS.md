@@ -4656,6 +4656,16 @@ Bryan, 2026-10-24: "i don't like the UI of this app at all. It's not similar to 
    source concentrations, chemical values and one run, exposure, risk or cleanup levels, results) as one project with
    Next and Back, where the site model decides which models run and each step reads the steps before it, with no send
    buttons. This replaces wave H's definition of parity as "workflow, not screens" (`docs/UI_PARITY.md` section 1).
-2. **DEFAULT, for Bryan.** The open calls listed at the end of `docs/GUIDED_FLOW.md`: several source media at once,
-   free navigation with re-run marks instead of locked steps, one method choice, the fate of the separate model
-   screens, 3c as its own screen, and its order against wave AB.
+2. **BRYAN, 2026-10-25: "all as recommended".** The six open calls at the end of `docs/GUIDED_FLOW.md`, each as its
+   recommendation says: several source media at once are allowed; navigation is free, with re-run marks instead of
+   locked steps; legacy or modern is chosen once in 3d with the other kept as a check; the separate model screens leave
+   the main navigation and stay reachable from one "Model workbench" link outside the steps; 3c is a summary on 3b
+   with an edit panel, not its own screen; and the guided flow (wave AC) comes before wave AB, with AB's label and unit
+   fixes made in each screen as it is rebuilt.
+3. **BRYAN, 2026-10-25: "approved".** The wave AC plan, `docs/GUIDED_FLOW_PLAN.md` (three waves, AC1 to AC3), and the
+   four calls put to him with it, each as recommended: two sources feeding the well add their well series and list
+   each source's share, while indoor air keeps one source with measured soil gas first; step 4c has no inhalation
+   basis control of its own and follows the one method choice in 3d; projects saved by the current app open with
+   every input kept, and their sent results print in the workbench report rather than becoming step 3d results; and
+   wave AC1 ships to main with steps 1 to 3 behind a home page link and steps 4 to 6 marked as arriving with the next
+   update, the main navigation unchanged.

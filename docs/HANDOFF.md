@@ -717,8 +717,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   closed as wave Z. The usability plan, `docs/USABILITY.md`, started with wave AA (2026-10-24, see "Wave AA landed").
   Its B1 follow-up landed the same day. Bryan, 2026-10-24: "i don't like the UI of this app at all. It's not similar
   to the flow of RISC-5 at all." On 2026-10-25 he approved a mockup of a six-step guided flow in the manual's order
-  (`docs/GUIDED_FLOW.md`, not built); it is the shape of wave AC. Next: his rulings on that doc's open calls
-  (each carries a recommendation, including doing it before wave AB), then a plan. The
+  (`docs/GUIDED_FLOW.md`, not built); it is the shape of wave AC. He ruled on that doc's six open calls the same
+  day, "all as recommended" (DECISIONS.md, 2026-10-25), so wave AC comes before wave AB. Next: the wave AC plan,
+  then his approval of it, then code. The
   wave P remainders still open (a soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal
   values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp
