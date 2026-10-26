@@ -1,0 +1,135 @@
+{
+  "format": "model_flow.project",
+  "version": 2,
+  "createdWith": "0.0.0",
+  "savedAt": "2026-10-25T12:00:00.000Z",
+  "screens": {
+    "transport": {
+      "form": {
+        "chemicalId": "71-43-2",
+        "K": "12",
+        "kd": "0.1",
+        "halfLifeYr": "10",
+        "c0": "10",
+        "timeYr": "15"
+      },
+      "method": "modern"
+    },
+    "vadose": {
+      "form": {
+        "chemicalId": "71-43-2",
+        "M": "78",
+        "infiltration": "20",
+        "srcF": "500",
+        "tphOn": true,
+        "srcFT": "5000"
+      }
+    },
+    "vapor": {
+      "form": {
+        "chemicalId": "108-88-3",
+        "source": "soilGas",
+        "soilConc": "1000",
+        "soilGas": "250",
+        "cgw": "1",
+        "temperature": "25"
+      }
+    },
+    "household": {
+      "form": {
+        "chemicalId": "71-43-2",
+        "chemicalName": "Benzene",
+        "waterConcentration": "0.5",
+        "henry": "0.2",
+        "showerMinutes": "10"
+      }
+    },
+    "risk": {
+      "form": {
+        "chemicals": [
+          {
+            "id": "71-43-2",
+            "name": "Benzene",
+            "conc": {
+              "soil": "3",
+              "groundwater": "0.02",
+              "bathroomAir": "1"
+            },
+            "groundwaterFromWell": false,
+            "indoorFromVapor": false,
+            "outdoorFromVapor": false,
+            "surfaceWaterFromModel": false,
+            "bathroomFromHousehold": false,
+            "indoorFromHousehold": false,
+            "outdoorFromHousehold": "",
+            "produceFromPlantsEco": false
+          }
+        ],
+        "a": {
+          "preset": "worker",
+          "pathways": {
+            "soilIngestion": false
+          }
+        },
+        "b": null,
+        "additive": true
+      }
+    },
+    "cleanup": {
+      "form": {
+        "targetKind": "well",
+        "wellTarget": "0.005",
+        "allocation": "equal",
+        "targetRisk": "1e-5",
+        "targetHq": "0.5",
+        "chemicals": [
+          {
+            "id": "71-43-2",
+            "name": "Benzene",
+            "conc": {},
+            "groundwaterFromWell": false,
+            "indoorFromVapor": false,
+            "outdoorFromVapor": false,
+            "surfaceWaterFromModel": false,
+            "bathroomFromHousehold": false,
+            "indoorFromHousehold": false,
+            "outdoorFromHousehold": "",
+            "produceFromPlantsEco": false
+          }
+        ]
+      }
+    }
+  },
+  "overrides": {
+    "receptors": {
+      "risk.a": {
+        "legacy.bwKg": {
+          "value": "75",
+          "note": ""
+        }
+      }
+    },
+    "receptorNames": {
+      "risk.a": "Worker"
+    }
+  },
+  "site": {
+    "receptors": "human",
+    "basis": "modeled",
+    "media": ["soil", "soilGasToIndoorAir"],
+    "location": "downgradient",
+    "vaporMethod": "legacy",
+    "produceSoil": true,
+    "produceIrrigation": false
+  },
+  "chemicals": [
+    {
+      "id": "71-43-2",
+      "name": "Benzene"
+    },
+    {
+      "id": "108-88-3",
+      "name": "Toluene"
+    }
+  ]
+}

@@ -73,6 +73,7 @@ import { clearChemicalSlots } from '../vapor/feedStore';
 import { clearModeledSummary } from '../cleanup/modeledSummary';
 import { emptyOverrides, type OverridesState } from '../overrides/model';
 import { defaultSite, type SiteState } from '../site/model';
+import { defaultGuided, withoutGuidedChemical, type GuidedState } from '../guided/state';
 import type { SavedModeledLevels } from '../cleanup/modeledLevels';
 import { chemicalIdsOf, deriveChemicals } from './chemicals';
 import { decodeJson, encodeJson } from './codec';
@@ -93,6 +94,7 @@ import {
   overridesOf,
   siteOf,
   modeledLevelsOf,
+  guidedOf,
   type Feeds,
   type Project,
   type ProjectChemical,
@@ -100,11 +102,14 @@ import {
 } from './index';
 
 /**
- * The localStorage key the current project autosaves under. It moved to .v2 with project file format
- * version 2, so a tab still running a version 1 build never reads or writes it.
+ * The localStorage key the current project autosaves under. It moved to .v3 with project file format
+ * version 3, so a tab still running a version 2 build never reads or writes it (and never writes over
+ * a version 3 save).
  */
-export const AUTOSAVE_KEY = 'model_flow.project.autosave.v2';
-/** The key the version 1 build used: read once to migrate, never written or removed here. */
+export const AUTOSAVE_KEY = 'model_flow.project.autosave.v3';
+/** The key the version 2 build used: read when the current key is missing, never written or removed here. */
+export const PREVIOUS_AUTOSAVE_KEY = 'model_flow.project.autosave.v2';
+/** The key the version 1 build used: read last, once to migrate, never written or removed here. */
 export const LEGACY_AUTOSAVE_KEY = 'model_flow.project.autosave.v1';
 const NEWER_NOTICE =
   'The saved copy in this browser was saved by a newer version of the app. This tab will not save over it.';
@@ -136,6 +141,8 @@ let title = '';
 let overrides: OverridesState = emptyOverrides();
 /** The advisory site model choices (see site/); they change no result. */
 let site: SiteState = defaultSite();
+/** The guided flow's answers and step 3d outputs (see guided/). The workbench screens never read it. */
+let guided: GuidedState = defaultGuided();
 /**
  * The project chemical list. It is stored and edited, not derived live: a screen choosing a chemical
  * that newly appears adds it (see `setScreen`), and only `removeChemical` takes one out, so removing
@@ -421,6 +428,7 @@ function build(): ReturnType<typeof buildProject> {
     feeds: currentFeeds(),
     overrides,
     site,
+    guided,
     chemicals,
     modeledLevels,
     createdWith: APP_VERSION,
@@ -438,6 +446,7 @@ function snapshot(): string {
     feeds: currentFeeds(),
     overrides,
     site,
+    guided,
     chemicals,
     modeledLevels,
   });
@@ -450,6 +459,7 @@ const startSnapshot = (): string =>
     feeds: {},
     overrides: emptyOverrides(),
     site: defaultSite(),
+    guided: defaultGuided(),
     chemicals: [],
     modeledLevels: {},
   });
@@ -496,6 +506,17 @@ export function setSite(next: SiteState): void {
   schedule();
   notify();
 }
+
+export const getGuided = (): GuidedState => guided;
+/** Replace the guided flow's state; subscribers are told. */
+export function setGuided(next: GuidedState): void {
+  if (stableStringify(next) === stableStringify(guided)) return;
+  guided = next;
+  schedule();
+  notify();
+}
+/** Subscribe to changes of the project, the guided state included. */
+export const subscribeGuided = subscribeProject;
 
 export const getModeledLevels = (): Readonly<Record<string, SavedModeledLevels>> => modeledLevels;
 /**
@@ -615,6 +636,7 @@ export function removeProjectChemical(id: string): void {
   }
   clearChemicalSlots(id);
   clearModeledLevels(id);
+  setGuided(withoutGuidedChemical(guided, id));
   if (USER_ID.test(id)) clearUserIdState(id);
   removeChemical(id);
 }
@@ -956,6 +978,7 @@ export function forgetMemory(): void {
   title = '';
   overrides = emptyOverrides();
   site = defaultSite();
+  guided = defaultGuided();
   chemicals = [];
   modeledLevels = {};
   hashes = {};
@@ -976,6 +999,7 @@ export function hydrate(): void {
   let text: string | null;
   try {
     text = localStorage.getItem(AUTOSAVE_KEY);
+    if (text === null) text = localStorage.getItem(PREVIOUS_AUTOSAVE_KEY);
     if (text === null) text = localStorage.getItem(LEGACY_AUTOSAVE_KEY);
   } catch {
     return;
@@ -997,6 +1021,7 @@ function seed(project: Project, droppedKeys: readonly string[] = []): void {
   screens = screensOf(project);
   overrides = overridesOf(project);
   site = siteOf(project);
+  guided = guidedOf(project);
   chemicals = chemicalsOf(project);
   modeledLevels = modeledLevelsOf(project);
   title = project.title ?? '';
@@ -1070,6 +1095,7 @@ export function newProject(): void {
   title = '';
   overrides = emptyOverrides();
   site = defaultSite();
+  guided = defaultGuided();
   chemicals = [];
   modeledLevels = {};
   clearAllFeeds();

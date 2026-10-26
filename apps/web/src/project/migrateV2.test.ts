@@ -20,16 +20,18 @@ describe('project file version 2: feeds per chemical', () => {
     newProject();
   });
 
-  it('this build writes and reads version 2, with one migration step from version 1', () => {
-    expect(CURRENT_VERSION).toBe(2);
+  it('this build reads version 2 files through a step from version 1', () => {
+    expect(CURRENT_VERSION).toBeGreaterThanOrEqual(2);
     expect(typeof migrations[1]).toBe('function');
   });
 
-  it('a saved version 1 file loads to the expected version 2 document', () => {
+  it('a saved version 1 file loads to the expected version 2 document, then on to the current one', () => {
     const r = parseProject(v1Text);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.project).toEqual(expectedV2);
+    const { guided: _guided, ...rest } = r.project;
+    void _guided;
+    expect(rest).toEqual({ ...expectedV2, version: CURRENT_VERSION });
     // the untagged vadose run was sent while the vadose screen was typed by hand
     expect(r.droppedFeeds).toEqual(['vadose']);
   });
@@ -40,7 +42,9 @@ describe('project file version 2: feeds per chemical', () => {
     if (!r.ok) return;
     const { feeds: _f, ...withoutFeeds } = expectedV2;
     void _f;
-    expect(r.project).toEqual(withoutFeeds);
+    const { guided: _guided, ...rest } = r.project;
+    void _guided;
+    expect(rest).toEqual({ ...withoutFeeds, version: CURRENT_VERSION });
     expect(r.droppedFeeds ?? []).toEqual([]);
   });
 
