@@ -101,13 +101,13 @@ describe('the property catalog', () => {
     for (const f of PROPERTY_FIELDS) {
       expect(groups.has(f.group), f.id).toBe(true);
       expect(f.label.length).toBeGreaterThan(3);
-      expect(f.label).not.toContain('—');
+      expect(f.label).not.toContain('\u2014');
       expect(f.bindings.length).toBeGreaterThan(0);
     }
     for (const model of GUIDED_FORM_KEYS) {
       for (const reason of Object.values(NON_VALUES[model])) {
         expect(reason).toMatch(/step 3[bcd]|step [45]|run/i);
-        expect(reason).not.toContain('—');
+        expect(reason).not.toContain('\u2014');
       }
     }
     expect(new Set(PROPERTY_FIELDS.map((f) => f.id)).size).toBe(PROPERTY_FIELDS.length);

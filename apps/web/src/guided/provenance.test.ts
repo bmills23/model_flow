@@ -84,6 +84,6 @@ describe('PROVENANCE_TEXT', () => {
     expect(PROVENANCE_TEXT.default).toMatch(/default with no source/i);
     expect(PROVENANCE_TEXT.entered).toMatch(/entered with no source/i);
     expect(PROVENANCE_TEXT.needed).toMatch(/needed/i);
-    for (const t of Object.values(PROVENANCE_TEXT)) expect(t).not.toContain('—');
+    for (const t of Object.values(PROVENANCE_TEXT)) expect(t).not.toContain('\u2014');
   });
 });
