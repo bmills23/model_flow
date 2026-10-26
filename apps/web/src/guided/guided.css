@@ -119,3 +119,68 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Step 2, the site model: the questions beside the chain panel. */
+.guided-site-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .guided-site-grid {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.guided-site-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.guided-site-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0;
+  min-width: 0;
+}
+
+.guided-site-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  overflow-wrap: anywhere;
+}
+
+.guided-chain {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 8px 12px;
+}
+
+.guided-chain h2 {
+  margin: 4px 0 8px;
+  font-size: 1.1rem;
+}
+
+.guided-chain-list {
+  padding-left: 1.4rem;
+  margin: 0 0 8px;
+}
+
+.guided-chain-list li {
+  margin: 0 0 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.guided-chain-list p {
+  margin: 4px 0 0;
+}

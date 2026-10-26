@@ -75,12 +75,20 @@ const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.
 
 // The guided step screens, by step id. A step without an entry shows the notice below until its screen
 // lands; each screen slice adds its own lazy import here.
-const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {};
+const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {
+  site: lazy(() => import('./guided/screens/SiteStep').then((m) => ({ default: m.SiteStep }))),
+};
 
 function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {
   const step = GUIDED_STEPS.find((s) => s.id === id)!;
   const Screen = STEP_SCREENS[id];
-  if (Screen !== undefined) return <Screen />;
+  if (Screen !== undefined) {
+    return (
+      <Suspense fallback={<p className="muted">Loading this step...</p>}>
+        <Screen />
+      </Suspense>
+    );
+  }
   return (
     <section>
       <h1>{step.label}</h1>
