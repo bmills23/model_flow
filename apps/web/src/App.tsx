@@ -77,6 +77,9 @@ const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.
 // lands; each screen slice adds its own lazy import here.
 const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {
   site: lazy(() => import('./guided/screens/SiteStep').then((m) => ({ default: m.SiteStep }))),
+  sources: lazy(() =>
+    import('./guided/screens/SourcesStep').then((m) => ({ default: m.SourcesStep })),
+  ),
 };
 
 function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {

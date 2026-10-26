@@ -14,6 +14,7 @@ export const overridesSchema = z.object({
   toxicity: fieldOverridesSchema.optional(),
   receptors: fieldOverridesSchema.optional(),
   receptorNames: z.record(z.string(), text).optional(),
+  fate: fieldOverridesSchema.optional(),
 });
 export type OverridesProject = z.infer<typeof overridesSchema>;
 
@@ -24,6 +25,7 @@ export function toProject(state: OverridesState): OverridesProject | undefined {
   if (Object.keys(state.toxicity).length > 0) out.toxicity = state.toxicity;
   if (Object.keys(state.receptors).length > 0) out.receptors = state.receptors;
   if (Object.keys(state.receptorNames).length > 0) out.receptorNames = state.receptorNames;
+  if (Object.keys(state.fate).length > 0) out.fate = state.fate;
   return cloneData(out);
 }
 
@@ -32,5 +34,6 @@ export function fromProject(p: OverridesProject | undefined): OverridesState {
   if (p?.toxicity !== undefined) out.toxicity = cloneData(p.toxicity);
   if (p?.receptors !== undefined) out.receptors = cloneData(p.receptors);
   if (p?.receptorNames !== undefined) out.receptorNames = cloneData(p.receptorNames);
+  if (p?.fate !== undefined) out.fate = cloneData(p.fate);
   return out;
 }

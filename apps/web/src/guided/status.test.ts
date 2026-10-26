@@ -72,6 +72,20 @@ describe('guidedStatus', () => {
     expect(guidedStatus(input).sources).toBe('todo');
   });
 
+  it('step 3b counts ND and a number above zero, not text a run cannot read', () => {
+    const g = guidedWith(wellSite);
+    const input = { chemicals, guided: g, outputCheck: noneRun };
+    const put = (v: string) => {
+      for (const id of ['benzene', 'toluene'])
+        g.sources[id] = { values: { groundwater: { value: v, unit: 'ug/L' } }, note: '', tph: '' };
+      return guidedStatus(input).sources;
+    };
+    expect(put('ND')).toBe('done');
+    expect(put('12.5')).toBe('done');
+    expect(put('abc')).toBe('todo');
+    expect(put('0')).toBe('todo');
+  });
+
   it('step 3d reads the injected output check for each chemical and chain output', () => {
     const g = guidedWith(wellSite);
     const input = { chemicals, guided: g };
