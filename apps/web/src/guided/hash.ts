@@ -97,7 +97,10 @@ export function chemicalHashes(plan: RunPlan, d: DerivedChemical): Record<string
 }
 
 /** The live hashes of every output the chain chooses, for every project chemical; empty while step 2 has a problem. */
-export function outputHashes(guided: GuidedState, chemicals: readonly ChemicalData[]): OutputHashes {
+export function outputHashes(
+  guided: GuidedState,
+  chemicals: readonly ChemicalData[],
+): OutputHashes {
   const plan = runPlan(guided);
   if (plan === null) return {};
   const out: OutputHashes = {};

@@ -47,9 +47,10 @@ export function guidedChemicalData(
 export function useGuidedChemicalData(enabled: boolean): ChemicalData[] | null {
   const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const overrides = useSyncExternalStore(subscribeProject, getOverrides, getOverrides);
-  const [files, setFiles] = useState<{ rows: VaporChemicalRow[]; props: CleanupProps | null } | null>(
-    null,
-  );
+  const [files, setFiles] = useState<{
+    rows: VaporChemicalRow[];
+    props: CleanupProps | null;
+  } | null>(null);
   useEffect(() => {
     if (!enabled || files !== null) return;
     let live = true;

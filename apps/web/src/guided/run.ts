@@ -1,10 +1,6 @@
 import { toScenario as transportScenario } from '../transport/form';
 import { compute as transportCompute } from '../transport/compute';
-import {
-  buildBankFeed,
-  buildWaterTableFeed,
-  buildWellFeed,
-} from '../transport/sendBuild';
+import { buildBankFeed, buildWaterTableFeed, buildWellFeed } from '../transport/sendBuild';
 import type { BankFeed } from '../transport/bankFeed';
 import type { WellFeed } from '../transport/wellFeed';
 import { isR7Case, toScenario as vadoseScenario } from '../vadose/form';
@@ -156,7 +152,8 @@ export function runChemical(job: RunJob): ChemicalRun {
   });
 
   if (plan.transportSource === 'soilAbove' && got.vadose === null) blocked('transport', 'vadose');
-  if (plan.transportSource === 'soilBelow' && got.saturated === null) blocked('transport', 'saturated');
+  if (plan.transportSource === 'soilBelow' && got.saturated === null)
+    blocked('transport', 'saturated');
   step('transport', () => {
     const f = forms.transport!;
     const parsed = transportScenario(f, got.vadose, got.saturated);
@@ -238,7 +235,8 @@ export function runChemical(job: RunJob): ChemicalRun {
     put('vaporRisk', feed);
   });
 
-  if (plan.models.includes('surfaceWater') && got.bank === null) blocked('surfaceWater', 'transport');
+  if (plan.models.includes('surfaceWater') && got.bank === null)
+    blocked('surfaceWater', 'transport');
   step('surfaceWater', () => {
     const f = forms.surfaceWater!;
     const parsed = surfaceRequest(f, got.bank);

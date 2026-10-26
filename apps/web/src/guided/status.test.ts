@@ -126,7 +126,10 @@ describe('guidedStatus', () => {
         toluene: { inputsHash: 'bbbb0002', value: {} },
       },
     };
-    const live = { well: { benzene: 'aaaa0001', toluene: 'cccc0003' }, household: { benzene: 'x' } };
+    const live = {
+      well: { benzene: 'aaaa0001', toluene: 'cccc0003' },
+      household: { benzene: 'x' },
+    };
     const check = hashOutputCheck(outputs, live);
     expect(check('well', 'benzene')).toBe('current');
     expect(check('well', 'toluene')).toBe('stale');

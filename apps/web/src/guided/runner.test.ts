@@ -115,9 +115,11 @@ describe('the worker protocol', () => {
   it('posts progress after each chemical, then the runs', () => {
     const posted: RunMessage[] = [];
     runMessages(prepareRun(building(), data()).jobs, (m) => posted.push(m));
-    expect(posted.map((m) => ('progress' in m ? `progress ${m.progress.done}` : 'done'))).toEqual(
-      ['progress 1', 'progress 2', 'done'],
-    );
+    expect(posted.map((m) => ('progress' in m ? `progress ${m.progress.done}` : 'done'))).toEqual([
+      'progress 1',
+      'progress 2',
+      'done',
+    ]);
     const last = posted[2]!;
     expect('ok' in last && last.ok && last.runs.length).toBe(2);
   });

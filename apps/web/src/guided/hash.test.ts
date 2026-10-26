@@ -71,10 +71,10 @@ describe('outputHashes', () => {
   it("a chemical's 3b value marks that chemical's outputs only", () => {
     expect(edit((g) => value(g, BENZENE, 'groundwater', '1500', 'ug/L'))).toEqual(
       [
-      `household:${BENZENE}`,
-      `vaporRisk:${BENZENE}`,
-      `vaporWaterTable:${BENZENE}`,
-      `well:${BENZENE}`,
+        `household:${BENZENE}`,
+        `vaporRisk:${BENZENE}`,
+        `vaporWaterTable:${BENZENE}`,
+        `well:${BENZENE}`,
       ].sort(),
     );
   });
@@ -86,25 +86,16 @@ describe('outputHashes', () => {
 
   it('the indoor air template marks indoor air only, for every chemical', () => {
     expect(edit((g) => (g.forms.vapor = { floorArea: '200' }))).toEqual(
-      [
-      `vaporRisk:${BENZENE}`,
-      `vaporRisk:${MTBE}`,
-      ].sort(),
+      [`vaporRisk:${BENZENE}`, `vaporRisk:${MTBE}`].sort(),
     );
     expect(edit((g) => (g.site.indoorModel = 'legacy'))).toEqual(
-      [
-      `vaporRisk:${BENZENE}`,
-      `vaporRisk:${MTBE}`,
-      ].sort(),
+      [`vaporRisk:${BENZENE}`, `vaporRisk:${MTBE}`].sort(),
     );
   });
 
   it('the household template marks the household output only', () => {
     expect(edit((g) => (g.forms.household = { showerMinutes: '12' }))).toEqual(
-      [
-      `household:${BENZENE}`,
-      `household:${MTBE}`,
-      ].sort(),
+      [`household:${BENZENE}`, `household:${MTBE}`].sort(),
     );
   });
 
@@ -116,17 +107,15 @@ describe('outputHashes', () => {
     const before = outputHashes(wellAndBuilding(), chems());
     const da = { ...row(BENZENE), rsl: { ...row(BENZENE).rsl, dia: { value: 0.07 } } };
     expect(changed(before, outputHashes(wellAndBuilding(), chems(da)))).toEqual(
-      [
-      `vaporRisk:${BENZENE}`,
-      ].sort(),
+      [`vaporRisk:${BENZENE}`].sort(),
     );
     const koc = { ...row(BENZENE), rsl: { ...row(BENZENE).rsl, koc: { value: 90 } } };
     expect(changed(before, outputHashes(wellAndBuilding(), chems(koc)))).toEqual(
       [
-      `household:${BENZENE}`,
-      `vaporRisk:${BENZENE}`,
-      `vaporWaterTable:${BENZENE}`,
-      `well:${BENZENE}`,
+        `household:${BENZENE}`,
+        `vaporRisk:${BENZENE}`,
+        `vaporWaterTable:${BENZENE}`,
+        `well:${BENZENE}`,
       ].sort(),
     );
   });
@@ -142,12 +131,7 @@ describe('outputHashes', () => {
       return g;
     };
     expect(edit((g) => (g.run.stepYr = '0.5'), leaching)).toEqual(
-      [
-      `household:${BENZENE}`,
-      `household:${MTBE}`,
-      `well:${BENZENE}`,
-      `well:${MTBE}`,
-      ].sort(),
+      [`household:${BENZENE}`, `household:${MTBE}`, `well:${BENZENE}`, `well:${MTBE}`].sort(),
     );
     // the vadose template marks the vadose run and the well it feeds
     expect(edit((g) => (g.forms.vadose = { infiltration: '30' }), leaching)).toHaveLength(6);

@@ -2,11 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import { toScenario as transportScenario } from '../transport/form';
 import { compute as transportCompute } from '../transport/compute';
-import {
-  buildBankFeed,
-  buildWaterTableFeed,
-  buildWellFeed,
-} from '../transport/sendBuild';
+import { buildBankFeed, buildWaterTableFeed, buildWellFeed } from '../transport/sendBuild';
 import { toScenario as saturatedScenario, isCaseA } from '../saturated/form';
 import { compute as saturatedCompute } from '../saturated/compute';
 import { buildSaturatedFeed, buildSaturatedVaporFeed } from '../saturated/sendBuild';
@@ -86,8 +82,7 @@ const guidedWith = (patch: (g: GuidedState) => void): GuidedState => {
 };
 const derive = (g: GuidedState, c: ChemicalData): DerivedChemical =>
   deriveChemical(g, runPlan(g)!, c);
-const runOne = (g: GuidedState, c: ChemicalData): ChemicalRun =>
-  runChemical(jobsOf(g, [c])[0]!);
+const runOne = (g: GuidedState, c: ChemicalData): ChemicalRun => runChemical(jobsOf(g, [c])[0]!);
 
 const keys = (r: ChemicalRun): string[] => Object.keys(r.outputs).sort();
 
