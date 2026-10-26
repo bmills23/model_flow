@@ -112,7 +112,13 @@ describe('production bundle size', () => {
     expect(
       names.filter((n) => WORKER_FILE.test(n)).length,
       'emitted worker files',
-    ).toBeGreaterThanOrEqual(6);
+    ).toBeGreaterThanOrEqual(7);
+    // the guided flow's chunks: the step 3d Run worker and one lazy chunk per built step screen (each is
+    // measured by the 500 kB rule below, the worker by the 400 kB rule)
+    expect(names.filter((n) => /^run\.worker-/.test(n)).length, 'guided run worker').toBe(1);
+    for (const step of ['Chemicals', 'Site', 'Properties', 'Sources', 'Run']) {
+      expect(names.filter((n) => n.startsWith(`${step}Step-`)).length, `${step}Step chunk`).toBe(1);
+    }
     expect(
       names.filter((n) => n.startsWith('engine-')).length,
       'engine chunks',

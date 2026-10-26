@@ -88,6 +88,12 @@
   color: var(--muted);
 }
 
+/* the long "arrives with the next update" mark goes under the label, so it never squeezes the label's column */
+.guided-step[data-mark='arrives'] .guided-step-mark {
+  grid-column: 2 / -1;
+  text-align: left;
+}
+
 @media (max-width: 520px) {
   .guided-step {
     grid-template-columns: 3rem minmax(0, 1fr);

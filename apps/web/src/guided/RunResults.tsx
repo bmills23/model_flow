@@ -202,11 +202,13 @@ export function RunResults(props: {
             <div key={c.id} role="group" aria-label={c.name} className="guided-run-detail">
               <h3>{c.name}</h3>
               {problems.length > 0 && (
-                <ul className="guided-run-problems" role="alert">
-                  {problems.map((p, i) => (
-                    <li key={i}>{p.message}</li>
-                  ))}
-                </ul>
+                <div role="alert">
+                  <ul className="guided-run-problems">
+                    {problems.map((p, i) => (
+                      <li key={i}>{p.message}</li>
+                    ))}
+                  </ul>
+                </div>
               )}
               {blocks.length === 0 && problems.length === 0 && (
                 <p className="muted">No results recorded for this chemical yet.</p>

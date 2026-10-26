@@ -76,6 +76,9 @@ const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.
 // The guided step screens, by step id. A step without an entry shows the notice below until its screen
 // lands; each screen slice adds its own lazy import here.
 const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {
+  chemicals: lazy(() =>
+    import('./guided/screens/ChemicalsStep').then((m) => ({ default: m.ChemicalsStep })),
+  ),
   site: lazy(() => import('./guided/screens/SiteStep').then((m) => ({ default: m.SiteStep }))),
   properties: lazy(() =>
     import('./guided/screens/PropertiesStep').then((m) => ({ default: m.PropertiesStep })),
