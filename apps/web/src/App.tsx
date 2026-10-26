@@ -1,7 +1,15 @@
-import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from 'react';
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ComponentType,
+} from 'react';
 import { sectionFromHash, slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
-import { STEPS, stepForHash } from './steps';
+import { GUIDED_STEPS, STEPS, guidedHref, guidedStepForHash, stepForHash } from './steps';
+import { GuidedShell } from './guided/GuidedShell';
 import { ProjectBar } from './project/ProjectBar';
 import {
   getChemicals,
@@ -64,6 +72,34 @@ const ValidationPage = lazy(() =>
 );
 
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
+
+// The guided step screens, by step id. A step without an entry shows the notice below until its screen
+// lands; each screen slice adds its own lazy import here.
+const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {
+  site: lazy(() => import('./guided/screens/SiteStep').then((m) => ({ default: m.SiteStep }))),
+};
+
+function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {
+  const step = GUIDED_STEPS.find((s) => s.id === id)!;
+  const Screen = STEP_SCREENS[id];
+  if (Screen !== undefined) {
+    return (
+      <Suspense fallback={<p className="muted">Loading this step...</p>}>
+        <Screen />
+      </Suspense>
+    );
+  }
+  return (
+    <section>
+      <h1>{step.label}</h1>
+      <p className="muted">
+        {step.arrives
+          ? 'This step arrives with the next update. The steps before it already work.'
+          : 'This screen is being built. The other steps open from the list.'}
+      </p>
+    </section>
+  );
+}
 
 const METHODS_HASH = '#/methods';
 const VALIDATION_HASH = '#/validation';
@@ -134,6 +170,7 @@ export function App() {
   const onPlantsEco = hash === PLANTS_ECO_HASH;
   const onReport = hash === REPORT_HASH;
   const currentStep = stepForHash(hash);
+  const guidedStep = guidedStepForHash(hash);
   const onDocs = hash === DOCS_HASH || hash.startsWith(`${DOCS_HASH}/`);
 
   return (
@@ -152,7 +189,8 @@ export function App() {
               onSurfaceWater ||
               onHousehold ||
               onPlantsEco ||
-              onValidation
+              onValidation ||
+              guidedStep !== undefined
             ? 'shell shell-wide'
             : 'shell'
       }
@@ -281,7 +319,11 @@ export function App() {
         </div>
       </nav>
       <main id="main" tabIndex={-1} key={epoch}>
-        {onDocs ? (
+        {guidedStep !== undefined ? (
+          <GuidedShell stepId={guidedStep.id}>
+            <GuidedPlaceholder id={guidedStep.id} />
+          </GuidedShell>
+        ) : onDocs ? (
           <Suspense fallback={<p className="muted">Loading the documentation...</p>}>
             <DocsPage slug={slugFromHash(hash)} section={sectionFromHash(hash)} />
           </Suspense>
@@ -351,6 +393,9 @@ export function App() {
               another says where it came from. The report gathers the results.
             </p>
             <p>
+              <a className="button" href={guidedHref('chemicals')}>
+                Start the guided flow
+              </a>{' '}
               <a className="button" href={TRANSPORT_HASH}>
                 Open groundwater transport
               </a>{' '}

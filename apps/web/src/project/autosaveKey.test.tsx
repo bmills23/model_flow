@@ -5,6 +5,7 @@ import { CURRENT_VERSION } from './index';
 import {
   AUTOSAVE_KEY,
   LEGACY_AUTOSAVE_KEY,
+  PREVIOUS_AUTOSAVE_KEY,
   flushAutosave,
   forgetMemory,
   getAutosaveNotice,
@@ -40,12 +41,13 @@ describe('autosave keys', () => {
     forgetMemory();
   });
 
-  it('the current key is the version 2 key and differs from the old one', () => {
-    expect(AUTOSAVE_KEY).toBe('model_flow.project.autosave.v2');
+  it('the current key is the version 3 key and differs from the older two', () => {
+    expect(AUTOSAVE_KEY).toBe('model_flow.project.autosave.v3');
+    expect(PREVIOUS_AUTOSAVE_KEY).toBe('model_flow.project.autosave.v2');
     expect(LEGACY_AUTOSAVE_KEY).toBe('model_flow.project.autosave.v1');
   });
 
-  it('a version 2 autosave loads', () => {
+  it('a version 3 autosave loads', () => {
     const text = makeSave();
     localStorage.setItem(AUTOSAVE_KEY, text);
     hydrate();
@@ -68,12 +70,39 @@ describe('autosave keys', () => {
     expect(localStorage.getItem(LEGACY_AUTOSAVE_KEY)).toBe(text);
   });
 
-  it('the new key wins over the old one', () => {
+  it('a version 2 autosave migrates on first load and the version 2 key is never touched', () => {
+    const doc = JSON.parse(makeSave());
+    doc.version = 2;
+    delete doc.guided;
+    const v2 = JSON.stringify(doc);
+    localStorage.setItem(PREVIOUS_AUTOSAVE_KEY, v2);
+    hydrate();
+    expect(getScreen('transport').form.K).toBe('77');
+    editK('79');
+    flushAutosave();
+    expect(localStorage.getItem(PREVIOUS_AUTOSAVE_KEY)).toBe(v2);
+    const written = JSON.parse(localStorage.getItem(AUTOSAVE_KEY) as string);
+    expect(written.version).toBe(3);
+    expect(written.screens.transport.form.K).toBe('79');
+    newProject();
+    expect(localStorage.getItem(PREVIOUS_AUTOSAVE_KEY)).toBe(v2);
+  });
+
+  it('the newest key wins over the older ones', () => {
     const text = makeSave();
     localStorage.setItem(LEGACY_AUTOSAVE_KEY, text.replace('"77"', '"11"'));
+    localStorage.setItem(PREVIOUS_AUTOSAVE_KEY, text.replace('"77"', '"22"'));
     localStorage.setItem(AUTOSAVE_KEY, text);
     hydrate();
     expect(getScreen('transport').form.K).toBe('77');
+  });
+
+  it('the version 2 key wins over the version 1 key', () => {
+    const text = makeSave();
+    localStorage.setItem(LEGACY_AUTOSAVE_KEY, text.replace('"77"', '"11"'));
+    localStorage.setItem(PREVIOUS_AUTOSAVE_KEY, text.replace('"77"', '"22"'));
+    hydrate();
+    expect(getScreen('transport').form.K).toBe('22');
   });
 
   it('edits write only the new key', () => {
@@ -81,6 +110,7 @@ describe('autosave keys', () => {
     editK('5');
     flushAutosave();
     expect(localStorage.getItem(AUTOSAVE_KEY)).not.toBeNull();
+    expect(localStorage.getItem(PREVIOUS_AUTOSAVE_KEY)).toBeNull();
     expect(localStorage.getItem(LEGACY_AUTOSAVE_KEY)).toBeNull();
   });
 

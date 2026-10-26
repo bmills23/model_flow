@@ -80,7 +80,7 @@ async function inflate(bytes: Uint8Array): Promise<string> {
 }
 
 /**
- * Build the share link for a project: the project without its feed values, deflated and base64url
+ * Build the share link for a project: the project without its feed values and guided outputs, deflated and base64url
  * encoded into the hash. `baseUrl` is the page address without a hash; the whole link is held to the
  * limit. A link that is too long is refused, never truncated.
  */
@@ -88,6 +88,12 @@ export async function makeShareLink(project: Project, baseUrl: string): Promise<
   if (!hasCompression()) return { ok: false, error: NO_COMPRESSION };
   const withoutFeeds: Partial<Project> = { ...project };
   delete withoutFeeds.feeds;
+  // the 3d outputs are results, like feeds: a link carries the answers and reads "run 3d"
+  if (withoutFeeds.guided?.outputs !== undefined) {
+    const { outputs: _outputs, ...answers } = withoutFeeds.guided;
+    void _outputs;
+    withoutFeeds.guided = answers;
+  }
   let payload: string;
   try {
     payload = toBase64Url(await deflate(JSON.stringify(withoutFeeds)));

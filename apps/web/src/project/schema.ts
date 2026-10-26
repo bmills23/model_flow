@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { cleanupProjectSchema } from '../cleanup/project';
+import { guidedProjectSchema } from '../guided/project';
 import { householdProjectSchema } from '../household/project';
 import { plantsEcoProjectSchema } from '../plantsEco/project';
 import { riskProjectSchema } from '../risk/project';
@@ -173,7 +174,7 @@ export const dataSchema = z.object({
 
 export const projectSchema = z.object({
   format: z.literal(PROJECT_FORMAT),
-  version: z.literal(2),
+  version: z.literal(3),
   createdWith: text,
   savedAt: z.iso.datetime({ offset: true }),
   title: text.optional(),
@@ -190,6 +191,8 @@ export const projectSchema = z.object({
   // each entry is checked on its own by parseProject, so one unusable feed never refuses the file
   feeds: z.record(z.string(), z.unknown()).optional(),
   data: dataSchema.optional(),
+  // the guided flow's answers and Run outputs (see guided/); absent means the defaults
+  guided: guidedProjectSchema.optional(),
 });
 export type Feeds = z.infer<typeof feedsSchema>;
 export type Project = Omit<z.infer<typeof projectSchema>, 'feeds'> & { feeds?: Feeds };

@@ -477,9 +477,9 @@ for (const view of VIEWS) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
-      // every visit starts from the seed: it goes under the key the app reads first (the legacy key is read
+      // every visit starts from the seed: it goes under the key the app reads first (the older keys are read
       // only when that one is missing, so a seed there would leave the previous visit's project in place)
-      `try{localStorage.removeItem('model_flow.project.autosave.v1');localStorage.setItem('model_flow.project.autosave.v2',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
+      `try{localStorage.removeItem('model_flow.project.autosave.v1');localStorage.removeItem('model_flow.project.autosave.v2');localStorage.setItem('model_flow.project.autosave.v3',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
     );
     await sleep(1800);
     if (viaSetup) {

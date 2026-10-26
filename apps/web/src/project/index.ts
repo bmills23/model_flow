@@ -2,6 +2,9 @@ import type { z } from 'zod';
 import * as overrides from '../overrides/project';
 import type { OverridesState } from '../overrides/model';
 import * as site from '../site/project';
+import * as guidedProject from '../guided/project';
+import { readGuidedOutputs } from '../guided/outputs';
+import type { GuidedState } from '../guided/state';
 import { readSavedModeledLevels, type SavedModeledLevels } from '../cleanup/modeledLevels';
 import type { SiteState } from '../site/model';
 import * as cleanup from '../cleanup/project';
@@ -32,6 +35,7 @@ export { CURRENT_VERSION } from './migrate';
 export { PROJECT_FORMAT, type Feeds, type Project } from './schema';
 export { hashInputs } from './hash';
 export type { ProjectChemical } from './chemicals';
+export { guidedOf } from '../guided/project';
 
 /** The live state of the screens (and the two uncertainty panels), in the form each screen's `fromProject` hands back. */
 export interface Screens {
@@ -85,6 +89,8 @@ export interface BuildOptions {
   feeds?: Feeds;
   overrides?: OverridesState;
   site?: SiteState;
+  /** The guided flow's answers and outputs; the key is written unless they are the defaults. */
+  guided?: GuidedState;
   /** The project chemical list; the key is written when given. */
   chemicals?: readonly ProjectChemical[];
   /** The modeled cleanup levels the cleanup screen solved, by chemical id; the key is written when any are given. */
@@ -123,6 +129,8 @@ export function buildProject(o: BuildOptions): Project {
   if (ov !== undefined) project.overrides = ov;
   const st = o.site === undefined ? undefined : site.toProject(o.site);
   if (st !== undefined) project.site = st;
+  const gd = o.guided === undefined ? undefined : guidedProject.toProject(o.guided);
+  if (gd !== undefined) project.guided = gd;
   if (o.chemicals !== undefined) project.chemicals = o.chemicals.map((c) => ({ ...c }));
   if (o.modeledLevels !== undefined && Object.keys(o.modeledLevels).length > 0) {
     project.modeledLevels = JSON.parse(JSON.stringify(o.modeledLevels)) as Record<string, unknown>;
@@ -274,6 +282,17 @@ export function parseProject(input: unknown): LoadResult {
   }
   const { feeds: rawFeeds, ...rest } = parsed.data;
   const project: Project = rest;
+  if (rest.guided?.outputs !== undefined) {
+    // each 3d output stands on its own: a bad one is dropped and reported, never costing the answers
+    const read = readGuidedOutputs(rest.guided.outputs);
+    for (const path of read.dropped) {
+      warnings.push({
+        path,
+        message: `Dropped the guided result "${path.replace(/^guided\.outputs\./, '')}" because it was not usable; run step 3d again.`,
+      });
+    }
+    project.guided = { ...rest.guided, outputs: read.kept };
+  }
   if (rawFeeds !== undefined) {
     // each feed is a convenience copy of a value passed between screens: an unusable one is dropped
     // and reported, and never costs the user the forms

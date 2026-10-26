@@ -240,3 +240,48 @@ describe('stale values banner', () => {
     expect(screen.getByText(note)).toBeTruthy();
   });
 });
+
+describe('guided flow routes', () => {
+  afterEach(() => {
+    window.location.hash = '';
+  });
+
+  it('links to the guided steps from the home page and leaves the main navigation alone', () => {
+    window.location.hash = '';
+    render(<App />);
+    const link = screen.getByRole('link', { name: /start the guided flow/i });
+    expect(link.getAttribute('href')).toBe('#/step/chemicals');
+    expect(screen.getByRole('navigation', { name: 'Main' }).textContent).toContain(
+      'Risk & cleanup',
+    );
+    expect(screen.queryByRole('navigation', { name: /guided steps/i })).toBeNull();
+  });
+
+  it.each([
+    ['chemicals', 'Chemicals'],
+    ['site', 'Site model'],
+    ['properties', 'Site properties'],
+    ['sources', 'Source values'],
+    ['run', 'Run and view'],
+    ['pathways', 'Pathways'],
+    ['results', 'Results'],
+  ])('renders the shell for #/step/%s with that step open', async (id, label) => {
+    window.location.hash = `#/step/${id}`;
+    render(<App />);
+    const steps = await screen.findByRole('navigation', { name: /guided steps/i });
+    expect(steps.querySelector('[aria-current="step"]')?.textContent ?? '').toContain(label);
+    expect(
+      await screen.findByRole('heading', { level: 1, name: label }, { timeout: 20000 }),
+    ).toBeTruthy();
+    expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /^back$/i })).toBeTruthy();
+  });
+
+  it('shows steps that are not built yet as arriving with the next update', async () => {
+    window.location.hash = '#/step/targets';
+    render(<App />);
+    expect(
+      await screen.findByText(/arrives with the next update/i, { selector: 'p' }),
+    ).toBeTruthy();
+  });
+});
