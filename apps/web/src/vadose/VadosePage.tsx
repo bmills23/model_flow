@@ -16,8 +16,7 @@ import {
   subscribeVadoseVaporFeed,
 } from '../vapor/feeds';
 import { ownSlot } from '../project/feedSlots';
-import { vadoseVaporSource } from './vaporFeed';
-import { chemicalTag } from '../project/feedChemical';
+import { buildVadoseFeed, buildVadoseVaporFeed } from './sendBuild';
 import {
   R7_FORM,
   R7_PUBLISHED,
@@ -204,23 +203,14 @@ export function VadosePage() {
 
   const useAsSource = (): void => {
     if (!scenario || !run) return;
-    setVadoseFeed({
-      scenario,
-      method: run.method,
-      label: `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}`,
-      ...chemicalTag(form.chemicalId),
-    });
+    setVadoseFeed(
+      buildVadoseFeed({ scenario, method: run.method, r7, chemicalId: form.chemicalId }),
+    );
   };
 
   const useAsVaporSource = (): void => {
     if (!run) return;
-    setVadoseVaporFeed({
-      ...vadoseVaporSource(
-        run,
-        `${r7 ? 'Table R-7 validation case' : 'Vadose leaching run'}, ${METHOD_SERIES[run.method].label}, source pore water`,
-      ),
-      ...chemicalTag(form.chemicalId),
-    });
+    setVadoseVaporFeed(buildVadoseVaporFeed({ run, r7, chemicalId: form.chemicalId }));
   };
 
   const sourceStats = (r: RunSummary) => {

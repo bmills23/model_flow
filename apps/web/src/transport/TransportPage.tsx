@@ -20,12 +20,12 @@ import { getSaturatedFeedSlots, subscribeSaturatedFeed } from '../saturated/feed
 import { getVadoseFeedSlots, subscribeVadoseFeed } from '../vadose/feed';
 import { getBankFeedSlots, setBankFeed, subscribeBankFeed } from './bankFeed';
 import { getWellFeedSlots, setWellFeed, subscribeWellFeed } from './wellFeed';
-import { transportRunInputs } from './runInputs';
+import { kdText } from './chemicalFill';
+import { buildBankFeed, buildTransportFeed, buildWaterTableFeed, buildWellFeed } from './sendBuild';
 import { getTransportFeedSlots, setTransportFeed, subscribeTransportFeed } from './chainFeed';
 import { getWaterTableFeedSlots, setWaterTableFeed, subscribeWaterTableFeed } from '../vapor/feeds';
 import { ownSlot, pickSlot } from '../project/feedSlots';
-import { waterTableSource } from './vaporFeed';
-import { chemicalTag, projectNameOf, screenFeedProblem } from '../project/feedChemical';
+import { projectNameOf, screenFeedProblem } from '../project/feedChemical';
 import { ResultStatus, StaleResultsNote } from '../ui/ResultStatus';
 import { HelpLink } from '../docs/HelpLink';
 
@@ -90,9 +90,7 @@ export function TransportPage() {
   const [noKocName, setNoKocName] = useState<string | null>(null);
   // Kd = Koc x foc (mL/g equals L/kg); a chemical without a Koc leaves Kd as typed
   const kdFor = (id: string, foc: string, keep: string): string => {
-    const koc = chemicals.find((c) => c.id === id)?.rsl.koc?.value;
-    const f = Number(foc);
-    return koc !== undefined && foc.trim() !== '' && Number.isFinite(f) ? String(koc * f) : keep;
+    return kdText(chemicals.find((c) => c.id === id)?.rsl.koc?.value, foc, keep);
   };
   const [wellMethod, setWellMethod] = useState<MethodKey>(() => getScreen('transport').method);
   useEffect(() => setScreen('transport', { form, method: wellMethod }), [form, wellMethod]);
@@ -781,16 +779,14 @@ export function TransportPage() {
                     disabled={csvStale}
                     onClick={() => {
                       const k = keys.includes(wellMethod) ? wellMethod : 'modern';
-                      const values = result.series[k];
-                      if (!values) return;
-                      setWellFeed({
+                      const feed = buildWellFeed({
                         method: k,
-                        label: `Receptor well, ${SERIES[k].label}, ${form.timeYr} years`,
-                        times: [...result.times],
-                        values: [...values],
-                        runInputs: transportRunInputs(scenario),
-                        ...chemicalTag(form.chemicalId),
+                        result,
+                        scenario,
+                        timeYr: form.timeYr,
+                        chemicalId: form.chemicalId,
                       });
+                      if (feed) setWellFeed(feed);
                     }}
                   >
                     Use as exposure well concentration
@@ -821,11 +817,14 @@ export function TransportPage() {
                     disabled={csvStale}
                     onClick={() => {
                       if (!scenario) return;
-                      setTransportFeed({
-                        scenario,
-                        label: `${form.timeYr} years, receptor at ${form.rx} m`,
-                        ...chemicalTag(form.chemicalId),
-                      });
+                      setTransportFeed(
+                        buildTransportFeed({
+                          scenario,
+                          timeYr: form.timeYr,
+                          rx: form.rx,
+                          chemicalId: form.chemicalId,
+                        }),
+                      );
                     }}
                   >
                     Use for cleanup levels
@@ -858,14 +857,14 @@ export function TransportPage() {
                     onClick={() => {
                       if (!parsed.ok) return;
                       const k = keys.includes(wellMethod) ? wellMethod : 'modern';
-                      setWaterTableFeed({
-                        ...waterTableSource(
-                          parsed.scenario,
-                          k,
-                          `Water table under the receptor point, ${SERIES[k].label}, ${form.timeYr} years`,
-                        ),
-                        ...chemicalTag(form.chemicalId),
-                      });
+                      setWaterTableFeed(
+                        buildWaterTableFeed({
+                          scenario: parsed.scenario,
+                          method: k,
+                          timeYr: form.timeYr,
+                          chemicalId: form.chemicalId,
+                        }),
+                      );
                     }}
                   >
                     Use as vapor groundwater source
@@ -896,13 +895,13 @@ export function TransportPage() {
                     disabled={csvStale || !scenario}
                     onClick={() => {
                       if (!scenario) return;
-                      const { zOf: _zOf, ...plain } = scenario;
-                      void _zOf;
-                      setBankFeed({
-                        scenario: plain,
-                        label: `Groundwater transport run, ${form.timeYr} years`,
-                        ...chemicalTag(form.chemicalId),
-                      });
+                      setBankFeed(
+                        buildBankFeed({
+                          scenario,
+                          timeYr: form.timeYr,
+                          chemicalId: form.chemicalId,
+                        }),
+                      );
                     }}
                   >
                     Use as surface water source
