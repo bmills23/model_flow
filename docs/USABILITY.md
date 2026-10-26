@@ -60,6 +60,7 @@ bed gradient and discharge thickness.
 - **AA, a report fit to submit (landed 2026-10-24):** B1 to B3, M1, M4, M5, M8 (stale results), M9 and M11. Every number the report prints is
   complete, current, honest about its sources, and says what was not quantified.
 - **AB, plain language:** M2, M3, m1 to m8 and n1. Labels, names and units instead of internal keys, codes and raw numbers.
-- **AC, a guided site workflow:** M6, M7, M8 (blank start), M10, m9, m10 and n2. Fate screens that start blank and run every
+- **AC, a guided site workflow:** M6, M7, M8 (blank start), M10, m9, m10 and n2. Since 2026-10-25 its shape is the
+  six-step flow in `docs/GUIDED_FLOW.md`, which Bryan approved from a mockup; its open calls go to him first. Fate screens that start blank and run every
   project chemical, site model paths that match real sites, and a worked example. Product choices here go to Bryan
   before the wave starts.

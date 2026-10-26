@@ -4646,3 +4646,16 @@ Bryan's overturn.
    that sending it again records them. A malformed rows value is dropped on load without dropping the slot.
 5. **Transport block.** When the well and the plume (bank) feeds hold the same rows they print once; when they differ,
    or the well feed has none, the plume rows are labelled as the surface water plume run's.
+
+## 2026-10-25: The guided six-step flow, the direction
+
+Bryan, 2026-10-24: "i don't like the UI of this app at all. It's not similar to the flow of RISC-5 at all." On
+2026-10-25 he approved a clickable mockup ("looks good"). The direction, described in `docs/GUIDED_FLOW.md`:
+
+1. **BRYAN.** The app follows the manual's six-step order (chemicals, site model, concentrations with site properties,
+   source concentrations, chemical values and one run, exposure, risk or cleanup levels, results) as one project with
+   Next and Back, where the site model decides which models run and each step reads the steps before it, with no send
+   buttons. This replaces wave H's definition of parity as "workflow, not screens" (`docs/UI_PARITY.md` section 1).
+2. **DEFAULT, for Bryan.** The open calls listed at the end of `docs/GUIDED_FLOW.md`: several source media at once,
+   free navigation with re-run marks instead of locked steps, one method choice, the fate of the separate model
+   screens, 3c as its own screen, and its order against wave AB.

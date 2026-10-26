@@ -1,6 +1,8 @@
 # UI near-parity gaps: model_flow against RISC5 (2026-10-19)
 
-Status (2026-10-23): wave V closed the last three gaps of the 2026-10-21 audit of the 102 inventory items, so all 102 are now present (74, one of them by a substitution Bryan accepted on 2026-10-23, F13 and F14) or different by design (28); rows F13 and F14, H9, H10 to H12 and I14 were corrected in place. Earlier status (2026-10-21): slices U1 to U10 are all landed (wave H, 2026-10-19, merged to main); each slice carries a status line below. The gap table in section 2 was corrected in place on 2026-10-21 to match the tree, with each row naming what landed and in which wave or slice. The slice text in section 3 is the plan as written, not rewritten after the fact.
+Status (2026-10-25): Bryan judged the app's flow "not similar to the flow of RISC-5 at all"; section 1's definition
+of parity (workflow, not screens, nothing locked) is replaced by the six-step flow in `docs/GUIDED_FLOW.md`. The
+feature rows below still hold. Earlier status (2026-10-23): wave V closed the last three gaps of the 2026-10-21 audit of the 102 inventory items, so all 102 are now present (74, one of them by a substitution Bryan accepted on 2026-10-23, F13 and F14) or different by design (28); rows F13 and F14, H9, H10 to H12 and I14 were corrected in place. Earlier status (2026-10-21): slices U1 to U10 are all landed (wave H, 2026-10-19, merged to main); each slice carries a status line below. The gap table in section 2 was corrected in place on 2026-10-21 to match the tree, with each row naming what landed and in which wave or slice. The slice text in section 3 is the plan as written, not rewritten after the fact.
 
 Inputs: `docs/RISC5_UI_INVENTORY.md` (102 paraphrased features, IDs A1 to J8 used below), `docs/USER_GUIDE.md`,
 `apps/web/src/App.tsx`, `docs/ROADMAP.md` section 7 Deferred lists, and targeted source reads cited inline.
