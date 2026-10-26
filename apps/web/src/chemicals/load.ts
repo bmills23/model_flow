@@ -1,4 +1,5 @@
 import type { ChemicalsFile, ToxFile } from '@model-flow/data/rsl-types';
+import { useEffect, useState } from 'react';
 import chemicalsUrl from '@model-flow/data/generated/rsl-2024-11/chemicals.json?url';
 import { buildBrowse, type BrowseDb } from './browse';
 
@@ -21,4 +22,21 @@ export function loadBrowse(): Promise<BrowseDb> {
     loading = null;
   });
   return loading;
+}
+
+/** Loads the chemical database once; `error` is set when it cannot be loaded. */
+export function useBrowseDb(): { db: BrowseDb | null; error: string | null } {
+  const [db, setDb] = useState<BrowseDb | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    loadBrowse().then(
+      (d) => live && setDb(d),
+      (e: unknown) => live && setError(e instanceof Error ? e.message : String(e)),
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
+  return { db, error };
 }

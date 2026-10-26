@@ -154,13 +154,21 @@ export function buildBrowse(full: ChemicalsFile, tox: ToxFile): BrowseDb {
   return { edition: tox.edition, retrieved: tox.source.retrieved, records };
 }
 
-/** Records whose name or CAS number contains the query (case blind); all of them for an empty query. */
+/** The most chemicals one project holds. */
+export const MAX_PROJECT_CHEMICALS = 50;
+
+/**
+ * Records whose name or CAS number contains the query (case blind); all of them for an empty query.
+ * A record whose name or CAS number equals the query comes first; the rest keep the database order.
+ */
 export function filterBrowse(db: BrowseDb, query: string): BrowseRecord[] {
   const q = query.trim().toLowerCase();
   if (q === '') return db.records;
-  return db.records.filter(
+  const hits = db.records.filter(
     (r) => r.name.toLowerCase().includes(q) || (r.cas !== undefined && r.cas.includes(q)),
   );
+  const exact = (r: BrowseRecord): boolean => r.name.toLowerCase() === q || r.cas === q;
+  return [...hits.filter(exact), ...hits.filter((r) => !exact(r))];
 }
 
 export const browseCsvColumns: readonly CsvColumn[] = [

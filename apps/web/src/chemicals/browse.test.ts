@@ -94,3 +94,26 @@ describe('browse CSV', () => {
     expect(browseCsvRows(some)).toHaveLength(n);
   });
 });
+
+describe('filterBrowse exact match first', () => {
+  it('puts the record whose name is exactly the query before longer names', () => {
+    const hits = filterBrowse(db, 'benzene');
+    expect(hits.length).toBeGreaterThan(1);
+    expect(hits[0]!.name.toLowerCase()).toBe('benzene');
+  });
+  it('puts an exact CAS number first and keeps the rest in database order', () => {
+    const hits = filterBrowse(db, '71-43-2');
+    expect(hits[0]!.cas).toBe('71-43-2');
+    const plain = db.records.filter(
+      (r) => r.cas?.includes('71-43-2') || r.name.includes('71-43-2'),
+    );
+    expect(hits.map((h) => h.id).sort()).toEqual(plain.map((h) => h.id).sort());
+  });
+  it('is stable for a query with no exact match', () => {
+    const hits = filterBrowse(db, 'chlor');
+    const ids = db.records
+      .filter((r) => r.name.toLowerCase().includes('chlor') || r.cas?.includes('chlor'))
+      .map((r) => r.id);
+    expect(hits.map((h) => h.id)).toEqual(ids);
+  });
+});
