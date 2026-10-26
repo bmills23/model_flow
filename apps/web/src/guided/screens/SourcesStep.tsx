@@ -216,6 +216,12 @@ export function SourcesStep() {
                       }
                       onChange={(e) => update(c.id, (x) => ({ ...x, tph: e.target.value }))}
                     />
+                    {s.tph.trim() !== '' && classifyValue(s.tph).kind === 'invalid' && (
+                      <small role="alert" className="field-error">
+                        Enter a number above zero in mg/kg, or ND for not detected, or leave it
+                        blank. Until then the models that read it do not run.
+                      </small>
+                    )}
                   </label>
                 )}
               </div>

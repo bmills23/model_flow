@@ -152,4 +152,37 @@ describe('guidedStatus', () => {
     // an output the chain no longer chooses has no live hash: it is not current
     expect(hashOutputCheck(outputs, {})('well', 'benzene')).toBe('stale');
   });
+
+  it('an output the Run could not produce reads blocked while its inputs are unchanged, missing after an edit', () => {
+    const live = { vaporRisk: { benzene: 'aaaa0001' } };
+    const notes = {
+      benzene: { problems: [], feeds: { vaporRisk: 'aaaa0001' } },
+    };
+    expect(hashOutputCheck({}, live, notes)('vaporRisk', 'benzene')).toBe('blocked');
+    expect(
+      hashOutputCheck({}, { vaporRisk: { benzene: 'bbbb0002' } }, notes)('vaporRisk', 'benzene'),
+    ).toBe('missing');
+    expect(hashOutputCheck({}, live, {})('vaporRisk', 'benzene')).toBe('missing');
+  });
+
+  it('step 3d is done after a Run that left some outputs blocked, and does not say run again', () => {
+    const g = guidedWith(wellSite);
+    const input = { chemicals, guided: g };
+    const check: OutputCheck = (_f, id) => (id === 'benzene' ? 'current' : 'blocked');
+    expect(guidedStatus({ ...input, outputCheck: check }).run).toBe('done');
+  });
+
+  it('step 3d is to do when a Run produced nothing at all (every output blocked)', () => {
+    const g = guidedWith(wellSite);
+    expect(guidedStatus({ chemicals, guided: g, outputCheck: () => 'blocked' }).run).toBe('todo');
+  });
+
+  it('step 3d reads checking while saved outputs wait for the chemical files, unless one is already stale', () => {
+    const g = guidedWith(wellSite);
+    expect(guidedStatus({ chemicals, guided: g, outputCheck: () => 'unchecked' }).run).toBe(
+      'checking',
+    );
+    const some: OutputCheck = (_f, id) => (id === 'benzene' ? 'stale' : 'unchecked');
+    expect(guidedStatus({ chemicals, guided: g, outputCheck: some }).run).toBe('run-again');
+  });
 });

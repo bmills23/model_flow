@@ -124,7 +124,8 @@ describe('SiteStep', () => {
     );
     const nav = screen.getByRole('navigation', { name: /guided steps/i });
     const run = () => within(nav).getAllByRole('listitem')[4]!;
-    expect(run().textContent).toMatch(/done/i);
+    // saved outputs wait for the chemical files before they can be called current
+    expect(run().textContent).toMatch(/checking/i);
     tick(/^a building/i);
     expect(run().textContent).toMatch(/run again/i);
   });

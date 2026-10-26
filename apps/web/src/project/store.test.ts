@@ -50,6 +50,7 @@ import {
   getDroppedFeeds,
   getStaleFeeds,
   getOverrides,
+  getGuided,
   getSite,
   hasUnfiledChanges,
   hasUnsavedChanges,
@@ -58,6 +59,7 @@ import {
   loadProject,
   markSaved,
   newProject,
+  setGuided,
   setOverrides,
   setScreen,
   setSite,
@@ -673,6 +675,21 @@ describe('project store', () => {
   it('never lets a rejected decimal entry reach the saved project', () => {
     const s = getScreen('transport');
     setScreen('transport', { ...s, form: { ...s.form, K: REJECTED_ENTRY } });
+    const text = JSON.stringify(currentProject());
+    expect(text).not.toContain(REJECTED_ENTRY);
+    expect(text).not.toMatch(/ambiguous/i);
+  });
+
+  it('never lets a rejected entry in the guided answers or the 3c edits reach the saved project', () => {
+    const g = getGuided();
+    setGuided({
+      ...g,
+      forms: { ...g.forms, transport: { ...DEFAULT_FORM, K: REJECTED_ENTRY } },
+    });
+    setOverrides({
+      ...emptyOverrides(),
+      fate: { benzene: { koc: { value: REJECTED_ENTRY, note: 'x' } } },
+    });
     const text = JSON.stringify(currentProject());
     expect(text).not.toContain(REJECTED_ENTRY);
     expect(text).not.toMatch(/ambiguous/i);

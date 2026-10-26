@@ -120,6 +120,53 @@ describe('deriveChemical', () => {
     );
   });
 
+  it('names a source duration it cannot read as a run problem, and leaves a blank one continuous', () => {
+    for (const bad of ['1O', '0,5', '0', '-3']) {
+      const g = guidedWith((x) => {
+        wellSite(x);
+        x.run.sourceYr = bad;
+      });
+      expect(runPlan(g)!.problems).toEqual([
+        'How long the source lasts must be a number of years above zero, or blank for a source that never ends.',
+      ]);
+    }
+    const blank = guidedWith((x) => {
+      wellSite(x);
+      x.run.sourceYr = '';
+    });
+    expect(runPlan(blank)!.problems).toEqual([]);
+    // a path that never reads the duration does not complain about it
+    const leach = guidedWith((x) => {
+      x.site.sources = ['soilAbove'];
+      x.site.paths.leaching = true;
+      x.run.sourceYr = '1O';
+    });
+    expect(runPlan(leach)!.problems).toEqual([]);
+  });
+
+  it('names a TPH value it cannot read as a problem of each model that would use it, not a silent drop', () => {
+    const g = guidedWith((x) => {
+      x.site.sources = ['soilAbove'];
+      x.site.paths.leaching = true;
+      x.site.paths.well = true;
+      value(x, BENZENE, 'soilAbove', '250', 'mg/kg');
+      x.sources[BENZENE]!.tph = '1,200';
+    });
+    const d = deriveChemical(g, runPlan(g)!, chem(BENZENE, 'Benzene'));
+    const tphProblems = d.problems.filter((p) => /TPH/.test(p.message));
+    expect(tphProblems.map((p) => p.model)).toEqual(['vadose']);
+    expect(tphProblems[0]!.message).toMatch(/Benzene/);
+    // blank and ND are both fine
+    for (const ok of ['', 'ND']) {
+      g.sources[BENZENE]!.tph = ok;
+      expect(
+        deriveChemical(g, runPlan(g)!, chem(BENZENE, 'Benzene')).problems.filter((p) =>
+          /TPH/.test(p.message),
+        ),
+      ).toEqual([]);
+    }
+  });
+
   it('reads ND as zero and names a missing value as a problem of the model that needs it', () => {
     const g = guidedWith((x) => {
       wellSite(x);

@@ -18,7 +18,7 @@ import {
   type ModeledSourceKey,
   type SourceValueKey,
 } from './state';
-import { sourceNumber } from './units';
+import { classifyValue, sourceNumber } from './units';
 
 /**
  * The step 3d Run's inputs, derived per chemical (plan section 2): the model forms the Run walks are the
@@ -134,6 +134,15 @@ export function runPlan(guided: GuidedState): RunPlan | null {
     const s = wellPath?.source ?? (building?.source === 'groundwater' ? 'groundwater' : null);
     if (s === 'groundwater' || s === 'soilBelow' || s === 'soilAbove') transportSource = s;
   }
+  if (
+    transportSource === 'groundwater' &&
+    run.sourceYr.trim() !== '' &&
+    positive(run.sourceYr) === null
+  ) {
+    problems.push(
+      'How long the source lasts must be a number of years above zero, or blank for a source that never ends.',
+    );
+  }
   const buildingSource =
     building?.source === 'soilGas' ||
     building?.source === 'soilAbove' ||
@@ -229,6 +238,16 @@ export function deriveChemical(
     return n === null ? null : numText(n);
   })();
 
+  // a TPH total that is typed but unreadable stops the models that would read it, rather than dropping out
+  const tphUnreadable = classifyValue(guided.sources[chem.id]?.tph ?? '').kind === 'invalid';
+  const tphProblem = (model: GuidedFormKey): void => {
+    if (!tphUnreadable || problems.some((p) => p.model === model && /TPH/.test(p.message))) return;
+    problems.push({
+      model,
+      message: `${chem.name} has a TPH value in step 3b that is not a number above zero, so the ${MODEL_WORDS[model]} cannot run for it. Enter a number above zero in mg/kg, ND for not detected, or leave it blank.`,
+    });
+  };
+
   for (const m of plan.models) {
     const need = REQUIRED[m] ?? [];
     const missing = FATE_FIELDS.filter((f) => need.includes(f.key) && rsl[f.key] === undefined);
@@ -254,6 +273,7 @@ export function deriveChemical(
     // no per-chemical decay input yet: the leachate does not decay
     f.mu = '0';
     f.srcF = source('soilAbove', 'vadose');
+    tphProblem('vadose');
     f.tphOn = tph !== null;
     if (tph !== null) f.srcFT = tph;
     f.durationYr = run.timeYr;
@@ -269,6 +289,7 @@ export function deriveChemical(
     f.H = prop('hPrime');
     f.Koc = prop('koc');
     f.F = source('soilBelow', 'saturated');
+    tphProblem('saturated');
     f.tphOn = tph !== null;
     if (tph !== null) f.FT = tph;
     f.horizonYr = run.timeYr;
@@ -315,6 +336,7 @@ export function deriveChemical(
     } else if (b === 'soilAbove') {
       f.source = 'soil';
       f.soilConc = source('soilAbove', 'vapor');
+      tphProblem('vapor');
       f.tphOn = tph !== null;
       if (tph !== null) f.tph = tph;
       if (f.Koc === '') {

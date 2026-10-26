@@ -1,4 +1,4 @@
-import { getGuided, setGuided } from '../project/store';
+import { getEpoch, getGuided, setGuided } from '../project/store';
 import { runPlan, type ChemicalData, type RunPlan } from './derive';
 import { outputHashes, type OutputHashes } from './hash';
 import {
@@ -10,7 +10,7 @@ import {
   type RunProgress,
   type RunReply,
 } from './run';
-import type { GuidedOutputs, GuidedState } from './state';
+import type { GuidedOutputs, GuidedRunNotes, GuidedState } from './state';
 
 /**
  * The step 3d Run (plan section 2): the jobs of every project chemical go to one module worker
@@ -127,6 +127,28 @@ export function outputsOfRun(prepared: PreparedRun, runs: readonly ChemicalRun[]
 }
 
 /**
+ * What the Run found for each chemical, to keep with the project: the reasons models did not run and the
+ * live hash of each chain output it could not produce. A chemical that lost nothing has no note.
+ */
+export function notesOfRun(prepared: PreparedRun, runs: readonly ChemicalRun[]): GuidedRunNotes {
+  const out: GuidedRunNotes = {};
+  const outputs = prepared.plan?.outputs ?? [];
+  for (const r of runs) {
+    const feeds: Record<string, string> = {};
+    for (const feed of outputs) {
+      const hash = prepared.hashes[feed]?.[r.chemicalId];
+      if (hash !== undefined && r.outputs[feed] === undefined) feeds[feed] = hash;
+    }
+    if (r.problems.length === 0 && Object.keys(feeds).length === 0) continue;
+    out[r.chemicalId] = {
+      problems: r.problems.map((p) => ({ model: p.model, message: p.message })),
+      feeds,
+    };
+  }
+  return out;
+}
+
+/**
  * Run step 3d on the project as it stands and write the outputs into the guided state. Resolves with each
  * chemical's run (its outputs and problems), or null when the Run could not start or a newer Run
  * superseded it; then nothing is written. A reply with an error writes nothing either and is thrown.
@@ -138,9 +160,66 @@ export async function runGuided(
 ): Promise<ChemicalRun[] | null> {
   const prepared = prepareRun(getGuided(), data);
   if (prepared.problems.length > 0) return null;
+  const epoch = getEpoch();
   const reply = await runner.run(prepared.jobs, onProgress);
   if (reply === null) return null;
   if (!reply.ok) throw new Error(reply.error);
-  setGuided({ ...getGuided(), outputs: outputsOfRun(prepared, reply.runs) });
+  // another project was opened or started while the models ran: its answers are not these
+  if (getEpoch() !== epoch) return null;
+  setGuided({
+    ...getGuided(),
+    outputs: outputsOfRun(prepared, reply.runs),
+    runNotes: notesOfRun(prepared, reply.runs),
+  });
   return reply.runs;
+}
+
+/** The Run in progress, if any, and the error that stopped the last one. */
+export interface RunState {
+  progress: { done: number; total: number } | null;
+  error: string | null;
+}
+const IDLE: RunState = { progress: null, error: null };
+let shared: GuidedRunner | null = null;
+let runState: RunState = IDLE;
+let runToken = 0;
+const runListeners = new Set<() => void>();
+const setRunState = (next: RunState): void => {
+  runState = next;
+  for (const l of runListeners) l();
+};
+
+export const getRunState = (): RunState => runState;
+export function subscribeRunState(l: () => void): () => void {
+  runListeners.add(l);
+  return () => runListeners.delete(l);
+}
+
+/**
+ * Start a Run that outlives the screen: leaving step 3d does not stop it, its outputs land in the project
+ * when it finishes, and the screen shows its progress again when it is opened. A newer Run supersedes it.
+ */
+export async function startGuidedRun(data: readonly ChemicalData[]): Promise<void> {
+  shared ??= createGuidedRunner();
+  const mine = ++runToken;
+  setRunState({ progress: { done: 0, total: data.length }, error: null });
+  try {
+    await runGuided(shared, data, (p) => {
+      if (runToken === mine)
+        setRunState({ progress: { done: p.done, total: p.total }, error: null });
+    });
+    if (runToken === mine) setRunState(IDLE);
+  } catch (e) {
+    if (runToken === mine) {
+      setRunState({ progress: null, error: e instanceof Error ? e.message : String(e) });
+    }
+  }
+}
+
+/** Stop any Run and forget its state (a test teardown). */
+export function resetGuidedRun(): void {
+  runToken++;
+  shared?.dispose();
+  shared = null;
+  setRunState(IDLE);
 }

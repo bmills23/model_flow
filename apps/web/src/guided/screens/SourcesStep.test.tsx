@@ -111,6 +111,20 @@ describe('SourcesStep, 3b', () => {
       target: { value: '1200' },
     });
     expect(getGuided().sources['71-43-2']!.tph).toBe('1200');
+    expect(screen.queryByText(/until then the models that read it do not run/i)).toBeNull();
+  });
+
+  it('says so when the total petroleum hydrocarbons value cannot be read', () => {
+    benzene();
+    wellSite({
+      sources: ['soilAbove'],
+      paths: { leaching: true, well: false, building: false, stream: false },
+    });
+    render(<SourcesStep />);
+    fireEvent.change(screen.getByLabelText(/total petroleum hydrocarbons/i), {
+      target: { value: '1,200' },
+    });
+    expect(screen.getByText(/until then the models that read it do not run/i)).toBeTruthy();
   });
 });
 

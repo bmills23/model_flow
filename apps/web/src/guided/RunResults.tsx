@@ -2,10 +2,10 @@ import { scaleLinear } from 'd3-scale';
 import { convert } from '@model-flow/engine';
 import { formatConcentration } from '../transport/chartData';
 import type { WellFeed } from '../transport/wellFeed';
-import type { ModelProblem, RunPlan } from './derive';
+import type { RunPlan } from './derive';
 import { MODEL_WORDS } from './derive';
-import type { GuidedOutputs, GuidedRun } from './state';
-import { indoorAirRows, inputBlocks } from './runView';
+import type { GuidedOutputs, GuidedRun, GuidedRunNotes } from './state';
+import { indoorAirRows, inputBlocks, stepText } from './runView';
 import type { RunChemical } from './runCsv';
 
 /**
@@ -102,8 +102,8 @@ export function RunResults(props: {
   chemicals: readonly RunChemical[];
   plan: RunPlan;
   run: GuidedRun;
-  /** What the last Run in this session found per chemical (a model that could not run, and why). */
-  problems: ReadonlyMap<string, ModelProblem[]> | null;
+  /** What the last Run found per chemical (a model that could not run, and why), kept with the project. */
+  notes: GuidedRunNotes;
 }) {
   const { outputs, chemicals, plan, run } = props;
   const wells = chemicals.filter((c) => outputs['well']?.[c.id] !== undefined);
@@ -180,9 +180,7 @@ export function RunResults(props: {
               </tr>
               <tr>
                 <th scope="row">Time step (groundwater transport curve)</th>
-                <td>
-                  {run.stepYr} years, {plan.settings.nCurve} points
-                </td>
+                <td>{stepText(run, plan.settings.nCurve)}</td>
               </tr>
               <tr>
                 <th scope="row">Models run</th>
@@ -197,7 +195,7 @@ export function RunResults(props: {
         <h2 id="guided-run-detail">Detail for each chemical</h2>
         {chemicals.map((c) => {
           const blocks = inputBlocks(outputs, c.id);
-          const problems = props.problems?.get(c.id) ?? [];
+          const problems = props.notes[c.id]?.problems ?? [];
           return (
             <div key={c.id} role="group" aria-label={c.name} className="guided-run-detail">
               <h3>{c.name}</h3>
