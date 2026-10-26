@@ -95,8 +95,85 @@ const SEED = {
     },
   },
 };
+// The guided visit's project: two chemicals (benzene and MTBE) with groundwater and soil gas sources, the
+// well and building paths, a downgradient exposure point, the site properties and source values filled in.
+// The step 3d Run is pressed in the browser (see GUIDED_RUN), so the outputs come from the real runner.
+const GUIDED_IDS = ['71-43-2', '1634-04-4'];
+const GUIDED_SEED = {
+  ...SEED,
+  version: 3,
+  title: 'Mobile check, guided',
+  chemicals: [
+    { id: GUIDED_IDS[0], name: 'Benzene' },
+    { id: GUIDED_IDS[1], name: 'Methyl tert-butyl ether' },
+  ],
+  guided: {
+    site: {
+      sources: ['groundwater', 'soilGas'],
+      location: 'downgradient',
+      paths: { well: true, building: true },
+    },
+    forms: {
+      transport: {
+        dispLaw: 'entered',
+        alphaLOverride: '10',
+        alphaTOverride: '1',
+        alphaVOverride: '0.1',
+      },
+      household: {
+        showerMethod: 'little',
+        householdFactor: '0.0005',
+        showerDropletDiameter: '1',
+        showerFallTime: '1',
+        showerFlow: '8',
+        showerMinutes: '10',
+        stallVolume: '2',
+        ventilation: '1',
+        postShowerMinutes: '5',
+        filmGas: '3',
+        filmLiquid: '0.02',
+      },
+      vapor: { capHeight: '0.2', capPorosity: '0.35', capMoisture: '0.25' },
+    },
+    sources: Object.fromEntries(
+      GUIDED_IDS.map((id) => [
+        id,
+        {
+          values: {
+            groundwater: { value: '1', unit: 'mg/L' },
+            soilGas: { value: '50', unit: 'ug/m3' },
+          },
+          note: 'mobile check',
+          tph: '',
+        },
+      ]),
+    ),
+  },
+};
+// The five guided step screens that exist in wave AC1 (steps 4a to 6 are placeholders until wave AC2).
+const GUIDED_ROUTES = [
+  '#/step/chemicals',
+  '#/step/site',
+  '#/step/properties',
+  '#/step/sources',
+  '#/step/run',
+];
+// Press Run on step 3d and wait for "Up to date", then open every disclosure so the well tables are measured.
+const GUIDED_RUN = `(async()=>{const u=window.__ui;
+  const find=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim()));
+  let run=null;
+  for(let i=0;i<120&&!run;i++){const b=find(/^run all chemicals/i);if(b&&!b.disabled)run=b;else await u.sleep(250)}
+  if(!run)return 'run button never enabled: '+[...document.querySelectorAll('main [role=alert],main .guided-run-status')].map(e=>e.textContent.trim()).join(' | ');
+  run.click();
+  for(let i=0;i<240;i++){
+    if(/^up to date/i.test((document.querySelector('main .guided-run-status')||{}).textContent||''))break;
+    await u.sleep(250)}
+  await u.sleep(500);
+  document.querySelectorAll('main details').forEach(d=>{d.open=true});
+  await u.sleep(500);return null})()`;
 const ROUTES = [
   '#/',
+  ...GUIDED_ROUTES,
   '#/transport',
   '#/vadose',
   '#/saturated',
@@ -259,6 +336,17 @@ const FED_ROUTES = [
       await u.sleep(1000)})()`,
   },
 ];
+// "guided" routes: each step screen over GUIDED_SEED, not pressed (PRESS would run the models twice); step 3d
+// presses its own Run first.
+FED_ROUTES.push(
+  ...GUIDED_ROUTES.map((route) => ({
+    route,
+    tag: 'guided',
+    seed: GUIDED_SEED,
+    noPress: true,
+    ...(route === '#/step/run' ? { viaSetup: GUIDED_RUN } : {}),
+  })),
+);
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.
 const ONLY = opt('routes');
 // --views m390-light,d1280-light limits the run to those viewports.
@@ -434,7 +522,7 @@ const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
     bad:bad.slice(0,6).map(e=>e.tagName.toLowerCase()+(e.className&&e.className.baseVal===undefined?'.'+String(e.className).trim().split(/\\s+/).join('.'):'')),
-    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),solubility:{list:document.querySelectorAll('main ul.solubility-defaults li').length,flags:document.querySelectorAll('main .level-flag').length,notes:[...document.querySelectorAll('main p.alert[role=note]')].filter(p=>/above the solubility/.test(p.textContent)).length},fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
+    seedOpen:document.querySelectorAll('main details.override-panel[open]').length,seedEdited:document.querySelectorAll('main .override-row.edited .edited-mark').length,projectList:{rows:document.querySelectorAll('main .project-chemicals .chem-list li').length,user:[...document.querySelectorAll('main .project-chemicals .chem-list li')].some(l=>/defined by you/.test(l.textContent)&&/Bis\\(2-ethylhexyl\\)phthalate \\(copy\\)/.test(l.textContent)),editor:!!document.querySelector('main .user-chemical-editor'),confirm:!!document.querySelector('main [role=group][aria-label^="Remove Bis"]')},seedBenzene:!![...document.querySelectorAll('main')].some(m=>/benzene/i.test(m.textContent)),modeledBlock:(()=>{const e=document.querySelector('[aria-label^="Modeled source uncertainty results"]');const t=e?e.textContent:'';return {present:!!e,current:/iterations ran/.test(t)&&/Which inputs matter/.test(t),notRun:/No run yet/.test(t),stale:/out of date/.test(t)}})(),solubility:{list:document.querySelectorAll('main ul.solubility-defaults li').length,flags:document.querySelectorAll('main .level-flag').length,notes:[...document.querySelectorAll('main p.alert[role=note]')].filter(p=>/above the solubility/.test(p.textContent)).length},fedPanel:!!document.querySelector('[aria-label="Total TPH level"]'),fedProduce:[...document.querySelectorAll('main label')].some(l=>/plant factors for homegrown produce/i.test(l.textContent)&&!!l.querySelector('input:checked')),critTables:document.querySelectorAll('main .criteria table.crit').length,critRows:document.querySelectorAll('main .criteria table.crit tbody tr').length,critSet:((document.querySelector('main .criteria select')||{}).value)||'',critNotes:document.querySelectorAll('main .criteria details.crit-note').length,guidedRun:{charts:document.querySelectorAll('main [role=img][aria-label*="at the well"]').length,tables:document.querySelectorAll('main table[aria-label$="at the well, values"]').length,upToDate:/^up to date/i.test((document.querySelector('main .guided-run-status')||{}).textContent||''),status:((document.querySelector('main .guided-run-status')||{}).textContent||'').slice(0,160)},tables:document.querySelectorAll('main table').length,charts:document.querySelectorAll('main svg').length,
     navMain:document.querySelectorAll('nav[aria-label="Main"]').length,mains:document.querySelectorAll('main#main').length,mainH1:document.querySelectorAll('main#main h1').length,controls:document.querySelectorAll('main#main input,main#main select,main#main textarea').length,links:document.querySelectorAll('main#main a[href]').length,textLen:((document.querySelector('main#main')||{}).innerText||'').trim().length,
     small:[...document.querySelectorAll('main button,main a,main input,main select')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.height<44)}).length})})()`;
 
@@ -473,13 +561,13 @@ for (const view of VIEWS) {
   await send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-color-scheme', value: view.dark ? 'dark' : 'light' }],
   });
-  for (const { route, via, mid, viaSetup, midSetup, routeSetup, tag, noPress } of visits) {
+  for (const { route, via, mid, viaSetup, midSetup, routeSetup, tag, noPress, seed } of visits) {
     await send('Page.navigate', { url: baseUrl });
     await sleep(500);
     await evaluate(
       // every visit starts from the seed: it goes under the key the app reads first (the older keys are read
       // only when that one is missing, so a seed there would leave the previous visit's project in place)
-      `try{localStorage.removeItem('model_flow.project.autosave.v1');localStorage.removeItem('model_flow.project.autosave.v2');localStorage.setItem('model_flow.project.autosave.v3',${JSON.stringify(JSON.stringify(SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
+      `try{localStorage.removeItem('model_flow.project.autosave.v1');localStorage.removeItem('model_flow.project.autosave.v2');localStorage.setItem('model_flow.project.autosave.v3',${JSON.stringify(JSON.stringify(seed ?? SEED))})}catch(e){};location.hash=${JSON.stringify(via ?? route)};location.reload()`,
     );
     await sleep(1800);
     if (viaSetup) {
@@ -558,10 +646,13 @@ for (const view of VIEWS) {
       (tag === 'seeded' && !(m.seedBenzene && m.seedOpen >= 2 && m.seedEdited >= 2)) ||
       (tag === 'solubility' &&
         !(m.solubility.list >= 2 && m.solubility.flags >= 1 && m.solubility.notes >= 1)) ||
+      (tag === 'guided' &&
+        route === '#/step/run' &&
+        !(m.guidedRun.upToDate && m.guidedRun.charts >= 2 && m.guidedRun.tables >= 2)) ||
       (tag === 'criteria' && !(m.critSet === 'all' && m.critTables >= 2 && m.critRows >= 10));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'solubility' ? ` solubility=${JSON.stringify(m.solubility)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'solubility' ? ` solubility=${JSON.stringify(m.solubility)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'guided' && route === '#/step/run' ? ` guidedRun=${JSON.stringify(m.guidedRun)}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }

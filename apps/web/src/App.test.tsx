@@ -258,24 +258,31 @@ describe('guided flow routes', () => {
   });
 
   it.each([
-    ['chemicals', 'Chemicals'],
+    ['chemicals', 'Chemicals', 'Chemicals of concern'],
     ['site', 'Site model'],
     ['properties', 'Site properties'],
     ['sources', 'Source values'],
     ['run', 'Run and view'],
     ['pathways', 'Pathways'],
     ['results', 'Results'],
-  ])('renders the shell for #/step/%s with that step open', async (id, label) => {
-    window.location.hash = `#/step/${id}`;
-    render(<App />);
-    const steps = await screen.findByRole('navigation', { name: /guided steps/i });
-    expect(steps.querySelector('[aria-current="step"]')?.textContent ?? '').toContain(label);
-    expect(
-      await screen.findByRole('heading', { level: 1, name: label }, { timeout: 20000 }),
-    ).toBeTruthy();
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: /^back$/i })).toBeTruthy();
-  });
+  ] as [string, string, string?][])(
+    'renders the shell for #/step/%s with that step open',
+    async (id, label, heading) => {
+      window.location.hash = `#/step/${id}`;
+      render(<App />);
+      const steps = await screen.findByRole('navigation', { name: /guided steps/i });
+      expect(steps.querySelector('[aria-current="step"]')?.textContent ?? '').toContain(label);
+      expect(
+        await screen.findByRole(
+          'heading',
+          { level: 1, name: heading ?? label },
+          { timeout: 20000 },
+        ),
+      ).toBeTruthy();
+      expect(screen.getByRole('navigation', { name: 'Main' })).toBeTruthy();
+      expect(screen.getByRole('link', { name: /^back$/i })).toBeTruthy();
+    },
+  );
 
   it('shows steps that are not built yet as arriving with the next update', async () => {
     window.location.hash = '#/step/targets';

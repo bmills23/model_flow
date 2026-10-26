@@ -169,18 +169,22 @@ export function RunStep() {
       </p>
 
       {settingsProblems.length > 0 && (
-        <ul className="guided-run-problems" role="alert">
-          {settingsProblems.map((p) => (
-            <li key={p}>{p}</li>
-          ))}
-        </ul>
+        <div role="alert">
+          <ul className="guided-run-problems">
+            {settingsProblems.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
       )}
       {prepared !== null && prepared.problems.length > 0 && settingsProblems.length === 0 && (
-        <ul className="guided-run-problems" role="alert">
-          {prepared.problems.map((p) => (
-            <li key={p}>{p}</li>
-          ))}
-        </ul>
+        <div role="alert">
+          <ul className="guided-run-problems">
+            {prepared.problems.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </div>
       )}
       {error !== null && (
         <p className="guided-run-problems" role="alert">
