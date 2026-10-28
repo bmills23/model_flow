@@ -25,6 +25,16 @@ import type { ScreenKey } from './methodsRun';
 import { ReportCharts } from './ReportCharts';
 import { ReportUncertainty } from './UncertaintyResults';
 import { computeResults, tableText, type ProjectResults, type SectionResults } from './results';
+import {
+  buildGuidedReport,
+  guidedReceptorEditRows,
+  guidedRunBasis,
+  guidedSummary,
+  hasGuidedOutputs,
+  loadGuidedReportData,
+  STEPS_NOT_RUN,
+  type GuidedSummary,
+} from './guidedSource';
 import type { ChemicalBlock } from './chemicalBlocks';
 import type { CsvTable } from '../export/DownloadCsv';
 import { HelpLink } from '../docs/HelpLink';
@@ -92,13 +102,22 @@ function ResultTable({ table, level = 4 }: { table: CsvTable; level?: 4 | 5 }) {
   );
 }
 
-function ChemicalBlocks({ blocks }: { blocks: readonly ChemicalBlock[] }) {
+function ChemicalBlocks({
+  blocks,
+  guided = false,
+}: {
+  blocks: readonly ChemicalBlock[];
+  guided?: boolean;
+}) {
   return (
     <div className="report-chemicals">
-      <h4>Results sent on, one block per chemical</h4>
+      <h4>
+        {guided ? 'Results, one block per chemical' : 'Results sent on, one block per chemical'}
+      </h4>
       <p className="muted">
-        A screen runs one chemical at a time. Each block below is the result sent from this screen
-        for one chemical, as the later screens used it, with the inputs it ran with.
+        {guided
+          ? 'Each block below is one chemical: the result the step 3d Run kept for it, as steps 4 to 6 use it, with the inputs its run used, then its full tables and charts.'
+          : 'A screen runs one chemical at a time. Each block below is the result sent from this screen for one chemical, as the later screens used it, with the inputs it ran with.'}
       </p>
       {blocks.map((b) => (
         <section key={b.chemicalId} className="report-chemical" aria-label={b.name}>
@@ -112,10 +131,15 @@ function ChemicalBlocks({ blocks }: { blocks: readonly ChemicalBlock[] }) {
             ))}
           </ul>
           {b.inputs.length > 0 && (
-            <table className="report-table" aria-label={`Inputs of the sent run, ${b.name}`}>
+            <table
+              className="report-table"
+              aria-label={
+                guided ? `Inputs of the run, ${b.name}` : `Inputs of the sent run, ${b.name}`
+              }
+            >
               <thead>
                 <tr>
-                  <th scope="col">Input of the sent run</th>
+                  <th scope="col">{guided ? 'Input of the run' : 'Input of the sent run'}</th>
                   <th scope="col">Value</th>
                 </tr>
               </thead>
@@ -132,6 +156,9 @@ function ChemicalBlocks({ blocks }: { blocks: readonly ChemicalBlock[] }) {
           {b.tables.map((t) => (
             <ResultTable key={t.name} table={t} level={5} />
           ))}
+          {b.charts !== undefined && (
+            <ReportCharts charts={b.charts} level={5} title={`Charts, ${b.name}`} />
+          )}
         </section>
       ))}
     </div>
@@ -162,11 +189,13 @@ function CurrentRunNote({ run }: { run: NonNullable<SectionResults['current']> }
   );
 }
 
-function ResultTables({ results }: { results: SectionResults }) {
+function ResultTables({ results, guided }: { results: SectionResults; guided: boolean }) {
   return (
     <>
       {results.methodBasis !== undefined && <MethodBasisNote basis={results.methodBasis} />}
-      {results.chemicals !== undefined && <ChemicalBlocks blocks={results.chemicals} />}
+      {results.chemicals !== undefined && (
+        <ChemicalBlocks blocks={results.chemicals} guided={guided} />
+      )}
       {results.current !== undefined && <CurrentRunNote run={results.current} />}
       {results.notes.length > 0 && (
         <ul className="report-notes">
@@ -312,6 +341,58 @@ function MethodIds({ ids, names }: { ids: readonly string[]; names: ReadonlyMap<
   );
 }
 
+/** What the guided report prints before its sections: the site model, the run settings and the Run's notes. */
+function GuidedSteps({ summary }: { summary: GuidedSummary }) {
+  return (
+    <section className="report-section" aria-labelledby="rep-guided">
+      <h2 id="rep-guided">Guided steps</h2>
+      <p className="muted">
+        This report prints the results of the guided steps: the models the site model chose, run
+        once for every chemical in step 3d, and the exposure and risk or cleanup levels of steps 4
+        and 5.
+      </p>
+      {summary.paths.length > 0 && (
+        <>
+          <h3>Site model (step 2)</h3>
+          <ul className="report-notes">
+            {summary.paths.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      <h3>Run settings (step 3d)</h3>
+      <table className="report-table" aria-label="Run settings">
+        <tbody>
+          {summary.settings.map((r) => (
+            <tr key={r.label}>
+              <th scope="row">{r.label}</th>
+              <td>{r.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <h3>Notes of the Run</h3>
+      {summary.runNotes.length === 0 ? (
+        <p className="muted">
+          The Run counted no value as below a reporting limit or not detected, and every model ran.
+        </p>
+      ) : (
+        summary.runNotes.map((n) => (
+          <div key={n.chemical} className="report-run-notes">
+            <h4>{n.chemical}</h4>
+            <ul className="report-notes">
+              {n.lines.map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      )}
+    </section>
+  );
+}
+
 export function ReportView({
   report,
   preparedBy,
@@ -323,6 +404,8 @@ export function ReportView({
   staleFeeds = [],
   basis = null,
   basisFailed = false,
+  guided = null,
+  notice = null,
 }: {
   report: Report;
   preparedBy: string;
@@ -345,6 +428,10 @@ export function ReportView({
   basis?: ProjectBasis | null;
   /** True when the databases the basis reads did not load, so it cannot be built. */
   basisFailed?: boolean;
+  /** The guided steps' summary, for a guided report; null for today's report. */
+  guided?: GuidedSummary | null;
+  /** One line printed under the header (today's report at `#/report` when the steps have not run). */
+  notice?: string | null;
 }) {
   const { statement } = report;
   const methodNames = new Map(statement.methods.map((m) => [m.id, m.name]));
@@ -376,6 +463,8 @@ export function ReportView({
         </dl>
         <p className="report-affiliation">{report.nonAffiliation}</p>
       </header>
+      {notice !== null && <p className="report-notice">{notice}</p>}
+      {guided !== null && <GuidedSteps summary={guided} />}
 
       {report.site !== null && (
         <p className="report-site">
@@ -452,7 +541,7 @@ export function ReportView({
               ) : results[sec.key] === undefined ? (
                 <p className="muted">No results for this screen.</p>
               ) : (
-                <ResultTables results={results[sec.key]!} />
+                <ResultTables results={results[sec.key]!} guided={guided !== null} />
               )}
               {results?.[sec.key] !== undefined && (
                 <ReportCharts charts={results[sec.key]!.charts} />
@@ -675,10 +764,61 @@ export function ReportView({
   );
 }
 
-export function ReportPage() {
-  const [preparedBy, setPreparedBy] = useState('');
-  const id = useId();
+/**
+ * The report page. At `#/report` (`source` 'auto') it prints the guided report when the project holds
+ * results of the guided Run, and otherwise today's report with one line saying the steps have not been
+ * run; `source` 'workbench' always prints today's report (`WorkbenchReportPage`).
+ */
+export function ReportPage({ source = 'auto' }: { source?: 'auto' | 'workbench' } = {}) {
   const project = useMemo(() => currentProject(), []);
+  const guided = useMemo(() => source === 'auto' && hasGuidedOutputs(project), [source, project]);
+  return guided ? (
+    <GuidedReportPage project={project} />
+  ) : (
+    <WorkbenchReport project={project} notice={source === 'auto' ? STEPS_NOT_RUN : null} />
+  );
+}
+
+/** Today's report, always: the model workbench screens and their sent results. */
+export function WorkbenchReportPage() {
+  return <ReportPage source="workbench" />;
+}
+
+function ReportTools({
+  preparedBy,
+  setPreparedBy,
+}: {
+  preparedBy: string;
+  setPreparedBy: (v: string) => void;
+}) {
+  const id = useId();
+  return (
+    <div className="report-tools">
+      <h1 id="report-heading" className="report-page-title">
+        Report
+      </h1>
+      <HelpLink target="report" />
+      <label htmlFor={id} className="report-prepared">
+        Prepared by (optional)
+        <input
+          id={id}
+          type="text"
+          value={preparedBy}
+          onChange={(e) => setPreparedBy(e.target.value)}
+          autoComplete="off"
+        />
+      </label>
+      <button type="button" className="btn" onClick={() => window.print()}>
+        Print or save as PDF
+      </button>
+    </div>
+  );
+}
+
+type Project = ReturnType<typeof currentProject>;
+
+function WorkbenchReport({ project, notice }: { project: Project; notice: string | null }) {
+  const [preparedBy, setPreparedBy] = useState('');
   const report = useMemo(() => buildReport(project), [project]);
   const staleFeeds = useStaleSlots();
   const [results, setResults] = useState<ProjectResults | null>(null);
@@ -687,17 +827,7 @@ export function ReportPage() {
   const userChemicals = useMemo(() => userChemicalRowsOf(project), [project]);
   const [basis, setBasis] = useState<ProjectBasis | null>(null);
   const [basisFailed, setBasisFailed] = useState(false);
-  useEffect(() => {
-    let live = true;
-    if (Object.keys(overridesOf(project).toxicity).length === 0) return;
-    loadOverrideRows(project).then(
-      (r) => live && setUserValues(r),
-      () => undefined,
-    );
-    return () => {
-      live = false;
-    };
-  }, [project]);
+  useUserValues(project, setUserValues);
   useEffect(() => {
     let live = true;
     computeResults(project, { chainHash: getChainHash }).then(
@@ -746,25 +876,7 @@ export function ReportPage() {
   }, [project, report, results, staleFeeds]);
   return (
     <section aria-labelledby="report-heading">
-      <div className="report-tools">
-        <h1 id="report-heading" className="report-page-title">
-          Report
-        </h1>
-        <HelpLink target="report" />
-        <label htmlFor={id} className="report-prepared">
-          Prepared by (optional)
-          <input
-            id={id}
-            type="text"
-            value={preparedBy}
-            onChange={(e) => setPreparedBy(e.target.value)}
-            autoComplete="off"
-          />
-        </label>
-        <button type="button" className="btn" onClick={() => window.print()}>
-          Print or save as PDF
-        </button>
-      </div>
+      <ReportTools preparedBy={preparedBy} setPreparedBy={setPreparedBy} />
       <ReportView
         report={report}
         preparedBy={preparedBy}
@@ -775,8 +887,123 @@ export function ReportPage() {
         staleFeeds={staleFeeds}
         basis={basis}
         basisFailed={basisFailed}
+        notice={notice}
         uncertainty={<ReportUncertainty project={project} />}
       />
+    </section>
+  );
+}
+
+/** The project's toxicity overrides as report rows, loaded once. */
+function useUserValues(project: Project, set: (rows: OverrideRow[]) => void): void {
+  useEffect(() => {
+    let live = true;
+    if (Object.keys(overridesOf(project).toxicity).length === 0) return;
+    loadOverrideRows(project).then(
+      (r) => live && set(r),
+      () => undefined,
+    );
+    return () => {
+      live = false;
+    };
+  }, [project, set]);
+}
+
+interface GuidedReportState {
+  report: Report;
+  summary: GuidedSummary;
+  receptorEdits: ReceptorEditRow[];
+  results: ProjectResults | null;
+  basis: ProjectBasis | null;
+  basisFailed: boolean;
+}
+
+/**
+ * The guided report: the guided project's derived forms and step 3d outputs run through the report's own
+ * code (`guidedSource.ts`). It computes off the first render, as today's report does.
+ */
+function GuidedReportPage({ project }: { project: Project }) {
+  const [preparedBy, setPreparedBy] = useState('');
+  const [state, setState] = useState<GuidedReportState | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [userValues, setUserValues] = useState<OverrideRow[]>([]);
+  const userChemicals = useMemo(() => userChemicalRowsOf(project), [project]);
+  useUserValues(project, setUserValues);
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const data = await loadGuidedReportData(project);
+        if (!live) return;
+        const report = buildGuidedReport(project, data);
+        const base: GuidedReportState = {
+          report,
+          summary: guidedSummary(data),
+          receptorEdits: guidedReceptorEditRows(project, data),
+          results: null,
+          basis: null,
+          basisFailed: false,
+        };
+        setState(base);
+        const results = await computeResults(project, {}, 'guided', data).catch(
+          (): ProjectResults => ({}),
+        );
+        if (!live) return;
+        setState({ ...base, results });
+        try {
+          const [fateRows, cleanupProps] = await Promise.all([
+            loadVaporChemicals(),
+            loadCleanupProps(),
+          ]);
+          if (!live) return;
+          const basis = guidedRunBasis({
+            report,
+            results,
+            project,
+            data,
+            fateRows,
+            cleanupProps,
+            defaults: validation.unverified.defaults as BasisDefault[],
+          });
+          setState({ ...base, results, basis });
+        } catch {
+          if (live) setState({ ...base, results, basisFailed: true });
+        }
+      } catch {
+        if (live) setFailed(true);
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [project]);
+  return (
+    <section aria-labelledby="report-heading">
+      <ReportTools preparedBy={preparedBy} setPreparedBy={setPreparedBy} />
+      {state === null ? (
+        failed ? (
+          <p className="report-basis-failed" role="alert">
+            The guided report could not be prepared because the chemical database did not load.
+            Reload the page and open the report again.
+          </p>
+        ) : (
+          <p className="muted" role="status">
+            Preparing the guided report...
+          </p>
+        )
+      ) : (
+        <ReportView
+          report={state.report}
+          preparedBy={preparedBy}
+          results={state.results}
+          userValues={userValues}
+          userChemicals={userChemicals}
+          receptorEdits={state.receptorEdits}
+          basis={state.basis}
+          basisFailed={state.basisFailed}
+          guided={state.summary}
+        />
+      )}
     </section>
   );
 }

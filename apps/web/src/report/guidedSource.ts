@@ -15,7 +15,7 @@ import type { VaporState } from '../vapor/project';
 import * as cleanupProject from '../cleanup/project';
 import * as riskProject from '../risk/project';
 import { chain, SOURCE_LABELS } from '../guided/chain';
-import { cleanupSourceKind, deriveCleanupForm } from '../guided/cleanupForm';
+import { deriveCleanupForm } from '../guided/cleanupForm';
 import {
   deriveChemical,
   runPlan,
@@ -386,6 +386,3 @@ export function guidedRunBasis(input: GuidedBasisInput): ProjectBasis {
     receptorForms: guidedReceptorForms(data),
   });
 }
-
-/** Where step 5 solves its levels: the medium contacted, or a modeled source. */
-export const guidedCleanupSource = (g: GuidedState) => cleanupSourceKind(g);

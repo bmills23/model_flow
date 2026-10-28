@@ -23,8 +23,10 @@ describe('the report route', () => {
     expect(await screen.findByRole('heading', { name: 'Guided steps' }, SLOW)).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Groundwater transport' })).toBeTruthy();
     expect(screen.queryByText(STEPS_NOT_RUN)).toBeNull();
-    expect(await screen.findByRole('region', { name: 'Benzene' }, SLOW)).toBeTruthy();
-    expect(screen.getByRole('region', { name: 'MTBE' })).toBeTruthy();
+    // one block per chemical in each model's section: groundwater transport, then shower and irrigation
+    expect(await screen.findAllByRole('region', { name: 'Benzene' }, SLOW)).toHaveLength(2);
+    expect(screen.getAllByRole('region', { name: 'MTBE' })).toHaveLength(2);
+    expect(screen.getAllByRole('heading', { name: 'Charts, MTBE' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/counted as 0.25 mg\/L, half the limit/)).toBeTruthy();
     expect(screen.queryByText(/Run on the screen now/)).toBeNull();
   }, 60000);

@@ -97,6 +97,7 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
 import { pickSlot, slotOf, type FeedSlots } from '../project/feedSlots';
 import { isChemicalFeed } from '../project/schema';
+import { cleanupSourceKind } from '../guided/cleanupForm';
 import { MODEL_WORDS } from '../guided/derive';
 import { OUTPUT_MODEL, outputHashes } from '../guided/hash';
 import { outputSlots } from '../guided/slots';
@@ -105,7 +106,6 @@ import type { GuidedFormKey, GuidedOutputs, GuidedState } from '../guided/state'
 import type { BasisChoice } from './methodBasis';
 import {
   chemicalScreens,
-  guidedCleanupSource,
   guidedScreens,
   guidedSectionKeys,
   individualFallback,
@@ -1129,7 +1129,7 @@ async function guidedCleanup(
   const g = data.guided;
   const sec = empty();
   const userProps = userCleanupProps(chemicalsOf(project));
-  const source = guidedCleanupSource(g);
+  const source = cleanupSourceKind(g);
   if (source !== 'direct') {
     const ctx = { chemicals: data.chemicals, db: data.db, overrides: data.overrides };
     const plan = guidedSolvePlan(g, ctx);
