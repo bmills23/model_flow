@@ -4693,9 +4693,8 @@ were made while building and reviewing it. Each is DEFAULT and open to Bryan's o
    produce path). Method choices (aquifer mode, dispersivity law, shower method, uptake) are not exposed in 3a; each
    template keeps the screen default. The start is blank except the site values (foc, bulk density), and Kd is derived
    per chemical at the Run.
-5. **ND in step 3b is a valid answer and reads as zero in the Run.** Zero typed by hand does not count as entered (use
-   ND). A pasted below-limit value, "<x", reads as ND and so loses its limit. Whether ND should read as zero or as half
-   the limit is a product call put to Bryan; zero stands until he rules.
+5. **ND in step 3b is a valid answer.** Zero typed by hand does not count as entered (use ND). In AC1 every ND read as
+   zero in the Run and a pasted "<x" lost its limit; Bryan ruled the change on 2026-10-27 (item 12), built in wave AC2.
 6. **Household Henry constant** is filled in atm m3/mol as the dimensionless value times 0.024465.
 7. **Run reasons are saved with the project** as `runNotes` and shown on 3d, so a refusal survives a reload and is not
    only in the session.
@@ -4708,8 +4707,11 @@ were made while building and reviewing it. Each is DEFAULT and open to Bryan's o
 11. **Timing and workers.** Five chemicals from soil above through the layered (modern) vadose model to a well took 9.7 s
     on one thread (about 2.1 s per aromatic, 1.1 s for MTBE), so one worker runs the Run and the uncertainty pool is not
     used; fifty chemicals would take about 1.6 minutes.
-12. **BRYAN, open.** Still to rule: ND as zero or half the limit (item 5), and what the Run should do when the household
-    shower inputs are blank (write no household output with a visible reason, or have 3a flag them as needed).
+12. **BRYAN, ruled 2026-10-27** ("go as recommended"), both built in wave AC2:
+    - **Non-detects.** A value below a reporting limit, "<x", counts as half the limit (x/2) in the Run, and the Run's
+      notes and the report say so per chemical and medium. A bare "ND" with no limit counts as zero, also noted.
+    - **Blank household shower inputs.** When the chain uses the household water model, step 3a marks its blank inputs
+      as needed like any other value a chosen model needs, so step 3a is not done while they are blank.
 13. **Staleness is a hash** per chemical and model, covering the derived form, the settings the model reads and the hash
     of the model that feeds it. The status names the model and chemical but not the field.
 14. **Chain.** A source ticked with no path ticked is the added problem `no-path`. Two sources feeding the well are
