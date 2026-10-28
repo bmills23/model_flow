@@ -16,9 +16,11 @@ export type Basis = 'legacy' | 'modern' | 'oxygen-limited';
 
 /**
  * Where the basis came from: the screen's own choice, the result sent on, a default for a screen with no
- * choice, or the stated default because nothing was sent for the chemical the screen shows.
+ * choice, or the stated default because nothing was sent for the chemical the screen shows; or, in a
+ * guided report, the one method chosen for the Run in step 3d (or, for indoor air, the model chosen in
+ * step 2).
  */
-export type BasisFrom = 'screen' | 'sent' | 'default' | 'unsent';
+export type BasisFrom = 'screen' | 'sent' | 'default' | 'unsent' | 'run' | 'site';
 
 export interface BasisChoice {
   basis: Basis;
@@ -89,11 +91,15 @@ export function methodBasisOf(choice: BasisChoice, disagreements: readonly strin
   const lead =
     choice.from === 'screen'
       ? `The conclusions in this section rest on the ${name}, the method shown on the screen.`
-      : choice.from === 'sent'
-        ? `The conclusions in this section rest on the ${name}, the one sent to the exposure and risk screen.`
-        : choice.from === 'unsent'
-          ? `No method was sent to the exposure and risk screen for this chemical, so the conclusions in this section rest on the ${name}, the default.`
-          : `This screen does not offer a choice of method, so the conclusions in this section rest on the ${name}.`;
+      : choice.from === 'run'
+        ? `The conclusions in this section rest on the ${name}, the method chosen for the Run in step 3d.`
+        : choice.from === 'site'
+          ? `The conclusions in this section rest on the ${name}, the indoor air model chosen in step 2.`
+          : choice.from === 'sent'
+            ? `The conclusions in this section rest on the ${name}, the one sent to the exposure and risk screen.`
+            : choice.from === 'unsent'
+              ? `No method was sent to the exposure and risk screen for this chemical, so the conclusions in this section rest on the ${name}, the default.`
+              : `This screen does not offer a choice of method, so the conclusions in this section rest on the ${name}.`;
   const others = OTHERS[choice.basis];
   const sensitivity = `${others === 'The legacy and modern methods' ? 'The legacy and modern methods are' : `${others} is`} printed as a sensitivity check and is not the basis of any conclusion here.`;
   return { basis: name, statement: `${lead} ${sensitivity}`, disagreements: [...disagreements] };

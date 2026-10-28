@@ -97,6 +97,22 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
 import { pickSlot, slotOf, type FeedSlots } from '../project/feedSlots';
 import { isChemicalFeed } from '../project/schema';
+import { cleanupSourceKind } from '../guided/cleanupForm';
+import { MODEL_WORDS } from '../guided/derive';
+import { OUTPUT_MODEL, outputHashes } from '../guided/hash';
+import { outputSlots } from '../guided/slots';
+import { guidedKeptLevels, guidedSolvePlan } from '../guided/solve';
+import type { GuidedFormKey, GuidedOutputs, GuidedState } from '../guided/state';
+import type { BasisChoice } from './methodBasis';
+import {
+  chemicalScreens,
+  guidedScreens,
+  guidedSectionKeys,
+  individualFallback,
+  isFateKey,
+  loadGuidedReportData,
+  type GuidedReportData,
+} from './guidedSource';
 
 /** An engine warning with the method (or table) it came from. */
 export interface ResultWarning {
@@ -726,16 +742,28 @@ function uncertainty(): SectionResults {
   };
 }
 
+/** Which results a report prints: today's (the model screens and their sent feeds) or the guided steps'. */
+export type ResultsSource = 'workbench' | 'guided';
+
 /**
  * The results of every screen the project shows as used, computed from the saved forms with each
  * screen's own compute function and CSV table builders. Values passed between screens come from the
  * project's stored feeds, decoded as loading the project decodes them. A screen that cannot be
  * computed (a form that does not parse, an engine refusal) says why in its notes.
+ *
+ * With `source` 'guided' the same code runs on the guided project (`guidedSource.ts`): the derived forms,
+ * the step 3d outputs as the feeds, and the sections the chain uses. `data` may be passed when it is
+ * already loaded.
  */
 export async function computeResults(
   project: Project,
   session: ReportSession = {},
+  source: ResultsSource = 'workbench',
+  data?: GuidedReportData,
 ): Promise<ProjectResults> {
+  if (source === 'guided') {
+    return computeGuidedResults(project, data ?? (await loadGuidedReportData(project)));
+  }
   const saved = screensOf(project);
   const screens = withProjectReceptorEdits(saved, overridesOf(project));
   const feeds = project.feeds as FeedsLike | undefined;
@@ -938,4 +966,287 @@ async function computeOne(
     case 'uncertainty':
       return uncertainty();
   }
+}
+
+/* ------------------------------------------------------------------ the guided report */
+
+/** The step 3d outputs as a section's feeds: a chemical reads only its own slot. */
+function outputsFeed(outputs: GuidedOutputs): Feed {
+  return Object.assign(
+    <T>(key: string, chemicalId?: string): T | null =>
+      outputSlots<T>(outputs, key).get(chemicalId ?? '') ?? null,
+    {
+      slots: <T>(key: string): FeedSlots<T> => outputSlots<T>(outputs, key),
+      hash: (key: string, slot: string): string | null => outputs[key]?.[slot]?.inputsHash ?? null,
+    },
+  );
+}
+
+/** The workbench's words in a block, as the steps say them (no screens, nothing sent). */
+const GUIDED_WORDS: readonly [RegExp, string][] = [
+  [
+    /^The inputs of the (.+) that was sent were not recorded.*$/,
+    'The inputs of the $1 were not recorded; run step 3d again to record them.',
+  ],
+  [/ sent to the exposure and risk screen/g, ' kept by the step 3d Run for exposure and risk'],
+  [/ sent to the surface water screen/g, ' kept by the step 3d Run for the surface water model'],
+  [
+    / sent to the groundwater screen as its source/g,
+    " kept by the step 3d Run as the groundwater transport model's source",
+  ],
+  [/the groundwater screen/g, 'the groundwater transport model'],
+  [/ was sent\./g, ' was used.'],
+  [/^Method sent$/, 'Method used'],
+];
+
+export function guidedWords(text: string): string {
+  return GUIDED_WORDS.reduce((t, [re, to]) => t.replace(re, to), text);
+}
+
+/** The warning origins of the workbench screens, as the steps name them. */
+const GUIDED_ORIGIN: Readonly<Record<string, string>> = {
+  'exposure screen': 'step 4',
+  'cleanup screen': 'step 5',
+};
+
+const slugOf = (id: string): string => id.replace(/[^A-Za-z0-9]+/g, '-');
+
+/** One model's section for one chemical's derived screens (the chemical's own run). */
+async function fateSection(key: GuidedFormKey, s: Screens, feed: Feed): Promise<SectionResults> {
+  switch (key) {
+    case 'transport':
+      return transport(s, feed);
+    case 'vadose':
+      return vadose(s);
+    case 'saturated':
+      return saturated(s);
+    case 'vapor':
+      return vapor(s, feed);
+    case 'surfaceWater':
+      return surfaceWater(s, feed);
+    case 'household':
+      return household(s, feed);
+    case 'plantsEco':
+      return plantsEco(s);
+  }
+}
+
+/** A table of one chemical's run, named and labelled for that chemical. */
+const forChemical = (t: CsvTable, id: string, name: string): CsvTable => ({
+  ...t,
+  name: `${t.name}-${slugOf(id)}`,
+  label: `${t.label}, ${name}`,
+});
+
+/**
+ * A fate model's guided section: one block per chemical the model runs for, with the result the Run kept
+ * (the blocks of `chemicalBlocks.ts`, in the words of the steps) and the inputs it used, then that
+ * chemical's full tables and charts computed on its derived forms. A result whose inputs changed since the
+ * Run says it is out of date; a chemical with no result says why, as not quantified.
+ */
+async function guidedFate(
+  key: GuidedFormKey,
+  data: GuidedReportData,
+  feed: Feed,
+  live: Readonly<Record<string, Readonly<Record<string, string>>>>,
+): Promise<SectionResults> {
+  const g = data.guided;
+  const sec = empty();
+  const feeds = Object.entries(OUTPUT_MODEL)
+    .filter(([f, m]) => m === key && (data.plan?.outputs.includes(f) ?? false))
+    .map(([f]) => f);
+  const nameOf: NameOf = (id) => data.names[id] ?? id;
+  const built = new Map(
+    (BLOCK_BUILDERS[key]?.(feed.slots, nameOf) ?? []).map((b) => [b.chemicalId, b]),
+  );
+  const blocks: ChemicalBlock[] = [];
+  for (const d of data.derived) {
+    if (d.forms[key] === undefined) continue;
+    const id = d.chemicalId;
+    const name = d.chemicalName;
+    const held = built.get(id);
+    const block: ChemicalBlock = {
+      chemicalId: id,
+      name,
+      sent: (held?.sent ?? []).map(guidedWords),
+      inputs: (held?.inputs ?? []).map((r) => ({ ...r, label: guidedWords(r.label) })),
+      notes: (held?.notes ?? []).map(guidedWords),
+      tables: (held?.tables ?? []).map((t) => ({ ...t, label: guidedWords(t.label) })),
+    };
+    const present = feeds.filter((f) => g.outputs[f]?.[id] !== undefined);
+    if (present.some((f) => g.outputs[f]![id]!.inputsHash !== live[f]?.[id])) {
+      block.notes.unshift(
+        'This result is out of date: an input it was run from has changed since the step 3d Run. Run step 3d again to bring it up to date.',
+      );
+    }
+    const problems = (g.runNotes[id]?.problems ?? []).filter((p) => p.model === key);
+    for (const p of problems) block.notes.push(`Not quantified: ${p.message}`);
+    if (present.length === 0) {
+      if (problems.length === 0) {
+        block.notes.push(
+          `Not quantified: the step 3d Run holds no result of the ${MODEL_WORDS[key]} for ${name}. Run step 3d.`,
+        );
+      }
+      blocks.push(block);
+      continue;
+    }
+    const one = await fateSection(key, chemicalScreens(data, d), feed);
+    // the vadose and saturated blocks already repeat the run with both methods in full
+    if (key !== 'vadose' && key !== 'saturated') {
+      block.tables.push(...one.tables.map((t) => forChemical(t, id, name)));
+    }
+    if (one.charts.length > 0) block.charts = one.charts;
+    for (const n of one.notes) if (!block.notes.includes(n)) block.notes.push(n);
+    for (const w of one.warnings) addWarnings(sec, `${w.origin}, ${name}`, [w]);
+    blocks.push(block);
+  }
+  if (blocks.length > 0) sec.chemicals = blocks;
+  else sec.notes.push(`No chemical of the project runs the ${MODEL_WORDS[key]}.`);
+  return sec;
+}
+
+const TARGET_WORDS: Record<string, string> = {
+  risk: 'the risk and hazard targets',
+  mcl: 'the federal MCL at the well',
+  state: 'the state standard at the well',
+};
+const ALLOCATION_WORDS: Record<string, string> = {
+  individual: 'each chemical alone',
+  cumulative: 'all chemicals together, keeping the step 3b ratios',
+  equal: 'with the target split equally among the chemicals',
+};
+
+/**
+ * The guided cleanup section: where the chain carries a source to a well, the step 5 levels kept with the
+ * project, printed while the guided fingerprint is current (`guidedKeptLevels`); then the levels in the
+ * media the receptors contact, from the derived cleanup form over the Run's results.
+ */
+async function guidedCleanup(
+  project: Project,
+  data: GuidedReportData,
+  feed: Feed,
+): Promise<SectionResults> {
+  const g = data.guided;
+  const sec = empty();
+  const userProps = userCleanupProps(chemicalsOf(project));
+  const source = cleanupSourceKind(g);
+  if (source !== 'direct') {
+    const ctx = { chemicals: data.chemicals, db: data.db, overrides: data.overrides };
+    const plan = guidedSolvePlan(g, ctx);
+    for (const c of data.chemicals) {
+      const k = guidedKeptLevels(g, c.id, ctx, plan);
+      if (!k.needed) continue;
+      const who = `${c.name}: `;
+      const row = plan.rows.find((r) => r.id === c.id);
+      if (k.levels === null) {
+        sec.notes.push(
+          row !== undefined && !row.result.ok
+            ? `${who}the cleanup level at the source is not quantified: ${row.result.errors.join(' ')}`
+            : `${who}the cleanup level at the source has not been solved yet. Open step 5: it solves the level and keeps it with the project, and the report then prints it.`,
+        );
+        continue;
+      }
+      if (!k.current) {
+        sec.notes.push(
+          `${who}the cleanup level kept with this project is out of date, because an input it was solved from has changed since. Open step 5: it solves it again, and the report then prints the new level.`,
+        );
+        continue;
+      }
+      const levels = k.levels;
+      if (levels.reason !== null) {
+        sec.notes.push(`${who}not quantified: ${levels.reason}.`);
+        continue;
+      }
+      const ceiling = solubilityCeiling('', c.id, data.cleanupProps, data.db.edition, userProps);
+      sec.tables.push(forChemical(savedLevelsTable(levels, ceiling), c.id, c.name));
+      sec.notes.push(
+        `${who}the level at the source is solved to meet ${TARGET_WORDS[levels.target]}, ${ALLOCATION_WORDS[levels.allocation]}.`,
+      );
+      for (const n of levels.notes) {
+        addWarnings(sec, 'step 5', [{ code: 'ui.source-note', message: `${who}${n}` }]);
+      }
+      for (const m of ['legacy', 'modern'] as const) {
+        const o = levels.methods[m];
+        if (o === undefined) continue;
+        if (o.ok) addWarnings(sec, MODELED_METHOD_ID, o.warnings);
+        else sec.notes.push(`${who}the ${METHOD_NAME[m]} level is not quantified: ${o.error}`);
+      }
+    }
+    sec.notes.push(
+      'The levels that follow are in the media the receptors contact (soil, tap water, indoor and outdoor air, surface water).',
+    );
+  }
+  if (individualFallback(g)) {
+    sec.notes.push(
+      'All chemicals together was chosen, but the media the receptors contact have no measured ratios on a modeled basis, so their levels are each chemical alone.',
+    );
+  }
+  const screens = guidedScreens(data);
+  const direct = await cleanup(
+    {
+      ...screens,
+      cleanup: { ...screens.cleanup, form: { ...screens.cleanup.form, source: 'direct' } },
+    },
+    feed,
+    data.db,
+    () => Promise.resolve(data.cleanupProps),
+    { saved: {}, unreadable: new Set(), userProps },
+  );
+  sec.tables.push(...direct.tables);
+  sec.charts.push(...direct.charts);
+  for (const n of direct.notes) if (!sec.notes.includes(n)) sec.notes.push(n);
+  for (const w of direct.warnings) addWarnings(sec, w.origin, [w]);
+  noteSolubilityFlags(sec);
+  return sec;
+}
+
+/** The method a guided section rests on: the step 3d choice, or the indoor air model of step 2. */
+function guidedBasisChoice(key: ScreenKey, g: GuidedState): BasisChoice | null {
+  if (key === 'household' || key === 'plantsEco' || key === 'uncertainty') return null;
+  if (key === 'vapor') {
+    const m = g.site.indoorModel;
+    return { basis: m === 'oxygenLimited' ? 'oxygen-limited' : m, from: 'site' };
+  }
+  return { basis: g.run.basis, from: 'run' };
+}
+
+async function computeGuidedResults(
+  project: Project,
+  data: GuidedReportData,
+): Promise<ProjectResults> {
+  const g = data.guided;
+  const feed = outputsFeed(g.outputs);
+  const live = outputHashes(g, data.chemicals);
+  const out: ProjectResults = {};
+  for (const key of guidedSectionKeys(g)) {
+    try {
+      const sec = isFateKey(key)
+        ? await guidedFate(key, data, feed, live)
+        : key === 'risk'
+          ? risk(guidedScreens(data), feed, data.db)
+          : await guidedCleanup(project, data, feed);
+      for (const w of sec.warnings) w.origin = GUIDED_ORIGIN[w.origin] ?? w.origin;
+      if (sec.tables.length === 0 && sec.notes.length === 0 && sec.chemicals === undefined) {
+        sec.notes.push('No result yet: the inputs entered are not enough to compute one.');
+      }
+      const choice = guidedBasisChoice(key, g);
+      const tables = [...sec.tables, ...(sec.chemicals ?? []).flatMap((b) => b.tables)];
+      if (choice !== null && tables.length > 0) {
+        const rowsOf = (match: (name: string) => boolean) =>
+          tables.filter((t) => match(t.name)).flatMap((t) => t.rows);
+        sec.methodBasis = methodBasisOf(
+          choice,
+          key === 'surfaceWater'
+            ? criteriaDisagreements(rowsOf((n) => n.startsWith('surface-water-criteria')))
+            : key === 'risk'
+              ? riskDisagreements(rowsOf((n) => n === 'risk-results'))
+              : [],
+        );
+      }
+      out[key] = sec;
+    } catch (e) {
+      out[key] = notComputed(e instanceof Error ? e.message : String(e));
+    }
+  }
+  return out;
 }

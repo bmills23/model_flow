@@ -15,6 +15,7 @@ import type { SurfaceWaterFeed } from '../surfaceWater/feed';
 import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed } from '../plantsEco/feeds';
 import type { ScreenKey } from './methodsRun';
+import type { ChartItem } from './chartItems';
 import { methodName, notRecordedNote, readRunInputs, type RunInputRow } from '../project/runInputs';
 import { transportRunInputs } from '../transport/runInputs';
 
@@ -37,6 +38,11 @@ export interface ChemicalBlock {
   /** Why part of the block is missing, when it is. */
   notes: string[];
   tables: CsvTable[];
+  /**
+   * The chemical's own charts, drawn after its tables. A guided report gives each chemical its charts
+   * (computed on that chemical's derived forms); absent in today's report, where the screen's run has them.
+   */
+  charts?: ChartItem[];
 }
 
 /** The run a fate screen currently shows, and whether it was sent on. */

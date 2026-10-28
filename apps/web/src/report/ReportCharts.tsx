@@ -77,12 +77,22 @@ function Chart({ item }: { item: ChartItem }) {
  * The charts of one report section, each with its data table open (the table is the print and
  * screen-reader form of the chart, so it is never hidden behind a button here).
  */
-export function ReportCharts({ charts }: { charts: ChartItem[] }) {
+export function ReportCharts({
+  charts,
+  level = 3,
+  title = 'Charts',
+}: {
+  charts: ChartItem[];
+  /** The heading level: 3 for a section's charts, 5 for a chemical block's. */
+  level?: 3 | 5;
+  title?: string;
+}) {
   if (charts.length === 0) return null;
+  const Heading = level === 3 ? 'h3' : 'h5';
   return (
     <TablesAlwaysOpen.Provider value={true}>
       <div className="report-charts">
-        <h3>Charts</h3>
+        <Heading>{title}</Heading>
         {charts.map((c, i) => (
           <div key={`${c.kind}:${i}`} className="report-chart">
             <Chart item={c} />
