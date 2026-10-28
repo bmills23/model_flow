@@ -245,3 +245,20 @@ describe('receptor edit helpers and saved shape', () => {
     newProject();
   });
 });
+
+describe('the guided flow keeps its own receptors', () => {
+  it('keys the edits guided.a and guided.b, apart from the risk and cleanup receptors', () => {
+    expect(receptorKey('guided', 'a')).toBe('guided.a');
+    expect(receptorKey('guided', 'b')).toBe('guided.b');
+    const state = stateWith(receptorKey('guided', 'b'), { 'legacy.bwKg': '48' }, 'Child');
+    expect(editsFor(state, 'guided', 'b')).toEqual({
+      name: 'Child',
+      values: { 'legacy.bwKg': '48' },
+    });
+    expect(editsFor(state, 'risk', 'b')).toBeUndefined();
+    expect(editCount(state, 'guided.b')).toBe(2);
+    const form = withReceptorEdits({ a: {}, b: {} } as unknown as RiskForm, state, 'guided');
+    expect(form.b?.edits?.name).toBe('Child');
+    expect(form.a.edits).toBeUndefined();
+  });
+});

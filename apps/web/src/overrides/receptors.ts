@@ -3,10 +3,10 @@ import type { FieldOverrides, OverridesState } from './model';
 /**
  * Editable exposure factors of a receptor, per project. The preset gives the starting values; an edit
  * here replaces one of them for the receptor it was typed on. Edits are keyed by `<screen>.<a|b>` so the
- * exposure and the cleanup screens keep their own receptors. Display units: the same boundary units the
+ * exposure and the cleanup screens keep their own receptors, and so does the guided flow (`guided`). Display units: the same boundary units the
  * engine's receptor tables use (kg, yr, d/yr, mg/d, mL/h).
  */
-export type ReceptorScreen = 'risk' | 'cleanup';
+export type ReceptorScreen = 'risk' | 'cleanup' | 'guided';
 
 export const receptorKey = (screen: ReceptorScreen, which: 'a' | 'b'): string =>
   `${screen}.${which}`;
