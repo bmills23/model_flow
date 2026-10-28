@@ -1,5 +1,13 @@
-import { defaultScreens, overridesOf, chemicalsOf, screensOf, type Project } from '../project';
-import { receptorKey } from '../overrides/receptors';
+import {
+  defaultScreens,
+  overridesOf,
+  chemicalsOf,
+  screensOf,
+  type Project,
+  type Screens,
+} from '../project';
+import { receptorKey, type ReceptorScreen } from '../overrides/receptors';
+import type { ReceptorForm } from '../risk/form';
 import { editableRows, shownValue } from '../risk/receptorRows';
 import { overrideRows } from '../overrides/toxicity';
 import { userChemicalRows } from '../overrides/userChemicals';
@@ -13,7 +21,7 @@ import { chemicalFields, type VaporChemicalRow } from '../vapor/chemicals';
 import type { Report, ReportSection } from './buildReport';
 import type { ScreenKey } from './methodsRun';
 import type { ProjectResults } from './results';
-import { siteEntries } from './siteValues';
+import { siteEntries, type SiteEntry } from './siteValues';
 
 /**
  * What a run rests on. Pure: the report model, the section results, the project and the databases go
@@ -97,6 +105,22 @@ export interface BasisInput {
   cleanupProps: CleanupProps;
   defaults: readonly BasisDefault[];
   stale: readonly (StaleSlot | StaleFeedKey)[];
+  /**
+   * The forms the sections were computed from; the project's saved screens when absent. A guided report
+   * passes its derived screens, whose fate forms are the step 3a templates.
+   */
+  screens?: Screens;
+  /** Further site values in use per section (a guided report's step 3b concentrations). */
+  siteRows?: Partial<Record<ScreenKey, readonly SiteEntry[]>>;
+  /** The receptors whose factor edits are listed; the exposure and cleanup screens' when absent. */
+  receptorForms?: readonly ReceptorFormRef[];
+}
+
+/** A receptor pair whose edits the project keeps under one screen's key, with the title the rows carry. */
+export interface ReceptorFormRef {
+  screen: ReceptorScreen;
+  title: string;
+  form: { a: ReceptorForm; b: ReceptorForm | null };
 }
 
 const row = (
@@ -311,14 +335,18 @@ function defaultRows(
   return out;
 }
 
-function receptorRows(project: Project): BasisRow[] {
-  const state = overridesOf(project);
+/** The exposure and cleanup screens' receptors, whose edits today's report lists. */
+export function screenReceptorForms(project: Project): ReceptorFormRef[] {
   const screens = screensOf(project);
-  const out: BasisRow[] = [];
-  const forms = [
+  return [
     { screen: 'risk', title: 'Exposure and risk', form: screens.risk.form },
     { screen: 'cleanup', title: 'Cleanup', form: screens.cleanup.form },
-  ] as const;
+  ];
+}
+
+function receptorRows(project: Project, forms: readonly ReceptorFormRef[]): BasisRow[] {
+  const state = overridesOf(project);
+  const out: BasisRow[] = [];
   for (const { screen, title, form } of forms) {
     for (const which of ['a', 'b'] as const) {
       const rf = which === 'a' ? form.a : form.b;
@@ -353,7 +381,11 @@ function receptorRows(project: Project): BasisRow[] {
   return out;
 }
 
-function projectRows(project: Project, db: ChemicalDb): BasisRow[] {
+function projectRows(
+  project: Project,
+  db: ChemicalDb,
+  receptors: readonly ReceptorFormRef[],
+): BasisRow[] {
   const out: BasisRow[] = [];
   for (const o of overrideRows(db, overridesOf(project))) {
     if (!o.applied || o.userValue === null) continue;
@@ -375,7 +407,7 @@ function projectRows(project: Project, db: ChemicalDb): BasisRow[] {
       }),
     );
   }
-  out.push(...receptorRows(project));
+  out.push(...receptorRows(project, receptors));
   return out;
 }
 
@@ -384,7 +416,7 @@ const keyOf = (r: BasisRow): string => `${r.kind}|${r.subject}|${r.value}|${r.vi
 /** What a run rests on, per section and for the project. */
 export function runBasis(input: BasisInput): ProjectBasis {
   const { report, results, project, defaults, stale } = input;
-  const screens = screensOf(project);
+  const screens = input.screens ?? screensOf(project);
   const byId = new Map(input.fateRows.map((r) => [r.id, r]));
   const propsById = new Map([...userCleanupProps(chemicalsOf(project)), ...input.cleanupProps]);
   const own = new Map<ScreenKey, BasisRow[]>();
@@ -398,6 +430,11 @@ export function runBasis(input: BasisInput): ProjectBasis {
       ...defaultRows(sec, codes, defaults),
       ...fateRowsFor(sec.key, form, byId, propsById),
       ...siteRowsFor(sec.key, form, freshForm),
+      ...(input.siteRows?.[sec.key] ?? []).map((e) =>
+        row('entered-unsourced', e.subject, e.value, {
+          detail: e.typed ? SITE_TYPED : SITE_PREFILLED,
+        }),
+      ),
     ]);
   }
   const sectionKeys = new Set(report.sections.map((s) => s.key));
@@ -431,5 +468,8 @@ export function runBasis(input: BasisInput): ProjectBasis {
     }
     sections[sec.key] = rows;
   }
-  return { sections, project: projectRows(project, input.db) };
+  return {
+    sections,
+    project: projectRows(project, input.db, input.receptorForms ?? screenReceptorForms(project)),
+  };
 }

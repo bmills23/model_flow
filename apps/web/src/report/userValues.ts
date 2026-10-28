@@ -1,5 +1,6 @@
 import { chemicalsOf, overridesOf, screensOf, type Project, type Screens } from '../project';
-import { receptorKey, withReceptorEdits } from '../overrides/receptors';
+import { receptorKey, withReceptorEdits, type ReceptorScreen } from '../overrides/receptors';
+import type { ReceptorForm } from '../risk/form';
 import { editableRows, shownValue } from '../risk/receptorRows';
 import { loadChemicalDb } from '../risk/chemicalDb';
 import { overrideRows, type OverrideRow } from '../overrides/toxicity';
@@ -29,6 +30,14 @@ export function withProjectReceptorEdits(screens: Screens, state: OverridesState
   };
 }
 
+const screenForms = (project: Project) => {
+  const screens = screensOf(project);
+  return [
+    { screen: 'risk' as const, title: 'Exposure and risk', form: screens.risk.form },
+    { screen: 'cleanup' as const, title: 'Cleanup', form: screens.cleanup.form },
+  ];
+};
+
 /** One edited exposure factor as the report lists it. */
 export interface ReceptorEditRow {
   receptor: string;
@@ -40,15 +49,20 @@ export interface ReceptorEditRow {
   note: string;
 }
 
-/** Every saved receptor factor edit, with the preset value beside it. */
-export function receptorEditRows(project: Project): ReceptorEditRow[] {
+/**
+ * Every saved receptor factor edit, with the preset value beside it: of the exposure and cleanup screens'
+ * receptors, or of the receptors `forms` names (a guided report passes the step 4 pair).
+ */
+export function receptorEditRows(
+  project: Project,
+  forms: readonly {
+    screen: ReceptorScreen;
+    title: string;
+    form: { a: ReceptorForm; b: ReceptorForm | null };
+  }[] = screenForms(project),
+): ReceptorEditRow[] {
   const state = overridesOf(project);
-  const screens = screensOf(project);
   const rows: ReceptorEditRow[] = [];
-  const forms = [
-    { screen: 'risk', title: 'Exposure and risk', form: screens.risk.form },
-    { screen: 'cleanup', title: 'Cleanup', form: screens.cleanup.form },
-  ] as const;
   for (const { screen, title, form } of forms) {
     for (const which of ['a', 'b'] as const) {
       const rf = which === 'a' ? form.a : form.b;

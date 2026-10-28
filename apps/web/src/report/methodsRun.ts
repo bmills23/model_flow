@@ -99,7 +99,7 @@ function preWaveRDefaults(key: ScreenKey): Screens[ScreenKey] | undefined {
  * The ids of the methods each used screen runs, from the screen's own rules: the screens run both
  * of their methods side by side, and a form choice adds or drops the optional ones.
  */
-function idsFor(key: ScreenKey, s: Screens): string[] {
+export function methodIdsFor(key: ScreenKey, s: Screens): string[] {
   switch (key) {
     case 'transport': {
       const f = s.transport.form;
@@ -200,7 +200,7 @@ export function methodsRun(screens: Screens, feeds?: FeedsLike): MethodsRun {
   const ids: string[] = [];
   for (const key of USED_SCREENS_ORDER) {
     if (!screenUsed(key, screens, feeds)) continue;
-    const list = idsFor(key, screens);
+    const list = methodIdsFor(key, screens);
     byScreen[key] = list;
     for (const id of list) if (!ids.includes(id)) ids.push(id);
   }
