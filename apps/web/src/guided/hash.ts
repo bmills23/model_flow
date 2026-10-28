@@ -62,13 +62,23 @@ function extrasOf(m: GuidedFormKey, plan: RunPlan, d: DerivedChemical): unknown 
     case 'saturated':
       return { method: s.basis };
     case 'vapor':
-      // the feed label carries the chemical's name; the source series wiring is part of the run
-      return { name: d.chemicalName, source: plan.buildingSource, downgradient: plan.downgradient };
+      // the source series wiring is part of the run
+      // the feed label carries the name, but a name alone changes no number, so it is not hashed
+      return { source: plan.buildingSource, downgradient: plan.downgradient };
     case 'surfaceWater':
       return { method: s.surfaceMethod };
     default:
       return null;
   }
+}
+
+/** The form a hash covers: a chemical's name is a label, so renaming a chemical changes no input. */
+function hashedForm(m: GuidedFormKey, form: unknown): unknown {
+  const fp = fingerprintForm(m, form);
+  if (fp === null || typeof fp !== 'object' || !('chemicalName' in fp)) return fp;
+  const { chemicalName: _label, ...rest } = fp as Record<string, unknown>;
+  void _label;
+  return rest;
 }
 
 /** The live hash of each output the plan writes, for one derived chemical. */
@@ -81,7 +91,7 @@ export function chemicalHashes(plan: RunPlan, d: DerivedChemical): Record<string
     const h = hashInputs({
       model: m,
       chemicalId: d.chemicalId,
-      form: fingerprintForm(m, d.forms[m] ?? null),
+      form: hashedForm(m, d.forms[m] ?? null),
       extras: extrasOf(m, plan, d),
       upstream: up === null ? null : hashOf(up),
     });

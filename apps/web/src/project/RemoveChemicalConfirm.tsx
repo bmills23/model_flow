@@ -1,4 +1,4 @@
-import { getHeldSlots, type StaleFeedKey } from './store';
+import { getHeldSlots, getOverrides, type StaleFeedKey } from './store';
 
 const FEED_LABELS: Record<StaleFeedKey, string> = {
   well: 'groundwater well result',
@@ -28,11 +28,13 @@ export function RemoveChemicalConfirm(props: {
   onCancel: () => void;
 }) {
   const held = getHeldSlots(props.id).map((k) => FEED_LABELS[k]);
+  const hasValues = props.id in getOverrides().fate;
   return (
     <div className="alert" role="group" aria-label={`Remove ${props.name} from the project?`}>
       <p>
         <strong>Remove {props.name} from the project?</strong> This deletes its row and everything
         entered on it on the exposure and risk screen and on the cleanup levels screen
+        {hasValues ? ', the chemical values you entered in step 3' : ''}
         {held.length > 0 ? `, and the results held for it: ${held.join(', ')}` : ''}.{' '}
         {/^user-\d+$/.test(props.id)
           ? 'It also deletes its surface water target and toxicity values, and a screen set to it is set back to no chemical, keeping the values typed there.'

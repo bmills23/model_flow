@@ -36,6 +36,19 @@ describe('defining a chemical on the chemicals page', () => {
     expect(within(section).getByText('Site solvent')).toBeTruthy();
   }, 30000);
 
+  it('says in the editor why a chemical is not saved when the project has filled up meanwhile', async () => {
+    await loaded();
+    define();
+    type(/^name$/i, 'Site solvent');
+    act(() => {
+      for (let i = 0; i < 50; i++) addChemical({ id: `fill-${i}`, name: `Fill ${i}` });
+    });
+    fireEvent.click(screen.getByRole('button', { name: /save chemical/i }));
+    expect(getChemicals().length).toBe(50);
+    expect(within(editor()).getByRole('alert').textContent).toMatch(/50 chemicals/i);
+    expect(within(editor()).getByRole('alert').textContent).toMatch(/remove one/i);
+  }, 30000);
+
   it('refuses a value without a note and saves nothing', async () => {
     await loaded();
     define();

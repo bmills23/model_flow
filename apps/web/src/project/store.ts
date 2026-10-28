@@ -616,7 +616,7 @@ export function getHeldSlots(chemicalId: string): StaleFeedKey[] {
 
 /**
  * Take a chemical out of the whole project: the list, its row on the risk and cleanup screens (with the
- * state in it) and every feed slot sent for it. The other chemicals are untouched. A fate screen set
+ * state in it), its step 3c chemical value edits and every feed slot sent for it. The other chemicals are untouched. A fate screen set
  * to it keeps its choice (it then shows as no longer in the list).
  */
 export function removeProjectChemical(id: string): void {
@@ -637,6 +637,11 @@ export function removeProjectChemical(id: string): void {
   clearChemicalSlots(id);
   clearModeledLevels(id);
   setGuided(withoutGuidedChemical(guided, id));
+  if (id in overrides.fate) {
+    const { [id]: _edits, ...fate } = overrides.fate;
+    void _edits;
+    setOverrides({ ...overrides, fate });
+  }
   if (USER_ID.test(id)) clearUserIdState(id);
   removeChemical(id);
 }

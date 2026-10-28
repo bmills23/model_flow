@@ -54,6 +54,13 @@ describe('SiteStep', () => {
     expect(screen.getByRole('alert').textContent).toMatch(/soil above the water table/i);
   });
 
+  it('announces the problems once: the alert sits in no live region', () => {
+    render(<SiteStep />);
+    const alert = screen.getByRole('alert');
+    expect(alert.closest('[aria-live]')).toBeNull();
+    expect(document.querySelectorAll('[role="alert"], [aria-live]').length).toBe(1);
+  });
+
   it('shows the chain panel: per path the source, the models and the notes', () => {
     render(<SiteStep />);
     tick(/^soil above the water table$/i);
