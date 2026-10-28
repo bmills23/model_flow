@@ -4,10 +4,12 @@ import { resetGuidedRun } from '../runner';
 import { defaultGuided } from '../state';
 import { RunStep } from './RunStep';
 import { addChemical, forgetMemory, getGuided, setGuided } from '../../project/store';
+import { setDecimalComma } from '../../ui/decimalComma';
 
 beforeEach(() => forgetMemory());
 afterEach(() => {
   cleanup();
+  setDecimalComma(false);
   resetGuidedRun();
   forgetMemory();
 });
@@ -59,6 +61,38 @@ describe('RunStep, 3d', () => {
     expect(getGuided().run.basis).toBe('legacy');
     expect(screen.getByText(/only the groundwater transport curve/i)).toBeTruthy();
     expect(screen.getByText(/keep their own time steps/i)).toBeTruthy();
+  });
+
+  it('honours the decimal comma setting and asks for a decimal keyboard', () => {
+    buildingSite();
+    setDecimalComma(true);
+    render(<RunStep />);
+    const time = screen.getByLabelText(/simulation time/i) as HTMLInputElement;
+    expect(time.getAttribute('inputmode')).toBe('decimal');
+    expect(
+      (screen.getByLabelText(/time step/i) as HTMLInputElement).getAttribute('inputmode'),
+    ).toBe('decimal');
+    fireEvent.change(screen.getByLabelText(/time step/i), { target: { value: '0,5' } });
+    expect(getGuided().run.stepYr).toBe('0.5');
+    expect((screen.getByLabelText(/time step/i) as HTMLInputElement).value).toBe('0,5');
+    fireEvent.change(screen.getByLabelText(/how long the source lasts/i), {
+      target: { value: '1,5' },
+    });
+    expect(getGuided().run.sourceYr).toBe('1.5');
+  });
+
+  it('stops the Run with a message when the simulation time cannot be used', async () => {
+    buildingSite();
+    render(<RunStep />);
+    await screen.findByText(/models are ready/i, undefined, { timeout: 20000 });
+    for (const bad of ['', '0', '-3', 'abc']) {
+      fireEvent.change(screen.getByLabelText(/simulation time/i), { target: { value: bad } });
+      const alert = await screen.findByRole('alert');
+      expect(alert.textContent).toMatch(/simulation time must be a number/i);
+      expect((runButton() as HTMLButtonElement).disabled).toBe(true);
+    }
+    fireEvent.change(screen.getByLabelText(/simulation time/i), { target: { value: '30' } });
+    expect(screen.queryByText(/simulation time must be a number/i)).toBeNull();
   });
 
   it('runs every chemical with one button, then shows indoor air, the input summary and the CSV', async () => {

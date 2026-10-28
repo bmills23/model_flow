@@ -59,12 +59,12 @@ export type GuidedStatus = Record<GuidedStepId, StepMark>;
 
 /**
  * A value counts as entered when a Run can read it: "ND" (not detected, which the Run takes as zero from
- * that medium) or a number above zero. Blank text and text a Run cannot read do not count.
+ * that medium), "<x" (below the reporting limit, which the Run takes as half of it) or a number above zero. Blank text and text a Run cannot read do not count.
  */
 const entered = (v: { value: string } | undefined): boolean => {
   if (v === undefined) return false;
   const k = classifyValue(v.value).kind;
-  return k === 'nd' || k === 'number';
+  return k === 'nd' || k === 'below' || k === 'number';
 };
 
 export function guidedStatus(input: StatusInput): GuidedStatus {

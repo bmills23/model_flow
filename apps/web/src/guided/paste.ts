@@ -6,7 +6,7 @@ import { classifyValue, normalizeUnit } from './units';
  * Pasting a table copied from a spreadsheet into step 3b. Tabs separate the cells (commas or semicolons
  * when there is no tab). A header row names the chemical column and the media; a row of units may follow;
  * without a header the columns are the grid's media in the order shown. Not-detected spellings become
- * "ND". Pure: nothing is saved here.
+ * "ND"; a value below a reporting limit keeps its limit ("<0.5"). Pure: nothing is saved here.
  */
 
 export interface PasteChemical {
@@ -176,11 +176,12 @@ export function parsePaste(
         return;
       }
       let v = cell;
-      if (ND.test(v) || LESS_THAN.test(v)) v = 'ND';
+      if (ND.test(v)) v = 'ND';
+      else if (LESS_THAN.test(v)) v = `<${v.slice(1).trim()}`;
       const c = classifyValue(v);
       if (c.kind === 'invalid') {
         result.problems.push(
-          `"${cell}" for ${chem.name} is not a number above zero or ND, so it was left out.`,
+          `"${cell}" for ${chem.name} is not a number above zero, a limit like <0.5, or ND, so it was left out.`,
         );
         return;
       }

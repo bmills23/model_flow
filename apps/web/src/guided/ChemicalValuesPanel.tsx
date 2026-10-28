@@ -81,6 +81,7 @@ export function ChemicalValuesPanel(props: {
                     <Field
                       label={`Your value for ${label.toLowerCase()}`}
                       value={entry?.value ?? ''}
+                      {...(problem !== null ? { describedBy: `${id}-problem` } : {})}
                       onChange={(v) =>
                         v === '' && (entry?.note ?? '') === ''
                           ? edit(chem.id, key, null)
@@ -90,6 +91,7 @@ export function ChemicalValuesPanel(props: {
                     <TextField
                       label={`Source note for ${label.toLowerCase()} (required)`}
                       value={entry?.note ?? ''}
+                      {...(problem !== null ? { describedBy: `${id}-problem` } : {})}
                       onChange={(n) =>
                         n === '' && (entry?.value ?? '') === ''
                           ? edit(chem.id, key, null)

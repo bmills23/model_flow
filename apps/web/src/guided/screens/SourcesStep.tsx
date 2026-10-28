@@ -10,19 +10,21 @@ import {
   subscribeProject,
 } from '../../project/store';
 import { guidedHref } from '../../steps';
-import { TextField } from '../../ui/controls';
+import { Field, TextField } from '../../ui/controls';
+import { REJECTED_ENTRY } from '../../ui/decimalComma';
 import { useChemicalRows } from '../../ui/chemicalFill';
 import { chain, SOURCE_LABELS } from '../chain';
 import { ChemicalValuesPanel } from '../ChemicalValuesPanel';
 import { parsePaste } from '../paste';
 import type { GuidedSource, SourceValueKey } from '../state';
-import { classifyValue, defaultUnit, unitsFor } from '../units';
+import { classifyValue, defaultUnit, tphUnusable, unitsFor } from '../units';
 
 /**
  * Steps 3b and 3c on one screen. 3b: a row for each chemical with a box for each source medium step 2
  * needs, a unit for each medium, a sample note for each row, pasting from a spreadsheet and the optional
- * total petroleum hydrocarbons in soil. "ND" (not detected) is a valid answer and the Run takes it as
- * zero from that medium. 3c: the chemical properties those models read, with project-only edits.
+ * total petroleum hydrocarbons in soil, where a modeled soil source reads it. "ND" (not detected) is a
+ * valid answer and the Run takes it as zero from that medium; "<x" (below the reporting limit x) is too,
+ * and the Run takes it as half the limit. 3c: the chemical properties those models read, with project-only edits.
  */
 
 const SOIL_MEDIA: readonly SourceValueKey[] = ['soil', 'soilAbove', 'soilBelow'];
@@ -40,7 +42,13 @@ export function SourcesStep() {
 
   const media = result.valuesNeeded;
   const sources = guided.sources;
-  const soilNeeded = media.some((m) => SOIL_MEDIA.includes(m));
+  // the TPH total is read by the leaching, saturated soil and soil-fed indoor air models, not by a measured value
+  const tphUsed =
+    guided.site.basis === 'modeled' &&
+    media.some((m) => SOIL_MEDIA.includes(m)) &&
+    (result.models.includes('vadose') ||
+      result.models.includes('saturated') ||
+      result.paths.find((p) => p.path === 'building')?.source === 'soilAbove');
 
   const save = (next: Record<string, GuidedSource>): void =>
     setGuided({ ...getGuided(), sources: next });
@@ -148,8 +156,11 @@ export function SourcesStep() {
         {guided.site.basis === 'measured'
           ? ' (here the values are the exposure concentrations)'
           : ''}
-        . Type <strong>ND</strong> where a chemical was not detected: the Run then counts none of it
-        from that medium. Pick the unit your lab reported; the values are converted for the models.
+        . Type <strong>ND</strong> where a chemical was not detected and the lab gave no limit: the
+        Run then counts none of it from that medium. Type a limit such as <strong>&lt;0.5</strong>{' '}
+        where the lab reported that a chemical was below its reporting limit: the Run counts half
+        the limit and says so in its notes. Pick the unit your lab reported; the values are
+        converted for the models.
       </p>
 
       <div className="guided-sources-units">
@@ -177,52 +188,35 @@ export function SourcesStep() {
                 {media.map((m) => {
                   const cell = s.values[m];
                   const unit = cell?.unit ?? columnUnit(m);
-                  const bad = cell !== undefined && classifyValue(cell.value).kind === 'invalid';
+                  const bad =
+                    cell !== undefined &&
+                    cell.value !== REJECTED_ENTRY &&
+                    classifyValue(cell.value).kind === 'invalid';
                   return (
-                    <label key={m} className="field">
-                      <span className="field-label">
-                        {SOURCE_LABELS[m]} ({unit})
-                      </span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        autoComplete="off"
-                        value={cell?.value ?? ''}
-                        aria-invalid={bad ? true : undefined}
-                        onChange={(e) => setValue(c.id, m, e.target.value)}
-                      />
-                      {bad && (
-                        <small role="alert" className="field-error">
-                          Enter a number above zero or ND for not detected.
-                        </small>
-                      )}
-                    </label>
-                  );
-                })}
-                {soilNeeded && (
-                  <label className="field">
-                    <span className="field-label">
-                      Total petroleum hydrocarbons in soil (mg/kg, optional)
-                    </span>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      autoComplete="off"
-                      value={s.tph}
-                      aria-invalid={
-                        s.tph.trim() !== '' && classifyValue(s.tph).kind === 'invalid'
-                          ? true
+                    <Field
+                      key={m}
+                      label={`${SOURCE_LABELS[m]} (${unit})`}
+                      value={cell?.value ?? ''}
+                      error={
+                        bad
+                          ? 'Enter a number above zero, a less-than value like <0.5, or ND for not detected.'
                           : undefined
                       }
-                      onChange={(e) => update(c.id, (x) => ({ ...x, tph: e.target.value }))}
+                      onChange={(v) => setValue(c.id, m, v)}
                     />
-                    {s.tph.trim() !== '' && classifyValue(s.tph).kind === 'invalid' && (
-                      <small role="alert" className="field-error">
-                        Enter a number above zero in mg/kg, or ND for not detected, or leave it
-                        blank. Until then the models that read it do not run.
-                      </small>
-                    )}
-                  </label>
+                  );
+                })}
+                {tphUsed && (
+                  <Field
+                    label="Total petroleum hydrocarbons in soil (mg/kg, optional)"
+                    value={s.tph}
+                    error={
+                      s.tph !== REJECTED_ENTRY && s.tph.trim() !== '' && tphUnusable(s.tph)
+                        ? 'Enter a number above zero in mg/kg, or ND for not detected, or leave it blank. A less-than value is not taken here. Until then the models that read it do not run.'
+                        : undefined
+                    }
+                    onChange={(v) => update(c.id, (x) => ({ ...x, tph: v }))}
+                  />
                 )}
               </div>
               <TextField
@@ -241,8 +235,8 @@ export function SourcesStep() {
         <p className="muted">
           Copy cells from a spreadsheet and paste them here. The first column is the chemical (name
           or CAS number). A header row naming the media, and a row of units under it, are used when
-          present; without a header the columns follow the order above. ND, N.D. and less-than
-          values are read as not detected.
+          present; without a header the columns follow the order above. ND and N.D. are read as not
+          detected; a less-than value such as &lt;0.5 keeps its limit.
         </p>
         <label className="field">
           <span className="field-label">Paste from a spreadsheet</span>

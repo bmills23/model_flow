@@ -18,7 +18,16 @@ import {
   type ModeledSourceKey,
   type SourceValueKey,
 } from './state';
-import { classifyValue, sourceNumber } from './units';
+import { propertyView } from './propertyCatalog';
+import {
+  classifyValue,
+  limitText,
+  MODEL_UNIT,
+  plainNumber,
+  sourceNumber,
+  tphUnusable,
+  unitClassOf,
+} from './units';
 
 /**
  * The step 3d Run's inputs, derived per chemical (plan section 2): the model forms the Run walks are the
@@ -62,6 +71,8 @@ export interface DerivedChemical {
   forms: DerivedForms;
   /** Why a model cannot run for this chemical (a missing 3b value or database property). */
   problems: ModelProblem[];
+  /** Each 3b value counted as half its reporting limit, or as zero, in plain words (Run notes). */
+  substitutions: string[];
 }
 
 export type VaporMethodKey = 'legacy' | 'modern' | 'devaull';
@@ -89,6 +100,8 @@ export interface RunPlan {
   settings: RunSettings;
   /** Why the Run cannot start (a run setting it cannot read). */
   problems: string[];
+  /** The household water model's inputs that step 3a marks as needed and are still blank, by name. */
+  householdBlanks: string[];
 }
 
 /** The most curve steps a Run computes: a finer time step is coarsened to this. */
@@ -118,6 +131,7 @@ export function runPlan(guided: GuidedState): RunPlan | null {
   const time = positive(run.timeYr);
   const step = positive(run.stepYr);
   let nCurve = 32;
+  if (time === null) problems.push('The simulation time must be a number of years above zero.');
   if (step === null) {
     problems.push('The time step must be a number of years above zero.');
   } else if (time !== null) {
@@ -177,7 +191,14 @@ export function runPlan(guided: GuidedState): RunPlan | null {
       surfaceMethod: run.basis === 'legacy' ? 'well-mixed' : 'mass-discharge',
     },
     problems,
+    householdBlanks: c.models.includes('household') ? householdBlanksOf(guided) : [],
   };
+}
+
+/** The household inputs step 3a lists as needed and finds blank, by their 3a names. */
+function householdBlanksOf(guided: GuidedState): string[] {
+  const group = propertyView(guided).groups.find((g) => g.id === 'household');
+  return (group?.fields ?? []).filter((f) => f.needed).map((f) => f.field.label);
 }
 
 /** A number as form text, without float noise (0.0012000000000000001 reads 0.0012). */
@@ -239,7 +260,7 @@ export function deriveChemical(
   })();
 
   // a TPH total that is typed but unreadable stops the models that would read it, rather than dropping out
-  const tphUnreadable = classifyValue(guided.sources[chem.id]?.tph ?? '').kind === 'invalid';
+  const tphUnreadable = tphUnusable(guided.sources[chem.id]?.tph ?? '');
   const tphProblem = (model: GuidedFormKey): void => {
     if (!tphUnreadable || problems.some((p) => p.model === model && /TPH/.test(p.message))) return;
     problems.push({
@@ -247,6 +268,26 @@ export function deriveChemical(
       message: `${chem.name} has a TPH value in step 3b that is not a number above zero, so the ${MODEL_WORDS[model]} cannot run for it. Enter a number above zero in mg/kg, ND for not detected, or leave it blank.`,
     });
   };
+
+  // each 3b value that is not a plain number, as the Run counts it (a note kept with the project)
+  const substitutions: string[] = [];
+  for (const medium of chain(guided.site).valuesNeeded) {
+    const v = guided.sources[chem.id]?.values[medium];
+    if (v === undefined) continue;
+    const c = classifyValue(v.value);
+    const where = `${chem.name} in ${SOURCE_LABELS[medium].toLowerCase()}`;
+    if (c.kind === 'nd') {
+      substitutions.push(`${where} was not detected and was counted as zero.`);
+    } else if (c.kind === 'below') {
+      const used = sourceNumber(v.value, v.unit, medium);
+      const unit = v.unit !== '' ? v.unit : MODEL_UNIT[unitClassOf(medium)];
+      if (used !== null) {
+        substitutions.push(
+          `${where} was below the reporting limit of ${limitText(v.value)} ${unit} and was counted as ${plainNumber(c.limit / 2)} ${unit}, half the limit.`,
+        );
+      }
+    }
+  }
 
   for (const m of plan.models) {
     const need = REQUIRED[m] ?? [];
@@ -258,6 +299,26 @@ export function deriveChemical(
         chem.fate === undefined
           ? `${chem.name} has no chemical properties in the database, so the ${MODEL_WORDS[m]} cannot run for it. Define it as your own chemical in step 1.`
           : `${chem.name} has no ${missing.map((f) => f.label.toLowerCase()).join(', ')} in the database, so the ${MODEL_WORDS[m]} cannot run for it. Enter the value in step 3c.`,
+    });
+  }
+
+  if (
+    has('household') &&
+    plan.householdBlanks.length > 0 &&
+    !problems.some((p) => p.model === 'household')
+  ) {
+    problems.push({
+      model: 'household',
+      message: `The ${MODEL_WORDS.household} cannot run for ${chem.name}, because these inputs are blank in step 3a: ${plan.householdBlanks.join(', ')}. Enter them in step 3a.`,
+    });
+  }
+  if (has('transport') && rsl.koc === undefined) {
+    problems.push({
+      model: 'transport',
+      message:
+        chem.fate === undefined
+          ? `${chem.name} has no chemical properties in the database, so the ${MODEL_WORDS.transport} cannot run for it. Define it as your own chemical in step 1.`
+          : `${chem.name} has no organic carbon partition coefficient (Koc) in the database, so the ${MODEL_WORDS.transport} cannot run for it. Enter the value in step 3c.`,
     });
   }
 
@@ -342,7 +403,7 @@ export function deriveChemical(
       if (f.Koc === '') {
         problems.push({
           model: 'vapor',
-          message: `${chem.name} has no koc in the database, so the ${MODEL_WORDS.vapor} cannot run for it from soil. Enter the value in step 3c.`,
+          message: `${chem.name} has no organic carbon partition coefficient (Koc) in the database, so the ${MODEL_WORDS.vapor} cannot run for it from soil. Enter the value in step 3c.`,
         });
       }
     } else if (b === 'groundwater' && !plan.downgradient) {
@@ -406,5 +467,5 @@ export function deriveChemical(
     forms.plantsEco = f;
   }
 
-  return { chemicalId: chem.id, chemicalName: chem.name, forms, problems };
+  return { chemicalId: chem.id, chemicalName: chem.name, forms, problems, substitutions };
 }

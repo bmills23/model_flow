@@ -9,7 +9,7 @@ import {
 import { guidedHref } from '../../steps';
 import { csvFileName } from '../../export/csvFileName';
 import { downloadCsv, exportCsv } from '../../export/csv';
-import { Seg, TextField } from '../../ui/controls';
+import { Field, Seg } from '../../ui/controls';
 import { chain } from '../chain';
 import { getRunState, prepareRun, startGuidedRun, subscribeRunState } from '../runner';
 import { RunResults } from '../RunResults';
@@ -121,17 +121,17 @@ export function RunStep() {
       </p>
 
       <div className="guided-run-settings">
-        <TextField
+        <Field
           label="Simulation time (years)"
           value={guided.run.timeYr}
           onChange={(v) => setRun({ timeYr: v })}
         />
-        <TextField
+        <Field
           label="Time step (years)"
           value={guided.run.stepYr}
           onChange={(v) => setRun({ stepYr: v })}
         />
-        <TextField
+        <Field
           label="How long the source lasts (years)"
           hint="Leave blank for a source that never ends."
           value={guided.run.sourceYr}

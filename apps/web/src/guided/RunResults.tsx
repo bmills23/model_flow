@@ -196,6 +196,7 @@ export function RunResults(props: {
         {chemicals.map((c) => {
           const blocks = inputBlocks(outputs, c.id);
           const problems = props.notes[c.id]?.problems ?? [];
+          const substitutions = props.notes[c.id]?.substitutions ?? [];
           return (
             <div key={c.id} role="group" aria-label={c.name} className="guided-run-detail">
               <h3>{c.name}</h3>
@@ -204,6 +205,18 @@ export function RunResults(props: {
                   <ul className="guided-run-problems">
                     {problems.map((p, i) => (
                       <li key={i}>{p.message}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {substitutions.length > 0 && (
+                <div className="guided-run-substitutions">
+                  <p>
+                    <strong>Values counted in place of a measurement</strong> (from step 3b):
+                  </p>
+                  <ul>
+                    {substitutions.map((t, i) => (
+                      <li key={i}>{t}</li>
                     ))}
                   </ul>
                 </div>

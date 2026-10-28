@@ -55,6 +55,14 @@ export function staleSentence(r: StaleReport): string {
   return parts.join('. ') + '.';
 }
 
+/**
+ * A recorded input in the words of the steps. The screens' run inputs say a source was "fed by another
+ * screen's result"; in the guided flow it came from an earlier model in the same Run.
+ */
+export function stepWords(text: string): string {
+  return text.replace(/fed by another screen's result/g, 'taken from an earlier model in this run');
+}
+
 export interface IndoorAirRow {
   chemical: string;
   peakMgPerM3: number;
@@ -78,10 +86,11 @@ export function indoorAirRows(
     out.push({
       chemical: c.name,
       peakMgPerM3: Math.max(...series.mgPerM3),
-      source:
+      source: stepWords(
         rowValue(feed.runInputs, 'Source') ??
-        rowValue(feed.runInputs, 'Source medium') ??
-        'not recorded',
+          rowValue(feed.runInputs, 'Source medium') ??
+          'not recorded',
+      ),
       method: rowValue(feed.runInputs, 'Indoor air method') ?? 'not recorded',
     });
   }
@@ -101,7 +110,10 @@ export function inputBlocks(
     const m = OUTPUT_MODEL[feed];
     if (rows === undefined || rows.length === 0 || m === undefined || seen.has(m)) continue;
     seen.add(m);
-    blocks.push({ model: MODEL_WORDS[m], rows });
+    blocks.push({
+      model: MODEL_WORDS[m],
+      rows: rows.map((r) => ({ ...r, value: stepWords(r.value) })),
+    });
   }
   return blocks;
 }
