@@ -128,7 +128,8 @@ export function outputsOfRun(prepared: PreparedRun, runs: readonly ChemicalRun[]
 
 /**
  * What the Run found for each chemical, to keep with the project: the reasons models did not run and the
- * live hash of each chain output it could not produce. A chemical that lost nothing has no note.
+ * live hash of each chain output it could not produce, and each value counted as half a reporting limit or as
+ * zero. A chemical with none of these has no note.
  */
 export function notesOfRun(prepared: PreparedRun, runs: readonly ChemicalRun[]): GuidedRunNotes {
   const out: GuidedRunNotes = {};
@@ -139,10 +140,15 @@ export function notesOfRun(prepared: PreparedRun, runs: readonly ChemicalRun[]):
       const hash = prepared.hashes[feed]?.[r.chemicalId];
       if (hash !== undefined && r.outputs[feed] === undefined) feeds[feed] = hash;
     }
-    if (r.problems.length === 0 && Object.keys(feeds).length === 0) continue;
+    const substitutions =
+      prepared.jobs.find((j) => j.chemicalId === r.chemicalId)?.substitutions ?? [];
+    if (r.problems.length === 0 && Object.keys(feeds).length === 0 && substitutions.length === 0) {
+      continue;
+    }
     out[r.chemicalId] = {
       problems: r.problems.map((p) => ({ model: p.model, message: p.message })),
       feeds,
+      ...(substitutions.length > 0 ? { substitutions } : {}),
     };
   }
   return out;

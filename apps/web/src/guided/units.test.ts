@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { classifyValue, defaultUnit, normalizeUnit, sourceNumber, unitsFor } from './units';
+import {
+  classifyValue,
+  defaultUnit,
+  halfLimitText,
+  normalizeUnit,
+  sourceNumber,
+  unitsFor,
+} from './units';
 
 describe('source units', () => {
   it('offers ug/L and mg/L for groundwater, mg/kg for soil, and an air unit for soil gas', () => {
@@ -41,5 +48,26 @@ describe('source units', () => {
     expect(normalizeUnit('ug/m^3', 'soilGas')).toBe('ug/m3');
     expect(normalizeUnit('furlongs', 'soil')).toBeNull();
     expect(normalizeUnit('ug/L', 'soil')).toBeNull();
+  });
+
+  it('reads a value below a reporting limit as half the limit, and keeps the limit', () => {
+    expect(classifyValue('<0.5')).toEqual({ kind: 'below', limit: 0.5 });
+    expect(classifyValue(' < 0.5 ')).toEqual({ kind: 'below', limit: 0.5 });
+    expect(classifyValue('<1e-3')).toEqual({ kind: 'below', limit: 0.001 });
+    expect(classifyValue('<').kind).toBe('invalid');
+    expect(classifyValue('<0').kind).toBe('invalid');
+    expect(classifyValue('<abc').kind).toBe('invalid');
+    expect(sourceNumber('<0.5', 'ug/L', 'groundwater')).toBeCloseTo(0.00025, 12);
+    expect(sourceNumber('<10', 'ug/kg', 'soilAbove')).toBeCloseTo(0.005, 12);
+    expect(sourceNumber('<2', 'mg/L', 'groundwater')).toBe(1);
+    expect(sourceNumber('<0.5', 'ug/L', 'nonsense' as never)).toBeNull();
+  });
+
+  it('writes the half limit without float noise', () => {
+    expect(halfLimitText('<0.5')).toBe('0.25');
+    expect(halfLimitText('<0.3')).toBe('0.15');
+    expect(halfLimitText('<1')).toBe('0.5');
+    expect(halfLimitText('5')).toBeNull();
+    expect(halfLimitText('ND')).toBeNull();
   });
 });

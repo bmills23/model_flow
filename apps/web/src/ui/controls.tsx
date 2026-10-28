@@ -16,6 +16,8 @@ export function TextField(props: {
   hint?: string;
   placeholder?: string;
   disabled?: boolean;
+  /** Another element that describes the box (a problem the caller shows itself). */
+  describedBy?: string | undefined;
 }) {
   return (
     <label className="field">
@@ -26,6 +28,7 @@ export function TextField(props: {
         value={props.value}
         placeholder={props.placeholder}
         disabled={props.disabled}
+        aria-describedby={props.describedBy}
         onChange={(e) => props.onChange(e.target.value)}
       />
       {props.hint && <small>{props.hint}</small>}
@@ -33,7 +36,11 @@ export function TextField(props: {
   );
 }
 
-/** A number box. Use `TextField` for text. */
+/**
+ * A number box. Use `TextField` for text. `error` is a problem with the value the caller found (shown
+ * under the box, announced, and referenced by the box); `describedBy` names another element that
+ * describes the box (a problem the caller shows itself).
+ */
 export function Field(props: {
   label: string;
   value: string;
@@ -41,6 +48,8 @@ export function Field(props: {
   hint?: string;
   placeholder?: string;
   disabled?: boolean;
+  error?: string | undefined;
+  describedBy?: string | undefined;
 }) {
   const comma = useSyncExternalStore(subscribeDecimalComma, getDecimalComma, getDecimalComma);
   const id = useId();
@@ -50,6 +59,12 @@ export function Field(props: {
   const live =
     props.value === REJECTED_ENTRY ? (rejected ?? { text: '', message: AMBIGUOUS }) : null;
   const shown = live !== null ? live.text : showNumber(props.value, comma);
+  const ownError = live === null && props.error !== undefined && props.error !== '';
+  const errorId = `${id}-error`;
+  const describedBy =
+    [live !== null ? id : undefined, ownError ? errorId : undefined, props.describedBy]
+      .filter((x) => x !== undefined)
+      .join(' ') || undefined;
   return (
     <label className="field">
       <span className="field-label">{props.label}</span>
@@ -60,8 +75,8 @@ export function Field(props: {
         value={shown}
         placeholder={props.placeholder}
         disabled={props.disabled}
-        aria-invalid={live !== null ? true : undefined}
-        aria-describedby={live !== null ? id : undefined}
+        aria-invalid={live !== null || ownError ? true : undefined}
+        aria-describedby={describedBy}
         onChange={(e) => {
           const text = e.target.value;
           const r = readEntry(text, comma);
@@ -78,6 +93,11 @@ export function Field(props: {
       {live !== null && (
         <small id={id} role="alert" className="field-error">
           {live.message}
+        </small>
+      )}
+      {ownError && (
+        <small id={errorId} role="alert" className="field-error">
+          {props.error}
         </small>
       )}
       {props.hint && <small>{props.hint}</small>}

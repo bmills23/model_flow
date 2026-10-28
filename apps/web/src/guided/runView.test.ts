@@ -5,6 +5,7 @@ import {
   inputBlocks,
   staleReport,
   staleSentence,
+  stepWords,
 } from './runView';
 import type { OutputCheck } from './status';
 import type { GuidedOutputs } from './state';
@@ -59,6 +60,30 @@ describe('indoorAirRows and inputBlocks', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ chemical: 'Alpha', source: 'Soil gas', method: 'Modern EPA' });
     expect(rows[0]!.peakMgPerM3).toBeCloseTo(3, 9);
+  });
+
+  it("words a source from an earlier model for the steps, not as another screen's", () => {
+    const fed: GuidedOutputs = {
+      vaporRisk: {
+        a: {
+          inputsHash: 'h',
+          value: {
+            chemicalId: 'a',
+            label: 'x',
+            indoor: { kind: 'constant', value: 3e-6, origin: 'vapor.je-epa' },
+            runInputs: [
+              { label: 'Indoor air method', value: 'Modern EPA' },
+              { label: 'Source', value: "fed by another screen's result (Water table, modern)" },
+            ],
+          },
+        } as never,
+      },
+    };
+    expect(indoorAirRows(fed, chems)[0]!.source).toBe(
+      'taken from an earlier model in this run (Water table, modern)',
+    );
+    expect(inputBlocks(fed, 'a')[0]!.rows[1]!.value).not.toMatch(/another screen/);
+    expect(stepWords('Soil gas')).toBe('Soil gas');
   });
 
   it('lists the recorded inputs by model for one chemical', () => {

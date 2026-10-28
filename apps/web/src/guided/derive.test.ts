@@ -73,11 +73,27 @@ describe('runPlan', () => {
   });
 });
 
+// household inputs for the tests that are not about them (step 3a would otherwise list them as needed)
+const HOUSEHOLD_FILLED = {
+  showerDropletDiameter: '1',
+  showerFallTime: '2',
+  showerFlow: '8',
+  showerMinutes: '10',
+  stallVolume: '2',
+  ventilation: '0.5',
+  sprayDropletDiameter: '1.5',
+  sprayFallTime: '3',
+  sprinklerFlow: '20',
+  windSpeed: '2',
+  mixingHeight: '2',
+};
+
 describe('deriveChemical', () => {
   const wellSite = (x: GuidedState): void => {
     x.site.sources = ['groundwater'];
     x.site.paths.well = true;
     x.forms.transport = { K: '5', foc: '0.002', rx: '80' };
+    x.forms.household = HOUSEHOLD_FILLED;
   };
 
   it('derives one transport form per chemical from the template, its database values and 3b', () => {

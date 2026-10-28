@@ -152,6 +152,11 @@ export type GuidedOutputs = Record<string, Record<string, GuidedOutput>>;
 export interface GuidedRunNote {
   problems: { model: GuidedFormKey; message: string }[];
   feeds: Record<string, string>;
+  /**
+   * Each 3b value the Run counted as half its reporting limit ("<x") or as zero (ND), in plain words with
+   * the unit, per chemical and medium. Absent when the chemical had none.
+   */
+  substitutions?: string[];
 }
 /** Run notes by chemical id. */
 export type GuidedRunNotes = Record<string, GuidedRunNote>;

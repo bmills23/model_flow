@@ -3,10 +3,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { defaultGuided } from '../state';
 import { SourcesStep } from './SourcesStep';
 import { addChemical, forgetMemory, getGuided, getOverrides, setGuided } from '../../project/store';
+import { setDecimalComma } from '../../ui/decimalComma';
 
 beforeEach(() => forgetMemory());
 afterEach(() => {
   cleanup();
+  setDecimalComma(false);
   forgetMemory();
 });
 
@@ -60,9 +62,39 @@ describe('SourcesStep, 3b', () => {
       unit: 'mg/L',
     });
     fireEvent.change(box, { target: { value: 'nd' } });
-    expect(screen.queryByText(/number above zero or ND/i)).toBeNull();
+    expect(screen.queryByText(/number above zero/i)).toBeNull();
     fireEvent.change(box, { target: { value: 'lots' } });
-    expect(screen.getByText(/number above zero or ND/i)).toBeTruthy();
+    expect(screen.getByText(/number above zero/i)).toBeTruthy();
+  });
+
+  it('keeps a value below a reporting limit as typed and takes it as entered', () => {
+    benzene();
+    wellSite();
+    render(<SourcesStep />);
+    const box = within(row(/^benzene$/i)).getByLabelText(/groundwater/i);
+    fireEvent.change(box, { target: { value: '<0.5' } });
+    expect(getGuided().sources['71-43-2']!.values.groundwater!.value).toBe('<0.5');
+    expect(screen.queryByText(/number above zero/i)).toBeNull();
+    fireEvent.change(box, { target: { value: '<' } });
+    expect(screen.getByText(/number above zero/i)).toBeTruthy();
+    expect(screen.getByText(/less-than value like <0\.5/i)).toBeTruthy();
+  });
+
+  it('honours the decimal comma setting and asks for a decimal keyboard', () => {
+    benzene();
+    wellSite();
+    setDecimalComma(true);
+    render(<SourcesStep />);
+    const box = within(row(/^benzene$/i)).getByLabelText(/groundwater/i) as HTMLInputElement;
+    expect(box.getAttribute('inputmode')).toBe('decimal');
+    fireEvent.change(box, { target: { value: '0,5' } });
+    expect(getGuided().sources['71-43-2']!.values.groundwater!.value).toBe('0.5');
+    expect(box.value).toBe('0,5');
+    fireEvent.change(box, { target: { value: '<0,5' } });
+    expect(getGuided().sources['71-43-2']!.values.groundwater!.value).toBe('<0.5');
+    // an entry that cannot be read either way is refused, once
+    fireEvent.change(box, { target: { value: '1,2,3' } });
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
   });
 
   it('changes the unit of a whole column and keeps a sample note for the row', () => {
@@ -114,6 +146,25 @@ describe('SourcesStep, 3b', () => {
     expect(screen.queryByText(/until then the models that read it do not run/i)).toBeNull();
   });
 
+  it('offers total petroleum hydrocarbons only where a modeled soil source uses it', () => {
+    benzene();
+    // a measured soil concentration is used as it is: no model reads the box
+    const g = defaultGuided();
+    g.site = { ...g.site, basis: 'measured', measured: ['soil'] };
+    setGuided(g);
+    render(<SourcesStep />);
+    expect(screen.getByLabelText(/^soil \(/i)).toBeTruthy();
+    expect(screen.queryByLabelText(/total petroleum hydrocarbons/i)).toBeNull();
+    cleanup();
+    // soil below the water table feeds the saturated soil source model, which reads it
+    wellSite({
+      sources: ['soilBelow'],
+      paths: { leaching: false, well: true, building: false, stream: false },
+    });
+    render(<SourcesStep />);
+    expect(screen.getByLabelText(/total petroleum hydrocarbons/i)).toBeTruthy();
+  });
+
   it('says so when the total petroleum hydrocarbons value cannot be read', () => {
     benzene();
     wellSite({
@@ -123,6 +174,11 @@ describe('SourcesStep, 3b', () => {
     render(<SourcesStep />);
     fireEvent.change(screen.getByLabelText(/total petroleum hydrocarbons/i), {
       target: { value: '1,200' },
+    });
+    expect(screen.getByText(/until then the models that read it do not run/i)).toBeTruthy();
+    // a less-than value is not taken here
+    fireEvent.change(screen.getByLabelText(/total petroleum hydrocarbons/i), {
+      target: { value: '<5' },
     });
     expect(screen.getByText(/until then the models that read it do not run/i)).toBeTruthy();
   });
@@ -147,6 +203,14 @@ describe('SourcesStep, 3c', () => {
     expect(shown.length).toBeGreaterThan(0);
     fireEvent.change(screen.getByLabelText(/your value for koc/i), { target: { value: '99' } });
     expect(screen.getByRole('status').textContent).toMatch(/source note is required/i);
+    // the field the problem is about points at it
+    const problem = screen.getByRole('status');
+    expect(screen.getByLabelText(/your value for koc/i).getAttribute('aria-describedby')).toContain(
+      problem.id,
+    );
+    expect(
+      screen.getByLabelText(/source note for koc/i).getAttribute('aria-describedby'),
+    ).toContain(problem.id);
     fireEvent.change(screen.getByLabelText(/source note for koc/i), {
       target: { value: 'site lab' },
     });

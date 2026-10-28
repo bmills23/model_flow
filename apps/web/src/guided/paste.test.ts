@@ -42,10 +42,17 @@ describe('parsePaste', () => {
     expect(h.units).toEqual({ groundwater: 'ug/L' });
   });
 
-  it('writes every not-detected spelling as ND, and a less-than value too', () => {
-    const r = parsePaste('Benzene\tN.D.\t<0.5\nToluene\tnot detected\t', [...cols], chems);
+  it('writes every not-detected spelling as ND', () => {
+    const r = parsePaste('Benzene\tN.D.\tND\nToluene\tnot detected\t', [...cols], chems);
     expect(r.rows[0]!.values).toEqual({ groundwater: 'ND', soilAbove: 'ND' });
     expect(r.rows[1]!.values).toEqual({ groundwater: 'ND' });
+  });
+
+  it('keeps the reporting limit of a less-than value', () => {
+    const r = parsePaste('Benzene\t<0.5\t< 12\nToluene\t<abc\t', [...cols], chems);
+    expect(r.rows[0]!.values).toEqual({ groundwater: '<0.5', soilAbove: '<12' });
+    expect(r.rows).toHaveLength(1);
+    expect(r.problems.join(' ')).toMatch(/<abc/);
   });
 
   it('keeps a sample note column', () => {

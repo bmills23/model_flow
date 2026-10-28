@@ -97,6 +97,8 @@ describe('guidedStatus', () => {
     };
     expect(put('ND')).toBe('done');
     expect(put('12.5')).toBe('done');
+    expect(put('<0.5')).toBe('done');
+    expect(put('<abc')).toBe('todo');
     expect(put('abc')).toBe('todo');
     expect(put('0')).toBe('todo');
   });

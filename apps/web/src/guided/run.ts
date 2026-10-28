@@ -46,6 +46,8 @@ export interface RunJob {
   forms: DerivedForms;
   /** What the derivation already found (a missing value or property): those models are not run. */
   problems: ModelProblem[];
+  /** The 3b values counted as half a reporting limit or as zero, in words, for the Run's notes. */
+  substitutions: string[];
 }
 
 export interface ChemicalRun {
@@ -73,6 +75,7 @@ export function jobsOf(guided: GuidedState, chemicals: readonly ChemicalData[]):
       plan,
       forms: d.forms,
       problems: d.problems,
+      substitutions: d.substitutions,
     };
   });
 }

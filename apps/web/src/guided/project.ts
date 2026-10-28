@@ -150,7 +150,10 @@ function readRunNote(n: unknown): GuidedRunNote | null {
   }
   const feeds: Record<string, string> = {};
   for (const [k, v] of Object.entries(n['feeds'])) if (typeof v === 'string') feeds[k] = v;
-  return { problems, feeds };
+  const substitutions = Array.isArray(n['substitutions'])
+    ? n['substitutions'].filter((x): x is string => typeof x === 'string')
+    : [];
+  return substitutions.length > 0 ? { problems, feeds, substitutions } : { problems, feeds };
 }
 
 /** The live guided state of a loaded project; an absent key or part gives the defaults. */
