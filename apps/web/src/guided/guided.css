@@ -456,3 +456,25 @@
 .guided-run-inputs dd {
   margin: 0;
 }
+
+/* Step 6 */
+.guided-results-print {
+  margin-top: 1rem;
+}
+.guided-results-print .button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.guided-results-settings {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+.guided-results-settings dt {
+  font-weight: 600;
+}
+.guided-results-settings dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

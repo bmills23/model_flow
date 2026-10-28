@@ -9,17 +9,13 @@ import {
 } from '../../cleanup/solubility';
 import { panelFeeds } from '../../cleanup/sourceLevelsCsv';
 import { jobsOf } from '../../cleanup/surfaceSolved';
-import {
-  surfaceWaterSourceLevels,
-  type SurfaceWaterLevelRow,
-} from '../../cleanup/surfaceWaterLevels';
+import { surfaceWaterSourceLevels } from '../../cleanup/surfaceWaterLevels';
 import { useCleanupProps } from '../../cleanup/useCleanupProps';
 import { useSurfaceSolves } from '../../cleanup/useSurfaceSolves';
-import { vaporSourceLevels, type VaporLevelRow } from '../../cleanup/vaporLevels';
+import { vaporSourceLevels } from '../../cleanup/vaporLevels';
 import type { OverridesState } from '../../overrides/model';
 import { userCleanupProps } from '../../overrides/userChemicals';
 import { useEffectiveDb, useOverrides } from '../../overrides/useOverrides';
-import { methodName } from '../../project/runInputs';
 import {
   getChemicals,
   getGuided,
@@ -36,6 +32,7 @@ import type { SurfaceWaterFeed } from '../../surfaceWater/feed';
 import { Field, Seg } from '../../ui/controls';
 import type { VaporRiskFeed } from '../../vapor/feeds';
 import { chain } from '../chain';
+import { METHOD_LABEL, surfaceRow, vaporRow, type SourceRow } from '../sourceRows';
 import type { GuidedKeptLevel } from '../levels';
 import { buildGuidedInputs } from '../riskForm';
 import { outputSlots } from '../slots';
@@ -62,7 +59,6 @@ import { useGuidedChemicalData } from '../useOutputCheck';
  */
 
 type Method = 'legacy' | 'modern';
-const METHOD_LABEL: Record<Method, string> = { legacy: 'Legacy', modern: 'Modern' };
 
 const ALLOCATION_OPTIONS: readonly { value: GuidedAllocation; label: string }[] = [
   { value: 'individual', label: 'Each chemical alone' },
@@ -467,7 +463,7 @@ function StandardsPanel(props: {
 
 // ---------------------------------------------------------------- the levels through the well path
 
-function ModeledLevels(props: {
+export function ModeledLevels(props: {
   guided: GuidedState;
   plan: GuidedSolvePlan | null;
   solve: GuidedSolveState;
@@ -678,75 +674,7 @@ function levelRows(
 
 // ---------------------------------------------------------------- vapor and surface water source levels
 
-interface SourceRow {
-  key: string;
-  chemical: string;
-  source: string;
-  method: string;
-  level: string;
-  flag: boolean;
-  reason: string | null;
-  limiting: string;
-  cancer: string;
-  noncancer: string;
-  foundBy: string;
-  warnings: string[];
-}
-
-function vaporRow(
-  r: VaporLevelRow,
-  chemical: string,
-  ceiling: SolubilityCeiling | null,
-): SourceRow {
-  const unitText = r.level === null ? '' : ` ${r.unit}`;
-  return {
-    key: `${chemical}|${r.method}|${r.what}`,
-    chemical,
-    source: `${r.what}, ${methodName(r.vaporMethod ?? undefined)}`,
-    method: METHOD_LABEL[r.method],
-    level: `${fmtSource(r.level, r.fromSi)}${unitText}`,
-    flag:
-      r.unit === 'mg/L' && r.level !== null
-        ? solubilityFlag(chemical, r.level * r.fromSi, ceiling) !== null
-        : false,
-    reason: r.reason,
-    limiting: r.limiting ?? 'none',
-    cancer: fmtSource(r.cancerLevel, r.fromSi),
-    noncancer: fmtSource(r.noncancerLevel, r.fromSi),
-    foundBy:
-      r.basis === null ? 'none' : r.basis === 'linear' ? 'proportional to the source' : 'solved',
-    warnings: r.warnings.map((w) => `${chemical}: ${w}`),
-  };
-}
-
-function surfaceRow(
-  r: SurfaceWaterLevelRow,
-  names: Record<string, string>,
-  ceilingOf: (id: string) => SolubilityCeiling | null,
-): SourceRow {
-  const chemical = names[r.chemical] ?? r.chemical;
-  const unitText = r.level === null ? '' : ` ${r.unit}`;
-  return {
-    key: `${r.chemical}|${r.method}|surface`,
-    chemical,
-    source: `${r.sourceMedium === 'groundwater' ? 'Groundwater' : 'Soil'} (surface water)`,
-    method: METHOD_LABEL[r.method],
-    level: r.pending ? 'solving' : `${fmtSource(r.level, r.fromSi)}${unitText}`,
-    flag:
-      r.unit === 'mg/L' && r.level !== null
-        ? solubilityFlag(chemical, r.level * r.fromSi, ceilingOf(r.chemical)) !== null
-        : false,
-    reason: r.reason,
-    limiting: r.limiting ?? 'none',
-    cancer: fmtSource(r.cancerLevel, r.fromSi),
-    noncancer: fmtSource(r.noncancerLevel, r.fromSi),
-    foundBy:
-      r.path === null ? 'none' : r.path === 'linear' ? 'proportional to the source' : 'solved',
-    warnings: r.warnings.map((w) => `${chemical}: ${w}`),
-  };
-}
-
-function SourceLevelTable(props: {
+export function SourceLevelTable(props: {
   title: string;
   caption: string;
   intro: string;
@@ -813,7 +741,7 @@ function SourceLevelTable(props: {
 
 // ---------------------------------------------------------------- the levels in the medium contacted
 
-function DirectLevels(props: {
+export function DirectLevels(props: {
   direct: ReturnType<typeof guidedDirectCleanup>;
   names: Record<string, string>;
   ceilingOf: (id: string) => SolubilityCeiling | null;
@@ -868,7 +796,7 @@ function DirectLevels(props: {
 }
 
 /** A list of notes and warnings in plain words: chemical names, no codes. */
-function PlainList(props: {
+export function PlainList(props: {
   title: string;
   items: readonly string[];
   names: Record<string, string>;

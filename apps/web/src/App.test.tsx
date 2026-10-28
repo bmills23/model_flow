@@ -286,7 +286,7 @@ describe('guided flow routes', () => {
   );
 
   it('shows steps that are not built yet as arriving with the next update', async () => {
-    window.location.hash = '#/step/results';
+    window.location.hash = '#/step/pathways';
     render(<App />);
     expect(
       await screen.findByText(/arrives with the next update/i, { selector: 'p' }),

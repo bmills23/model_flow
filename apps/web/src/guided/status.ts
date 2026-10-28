@@ -78,6 +78,17 @@ function targetsMark(input: StatusInput, run: StepMark, wellPath: boolean): Step
   return 'todo';
 }
 
+/**
+ * Step 6's mark (plan section 1): the results are done when steps 3d and 5 are done, and follow their
+ * marks otherwise (run again or checking when either says so, else to do).
+ */
+function resultsMark(run: StepMark, targets: StepMark): StepMark {
+  if (run === 'done' && targets === 'done') return 'done';
+  if (run === 'run-again' || targets === 'run-again') return 'run-again';
+  if (run === 'checking' || targets === 'checking') return 'checking';
+  return 'todo';
+}
+
 export type GuidedStatus = Record<GuidedStepId, StepMark>;
 
 /**
@@ -132,6 +143,8 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
     } else run = ran ? 'run-again' : 'todo';
   }
 
+  const targets: StepMark = sound ? targetsMark(input, run, c.outputs.includes('well')) : 'todo';
+
   return {
     chemicals: hasChemicals ? 'done' : 'todo',
     site: sound ? 'done' : 'todo',
@@ -141,7 +154,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
     pathways: 'todo',
     receptors: 'todo',
     toxicity: 'todo',
-    targets: sound ? targetsMark(input, run, c.outputs.includes('well')) : 'todo',
-    results: 'todo',
+    targets,
+    results: resultsMark(run, targets),
   };
 }
