@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { clearWellFeed, getWellFeedSlots, setWellFeed } from '../transport/wellFeed';
 import {
@@ -30,8 +30,11 @@ describe('RiskPage follows the project chemical list', () => {
     const toluene = await screen.findByRole('group', { name: /toluene/i });
     expect(screen.getByRole('group', { name: /benzene/i })).toBeTruthy();
     expect(within(toluene).getByText(/nothing set for this chemical/i)).toBeTruthy();
-    // the rows are written back, so the saved screen holds both
-    expect(getScreen('risk').form.chemicals.map((c) => c.id)).toEqual(['71-43-2', '108-88-3']);
+    // the rows are written back by a passive effect that React may flush after the cards reach the DOM,
+    // so wait for the store rather than read it the instant the card appears
+    await waitFor(() =>
+      expect(getScreen('risk').form.chemicals.map((c) => c.id)).toEqual(['71-43-2', '108-88-3']),
+    );
   }, 30000);
 
   it('a chemical added to the list while the screen is open gets a row; one with state keeps it', async () => {
