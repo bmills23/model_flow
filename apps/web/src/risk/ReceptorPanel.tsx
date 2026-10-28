@@ -18,6 +18,10 @@ export function ReceptorPanel(props: {
   screen: ReceptorScreen;
   form: ReceptorForm;
   onChange: (next: ReceptorForm) => void;
+  /** Leave out the pathway switches (the guided flow sets pathways once, in step 4a). */
+  hidePathways?: boolean;
+  /** Open the site-specific factors (the guided flow opens them when a step names one as missing). */
+  openSiteFactors?: boolean;
 }) {
   const { form } = props;
   const [overrides, setOverrides] = useOverrides();
@@ -113,33 +117,35 @@ export function ReceptorPanel(props: {
         state={overrides}
         onChange={setOverrides}
       />
-      <Group title="Pathways">
-        {DIRECT_PATHWAY_IDS.map((p: PathwayId) => (
-          <label className="check" key={p}>
+      {props.hidePathways === true ? null : (
+        <Group title="Pathways">
+          {DIRECT_PATHWAY_IDS.map((p: PathwayId) => (
+            <label className="check" key={p}>
+              <input
+                type="checkbox"
+                checked={form.pathways[p]}
+                onChange={(e) => set('pathways', { ...form.pathways, [p]: e.target.checked })}
+              />
+              <span>{PATHWAY_LABELS[p]}</span>
+            </label>
+          ))}
+          <label className="check">
             <input
               type="checkbox"
-              checked={form.pathways[p]}
-              onChange={(e) => set('pathways', { ...form.pathways, [p]: e.target.checked })}
+              checked={form.produce}
+              onChange={(e) => set('produce', e.target.checked)}
             />
-            <span>{PATHWAY_LABELS[p]}</span>
+            <span>
+              {PATHWAY_LABELS.produce} (intake and plant factors from the plants and ecology screen)
+            </span>
           </label>
-        ))}
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={form.produce}
-            onChange={(e) => set('produce', e.target.checked)}
-          />
-          <span>
-            {PATHWAY_LABELS.produce} (intake and plant factors from the plants and ecology screen)
-          </span>
-        </label>
-        <p className="muted">
-          A pathway runs only when a chemical has a concentration for its medium. Homegrown produce
-          runs only for a chemical that uses the plants and ecology plant factors.
-        </p>
-      </Group>
-      <Group title="Site-specific factors" open={false}>
+          <p className="muted">
+            A pathway runs only when a chemical has a concentration for its medium. Homegrown
+            produce runs only for a chemical that uses the plants and ecology plant factors.
+          </p>
+        </Group>
+      )}
+      <Group title="Site-specific factors" open={props.openSiteFactors ?? false}>
         <p className="muted">
           Neither method gives these a default. Left blank, the pathways that need them are not
           quantified and the warnings say so.

@@ -158,6 +158,17 @@ const GUIDED_ROUTES = [
   '#/step/sources',
   '#/step/run',
 ];
+// Steps 4a to 4c over the same project, on the legacy method with a second receptor (so the inputs a profile
+// leaves open are named) and a few pathways unticked.
+const GUIDED_EXPOSURE_ROUTES = ['#/step/pathways', '#/step/receptors', '#/step/toxicity'];
+const GUIDED_EXPOSURE_SEED = {
+  ...GUIDED_SEED,
+  guided: {
+    ...GUIDED_SEED.guided,
+    run: { basis: 'legacy' },
+    exposure: { pathways: { showerInhalation: false }, b: { preset: 'worker' }, additive: true },
+  },
+};
 // Press Run on step 3d and wait for "Up to date", then open every disclosure so the well tables are measured.
 const GUIDED_RUN = `(async()=>{const u=window.__ui;
   const find=(re)=>[...document.querySelectorAll('main button')].find(x=>re.test(x.textContent.trim()));
@@ -345,6 +356,14 @@ FED_ROUTES.push(
     seed: GUIDED_SEED,
     noPress: true,
     ...(route === '#/step/run' ? { viaSetup: GUIDED_RUN } : {}),
+  })),
+);
+FED_ROUTES.push(
+  ...GUIDED_EXPOSURE_ROUTES.map((route) => ({
+    route,
+    tag: 'guided',
+    seed: GUIDED_EXPOSURE_SEED,
+    noPress: true,
   })),
 );
 // --routes '#/docs,#/risk' limits the run to those routes (a prefix match), for a quick pass on one screen.

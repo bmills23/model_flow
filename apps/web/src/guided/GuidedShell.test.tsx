@@ -42,7 +42,7 @@ describe('GuidedShell', () => {
     expect(items[0]!.textContent).toMatch(/to do/i);
   });
 
-  it('shows done once a step is done, and steps 4 to 6 as arriving with the next update', () => {
+  it('shows done once a step is done, and steps 5 and 6 as arriving with the next update', () => {
     addChemical({ id: 'benzene', name: 'Benzene' });
     render(
       <GuidedShell stepId="site">
@@ -51,8 +51,8 @@ describe('GuidedShell', () => {
     );
     const items = within(list()).getAllByRole('listitem');
     expect(items[0]!.textContent).toMatch(/done/i);
-    for (const i of [5, 6, 7, 8, 9]) expect(items[i]!.textContent).toMatch(/next update/i);
-    expect(items[4]!.textContent).not.toMatch(/next update/i);
+    for (const i of [8, 9]) expect(items[i]!.textContent).toMatch(/next update/i);
+    for (const i of [4, 5, 6, 7]) expect(items[i]!.textContent).not.toMatch(/next update/i);
   });
 
   it('marks step 3d to run again when the output check finds a stale output', () => {

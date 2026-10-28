@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultGuided, type GuidedState } from './state';
 import { chain } from './chain';
+import { pathwayStatuses } from './pathways';
 import { blankTemplate, propertyView, setProperty } from './propertyCatalog';
 import { guidedStatus, hashOutputCheck, type OutputCheck } from './status';
 
@@ -131,9 +132,33 @@ describe('guidedStatus', () => {
 
   it('steps that arrive later stay to do', () => {
     const s = guidedStatus({ chemicals, guided: guidedWith(wellSite), outputCheck: allCurrent });
-    for (const id of ['pathways', 'receptors', 'toxicity', 'targets', 'results'] as const) {
+    for (const id of ['targets', 'results'] as const) {
       expect(s[id]).toBe('todo');
     }
+  });
+
+  it('step 4 is done with at least one pathway on and a valid receptor, read live', () => {
+    const input = { chemicals, outputCheck: noneRun };
+    const open = guidedStatus({ ...input, guided: defaultGuided() });
+    for (const id of ['pathways', 'receptors', 'toxicity'] as const) expect(open[id]).toBe('todo');
+    const g = guidedWith(wellSite);
+    const done = guidedStatus({ ...input, guided: g });
+    for (const id of ['pathways', 'receptors', 'toxicity'] as const) expect(done[id]).toBe('done');
+    // every available pathway unticked, or a receptor factor that is not a number: back to do
+    const off = guidedWith((x) => {
+      wellSite(x);
+      x.exposure.pathways = Object.fromEntries(
+        pathwayStatuses(x)
+          .filter((p) => p.available)
+          .map((p) => [p.id, false]),
+      );
+    });
+    expect(guidedStatus({ ...input, guided: off }).pathways).toBe('todo');
+    const bad = guidedWith((x) => {
+      wellSite(x);
+      x.exposure.a = { ...x.exposure.a, waterIngestion: 'lots' };
+    });
+    expect(guidedStatus({ ...input, guided: bad }).receptors).toBe('todo');
   });
 
   it('the hash check: current while the recorded hash equals the live one, stale when not, missing when absent', () => {

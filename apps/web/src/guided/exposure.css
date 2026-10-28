@@ -1,0 +1,66 @@
+/* Steps 4a to 4c: the pathway list, the receptors and the toxicity values. */
+.guided-exposure {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.guided-pathway-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 0;
+}
+
+.guided-pathway-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guided-pathway-list li {
+  padding: 4px 0;
+  min-width: 0;
+}
+
+.guided-pathway-list .guided-site-check {
+  min-height: var(--tap);
+}
+
+.guided-pathway-off > label {
+  opacity: 0.7;
+}
+
+.guided-pathway-reason {
+  margin: 0 0 4px 28px;
+  overflow-wrap: anywhere;
+}
+
+.guided-exposure-warn {
+  color: var(--legacy);
+  font-weight: 600;
+}
+
+.guided-missing,
+.guided-basis {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: var(--surface);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.guided-missing h2,
+.guided-basis h2 {
+  margin-top: 0;
+}
+
+.guided-child-adult .btn {
+  min-height: var(--tap);
+}
+
+.guided-exposure .chem-card {
+  min-width: 0;
+}

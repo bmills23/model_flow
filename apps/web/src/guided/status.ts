@@ -1,5 +1,6 @@
 import type { GuidedStepId } from '../steps';
 import { chain } from './chain';
+import { exposureDone } from './exposure';
 import { propertiesComplete as catalogComplete } from './propertyCatalog';
 import type { GuidedOutputs, GuidedRunNotes, GuidedState } from './state';
 import { classifyValue } from './units';
@@ -109,15 +110,18 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
     } else run = ran ? 'run-again' : 'todo';
   }
 
+  const exposure: StepMark = exposureDone(guided) ? 'done' : 'todo';
+
   return {
     chemicals: hasChemicals ? 'done' : 'todo',
     site: sound ? 'done' : 'todo',
     properties: propertiesDone ? 'done' : 'todo',
     sources: sourcesDone ? 'done' : 'todo',
     run,
-    pathways: 'todo',
-    receptors: 'todo',
-    toxicity: 'todo',
+    // step 4 is one answer read live: a pathway on and receptors that can be built
+    pathways: exposure,
+    receptors: exposure,
+    toxicity: exposure,
     targets: 'todo',
     results: 'todo',
   };
