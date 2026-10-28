@@ -2,7 +2,7 @@ import type { ChemicalRecord } from '../risk/chemicalDb';
 import { fmtTox } from '../risk/format';
 import { Field } from '../ui/controls';
 import { entryProblem, type OverrideEntry } from './model';
-import { TOX_FIELDS } from './toxicity';
+import { TOX_FIELDS, type ToxField } from './toxicity';
 
 /**
  * "Edit values" for one chemical: each toxicity value shown with the database value and its source, and
@@ -17,6 +17,8 @@ export function OverridesPanel(props: {
   edits: Record<string, OverrideEntry> | undefined;
   /** An entry to set a field, or null to reset it. */
   onEdit: (field: string, entry: OverrideEntry | null) => void;
+  /** Show only these values (step 4c passes the ones the ticked pathways need); all four when absent. */
+  fields?: readonly ToxField[];
 }) {
   const { rec, edits = {} } = props;
   const base = rec.dbTox ?? rec.tox;
@@ -30,67 +32,69 @@ export function OverridesPanel(props: {
         is required, and a value without one is not used. The database holds chronic values; for a
         short-term case enter the reference dose that applies and say so in the note.
       </p>
-      {TOX_FIELDS.map(({ key, label, unit }) => {
-        const dbv = base[key];
-        const entry = edits[key];
-        const problem = entry === undefined ? null : entryProblem(entry);
-        const id = `ov-${rec.id}-${key}`;
-        return (
-          <div key={key} className={entry === undefined ? 'override-row' : 'override-row edited'}>
-            <p className="override-title">
-              {label} <small>{unit}</small>
-              {entry !== undefined && <span className="edited-mark">Edited</span>}
-            </p>
-            <p className="muted">
-              Database value:{' '}
-              {dbv === undefined
-                ? 'none (the database gives this chemical no value)'
-                : `${fmtTox(dbv.value)} (${props.sourceKeys[dbv.source] ?? dbv.source})`}
-            </p>
-            <div className="fields">
-              <Field
-                label={`Your value for ${label.toLowerCase()}`}
-                value={entry?.value ?? ''}
-                onChange={(v) =>
-                  v === '' && (entry?.note ?? '') === ''
-                    ? props.onEdit(key, null)
-                    : props.onEdit(key, { value: v, note: entry?.note ?? '' })
-                }
-              />
-              <label className="field">
-                <span className="field-label">Source note (required)</span>
-                <input
-                  id={id}
-                  type="text"
-                  autoComplete="off"
-                  value={entry?.note ?? ''}
-                  aria-describedby={problem === null ? undefined : `${id}-problem`}
-                  onChange={(e) =>
-                    e.target.value === '' && (entry?.value ?? '') === ''
+      {TOX_FIELDS.filter((f) => props.fields === undefined || props.fields.includes(f.key)).map(
+        ({ key, label, unit }) => {
+          const dbv = base[key];
+          const entry = edits[key];
+          const problem = entry === undefined ? null : entryProblem(entry);
+          const id = `ov-${rec.id}-${key}`;
+          return (
+            <div key={key} className={entry === undefined ? 'override-row' : 'override-row edited'}>
+              <p className="override-title">
+                {label} <small>{unit}</small>
+                {entry !== undefined && <span className="edited-mark">Edited</span>}
+              </p>
+              <p className="muted">
+                Database value:{' '}
+                {dbv === undefined
+                  ? 'none (the database gives this chemical no value)'
+                  : `${fmtTox(dbv.value)} (${props.sourceKeys[dbv.source] ?? dbv.source})`}
+              </p>
+              <div className="fields">
+                <Field
+                  label={`Your value for ${label.toLowerCase()}`}
+                  value={entry?.value ?? ''}
+                  onChange={(v) =>
+                    v === '' && (entry?.note ?? '') === ''
                       ? props.onEdit(key, null)
-                      : props.onEdit(key, { value: entry?.value ?? '', note: e.target.value })
+                      : props.onEdit(key, { value: v, note: entry?.note ?? '' })
                   }
                 />
-              </label>
+                <label className="field">
+                  <span className="field-label">Source note (required)</span>
+                  <input
+                    id={id}
+                    type="text"
+                    autoComplete="off"
+                    value={entry?.note ?? ''}
+                    aria-describedby={problem === null ? undefined : `${id}-problem`}
+                    onChange={(e) =>
+                      e.target.value === '' && (entry?.value ?? '') === ''
+                        ? props.onEdit(key, null)
+                        : props.onEdit(key, { value: entry?.value ?? '', note: e.target.value })
+                    }
+                  />
+                </label>
+              </div>
+              {problem !== null && (
+                <p id={`${id}-problem`} className="override-problem" role="status">
+                  {problem}
+                </p>
+              )}
+              {entry !== undefined && (
+                <button
+                  type="button"
+                  className="btn"
+                  aria-label={`Reset to database value: ${label.toLowerCase()} of ${rec.name}`}
+                  onClick={() => props.onEdit(key, null)}
+                >
+                  Reset to database value
+                </button>
+              )}
             </div>
-            {problem !== null && (
-              <p id={`${id}-problem`} className="override-problem" role="status">
-                {problem}
-              </p>
-            )}
-            {entry !== undefined && (
-              <button
-                type="button"
-                className="btn"
-                aria-label={`Reset to database value: ${label.toLowerCase()} of ${rec.name}`}
-                onClick={() => props.onEdit(key, null)}
-              >
-                Reset to database value
-              </button>
-            )}
-          </div>
-        );
-      })}
+          );
+        },
+      )}
     </details>
   );
 }

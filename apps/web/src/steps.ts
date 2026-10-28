@@ -65,9 +65,9 @@ export const GUIDED_STEPS: readonly GuidedStep[] = [
   { id: 'properties', number: '3a', label: 'Site properties', arrives: false },
   { id: 'sources', number: '3b, 3c', label: 'Source values', arrives: false },
   { id: 'run', number: '3d', label: 'Run and view', arrives: false },
-  { id: 'pathways', number: '4a', label: 'Pathways', arrives: true },
-  { id: 'receptors', number: '4b', label: 'Receptors', arrives: true },
-  { id: 'toxicity', number: '4c', label: 'Toxicity', arrives: true },
+  { id: 'pathways', number: '4a', label: 'Pathways', arrives: false },
+  { id: 'receptors', number: '4b', label: 'Receptors', arrives: false },
+  { id: 'toxicity', number: '4c', label: 'Toxicity', arrives: false },
   { id: 'targets', number: '5', label: 'Risk or cleanup', arrives: true },
   { id: 'results', number: '6', label: 'Results', arrives: true },
 ];

@@ -87,6 +87,15 @@ const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], Componen
     import('./guided/screens/SourcesStep').then((m) => ({ default: m.SourcesStep })),
   ),
   run: lazy(() => import('./guided/screens/RunStep').then((m) => ({ default: m.RunStep }))),
+  pathways: lazy(() =>
+    import('./guided/screens/PathwaysStep').then((m) => ({ default: m.PathwaysStep })),
+  ),
+  receptors: lazy(() =>
+    import('./guided/screens/ReceptorsStep').then((m) => ({ default: m.ReceptorsStep })),
+  ),
+  toxicity: lazy(() =>
+    import('./guided/screens/ToxicityStep').then((m) => ({ default: m.ToxicityStep })),
+  ),
 };
 
 function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {

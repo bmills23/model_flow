@@ -264,6 +264,8 @@ describe('guided flow routes', () => {
     ['sources', 'Source values'],
     ['run', 'Run and view'],
     ['pathways', 'Pathways'],
+    ['receptors', 'Receptors'],
+    ['toxicity', 'Toxicity', 'Toxicity values'],
     ['results', 'Results'],
   ] as [string, string, string?][])(
     'renders the shell for #/step/%s with that step open',
