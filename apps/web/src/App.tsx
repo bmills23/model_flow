@@ -96,6 +96,12 @@ const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], Componen
   toxicity: lazy(() =>
     import('./guided/screens/ToxicityStep').then((m) => ({ default: m.ToxicityStep })),
   ),
+  targets: lazy(() =>
+    import('./guided/screens/TargetsStep').then((m) => ({ default: m.TargetsStep })),
+  ),
+  results: lazy(() =>
+    import('./guided/screens/ResultsStep').then((m) => ({ default: m.ResultsStep })),
+  ),
 };
 
 function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {

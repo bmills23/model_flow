@@ -54,6 +54,40 @@ export interface StatusInput {
    * (`guided/propertyCatalog.ts`) reads the guided state given here.
    */
   propertiesComplete?: () => boolean;
+  /**
+   * Step 5: whether each chemical's kept cleanup level is current (`levelsCheckFor` in `guided/solve.ts`),
+   * read only for cleanup levels solved through the well path. Without one, nothing is kept yet.
+   */
+  levelsCheck?: LevelsCheck;
+}
+
+/** A chemical's kept step 5 level: current, out of date, not kept, or not checked yet (data loading). */
+export type LevelsCheck = (chemicalId: string) => 'current' | 'stale' | 'missing' | 'unchecked';
+
+/**
+ * Step 5's mark (plan section 1): forward risk and levels in the medium contacted are live, so done with
+ * step 3d; cleanup levels through the well path are done when every chemical's kept level is current.
+ */
+function targetsMark(input: StatusInput, run: StepMark, wellPath: boolean): StepMark {
+  if (input.guided.targets.mode === 'risk' || !wellPath) return run === 'done' ? 'done' : 'todo';
+  const check = input.levelsCheck;
+  if (check === undefined || input.chemicals.length === 0) return 'todo';
+  const states = input.chemicals.map((c) => check(c.id));
+  if (states.every((s) => s === 'current')) return 'done';
+  if (states.includes('stale')) return 'run-again';
+  if (states.includes('unchecked')) return 'checking';
+  return 'todo';
+}
+
+/**
+ * Step 6's mark (plan section 1): the results are done when steps 3d and 5 are done, and follow their
+ * marks otherwise (run again or checking when either says so, else to do).
+ */
+function resultsMark(run: StepMark, targets: StepMark): StepMark {
+  if (run === 'done' && targets === 'done') return 'done';
+  if (run === 'run-again' || targets === 'run-again') return 'run-again';
+  if (run === 'checking' || targets === 'checking') return 'checking';
+  return 'todo';
 }
 
 export type GuidedStatus = Record<GuidedStepId, StepMark>;
@@ -111,6 +145,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
   }
 
   const exposure: StepMark = exposureDone(guided) ? 'done' : 'todo';
+  const targets: StepMark = sound ? targetsMark(input, run, c.outputs.includes('well')) : 'todo';
 
   return {
     chemicals: hasChemicals ? 'done' : 'todo',
@@ -122,7 +157,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
     pathways: exposure,
     receptors: exposure,
     toxicity: exposure,
-    targets: 'todo',
-    results: 'todo',
+    targets,
+    results: resultsMark(run, targets),
   };
 }

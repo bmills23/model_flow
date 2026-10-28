@@ -66,7 +66,7 @@ describe('guided step list', () => {
       'targets',
       'results',
     ]);
-    expect(GUIDED_STEPS.filter((s) => s.arrives).map((s) => s.number)).toEqual(['5', '6']);
+    expect(GUIDED_STEPS.filter((s) => s.arrives)).toEqual([]);
     for (const s of GUIDED_STEPS) {
       expect(guidedHref(s.id)).toBe(`#/step/${s.id}`);
       expect(guidedStepForHash(`#/step/${s.id}`)).toBe(s);

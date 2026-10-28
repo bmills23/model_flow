@@ -68,8 +68,8 @@ export const GUIDED_STEPS: readonly GuidedStep[] = [
   { id: 'pathways', number: '4a', label: 'Pathways', arrives: false },
   { id: 'receptors', number: '4b', label: 'Receptors', arrives: false },
   { id: 'toxicity', number: '4c', label: 'Toxicity', arrives: false },
-  { id: 'targets', number: '5', label: 'Risk or cleanup', arrives: true },
-  { id: 'results', number: '6', label: 'Results', arrives: true },
+  { id: 'targets', number: '5', label: 'Risk or cleanup', arrives: false },
+  { id: 'results', number: '6', label: 'Results', arrives: false },
 ];
 
 export const GUIDED_HASH_PREFIX = '#/step/';
