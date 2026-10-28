@@ -131,7 +131,7 @@ describe('guidedStatus', () => {
 
   it('steps that arrive later stay to do', () => {
     const s = guidedStatus({ chemicals, guided: guidedWith(wellSite), outputCheck: allCurrent });
-    for (const id of ['pathways', 'receptors', 'toxicity', 'targets', 'results'] as const) {
+    for (const id of ['pathways', 'receptors', 'toxicity', 'results'] as const) {
       expect(s[id]).toBe('todo');
     }
   });

@@ -87,6 +87,9 @@ const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], Componen
     import('./guided/screens/SourcesStep').then((m) => ({ default: m.SourcesStep })),
   ),
   run: lazy(() => import('./guided/screens/RunStep').then((m) => ({ default: m.RunStep }))),
+  targets: lazy(() =>
+    import('./guided/screens/TargetsStep').then((m) => ({ default: m.TargetsStep })),
+  ),
 };
 
 function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {

@@ -136,7 +136,12 @@ export function guidedSolvePlan(guided: GuidedState, ctx: GuidedSolveContext): G
     const target = targetOf(guided, c.id);
     const one = cleanupFormFor(form, guided, c.id);
     const result = plainBuild(
-      buildModeled({ ...one, allocation: 'individual' }, ctx.db, feedsOf(c.id), ctx.chemicals.length),
+      buildModeled(
+        { ...one, allocation: 'individual' },
+        ctx.db,
+        feedsOf(c.id),
+        ctx.chemicals.length,
+      ),
     );
     const v = guided.sources[c.id]?.values[medium];
     const n = v === undefined ? null : sourceNumber(v.value, v.unit, medium);
@@ -292,10 +297,16 @@ function groupEntries(
     if (outs.every((o) => o === undefined)) continue;
     const failed = members.flatMap((m, i) => {
       const o = outs[i];
-      return o === undefined ? [`${m.name}: this method did not run`] : o.ok ? [] : [`${m.name}: ${o.error}`];
+      return o === undefined
+        ? [`${m.name}: this method did not run`]
+        : o.ok
+          ? []
+          : [`${m.name}: ${o.error}`];
     });
     const ends = outs.map((o) => (o === undefined ? null : endpointsOf(o)));
-    const notLinear = members.flatMap((m, i) => (ends[i]?.linear === false && outs[i]?.ok ? [NOT_LINEAR(m.name)] : []));
+    const notLinear = members.flatMap((m, i) =>
+      ends[i]?.linear === false && outs[i]?.ok ? [NOT_LINEAR(m.name)] : [],
+    );
     const problems = [...failed, ...notLinear];
 
     const req = solved.get(members[0]!.id)!.req;
@@ -477,8 +488,7 @@ export function guidedDirectCleanup(
   overrides?: OverridesState,
 ): GuidedDirectCleanup {
   const form = deriveCleanupForm(guided, chemicals, db, overrides);
-  const individualFallback =
-    guided.site.basis === 'modeled' && form.allocation === 'cumulative';
+  const individualFallback = guided.site.basis === 'modeled' && form.allocation === 'cumulative';
   const built = buildCleanup(
     individualFallback ? { ...form, allocation: 'individual' } : form,
     db,

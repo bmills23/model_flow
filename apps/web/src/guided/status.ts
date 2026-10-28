@@ -53,6 +53,29 @@ export interface StatusInput {
    * (`guided/propertyCatalog.ts`) reads the guided state given here.
    */
   propertiesComplete?: () => boolean;
+  /**
+   * Step 5: whether each chemical's kept cleanup level is current (`levelsCheckFor` in `guided/solve.ts`),
+   * read only for cleanup levels solved through the well path. Without one, nothing is kept yet.
+   */
+  levelsCheck?: LevelsCheck;
+}
+
+/** A chemical's kept step 5 level: current, out of date, not kept, or not checked yet (data loading). */
+export type LevelsCheck = (chemicalId: string) => 'current' | 'stale' | 'missing' | 'unchecked';
+
+/**
+ * Step 5's mark (plan section 1): forward risk and levels in the medium contacted are live, so done with
+ * step 3d; cleanup levels through the well path are done when every chemical's kept level is current.
+ */
+function targetsMark(input: StatusInput, run: StepMark, wellPath: boolean): StepMark {
+  if (input.guided.targets.mode === 'risk' || !wellPath) return run === 'done' ? 'done' : 'todo';
+  const check = input.levelsCheck;
+  if (check === undefined || input.chemicals.length === 0) return 'todo';
+  const states = input.chemicals.map((c) => check(c.id));
+  if (states.every((s) => s === 'current')) return 'done';
+  if (states.includes('stale')) return 'run-again';
+  if (states.includes('unchecked')) return 'checking';
+  return 'todo';
 }
 
 export type GuidedStatus = Record<GuidedStepId, StepMark>;
@@ -118,7 +141,7 @@ export function guidedStatus(input: StatusInput): GuidedStatus {
     pathways: 'todo',
     receptors: 'todo',
     toxicity: 'todo',
-    targets: 'todo',
+    targets: sound ? targetsMark(input, run, c.outputs.includes('well')) : 'todo',
     results: 'todo',
   };
 }

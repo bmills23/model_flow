@@ -3,6 +3,7 @@ import { getChemicals, getGuided, subscribeChemicals, subscribeGuided } from '..
 import { GUIDED_STEPS, guidedHref, type GuidedStepId } from '../steps';
 import { guidedStatus, type OutputCheck, type StepMark } from './status';
 import { useGuidedOutputCheck } from './useOutputCheck';
+import { useGuidedLevelsCheck } from './useLevelsCheck';
 
 /**
  * The guided flow's frame: the step list (above the content at phone width, beside it on a wide screen)
@@ -34,6 +35,7 @@ export function GuidedShell({
   // the hash compare of each output with its live inputs, unless a check is injected
   const liveCheck = useGuidedOutputCheck();
   const outputCheck = injected ?? liveCheck;
+  const levelsCheck = useGuidedLevelsCheck();
   const guided = useSyncExternalStore(subscribeGuided, getGuided, getGuided);
   const chemicals = useSyncExternalStore(subscribeChemicals, getChemicals, getChemicals);
   const status = useMemo(
@@ -43,8 +45,9 @@ export function GuidedShell({
         guided,
         outputCheck,
         ...(propertiesComplete === undefined ? {} : { propertiesComplete }),
+        ...(levelsCheck === undefined ? {} : { levelsCheck }),
       }),
-    [chemicals, guided, outputCheck, propertiesComplete],
+    [chemicals, guided, outputCheck, propertiesComplete, levelsCheck],
   );
   const index = GUIDED_STEPS.findIndex((s) => s.id === stepId);
   const back = index > 0 ? GUIDED_STEPS[index - 1] : undefined;

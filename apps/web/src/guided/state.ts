@@ -264,7 +264,13 @@ export function withoutGuidedChemical(g: GuidedState, chemicalId: string): Guide
   }
   const { [chemicalId]: _note, ...runNotes } = g.runNotes;
   void _note;
-  const next: GuidedState = { ...g, sources, outputs, runNotes, targets: { ...g.targets, standards } };
+  const next: GuidedState = {
+    ...g,
+    sources,
+    outputs,
+    runNotes,
+    targets: { ...g.targets, standards },
+  };
   if (g.levels !== undefined) {
     const { [chemicalId]: _level, ...levels } = g.levels;
     void _level;
