@@ -27,7 +27,8 @@ export function UserChemicalEditor(props: {
   draft: UserChemicalDraft;
   /** Chemicals whose CAS number is taken (the database and the other user chemicals). */
   knownCas: readonly { cas?: string | undefined; name: string }[];
-  onSave: (result: UserChemicalResult) => void;
+  /** Returns the reason the chemical could not be saved, which the editor shows; nothing when it was saved. */
+  onSave: (result: UserChemicalResult) => string | void;
   onCancel: () => void;
 }) {
   const [name, setName] = useState(props.draft.name);
@@ -57,11 +58,12 @@ export function UserChemicalEditor(props: {
     const clean = Object.fromEntries(
       Object.entries(values).map(([k, v]) => [k, { value: v.value.trim(), note: v.note.trim() }]),
     );
-    props.onSave({
+    const refused = props.onSave({
       name: name.trim(),
       ...(cas.trim() === '' ? {} : { cas: cas.trim() }),
       values: clean,
     });
+    if (typeof refused === 'string') setProblems([refused]);
   };
 
   return (

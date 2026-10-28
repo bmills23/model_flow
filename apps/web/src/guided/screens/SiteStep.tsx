@@ -35,7 +35,7 @@ const PATHS: { key: keyof GuidedSite['paths']; label: string }[] = [
 
 function ChainPanel({ result, site }: { result: Chain; site: GuidedSite }) {
   return (
-    <section className="guided-chain" aria-label="Models your answers use" aria-live="polite">
+    <section className="guided-chain" aria-label="Models your answers use">
       <h2>Models your answers use</h2>
       {result.problems.length > 0 ? (
         <div className="alert" role="alert">

@@ -52,12 +52,12 @@
   min-width: 0;
 }
 
-.chemicals .chem-step .chem-lists {
+.chemicals.chem-step .chem-lists {
   align-items: start;
 }
 
 @media (min-width: 900px) {
-  .chemicals .chem-step .chem-lists {
+  .chemicals.chem-step .chem-lists {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   }
 }

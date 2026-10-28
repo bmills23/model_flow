@@ -44,7 +44,7 @@ export function ChemicalsWorkspace({
     ...(db?.records ?? []),
     ...project.filter((c) => isUserChemical(c) && c.id !== editing?.id),
   ].map((c) => ({ cas: c.cas, name: c.name }));
-  const save = (r: UserChemicalResult): void => {
+  const save = (r: UserChemicalResult): string | void => {
     if (editing === null) return;
     const entry = {
       id: editing.id ?? nextProjectUserId(),
@@ -53,7 +53,8 @@ export function ChemicalsWorkspace({
       values: r.values,
     };
     if (editing.id === null) {
-      if (getChemicals().length >= MAX_PROJECT_CHEMICALS) return;
+      if (getChemicals().length >= MAX_PROJECT_CHEMICALS)
+        return `The project already holds ${MAX_PROJECT_CHEMICALS} chemicals, so this one was not saved. Remove one from the project list, then save again.`;
       addChemical(entry);
     } else updateChemical(entry);
     setEditing(null);

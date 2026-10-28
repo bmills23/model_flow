@@ -217,7 +217,7 @@ describe('chain: problems are explained', () => {
       chain(modeled(['groundwater', 'soilBelow'], { well: true })),
       chain({ ...defaultGuidedSite(), basis: 'measured', measured: [] }),
     ];
-    for (const c of all) for (const p of c.problems) expect(p.message).not.toContain('—');
+    for (const c of all) for (const p of c.problems) expect(p.message).not.toContain('\u2014');
   });
 });
 

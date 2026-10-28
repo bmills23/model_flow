@@ -93,6 +93,21 @@ describe('outputHashes', () => {
     );
   });
 
+  it('a chemical name change alone marks no output, with indoor air, household and produce in the plan', () => {
+    const base = (): GuidedState => {
+      const g = wellAndBuilding();
+      g.site.paths.leaching = false;
+      g.site.produce = 'irrigation';
+      return g;
+    };
+    const before = outputHashes(base(), chems());
+    expect(Object.keys(before).sort()).toContain('produce');
+    const renamed = chems().map((c) =>
+      c.id === BENZENE ? { ...c, name: 'Benzene (renamed)' } : c,
+    );
+    expect(changed(before, outputHashes(base(), renamed))).toEqual([]);
+  });
+
   it('the household template marks the household output only', () => {
     expect(edit((g) => (g.forms.household = { showerMinutes: '12' }))).toEqual(
       [`household:${BENZENE}`, `household:${MTBE}`].sort(),

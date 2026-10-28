@@ -81,6 +81,18 @@ describe('removeProjectChemical', () => {
     expect(getStaleSlots().some((s) => s.chemicalId === '71-43-2')).toBe(false);
   });
 
+  it('drops the step 3c chemical value edits of the removed chemical only', () => {
+    addChemical({ id: '71-43-2', name: 'Benzene' });
+    addChemical({ id: '108-88-3', name: 'Toluene' });
+    const entry = { value: '100', note: 'lab' };
+    setOverrides({
+      ...getOverrides(),
+      fate: { '71-43-2': { koc: entry }, '108-88-3': { koc: entry } },
+    });
+    removeProjectChemical('71-43-2');
+    expect(Object.keys(getOverrides().fate)).toEqual(['108-88-3']);
+  });
+
   it('is a no-op for an id the project does not hold', () => {
     addChemical({ id: 'x', name: 'X' });
     removeProjectChemical('nothing');
