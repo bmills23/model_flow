@@ -70,7 +70,6 @@ describe('guided step list', () => {
       '4a',
       '4b',
       '4c',
-      '5',
       '6',
     ]);
     for (const s of GUIDED_STEPS) {

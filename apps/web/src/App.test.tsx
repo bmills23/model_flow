@@ -264,6 +264,7 @@ describe('guided flow routes', () => {
     ['sources', 'Source values'],
     ['run', 'Run and view'],
     ['pathways', 'Pathways'],
+    ['targets', 'Risk or cleanup', 'Risk or cleanup levels'],
     ['results', 'Results'],
   ] as [string, string, string?][])(
     'renders the shell for #/step/%s with that step open',
@@ -285,7 +286,7 @@ describe('guided flow routes', () => {
   );
 
   it('shows steps that are not built yet as arriving with the next update', async () => {
-    window.location.hash = '#/step/targets';
+    window.location.hash = '#/step/results';
     render(<App />);
     expect(
       await screen.findByText(/arrives with the next update/i, { selector: 'p' }),
