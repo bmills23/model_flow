@@ -8,6 +8,7 @@ import type { TransportProject } from '../transport/project';
 import type { VadoseProject } from '../vadose/project';
 import type { VaporProject } from '../vapor/project';
 import { stableStringify } from '../project/hash';
+import type { GuidedKeptLevel } from './levels';
 
 /**
  * The guided flow's project state (format version 3, the `guided` key): every step's answers and the
@@ -194,6 +195,11 @@ export interface GuidedState {
   runNotes: GuidedRunNotes;
   exposure: GuidedExposure;
   targets: GuidedTargets;
+  /**
+   * The step 5 cleanup levels kept per chemical (`guided/levels.ts`), judged current by the guided
+   * fingerprint (`guided/solve.ts`). Optional: absent means none are kept.
+   */
+  levels?: Record<string, GuidedKeptLevel>;
 }
 
 export const defaultGuidedSite = (): GuidedSite => ({
@@ -258,5 +264,12 @@ export function withoutGuidedChemical(g: GuidedState, chemicalId: string): Guide
   }
   const { [chemicalId]: _note, ...runNotes } = g.runNotes;
   void _note;
-  return { ...g, sources, outputs, runNotes, targets: { ...g.targets, standards } };
+  const next: GuidedState = { ...g, sources, outputs, runNotes, targets: { ...g.targets, standards } };
+  if (g.levels !== undefined) {
+    const { [chemicalId]: _level, ...levels } = g.levels;
+    void _level;
+    if (Object.keys(levels).length > 0) next.levels = levels;
+    else delete next.levels;
+  }
+  return next;
 }

@@ -11,6 +11,7 @@ import { vaporProjectSchema } from '../vapor/project';
 import { decodeJson, encodeJson } from '../project/codec';
 import { flag, partialObject, text } from '../project/fields';
 import { cloneData, mergeDefaults } from '../project/merge';
+import { readGuidedLevels } from './levels';
 import {
   GUIDED_FORM_KEYS,
   MEASURED_MEDIUM_KEYS,
@@ -99,6 +100,8 @@ export const guidedProjectSchema = z.object({
     targetHq: text,
     standards: z.record(z.string(), standardSchema),
   }).optional(),
+  // the step 5 kept levels, held loose and read one entry at a time (`readGuidedLevels`)
+  levels: z.record(z.string(), z.unknown()).optional(),
 });
 export type GuidedProject = z.infer<typeof guidedProjectSchema>;
 
@@ -123,6 +126,7 @@ export function toProject(g: GuidedState): GuidedProject | undefined {
     ...(Object.keys(g.runNotes).length > 0 ? { runNotes: g.runNotes } : {}),
     exposure: g.exposure,
     targets: g.targets,
+    ...(g.levels !== undefined && Object.keys(g.levels).length > 0 ? { levels: g.levels } : {}),
   }) as GuidedProject;
 }
 
@@ -182,7 +186,9 @@ export function fromProject(p: GuidedProject | undefined): GuidedState {
     const note = readRunNote(n);
     if (note !== null) runNotes[chemical] = note;
   }
+  const levels = readGuidedLevels(p.levels);
   return {
+    ...(Object.keys(levels).length > 0 ? { levels } : {}),
     site: mergeDefaults(d.site, p.site),
     forms: cloneData(p.forms ?? {}) as GuidedState['forms'],
     sources: Object.fromEntries(Object.entries(p.sources ?? {}).map(([k, v]) => [k, sourceOf(v)])),
