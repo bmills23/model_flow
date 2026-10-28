@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   addChemical,
@@ -27,7 +27,10 @@ describe('CleanupPage follows the project chemical list', () => {
     await loaded();
     expect(await screen.findByRole('group', { name: /toluene/i })).toBeTruthy();
     expect(screen.getByRole('group', { name: /benzene/i })).toBeTruthy();
-    expect(getScreen('cleanup').form.chemicals.map((c) => c.id)).toEqual(['71-43-2', '108-88-3']);
+    // the rows are written back by a passive effect, so wait for the store rather than read it at once
+    await waitFor(() =>
+      expect(getScreen('cleanup').form.chemicals.map((c) => c.id)).toEqual(['71-43-2', '108-88-3']),
+    );
   }, 30000);
 
   it('adding with the picker puts the chemical on the project list', async () => {

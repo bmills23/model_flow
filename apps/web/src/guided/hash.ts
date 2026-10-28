@@ -54,7 +54,7 @@ function upstreamOf(m: GuidedFormKey, plan: RunPlan): GuidedFormKey | null {
 }
 
 /** What a model reads that its form does not hold. */
-function extrasOf(m: GuidedFormKey, plan: RunPlan, d: DerivedChemical): unknown {
+function extrasOf(m: GuidedFormKey, plan: RunPlan): unknown {
   const s = plan.settings;
   switch (m) {
     case 'transport':
@@ -92,7 +92,7 @@ export function chemicalHashes(plan: RunPlan, d: DerivedChemical): Record<string
       model: m,
       chemicalId: d.chemicalId,
       form: hashedForm(m, d.forms[m] ?? null),
-      extras: extrasOf(m, plan, d),
+      extras: extrasOf(m, plan),
       upstream: up === null ? null : hashOf(up),
     });
     byModel.set(m, h);

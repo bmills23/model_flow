@@ -13,11 +13,16 @@ afterEach(() => {
 });
 
 const show = () =>
-  render(<RemoveChemicalConfirm id="71-43-2" name="Benzene" onConfirm={() => {}} onCancel={() => {}} />);
+  render(
+    <RemoveChemicalConfirm id="71-43-2" name="Benzene" onConfirm={() => {}} onCancel={() => {}} />,
+  );
 
 describe('RemoveChemicalConfirm', () => {
   it('names the step 3c chemical values when the chemical has any', () => {
-    setOverrides({ ...getOverrides(), fate: { '71-43-2': { koc: { value: '100', note: 'lab' } } } });
+    setOverrides({
+      ...getOverrides(),
+      fate: { '71-43-2': { koc: { value: '100', note: 'lab' } } },
+    });
     show();
     expect(screen.getByRole('group').textContent).toMatch(/chemical values you entered in step 3/i);
   });

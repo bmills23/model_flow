@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { CleanupPage } from '../cleanup/CleanupPage';
 import { RiskPage } from '../risk/RiskPage';
@@ -45,16 +45,20 @@ describe('an older project whose risk and cleanup rows differed', () => {
     const ethyl = await screen.findByRole('group', { name: /^ethylbenzene\b/i });
     // benzene takes its groundwater from the well, so its field is not shown; the row keeps both
     expect(within(benzene).queryByLabelText(/groundwater \(mg\/L\)/i)).toBeNull();
-    expect(getScreen('risk').form.chemicals.find((c) => c.id === '71-43-2')?.conc).toEqual({
-      groundwater: '0.005',
-    });
+    await waitFor(() =>
+      expect(getScreen('risk').form.chemicals.find((c) => c.id === '71-43-2')?.conc).toEqual({
+        groundwater: '0.005',
+      }),
+    );
     expect((within(toluene).getByLabelText(/soil \(mg\/kg\)/i) as HTMLInputElement).value).toBe(
       '2',
     );
     expect(within(ethyl).getByText(/nothing set for this chemical/i)).toBeTruthy();
-    expect(
-      getScreen('risk').form.chemicals.find((c) => c.id === '71-43-2')?.groundwaterFromWell,
-    ).toBe(true);
+    await waitFor(() =>
+      expect(
+        getScreen('risk').form.chemicals.find((c) => c.id === '71-43-2')?.groundwaterFromWell,
+      ).toBe(true),
+    );
     expect(getStaleSlots()).toEqual(before);
   }, 30000);
 

@@ -102,7 +102,9 @@ describe('outputHashes', () => {
     };
     const before = outputHashes(base(), chems());
     expect(Object.keys(before).sort()).toContain('produce');
-    const renamed = chems().map((c) => (c.id === BENZENE ? { ...c, name: 'Benzene (renamed)' } : c));
+    const renamed = chems().map((c) =>
+      c.id === BENZENE ? { ...c, name: 'Benzene (renamed)' } : c,
+    );
     expect(changed(before, outputHashes(base(), renamed))).toEqual([]);
   });
 
