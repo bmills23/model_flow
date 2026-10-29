@@ -63,7 +63,9 @@ describe('App shell', () => {
 
   it('lists the household screen on the workbench', async () => {
     renderWorkbench();
-    const link = (await screen.findAllByRole('link', { name: /shower, irrigation and particulates/i }))[0]!;
+    const link = (
+      await screen.findAllByRole('link', { name: /shower, irrigation and particulates/i })
+    )[0]!;
     expect(link.getAttribute('href')).toBe('#/household');
   });
 
