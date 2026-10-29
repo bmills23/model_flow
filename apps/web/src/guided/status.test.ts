@@ -130,11 +130,13 @@ describe('guidedStatus', () => {
     );
   });
 
-  it('steps that arrive later stay to do', () => {
+  it('step 5 follows step 3d for forward risk, and step 6 follows steps 3d and 5', () => {
     const s = guidedStatus({ chemicals, guided: guidedWith(wellSite), outputCheck: allCurrent });
-    for (const id of ['targets', 'results'] as const) {
-      expect(s[id]).toBe('todo');
-    }
+    expect(s.targets).toBe(s.run);
+    expect(s.results).toBe(s.run);
+    const none = guidedStatus({ chemicals, guided: guidedWith(wellSite), outputCheck: noneRun });
+    expect(none.targets).toBe('todo');
+    expect(none.results).toBe('todo');
   });
 
   it('step 4 is done with at least one pathway on and a valid receptor, read live', () => {

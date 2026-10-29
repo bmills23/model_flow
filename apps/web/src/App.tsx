@@ -8,8 +8,8 @@ import {
 } from 'react';
 import { sectionFromHash, slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
+import type { GUIDED_STEPS } from './steps';
 import {
-  GUIDED_STEPS,
   STEPS,
   WORKBENCH_HASH,
   WORKBENCH_REPORT_HASH,

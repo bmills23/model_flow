@@ -37,33 +37,33 @@ describe('App shell', () => {
     expect(screen.getByRole('contentinfo').textContent).toMatch(/not affiliated/i);
   });
 
-  it('lists the Methods & References page on the workbench', () => {
+  it('lists the Methods & References page on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getByRole('link', { name: /methods and references/i });
+    const link = (await screen.findAllByRole('link', { name: /methods and references/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/methods');
   });
 
-  it('lists the vadose leaching screen on the workbench', () => {
+  it('lists the vadose leaching screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /vadose leaching/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /vadose leaching/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/vadose');
   });
 
-  it('lists the saturated soil source screen on the workbench', () => {
+  it('lists the saturated soil source screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /saturated soil source/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /saturated soil source/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/saturated');
   });
 
-  it('lists the exposure and risk screen on the workbench', () => {
+  it('lists the exposure and risk screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /exposure and risk/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /exposure and risk/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/risk');
   });
 
-  it('lists the household screen on the workbench', () => {
+  it('lists the household screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /shower, irrigation and particulates/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /shower, irrigation and particulates/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/household');
   });
 
@@ -93,9 +93,9 @@ describe('App shell', () => {
     window.location.hash = '';
   }, 30000);
 
-  it('lists the cleanup levels screen on the workbench', () => {
+  it('lists the cleanup levels screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /cleanup levels/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /cleanup levels/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/cleanup');
   });
 
@@ -115,9 +115,9 @@ describe('App shell', () => {
     window.location.hash = '';
   });
 
-  it('lists the surface water screen on the workbench', () => {
+  it('lists the surface water screen on the workbench', async () => {
     renderWorkbench();
-    const link = screen.getAllByRole('link', { name: /surface water and sediment/i })[0]!;
+    const link = (await screen.findAllByRole('link', { name: /surface water and sediment/i }))[0]!;
     expect(link.getAttribute('href')).toBe('#/surface-water');
   });
 
@@ -139,7 +139,7 @@ describe('App shell', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
   });
 
-  it('prints today\'s report at #/workbench/report', async () => {
+  it("prints today's report at #/workbench/report", async () => {
     window.location.hash = '#/workbench/report';
     render(<App />);
     expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
@@ -289,24 +289,24 @@ describe('stale values banner', () => {
     expect(screen.queryByText(note)).toBeNull();
   });
 
-  it.each(['', '#/step/run', '#/report', '#/docs'])(
-    'does not show on %s',
+  it.each(['', '#/step/run', '#/report', '#/docs'])('does not show on %s', (hash) => {
+    window.location.hash = hash;
+    render(<App />);
+    act(() => setWellFeed(well));
+    editK('99');
+    expect(screen.queryByText(note)).toBeNull();
+  });
+
+  it.each(['#/workbench', '#/workbench/report', '#/transport', '#/risk', '#/methods'])(
+    'shows on %s',
     (hash) => {
       window.location.hash = hash;
       render(<App />);
       act(() => setWellFeed(well));
       editK('99');
-      expect(screen.queryByText(note)).toBeNull();
+      expect(screen.getByText(note)).toBeTruthy();
     },
   );
-
-  it.each(['#/workbench', '#/workbench/report', '#/transport', '#/risk', '#/methods'])('shows on %s', (hash) => {
-    window.location.hash = hash;
-    render(<App />);
-    act(() => setWellFeed(well));
-    editK('99');
-    expect(screen.getByText(note)).toBeTruthy();
-  });
 
   it('stays dismissed for the same stale feed and comes back for a later one', () => {
     renderWorkbench();
