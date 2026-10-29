@@ -1,59 +1,90 @@
 import { describe, expect, it } from 'vitest';
-import { STEPS, stepForHash } from './steps';
-
-const ALL_ROUTES = [
-  '#/site',
-  '#/chemicals',
-  '#/transport',
-  '#/vadose',
-  '#/saturated',
-  '#/vapor',
-  '#/surface-water',
-  '#/household',
-  '#/plants-eco',
-  '#/risk',
-  '#/cleanup',
-  '#/report',
-];
+import {
+  GUIDED_STEPS,
+  ROUTE_REDIRECTS,
+  STEPS,
+  WORKBENCH_HASH,
+  WORKBENCH_REPORT_HASH,
+  WORKBENCH_ROUTES,
+  guidedHref,
+  guidedStepForHash,
+  isWorkbenchHash,
+  redirectedHash,
+  stepForHash,
+} from './steps';
 
 describe('step bar model', () => {
-  it('lists six steps in order, each with a real target route', () => {
+  it('lists the six steps in order, each opening a guided step', () => {
     expect(STEPS.map((s) => s.label)).toEqual([
       'Chemicals',
       'Site model',
-      'Transport',
-      'Receptors',
-      'Risk & cleanup',
+      'Site values and run',
+      'Pathways and receptors',
+      'Risk or cleanup',
       'Results',
     ]);
-    for (const step of STEPS) expect(step.href).toMatch(/^#\/[a-z-]+$/);
+    for (const step of STEPS) expect(guidedStepForHash(step.href), step.label).toBeDefined();
   });
 
-  it('maps every screen route to exactly one step', () => {
-    for (const route of ALL_ROUTES) {
-      const owners = STEPS.filter((s) => s.owns.includes(route));
-      expect(owners, route).toHaveLength(1);
-      expect(stepForHash(route)?.label).toBe(owners[0]!.label);
+  it('maps every guided step to exactly one of the six', () => {
+    for (const g of GUIDED_STEPS) {
+      const owners = STEPS.filter((s) => s.owns.includes(guidedHref(g.id)));
+      expect(owners, g.id).toHaveLength(1);
+      expect(stepForHash(guidedHref(g.id))).toBe(owners[0]);
     }
   });
 
-  it('puts the fate screens under Transport and the others where the plan says', () => {
-    for (const r of ['#/transport', '#/vadose', '#/saturated', '#/vapor', '#/surface-water'])
-      expect(stepForHash(r)?.label).toBe('Transport');
-    expect(stepForHash('#/risk')?.label).toBe('Receptors');
-    expect(stepForHash('#/cleanup')?.label).toBe('Risk & cleanup');
-    expect(stepForHash('#/report')?.label).toBe('Results');
+  it('groups 3a to 3d and 4a to 4c under one step each', () => {
+    for (const id of ['properties', 'sources', 'run'] as const)
+      expect(stepForHash(guidedHref(id))?.label).toBe('Site values and run');
+    for (const id of ['pathways', 'receptors', 'toxicity'] as const)
+      expect(stepForHash(guidedHref(id))?.label).toBe('Pathways and receptors');
   });
 
-  it('gives no step to the home, methods and documentation pages', () => {
-    for (const r of ['', '#/', '#/methods', '#/docs', '#/docs/user-guide'])
+  it('gives no step to the home, report, workbench, methods and documentation pages', () => {
+    for (const r of ['', '#/', '#/report', '#/workbench', '#/vadose', '#/methods', '#/docs'])
       expect(stepForHash(r)).toBeUndefined();
   });
 });
 
+describe('workbench routes', () => {
+  it('lists every model screen once, with a report and the validation and methods pages', () => {
+    const hrefs = WORKBENCH_ROUTES.map((r) => r.href);
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+    for (const h of [
+      '#/transport',
+      '#/vadose',
+      '#/saturated',
+      '#/vapor',
+      '#/surface-water',
+      '#/household',
+      '#/plants-eco',
+      '#/risk',
+      '#/cleanup',
+      WORKBENCH_REPORT_HASH,
+      '#/validation',
+      '#/methods',
+    ])
+      expect(hrefs).toContain(h);
+  });
+
+  it('knows the workbench page and its routes, and nothing else', () => {
+    expect(isWorkbenchHash(WORKBENCH_HASH)).toBe(true);
+    for (const r of WORKBENCH_ROUTES) expect(isWorkbenchHash(r.href), r.href).toBe(true);
+    for (const h of ['', '#/', '#/report', '#/step/run', '#/docs', '#/site'])
+      expect(isWorkbenchHash(h), h).toBe(false);
+  });
+
+  it('sends the retired site and chemicals routes to steps 2 and 1', () => {
+    expect(ROUTE_REDIRECTS).toEqual({ '#/site': '#/step/site', '#/chemicals': '#/step/chemicals' });
+    expect(redirectedHash('#/site')).toBe('#/step/site');
+    expect(redirectedHash('#/chemicals')).toBe('#/step/chemicals');
+    expect(redirectedHash('#/risk')).toBe('#/risk');
+  });
+});
+
 describe('guided step list', () => {
-  it('lists the steps in order with a route each, steps 4 to 6 marked as arriving', async () => {
-    const { GUIDED_STEPS, guidedHref, guidedStepForHash } = await import('./steps');
+  it('lists the steps in order with a route each', () => {
     expect(GUIDED_STEPS.map((s) => s.id)).toEqual([
       'chemicals',
       'site',
@@ -66,7 +97,6 @@ describe('guided step list', () => {
       'targets',
       'results',
     ]);
-    expect(GUIDED_STEPS.filter((s) => s.arrives)).toEqual([]);
     for (const s of GUIDED_STEPS) {
       expect(guidedHref(s.id)).toBe(`#/step/${s.id}`);
       expect(guidedStepForHash(`#/step/${s.id}`)).toBe(s);

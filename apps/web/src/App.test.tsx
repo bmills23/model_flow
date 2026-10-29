@@ -3,17 +3,29 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { currentProject, forgetMemory, getScreen, loadProject, setScreen } from './project/store';
 import { clearWellFeed, setWellFeed } from './transport/wellFeed';
+import { HOME_LINKS, MIN_TEXT, shellProblems } from '../../../scripts/shell-verdict.mjs';
+
+/** Renders the app on the workbench page, where the model screens are listed. */
+const renderWorkbench = (): void => {
+  window.location.hash = '#/workbench';
+  render(<App />);
+};
 
 describe('App shell', () => {
+  afterEach(() => {
+    cleanup();
+    window.location.hash = '';
+  });
+
   it('shows the six RISC-style steps in the navigation', () => {
     render(<App />);
     const nav = screen.getByRole('navigation');
     for (const label of [
       'Chemicals',
       'Site model',
-      'Transport',
-      'Receptors',
-      'Risk & cleanup',
+      'Site values and run',
+      'Pathways and receptors',
+      'Risk or cleanup',
       'Results',
     ]) {
       expect(nav.textContent).toContain(label);
@@ -25,32 +37,32 @@ describe('App shell', () => {
     expect(screen.getByRole('contentinfo').textContent).toMatch(/not affiliated/i);
   });
 
-  it('opens the Methods & References page from the navigation', () => {
-    render(<App />);
-    const link = screen.getByRole('link', { name: /methods/i });
-    expect(link).toBeTruthy();
+  it('lists the Methods & References page on the workbench', () => {
+    renderWorkbench();
+    const link = screen.getByRole('link', { name: /methods and references/i });
+    expect(link.getAttribute('href')).toBe('#/methods');
   });
 
-  it('links to the vadose leaching screen from the navigation', () => {
-    render(<App />);
+  it('lists the vadose leaching screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /vadose leaching/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/vadose');
   });
 
-  it('links to the saturated soil source screen from the navigation', () => {
-    render(<App />);
+  it('lists the saturated soil source screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /saturated soil source/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/saturated');
   });
 
-  it('links to the exposure and risk screen from the navigation', () => {
-    render(<App />);
+  it('lists the exposure and risk screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /exposure and risk/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/risk');
   });
 
-  it('links to the household screen from the navigation', () => {
-    render(<App />);
+  it('lists the household screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /shower, irrigation and particulates/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/household');
   });
@@ -68,11 +80,9 @@ describe('App shell', () => {
     window.location.hash = '';
   });
 
-  it('links to the plants, ecology and TPH screen and opens it at #/plants-eco', async () => {
+  it('opens the plants, ecology and TPH screen at #/plants-eco', async () => {
     window.location.hash = '#/plants-eco';
     render(<App />);
-    const link = screen.getAllByRole('link', { name: /plants, ecology and tph/i })[0]!;
-    expect(link.getAttribute('href')).toBe('#/plants-eco');
     expect(
       await screen.findByRole(
         'heading',
@@ -83,8 +93,8 @@ describe('App shell', () => {
     window.location.hash = '';
   }, 30000);
 
-  it('links to the cleanup levels screen from the navigation', () => {
-    render(<App />);
+  it('lists the cleanup levels screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /cleanup levels/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/cleanup');
   });
@@ -98,17 +108,15 @@ describe('App shell', () => {
     window.location.hash = '';
   }, 30000);
 
-  it('links to the vapor screen from the navigation and renders it on its route', async () => {
+  it('renders the vapor screen on its route', async () => {
     window.location.hash = '#/vapor';
     render(<App />);
-    const link = screen.getAllByRole('link', { name: /vapor intrusion/i })[0]!;
-    expect(link.getAttribute('href')).toBe('#/vapor');
     expect(await screen.findByRole('heading', { level: 1, name: /vapor intrusion/i })).toBeTruthy();
     window.location.hash = '';
   });
 
-  it('links to the surface water screen from the navigation', () => {
-    render(<App />);
+  it('lists the surface water screen on the workbench', () => {
+    renderWorkbench();
     const link = screen.getAllByRole('link', { name: /surface water and sediment/i })[0]!;
     expect(link.getAttribute('href')).toBe('#/surface-water');
   });
@@ -122,17 +130,23 @@ describe('App shell', () => {
     window.location.hash = '';
   });
 
-  it('links to the report and opens it at #/report', async () => {
+  it('links to the report from the navigation and opens it at #/report', async () => {
     render(<App />);
     expect(screen.getByRole('link', { name: 'Report' }).getAttribute('href')).toBe('#/report');
-  });
-
-  it('opens the report screen at #/report', async () => {
+    cleanup();
     window.location.hash = '#/report';
     render(<App />);
     expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
-    window.location.hash = '';
   });
+
+  it('prints today\'s report at #/workbench/report', async () => {
+    window.location.hash = '#/workbench/report';
+    render(<App />);
+    expect(await screen.findByRole('heading', { level: 1, name: 'Report' })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/guided steps/i);
+    expect(screen.getByRole('link', { name: /model workbench/i })).toBeTruthy();
+  });
+
   it('links to the documentation and opens the reader at #/docs and #/docs/user-guide', async () => {
     render(<App />);
     expect(screen.getByRole('link', { name: 'Documentation' }).getAttribute('href')).toBe('#/docs');
@@ -140,45 +154,103 @@ describe('App shell', () => {
     window.location.hash = '#/docs/user-guide';
     render(<App />);
     expect(await screen.findByRole('heading', { level: 1, name: 'User guide' })).toBeTruthy();
-    window.location.hash = '';
   });
 
-  it('has no disabled step and links every step to a route', () => {
-    window.location.hash = '';
+  it('lists the six steps in the navigation, each linked to a guided step, with no disabled one', () => {
     render(<App />);
-    const nav = screen.getByRole('navigation');
+    const nav = screen.getByRole('navigation', { name: 'Main' });
     const steps = nav.querySelectorAll('ol.steps li');
     expect(steps).toHaveLength(6);
     expect(nav.querySelectorAll('.steps button')).toHaveLength(0);
     const hrefs = [...steps].map((li) => li.querySelector('a')?.getAttribute('href'));
     expect(hrefs).toEqual([
-      '#/chemicals',
-      '#/site',
-      '#/transport',
-      '#/risk',
-      '#/cleanup',
-      '#/report',
+      '#/step/chemicals',
+      '#/step/site',
+      '#/step/properties',
+      '#/step/pathways',
+      '#/step/targets',
+      '#/step/results',
     ]);
   });
 
-  it('marks only the step that owns the current route', () => {
-    window.location.hash = '#/vadose';
+  it('keeps the model screens out of the main navigation and links the workbench instead', () => {
     render(<App />);
-    const current = screen
-      .getByRole('navigation')
-      .querySelectorAll('ol.steps a[aria-current="page"]');
-    expect(current).toHaveLength(1);
-    expect(current[0]!.textContent).toContain('Transport');
-    window.location.hash = '';
+    const nav = screen.getByRole('navigation', { name: 'Main' });
+    expect(nav.querySelector('a[href="#/vadose"]')).toBeNull();
+    expect(nav.querySelector('a[href="#/risk"]')).toBeNull();
+    expect(nav.querySelector('a[href="#/workbench"]')?.textContent).toMatch(/model workbench/i);
   });
 
-  it('marks no step on the home page, which names no placeholder and links the report', () => {
+  it('lists every old model route on the workbench', () => {
+    renderWorkbench();
+    expect(screen.getByRole('heading', { level: 1, name: 'Model workbench' })).toBeTruthy();
+    const main = document.getElementById('main')!;
+    for (const h of [
+      '#/transport',
+      '#/vadose',
+      '#/saturated',
+      '#/vapor',
+      '#/surface-water',
+      '#/household',
+      '#/plants-eco',
+      '#/risk',
+      '#/cleanup',
+      '#/workbench/report',
+      '#/validation',
+      '#/methods',
+    ]) {
+      expect(main.querySelector(`a[href="${h}"]`), h).toBeTruthy();
+    }
+  });
+
+  it.each([
+    ['#/site', '#/step/site'],
+    ['#/chemicals', '#/step/chemicals'],
+  ])('sends %s to %s', async (from, to) => {
+    window.location.hash = from;
+    render(<App />);
+    expect(await screen.findByRole('navigation', { name: /guided steps/i })).toBeTruthy();
+    expect(window.location.hash).toBe(to);
+  });
+
+  it('marks only the step that owns the current route', () => {
+    window.location.hash = '#/step/run';
+    render(<App />);
+    const current = screen
+      .getByRole('navigation', { name: 'Main' })
+      .querySelectorAll('ol.steps a[aria-current="page"]');
+    expect(current).toHaveLength(1);
+    expect(current[0]!.textContent).toContain('Site values and run');
+  });
+
+  it('marks no step on the home page, which leads into step 1 and passes the shell rule', () => {
     window.location.hash = '';
     render(<App />);
     expect(document.querySelectorAll('ol.steps a[aria-current]')).toHaveLength(0);
     expect(document.body.textContent).not.toMatch(/placeholder/i);
     const main = document.getElementById('main')!;
+    expect(main.querySelector('a[href="#/step/chemicals"]')).toBeTruthy();
+    expect(main.querySelector('a[href="#/workbench"]')).toBeTruthy();
     expect(main.querySelector('a[href="#/report"]')).toBeTruthy();
+    expect(main.querySelectorAll('a[href]').length).toBeGreaterThanOrEqual(HOME_LINKS);
+    expect((main.textContent ?? '').trim().length).toBeGreaterThanOrEqual(MIN_TEXT);
+    expect(
+      shellProblems({
+        navMain: document.querySelectorAll('nav[aria-label="Main"]').length,
+        mains: document.querySelectorAll('main#main').length,
+        mainH1: main.querySelectorAll('h1').length,
+        links: main.querySelectorAll('a[href]').length,
+        controls: main.querySelectorAll('input, select, textarea').length,
+        tables: main.querySelectorAll('table').length,
+        charts: main.querySelectorAll('svg').length,
+        textLen: (main.textContent ?? '').trim().length,
+      }),
+    ).toEqual([]);
+  });
+
+  it('carries no interim wording about steps arriving later', () => {
+    render(<App />);
+    expect(document.body.textContent).not.toMatch(/next update|arrives with|being built/i);
   });
 });
 
@@ -189,6 +261,7 @@ describe('stale values banner', () => {
       clearWellFeed();
       forgetMemory();
     });
+    window.location.hash = '';
   });
   const well = {
     method: 'modern' as const,
@@ -204,7 +277,7 @@ describe('stale values banner', () => {
   const note = /built from inputs that have since changed/i;
 
   it('appears the moment the sending screen is edited and goes when it is edited back', () => {
-    render(<App />);
+    renderWorkbench();
     const k = getScreen('transport').form.K;
     act(() => setWellFeed(well));
     expect(screen.queryByText(note)).toBeNull();
@@ -216,8 +289,27 @@ describe('stale values banner', () => {
     expect(screen.queryByText(note)).toBeNull();
   });
 
-  it('stays dismissed for the same stale feed and comes back for a later one', () => {
+  it.each(['', '#/step/run', '#/report', '#/docs'])(
+    'does not show on %s',
+    (hash) => {
+      window.location.hash = hash;
+      render(<App />);
+      act(() => setWellFeed(well));
+      editK('99');
+      expect(screen.queryByText(note)).toBeNull();
+    },
+  );
+
+  it.each(['#/workbench', '#/workbench/report', '#/transport', '#/risk', '#/methods'])('shows on %s', (hash) => {
+    window.location.hash = hash;
     render(<App />);
+    act(() => setWellFeed(well));
+    editK('99');
+    expect(screen.getByText(note)).toBeTruthy();
+  });
+
+  it('stays dismissed for the same stale feed and comes back for a later one', () => {
+    renderWorkbench();
     act(() => setWellFeed(well));
     editK('99');
     fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
@@ -230,7 +322,7 @@ describe('stale values banner', () => {
   });
 
   it('a dismissal made in one project does not hide the note of the next project opened', () => {
-    render(<App />);
+    renderWorkbench();
     act(() => setWellFeed(well));
     editK('99');
     const staleProject = currentProject();
@@ -246,14 +338,11 @@ describe('guided flow routes', () => {
     window.location.hash = '';
   });
 
-  it('links to the guided steps from the home page and leaves the main navigation alone', () => {
+  it('links to step 1 from the home page', () => {
     window.location.hash = '';
     render(<App />);
     const link = screen.getByRole('link', { name: /start the guided flow/i });
     expect(link.getAttribute('href')).toBe('#/step/chemicals');
-    expect(screen.getByRole('navigation', { name: 'Main' }).textContent).toContain(
-      'Risk & cleanup',
-    );
     expect(screen.queryByRole('navigation', { name: /guided steps/i })).toBeNull();
   });
 
@@ -286,12 +375,4 @@ describe('guided flow routes', () => {
       expect(screen.getByRole('link', { name: /^back$/i })).toBeTruthy();
     },
   );
-
-  it('shows steps that are not built yet as arriving with the next update', async () => {
-    window.location.hash = '#/step/pathways';
-    render(<App />);
-    expect(
-      await screen.findByText(/arrives with the next update/i, { selector: 'p' }),
-    ).toBeTruthy();
-  });
 });

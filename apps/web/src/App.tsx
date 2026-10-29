@@ -8,7 +8,17 @@ import {
 } from 'react';
 import { sectionFromHash, slugFromHash } from './docs/catalog';
 import { NON_AFFILIATION } from './nonAffiliation';
-import { GUIDED_STEPS, STEPS, guidedHref, guidedStepForHash, stepForHash } from './steps';
+import {
+  GUIDED_STEPS,
+  STEPS,
+  WORKBENCH_HASH,
+  WORKBENCH_REPORT_HASH,
+  guidedHref,
+  guidedStepForHash,
+  isWorkbenchHash,
+  redirectedHash,
+  stepForHash,
+} from './steps';
 import { GuidedShell } from './guided/GuidedShell';
 import { ProjectBar } from './project/ProjectBar';
 import {
@@ -56,16 +66,16 @@ const RiskPage = lazy(() => import('./risk/RiskPage').then((m) => ({ default: m.
 const ReportPage = lazy(() =>
   import('./report/ReportPage').then((m) => ({ default: m.ReportPage })),
 );
+const WorkbenchReportPage = lazy(() =>
+  import('./report/ReportPage').then((m) => ({ default: m.WorkbenchReportPage })),
+);
+const WorkbenchPage = lazy(() =>
+  import('./guided/WorkbenchPage').then((m) => ({ default: m.WorkbenchPage })),
+);
 
 const CleanupPage = lazy(() =>
   import('./cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })),
 );
-
-const ChemicalsPage = lazy(() =>
-  import('./chemicals/ChemicalsPage').then((m) => ({ default: m.ChemicalsPage })),
-);
-
-const SitePage = lazy(() => import('./site/SitePage').then((m) => ({ default: m.SitePage })));
 
 const ValidationPage = lazy(() =>
   import('./validation/ValidationPage').then((m) => ({ default: m.ValidationPage })),
@@ -73,9 +83,8 @@ const ValidationPage = lazy(() =>
 
 const DocsPage = lazy(() => import('./docs/DocsPage').then((m) => ({ default: m.DocsPage })));
 
-// The guided step screens, by step id. A step without an entry shows the notice below until its screen
-// lands; each screen slice adds its own lazy import here.
-const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType>> = {
+// The guided step screens, by step id.
+const STEP_SCREENS: Record<(typeof GUIDED_STEPS)[number]['id'], ComponentType> = {
   chemicals: lazy(() =>
     import('./guided/screens/ChemicalsStep').then((m) => ({ default: m.ChemicalsStep })),
   ),
@@ -104,25 +113,12 @@ const STEP_SCREENS: Partial<Record<(typeof GUIDED_STEPS)[number]['id'], Componen
   ),
 };
 
-function GuidedPlaceholder({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {
-  const step = GUIDED_STEPS.find((s) => s.id === id)!;
+function GuidedScreen({ id }: { id: (typeof GUIDED_STEPS)[number]['id'] }) {
   const Screen = STEP_SCREENS[id];
-  if (Screen !== undefined) {
-    return (
-      <Suspense fallback={<p className="muted">Loading this step...</p>}>
-        <Screen />
-      </Suspense>
-    );
-  }
   return (
-    <section>
-      <h1>{step.label}</h1>
-      <p className="muted">
-        {step.arrives
-          ? 'This step arrives with the next update. The steps before it already work.'
-          : 'This screen is being built. The other steps open from the list.'}
-      </p>
-    </section>
+    <Suspense fallback={<p className="muted">Loading this step...</p>}>
+      <Screen />
+    </Suspense>
   );
 }
 
@@ -131,8 +127,6 @@ const VALIDATION_HASH = '#/validation';
 const TRANSPORT_HASH = '#/transport';
 const VADOSE_HASH = '#/vadose';
 const SATURATED_HASH = '#/saturated';
-const SITE_HASH = '#/site';
-const CHEMICALS_HASH = '#/chemicals';
 const RISK_HASH = '#/risk';
 const CLEANUP_HASH = '#/cleanup';
 const REPORT_HASH = '#/report';
@@ -143,12 +137,19 @@ const PLANTS_ECO_HASH = '#/plants-eco';
 const DOCS_HASH = '#/docs';
 
 export function App() {
-  const [hash, setHash] = useState(() => window.location.hash);
+  // the retired #/site and #/chemicals open steps 2 and 1: the address is replaced, not added to history
+  const [hash, setHash] = useState(() => redirectedHash(window.location.hash));
   useEffect(() => {
-    const onChange = () => setHash(window.location.hash);
-    window.addEventListener('hashchange', onChange);
-    return () => window.removeEventListener('hashchange', onChange);
+    const sync = () => {
+      const next = redirectedHash(window.location.hash);
+      if (next !== window.location.hash) window.location.replace(next);
+      setHash(next);
+    };
+    sync();
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
   }, []);
+  const onWorkbench = isWorkbenchHash(hash);
   const epoch = useSyncExternalStore(subscribeProject, getEpoch, getEpoch);
   const [staleShown, setStaleShown] = useState(true);
   // the stale mark is live and per chemical (see project/staleFeeds); a dismissal covers the slots
@@ -165,10 +166,11 @@ export function App() {
   }
   const stillDismissed = dismissedStale.filter((k) => nowKeys.includes(k));
   if (stillDismissed.length !== dismissedStale.length) setDismissedStale(stillDismissed);
-  const stale = staleNow.filter(
-    (s) => dismissedEpoch !== epoch || !dismissedStale.includes(slotKey(s)),
-  );
-  const dropped = staleShown ? getDroppedFeeds() : [];
+  const stale = onWorkbench
+    ? staleNow.filter((s) => dismissedEpoch !== epoch || !dismissedStale.includes(slotKey(s)))
+    : [];
+  // the values passed between screens exist only on the workbench screens, so their notes show there only
+  const dropped = staleShown && onWorkbench ? getDroppedFeeds() : [];
   const onNewProject = (): void => {
     if (
       window.confirm(
@@ -185,8 +187,6 @@ export function App() {
   const onTransport = hash === TRANSPORT_HASH;
   const onVadose = hash === VADOSE_HASH;
   const onSaturated = hash === SATURATED_HASH;
-  const onSite = hash === SITE_HASH;
-  const onChemicals = hash === CHEMICALS_HASH;
   const onRisk = hash === RISK_HASH;
   const onCleanup = hash === CLEANUP_HASH;
   const onVapor = hash === VAPOR_HASH;
@@ -194,6 +194,8 @@ export function App() {
   const onHousehold = hash === HOUSEHOLD_HASH;
   const onPlantsEco = hash === PLANTS_ECO_HASH;
   const onReport = hash === REPORT_HASH;
+  const onWorkbenchPage = hash === WORKBENCH_HASH;
+  const onWorkbenchReport = hash === WORKBENCH_REPORT_HASH;
   const currentStep = stepForHash(hash);
   const guidedStep = guidedStepForHash(hash);
   const onDocs = hash === DOCS_HASH || hash.startsWith(`${DOCS_HASH}/`);
@@ -201,14 +203,12 @@ export function App() {
   return (
     <div
       className={
-        onReport
+        onReport || onWorkbenchReport
           ? 'shell shell-report'
           : onTransport ||
               onVadose ||
               onSaturated ||
               onRisk ||
-              onChemicals ||
-              onSite ||
               onVapor ||
               onCleanup ||
               onSurfaceWater ||
@@ -275,68 +275,15 @@ export function App() {
           ))}
         </ol>
         <div className="nav-links">
-          <a className="nav-link" href={SITE_HASH} aria-current={onSite ? 'page' : undefined}>
-            Site model
-          </a>
-          <a
-            className="nav-link"
-            href={CHEMICALS_HASH}
-            aria-current={onChemicals ? 'page' : undefined}
-          >
-            Chemical database
-          </a>
-          <a className="nav-link" href={VADOSE_HASH} aria-current={onVadose ? 'page' : undefined}>
-            Vadose leaching
-          </a>
-          <a
-            className="nav-link"
-            href={SATURATED_HASH}
-            aria-current={onSaturated ? 'page' : undefined}
-          >
-            Saturated soil source
-          </a>
-          <a className="nav-link" href={VAPOR_HASH} aria-current={onVapor ? 'page' : undefined}>
-            Vapor intrusion
-          </a>
-          <a
-            className="nav-link"
-            href={SURFACE_WATER_HASH}
-            aria-current={onSurfaceWater ? 'page' : undefined}
-          >
-            Surface water and sediment
-          </a>
-          <a
-            className="nav-link"
-            href={HOUSEHOLD_HASH}
-            aria-current={onHousehold ? 'page' : undefined}
-          >
-            Shower, irrigation and particulates
-          </a>
-          <a
-            className="nav-link"
-            href={PLANTS_ECO_HASH}
-            aria-current={onPlantsEco ? 'page' : undefined}
-          >
-            Plants, ecology and TPH
-          </a>
-          <a className="nav-link" href={RISK_HASH} aria-current={onRisk ? 'page' : undefined}>
-            Exposure and risk
-          </a>
-          <a className="nav-link" href={CLEANUP_HASH} aria-current={onCleanup ? 'page' : undefined}>
-            Cleanup levels
-          </a>
           <a className="nav-link" href={REPORT_HASH} aria-current={onReport ? 'page' : undefined}>
             Report
           </a>
-          <a className="nav-link" href={METHODS_HASH} aria-current={onMethods ? 'page' : undefined}>
-            Methods &amp; References
-          </a>
           <a
             className="nav-link"
-            href={VALIDATION_HASH}
-            aria-current={onValidation ? 'page' : undefined}
+            href={WORKBENCH_HASH}
+            aria-current={onWorkbench ? 'page' : undefined}
           >
-            Validation
+            Model workbench
           </a>
           <a className="nav-link" href={DOCS_HASH} aria-current={onDocs ? 'page' : undefined}>
             Documentation
@@ -346,7 +293,7 @@ export function App() {
       <main id="main" tabIndex={-1} key={epoch}>
         {guidedStep !== undefined ? (
           <GuidedShell stepId={guidedStep.id}>
-            <GuidedPlaceholder id={guidedStep.id} />
+            <GuidedScreen id={guidedStep.id} />
           </GuidedShell>
         ) : onDocs ? (
           <Suspense fallback={<p className="muted">Loading the documentation...</p>}>
@@ -388,13 +335,13 @@ export function App() {
           <Suspense fallback={<p className="muted">Loading the plants and ecology screen...</p>}>
             <PlantsEcoPage />
           </Suspense>
-        ) : onSite ? (
-          <Suspense fallback={<p className="muted">Loading the site model screen...</p>}>
-            <SitePage />
+        ) : onWorkbenchPage ? (
+          <Suspense fallback={<p className="muted">Loading the model workbench...</p>}>
+            <WorkbenchPage />
           </Suspense>
-        ) : onChemicals ? (
-          <Suspense fallback={<p className="muted">Loading the chemical database...</p>}>
-            <ChemicalsPage />
+        ) : onWorkbenchReport ? (
+          <Suspense fallback={<p className="muted">Loading the report...</p>}>
+            <WorkbenchReportPage />
           </Suspense>
         ) : onRisk ? (
           <Suspense fallback={<p className="muted">Loading the exposure and risk screen...</p>}>
@@ -413,55 +360,28 @@ export function App() {
             <h1>Fate-and-transport and risk modeling</h1>
             <p className="lede">
               An open reimplementation of RISC5-class methods with a switch between legacy and
-              modern alternatives for each process. Work through the six steps above in order, or
-              open any screen directly: nothing is locked, and a screen that needs a value from
-              another says where it came from. The report gathers the results.
+              modern alternatives for each process. Work through the six steps in order: they carry
+              one project from the chemicals to a printed report, and any step opens at any time.
+              The report gathers the results.
             </p>
             <p>
               <a className="button" href={guidedHref('chemicals')}>
                 Start the guided flow
-              </a>{' '}
-              <a className="button" href={TRANSPORT_HASH}>
-                Open groundwater transport
-              </a>{' '}
-              <a className="button" href={VADOSE_HASH}>
-                Open vadose leaching
-              </a>{' '}
-              <a className="button" href={SATURATED_HASH}>
-                Open saturated soil source
-              </a>{' '}
-              <a className="button" href={VAPOR_HASH}>
-                Open vapor intrusion
-              </a>{' '}
-              <a className="button" href={SURFACE_WATER_HASH}>
-                Open surface water and sediment
-              </a>{' '}
-              <a className="button" href={HOUSEHOLD_HASH}>
-                Open shower, irrigation and particulates
-              </a>{' '}
-              <a className="button" href={PLANTS_ECO_HASH}>
-                Open plants, ecology and TPH
-              </a>{' '}
-              <a className="button" href={SITE_HASH}>
-                Plan the site model
-              </a>{' '}
-              <a className="button" href={CHEMICALS_HASH}>
-                Browse the chemical database
-              </a>{' '}
-              <a className="button" href={RISK_HASH}>
-                Open exposure and risk
-              </a>{' '}
-              <a className="button" href={CLEANUP_HASH}>
-                Open cleanup levels
-              </a>{' '}
+              </a>
+            </p>
+            <ol className="home-steps">
+              {STEPS.map((step) => (
+                <li key={step.label}>
+                  <a href={step.href}>{step.label}</a>
+                </li>
+              ))}
+            </ol>
+            <p>
               <a className="button" href={REPORT_HASH}>
                 Open the report
               </a>{' '}
-              <a className="button" href={METHODS_HASH}>
-                Read how each calculation is sourced
-              </a>{' '}
-              <a className="button" href={VALIDATION_HASH}>
-                See what the tests reproduce
+              <a className="button" href={WORKBENCH_HASH}>
+                Open the model workbench
               </a>{' '}
               <a className="button" href={DOCS_HASH}>
                 Read the user guide

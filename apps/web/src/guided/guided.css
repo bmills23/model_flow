@@ -84,16 +84,6 @@
   font-weight: 600;
 }
 
-.guided-step[data-mark='arrives'] {
-  color: var(--muted);
-}
-
-/* the long "arrives with the next update" mark goes under the label, so it never squeezes the label's column */
-.guided-step[data-mark='arrives'] .guided-step-mark {
-  grid-column: 2 / -1;
-  text-align: left;
-}
-
 @media (max-width: 520px) {
   .guided-step {
     grid-template-columns: 3rem minmax(0, 1fr);
@@ -476,5 +466,33 @@
 }
 .guided-results-settings dd {
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* the model workbench page: one link per screen with a line under it, links at least 44 px tall */
+.workbench-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.workbench-list li {
+  display: grid;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.workbench-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+
+.workbench-about {
   overflow-wrap: anywhere;
 }

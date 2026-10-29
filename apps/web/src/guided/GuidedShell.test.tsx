@@ -42,7 +42,7 @@ describe('GuidedShell', () => {
     expect(items[0]!.textContent).toMatch(/to do/i);
   });
 
-  it('shows done once a step is done, and steps 5 and 6 as arriving with the next update', () => {
+  it('shows done once a step is done, and every step as built', () => {
     addChemical({ id: 'benzene', name: 'Benzene' });
     render(
       <GuidedShell stepId="site">

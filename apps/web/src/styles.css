@@ -532,3 +532,15 @@ footer {
   height: 24px;
   flex: none;
 }
+
+/* the home page's list of the six steps, each link a full tap target */
+.home-steps {
+  margin: 0 0 16px;
+  padding-left: 1.5rem;
+}
+
+.home-steps a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+}

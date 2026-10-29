@@ -60,18 +60,14 @@ export function GuidedShell({
         <ol>
           {GUIDED_STEPS.map((step) => {
             const current = step.id === stepId;
-            const mark = step.arrives
-              ? 'Arrives with the next update'
-              : current
-                ? 'Current'
-                : MARK_TEXT[status[step.id]];
+            const mark = current ? 'Current' : MARK_TEXT[status[step.id]];
             return (
               <li key={step.id}>
                 <a
                   className="guided-step"
                   href={guidedHref(step.id)}
                   aria-current={current ? 'step' : undefined}
-                  data-mark={step.arrives ? 'arrives' : current ? 'current' : status[step.id]}
+                  data-mark={current ? 'current' : status[step.id]}
                 >
                   <span className="guided-step-num">{step.number}</span>
                   <span className="guided-step-label">{step.label}</span>

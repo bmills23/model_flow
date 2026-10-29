@@ -9,7 +9,6 @@ import './saturated/saturated.css';
 import './risk/risk.css';
 import './overrides/overrides.css';
 import './chemicals/chemicals.css';
-import './site/site.css';
 import './guided/guided.css';
 import './guided/exposure.css';
 import './cleanup/cleanup.css';
