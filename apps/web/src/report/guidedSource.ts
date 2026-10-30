@@ -52,9 +52,17 @@ import { receptorEditRows, type ReceptorEditRow } from './userValues';
 export const STEPS_NOT_RUN =
   'The guided steps have not been run for this project (step 3d has no results), so this report covers the model workbench screens.';
 
-/** True when the project holds results of the step 3d Run. */
+/**
+ * True when the project holds results of the step 3d Run, or measured concentrations (a measured basis
+ * has no Run outputs, yet steps 5 and 6 compute from the values typed in step 3b).
+ */
 export function hasGuidedOutputs(project: Project): boolean {
-  return Object.values(guidedOf(project).outputs).some((slots) => Object.keys(slots).length > 0);
+  const g = guidedOf(project);
+  if (Object.values(g.outputs).some((slots) => Object.keys(slots).length > 0)) return true;
+  if (g.site.basis !== 'measured' || chain(g.site).problems.length > 0) return false;
+  return chain(g.site).valuesNeeded.some((m) =>
+    Object.values(g.sources).some((s) => (s.values[m]?.value ?? '').trim() !== ''),
+  );
 }
 
 /** Everything the guided report reads besides the project. */
@@ -216,6 +224,39 @@ const dropFormPrefix = (r: { path: string; label: string; value: string }) => ({
   label: r.label.replace(/^form /, ''),
 });
 
+/** How a chemical's cleanup target reads in the report: the state standard with its value, unit and source. */
+export function targetWords(g: GuidedState, id: string): string {
+  const std = g.targets.standards[id];
+  if (std === undefined || std.kind === 'risk') return 'the risk and hazard targets';
+  if (std.kind === 'mcl') return 'the federal MCL at the well';
+  const v = std.value.trim() === '' ? '(no value)' : std.value.trim();
+  const what = `the state standard at the well, ${v}${std.unit === '' ? '' : ` ${std.unit}`}`;
+  return std.source.trim() === '' ? `${what} (source not named)` : `${what} (${std.source.trim()})`;
+}
+
+/**
+ * The step 5 inputs: the derived form's rows without the single target kind and well target (the target is
+ * per chemical in step 5, so a form-wide "risk" would contradict a state standard), then each chemical's own.
+ */
+function cleanupInputs(
+  g: GuidedState,
+  screens: Screens,
+  names: Readonly<Record<string, string>>,
+): Report['sections'][number]['inputs'] {
+  const rows = flattenInputs(cleanupProject.toProject(screens.cleanup))
+    .map(dropFormPrefix)
+    .filter((r) => r.path !== 'targetKind' && r.path !== 'wellTarget');
+  for (const c of screens.cleanup.form.chemicals) {
+    const word = targetWords(g, c.id);
+    rows.push({
+      path: `target[${c.id}]`,
+      label: `${names[c.id] ?? c.id} target`,
+      value: word.charAt(0).toUpperCase() + word.slice(1),
+    });
+  }
+  return rows;
+}
+
 /** The report model of a guided project: its sections with their inputs, then the methods statement. */
 export function buildGuidedReport(project: Project, data: GuidedReportData): Report {
   const g = data.guided;
@@ -229,11 +270,9 @@ export function buildGuidedReport(project: Project, data: GuidedReportData): Rep
     for (const id of list) if (!ids.includes(id)) ids.push(id);
     const inputs = isFateKey(key)
       ? templateInputs(g, key)
-      : flattenInputs(
-          key === 'risk'
-            ? riskProject.toProject(screens.risk)
-            : cleanupProject.toProject(screens.cleanup),
-        ).map(dropFormPrefix);
+      : key === 'risk'
+        ? flattenInputs(riskProject.toProject(screens.risk)).map(dropFormPrefix)
+        : cleanupInputs(g, screens, data.names);
     return { key, name: SCREEN_NAMES[key], inputs, methodIds: list, reads: [] };
   });
   const unused = USED_SCREENS_ORDER.filter((k) => !keys.includes(k)).map((k) => SCREEN_NAMES[k]);
@@ -317,8 +356,10 @@ function sourceEntries(
 ): Partial<Record<ScreenKey, SiteEntry[]>> {
   const out: Partial<Record<ScreenKey, SiteEntry[]>> = {};
   const g = data.guided;
+  const measured = g.site.basis === 'measured';
   for (const medium of chain(g.site).valuesNeeded) {
-    const key = READ_BY[medium]?.find((k) => keys.includes(k));
+    // measured values are read by exposure and risk or cleanup, the last section
+    const key = measured ? keys[keys.length - 1] : READ_BY[medium]?.find((k) => keys.includes(k));
     if (key === undefined) continue;
     for (const c of data.chemicals) {
       const v = g.sources[c.id]?.values[medium];

@@ -140,6 +140,18 @@ describe('one chemical of the cleanup form with its water standard', () => {
     expect(f.wellTarget).not.toBe('');
   });
 
+  it('a state standard is a plain number: ND and a below-limit value are refused, not read as a sample', () => {
+    for (const value of ['ND', '<5', 'abc']) {
+      const h = guidedWith((x) => {
+        x.site.sources = ['groundwater'];
+        x.site.paths.well = true;
+        x.targets.standards = { [BENZENE]: { kind: 'state', value, unit: 'ug/L', source: 'X' } };
+      });
+      const f = cleanupFormFor(deriveCleanupForm(h, CHEMS, db), h, BENZENE);
+      expect(f.wellTarget).toBe('0');
+    }
+  });
+
   it('a chemical with no standard is on risk', () => {
     const f = cleanupFormFor(deriveCleanupForm(g, CHEMS, db), g, 'other');
     expect(f.targetKind).toBe('risk');

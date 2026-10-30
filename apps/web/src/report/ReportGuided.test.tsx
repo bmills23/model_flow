@@ -6,6 +6,7 @@ import type { GuidedState } from '../guided/state';
 import { ReportPage, WorkbenchReportPage } from './ReportPage';
 import { STEPS_NOT_RUN } from './guidedSource';
 import { afterRun, chemicalData, guidedProject, wellSite } from './guidedReport.testkit';
+import { guidedWith, setValue } from '../guided/forms.testkit';
 
 afterEach(() => newProject());
 
@@ -29,6 +30,19 @@ describe('the report route', () => {
     expect(screen.getAllByRole('heading', { name: 'Charts, MTBE' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/counted as 0.25 mg\/L, half the limit/)).toBeTruthy();
     expect(screen.queryByText(/Run on the screen now/)).toBeNull();
+  }, 60000);
+
+  it('prints the guided report for measured concentrations, which have no Run outputs', async () => {
+    const g = guidedWith((x) => {
+      x.site.basis = 'measured';
+      x.site.measured = ['groundwater'];
+      setValue(x, '1634-04-4', 'groundwater', '4', 'mg/L');
+    });
+    loadProject(guidedProject(g));
+    render(<ReportPage />);
+    expect(await screen.findByRole('heading', { name: 'Guided steps' }, SLOW)).toBeTruthy();
+    expect(screen.queryByText(STEPS_NOT_RUN)).toBeNull();
+    await waitFor(() => expect(screen.queryByText(/computing results/i)).toBeNull(), SLOW);
   }, 60000);
 
   it("prints today's report with one line saying the steps have not been run", async () => {

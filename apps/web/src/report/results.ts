@@ -111,6 +111,7 @@ import {
   individualFallback,
   isFateKey,
   loadGuidedReportData,
+  targetWords,
   type GuidedReportData,
 } from './guidedSource';
 
@@ -1146,6 +1147,12 @@ async function guidedCleanup(
         );
         continue;
       }
+      if (!k.current && row !== undefined && !row.result.ok) {
+        sec.notes.push(
+          `${who}the cleanup level at the source is not quantified: ${row.result.errors.join(' ')}`,
+        );
+        continue;
+      }
       if (!k.current) {
         sec.notes.push(
           `${who}the cleanup level kept with this project is out of date, because an input it was solved from has changed since. Open step 5: it solves it again, and the report then prints the new level.`,
@@ -1160,7 +1167,7 @@ async function guidedCleanup(
       const ceiling = solubilityCeiling('', c.id, data.cleanupProps, data.db.edition, userProps);
       sec.tables.push(forChemical(savedLevelsTable(levels, ceiling), c.id, c.name));
       sec.notes.push(
-        `${who}the level at the source is solved to meet ${TARGET_WORDS[levels.target]}, ${ALLOCATION_WORDS[levels.allocation]}.`,
+        `${who}the level at the source is solved to meet ${levels.target === 'state' ? targetWords(g, c.id) : TARGET_WORDS[levels.target]}, ${ALLOCATION_WORDS[levels.allocation]}.`,
       );
       for (const n of levels.notes) {
         addWarnings(sec, 'step 5', [{ code: 'ui.source-note', message: `${who}${n}` }]);

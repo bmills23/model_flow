@@ -9,7 +9,7 @@ import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import type { ChemicalData } from '../guided/derive';
 import { keptLevelsFrom, guidedSolvePlan, requestsToSolve } from '../guided/solve';
 import type { GuidedState } from '../guided/state';
-import { setValue } from '../guided/forms.testkit';
+import { guidedWith, setValue } from '../guided/forms.testkit';
 import type { BasisDefault } from './basis';
 import {
   buildGuidedReport,
@@ -266,5 +266,107 @@ describe('the guided cleanup section', () => {
       /MTBE: the cleanup level kept with this project is out of date/,
     );
     expect(s.cleanup!.notes.join(' ')).not.toMatch(/Benzene: the cleanup level kept/);
+  }, 240000);
+});
+
+describe('the guided report of measured concentrations', () => {
+  const measuredSite = () =>
+    guidedWith((x) => {
+      x.site.basis = 'measured';
+      x.site.measured = ['groundwater'];
+      setValue(x, MTBE, 'groundwater', '4', 'mg/L');
+    });
+
+  it('is a guided report although a measured basis has no Run outputs', () => {
+    const g = measuredSite();
+    expect(Object.keys(g.outputs)).toEqual([]);
+    expect(hasGuidedOutputs(guidedProject(g))).toBe(true);
+    const blank = guidedWith((x) => {
+      x.site.basis = 'measured';
+      x.site.measured = ['groundwater'];
+    });
+    expect(hasGuidedOutputs(guidedProject(blank))).toBe(false);
+  });
+
+  it('lists the measured step 3b values as entries without a source', () => {
+    const g = measuredSite();
+    const project = guidedProject(g);
+    const data = dataOf(g);
+    const report = buildGuidedReport(project, data);
+    const basis = guidedRunBasis({
+      report,
+      results: {},
+      project,
+      data,
+      fateRows: rows,
+      cleanupProps: props,
+      defaults: validation.unverified.defaults as BasisDefault[],
+    });
+    const all = Object.values(basis.sections).flat();
+    expect(
+      all.some(
+        (r) =>
+          r.kind === 'entered-unsourced' &&
+          r.subject === 'MTBE, groundwater concentration' &&
+          r.value === '4 mg/L',
+      ),
+    ).toBe(true);
+  });
+});
+
+describe('a cleanup level solved to a state standard', () => {
+  const stateSite = (value: string) => {
+    const g = afterRun(
+      wellSite((x) => {
+        x.targets.mode = 'cleanup';
+        x.targets.standards[MTBE] = {
+          kind: 'state',
+          value,
+          unit: 'ug/L',
+          source: 'State reg. X',
+        };
+      }),
+      chems,
+    );
+    return g;
+  };
+  const withKept = (g: GuidedState): GuidedState => {
+    const data = dataOf(g);
+    const plan = guidedSolvePlan(g, { chemicals: data.chemicals, db: data.db });
+    const reqs = requestsToSolve(plan, {});
+    const items = solveAll(reqs);
+    const solved = new Map<string, ModeledSolved>();
+    reqs.forEach((req, i) => solved.set(req.chemical.id, { req, item: items[i]! }));
+    const kept = keptLevelsFrom(plan, solved);
+    return { ...g, levels: Object.fromEntries(kept.map((e) => [e.chemicalId, e])) };
+  };
+
+  it('prints the standard with its value, unit and source, and no contradicting risk target', () => {
+    const g = stateSite('20');
+    const report = buildGuidedReport(guidedProject(g), dataOf(g));
+    const inputs = report.sections.find((s) => s.key === 'cleanup')!.inputs;
+    expect(inputs.map((i) => i.path)).not.toContain('targetKind');
+    expect(inputs.map((i) => i.path)).not.toContain('wellTarget');
+    const row = inputs.find((i) => /MTBE/.test(i.label) && /target/i.test(i.label))!;
+    expect(row.value).toMatch(/state standard at the well, 20 ug\/L \(State reg\. X\)/);
+    const benzene = inputs.find((i) => /Benzene/.test(i.label) && /target/i.test(i.label))!;
+    expect(benzene.value).toMatch(/risk/i);
+  });
+
+  it('names the standard in the note under the level', async () => {
+    const r = await resultsOf(withKept(stateSite('20')));
+    expect(r.cleanup!.notes.join(' ')).toMatch(
+      /MTBE: the level at the source is solved to meet the state standard at the well, 20 ug\/L \(State reg\. X\)/,
+    );
+  }, 240000);
+
+  it('does not say step 5 solves it again when the level cannot be solved', async () => {
+    const kept = withKept(stateSite('20'));
+    const bad = structuredClone(kept);
+    bad.targets.standards[MTBE]!.value = 'ND';
+    const r = await resultsOf(bad);
+    const notes = r.cleanup!.notes.join(' ');
+    expect(notes).not.toMatch(/MTBE: the cleanup level kept with this project is out of date/);
+    expect(notes).toMatch(/MTBE: the cleanup level at the source is not quantified/);
   }, 240000);
 });
