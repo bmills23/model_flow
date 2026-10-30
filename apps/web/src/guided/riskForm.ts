@@ -149,6 +149,9 @@ export interface GuidedRiskGap {
   chemicalId: string;
   flag: RiskFeedUse['flag'];
   medium?: Medium;
+  /** The chemical's name and the pathway group in words, for a total that leaves it out. */
+  chemical: string;
+  what: string;
   note: string;
 }
 
@@ -183,6 +186,8 @@ export function guidedRiskGaps(
       gaps.push({
         chemicalId: c.id,
         flag: use.flag,
+        chemical: c.name,
+        what: use.what,
         ...(use.medium === undefined ? {} : { medium: use.medium }),
         note: `${c.name}: ${use.what} is not quantified. ${reason}`,
       });

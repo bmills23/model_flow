@@ -177,6 +177,36 @@ describe('the guided exposure and risk section', () => {
   });
 });
 
+describe('the guided exposure and risk section with a chemical the Run gave no well water', () => {
+  it('computes the other chemical, names the gap with the Run reason, and marks the total partial', async () => {
+    const gap = structuredClone(risk);
+    delete gap.outputs['well']![MTBE];
+    gap.runNotes[MTBE] = {
+      ...gap.runNotes[MTBE]!,
+      problems: [{ model: 'transport', message: 'MTBE could not run: a test reason.' }],
+      feeds: { ...gap.runNotes[MTBE]!.feeds, well: 'h' },
+    };
+    const sec = (await resultsOf(gap)).risk!;
+    expect(sec.notes.join(' ')).not.toMatch(/Not computed/);
+    expect(sec.notes.join(' ')).toMatch(/MTBE: well water \(drinking and bathing\) is not quantified/);
+    expect(sec.notes.join(' ')).toMatch(/MTBE could not run: a test reason\./);
+    const table = sec.tables.map(tableText).find((t) => t.name === 'risk-results')!;
+    expect(table.rows.length).toBeGreaterThan(0);
+    const note = table.rows.map((r) => r[r.length - 1]).join(' | ');
+    expect(note).toMatch(/partial total, omits well water \(drinking and bathing\) for MTBE/);
+    expect(JSON.stringify(sec.tables.map(tableText))).toMatch(/Benzene/);
+  });
+  it('adds no gap wording when the Run gave every chemical a result', () => {
+    const note = riskResults
+      .risk!.tables.map(tableText)
+      .find((t) => t.name === 'risk-results')!
+      .rows.map((r) => r[r.length - 1])
+      .join(' ');
+    expect(note).not.toMatch(/ for (Benzene|MTBE)/);
+    expect(riskResults.risk!.notes.join(' ')).not.toMatch(/is not quantified/);
+  });
+});
+
 describe('the guided summary', () => {
   it("prints the Run's notes, with each non-detect substitution", () => {
     const s = guidedSummary(dataOf(risk));
