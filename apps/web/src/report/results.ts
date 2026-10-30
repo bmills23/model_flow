@@ -97,12 +97,13 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
 import { pickSlot, slotOf, type FeedSlots } from '../project/feedSlots';
 import { isChemicalFeed } from '../project/schema';
-import { cleanupSourceKind } from '../guided/cleanupForm';
+import { cleanupSourceKind, guidedCleanupGaps } from '../guided/cleanupForm';
 import { MODEL_WORDS } from '../guided/derive';
 import { OUTPUT_MODEL, outputHashes } from '../guided/hash';
 import { outputSlots } from '../guided/slots';
 import { guidedKeptLevels, guidedSolvePlan } from '../guided/solve';
 import type { GuidedFormKey, GuidedOutputs, GuidedState } from '../guided/state';
+import { guidedRiskGaps } from '../guided/riskForm';
 import type { BasisChoice } from './methodBasis';
 import {
   chemicalScreens,
@@ -450,6 +451,30 @@ function risk(s: Screens, feed: Feed, db: ChemicalDb): SectionResults {
     const o = outcome[m];
     if (o.ok) addWarnings(sec, RISK_METHOD_IDS[m], o.result.warnings);
     else sec.notes.push(`The ${METHOD_NAME[m]} did not run: ${o.error}`);
+  }
+  return sec;
+}
+
+/**
+ * The guided exposure and risk section: the risk computed for the chemicals the Run gave a result, then
+ * each chemical pathway it did not (the Run's reason) as a note, and every total marked partial where a
+ * gap pathway is left out, as the workbench marks a pathway that is not quantified.
+ */
+function guidedRisk(data: GuidedReportData, feed: Feed): SectionResults {
+  const screens = guidedScreens(data);
+  const refs = data.chemicals.map((c) => ({ id: c.id, name: c.name }));
+  const gaps = guidedRiskGaps(data.guided, refs);
+  const sec = risk(screens, feed, data.db);
+  if (gaps.length === 0) return sec;
+  sec.notes.unshift(...gaps.map((g) => g.note));
+  const omits = [...new Set(gaps.map((g) => `${g.what} for ${g.chemical}`))].join(', ');
+  const text = `partial total, omits ${omits} (not quantified)`;
+  for (const t of sec.tables) {
+    if (t.name !== 'risk-results') continue;
+    t.rows = t.rows.map((r) => {
+      const prior = typeof r.note === 'string' && r.note !== '' ? `${r.note}; ` : '';
+      return { ...r, note: `${prior}${text}` };
+    });
   }
   return sec;
 }
@@ -1183,6 +1208,12 @@ async function guidedCleanup(
       'The levels that follow are in the media the receptors contact (soil, tap water, indoor and outdoor air, surface water).',
     );
   }
+  for (const gap of guidedCleanupGaps(
+    g,
+    data.chemicals.map((c) => ({ id: c.id, name: c.name })),
+  )) {
+    sec.notes.push(`${gap.note} Its level in soil leaves homegrown produce out.`);
+  }
   if (individualFallback(g)) {
     sec.notes.push(
       'All chemicals together was chosen, but the media the receptors contact have no measured ratios on a modeled basis, so their levels are each chemical alone.',
@@ -1230,7 +1261,7 @@ async function computeGuidedResults(
       const sec = isFateKey(key)
         ? await guidedFate(key, data, feed, live)
         : key === 'risk'
-          ? risk(guidedScreens(data), feed, data.db)
+          ? guidedRisk(data, feed)
           : await guidedCleanup(project, data, feed);
       for (const w of sec.warnings) w.origin = GUIDED_ORIGIN[w.origin] ?? w.origin;
       if (sec.tables.length === 0 && sec.notes.length === 0 && sec.chemicals === undefined) {

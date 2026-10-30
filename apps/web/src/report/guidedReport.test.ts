@@ -177,6 +177,67 @@ describe('the guided exposure and risk section', () => {
   });
 });
 
+describe('the guided exposure and risk section with a chemical the Run gave no well water', () => {
+  it('computes the other chemical, names the gap with the Run reason, and marks the total partial', async () => {
+    const gap = structuredClone(risk);
+    delete gap.outputs['well']![MTBE];
+    gap.runNotes[MTBE] = {
+      ...gap.runNotes[MTBE]!,
+      problems: [{ model: 'transport', message: 'MTBE could not run: a test reason.' }],
+      feeds: { ...gap.runNotes[MTBE]!.feeds, well: 'h' },
+    };
+    const sec = (await resultsOf(gap)).risk!;
+    expect(sec.notes.join(' ')).not.toMatch(/Not computed/);
+    expect(sec.notes.join(' ')).toMatch(
+      /MTBE: well water \(drinking and bathing\) is not quantified/,
+    );
+    expect(sec.notes.join(' ')).toMatch(/MTBE could not run: a test reason\./);
+    const table = sec.tables.map(tableText).find((t) => t.name === 'risk-results')!;
+    expect(table.rows.length).toBeGreaterThan(0);
+    const note = table.rows.map((r) => r[r.length - 1]).join(' | ');
+    expect(note).toMatch(/partial total, omits well water \(drinking and bathing\) for MTBE/);
+    expect(JSON.stringify(sec.tables.map(tableText))).toMatch(/Benzene/);
+  });
+  it('adds no gap wording when the Run gave every chemical a result', () => {
+    const note = riskResults
+      .risk!.tables.map(tableText)
+      .find((t) => t.name === 'risk-results')!
+      .rows.map((r) => r[r.length - 1])
+      .join(' ');
+    expect(note).not.toMatch(/ for (Benzene|MTBE)/);
+    expect(riskResults.risk!.notes.join(' ')).not.toMatch(/is not quantified/);
+  });
+});
+
+describe('the guided cleanup section with a chemical the Run gave no produce result', () => {
+  it('computes the other chemical and names the gap', async () => {
+    const withProduce = chems.map((c) => ({ ...c, props: { logKow: 3, kd: 5 } }));
+    const base = guidedWith((x) => {
+      x.site.basis = 'measured';
+      x.site.measured = ['soil'];
+      x.site.produce = 'soil';
+      x.targets.mode = 'cleanup';
+      x.forms.plantsEco = { moistureFraction: '0.8', bulkDensity: '1.5' };
+      x.exposure.pathways = { produce: true };
+      setValue(x, BENZENE, 'soil', '10', 'mg/kg');
+      setValue(x, MTBE, 'soil', '30', 'mg/kg');
+    });
+    const g = afterRun(base, withProduce);
+    expect(g.outputs['produce']?.[BENZENE]).toBeDefined();
+    delete g.outputs['produce']![MTBE];
+    g.runNotes[MTBE] = {
+      problems: [{ model: 'plantsEco', message: 'MTBE could not run: a test reason.' }],
+      feeds: { produce: 'h' },
+    };
+    const sec = (await resultsOf(g)).cleanup!;
+    expect(sec.notes.join(' ')).not.toMatch(/Not computed/);
+    expect(sec.notes.join(' ')).toMatch(
+      /MTBE: homegrown produce is not quantified\..*a test reason/,
+    );
+    expect(JSON.stringify(sec.tables.map(tableText))).toMatch(/Benzene/);
+  }, 120000);
+});
+
 describe('the guided summary', () => {
   it("prints the Run's notes, with each non-detect substitution", () => {
     const s = guidedSummary(dataOf(risk));
