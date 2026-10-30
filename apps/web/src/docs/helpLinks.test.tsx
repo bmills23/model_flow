@@ -42,10 +42,10 @@ describe('help link targets', () => {
 
   it('builds a reader hash for a section', () => {
     expect(helpHref('chemicals')).toBe(
-      `#/docs/user-guide/${sectionId('Chemical database (`#/chemicals`)')}`,
+      `#/docs/user-guide/${sectionId('Chemical database (step 1)')}`,
     );
     expect(helpHref('step/chemicals')).toBe(
-      `#/docs/user-guide/${sectionId('The guided flow (steps 1 to 3)')}`,
+      `#/docs/user-guide/${sectionId('Step 1, Chemicals (`#/step/chemicals`)')}`,
     );
   });
 });
@@ -78,7 +78,7 @@ describe('help link on every screen', () => {
       { timeout: 5000 },
     );
     expect(document.activeElement).toBe(heading);
-    expect(heading.textContent).toMatch(/guided flow/);
+    expect(heading.textContent).toMatch(/Step 1, Chemicals/);
     window.location.hash = '#/step/chemicals';
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Chemicals of concern' }),

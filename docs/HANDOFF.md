@@ -1,17 +1,20 @@
-# HANDOFF (written from the tree, 2026-10-26, after wave AC1)
+# HANDOFF (written from the tree, 2026-10-30, after wave AC2)
 
 Resume: start a fresh session in `~/repos/model_flow`, read this file, then `docs/ROADMAP.md` (line 1 and
 sections 7 and 8) and `docs/DECISIONS.md`. Statuses are claims: grep the tree before acting on an open row or
 skipping a done one.
 
 ## State of the tree
-- Wave AC1 (the guided steps 1 to 3, the first of three waves of `docs/GUIDED_FLOW_PLAN.md`) landed 2026-10-26 on
-  branch `wave-ac1`, built from main `b59316c`; code head `6385302`, then the wave close docs commit. It is not yet
-  merged to main or pushed. Last full `corepack pnpm gate` on `6385302` (2026-10-26): exit 0, build included. Test
-  counts: engine 1483 passed (89 files), data 307 passed and 3 skipped (15 files), web 2635 passed and 1 skipped (265
-  files). `mobile:check:full` on that tree: exit 0 in 639 s, 108 views (36 routes at 390 light, 390 dark and 1280), 0
-  overflow and 0 axe violations on every view, including `#/step/chemicals`, `#/step/site`, `#/step/properties`,
-  `#/step/sources` and `#/step/run` with a real in-browser Run. The older entries below are the history before it.
+- Wave AC2 (the guided steps 4 to 6, the guided report and the switch of the main navigation, the second of three waves of
+  `docs/GUIDED_FLOW_PLAN.md`) landed 2026-10-30, built on branch `wave-ac2` from main `7c630f2`; code head `bf57ff9`,
+  then the wave close docs commit, which reaches main by fast-forward (the gate passed again on it). Last
+  full `corepack pnpm gate` on `bf57ff9` (2026-10-30): exit 0, build included. Test counts: engine 1483 passed (89
+  files), data 307 passed and 3 skipped, web 2634 passed and 1 skipped (288 files). `mobile:check:full` on that tree:
+  exit 0 in 710 s (10:10:47 to 10:22:38), 126 views (42 visits at 390 light, 390 dark and 1280), 0 overflow, 0 serious
+  or critical axe violations; the only axe note is one moderate `landmark-unique` on `#/report` (the repeated
+  `aria-label` on the guided report's chemical blocks, a scope row for AC3), in all three views.
+- Wave AC1 (the guided steps 1 to 3) is merged to main and pushed (main `7c630f2`, CI and Pages green). The older
+  entries below are the history before it.
 - Main holds M0 to M11, wave G (parity gaps, built on branch `wave-gaps`), wave H (UI near-parity, built on
   branch `wave-ui`), wave I (built on branch `wave-i`), all pushed 2026-10-19, and wave J (five slices, built on
   branch `wave-j`), fast-forwarded to main and pushed 2026-10-21 (head `ad593e6`), and wave K (four slices and a corrective pass,
@@ -139,6 +142,28 @@ skipping a done one.
   `planned`, 18 `data`, 4 `fixture`. Six entries still carry square-bracketed descriptor titles, all
   `planned`: `srinivasan2008a`, `srinivasan2008b`, `gelhar1992`, `foster1986`, `trapp2015`, `sobol1993`.
 
+## Wave AC2 landed (2026-10-30)
+Bryan: "let's finish the wave." (2026-10-29) and "Let's continue" (2026-10-30). Rulings in the DECISIONS.md "Wave AC2,
+the guided steps 4 to 6, the report and the switch" block, all DEFAULT; his 2026-10-27 rulings on non-detects (<x counts
+as half the limit, ND as zero) and on blank household shower inputs (step 3a marks them needed) are item 12 of the AC1
+block and were built here.
+- Slices: polish A and B (the AC1 review's polish rows), AC2.1 derived risk and cleanup forms with output slots and
+  pathway statuses, AC2.2 steps 4a to 4c, AC2.3 step 5 with the solve and the kept levels, AC2.4 step 6, AC2.5 the guided
+  report, AC2.6 the switch, AC2.7 the mobile and keyboard checks.
+- The main navigation now lists the six steps. Every model screen, the workbench report (`#/workbench/report`),
+  validation and methods sit behind "Model workbench" (`#/workbench`); `#/site` and `#/chemicals` redirect to steps 2 and
+  1. `#/report` prints the guided report when the project holds guided outputs, otherwise today's report with a line
+  saying the steps were not run. The workbench is today's app: its runs do not feed the steps.
+- The wave was paused 2026-10-27 during AC2.6 and finished 2026-10-30. Two independent reviews (state and screens)
+  found correctness defects, fixed in one corrective pass: one chemical without a Run output no longer stops forward risk
+  for the others (its pathway reads "not quantified" with the Run's reason and the totals that omit it are partial); a
+  measured basis gets the guided report; a kept level built on a stale 3d output reads out of date; a state standard
+  prints with its value, unit and source; a Help link on every step; the receptor site-factor panel stays open while
+  typing; the child and adult preset asks before replacing edited factors; the 3b boxes use a text keypad so ND and <x
+  can be typed on a phone; the mobile check fails a blank step 5 or 6. The empty steps 5 and 6 seen during the wave came
+  from the seed's blank household inputs blocking the household output for every chemical.
+- The review findings that are not correctness defects are scope rows in the plan's "Carried into AC3" list.
+
 ## Wave AC1 landed (2026-10-26)
 Bryan approved the plan on 2026-10-25 ("approved"). Rulings in the DECISIONS.md "Wave AC1, the guided steps 1 to 3"
 block, all DEFAULT but item 12 (Bryan's two open calls).
@@ -147,11 +172,10 @@ block, all DEFAULT but item 12 (Bryan's two open calls).
   step 2 site model; send builders extracted from the transport, vadose, saturated, vapor and surface water screens; 3a
   site properties; 3b and 3c; the orchestration with a hash per chemical and model; 3d run and view with a CSV; mobile
   check routes, a seeded guided visit and keyboard order.
-- Steps 1 to 3 are reached from "Start the guided flow" on the home page; steps 4 to 6 show as arriving with the next
-  update. The main navigation and every existing screen are unchanged (Bryan's ruling 4 of 2026-10-25).
+- Steps 1 to 3 were reached from "Start the guided flow" on the home page, with the main navigation unchanged (Bryan's
+  ruling 4 of 2026-10-25); wave AC2 built steps 4 to 6 and switched the navigation.
 - An independent review found correctness defects, fixed on branches `ac1-fix-run` and `ac1-fix-state` (merged), plus a
-  stale store test assertion fixed in `6385302`. The review's polish findings are scope rows in the plan's "Carried
-  into AC2" list.
+  stale store test assertion fixed in `6385302`. The review's polish findings were built in AC2.
 - Timing: five chemicals through the layered vadose model to a well took 9.7 s on one thread, so the Run uses one worker.
 
 ## Wave AA landed (2026-10-24)
@@ -604,9 +628,9 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   `feenstra1991` and `falta2005` were checked against their abstracts only.
 
 ## Open items
-- Wave AC1 loose ends (the plan's "Carried into AC2" list holds them all): `ReceptorScreen` lacks `'guided'`;
-  `chain.test.ts` holds a literal long dash (write it as an escape); the bundle effect of `status.ts` importing the
-  property catalog eagerly is unmeasured; the household values flag in 3a.
+- Wave AC2 loose ends: the plan's "Carried into AC3" list holds them all (review findings that are not correctness
+  defects, a few missing tests and report gaps). The AC1 loose ends (`'guided'` in `ReceptorScreen`, the chain test dash,
+  the catalog bundle effect, the household values flag in 3a) were closed in AC2.
 - Unverified values and sources that ship as warned defaults or required inputs: `foster1986` (film
   coefficients), `little1992` (equations checked by identities only), the household factor K, the HHRAP
   fallback for `trapp2015`, TSCF and the leaf-air partition coefficient, the Briggs root factor constants
@@ -728,11 +752,20 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   (the appendix line index in ROADMAP section 3 refers to that extraction).
 
 ## Next
-- Wave AC2 (steps 4 to 6, the report, the switch of the main navigation and the "Model workbench" link) is next, per
-  `docs/GUIDED_FLOW_PLAN.md`. Its scope rows from AC1 are in that file's "Carried into AC2" list. First: merge
-  `wave-ac1` to main and push (one push; CI cost about 6 billed minutes), then remove the AC1 worktrees
-  (`.claude/worktrees/ac1-*` and `wave-ac1`) once nothing is left to resume. Bryan's two open calls (DECISIONS.md
-  "Wave AC1" item 12): ND as zero or half the limit, and the blank household shower inputs.
+- Wave AC3 is next, per `docs/GUIDED_FLOW_PLAN.md` section 6 (AC3.1 indoor air in the modeled solve (M6), AC3.2 two
+  sources on one path, AC3.3 the ecological flow with m9's state standard in the criteria comparison, AC3.4 the worked
+  example (m10), AC3.5 checks). First: merge `wave-ac2` to main and push (one push; CI cost about 6 billed minutes),
+  then remove the AC2 worktrees once nothing is left to resume. Its scope rows from the AC2 reviews are in the plan's
+  "Carried into AC3" list: state review 6 (the "needed an iteration" wording is also used for unreachable or capped
+  levels) and 8 (group members solved and discarded while a group problem stands); screens review 6 (the "ambiguous
+  entry, not a number" marker shown on step 6 and in its CSV), 7 (step 4a says "tick at least one" when every box is
+  disabled, and an ecological project's 4a to 4c stay To do), 8 (risk mode: step 5 reads To do while 3d reads Run
+  again), 9 (re-ticking the second receptor reattaches the removed receptor's edits), 10 (the 4c alert is re-announced
+  on every render) and 11 (repeated `aria-label` on the guided report's chemical blocks); no unit test of forward risk
+  over the modeled well path on steps 5 and 6; steps 5 and 6 do not show the cleanup produce-gap note (the report
+  does); the guided report does not list step 3c chemical value edits in the run basis nor the soil type among the 3a
+  inputs, and its risk and cleanup inputs keep the workbench's flattened labels; the mobile check does not yet assert a
+  well table for both chemicals on 3d.
 - Done 2026-10-21 to 2026-10-24: waves J to AA merged to main and pushed (CI cost in CLAUDE.md); their worktrees
   and branches removed, and the 15 fully merged `origin/` milestone branches deleted (shas under State of the tree).
 - Bryan, 2026-10-22: the target user is regulatory work (DECISIONS.md "Target user and wave Q scope"); asked for the
@@ -749,7 +782,7 @@ Plan `docs/UI_PARITY.md` (a status line per slice); rulings in the DECISIONS.md 
   to the flow of RISC-5 at all." On 2026-10-25 he approved a mockup of a six-step guided flow in the manual's order
   (`docs/GUIDED_FLOW.md`); it is the shape of wave AC. He ruled on that doc's six open calls the same
   day, "all as recommended" (DECISIONS.md, 2026-10-25), so wave AC comes before wave AB. He approved the plan the
-  same day, and wave AC1 landed 2026-10-26 (see "Wave AC1 landed"). The
+  same day, wave AC1 landed 2026-10-26 and wave AC2 2026-10-30 (see "Wave AC2 landed"). The
   wave P remainders still open (a soil-to-groundwater comparison for user chemicals; user Kd, vapor and dermal
   values) are listed under the Wave P entry in ROADMAP section 7.
 - Then the open items above. The five sources not openly readable (Foster and Chrostowski 1986, Little 1992, Trapp

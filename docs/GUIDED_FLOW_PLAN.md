@@ -1,10 +1,10 @@
 # Guided flow: implementation plan (wave AC)
 
-Status (2026-10-26): plan of record for building `docs/GUIDED_FLOW.md`, whose six open calls Bryan settled "all as
+Status (2026-10-30): plan of record for building `docs/GUIDED_FLOW.md`, whose six open calls Bryan settled "all as
 recommended". Bryan approved this plan and the questions in section 8, each as recommended, on 2026-10-25
-("approved"). Wave AC1 (steps 1 to 3) landed 2026-10-26 on branch `wave-ac1`; AC2 (steps 4 to 6 and the report) is
-next, AC3 after it. See "Carried into AC2" below. The engine (`packages/engine`) does not change. Line references are to the tree at
-`114d140`.
+("approved"). Wave AC1 (steps 1 to 3) landed 2026-10-26 and is on main; wave AC2 (steps 4 to 6, the guided report and
+the switch of the main navigation) landed 2026-10-30 on branch `wave-ac2`; AC3 is next. See "Carried into AC3" below.
+The engine (`packages/engine`) does not change. Line references are to the tree at `114d140`.
 
 ## 0. The plan in short
 
@@ -22,20 +22,21 @@ next, AC3 after it. See "Carried into AC2" below. The engine (`packages/engine`)
 
 ## Carried into AC2
 
-Wave AC1 landed 2026-10-26 (decisions in the DECISIONS.md "Wave AC1, the guided steps 1 to 3" block). AC2 slices must
-know these AC1 choices:
+Built in AC2 (2026-10-30; decisions in the DECISIONS.md "Wave AC2" block); every row below is closed unless it says
+otherwise. Wave AC1 landed 2026-10-26 (decisions in the "Wave AC1, the guided steps 1 to 3" block). AC2 slices knew
+these AC1 choices:
 
-- `ReceptorScreen` in `overrides/receptors.ts` does not yet include `'guided'`. The v2ToV3 migration copies receptor
-  edits and names into `guided.a` and `guided.b` inside overrides, but the type does not name the screen. AC2.1 adds it.
+- `ReceptorScreen` in `overrides/receptors.ts` did not include `'guided'` until AC2.1 added it. The v2ToV3 migration copies receptor
+  edits and names into `guided.a` and `guided.b` inside overrides, but the type did not name the screen.
 - Run reasons and blocked outputs are saved with the project as `runNotes` and shown on 3d. AC2 reads them; it does
   not rebuild them.
 - A model that cannot produce an output for the same inputs is "blocked", not "run again".
-- ND in step 3b reads as zero in the Run (`units.sourceNumber`). A pasted "<x" reads as ND. Take any new source value
-  through `sourceNumber`.
+- A source value goes through `units.sourceNumber`: ND reads as zero and, since the 2026-10-27 ruling (built in AC2), a
+  "<x" reads as half the limit. Take any new source value through `sourceNumber`.
 - The Run lives in a module-level runner and survives leaving 3d. The time step drives only the transport curve,
   capped at 500 points, with a note when coarsened.
 
-Scope rows from the AC1 review (polish, not fixed in AC1; the findings are reviewer 0 numbers 7 to 13 and reviewer 1
+Scope rows from the AC1 review (polish, all built in AC2 (polish A and B), except where a row says otherwise; the findings are reviewer 0 numbers 7 to 13 and reviewer 1
 numbers 4 to 9):
 
 - Step 1: the two-column CSS rule never matches.
@@ -49,13 +50,43 @@ numbers 4 to 9):
 - Renaming a chemical marks its results to run again.
 - Simulation time is not validated in the run plan.
 - `readGuidedOutputs` keeps the raw slot instead of the parsed one.
-- A pasted "<x" loses its limit. Product call for Bryan: ND as zero, or half the limit.
+- A pasted "<x" loses its limit. Ruled 2026-10-27 and built: "<x" counts as half the limit, a bare ND as zero, noted per chemical and medium.
 - Removing a chemical keeps its step 3c fate edits.
 - With the well path on and the household shower inputs blank, the Run writes no household output and the status
   reads "out of date: No result yet" with no alert. Step 3a should flag those values as needed, or the Run should say
   why.
 - `chain.test.ts` holds a literal long dash in a test (write it as an escape).
-- The bundle effect of `status.ts` importing the property catalog eagerly is unmeasured.
+- The bundle effect of `status.ts` importing the property catalog eagerly is unmeasured. Measured in AC2: under 0.1 kB, it stays eager.
+
+## Carried into AC3
+
+Wave AC2 landed 2026-10-30 (decisions in the DECISIONS.md "Wave AC2" block). Two independent reviews found
+correctness defects, fixed in a corrective pass; these rows are what they found that is not one, plus gaps the
+slices recorded. Scope rows for AC3, with the slices of section 6:
+
+State review:
+- Finding 6: the "needed an iteration" wording is also used for unreachable or capped levels.
+- Finding 8: group members are solved and then discarded while a group problem stands.
+
+Screens review:
+- Finding 6: the "ambiguous entry, not a number" marker shows on step 6 and in its CSV.
+- Finding 7: step 4a says "tick at least one" when every box is disabled, and an ecological project's 4a to 4c stay
+  To do.
+- Finding 8: in risk mode step 5 reads To do while 3d reads Run again.
+- Finding 9: re-ticking the second receptor reattaches the removed receptor's edits.
+- Finding 10: the 4c alert is re-announced on every render.
+- Finding 11: the guided report's chemical blocks repeat an `aria-label` (a moderate axe `landmark-unique` note on
+  `#/report`).
+
+Tests, report and checks:
+- No unit test of forward risk over the modeled well path on steps 5 and 6.
+- Steps 5 and 6 do not show the cleanup produce-gap note (the report does).
+- The guided report does not list step 3c chemical value edits in the run basis, nor the soil type among the 3a inputs,
+  and its risk and cleanup inputs keep the workbench's flattened labels.
+- The mobile check does not yet assert a well table for both chemicals on 3d.
+
+Plus the planned AC3 slices below: M6 indoor air in the modeled solve, two sources on one path, the ecological flow
+with m9's criteria comparison, and the worked example (m10).
 
 ## 1. State model
 
@@ -304,6 +335,8 @@ AC1.8 and AC1.9 together; then AC1.10, AC1.11, AC1.12 in order. AC1.6 and AC1.7 
 
 ### Wave AC2: steps 4 to 6, the report and the switch
 
+Status: landed 2026-10-30 on branch `wave-ac2` (all seven slices; merge to main pending).
+
 Ships: the full six-step flow as the main navigation, the guided report at `#/report`, and every model screen,
 exposure and risk, cleanup, validation and methods behind "Model workbench".
 
@@ -347,8 +380,8 @@ M6, M7, M8, M10, m9, m10, n2 updated in place, user guide).
   out of the feed and stale machinery entirely and adds it only to the snapshot, the build and the reset paths.
 - **Report cost.** Charts per chemical make the guided report heavier; the report already computes off the first render
   (`report/ReportPage.tsx:703`), and the guided visit in the mobile check times it.
-- **Interim state after AC1.** Steps 1 to 3 are live while 4 to 6 are not; the step list shows steps 4 to 6 as
-  "arrives with the next update" and the home page keeps today's route to risk and cleanup.
+- **Interim state after AC1 (closed by AC2, 2026-10-30).** Between the waves steps 1 to 3 were live while 4 to 6
+  showed "arrives with the next update"; AC2 built steps 4 to 6 and removed that wording.
 
 ## 8. Questions for Bryan (ruled 2026-10-25, each as recommended)
 

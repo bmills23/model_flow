@@ -4719,5 +4719,60 @@ were made while building and reviewing it. Each is DEFAULT and open to Bryan's o
     plus a building, is allowed.
 15. **Step 1.** The project holds at most 50 chemicals, enforced in the screens (Add, Copy, Define and the user-chemical
     save), not in the store; an exact name or CAS match sorts first in the database browser on both pages.
-16. **Not done, carried to AC2** (`docs/GUIDED_FLOW_PLAN.md`, "Carried into AC2"): the review's polish findings,
+16. **Carried to AC2 and built there** (`docs/GUIDED_FLOW_PLAN.md`, "Carried into AC2"): the review's polish findings,
     `'guided'` in the `ReceptorScreen` type, and the household values flag in 3a.
+
+## 2026-10-30: Wave AC2, the guided steps 4 to 6, the report and the switch
+
+Wave AC2, the second of the three waves of `docs/GUIDED_FLOW_PLAN.md`, built steps 4 to 6, the guided report and the
+switch of the main navigation to the six steps; the model screens moved behind "Model workbench". Bryan's rulings of
+2026-10-27 on non-detects and on blank household shower inputs are item 12 of the "Wave AC1" block above and were built
+here; they are not repeated. The choices below were made while building and reviewing it. Each is DEFAULT and open to
+Bryan's overturn.
+
+1. **Kept levels live in the optional `guided.levels` key,** one entry per chemical (the workbench's saved modeled
+   levels plus the target kind, the allocation and the reason). The project format version does not change: an older
+   file opens with none, and a malformed entry, or one filed under the wrong id, is dropped alone. Share links keep the
+   levels. A level is current only while its fingerprint matches: a hash of the modeled request, the target kind and,
+   for chemicals solved together, every member's request and source ratio. A level built on a 3d output that is out of
+   date reads out of date.
+2. **`exposure.pathways` holds changed ticks only.** A pathway absent from it is ticked, so a new pathway in the chain
+   comes in ticked. The receptor's own pathway switches are hidden on the guided screen and stay at their default.
+3. **The child and adult preset** sets receptor A to a child resident and B to a resident (adult), additive. With the
+   modern method a note says this counts the child stage twice. Pressing it asks before it replaces edited factors.
+4. **The 4c inhalation basis is text only.** The engine's legacy method derives its slope factor from the unit risk, so
+   the 3d method changes the wording of what 4c asks for and not which values it asks for. 4c lists only the toxicity
+   values the ticked pathways need (oral and dermal read the slope factor and reference dose, inhalation the unit risk
+   and reference concentration).
+5. **All together and split equally are computed from each chemical solved alone,** on the well path, keeping the 3b
+   ratios for all together. This is exact only for a linear solve: a solve that needed an iteration is "not
+   quantified" with its reason, and the summed hazard index is conservative for the modern life stages. On a modeled
+   basis, all together falls back to each chemical alone for the media contacted, with a note. A chemical not detected
+   gets no level; a chemical with a water standard is solved alone.
+6. **The guided report prints the risk section or the cleanup section, following the step 5 mode,** not both. It prints
+   the chain's model sections as one block per chemical with its inputs, full tables and charts; kept levels print while
+   current, otherwise a note says not solved yet or out of date. A measured basis gets the report too, with the 3b
+   values as entries without a source.
+7. **A gap belongs to its chemical.** A chemical without a Run output no longer stops forward risk for all: its pathway
+   is "not quantified" with the Run's reason and the totals that omit it are marked partial, on steps 5 and 6 and in the
+   report. In cleanup a chemical without a produce output keeps its soil level with produce left out, and the report
+   names it. The empty steps 5 and 6 seen during the wave came from blank household inputs blocking the household
+   output for every chemical (the 2026-10-27 ruling) meeting the old all-or-nothing rule.
+8. **Validation sits behind the workbench,** with the model screens and the workbench report (`#/workbench/report`,
+   today's report whatever the steps hold). The old validation link test now checks the workbench. `#/site` and
+   `#/chemicals` redirect to steps 2 and 1. `#/report` prints the guided report when the project holds guided outputs,
+   otherwise today's with a line saying the steps were not run.
+9. **A state standard prints with its value, unit and source** in step 5, step 6 and the report; a blank source is
+   flagged. With a well path, a chemical can meet a federal MCL or a state standard instead of the risk target.
+10. **A Help link on every guided step,** retargeted to the user guide section for the step; the receptor site-factor
+    panel stays open while typing.
+11. **The 3b boxes use a text keypad** so ND and <x can be typed on a phone; the decimal comma
+    setting still applies.
+12. **The catalog import was measured and kept eager:** the entry chunk is 47.67 kB with the property catalog import and
+    47.70 kB with a stub, so it adds nothing measurable.
+13. **Household whole-house air and sprinkler air are not used** in the derived risk form. Produce is on when its pathway
+    is on and soil above or measured soil exists.
+14. **The mobile check fails a blank step 5 or 6** and drives `#/step/chemicals`; it also checks 4a to 6, the guided
+    report and the workbench in three views.
+15. **Not done, carried to AC3** (`docs/GUIDED_FLOW_PLAN.md`, "Carried into AC3"): the review findings that are not
+    correctness defects, a few missing tests and report gaps, and the planned AC3 slices.

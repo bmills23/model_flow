@@ -11,15 +11,20 @@ This is not full RISC5 parity: see line 1 of `docs/ROADMAP.md` for what still se
 deferred lists in its section 7 rows and in `docs/HANDOFF.md` (open items). See `docs/ROADMAP.md` for
 scope, milestones and the research brief, and `docs/DECISIONS.md` for the decisions behind them.
 
-Screens (hash routes): `#/chemicals` the read-only chemical database browser, `#/site` the advisory site model checklist, `#/transport` groundwater transport, `#/vadose` vadose zone leaching,
-`#/saturated` saturated soil source, `#/risk` exposure and risk (with the uncertainty panel), `#/cleanup`
-cleanup levels (with the produce and total TPH levels and the probabilistic panel), `#/vapor` vapor intrusion and outdoor air, `#/surface-water`
-surface water and sediment, `#/household` shower, irrigation and particulates, `#/plants-eco` plant uptake,
-ecological screening and TPH fractions, `#/report` the printable report with the methods statement, charts and on-request uncertainty results, and
-`#/docs` the in-app user guide, methods notes and attributions, and `#/methods` the methods and references page. Projects save to a file, a share link or
-browser autosave. Each screen has a Help link into the user guide, toxicity values, exposure factors and receptor
-names can be overridden per project (never in the master data), and decimal comma entry is an option. The six
-numbered steps in the header all link to a screen.
+The main navigation is six guided steps (since wave AC2, 2026-10-30): 1 chemicals of concern (`#/step/chemicals`),
+2 the site model (`#/step/site`), 3 site properties, source concentrations and one Run of every chemical through every
+chosen model (`#/step/properties`, `#/step/sources`, `#/step/run`), 4 pathways, receptors and toxicity values
+(`#/step/pathways`, `#/step/receptors`, `#/step/toxicity`), 5 risk or cleanup levels (`#/step/targets`) and 6 results
+(`#/step/results`); `#/report` prints the report built from the steps. The single-model screens sit behind the Model
+workbench (`#/workbench`), and their runs do not feed the steps: `#/transport` groundwater transport, `#/vadose` vadose
+zone leaching, `#/saturated` saturated soil source, `#/risk` exposure and risk (with the uncertainty panel),
+`#/cleanup` cleanup levels (with the produce and total TPH levels and the probabilistic panel), `#/vapor` vapor
+intrusion and outdoor air, `#/surface-water` surface water and sediment, `#/household` shower, irrigation and
+particulates, `#/plants-eco` plant uptake, ecological screening and TPH fractions, `#/workbench/report` the report of
+the workbench screens, `#/validation` the validation evidence, and `#/methods` the methods and references page.
+`#/docs` holds the in-app user guide, methods notes and attributions. Projects save to a file, a share link or
+browser autosave. Each step and screen has a Help link into the user guide, toxicity values, exposure factors and
+receptor names can be overridden per project (never in the master data), and decimal comma entry is an option.
 
 ## What it will do
 

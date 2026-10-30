@@ -2,22 +2,23 @@
 
 model_flow is an open reimplementation of RISC5-class fate-and-transport and risk methods. Everything runs
 in your browser: nothing is uploaded, there are no accounts and no analytics. This guide covers each screen,
-saving and sharing a project, the report, and the switch between legacy and modern methods. The reasoning
+the six steps, saving and sharing a project, the report, and the switch between legacy and modern methods. The reasoning
 and sources behind each calculation are in the methods notes listed on the documentation index.
 
 ## Getting around
 
-- The links under the title open each screen. The flow runs from the chemicals and site, through transport
-  and receptors, to risk, cleanup levels and the report.
+- The main navigation lists six steps: Chemicals, Site model, Site values and run, Pathways and receptors, Risk or
+  cleanup, and Results. They are the guided flow (see "The six steps" below), and none is locked: open them in any
+  order. The step that owns the screen you are on is highlighted, and the step list inside the flow marks every
+  sub-step Done, Current, To do or Run again.
+- **Model workbench** in the navigation opens every model screen on its own (groundwater transport, vadose leaching,
+  saturated soil, vapor intrusion, surface water, household, plants and ecology, exposure and risk, cleanup levels,
+  the workbench report, validation, methods). See "Model workbench" below. The old addresses `#/chemicals` and
+  `#/site` open steps 1 and 2.
 - Every screen has a **Help** link under its title. It opens the section of this guide that describes that
   screen, and the browser Back button returns you to the screen.
-- The six numbered steps (Chemicals, Site model, Transport, Receptors, Risk & cleanup, Results) are all
-  links, and none is locked: open them in any order. The step that owns the screen you are on is
-  highlighted; the groundwater, vadose, saturated soil, vapor, surface water, household and plants screens
-  count as Transport. Chemicals opens the chemical database and Site model opens the site model screen.
-- Screens pass results to each other (for example the groundwater concentration at a well goes to the risk
-  screen). A result is only passed when you press the button that sends it, and the receiving screen says
-  where its value came from.
+- On the workbench screens, results pass between screens only when you press the button that sends them, and the
+  receiving screen says where its value came from. The six steps need no send buttons: one Run feeds every later step.
 - Everything you type is kept in this browser as you work, so a reload brings it back. That copy is a
   convenience only. Save the project to a file to keep it.
 - **New project** in the header clears every screen, the values passed between screens and the copy kept in
@@ -28,39 +29,119 @@ and sources behind each calculation are in the methods notes listed on the docum
   all four on the plume map, one grid cell per press). The reading appears in the line below the chart. Every
   chart also has a data table.
 
-## The guided flow (steps 1 to 3)
+## The six steps
 
-The guided flow takes one project through the steps in order, with one Run for every chemical and no send buttons.
-Steps 1 to 3 are available now; steps 4 to 6 (exposure, risk or cleanup levels, results) are coming. The main
-navigation and every screen below are unchanged, and the guided flow keeps its own answers: a check on a model screen
-never changes a guided result.
+The six steps take one project from the chemicals to the results, in order, with one Run for every chemical and no send
+buttons. The flow keeps its own answers: a check on a workbench screen never changes a step's result, and a step never
+fills a workbench screen. Start from **Start the guided flow** on the home page or from any step in the navigation. The
+step list shows every sub-step with a mark (Done, Current, To do, Run again, or Blocked), and Back and Next move one
+step. Every step has a **Help** link that opens its section below.
 
-- **Start it** with **Start the guided flow** on the home page. The step list shows every step with a mark (Done,
-  Current, To do, Run again, or Arrives with the next update). No step is locked: open them in any order, and Back and
-  Next move one step.
-- **Step 1, Chemicals** (`#/step/chemicals`). Search the EPA chemical list, add chemicals to the project (up to 50),
-  define your own, and download the list as a CSV. An exact name or CAS number comes first.
-- **Step 2, Site model** (`#/step/site`). Say who is exposed, whether the concentrations are modeled from a source or
-  measured in a medium, which source media you have (soil above or below the water table, groundwater, soil gas; several
-  at once are fine), which of the four paths apply (well, building, surface water, produce), whether the exposure point
-  is onsite or downgradient, the indoor air method, and produce. The panel names the models your answers use and says in
-  words what is missing or inconsistent.
-- **Step 3a, Site properties** (`#/step/properties`). The values the chosen models need, in groups, each tagged: from
-  the soil type, a default with no source, entered with no source, needed, or optional and left blank. The screen counts
-  the values still needed.
-- **Step 3b, Source values** (`#/step/sources`). A concentration for each chemical in each source medium, with a unit
-  chosen per column; you can paste a column. Type **ND** for a chemical not detected: the Run reads ND as zero. A
-  pasted "<x" reads as ND. Step 3c on the same page lists the chemical properties the models read and lets you edit one
-  with a note.
-- **Step 3d, Run** (`#/step/run`). Choose the simulation time, the time step, the source duration and the method
-  basis (legacy or modern) once, then press **Run all chemicals**. The time step sets only the groundwater curve, capped
-  at 500 points, with a note when it was coarsened. The result is a groundwater concentration curve at the well for each
-  chemical, an indoor air table (peak concentration, source used, method), a summary of the inputs, and a detail view per
-  chemical. **Download CSV** saves the well and indoor air rows with a unit column.
-- **Run-again marks.** A later step is marked **Run again** when something it depends on changed since the last Run:
-  the status names the model and chemical, for example "the indoor air model (Benzene)". A model that cannot produce an
-  output from the same inputs is marked blocked, with its reason, and pressing Run again would not change it. The Run
-  continues if you leave the page, and its reasons are saved with the project.
+- **Run-again marks.** A later step is marked **Run again** when something it depends on changed since the last Run or
+  the last solve: the status names the model and chemical, for example "the indoor air model (Benzene)". A model that
+  cannot produce an output from the same inputs is marked blocked, with its reason, and pressing Run again would not
+  change it. The Run continues if you leave the page, and its reasons are saved with the project.
+- **A chemical without a result** does not stop the others. If the Run gave one chemical no output, steps 5 and 6 and the
+  report show its pathway as "not quantified" with the Run's reason, mark any total that leaves it out as partial, and
+  compute the rest.
+
+### Step 1, Chemicals (`#/step/chemicals`)
+
+Search the EPA chemical list, add chemicals to the project (up to 50), define your own, and download the list as a CSV.
+An exact name or CAS number comes first. The chemical database section below describes the browser and the chemicals you
+define; the page that used to be `#/chemicals` is this step.
+
+### Step 2, Site model (`#/step/site`)
+
+Say who is exposed, whether the concentrations are modeled from a source or measured in a medium, which source media you
+have (soil above or below the water table, groundwater, soil gas; several at once are fine), which of the four paths
+apply (well, building, surface water, produce), whether the exposure point is onsite or downgradient, the indoor air
+method, and produce. The panel names the models your answers use and says in words what is missing or inconsistent. Two
+sources feeding the well are refused for now. Answers are saved with the project, and the report shows them above the
+model sections.
+
+### Step 3a, Site properties (`#/step/properties`)
+
+The values the chosen models need, in groups, each tagged: from the soil type, a default with no source, entered with no
+source, needed, or optional and left blank. The screen counts the values still needed. When the chain uses the household
+water model, its blank shower inputs are marked needed, so 3a is not done while they are blank.
+
+### Steps 3b and 3c, Source values and chemical values (`#/step/sources`)
+
+A concentration for each chemical in each source medium, with a unit chosen per column; you can paste a column. Type
+**ND** for a chemical not detected: the Run reads ND as zero. A value below a reporting limit, written "<x", counts as
+half the limit, and the Run's notes and the report say so for each chemical and medium. Step 3c on the same page lists
+the chemical properties the models read and lets you edit one with a note.
+
+### Step 3d, Run and view (`#/step/run`)
+
+Choose the simulation time, the time step, the source duration and the method basis (legacy or modern) once, then press
+**Run all chemicals**. The time step sets only the groundwater curve, capped at 500 points, with a note when it was
+coarsened. The result is a groundwater concentration curve at the well for each chemical, an indoor air table (peak
+concentration, source used, method), a summary of the inputs, and a detail view per chemical. **Download CSV** saves the
+well and indoor air rows with a unit column.
+
+### Step 4a, Pathways (`#/step/pathways`)
+
+One tick per exposure pathway the chain makes possible, all ticked to start. A pathway the site cannot have is disabled with its reason. Untick a pathway to leave it out of
+the risk or the cleanup levels. Only changed ticks are saved with the project.
+
+### Step 4b, Receptors (`#/step/receptors`)
+
+Receptor A and, if you add it, receptor B: who is exposed, how often and for how long, with the site-specific factors
+(body weight, intake, skin area) behind a panel that stays open while you type. **Child and adult** sets A to a child
+resident and B to an adult resident and adds their risks; it asks before replacing factors you edited, and with the
+modern method it notes that the child stage is counted twice. A missing exposure input is named with the receptor and the
+pathways that need it.
+
+### Step 4c, Toxicity (`#/step/toxicity`)
+
+Only the toxicity values the ticked pathways read: the oral slope factor and reference dose for ingestion and skin, the
+inhalation unit risk and reference concentration for air. A value the database lacks is a gap you can fill, with a note.
+Under the legacy method the inhalation slope factor is derived from the unit risk, so the method choice changes the
+wording on this step and not which values it asks for.
+
+### Step 5, Risk or cleanup (`#/step/targets`)
+
+Choose **risk** or **cleanup levels**.
+
+- **Risk** shows the cancer risk and hazard index for each chemical and pathway, live, from the 3d outputs and the
+  receptors of step 4.
+- **Cleanup levels** takes a target risk and hazard quotient, and a choice of allocation: each chemical alone, all
+  together keeping the 3b ratios, or split equally. With a well path, a chemical can meet a federal MCL or a state
+  standard instead: enter the state standard with its value, unit and source (a blank source is flagged). Modeled levels
+  are solved in the background for the chemicals whose kept level is not current, and are kept with the project. The result
+  is the source level through the groundwater path, then the vapor and surface water source levels (today's separate
+  solves, shown in plain tables), then the levels in the media the receptors contact. A level above a chemical's
+  solubility is flagged. All together and split equally are computed from each chemical solved alone, which is exact only
+  for a linear solve; a solve that needed an iteration reads "not quantified" with its reason. A chemical not detected has
+  no level.
+
+### Step 6, Results (`#/step/results`)
+
+A picker of views: cleanup levels, cancer risk, hazard index and summary, each as a table with a **Download CSV**.
+Nothing is solved here: a level that is not kept reads "not solved yet", and one built on an out of date Run reads "out of
+date", with a link to step 5. **Print the report** opens the guided report.
+
+### The guided report
+
+`#/report` prints the report for the six steps when the project holds Run outputs. It follows the step 5 mode and prints
+the risk sections or the cleanup sections, not both. It opens with a "Guided steps" section (the step 2 paths, the run
+settings and the Run's notes per chemical, including each non-detect substitution), then one block per chemical for each
+model in the chain with its inputs, full tables and charts, then the risk or the kept cleanup levels, the solubility
+flags and the step 3d method basis. A chemical block says when its result is out of date, and "not quantified" with the
+Run's reason when the Run kept none. With a measured basis (no modeled source) the step 3b values print as entries
+without a source. Without Run outputs, `#/report` prints the workbench report with a line saying the steps were not run.
+The sections below that describe the workbench report also describe its layout.
+
+## Model workbench (`#/workbench`)
+
+The workbench lists every model screen: groundwater transport, vadose leaching, saturated soil source, vapor intrusion,
+surface water and sediment, shower, irrigation and particulates, plants, ecology and TPH, exposure and risk, cleanup
+levels, the workbench report (`#/workbench/report`), validation and methods. Each screen is for checking one calculation
+at a time and keeps its own form. **Runs on the workbench do not feed the six steps, and the steps do not fill the
+workbench screens.** The workbench report prints today's report from the workbench screens whatever the steps hold. The
+screen sections under "Screens" describe the workbench screens.
 
 ## Legacy and modern methods
 
@@ -150,7 +231,9 @@ its validity limits are. Warnings on a screen list the checks a method failed fo
 
 ## Screens
 
-### Chemical database (`#/chemicals`)
+The sections below describe the model workbench screens and the chemical database that step 1 contains.
+
+### Chemical database (step 1)
 
 A browser over the EPA Regional Screening Level chemical data the calculations use, read only (edition
 2024-11, shown on the screen). Search by name or CAS number, then open a chemical to see its physical and
@@ -194,24 +277,6 @@ ecology screens, which fill what you entered and say which value is missing when
 under "Chemicals defined by the user" with every value, its source (user) and its note. The project file keeps
 them. A share link carries them too, but a link longer than 8,000 characters is refused (about six chemicals with every value
 and a note of a sentence each still fit); use Save project then.
-
-### Site model (`#/site`)
-
-A planning aid, not a gate. Answer six questions about the site: who is exposed (human or ecological), whether
-you enter source concentrations directly or use the models, the single source medium, whether the exposure point
-is onsite or downgradient, the vapor intrusion method (shown when the source is indoor air from soil or soil gas)
-and whether homegrown produce takes its contaminant from the soil or from irrigation water. The page lists the
-screens to visit in that order, links to each, and names the feed button to press on it (for example **Use as
-groundwater source** on vadose leaching, then **Use as exposure well concentration** on transport).
-
-Some combinations are not allowed, and the page says why instead of listing screens: no source medium, more than
-one source medium (run the others as separate projects; when you have both soil and soil gas for indoor air,
-soil gas is the better basis), produce from soil and from irrigation water together, and produce from a medium
-that is not its source (soil for soil produce, groundwater for irrigation), and ecological receptors with any source
-other than soil (the ecological screen takes a soil concentration only, so only soil is supported; for soil the
-steps are the chemical database, the plants and ecology screen, then the report). Nothing on any other screen is
-locked or changed by these answers. They are saved with the project, and the report shows them as one line
-above the screen sections when they differ from the defaults.
 
 ### Groundwater transport (`#/transport`)
 

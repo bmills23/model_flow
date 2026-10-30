@@ -1,9 +1,10 @@
 # Guided flow: one project, six steps
 
-Status (2026-10-26): direction approved by Bryan from a clickable mockup of the screens below ("looks good"), and his
-open calls ruled "all as recommended" on 2026-10-25. Steps 1 to 3 are built (wave AC1, landed 2026-10-26) behind
-"Start the guided flow" on the home page, with the main navigation unchanged; steps 4 to 6 and the switch of the
-main navigation are wave AC2, the worked example and the remaining items wave AC3 (`docs/GUIDED_FLOW_PLAN.md`).
+Status (2026-10-30): direction approved by Bryan from a clickable mockup of the screens below ("looks good"), and his
+open calls ruled "all as recommended" on 2026-10-25. All six steps are built: steps 1 to 3 in wave AC1 (landed
+2026-10-26) and steps 4 to 6 with the guided report in wave AC2 (landed 2026-10-30), when the main navigation switched
+to the six steps and the model screens moved behind "Model workbench". The worked example and the remaining items are
+wave AC3 (`docs/GUIDED_FLOW_PLAN.md`).
 
 ## Why
 
