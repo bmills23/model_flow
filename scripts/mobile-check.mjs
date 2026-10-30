@@ -17,6 +17,7 @@
 // critical violation; moderate and minor ones are counted and listed but do not fail the run.
 // Pass --no-axe to skip the axe pass, and --axe-json <file> to write every violation to a JSON file.
 import { spawn } from 'node:child_process';
+import { guidedResultProblems, GUIDED_RESULT_ROUTES } from './guided-verdict.mjs';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -215,8 +216,8 @@ const FED_ROUTES = [
     via: '#/plants-eco',
     // lead (an inorganic, so no organic partitioning inputs), its produce factors sent to the cleanup screen
     viaSetup: `(async()=>{const u=window.__ui;
-      // the project list holds lead (added on #/chemicals), then plants and eco picks it from the list
-      location.hash='#/chemicals';await u.sleep(1500);await u.pick('lead',/^add to project: lead and compounds/i);await u.sleep(800);
+      // the project list holds lead (added on #/step/chemicals), then plants and eco picks it from the list
+      location.hash='#/step/chemicals';await u.sleep(1500);await u.pick('lead',/^add to project: lead and compounds/i);await u.sleep(800);
       location.hash='#/plants-eco';await u.sleep(1500);u.choose(/^chemical/i,/^lead and compounds/i);await u.sleep(800);
       u.fill(/^log kow/i,'3');u.fill(/^kd \\(l\\/kg\\)/i,'5');u.fill(/^moisture fraction/i,'0.8');u.fill(/^dry bulk density/i,'1.5');
       await u.sleep(500)})()`,
@@ -265,11 +266,11 @@ const FED_ROUTES = [
       await u.pick('7440-66-6',/^compare zinc/i);
       await u.sleep(1200)})()`,
   },
-  // "projectlist" route: #/chemicals with a database chemical added and a user chemical with a long name
+  // "projectlist" route: #/step/chemicals with a database chemical added and a user chemical with a long name
   // defined, so the project list rows (name, id, "defined by you", Edit and Remove), the chemical editor
   // and the remove confirmation are all on screen at once.
   {
-    route: '#/chemicals',
+    route: '#/step/chemicals',
     tag: 'projectlist',
     noPress: true,
     viaSetup: `(async()=>{const u=window.__ui;await u.sleep(1000);
@@ -301,7 +302,7 @@ const FED_ROUTES = [
     viaSetup: `(async()=>{const u=window.__ui;
       // two chemicals, so the cleanup screen solves and reports each on its own: both are added on the
       // chemicals page, then each gets its own groundwater run sent from the transport screen
-      location.hash='#/chemicals';await u.sleep(1500);
+      location.hash='#/step/chemicals';await u.sleep(1500);
       await u.pick('71-43-2',/^add to project: benzene/i);await u.sleep(800);
       await u.pick('108-88-3',/^add to project: toluene/i);await u.sleep(800);
       location.hash='#/transport';await u.sleep(1500);
@@ -549,6 +550,13 @@ const UI = `(()=>{
 const READY = `(()=>{const main=document.querySelector('main#main');
   if(!main||!main.querySelector('h1'))return false;
   return ![...main.querySelectorAll('p.muted')].some((p)=>/^Loading\\b/.test((p.textContent||'').trim()))})()`;
+// Steps 5 and 6 draw their tables only after the chemical database loads (and a build problem shows as an alert),
+// so those visits wait (bounded) for a table, a "not quantified" statement, an alert or no loading message.
+const GUIDED_STATE = `(()=>{const main=document.querySelector('main#main');if(!main)return JSON.stringify({tables:0,notQuantified:false,loading:true,alerts:[],textLen:0});
+  const t=main.textContent||'';
+  return JSON.stringify({tables:main.querySelectorAll('table').length,notQuantified:/not quantified/i.test(t),
+    loading:[...main.querySelectorAll('p.muted')].some((p)=>/^Loading\\b/.test((p.textContent||'').trim())),
+    alerts:[...main.querySelectorAll('[role=alert]')].map((a)=>(a.textContent||'').trim()),textLen:t.trim().length})})()`;
 const MEASURE = `(()=>{const cw=document.documentElement.clientWidth;
   const bad=[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.right>cw+0.5});
   return JSON.stringify({cw,sw:document.documentElement.scrollWidth,n:bad.length,
@@ -631,7 +639,17 @@ for (const view of VIEWS) {
       if ((await evaluate(READY)) === true) break;
       await sleep(250);
     }
+    const guidedResult = tag === 'guided' && GUIDED_RESULT_ROUTES.includes(route);
+    let gstate = null;
+    if (guidedResult) {
+      for (let waited = 0; waited < 20000; waited += 500) {
+        gstate = JSON.parse(await evaluate(GUIDED_STATE));
+        if (gstate.tables >= 1 || gstate.notQuantified || gstate.alerts.length) break;
+        await sleep(500);
+      }
+    }
     const m = JSON.parse(await evaluate(MEASURE));
+    const guidedProblems = guidedResult && via ? guidedResultProblems(gstate) : [];
     const slug =
       (route.replace(/[#/]/g, '') || 'home') + (via ? '-fed' : '') + (tag ? `-${tag}` : '');
     const shot = await send('Page.captureScreenshot', {
@@ -680,10 +698,11 @@ for (const view of VIEWS) {
       (tag === 'guided' &&
         route === '#/step/run' &&
         !(m.guidedRun.upToDate && m.guidedRun.charts >= 2 && m.guidedRun.tables >= 2)) ||
+      guidedProblems.length > 0 ||
       (tag === 'criteria' && !(m.critSet === 'all' && m.critTables >= 2 && m.critRows >= 10));
     if (bad) failures++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'solubility' ? ` solubility=${JSON.stringify(m.solubility)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'guided' && route === '#/step/run' ? ` guidedRun=${JSON.stringify(m.guidedRun)}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
+      `${bad ? 'FAIL' : 'ok  '} ${view.name} ${route}${tag ? ` (${tag})` : via ? ` (fed from ${via})` : ''} cw=${m.cw} sw=${m.sw} overflow=${m.n}${tag === 'modeled' ? ` modeledBlock=${JSON.stringify(m.modeledBlock)}` : via && !tag ? ` tphPanel=${m.fedPanel} produceSwitch=${m.fedProduce}` : ''}${tag === 'projectlist' ? ` projectList=${JSON.stringify(m.projectList)}` : ''}${tag === 'solubility' ? ` solubility=${JSON.stringify(m.solubility)}` : ''}${tag === 'seeded' ? ` openPanels=${m.seedOpen} editedMarks=${m.seedEdited} benzene=${m.seedBenzene}` : ''}${tag === 'guided' && route === '#/step/run' ? ` guidedRun=${JSON.stringify(m.guidedRun)}` : ''}${tag === 'criteria' ? ` set=${m.critSet} criteriaTables=${m.critTables} criteriaRows=${m.critRows} notes=${m.critNotes}` : ''} tables=${m.tables} charts=${m.charts} nav=${m.navMain} main=${m.mains} h1=${m.mainH1} controls=${m.controls} links=${m.links} text=${m.textLen}${shell.length ? ` SHELL: ${shell.join('; ')}` : ''}${guidedProblems.length ? ` GUIDED: ${guidedProblems.join('; ')}` : ''}${m.n ? ' ' + m.bad.join(' ') : ''}${axeNote}`,
     );
   }
 }

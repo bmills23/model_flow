@@ -40,6 +40,6 @@ describe('WorkbenchPage', () => {
     expect(
       screen.getByRole('link', { name: /start the guided flow|back to the steps/i }),
     ).toBeTruthy();
-    expect(document.body.textContent).not.toContain('—');
+    expect(document.body.textContent).not.toContain('\u2014');
   });
 });

@@ -33,7 +33,7 @@ describe('staleReport', () => {
     const s = staleSentence(r);
     expect(s).toMatch(/groundwater transport model \(Alpha\)/);
     expect(s).toMatch(/No result yet for Beta/);
-    expect(s).not.toMatch(/—/);
+    expect(s).not.toMatch(/\u2014/);
   });
 });
 
