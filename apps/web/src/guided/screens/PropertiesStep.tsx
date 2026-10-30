@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useId, useMemo, useSyncExternalStore } from 'react';
 import { getGuided, setGuided, subscribeGuided } from '../../project/store';
 import { Field } from '../../ui/controls';
@@ -134,6 +135,7 @@ export function PropertiesStep() {
   return (
     <section aria-labelledby="guided-properties-heading" className="guided-properties">
       <h1 id="guided-properties-heading">Site properties</h1>
+      <HelpLink target="step/properties" />
       <p className="muted">
         The site values the models from step 2 read, for every chemical at once. Each value says
         where it came from; a value one of those models needs and nobody entered is marked as

@@ -60,13 +60,17 @@ describe('validation route and links', () => {
     expect(screen.getByRole('link', { name: 'Help' })).toBeTruthy();
   });
 
-  it('is linked from the nav and the home page, after methods and before documentation', () => {
+  it('is linked from the Model workbench page, after the report and before methods', async () => {
+    window.location.hash = '#/workbench';
     render(<App />);
-    const links = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
-    expect(links.filter((h) => h === '#/validation').length).toBeGreaterThanOrEqual(2);
-    const i = links.indexOf('#/validation');
-    expect(i).toBeGreaterThan(links.indexOf('#/methods'));
-    expect(i).toBeLessThan(links.indexOf('#/docs'));
+    await screen.findByRole('heading', { level: 1, name: /model workbench/i });
+    const main = screen.getByRole('main');
+    const links = within(main)
+      .getAllByRole('link')
+      .map((a) => a.getAttribute('href'));
+    expect(links.filter((h) => h === '#/validation')).toHaveLength(1);
+    expect(links.indexOf('#/validation')).toBeGreaterThan(links.indexOf('#/cleanup'));
+    expect(links.indexOf('#/validation')).toBeLessThan(links.indexOf('#/methods'));
   });
 
   it('is linked from the methods page', async () => {

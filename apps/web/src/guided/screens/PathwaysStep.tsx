@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useSyncExternalStore } from 'react';
 import { getGuided, setGuided, subscribeGuided } from '../../project/store';
 import { guidedHref } from '../../steps';
@@ -21,6 +22,7 @@ export function PathwaysStep() {
   return (
     <section aria-labelledby="guided-pathways-heading" className="guided-exposure">
       <h1 id="guided-pathways-heading">Pathways</h1>
+      <HelpLink target="step/pathways" />
       <p className="muted">
         The ways a person can come into contact with the contamination. Each pathway the site model
         gives a concentration is ticked to start with; untick the ones you do not want to count. A

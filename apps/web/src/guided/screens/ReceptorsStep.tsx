@@ -1,4 +1,6 @@
-import { useMemo, useSyncExternalStore } from 'react';
+import { HelpLink } from '../../docs/HelpLink';
+import { useMemo, useState, useSyncExternalStore } from 'react';
+import { AlertDialog } from '../../ui/AlertDialog';
 import { ReceptorPanel } from '../../risk/ReceptorPanel';
 import { defaultReceptor, type ReceptorForm } from '../../risk/form';
 import { useOverrides } from '../../overrides/useOverrides';
@@ -15,7 +17,12 @@ import type { GuidedState } from '../state';
  */
 export function ReceptorsStep() {
   const guided = useSyncExternalStore(subscribeGuided, getGuided, getGuided);
-  const [overrides] = useOverrides();
+  const [overrides, setOverrides] = useOverrides();
+  const [confirming, setConfirming] = useState(false);
+  const factorEdits = ['guided.a', 'guided.b'].reduce(
+    (n, k) => n + Object.keys(overrides.receptors[k] ?? {}).length,
+    0,
+  );
   const exposure = guided.exposure;
   const save = (patch: Partial<GuidedState['exposure']>): void => {
     const g = getGuided();
@@ -30,6 +37,7 @@ export function ReceptorsStep() {
   return (
     <section aria-labelledby="guided-receptors-heading" className="guided-exposure">
       <h1 id="guided-receptors-heading">Receptors</h1>
+      <HelpLink target="step/receptors" />
       <p className="muted">
         Who is exposed. Choose one or two receptors, give each a name if you like, and pick the
         profile that fits. A profile gives EPA RSL default exposure factors; change any of them for
@@ -85,9 +93,59 @@ export function ReceptorsStep() {
         </label>
       )}
       <div className="guided-child-adult">
-        <button type="button" className="btn" onClick={() => setGuided(childAndAdult(getGuided()))}>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            if (factorEdits > 0) setConfirming(true);
+            else setGuided(childAndAdult(getGuided()));
+          }}
+        >
           Use a child and an adult for cancer risk
         </button>
+        {confirming && (
+          <AlertDialog
+            className="alert"
+            label="Change both receptors"
+            onCancel={() => setConfirming(false)}
+          >
+            <p>
+              <strong>
+                The receptors have {factorEdits} edited exposure factor
+                {factorEdits === 1 ? '' : 's'}.
+              </strong>{' '}
+              The edits belong to the profiles they were made on. Using a child and an adult resets
+              them to the profiles&apos; values. The receptor names stay.
+            </p>
+            <div className="u-actions">
+              <button
+                type="button"
+                className="button"
+                onClick={() => {
+                  setOverrides({
+                    ...overrides,
+                    receptors: Object.fromEntries(
+                      Object.entries(overrides.receptors).filter(
+                        ([k]) => k !== 'guided.a' && k !== 'guided.b',
+                      ),
+                    ),
+                  });
+                  setGuided(childAndAdult(getGuided()));
+                  setConfirming(false);
+                }}
+              >
+                Use them and reset edits
+              </button>
+              <button
+                type="button"
+                className="button button-quiet"
+                onClick={() => setConfirming(false)}
+              >
+                Keep the current receptors
+              </button>
+            </div>
+          </AlertDialog>
+        )}
         <p className="muted">
           Sets Receptor A to a child resident and Receptor B to a resident adult, and adds their
           cancer risks.{' '}

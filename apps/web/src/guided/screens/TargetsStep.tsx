@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useSyncExternalStore } from 'react';
 import { fmtSource } from '../../cleanup/format';
 import { usableMcl } from '../../cleanup/mcl';
@@ -179,7 +180,12 @@ export function TargetsStep() {
     [outcome, surfaceFeeds, names, surfaceSolved.solves, csat],
   );
 
-  const heading = <h1 id="guided-targets-heading">Risk or cleanup levels</h1>;
+  const heading = (
+    <>
+      <h1 id="guided-targets-heading">Risk or cleanup levels</h1>
+      <HelpLink target="step/targets" />
+    </>
+  );
   if (chemicals.length === 0) {
     return (
       <section aria-labelledby="guided-targets-heading" className="guided-targets">

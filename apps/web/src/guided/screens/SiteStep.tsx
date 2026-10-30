@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useSyncExternalStore } from 'react';
 import { getGuided, setGuided, subscribeGuided } from '../../project/store';
 import { Seg } from '../../ui/controls';
@@ -94,6 +95,7 @@ export function SiteStep() {
   return (
     <section aria-labelledby="guided-site-heading" className="guided-site">
       <h1 id="guided-site-heading">Site model</h1>
+      <HelpLink target="step/site" />
       <p className="muted">
         Answer a few questions about the site. Your answers decide which models the Run in step 3
         uses for every chemical, and the panel beside them shows that chain as you go. You can

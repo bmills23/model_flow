@@ -104,3 +104,16 @@ describe('TextField', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 });
+
+describe('Field keyboard', () => {
+  it('uses the decimal keypad unless the caller allows letters', () => {
+    render(
+      <>
+        <Field label="Depth" value="" onChange={() => undefined} />
+        <Field label="Conc" value="" inputMode="text" onChange={() => undefined} />
+      </>,
+    );
+    expect(screen.getByLabelText('Depth').getAttribute('inputmode')).toBe('decimal');
+    expect(screen.getByLabelText('Conc').getAttribute('inputmode')).toBe('text');
+  });
+});

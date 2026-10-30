@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import type { ReceptorRiskSummary } from '@model-flow/engine';
 import { cleanupCsvTables, savedLevelsTable } from '../../cleanup/csv';
@@ -67,7 +68,12 @@ export function ResultsStep() {
   const [picked, setPicked] = useState<View | null>(null);
   const view: View = picked ?? (guided.targets.mode === 'cleanup' ? 'cleanup' : 'cancer');
 
-  const heading = <h1 id="guided-results-heading">Results</h1>;
+  const heading = (
+    <>
+      <h1 id="guided-results-heading">Results</h1>
+      <HelpLink target="step/results" />
+    </>
+  );
   if (chemicals.length === 0) {
     return (
       <section aria-labelledby="guided-results-heading" className="guided-targets">
