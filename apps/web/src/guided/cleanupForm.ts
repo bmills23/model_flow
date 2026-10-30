@@ -7,7 +7,7 @@ import { runPlan } from './derive';
 import { guidedReceptors, guidedRows, type GuidedChemicalRef } from './riskForm';
 import { riskFeeds } from './slots';
 import type { GuidedState } from './state';
-import { sourceNumber } from './units';
+import { classifyValue, sourceNumber } from './units';
 
 /**
  * The cleanup form step 5 derives from the guided answers: the source kind the chain implies, the rows
@@ -69,7 +69,11 @@ export function cleanupFormFor(
   if (std === undefined || std.kind === 'risk')
     return { ...base, targetKind: 'risk', wellTarget: '' };
   if (std.kind === 'mcl') return { ...base, targetKind: 'well', wellTarget: '' };
-  const n = sourceNumber(std.value, std.unit, 'groundwater');
+  // a standard is a plain number: ND and a below-limit value are sample readings, not standards
+  const n =
+    classifyValue(std.value).kind === 'number'
+      ? sourceNumber(std.value, std.unit, 'groundwater')
+      : null;
   return { ...base, targetKind: 'well', wellTarget: n === null ? '0' : numText(n) };
 }
 
