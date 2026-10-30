@@ -4,7 +4,13 @@ import type { ChemicalDb } from '../risk/chemicalDb';
 import type { OverridesState } from '../overrides/model';
 import { withReceptorEdits } from '../overrides/receptors';
 import { runPlan } from './derive';
-import { guidedReceptors, guidedRows, type GuidedChemicalRef } from './riskForm';
+import {
+  guidedReceptors,
+  guidedRiskGaps,
+  guidedRows,
+  type GuidedChemicalRef,
+  type GuidedRiskGap,
+} from './riskForm';
 import { riskFeeds } from './slots';
 import type { GuidedState } from './state';
 import { classifyValue, sourceNumber } from './units';
@@ -30,6 +36,18 @@ export function cleanupSourceKind(guided: GuidedState): SourceKind {
 
 const numText = (v: number): string => String(Number(v.toPrecision(12)));
 
+/**
+ * The chemical pathways the cleanup levels leave out because the Run gave that chemical no result: the
+ * homegrown produce pathway of a chemical with no produce output while another chemical has one (or the
+ * Run's note records it). The cleanup reads no other model output per chemical.
+ */
+export function guidedCleanupGaps(
+  guided: GuidedState,
+  chemicals: readonly GuidedChemicalRef[],
+): GuidedRiskGap[] {
+  return guidedRiskGaps(guided, chemicals).filter((g) => g.flag === 'produceFromPlantsEco');
+}
+
 export function deriveCleanupForm(
   guided: GuidedState,
   chemicals: readonly GuidedChemicalRef[],
@@ -37,10 +55,15 @@ export function deriveCleanupForm(
   overrides?: OverridesState,
 ): CleanupForm {
   const { a, b } = guidedReceptors(guided);
+  // a chemical with no produce result leaves produce out and is named (`guidedCleanupGaps`), so the
+  // other chemicals are still solved instead of the whole build refusing
+  const noProduce = new Set(guidedCleanupGaps(guided, chemicals).map((g) => g.chemicalId));
   const form: CleanupForm = {
     ...defaultCleanupForm(),
     source: cleanupSourceKind(guided),
-    chemicals: guidedRows(guided, chemicals, db),
+    chemicals: guidedRows(guided, chemicals, db).map((row) =>
+      noProduce.has(row.id) ? { ...row, produceFromPlantsEco: false } : row,
+    ),
     surfaceTargets: [],
     a,
     b,

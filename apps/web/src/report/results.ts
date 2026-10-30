@@ -97,7 +97,7 @@ import type { HouseholdRiskFeed } from '../household/feeds';
 import type { ProduceRiskFeed, TphRiskFeed } from '../plantsEco/feeds';
 import { pickSlot, slotOf, type FeedSlots } from '../project/feedSlots';
 import { isChemicalFeed } from '../project/schema';
-import { cleanupSourceKind } from '../guided/cleanupForm';
+import { cleanupSourceKind, guidedCleanupGaps } from '../guided/cleanupForm';
 import { MODEL_WORDS } from '../guided/derive';
 import { OUTPUT_MODEL, outputHashes } from '../guided/hash';
 import { outputSlots } from '../guided/slots';
@@ -1207,6 +1207,12 @@ async function guidedCleanup(
     sec.notes.push(
       'The levels that follow are in the media the receptors contact (soil, tap water, indoor and outdoor air, surface water).',
     );
+  }
+  for (const gap of guidedCleanupGaps(
+    g,
+    data.chemicals.map((c) => ({ id: c.id, name: c.name })),
+  )) {
+    sec.notes.push(`${gap.note} Its level in soil leaves homegrown produce out.`);
   }
   if (individualFallback(g)) {
     sec.notes.push(

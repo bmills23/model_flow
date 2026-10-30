@@ -3,8 +3,15 @@ import { buildCleanup } from '../cleanup/build';
 import { defaultCleanupForm } from '../cleanup/form';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { newChemicalRow } from '../risk/form';
-import { buildGuidedCleanup, cleanupFormFor, deriveCleanupForm } from './cleanupForm';
-import { BENZENE, MTBE, guidedWith, setValue } from './forms.testkit';
+import {
+  buildGuidedCleanup,
+  cleanupFormFor,
+  deriveCleanupForm,
+  guidedCleanupGaps,
+} from './cleanupForm';
+import { loadVaporChemicals } from '../vapor/chemicals';
+import type { ChemicalData } from './derive';
+import { BENZENE, MTBE, guidedWith, setValue, withRunOutputs } from './forms.testkit';
 
 let db: ChemicalDb;
 beforeAll(async () => {
@@ -156,4 +163,40 @@ describe('one chemical of the cleanup form with its water standard', () => {
     const f = cleanupFormFor(deriveCleanupForm(g, CHEMS, db), g, 'other');
     expect(f.targetKind).toBe('risk');
   });
+});
+
+describe('a cleanup with one chemical the Run gave no produce result', () => {
+  it('computes the other chemical and names the gap instead of failing the whole cleanup', async () => {
+    const rows = await loadVaporChemicals();
+    const data = (id: string, name: string): ChemicalData => ({
+      id,
+      name,
+      fate: rows.find((r) => r.id === id)!,
+      props: { logKow: 3, kd: 5 },
+    });
+    const base = guidedWith((x) => {
+      x.site.basis = 'measured';
+      x.site.measured = ['soil'];
+      x.site.produce = 'soil';
+      x.forms.plantsEco = { moistureFraction: '0.8', bulkDensity: '1.5' };
+      x.exposure.pathways = { produce: true };
+      setValue(x, BENZENE, 'soil', '10', 'mg/kg');
+      setValue(x, MTBE, 'soil', '30', 'mg/kg');
+    });
+    const g = withRunOutputs(base, [data(BENZENE, 'Benzene'), data(MTBE, 'MTBE')]);
+    expect(g.outputs['produce']?.[BENZENE]).toBeDefined();
+    delete g.outputs['produce']![MTBE];
+    g.runNotes[MTBE] = {
+      problems: [{ model: 'plantsEco', message: 'MTBE could not run: a test reason.' }],
+      feeds: { produce: 'h' },
+    };
+    const form = deriveCleanupForm(g, CHEMS, db);
+    expect(form.chemicals[0]).toMatchObject({ produceFromPlantsEco: true });
+    expect(form.chemicals[1]).toMatchObject({ produceFromPlantsEco: false });
+    const r = buildGuidedCleanup(g, CHEMS, db);
+    expect(r.ok ? [] : r.errors).toEqual([]);
+    expect(guidedCleanupGaps(g, CHEMS).map((x) => x.note)).toEqual([
+      expect.stringMatching(/^MTBE: homegrown produce is not quantified\..*a test reason/),
+    ]);
+  }, 60000);
 });
