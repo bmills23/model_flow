@@ -23,6 +23,7 @@ import type { ChemicalDb } from '../risk/chemicalDb';
 import { cleanupFormFor, cleanupSourceKind, deriveCleanupForm } from './cleanupForm';
 import type { ChemicalData } from './derive';
 import type { GuidedKeptLevel } from './levels';
+import { outputHashes } from './hash';
 import { cleanupFeedsOf, riskFeeds } from './slots';
 import type { GuidedAllocation, GuidedState, SourceValueKey, StandardKind } from './state';
 import { sourceNumber } from './units';
@@ -120,6 +121,32 @@ function plainBuild(r: ModeledBuildResult): ModeledBuildResult {
     : { ok: false, errors: plainErrors(r.errors) };
 }
 
+/**
+ * The cleanup feeds of a chemical with only its current step 3d outputs: a held leaching or saturated soil
+ * output whose recorded inputs hash differs from the live one (a step 3a or 3b edit since the Run) is left
+ * out, so the build asks for step 3d again instead of solving, and keeping as current, a level on a result
+ * the inputs no longer give.
+ */
+function currentFeedsOf(
+  guided: GuidedState,
+  chemicals: readonly ChemicalData[],
+): (chemicalId: string) => ReturnType<ReturnType<typeof cleanupFeedsOf>> {
+  const feedsOf = cleanupFeedsOf(guided, chemicals);
+  const live = outputHashes(guided, chemicals);
+  const current = (feed: string, id: string): boolean => {
+    const slot = guided.outputs[feed]?.[id];
+    return slot !== undefined && slot.inputsHash === live[feed]?.[id];
+  };
+  return (id) => {
+    const f = feedsOf(id);
+    return {
+      ...f,
+      vadose: f.vadose !== null && current('vadose', id) ? f.vadose : null,
+      saturated: f.saturated !== null && current('saturated', id) ? f.saturated : null,
+    };
+  };
+}
+
 const targetOf = (g: GuidedState, id: string): StandardKind =>
   g.targets.standards[id]?.kind ?? 'risk';
 
@@ -130,7 +157,7 @@ export function guidedSolvePlan(guided: GuidedState, ctx: GuidedSolveContext): G
     return { source, allocation, rows: [], groupProblem: null };
   }
   const form = deriveCleanupForm(guided, ctx.chemicals, ctx.db, ctx.overrides);
-  const feedsOf = cleanupFeedsOf(guided, ctx.chemicals);
+  const feedsOf = currentFeedsOf(guided, ctx.chemicals);
   const medium = SOURCE_MEDIUM[source];
   const rows: GuidedSolveRow[] = ctx.chemicals.map((c) => {
     const target = targetOf(guided, c.id);
@@ -169,8 +196,11 @@ export function guidedSolvePlan(guided: GuidedState, ctx: GuidedSolveContext): G
     blocked.length > 0
       ? `${allocation === 'cumulative' ? 'All chemicals together' : 'A target split equally'} needs every chemical's level, and ${blocked.map((r) => r.name).join(', ')} cannot be solved yet (see below).`
       : null;
+  // a chemical's name is a label: renaming it changes no number, so the fingerprint leaves it out
   const keyOf = (r: GuidedSolveRow): string | null =>
-    r.result.ok ? requestKey(r.result.request) : null;
+    r.result.ok
+      ? requestKey({ ...r.result.request, chemical: { ...r.result.request.chemical, name: '' } })
+      : null;
   const groupPrint =
     groupProblem === null && members.length > 0
       ? hashInputs({
