@@ -150,7 +150,7 @@ const GUIDED_SEED = {
     ),
   },
 };
-// The five guided step screens that exist in wave AC1 (steps 4a to 6 are placeholders until wave AC2).
+// The five guided step screens of steps 1 to 3d.
 const GUIDED_ROUTES = [
   '#/step/chemicals',
   '#/step/site',
@@ -192,8 +192,8 @@ const ROUTES = [
   '#/surface-water',
   '#/household',
   '#/plants-eco',
-  '#/site',
-  '#/chemicals',
+  '#/workbench',
+  '#/workbench/report',
   '#/risk',
   '#/cleanup',
   '#/report',
@@ -363,6 +363,18 @@ FED_ROUTES.push(
     route,
     tag: 'guided',
     seed: GUIDED_EXPOSURE_SEED,
+    noPress: true,
+  })),
+);
+// Steps 5 and 6 and the guided report after the step 3d Run: the run is pressed on 3d, then the hash moves to
+// the screen, so the held outputs are on screen.
+FED_ROUTES.push(
+  ...['#/step/targets', '#/step/results', '#/report'].map((route) => ({
+    route,
+    via: '#/step/run',
+    viaSetup: GUIDED_RUN,
+    tag: 'guided',
+    seed: GUIDED_SEED,
     noPress: true,
   })),
 );

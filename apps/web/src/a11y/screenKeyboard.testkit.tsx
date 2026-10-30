@@ -13,8 +13,8 @@ export const ROUTES = [
   '#/surface-water',
   '#/household',
   '#/plants-eco',
-  '#/site',
-  '#/chemicals',
+  '#/workbench',
+  '#/workbench/report',
   '#/risk',
   '#/cleanup',
   '#/report',
@@ -26,13 +26,22 @@ export const ROUTES = [
   '#/docs/attributions',
 ];
 
-/** The guided flow's step screens that exist in wave AC1 (steps 4a to 6 are placeholders until wave AC2). */
+/** The guided flow's step screens 1 to 3d. */
 export const GUIDED_ROUTES = [
   '#/step/chemicals',
   '#/step/site',
   '#/step/properties',
   '#/step/sources',
   '#/step/run',
+];
+
+/** Steps 4a to 6 (the guided report is `#/report`, covered with the workbench screens). */
+export const GUIDED_LATE_ROUTES = [
+  '#/step/pathways',
+  '#/step/receptors',
+  '#/step/toxicity',
+  '#/step/targets',
+  '#/step/results',
 ];
 
 afterEach(() => {
