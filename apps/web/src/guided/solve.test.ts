@@ -4,7 +4,8 @@ import type { ModeledSolved } from '../cleanup/ModeledCleanup';
 import { loadChemicalDb, type ChemicalDb } from '../risk/chemicalDb';
 import { loadVaporChemicals, type VaporChemicalRow } from '../vapor/chemicals';
 import type { ChemicalData } from './derive';
-import { BENZENE, MTBE, guidedWith, setValue } from './forms.testkit';
+import { BENZENE, MTBE, guidedWith, setValue, withRunOutputs } from './forms.testkit';
+import { outputHashes } from './hash';
 import type { GuidedKeptLevel } from './levels';
 import {
   guidedDirectCleanup,
@@ -233,6 +234,71 @@ describe('kept levels and the guided fingerprint', () => {
     const entries = solveAndKeep(guidedSolvePlan(g, ctx()), g);
     expect(entries.find((e) => e.chemicalId === MTBE)?.allocation).toBe('individual');
     expect(entries.find((e) => e.chemicalId === BENZENE)?.allocation).toBe('cumulative');
+  });
+});
+
+describe('kept levels built on a held step 3d output', () => {
+  /** The Run's outputs recorded with the live inputs hashes, as step 3d leaves them. */
+  const ran = (g: GuidedState, chems: ChemicalData[]): GuidedState => {
+    const out = withRunOutputs(g, chems);
+    const live = outputHashes(out, chems);
+    for (const [feed, byId] of Object.entries(out.outputs)) {
+      for (const [id, slot] of Object.entries(byId)) slot.inputsHash = live[feed]?.[id] ?? '';
+    }
+    return out;
+  };
+  const soil = (infiltration: string): GuidedState =>
+    guidedWith((x) => {
+      x.site.sources = ['soilAbove'];
+      x.site.paths.leaching = true;
+      x.site.paths.well = true;
+      x.targets.mode = 'cleanup';
+      x.forms.vadose = { ...x.forms.vadose, infiltration };
+      setValue(x, BENZENE, 'soilAbove', '10', 'mg/kg');
+    });
+
+  it('a soil source: a leaching input edited after the Run makes the kept level out of date', () => {
+    const chems = [data(BENZENE, 'Benzene')];
+    const g = ran(soil('20'), chems);
+    const plan = guidedSolvePlan(g, ctx(chems));
+    expect(plan.rows[0]!.result.ok ? [] : plan.rows[0]!.result.errors).toEqual([]);
+    const held = keep(g, solveAndKeep(plan, g));
+    expect(guidedKeptLevels(held, BENZENE, ctx(chems)).current).toBe(true);
+
+    // the leaching model reads the infiltration; the held leaching output no longer matches it
+    const edited: GuidedState = {
+      ...held,
+      forms: { ...held.forms, vadose: { ...held.forms.vadose, infiltration: '40' } },
+    };
+    const after = guidedKeptLevels(edited, BENZENE, ctx(chems));
+    expect(after.current).toBe(false);
+    expect(levelsCheckFor(edited, ctx(chems))(BENZENE)).toBe('stale');
+    const row = guidedSolvePlan(edited, ctx(chems)).rows[0]!;
+    expect(row.result.ok ? [] : row.result.errors.join(' ')).toMatch(/run step 3d/);
+  }, 120000);
+
+  it('renaming a chemical keeps its kept level current', () => {
+    const user = 'user-1';
+    const rec = db.byId.get(BENZENE)!;
+    const named = (name: string): ChemicalDb => ({
+      ...db,
+      byId: new Map([...db.byId, [user, { ...rec, id: user, name }]]),
+    });
+    const fate = rows.find((r) => r.id === BENZENE)!;
+    const chem = (name: string): ChemicalData => ({ id: user, name, fate: { ...fate, id: user } });
+    const g = guidedWith((x) => {
+      x.site.sources = ['groundwater'];
+      x.site.paths.well = true;
+      x.targets.mode = 'cleanup';
+      setValue(x, user, 'groundwater', '2', 'mg/L');
+    });
+    const before = guidedSolvePlan(g, { chemicals: [chem('My solvent')], db: named('My solvent') });
+    const after = guidedSolvePlan(g, {
+      chemicals: [chem('Old solvent')],
+      db: named('Old solvent'),
+    });
+    expect(before.rows[0]!.fingerprint).not.toBeNull();
+    expect(after.rows[0]!.fingerprint).toBe(before.rows[0]!.fingerprint);
   });
 });
 

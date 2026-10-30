@@ -10,6 +10,7 @@ import { buildGuidedInputs, deriveRiskForm } from './riskForm';
 import { pathwayStatuses } from './pathways';
 import { riskFeeds } from './slots';
 import type { ChemicalData } from './derive';
+import { jobsOf, runAll } from './run';
 import { BENZENE, MTBE, guidedWith, setValue, withRunOutputs } from './forms.testkit';
 
 let db: ChemicalDb;
@@ -187,6 +188,68 @@ describe('the derived risk form for modeled sources', () => {
       expect(r.modern.receptors[0]!.chemicals.map((c) => c.id)).toEqual([BENZENE, MTBE]);
     }
   });
+  it('leaves a chemical the Run could not carry to the well not quantified and computes the others', () => {
+    const row = rows.find((r) => r.id === MTBE)!;
+    const { koc: _koc, ...rsl } = row.rsl;
+    void _koc;
+    const noKoc: ChemicalData = { id: MTBE, name: 'MTBE', fate: { ...row, rsl } };
+    const chems = [data(BENZENE, 'Benzene'), noKoc];
+    const base = guidedWith((x) => {
+      x.site.sources = ['groundwater'];
+      x.site.paths.well = true;
+      x.exposure.pathways = { showerInhalation: false };
+      setValue(x, BENZENE, 'groundwater', '2', 'mg/L');
+      setValue(x, MTBE, 'groundwater', '500', 'ug/L');
+    });
+    // the Run as step 3d records it: the outputs it computed and, per chemical, why a model did not run
+    const runs = runAll(jobsOf(base, chems));
+    const g = withRunOutputs(base, chems);
+    for (const r of runs) {
+      if (r.outputs['well'] !== undefined) continue;
+      g.runNotes[r.chemicalId] = {
+        problems: r.problems.map((p) => ({ model: p.model, message: p.message })),
+        feeds: { well: 'h' },
+      };
+    }
+    expect(g.outputs['well']?.[MTBE]).toBeUndefined();
+    expect(g.outputs['well']?.[BENZENE]).toBeDefined();
+    const form = deriveRiskForm(g, CHEMS, db);
+    expect(form.chemicals[0]).toMatchObject({ groundwaterFromWell: true });
+    // MTBE's 3b source concentration is not the water at the well, so it must not stand in for it
+    expect(form.chemicals[1]).toMatchObject({ groundwaterFromWell: false });
+    expect(form.chemicals[1]!.conc.groundwater).toBeUndefined();
+    const r = buildGuidedInputs(g, CHEMS, db);
+    expect(r.ok ? [] : r.errors).toEqual([]);
+    if (r.ok) {
+      const chemicals = r.modern.receptors[0]!.chemicals;
+      expect(chemicals.find((c) => c.id === BENZENE)!.epcs.waterIngestion).toBeDefined();
+      expect(chemicals.find((c) => c.id === MTBE)!.epcs.waterIngestion).toBeUndefined();
+      const note = r.notes.find((n) => n.startsWith('MTBE:'));
+      expect(note).toMatch(/not quantified/);
+      expect(note).toMatch(/Koc/);
+      expect(r.notes.join(' ')).not.toMatch(/send|screen/);
+    }
+  });
+
+  it('leaves indoor air not quantified for a chemical the indoor air model gave nothing', () => {
+    const chems = [data(BENZENE, 'Benzene'), data(MTBE, 'MTBE')];
+    const g = withRunOutputs(
+      guidedWith((x) => {
+        x.site.sources = ['soilAbove'];
+        x.site.paths.building = true;
+        setValue(x, BENZENE, 'soilAbove', '10', 'mg/kg');
+        setValue(x, MTBE, 'soilAbove', '10', 'mg/kg');
+      }),
+      chems,
+    );
+    delete g.outputs['vaporRisk']![MTBE];
+    const form = deriveRiskForm(g, CHEMS, db);
+    expect(form.chemicals[1]).toMatchObject({ indoorFromVapor: false, outdoorFromVapor: false });
+    const r = buildGuidedInputs(g, CHEMS, db);
+    expect(r.ok ? [] : r.errors).toEqual([]);
+    if (r.ok) expect(r.notes.join(' ')).toMatch(/MTBE: indoor air is not quantified/);
+  });
+
   it('reads outdoor air from the indoor air model when a soil source gives it', () => {
     const chems = [data(BENZENE, 'Benzene')];
     const g = withRunOutputs(
