@@ -36,6 +36,14 @@ describe('SourcesStep, 3b', () => {
     expect(screen.getByText(/finish the site model/i)).toBeTruthy();
   });
 
+  it('gives the concentration boxes a keyboard with letters, so ND and a less-than value can be typed', () => {
+    benzene();
+    wellSite();
+    render(<SourcesStep />);
+    const box = within(row(/^benzene$/i)).getByLabelText(/groundwater/i);
+    expect(box.getAttribute('inputmode')).toBe('text');
+  });
+
   it('shows one row per chemical with a box for each source medium step 2 needs', () => {
     benzene();
     toluene();
@@ -80,13 +88,13 @@ describe('SourcesStep, 3b', () => {
     expect(screen.getByText(/less-than value like <0\.5/i)).toBeTruthy();
   });
 
-  it('honours the decimal comma setting and asks for a decimal keyboard', () => {
+  it('honours the decimal comma setting and keeps a keyboard with letters', () => {
     benzene();
     wellSite();
     setDecimalComma(true);
     render(<SourcesStep />);
     const box = within(row(/^benzene$/i)).getByLabelText(/groundwater/i) as HTMLInputElement;
-    expect(box.getAttribute('inputmode')).toBe('decimal');
+    expect(box.getAttribute('inputmode')).toBe('text');
     fireEvent.change(box, { target: { value: '0,5' } });
     expect(getGuided().sources['71-43-2']!.values.groundwater!.value).toBe('0.5');
     expect(box.value).toBe('0,5');

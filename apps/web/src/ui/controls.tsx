@@ -50,6 +50,8 @@ export function Field(props: {
   disabled?: boolean;
   error?: string | undefined;
   describedBy?: string | undefined;
+  /** The phone keyboard: the decimal keypad by default; 'text' where letters or "<" are valid (ND, <0.5). */
+  inputMode?: 'decimal' | 'text';
 }) {
   const comma = useSyncExternalStore(subscribeDecimalComma, getDecimalComma, getDecimalComma);
   const id = useId();
@@ -70,7 +72,7 @@ export function Field(props: {
       <span className="field-label">{props.label}</span>
       <input
         type="text"
-        inputMode="decimal"
+        inputMode={props.inputMode ?? 'decimal'}
         autoComplete="off"
         value={shown}
         placeholder={props.placeholder}
@@ -133,9 +135,25 @@ export function Seg<T extends string>(props: {
   );
 }
 
+/**
+ * A collapsible group. `open` asks for it to be open (it defaults to open); it is a request to open, not a
+ * lock: once open it stays open until the viewer closes it, so a group that was opened because a value was
+ * needed does not collapse under the viewer's hands when typing that value ends the need.
+ */
 export function Group(props: { title: string; children: React.ReactNode; open?: boolean }) {
+  const requested = props.open ?? true;
+  const [open, setOpen] = useState(requested);
+  const [wasRequested, setWasRequested] = useState(requested);
+  if (requested !== wasRequested) {
+    setWasRequested(requested);
+    if (requested) setOpen(true);
+  }
   return (
-    <details className="group" open={props.open ?? true}>
+    <details
+      className="group"
+      open={open}
+      onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+    >
       <summary>{props.title}</summary>
       <div className="group-body">{props.children}</div>
     </details>

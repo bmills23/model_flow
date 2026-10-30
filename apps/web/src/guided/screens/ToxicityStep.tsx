@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useSyncExternalStore } from 'react';
 import { toxRows, type ChemicalDb } from '../../risk/chemicalDb';
 import { useChemicalDb } from '../../risk/useChemicalDb';
@@ -33,7 +34,12 @@ export function ToxicityStep() {
   const inhalation = fields.includes('iur') || fields.includes('rfci');
   const basis = inhalationBasis(guided.run.basis);
 
-  const heading = <h1 id="guided-tox-heading">Toxicity values</h1>;
+  const heading = (
+    <>
+      <h1 id="guided-tox-heading">Toxicity values</h1>
+      <HelpLink target="step/toxicity" />
+    </>
+  );
   if (chemicals.length === 0) {
     return (
       <section aria-labelledby="guided-tox-heading" className="guided-exposure">

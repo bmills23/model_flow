@@ -26,7 +26,7 @@ async function openRoute(hash: string) {
   window.location.hash = hash;
   const view = render(<App />);
   const main = await screen.findByRole('main');
-  await waitFor(() => expect(main.textContent ?? '').not.toMatch(/^\s*Loading the/), {
+  await waitFor(() => expect(main.textContent ?? '').not.toMatch(/Loading (the|this) /), {
     timeout: 20000,
   });
   return { ...view, main };
@@ -43,6 +43,9 @@ describe('help link targets', () => {
   it('builds a reader hash for a section', () => {
     expect(helpHref('chemicals')).toBe(
       `#/docs/user-guide/${sectionId('Chemical database (`#/chemicals`)')}`,
+    );
+    expect(helpHref('step/chemicals')).toBe(
+      `#/docs/user-guide/${sectionId('The guided flow (steps 1 to 3)')}`,
     );
   });
 });
@@ -63,22 +66,22 @@ describe('help link on every screen', () => {
   it('opens the reader at the section, and the back link returns to the screen', async () => {
     await openRoute('#/chemicals');
     const link = screen.getByRole('link', { name: 'Help' });
-    expect(link.getAttribute('href')).toBe(helpHref('chemicals'));
+    expect(link.getAttribute('href')).toBe(helpHref('step/chemicals'));
     // jsdom does not follow anchors, so the browser's navigation is applied to the hash directly
-    window.location.hash = helpHref('chemicals');
+    window.location.hash = helpHref('step/chemicals');
     const heading = await waitFor(
       () => {
-        const el = document.getElementById(sectionId(HELP_TARGETS.chemicals));
+        const el = document.getElementById(sectionId(HELP_TARGETS['step/chemicals']));
         expect(el).not.toBeNull();
         return el!;
       },
       { timeout: 5000 },
     );
     expect(document.activeElement).toBe(heading);
-    expect(heading.textContent).toMatch(/Chemical database/);
-    window.location.hash = '#/chemicals';
+    expect(heading.textContent).toMatch(/guided flow/);
+    window.location.hash = '#/step/chemicals';
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Chemical database' }),
+      await screen.findByRole('heading', { level: 1, name: 'Chemicals of concern' }),
     ).toBeTruthy();
   }, 40000);
 });

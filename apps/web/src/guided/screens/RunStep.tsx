@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useSyncExternalStore } from 'react';
 import {
   getChemicals,
@@ -41,7 +42,12 @@ export function RunStep() {
   );
   const names = useMemo(() => chemicals.map((c) => ({ id: c.id, name: c.name })), [chemicals]);
 
-  const heading = <h1 id="guided-run-heading">Run and view</h1>;
+  const heading = (
+    <>
+      <h1 id="guided-run-heading">Run and view</h1>
+      <HelpLink target="step/run" />
+    </>
+  );
   if (chemicals.length === 0) {
     return (
       <section aria-labelledby="guided-run-heading" className="guided-run">

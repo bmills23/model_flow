@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import {
   getChemicals,
@@ -122,6 +123,7 @@ export function SourcesStep() {
   const heading = (
     <>
       <h1 id="guided-sources-heading">Source values</h1>
+      <HelpLink target="step/sources" />
     </>
   );
 
@@ -196,6 +198,7 @@ export function SourcesStep() {
                     <Field
                       key={m}
                       label={`${SOURCE_LABELS[m]} (${unit})`}
+                      inputMode="text"
                       value={cell?.value ?? ''}
                       error={
                         bad
@@ -209,6 +212,7 @@ export function SourcesStep() {
                 {tphUsed && (
                   <Field
                     label="Total petroleum hydrocarbons in soil (mg/kg, optional)"
+                    inputMode="text"
                     value={s.tph}
                     error={
                       s.tph !== REJECTED_ENTRY && s.tph.trim() !== '' && tphUnusable(s.tph)

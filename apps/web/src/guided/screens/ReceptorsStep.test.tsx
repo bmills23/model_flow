@@ -2,7 +2,14 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { defaultGuided, type GuidedState } from '../state';
 import { ReceptorsStep } from './ReceptorsStep';
-import { forgetMemory, getGuided, getOverrides, setGuided } from '../../project/store';
+import {
+  forgetMemory,
+  getGuided,
+  getOverrides,
+  setGuided,
+  setOverrides,
+} from '../../project/store';
+import { setField } from '../../overrides/model';
 
 beforeEach(() => forgetMemory());
 afterEach(() => {
@@ -88,5 +95,52 @@ describe('ReceptorsStep, 4b', () => {
     });
     render(<ReceptorsStep />);
     expect(screen.getByRole('alert').textContent).toMatch(/drinking water/i);
+  });
+
+  it('keeps the site-specific factors open while a needed factor is typed in', () => {
+    start((g) => {
+      g.run.basis = 'legacy';
+      g.exposure.a = { ...g.exposure.a, preset: 'resident', soilSkinArea: '5700' };
+    });
+    render(<ReceptorsStep />);
+    const details = (): HTMLDetailsElement =>
+      screen.getByText('Site-specific factors').closest('details') as HTMLDetailsElement;
+    expect(details().open).toBe(true);
+    const box = screen.getByLabelText(/^soil adherence/i);
+    fireEvent.change(box, { target: { value: '0' } });
+    expect(details().open).toBe(true);
+    fireEvent.change(screen.getByLabelText(/^soil adherence/i), { target: { value: '0.07' } });
+    expect(details().open).toBe(true);
+    expect((screen.getByLabelText(/^soil adherence/i) as HTMLInputElement).value).toBe('0.07');
+  });
+
+  it('asks before the child and adult preset replaces edited receptor factors', () => {
+    start((g) => {
+      g.exposure.a = { ...g.exposure.a, preset: 'worker' };
+    });
+    setOverrides({
+      ...getOverrides(),
+      receptors: setField(
+        setField({}, 'guided.a', 'legacy.bwKg', { value: '80', note: '' }),
+        'guided.a',
+        'legacy.edYr',
+        { value: '25', note: '' },
+      ),
+    });
+    render(<ReceptorsStep />);
+    fireEvent.click(screen.getByRole('button', { name: /child and an adult/i }));
+    // nothing changed yet, and the edits are named
+    expect(getGuided().exposure.a.preset).toBe('worker');
+    const dialog = screen.getByRole('alertdialog');
+    expect(dialog.textContent).toMatch(/edited exposure factor/i);
+    fireEvent.click(within(dialog).getByRole('button', { name: /keep/i }));
+    expect(getGuided().exposure.a.preset).toBe('worker');
+    expect(Object.keys(getOverrides().receptors['guided.a'] ?? {}).length).toBe(2);
+    fireEvent.click(screen.getByRole('button', { name: /child and an adult/i }));
+    fireEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', { name: /reset edits/i }),
+    );
+    expect(getGuided().exposure.a.preset).toBe('child');
+    expect(getOverrides().receptors['guided.a']).toBeUndefined();
   });
 });

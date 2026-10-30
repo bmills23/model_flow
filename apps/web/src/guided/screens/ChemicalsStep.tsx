@@ -1,3 +1,4 @@
+import { HelpLink } from '../../docs/HelpLink';
 import { ChemicalsWorkspace } from '../../chemicals/ChemicalsPage';
 import { MAX_PROJECT_CHEMICALS } from '../../chemicals/browse';
 
@@ -9,6 +10,7 @@ export function ChemicalsStep() {
   return (
     <section aria-labelledby="step-chemicals-heading" className="vadose chemicals chem-step">
       <h1 id="step-chemicals-heading">Chemicals of concern</h1>
+      <HelpLink target="step/chemicals" />
       <p className="muted">
         Choose the chemicals this assessment covers, up to {MAX_PROJECT_CHEMICALS}. Every later step
         works on this list.
